@@ -1,7 +1,20 @@
 {
-  "functions": {
-    "api/*.js": {
-      "runtime": "edge"
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+      ]
+    },
+    {
+      "source": "/tools/wayback-fixer/demo/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=600" }
+      ]
     }
+  ],
+  "functions": {
+    "api/*.js": { "runtime": "edge" }
   }
 }
