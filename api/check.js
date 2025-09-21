@@ -1,35 +1,34 @@
+// File: /api/check.js
 export const config = { runtime: 'edge' };
 
-/* ---------- helpers ---------- */
-
 const UA = 'TinyUtils-DeadLinkChecker/1.0 (+https://tinyutils.net; hello@tinyutils.net)';
-const RUN_CAP = 200;
-const REDIRECT_CAP = 5;
-const GLOBAL_CONCURRENCY = 10;
-const PER_ORIGIN_CAP = 2;
-const TLS_FALLBACK_TLD_GUARD = [/\.gov$/i, /\.mil$/i, /\.bank$/i, /\.edu$/i];
+const HARD_CAP = 200;
+const MAX_GLOBAL = 10;
+const MAX_PER_ORIGIN = 2;
+const MAX_REDIRECTS = 5;
+const TLD_NO_FALLBACK = [/\.gov$/i, /\.mil$/i, /\.bank$/i, /\.edu$/i];
 
-function isPrivateHost(h) {
-  const host = (h || '').toLowerCase();
-  if (['localhost', '127.0.0.1', '::1'].includes(host) || host.endsWith('.local')) return true;
-  if (/^10\./.test(host) || /^192\.168\./.test(host) || /^169\.254\./.test(host) || /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(host)) return true;
+function badScheme(u) { return /^(javascript:|data:|mailto:)/i.test(u || ''); }
+function originOf(u) { try { return new URL(u).origin; } catch { return ''; } }
+function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
+function tldGuard(host){ const h = (host||'').toLowerCase(); return TLD_NO_FALLBACK.some(rx=>rx.test(h)); }
+
+function isPrivateHost(host){
+  const h = (host||'').toLowerCase();
+  if (['localhost','127.0.0.1','::1'].includes(h) || h.endsWith('.local')) return true;
+  if (/^10\./.test(h) || /^192\.168\./.test(h) || /^169\.254\./.test(h) || /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(h)) return true;
   return false;
 }
-
-function assertPublicHttp(u) {
-  let url;
-  try { url = new URL(u); } catch { throw new Error('invalid_url'); }
+function assertPublicHttp(u){
+  let url; try { url = new URL(u); } catch { throw new Error('invalid_url'); }
   if (!/^https?:$/.test(url.protocol)) throw new Error('unsupported_scheme');
   if (isPrivateHost(url.hostname)) throw new Error('private_host_blocked');
   if (url.toString().length > 2048) throw new Error('invalid_url');
   url.hash = '';
   return url.toString();
 }
-
-function unsupportedScheme(u) { return /^(javascript:|data:|mailto:)/i.test(u || ''); }
-
-function normalize(u) {
-  try {
+function norm(u){
+  try{
     const x = new URL(u);
     x.hash = '';
     x.hostname = x.hostname.toLowerCase();
@@ -40,253 +39,255 @@ function normalize(u) {
   } catch { return null; }
 }
 
-function originOf(u) { try { return new URL(u).origin; } catch { return ''; } }
-
-async function head(u, t) {
-  return fetch(u, { method: 'HEAD', redirect: 'manual', headers: { 'user-agent': UA }, signal: AbortSignal.timeout(t) });
-}
-async function get(u, t) {
-  return fetch(u, { method: 'GET', redirect: 'manual', headers: { 'user-agent': UA }, signal: AbortSignal.timeout(t) });
-}
-
-async function followOnce(url, timeout, headFirst) {
-  // one hop (HEAD then GET on success)
-  if (headFirst) {
-    try {
-      const rH = await head(url, timeout);
-      if (rH.status >= 200 && rH.status < 300) {
-        const rG = await get(url, timeout);
-        return { status: rG.status, ok: rG.ok, headers: rG.headers, finalUrl: url };
-      }
-      return { status: rH.status, ok: rH.ok, headers: rH.headers, finalUrl: url };
-    } catch { /* fall through to GET */ }
-  }
-  const r = await get(url, timeout);
-  return { status: r.status, ok: r.ok, headers: r.headers, finalUrl: url };
-}
-
-async function follow(url, timeout, headFirst) {
-  let current = url;
-  let chain = 0;
-  while (chain <= REDIRECT_CAP) {
-    const r = await followOnce(current, timeout, headFirst);
-    if (r.status >= 300 && r.status < 400) {
-      const loc = r.headers.get('location');
-      if (!loc) return { status: r.status, ok: false, finalUrl: current, note: 'bad_redirect', chain, headers: r.headers };
-      try {
-        current = new URL(loc, current).toString();
-      } catch {
-        return { status: r.status, ok: false, finalUrl: current, note: 'bad_redirect', chain, headers: r.headers };
-      }
-      chain++;
-      continue;
-    }
-    return { ...r, chain };
-  }
-  return { status: 0, ok: false, finalUrl: current, note: 'redirect_loop', chain: REDIRECT_CAP };
-}
-
-function tldGuard(hostname) {
-  const h = (hostname || '').toLowerCase();
-  return TLS_FALLBACK_TLD_GUARD.some(rx => rx.test(h));
-}
-
-async function tryHttpFallback(url, headers, timeout, headFirst) {
-  try {
-    const u = new URL(url);
-    const hsts = headers && headers.get('strict-transport-security');
-    if (u.protocol !== 'https:' || hsts || tldGuard(u.hostname)) {
-      return { skipped: true, reason: hsts ? 'hsts' : 'guard' };
-    }
-    u.protocol = 'http:';
-    const r = await follow(u.toString(), timeout, headFirst);
-    return { skipped: false, result: r };
-  } catch {
-    return { skipped: true, reason: 'proto' };
-  }
-}
-
-function protectCSV(v) {
-  const s = String(v ?? '');
-  return /^[=+\-@]/.test(s) ? `'${s}` : s;
-}
-
-function extractLinksFromHtml(html, base, includeAssets) {
-  const out = [];
-  const abs = v => new URL(v, base).toString();
-  html.replace(/<a\b[^>]*href=["']([^"']+)["']/gi, (_, v) => { out.push(v); return _; });
-  if (includeAssets) {
-    html.replace(/<img\b[^>]*src=["']([^"']+)["']/gi, (_, v) => { out.push(v); return _; });
-    html.replace(/<script\b[^>]*src=["']([^"']+)["']/gi, (_, v) => { out.push(v); return _; });
-    html.replace(/<link\b[^>]*href=["']([^"']+)["']/gi, (_, v) => { out.push(v); return _; });
-  }
-  return out.filter(v => !unsupportedScheme(v)).map(v => abs(v));
-}
-
-async function getSitemapUrls(url) {
-  const res = await fetch(url, { headers: { 'user-agent': UA }, signal: AbortSignal.timeout(12000) });
-  const xml = await res.text();
-  const urls = [];
-  const reUrl = /<url>\s*<loc>([^<]+)<\/loc>/gi;
-  let m;
-  while ((m = reUrl.exec(xml))) {
-    urls.push(m[1].trim());
-    if (urls.length >= RUN_CAP) break;
-  }
-  if (urls.length) return urls;
-
-  // sitemapindex
-  const reSm = /<sitemap>\s*<loc>([^<]+)<\/loc>/gi;
-  const sms = [];
-  while ((m = reSm.exec(xml))) {
-    sms.push(m[1].trim());
-    if (sms.length >= 50) break;
-  }
-  const agg = [];
-  for (const child of sms) {
-    try {
-      const r2 = await fetch(child, { headers: { 'user-agent': UA }, signal: AbortSignal.timeout(12000) });
-      const x2 = await r2.text();
-      let m2; const re2 = /<url>\s*<loc>([^<]+)<\/loc>/gi;
-      while ((m2 = re2.exec(x2))) {
-        agg.push(m2[1].trim());
-        if (agg.length >= RUN_CAP) break;
-      }
-      if (agg.length >= RUN_CAP) break;
-    } catch { /* ignore */ }
-  }
-  return agg;
-}
-
-/* ---------- handler ---------- */
-
-export default async function handler(req) {
-  if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ message: 'Method Not Allowed' }), { status: 405, headers: { 'content-type': 'application/json' } });
-  }
-
-  try {
-    const body = await req.json();
-    const mode = body.mode || 'list';
-    const timeout = Math.min(30000, Math.max(1000, Number(body.timeout) || 10000));
-    const headFirst = body.headFirst !== false;
-    const retryHttp = !!body.retryHttp;
-    const includeAssets = !!body.includeAssets;
-    const scope = body.scope || 'internal'; // 'internal' | 'all'
-
-    // Gather URLs
-    let urls = [];
-    if (mode === 'list') {
-      const raw = Array.isArray(body.urls) ? body.urls.join('\n') : String(body.list || '');
-      urls = raw.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
-    } else if (mode === 'crawl') {
-      const pageUrl = assertPublicHttp(body.pageUrl || '');
-      const r = await fetch(pageUrl, { headers: { 'user-agent': UA }, signal: AbortSignal.timeout(12000) });
-      const html = await r.text();
-      const links = extractLinksFromHtml(html, pageUrl, includeAssets);
-      if (scope === 'internal') {
-        const origin = originOf(pageUrl);
-        urls = links.filter(u => originOf(u) === origin);
-      } else {
-        urls = links;
-      }
-    } else if (mode === 'sitemap') {
-      const sm = assertPublicHttp(body.sitemapUrl || '');
-      urls = await getSitemapUrls(sm);
-    } else {
-      return new Response(JSON.stringify({ message: 'bad_mode' }), { status: 400, headers: { 'content-type': 'application/json' } });
-    }
-
-    // Normalize + SSRF guard + cap
-    const uniq = new Set();
-    const work = [];
-    for (const u0 of urls) {
-      try {
-        if (unsupportedScheme(u0)) { work.push({ url: u0, note: 'unsupported_scheme', skip: true }); continue; }
-        const u = assertPublicHttp(u0);
-        const n = normalize(u);
-        if (n && !uniq.has(n)) { uniq.add(n); work.push({ url: n }); }
-      } catch (e) {
-        work.push({ url: u0, note: e.message || 'invalid_url', skip: true });
-      }
-      if (work.length >= RUN_CAP) break;
-    }
-
-    const toCheck = work.filter(x => !x.skip).map(x => x.url);
-    const prefilled = work.filter(x => x.skip).map(x => ({
-      url: x.url, status: 0, ok: false, finalUrl: '', archive: null, note: x.note, chain: 0
-    }));
-
-    // Pool with per-origin cap
-    const results = [];
-    let i = 0, inFlight = 0;
-    const originCounts = new Map();
-    async function tick() {
-      while (i < toCheck.length && inFlight < GLOBAL_CONCURRENCY) {
-        const idx = i++;
-        const u = toCheck[idx];
-        const org = originOf(u);
-        const cnt = originCounts.get(org) || 0;
-        if (cnt >= PER_ORIGIN_CAP) { i--; break; }
-        originCounts.set(org, cnt + 1);
-        inFlight++;
-        (async () => {
-          try {
-            let r = await follow(u, timeout, headFirst);
-            if (r.status && (r.status === 429 || r.status >= 500)) {
-              r = await follow(u, timeout, false);
-              if (r) r.note = (r.note ? r.note + '|' : '') + 'retry_1';
-            }
-            if (!r.ok && retryHttp) {
-              const fb = await tryHttpFallback(u, r.headers, timeout, headFirst);
-              if (fb.skipped) {
-                r.note = (r.note ? r.note + '|' : '') + (fb.reason || 'guard');
-              } else if (fb.result) {
-                r = { ...fb.result, note: (r.note ? r.note + '|' : '') + 'http_fallback_used' };
-              }
-            }
-            if (r.status === 410) r.note = (r.note ? r.note + '|' : '') + 'gone';
-            results[idx] = {
-              url: u, status: r.status || 0, ok: !!r.ok, finalUrl: r.finalUrl || u,
-              archive: null, note: r.note || null, chain: r.chain || 0
-            };
-          } catch {
-            results[idx] = { url: u, status: 0, ok: false, finalUrl: '', archive: null, note: 'network_error', chain: 0 };
-          } finally {
-            originCounts.set(org, (originCounts.get(org) || 1) - 1);
-            inFlight--;
-            tick();
-          }
-        })();
-      }
-      if (i >= toCheck.length && inFlight === 0) return true;
-      return false;
-    }
-    await new Promise(res => {
-      const loop = () => { if (tick()) res(); else setTimeout(loop, 25); };
-      loop();
+// --- robots.txt (naive, cached) ---
+const ROBOTS_TTL_MS = 20 * 60 * 1000;
+const robotsCache = new Map(); // origin -> { ts, allow, disallow, ok|unknown }
+async function fetchRobots(origin){
+  const now = Date.now();
+  const cached = robotsCache.get(origin);
+  if (cached && now - cached.ts < ROBOTS_TTL_MS) return cached;
+  try{
+    const res = await fetch(`${origin}/robots.txt`, {
+      headers:{ 'user-agent': UA }, signal: AbortSignal.timeout(6000)
     });
+    if (!res.ok) throw new Error('bad');
+    const txt = await res.text();
+    const allow = [], disallow = [];
+    let inStar = false;
+    for (const raw of txt.split(/\r?\n/)) {
+      const line = raw.trim(); if (!line || line.startsWith('#')) continue;
+      const i = line.indexOf(':'); if (i < 0) continue;
+      const k = line.slice(0,i).trim().toLowerCase();
+      const v = (line.slice(i+1).trim()) || '';
+      if (k === 'user-agent') inStar = (v === '*' || v.includes('*'));
+      else if (inStar && k === 'disallow') disallow.push(v);
+      else if (inStar && k === 'allow') allow.push(v);
+    }
+    const entry = { ts: now, allow, disallow, ok: true };
+    robotsCache.set(origin, entry);
+    return entry;
+  } catch {
+    const entry = { ts: now, allow:[], disallow:[], ok:false, unknown:true };
+    robotsCache.set(origin, entry);
+    return entry;
+  }
+}
+function isAllowedByRobots(path, rules){
+  const match = (p, arr) => arr.some(rule => rule && p.startsWith(rule));
+  if (match(path, rules.disallow) && !match(path, rules.allow)) return false;
+  return true;
+}
 
-    const out = [...prefilled, ...results.filter(Boolean)];
+// --- fetching helpers ---
+async function head(u,t){ return fetch(u,{ method:'HEAD', redirect:'manual', headers:{'user-agent':UA}, signal:AbortSignal.timeout(t) }); }
+async function get(u,t){ return fetch(u,{ method:'GET',  redirect:'manual', headers:{'user-agent':UA}, signal:AbortSignal.timeout(t) }); }
 
-    const meta = {
-      runTimestamp: new Date().toISOString(),
-      mode,
-      source: body.pageUrl || body.sitemapUrl || 'list',
-      concurrency: GLOBAL_CONCURRENCY,
-      timeoutMs: timeout,
-      robots: body.respectRobots !== false, // UI defaults ON; server is neutral here
-      scope,
-      assets: !!includeAssets,
-      httpFallback: !!retryHttp,
-      wayback: !!body.includeArchive,
-      totalQueued: work.length,
-      totalChecked: toCheck.length,
-      truncated: work.length > toCheck.length
+async function follow(url, timeout, headFirst){
+  let current = url, hops = 0, usedGet = !headFirst;
+  while (hops <= MAX_REDIRECTS) {
+    let res;
+    if (!usedGet) {
+      try {
+        res = await head(current, timeout);
+      } catch { usedGet = true; continue; }
+      if (res.status >= 200 && res.status < 300) res = await get(current, timeout);
+    } else {
+      res = await get(current, timeout);
+    }
+    if (res.status >= 300 && res.status < 400) {
+      const loc = res.headers.get('location');
+      if (!loc) return { status: res.status, ok:false, finalUrl: current, note:'bad_redirect', chain: hops, headers: res.headers };
+      try{ current = new URL(loc, current).toString(); } catch {
+        return { status: res.status, ok:false, finalUrl: current, note:'bad_redirect', chain:hops, headers:res.headers };
+      }
+      hops++; continue;
+    }
+    return { status: res.status, ok: (res.status>=200 && res.status<300), finalUrl: current, chain: hops, headers: res.headers };
+  }
+  return { status: 0, ok:false, finalUrl: url, note:'redirect_loop', chain: MAX_REDIRECTS, headers: null };
+}
+
+async function gatherUrls(body){
+  const mode = body.mode || 'list';
+  if (mode === 'list') {
+    const raw = (Array.isArray(body.urls) ? body.urls.join('\n') : (body.list||'')).toString();
+    return raw.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+  }
+  if (mode === 'crawl') {
+    const pageUrl = assertPublicHttp(body.pageUrl||'');
+    const res = await fetch(pageUrl, { headers:{'user-agent':UA}, signal:AbortSignal.timeout(10000) });
+    const html = await res.text();
+    const links = [];
+    html.replace(/<a\b[^>]*href=["']([^"']+)["']/gi, (_,v)=>{ links.push(v); return _; });
+    if (body.includeAssets) {
+      html.replace(/<img\b[^>]*src=["']([^"']+)["']/gi,(_,v)=>{ links.push(v); return _; });
+      html.replace(/<script\b[^>]*src=["']([^"']+)["']/gi,(_,v)=>{ links.push(v); return _; });
+      html.replace(/<link\b[^>]*href=["']([^"']+)["']/gi,(_,v)=>{ links.push(v); return _; });
+    }
+    const abs = (v)=>new URL(v, pageUrl).toString();
+    const absed = links.filter(v=>!badScheme(v)).map(abs);
+    if ((body.scope||'internal') === 'internal') {
+      const o = originOf(pageUrl);
+      return Array.from(new Set(absed.filter(u=>originOf(u)===o)));
+    }
+    return Array.from(new Set(absed));
+  }
+  if (mode === 'sitemap') {
+    const sm = assertPublicHttp(body.sitemapUrl||'');
+    const r = await fetch(sm, { headers:{'user-agent':UA}, signal:AbortSignal.timeout(10000) });
+    const xml = await r.text();
+    const locs = [];
+    // urlset
+    xml.replace(/<url>\s*<loc>([^<]+)<\/loc>[\s\S]*?<\/url>/gi, (_,u)=>{ locs.push(u.trim()); return _; });
+    if (locs.length) return locs;
+    // sitemapindex
+    const sitems = []; xml.replace(/<sitemap>\s*<loc>([^<]+)<\/loc>[\s\S]*?<\/sitemap>/gi, (_,u)=>{ sitems.push(u.trim()); return _; });
+    let agg = [];
+    for (const child of sitems.slice(0,50)){
+      try{
+        const r2 = await fetch(child, { headers:{'user-agent':UA}, signal:AbortSignal.timeout(10000) });
+        const x2 = await r2.text();
+        x2.replace(/<url>\s*<loc>([^<]+)<\/loc>[\s\S]*?<\/url>/gi, (_,u)=>{ agg.push(u.trim()); return _; });
+      }catch{}
+      if (agg.length >= HARD_CAP) break;
+    }
+    return agg;
+  }
+  return [];
+}
+
+async function handlerCore(body){
+  const headFirst = body.headFirst !== false;
+  const retryHttp = !!body.retryHttp;
+  const respectRobots = body.respectRobots !== false;
+  const includeAssets = !!body.includeAssets;
+  const scope = body.scope || 'internal';
+  const timeout = Math.min(30000, Math.max(1000, Number(body.timeout)||10000));
+
+  // gather -> normalize -> cap
+  let urls = await gatherUrls({ ...body, includeAssets, scope });
+  const seen = new Set(), work = [];
+  for (const raw of urls) {
+    try{
+      const guarded = assertPublicHttp(raw);
+      const n = norm(guarded); if (!n) continue;
+      if (!seen.has(n)) { seen.add(n); work.push(n); }
+    }catch(e){
+      work.push({ url: raw, err: e.message });
+    }
+  }
+  const totalQueued = work.length;
+  const slice = work.slice(0, HARD_CAP);
+
+  // polite per-origin pool
+  const results = new Array(slice.length);
+  const originCounts = new Map();
+  let idx = 0, inflight = 0;
+
+  async function runOne(i, val){
+    if (typeof val !== 'string') {
+      results[i] = { url: val.url, status:0, ok:false, finalUrl:'', archive:null, note: val.err === 'unsupported_scheme' ? 'unsupported_scheme' :
+                     val.err === 'private_host_blocked' ? 'blocked_private_host' : 'invalid_url', chain:0 };
+      return;
+    }
+    const u = val;
+    if (badScheme(u)) { results[i] = { url:u, status:0, ok:false, finalUrl:'', archive:null, note:'unsupported_scheme', chain:0 }; return; }
+    // robots
+    if (respectRobots) {
+      try{
+        const rules = await fetchRobots(originOf(u));
+        if (rules.unknown) {
+          // proceed but record note at the end
+          var robotsUnknown = true; // function-scope
+        }
+        const path = new URL(u).pathname + (new URL(u).search||'');
+        if (!isAllowedByRobots(path, rules)) {
+          results[i] = { url:u, status:0, ok:false, finalUrl:'', archive:null, note:'robots_blocked', chain:0 };
+          return;
+        }
+      }catch{}
+    }
+    // follow & optional HTTP fallback
+    let r = await follow(u, timeout, headFirst);
+    if (r.status && (r.status === 429 || r.status >= 500)) {
+      await sleep(40 + Math.floor(Math.random()*40));
+      r = await follow(u, timeout, false);
+      r.note = (r.note ? r.note + '|' : '') + 'retry_1';
+    }
+    if (!r.ok && retryHttp) {
+      try{
+        const HSTS = r.headers && r.headers.get('strict-transport-security');
+        const host = new URL(r.finalUrl||u).hostname;
+        if (!HSTS && !tldGuard(host) && (u.startsWith('https://'))) {
+          const hUrl = 'http://' + u.slice('https://'.length);
+          const r2 = await follow(hUrl, timeout, false);
+          r = { ...r2, note: (r.note ? r.note+'|' : '') + 'http_fallback_used' };
+        } else if (HSTS) {
+          r.note = (r.note ? r.note+'|' : '') + 'hsts';
+        }
+      }catch{}
+    }
+    if (r.status === 410) r.note = (r.note ? r.note+'|' : '') + 'gone';
+    if (typeof robotsUnknown !== 'undefined') r.note = (r.note ? r.note+'|' : '') + 'robots_unknown';
+
+    results[i] = {
+      url: u,
+      status: r.status||0,
+      ok: !!r.ok,
+      finalUrl: r.finalUrl || '',
+      archive: null,
+      note: r.note || null,
+      chain: r.chain || 0
     };
+  }
 
-    return new Response(JSON.stringify({ meta, results: out }), { status: 200, headers: { 'content-type': 'application/json' } });
-  } catch (e) {
-    return new Response(JSON.stringify({ message: 'Server error', error: String(e).slice(0, 200) }), { status: 500, headers: { 'content-type': 'application/json' } });
+  return await new Promise(resolve=>{
+    const pump = async () => {
+      while (idx < slice.length && inflight < MAX_GLOBAL) {
+        const i = idx++;
+        const val = slice[i];
+        const u = (typeof val === 'string') ? val : val.url;
+        const org = originOf(u);
+        const n = originCounts.get(org) || 0;
+        if (n >= MAX_PER_ORIGIN) { await sleep(50); break; }
+        originCounts.set(org, n+1); inflight++;
+        runOne(i, val).finally(() => {
+          originCounts.set(org, Math.max(0, (originCounts.get(org)||1)-1));
+          inflight--; pump();
+        });
+      }
+      if (idx >= slice.length && inflight === 0) {
+        const meta = {
+          runTimestamp: new Date().toISOString(),
+          mode: (body.mode||'list'),
+          source: body.pageUrl || body.sitemapUrl || 'list',
+          concurrency: MAX_GLOBAL,
+          timeoutMs: timeout,
+          robots: !!respectRobots,
+          scope,
+          assets: !!body.includeAssets,
+          httpFallback: !!retryHttp,
+          wayback: !!body.includeArchive,
+          totalQueued,
+          totalChecked: slice.length,
+          truncated: totalQueued > slice.length
+        };
+        resolve({ meta, results });
+      }
+    };
+    pump();
+  });
+}
+
+export default async function handler(req){
+  if (req.method !== 'POST') {
+    return new Response(JSON.stringify({ message:'Method Not Allowed' }), { status:405, headers:{'content-type':'application/json'} });
+  }
+  try{
+    const body = await req.json();
+    const { meta, results } = await handlerCore(body);
+    return new Response(JSON.stringify({ meta, results }), { status:200, headers:{'content-type':'application/json'} });
+  }catch(e){
+    return new Response(JSON.stringify({ message:'Server error', error: String(e.message||e).slice(0,200) }), { status:500, headers:{'content-type':'application/json'} });
   }
 }
