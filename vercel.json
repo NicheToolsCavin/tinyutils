@@ -1,5 +1,13 @@
 {
   "version": 2,
+  "functions": {
+    "api/check.js": { "runtime": "edge" },
+    "api/sitemap-delta.js": { "runtime": "edge" },
+    "api/wayback-fixer.js": { "runtime": "edge" },
+    "api/metafetch.js": { "runtime": "edge" }
+  },
+  "cleanUrls": true,
+  "trailingSlash": false,
   "headers": [
     {
       "source": "/(.*)",
@@ -14,8 +22,5 @@
         { "key": "Cache-Control", "value": "public, max-age=600" }
       ]
     }
-  ],
-  "functions": {
-    "api/*.js": { "runtime": "edge" }
-  }
+  ]
 }
