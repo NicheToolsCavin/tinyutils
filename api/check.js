@@ -1,3 +1,4 @@
+export const config = { runtime: 'edge' };
 function isPrivateHost(host){
   const h = (host||'').toLowerCase();
   if (['localhost','127.0.0.1','::1'].includes(h) || h.endsWith('.local')) return true;
