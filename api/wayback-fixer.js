@@ -1,6 +1,3 @@
-export const config = { runtime: 'edge' };
-const UA = 'TinyUtils-WaybackFixer/1.0 (+https://tinyutils.net; hello@tinyutils.net)';
-
 function isPrivateHost(host){
   const h = (host||'').toLowerCase();
   if (['localhost','127.0.0.1','::1'].includes(h) || h.endsWith('.local')) return true;
@@ -10,128 +7,233 @@ function isPrivateHost(host){
 function assertPublicHttp(u){
   let url; try { url = new URL(u); } catch { throw new Error('invalid_url'); }
   if (!/^https?:$/.test(url.protocol)) throw new Error('unsupported_scheme');
-  if (isPrivateHost(url.hostname)) throw new Error('blocked_private_host');
-  if (u.length > 2048) throw new Error('invalid_url');
-  url.hash = ''; return url.toString();
+  if (isPrivateHost(url.hostname)) throw new Error('private_host_blocked');
+  if (url.toString().length > 2048) throw new Error('invalid_url');
+  url.hash=''; return url.toString();
 }
-function jitter(){ return 40 + Math.floor(Math.random()*40); }
+const NOTES = { invalid_url:'invalid_url', unsupported_scheme:'unsupported_scheme', private_host_blocked:'blocked_private_host', aborted:'timeout' };
 
-async function availability(url, timeout){
-  const r = await fetch('https://archive.org/wayback/available?url='+encodeURIComponent(url), {
-    headers: { 'user-agent': UA }, signal: AbortSignal.timeout(timeout)
-  });
-  if (!r.ok) throw new Error('network_error');
-  return r.json();
+export const config = { runtime: 'edge' };
+
+const UA = 'TinyUtils-SitemapDelta/1.0 (+https://tinyutils.net)';
+const HARD_CAP = 200;
+const CHILD_SITEMAPS_LIMIT = 50;
+const VERIFY_CONCURRENCY = 6;
+
+function normUrl(u){
+  try{ const x=new URL(u); x.hash=''; x.hostname=x.hostname.toLowerCase();
+    if(x.port==='80'&&x.protocol==='http:')x.port='';
+    if(x.port==='443'&&x.protocol==='https:')x.port='';
+    if(!x.pathname)x.pathname='/';
+    return x.toString();
+  }catch{ return null; }
 }
-function pickByWindow(closest, prefWindow){
-  if (!closest?.url) return null;
-  if (prefWindow === 'any') return closest;
-  const ts = closest.timestamp||'';
-  if (ts.length < 4) return closest;
-  const year = Number(ts.slice(0,4));
-  const y = (new Date()).getUTCFullYear();
-  const min = prefWindow === '1y' ? y-1 : y-5;
-  return (year >= min) ? closest : closest; // fallback to closest
+
+async function fetchMaybeGzip(url){ url = assertPublicHttp(url);
+  const res = await fetch(url, { headers:{'user-agent':UA}, signal: AbortSignal.timeout(12000) });
+  const ct = (res.headers.get('content-type')||'').toLowerCase();
+  const looksGz = url.endsWith('.gz') || ct.includes('application/gzip') || ct.includes('application/x-gzip');
+  if (looksGz && typeof DecompressionStream !== 'undefined'){
+    const ds = new DecompressionStream('gzip');
+    const txt = await new Response(res.body.pipeThrough(ds)).text();
+    return txt;
+  }
+  return await res.text();
 }
-async function trySavePageNow(url, timeout){
+
+function extractLocs(xml){
+  const locs = [];
+  const reUrl = /<url>\s*<loc>([^<]+)<\/loc>[\s\S]*?<\/url>/gi;
+  let m;
+  while ((m = reUrl.exec(xml))) {
+    locs.push(m[1].trim());
+    if (locs.length >= HARD_CAP) break;
+  }
+  if (locs.length) return { isIndex:false, items: locs };
+  const reSm = /<sitemap>\s*<loc>([^<]+)<\/loc>[\s\S]*?<\/sitemap>/gi;
+  const sm = [];
+  while ((m = reSm.exec(xml))) {
+    sm.push(m[1].trim());
+    if (sm.length >= CHILD_SITEMAPS_LIMIT) break;
+  }
+  return { isIndex:true, items: sm };
+}
+
+async function loadSitemapAny({ url, text }){ if (url) { url = assertPublicHttp(url); }
+  if (!url && !text) return [];
   try{
-    await fetch('https://web.archive.org/save/'+encodeURIComponent(url), {
-      headers: { 'user-agent': UA }, signal: AbortSignal.timeout(timeout)
-    });
-  }catch{}
+    const xml = text ? text : await fetchMaybeGzip(url);
+    const block = extractLocs(xml);
+    if (!block.items.length) return [];
+    if (block.isIndex){
+      let agg = [];
+      for (const child0 of block.items.slice(0, CHILD_SITEMAPS_LIMIT)){
+        let child;
+        try{ child = assertPublicHttp(child0); }catch{ continue }
+
+        try{
+          const x = await fetchMaybeGzip(child);
+          const urls = extractLocs(x);
+          if (!urls.isIndex) agg = agg.concat(urls.items);
+        }catch{}
+        if (agg.length >= HARD_CAP) break;
+      }
+      return agg.slice(0,HARD_CAP);
+    } else {
+      return block.items.slice(0,HARD_CAP);
+    }
+  }catch(e){ return []; }
 }
-function toIso(ts){ // YYYYMMDDhhmmss -> ISO
-  if (!ts || ts.length < 14) return '';
-  return `${ts.slice(0,4)}-${ts.slice(4,6)}-${ts.slice(6,8)}T${ts.slice(8,10)}:${ts.slice(10,12)}:${ts.slice(12,14)}Z`;
+
+// --- similarity ---
+function pathOf(u){ try{ return new URL(u).pathname.replace(/\/$/,'').toLowerCase(); }catch{return u} }
+function lastSeg(p){ const s=p.split('/').filter(Boolean); return s[s.length-1]||''; }
+function slugNorm(s){ return s.replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' '); }
+function lev(a,b){
+  const n=a.length, m=b.length; if(!n) return m; if(!m) return n;
+  const dp=new Array(m+1); for(let j=0;j<=m;j++) dp[j]=j;
+  for(let i=1;i<=n;i++){ let prev=dp[0]; dp[0]=i;
+    for(let j=1;j<=m;j++){ const tmp=dp[j];
+      dp[j]=Math.min(dp[j]+1, dp[j-1]+1, prev + (a[i-1]===b[j-1]?0:1)); prev=tmp; } }
+  return dp[m];
+}
+function sim01(a,b){ if(a===b) return 1; const d=lev(a,b); const den=Math.max(a.length,b.length)||1; return 1 - (d/den); }
+function guessMatchNote(aPath,bPath){
+  const la=lastSeg(aPath), lb=lastSeg(bPath);
+  if (la===lb) return {note:'slug_exact', conf:0.95};
+  const sA=slugNorm(la), sB=slugNorm(lb);
+  const sSim = sim01(sA,sB);
+  if (sSim>=0.85) return {note:'slug_similar', conf:0.88};
+  const whole = sim01(aPath,bPath);
+  if (whole>=0.70) return {note:'path_similar', conf:0.75};
+  return {note:'low_similarity', conf:0.40};
+}
+function sameRegDomain(a,b){
+  try{
+    const A=new URL(a).hostname.split('.'), B=new URL(b).hostname.split('.');
+    return A.slice(-2).join('.') === B.slice(-2).join('.');
+  }catch{return false}
+}
+
+function inferPrefixRules(pairs){
+  const counts = new Map();
+  for(const p of pairs){
+    try{
+      const A = new URL(p.from).pathname.split('/').filter(Boolean)[0]||'';
+      const B = new URL(p.to).pathname.split('/').filter(Boolean)[0]||'';
+      if (A && B && A!==B){
+        const key = A+'|'+B;
+        counts.set(key, (counts.get(key)||0)+1);
+      }
+    }catch{}
+  }
+  const rules = [];
+  for (const [k,v] of counts){
+    const [a,b]=k.split('|');
+    if (v>=5) rules.push({ fromPrefix:'/'+a+'/', toPrefix:'/'+b+'/', support:v });
+  }
+  rules.sort((x,y)=>y.support-x.support);
+  return rules.slice(0,5);
+}
+
+async function verifyTargets(pairs, timeout){
+  function jitter(){ return 40 + Math.floor(Math.random()*40); }
+  const out = new Array(pairs.length);
+  let i=0; const W = Math.min(VERIFY_CONCURRENCY, pairs.length||1);
+  async function worker(){
+    while(true){
+      const idx = i++; if (idx>=pairs.length) return;
+      const p = pairs[idx];
+      try{
+        let toUrl;
+        try{ toUrl = assertPublicHttp(p.to); }catch(e){ out[idx] = { ...p, verifyStatus: 0, verifyOk:false, note:(NOTES[e.message]||'network_error') }; continue; }
+        let res = await fetch(toUrl, { method:'HEAD', redirect:'manual', headers:{'user-agent':UA}, signal: AbortSignal.timeout(timeout) });
+        if (res.status===429 || res.status>=500){ await new Promise(r=>setTimeout(r,jitter())); res = await fetch(toUrl, { method:'HEAD', redirect:'manual', headers:{'user-agent':UA}, signal: AbortSignal.timeout(timeout) }); out[idx] = { ...p, verifyStatus: res.status||0, verifyOk: (res.status>=200&&res.status<300)||(res.status>=301&&res.status<=308), note: ((p.note?p.note+'|':'')+'retry_1') }; }
+        else { out[idx] = { ...p, verifyStatus: res.status||0, verifyOk: (res.status>=200&&res.status<300)||(res.status>=301&&res.status<=308) }; }
+      }catch(e){
+        const nm = (e&&e.message)||'';
+        out[idx] = { ...p, verifyStatus: 0, verifyOk: false, note: (NOTES[nm]||'network_error') };
+      }
+    }
+  }
+  await Promise.all(Array.from({length:W}, ()=>worker()));
+  return out;
 }
 
 const reqId = Math.random().toString(36).slice(2,8);
-if (req.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
-  try{
-    const body = await req.json();
-    const verifyHead = !!body.verifyHead;
-    const trySPN = !!body.trySavePageNow;
-    const prefWindow = body.prefWindow || 'any';
-    const timeout = Math.min(30000, Math.max(1000, Number(body.timeout)||10000));
-    const maxConc = Math.max(1, Math.min(6, Number(body.concurrency)||6));
+if (req.method!=='POST') return new Response(JSON.stringify({ error:'POST only' }), { status:405, headers:{'content-type':'application/json'} });
+  const body = await req.json();
+  const timeout = Math.min(30000, Math.max(1000, Number(body.timeout)||10000));
+  const maxCompare = Math.min(HARD_CAP, Math.max(100, Number(body.maxCompare)||2000));
+  const verify = !!body.verifyTargets;
+  const sameReg = body.sameRegDomainOnly !== false;
 
-    let lines = [];
-    if (Array.isArray(body.urls)) lines = body.urls.map(s=>String(s||''));
-    if (body.list) lines = String(body.list||'').split(/\r?\n/);
-    const cleaned = Array.from(new Set(lines.map(s=>s.trim()).filter(Boolean)));
+  const listA = await loadSitemapAny({ url: body.sitemapAUrl ? assertPublicHttp(body.sitemapAUrl) : null, text: body.sitemapAText });
+  const listB = await loadSitemapAny({ url: body.sitemapBUrl ? assertPublicHttp(body.sitemapBUrl) : null, text: body.sitemapBText });
 
-    const prepared = cleaned.map(u=>{
-      try{ return assertPublicHttp(u); }catch(e){ return { url:u, err: e.message }; }
-    });
-    const queued = prepared.slice(0,200);
-    const results = [];
-    let spnQueued = 0;
+  const normA = Array.from(new Set(listA.map(normUrl).filter(Boolean))).slice(0,maxCompare);
+  const normB = Array.from(new Set(listB.map(normUrl).filter(Boolean))).slice(0,maxCompare);
 
-    // simple concurrency pool
-    const pending = new Set();
-    async function runOne(item){
-      if (typeof item !== 'string'){
-        results.push({ url: item.url, snapshotUrl:'', snapshotTs:'', verify:null, note: item.err });
-        return;
-      }
-      let note = '';
-      try{
-        let data;
-        try {
-          data = await availability(item, timeout);
-        } catch(e) {
-          await new Promise(r=>setTimeout(r, jitter()));
-          data = await availability(item, timeout);
-          note += (note? '|' : '') + 'retry_1';
-        }
-        const closest = pickByWindow(data?.archived_snapshots?.closest, prefWindow);
-        if (closest?.url){
-          let v = null;
-          if (verifyHead){
-            try{
-              const r = await fetch(closest.url, { method:'HEAD', redirect:'manual', headers:{'user-agent':UA}, signal: AbortSignal.timeout(timeout) });
-              v = { status: r.status, ok: r.status>=200 && r.status<300 };
-            }catch{
-              v = { status:0, ok:false }; note += (note? '|' : '') + 'timeout';
-            }
-          }
-          results.push({ url: item, snapshotUrl: closest.url, snapshotTs: toIso(closest.timestamp), verify: v, note: (note? note+'|' : '') + 'archived' });
-        } else {
-          if (trySPN && spnQueued < 10){
-            spnQueued++;
-            await trySavePageNow(item, timeout);
-            note += (note? '|' : '') + 'spn_queued';
-          }
-          results.push({ url: item, snapshotUrl:'', snapshotTs:'', verify: null, note: (note? note+'|' : '') + 'no_snapshot' });
-        }
-      }catch(e){
-        const m = (e?.message)||'network_error';
-        results.push({ url: item, snapshotUrl:'', snapshotTs:'', verify:null, note: m });
-      }
-    }
-    for (const it of queued){
-      const task = runOne(it);
-      pending.add(task);
-      task.finally(()=>pending.delete(task));
-      if (pending.size >= maxConc){
-        await Promise.race(pending);
-      }
-    }
-    await Promise.all(Array.from(pending));
+  const setA = new Set(normA);
+  const setB = new Set(normB);
 
-    const meta = {
-      runTimestamp: new Date().toISOString(),
-      totalQueued: queued.length,
-      totalChecked: results.length,
-      archived: results.filter(r=>r.note?.includes('archived')).length,
-      noSnapshot: results.filter(r=>r.note?.includes('no_snapshot')).length,
-      spnQueued,
-      timeoutMs: timeout,
-      verifyHead, trySavePageNow: trySPN, prefWindow,
-      truncated: cleaned.length > 200
-    };
-    return new Response(JSON.stringify({ meta, results }), { status:200, headers:{ 'content-type':'application/json', 'x-request-id': reqId } });
-  }catch(e){
-    return new Response(JSON.stringify({ message:'Server error', error: (e?.message||'').slice(0,200) }), { status:500, headers:{'content-type':'application/json'} });
+  const removed = normA.filter(u=>!setB.has(u));
+  const added = normB.filter(u=>!setA.has(u));
+
+  // Build mapping suggestions
+  const byHost = new Map();
+  for (const u of added){
+    try{
+      const host = new URL(u).host;
+      if (!byHost.has(host)) byHost.set(host, []);
+      byHost.get(host).push(u);
+    }catch{}
   }
-}
+  const allAdded = added.slice();
+  const pairs = [];
+  for (const r of removed){
+    let cand = [];
+    try {
+      const host = new URL(r).host;
+      cand = (byHost.get(host)||[]);
+      if (!cand.length) cand = allAdded.filter(u=>sameRegDomain(u,r));
+    }catch{ cand = allAdded; }
+    let best=null, bestScore=-1, bestNote='';
+    const rp = pathOf(r);
+    for (const t of (cand.length?cand:allAdded)){
+      if (sameReg && !sameRegDomain(r, t)) continue;
+      const g = guessMatchNote(rp, pathOf(t));
+      if (g.conf > bestScore){ best={from:r,to:t,confidence:g.conf,note:g.note}, bestScore=g.conf; }
+    }
+    if (best && best.confidence >= 0.66){
+      pairs.push({ ...best, method:'301' });
+    }
+  }
+
+  // Dedup by "from"
+  const map = new Map();
+  for (const p of pairs){
+    const prev = map.get(p.from);
+    if (!prev || p.confidence > prev.confidence) map.set(p.from, p);
+  }
+  let dedup = Array.from(map.values());
+
+  if (verify && dedup.length){
+    dedup = await verifyTargets(dedup, timeout);
+  }
+
+  const mappedFrom = new Set(dedup.map(p=>p.from));
+  const unmapped = removed.filter(u=>!mappedFrom.has(u));
+
+  const rules = inferPrefixRules(dedup);
+
+  const meta = {
+    runTimestamp: new Date().toISOString(),
+    removedCount: removed.length,
+    addedCount: added.length,
+    suggestedMappings: dedup.length,
+    truncated: normA.length!==listA.length || normB.length!==listB.length || (normA.length>maxCompare || normB.length>maxCompare),
+    verify, timeoutMs: timeout, maxCompare, sameRegDomainOnly: sameReg
+  };
+
+  return new Response(JSON.stringify({ meta, added, removed, pairs: dedup, unmapped, rules }), { headers:{'content-type':'application/json'} });
