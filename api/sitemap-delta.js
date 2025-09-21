@@ -1,7 +1,7 @@
 // File: /api/sitemap-delta.js
 export const config = { runtime: 'edge' };
 
-const UA = 'TinyUtils-SitemapDelta/1.0 (+https://tinyutils.net; hello@tinyutils.net)';
+const UA = 'TinyUtils-SitemapDelta/1.0 (+https://tinyutils.net)';
 const HARD_CAP = 200;
 const CHILD_SITEMAPS_LIMIT = 50;
 const VERIFY_CONCURRENCY = 6;
@@ -19,23 +19,25 @@ function assertPublicHttp(u){
   if (url.toString().length > 2048) throw new Error('invalid_url');
   url.hash=''; return url.toString();
 }
+const NOTES = { invalid_url:'invalid_url', unsupported_scheme:'unsupported_scheme', private_host_blocked:'blocked_private_host', aborted:'timeout' };
+
 function normUrl(u){
-  try{ const x = new URL(u); x.hash=''; x.hostname=x.hostname.toLowerCase();
-    if (x.port==='80'&&x.protocol==='http:') x.port='';
-    if (x.port==='443'&&x.protocol==='https:') x.port='';
-    if (!x.pathname) x.pathname='/';
+  try{ const x=new URL(u); x.hash=''; x.hostname=x.hostname.toLowerCase();
+    if(x.port==='80'&&x.protocol==='http:')x.port='';
+    if(x.port==='443'&&x.protocol==='https:')x.port='';
+    if(!x.pathname)x.pathname='/';
     return x.toString();
   }catch{ return null; }
 }
 
-async function fetchMaybeGzip(url){
-  url = assertPublicHttp(url);
+async function fetchMaybeGzip(url){ url = assertPublicHttp(url);
   const res = await fetch(url, { headers:{'user-agent':UA}, signal: AbortSignal.timeout(12000) });
   const ct = (res.headers.get('content-type')||'').toLowerCase();
   const looksGz = url.endsWith('.gz') || ct.includes('application/gzip') || ct.includes('application/x-gzip');
-  if (looksGz && typeof DecompressionStream !== 'undefined') {
+  if (looksGz && typeof DecompressionStream !== 'undefined'){
     const ds = new DecompressionStream('gzip');
-    return await new Response(res.body.pipeThrough(ds)).text();
+    const txt = await new Response(res.body.pipeThrough(ds)).text();
+    return txt;
   }
   return await res.text();
 }
@@ -59,30 +61,33 @@ function extractLocs(xml){
 }
 
 async function loadSitemapAny({ url, text }){
+  if (url) { url = assertPublicHttp(url); }
   if (!url && !text) return [];
   try{
     const xml = text ? text : await fetchMaybeGzip(url);
-    const blk = extractLocs(xml);
-    if (!blk.items.length) return [];
-    if (blk.isIndex) {
+    const block = extractLocs(xml);
+    if (!block.items.length) return [];
+    if (block.isIndex){
       let agg = [];
-      for (const child of blk.items.slice(0, CHILD_SITEMAPS_LIMIT)) {
-        try {
+      for (const child0 of block.items.slice(0, CHILD_SITEMAPS_LIMIT)){
+        let child;
+        try{ child = assertPublicHttp(child0); }catch{ continue }
+        try{
           const x = await fetchMaybeGzip(child);
           const urls = extractLocs(x);
           if (!urls.isIndex) agg = agg.concat(urls.items);
-        } catch {}
+        }catch{}
         if (agg.length >= HARD_CAP) break;
       }
-      return agg.slice(0, HARD_CAP);
+      return agg.slice(0,HARD_CAP);
     } else {
-      return blk.items.slice(0, HARD_CAP);
+      return block.items.slice(0,HARD_CAP);
     }
-  } catch { return []; }
+  }catch(e){ return []; }
 }
 
-// similarity helpers
-function pathOf(u){ try{ return new URL(u).pathname.replace(/\/$/,'').toLowerCase(); }catch{ return u; } }
+// --- similarity helpers ---
+function pathOf(u){ try{ return new URL(u).pathname.replace(/\/$/,'').toLowerCase(); }catch{return u} }
 function lastSeg(p){ const s=p.split('/').filter(Boolean); return s[s.length-1]||''; }
 function slugNorm(s){ return s.replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' '); }
 function lev(a,b){
@@ -94,7 +99,7 @@ function lev(a,b){
   return dp[m];
 }
 function sim01(a,b){ if(a===b) return 1; const d=lev(a,b); const den=Math.max(a.length,b.length)||1; return 1 - (d/den); }
-function guessMatch(aPath,bPath){
+function guessMatchNote(aPath,bPath){
   const la=lastSeg(aPath), lb=lastSeg(bPath);
   if (la===lb) return {note:'slug_exact', conf:0.95};
   const sA=slugNorm(la), sB=slugNorm(lb);
@@ -108,10 +113,32 @@ function sameRegDomain(a,b){
   try{
     const A=new URL(a).hostname.split('.'), B=new URL(b).hostname.split('.');
     return A.slice(-2).join('.') === B.slice(-2).join('.');
-  }catch{ return false; }
+  }catch{return false}
+}
+
+function inferPrefixRules(pairs){
+  const counts = new Map();
+  for(const p of pairs){
+    try{
+      const A = new URL(p.from).pathname.split('/').filter(Boolean)[0]||'';
+      const B = new URL(p.to).pathname.split('/').filter(Boolean)[0]||'';
+      if (A && B && A!==B){
+        const key = A+'|'+B;
+        counts.set(key, (counts.get(key)||0)+1);
+      }
+    }catch{}
+  }
+  const rules = [];
+  for (const [k,v] of counts){
+    const [a,b]=k.split('|');
+    if (v>=5) rules.push({ fromPrefix:'/'+a+'/', toPrefix:'/'+b+'/', support:v });
+  }
+  rules.sort((x,y)=>y.support-x.support);
+  return rules.slice(0,5);
 }
 
 async function verifyTargets(pairs, timeout){
+  function jitter(){ return 40 + Math.floor(Math.random()*40); }
   const out = new Array(pairs.length);
   let i=0; const W = Math.min(VERIFY_CONCURRENCY, pairs.length||1);
   async function worker(){
@@ -119,10 +146,14 @@ async function verifyTargets(pairs, timeout){
       const idx = i++; if (idx>=pairs.length) return;
       const p = pairs[idx];
       try{
-        const res = await fetch(p.to, { method:'HEAD', redirect:'manual', headers:{'user-agent':UA}, signal:AbortSignal.timeout(timeout) });
-        out[idx] = { ...p, verifyStatus: res.status||0, verifyOk: (res.status>=200 && res.status<300) || (res.status>=301 && res.status<=308) };
-      }catch{
-        out[idx] = { ...p, verifyStatus: 0, verifyOk:false };
+        let toUrl;
+        try{ toUrl = assertPublicHttp(p.to); }catch(e){ out[idx] = { ...p, verifyStatus: 0, verifyOk:false, note:(NOTES[e.message]||'network_error') }; continue; }
+        let res = await fetch(toUrl, { method:'HEAD', redirect:'manual', headers:{'user-agent':UA}, signal: AbortSignal.timeout(timeout) });
+        if (res.status===429 || res.status>=500){ await new Promise(r=>setTimeout(r,jitter())); res = await fetch(toUrl, { method:'HEAD', redirect:'manual', headers:{'user-agent':UA}, signal: AbortSignal.timeout(timeout) }); out[idx] = { ...p, verifyStatus: res.status||0, verifyOk: (res.status>=200&&res.status<300)||(res.status>=301&&res.status<=308), note: ((p.note?p.note+'|':'')+'retry_1') }; }
+        else { out[idx] = { ...p, verifyStatus: res.status||0, verifyOk: (res.status>=200&&res.status<300)||(res.status>=301&&res.status<=308) }; }
+      }catch(e){
+        const nm = (e&&e.message)||'';
+        out[idx] = { ...p, verifyStatus: 0, verifyOk: false, note: (NOTES[nm]||'network_error') };
       }
     }
   }
@@ -131,77 +162,82 @@ async function verifyTargets(pairs, timeout){
 }
 
 export default async function handler(req){
-  if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error:'POST only' }), { status:405, headers:{'content-type':'application/json'} });
+  const reqId = Math.random().toString(36).slice(2,8);
+  if (req.method!=='POST') return new Response(JSON.stringify({ error:'POST only' }), { status:405, headers:{'content-type':'application/json','x-request-id':reqId} });
+  const body = await req.json();
+  const timeout = Math.min(30000, Math.max(1000, Number(body.timeout)||10000));
+  const maxCompare = Math.min(HARD_CAP, Math.max(100, Number(body.maxCompare)||2000));
+  const verify = !!body.verifyTargets;
+  const sameReg = body.sameRegDomainOnly !== false;
+
+  const listA = await loadSitemapAny({ url: body.sitemapAUrl ? assertPublicHttp(body.sitemapAUrl) : null, text: body.sitemapAText });
+  const listB = await loadSitemapAny({ url: body.sitemapBUrl ? assertPublicHttp(body.sitemapBUrl) : null, text: body.sitemapBText });
+
+  const normA = Array.from(new Set(listA.map(normUrl).filter(Boolean))).slice(0,maxCompare);
+  const normB = Array.from(new Set(listB.map(normUrl).filter(Boolean))).slice(0,maxCompare);
+
+  const setA = new Set(normA);
+  const setB = new Set(normB);
+
+  const removed = normA.filter(u=>!setB.has(u));
+  const added = normB.filter(u=>!setA.has(u));
+
+  // Suggest mappings
+  const byHost = new Map();
+  for (const u of added){
+    try{
+      const host = new URL(u).host;
+      if (!byHost.has(host)) byHost.set(host, []);
+      byHost.get(host).push(u);
+    }catch{}
   }
-  try{
-    const body = await req.json();
-    const timeout = Math.min(30000, Math.max(1000, Number(body.timeout)||10000));
-    const maxCompare = Math.min(HARD_CAP, Math.max(100, Number(body.maxCompare)||2000));
-    const verify = !!body.verifyTargets;
-    const sameRegOnly = body.sameRegDomainOnly !== false;
-
-    const listA = await loadSitemapAny({ url: body.sitemapAUrl ? assertPublicHttp(body.sitemapAUrl) : null, text: body.sitemapAText });
-    const listB = await loadSitemapAny({ url: body.sitemapBUrl ? assertPublicHttp(body.sitemapBUrl) : null, text: body.sitemapBText });
-
-    const normA = Array.from(new Set(listA.map(normUrl).filter(Boolean))).slice(0,maxCompare);
-    const normB = Array.from(new Set(listB.map(normUrl).filter(Boolean))).slice(0,maxCompare);
-
-    const setA = new Set(normA), setB = new Set(normB);
-    const removed = normA.filter(u=>!setB.has(u));
-    const added   = normB.filter(u=>!setA.has(u));
-
-    // host -> candidates
-    const byHost = new Map();
-    for (const u of added) {
-      try{
-        const host = new URL(u).host;
-        if (!byHost.has(host)) byHost.set(host, []);
-        byHost.get(host).push(u);
-      }catch{}
+  const allAdded = added.slice();
+  const pairs = [];
+  for (const r of removed){
+    let cand = [];
+    try {
+      const host = new URL(r).host;
+      cand = (byHost.get(host)||[]);
+      if (!cand.length) cand = allAdded.filter(u=>sameRegDomain(u,r));
+    }catch{ cand = allAdded; }
+    let best=null, bestScore=-1;
+    const rp = pathOf(r);
+    for (const t of (cand.length?cand:allAdded)){
+      if (sameReg && !sameRegDomain(r, t)) continue;
+      const g = guessMatchNote(rp, pathOf(t));
+      if (g.conf > bestScore){ best={from:r,to:t,confidence:g.conf,note:g.note}, bestScore=g.conf; }
     }
-    const allAdded = added.slice();
-
-    const pairs = [];
-    for (const r of removed) {
-      const rp = pathOf(r);
-      let cands = [];
-      try{
-        const h = new URL(r).host;
-        cands = (byHost.get(h)||[]);
-        if (!cands.length) cands = allAdded.filter(u=>sameRegDomain(u, r));
-      }catch{ cands = allAdded; }
-      let best=null, bestScore=-1;
-      for (const t of (cands.length?cands:allAdded)){
-        if (sameRegOnly && !sameRegDomain(r, t)) continue;
-        const g = guessMatch(rp, pathOf(t));
-        if (g.conf > bestScore) { best = { from:r, to:t, confidence:g.conf, note:g.note, method:'301' }; bestScore = g.conf; }
-      }
-      if (best && best.confidence >= 0.66) pairs.push(best);
+    if (best && best.confidence >= 0.66){
+      pairs.push({ ...best, method:'301' });
     }
-    // dedupe by from
-    const map = new Map();
-    for (const p of pairs) {
-      const prev = map.get(p.from);
-      if (!prev || p.confidence > prev.confidence) map.set(p.from, p);
-    }
-    let dedup = Array.from(map.values());
-    if (verify && dedup.length) dedup = await verifyTargets(dedup, timeout);
-
-    const mappedFrom = new Set(dedup.map(p=>p.from));
-    const unmapped = removed.filter(u=>!mappedFrom.has(u));
-
-    const meta = {
-      runTimestamp: new Date().toISOString(),
-      removedCount: removed.length,
-      addedCount: added.length,
-      suggestedMappings: dedup.length,
-      truncated: normA.length!==listA.length || normB.length!==listB.length || (normA.length>maxCompare || normB.length>maxCompare),
-      verify, timeoutMs: timeout, maxCompare, sameRegDomainOnly: sameRegOnly
-    };
-
-    return new Response(JSON.stringify({ meta, added, removed, pairs: dedup, unmapped }), { status:200, headers:{'content-type':'application/json'} });
-  }catch(e){
-    return new Response(JSON.stringify({ error: String(e.message||e).slice(0,200) }), { status:500, headers:{'content-type':'application/json'} });
   }
+
+  const map = new Map();
+  for (const p of pairs){
+    const prev = map.get(p.from);
+    if (!prev || p.confidence > prev.confidence) map.set(p.from, p);
+  }
+  let dedup = Array.from(map.values());
+
+  if (verify && dedup.length){
+    dedup = await verifyTargets(dedup, timeout);
+  }
+
+  const mappedFrom = new Set(dedup.map(p=>p.from));
+  const unmapped = removed.filter(u=>!mappedFrom.has(u));
+
+  const rules = inferPrefixRules(dedup);
+
+  const meta = {
+    runTimestamp: new Date().toISOString(),
+    removedCount: removed.length,
+    addedCount: added.length,
+    suggestedMappings: dedup.length,
+    truncated: normA.length!==listA.length || normB.length!==listB.length || (normA.length>maxCompare || normB.length>maxCompare),
+    verify, timeoutMs: timeout, maxCompare, sameRegDomainOnly: sameReg
+  };
+
+  return new Response(JSON.stringify({ meta, added, removed, pairs: dedup, unmapped, rules }), {
+    headers:{'content-type':'application/json','x-request-id':reqId}
+  });
 }
