@@ -1,4 +1,3 @@
-
 function isPrivateHost(host){
   const h = (host||'').toLowerCase();
   if (['localhost','127.0.0.1','::1'].includes(h) || h.endsWith('.local')) return true;
@@ -56,4 +55,3 @@ if(req.method!=='POST') return new Response('Method Not Allowed',{status:405});
   }
   const meta={runTimestamp:new Date().toISOString(),mode:b.mode||'list',source:b.pageUrl||b.sitemapUrl||'list',concurrency: b.concurrency||10,timeoutMs:timeout,robots: b.respectRobots!==false,scope:b.scope||'internal',assets:!!b.includeAssets,httpFallback:!!b.retryHttp,wayback:!!b.includeArchive,totalQueued,totalChecked:slice.length,truncated: totalQueued>slice.length};
   return new Response(JSON.stringify({ meta, results: res }),{headers:{'content-type':'application/json'}})
-}
