@@ -45,7 +45,7 @@ function toIso(ts){ // YYYYMMDDhhmmss -> ISO
   return `${ts.slice(0,4)}-${ts.slice(4,6)}-${ts.slice(6,8)}T${ts.slice(8,10)}:${ts.slice(10,12)}:${ts.slice(12,14)}Z`;
 }
 
-\1const reqId = Math.random().toString(36).slice(2,8);
+const reqId = Math.random().toString(36).slice(2,8);
 if (req.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
   try{
     const body = await req.json();
