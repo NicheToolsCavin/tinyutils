@@ -33,7 +33,7 @@ async function follow(u,timeout,headFirst){
 async function fallback(u,h,timeout){
   try{const U=new URL(u); const host=U.hostname.toLowerCase(); if(TLDS.some(s=>host.endsWith(s))) return {skipped:true,reason:'tld_guard'}; const hsts=h && /max-age/i.test(h.get('strict-transport-security')||''); if(hsts) return {skipped:true,reason:'hsts'}; if(U.protocol==='https:'){U.protocol='http:'; const r=await follow(U.href,timeout,false); return {skipped:false,result:r}}}catch{} return {skipped:true,reason:'proto'}
 }
-const reqId = Math.random().toString(36).slice(2,8);
+\1const reqId = Math.random().toString(36).slice(2,8);
 if(req.method!=='POST') return new Response('Method Not Allowed',{status:405});
   const b=await req.json();
   const timeout=Math.min(30000,Math.max(1000,Number(b.timeout)||10000));

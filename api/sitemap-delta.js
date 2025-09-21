@@ -161,7 +161,7 @@ async function verifyTargets(pairs, timeout){
   return out;
 }
 
-const reqId = Math.random().toString(36).slice(2,8);
+\1const reqId = Math.random().toString(36).slice(2,8);
 if (req.method!=='POST') return new Response(JSON.stringify({ error:'POST only' }), { status:405, headers:{'content-type':'application/json'} });
   const body = await req.json();
   const timeout = Math.min(30000, Math.max(1000, Number(body.timeout)||10000));
