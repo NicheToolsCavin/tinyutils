@@ -22,6 +22,7 @@ function protectCSVCell(v){
 
 <link rel="preload" href="/public/styles.css" as="style">
 <link rel="stylesheet" href="/public/styles.css">
+<link rel="stylesheet" href="/styles/site.css">
 <script type="application/ld+json">{
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
@@ -146,24 +147,23 @@ function protectCSVCell(v){
 <link rel="icon" href="/public/favicon.ico" sizes="any">
 </head>
 <body>
-<header class="nav" role="banner">
-  <div class="brand">
-    <img src="/public/logo.svg" alt="TinyUtils logo" width="28" height="28">
-    <span class="name">TinyUtils</span><span class="badge">beta</span>
+<header class="site-header">
+  <div class="container row between center">
+    <a class="brand" href="/">TinyUtils</a>
+    <nav class="nav">
+      <a class="active" href="/tools/">Tools</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+    </nav>
   </div>
-<nav class="links" aria-label="Primary">
-    <a href="/">Dead Link Finder</a>
-    <a href="/tools/">Tools</a>
-    <a href="/guides/">Guides</a>
-    <a href="/privacy.html">Privacy</a>
-  </nav>
 </header>
 
+<main>
 <div class="container">
 <div class="chips" id="runChips" aria-live="polite"></div>
   <h1>Dead Link Finder</h1>
   <p class="subtitle">Paste URLs or crawl a page/sitemap → check status → export CSV/JSON. <span class="badge">Wayback snapshots</span></p>
-  <p><a class="cta" href="/tools.html">See all tools →</a> <span class="small">Support: <a href="/support.html">buy me a coffee</a></span></p>
+  <p><a class="cta" href="/tools/">See all tools →</a> <span class="small">Support: <a href="/support.html">buy me a coffee</a></span></p>
 
   <div class="card" role="region" aria-labelledby="inputHeading">
     <h2 id="inputHeading" style="margin-top:0">Input</h2>
@@ -565,5 +565,15 @@ function protectCSVCell(v){
   return /^[=+\-@]/.test(s) ? "'" + s : s;
 }
 </script>
+
+</div>
+</main>
+<footer class="site-footer">
+  <div class="container row between wrap">
+    <span>© <span id="y"></span> TinyUtils</span>
+    <span><a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a></span>
+  </div>
+</footer>
+<script>document.getElementById('y').textContent = new Date().getFullYear();</script>
 
 </body></html>
