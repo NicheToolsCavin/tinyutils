@@ -1,15 +1,4 @@
 {
-  "cleanUrls": true,
-  "trailingSlash": false,
-  "rewrites": [
-    { "source": "/", "destination": "/index.html" },
-    { "source": "/tools", "destination": "/tools/index.html" },
-    { "source": "/tools/", "destination": "/tools/index.html" },
-    { "source": "/tools/sitemap-delta", "destination": "/tools/sitemap-delta/index.html" },
-    { "source": "/tools/sitemap-delta/", "destination": "/tools/sitemap-delta/index.html" },
-    { "source": "/tools/wayback-fixer", "destination": "/tools/wayback-fixer/index.html" },
-    { "source": "/tools/wayback-fixer/", "destination": "/tools/wayback-fixer/index.html" }
-  ],
   "headers": [
     {
       "source": "/(.*)",
