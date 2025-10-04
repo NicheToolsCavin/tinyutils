@@ -13,8 +13,6 @@
   <meta property="og:image" content="/public/og.png">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="/public/styles.css">
-  <link rel="stylesheet" href="/styles/site.css">
-  <script defer src="/scripts/consent.js"></script>
 
 <script type="application/ld+json">
 {
@@ -38,24 +36,12 @@ function protectCSVCell(v){
 </style>
 </head>
 <body>
-<header class="site-header">
-  <div class="container row between center">
-    <a class="brand" href="/">TinyUtils</a>
-    <nav class="nav">
-      <a class="active" href="/tools/">Tools</a>
-      <a href="/privacy.html">Privacy</a>
-      <a href="/terms.html">Terms</a>
-    </nav>
-  </div>
-</header>
-
-<main>
-  <section class="container tool-hero">
+  <header class="container">
     <h1>🧭 Sitemap Delta + Redirect Mapper</h1>
     <p class="sub">Compare two sitemaps (or paste XML), detect <b>added / removed</b> URLs, and auto-suggest <b>301</b> mappings. Export CSV/JSON.</p>
-  </section>
+  </header>
 
-  <section class="container card">
+  <main class="container card">
     <section class="grid">
       <div>
         <label class="lbl">Sitemap A (before)</label>
@@ -154,9 +140,7 @@ function protectCSVCell(v){
     <footer class="foot">
       <small>We fetch sitemaps and (optionally) verify target URLs. No aggressive crawling; per-origin throttling applies in verification.</small>
     </footer>
-  </section>
-
-</main>
+  </main>
 
   <script>
   const statusEl = document.getElementById('status');
@@ -469,14 +453,6 @@ function protectCSVCell(v){
   return /^[=+\-@]/.test(s) ? "'" + s : s;
 }
 </script>
-
-<footer class="site-footer">
-  <div class="container row between wrap">
-    <span>© <span id="y"></span> TinyUtils</span>
-    <span><a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a></span>
-  </div>
-</footer>
-<script>document.getElementById('y').textContent = new Date().getFullYear();</script>
 
 </body>
 </html>
