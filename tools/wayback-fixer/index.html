@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Wayback Fixer — TinyUtils</title>
+  <meta name="description" content="Paste dead URLs and get Wayback replacements. Export a replacement map and 410 list.">
+  <link rel="canonical" href="https://tinyutils.net/tools/wayback-fixer/">
+  <link rel="icon" href="/public/favicon.ico">
+  <meta property="og:title" content="Wayback Fixer — TinyUtils">
+  <meta property="og:description" content="Paste dead URLs and get Wayback replacements. Optional verify and SavePageNow.">
+  <meta property="og:image" content="/public/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/styles/site.css">
+  <script defer src="/scripts/consent.js"></script>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Ubuntu,sans-serif;background:#0a0f1f;color:#e6edf7;margin:0}
+    .wrap{max-width:980px;margin:0 auto;padding:24px}
+    header h1{margin:0 0 8px 0;font-size:28px}
+    .grid{display:grid;gap:12px}
+    .two{grid-template-columns:1fr 1fr}
+    .card{background:#0b1224;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px}
+    .btn{background:#3b82f6;border:none;border-radius:10px;color:#fff;padding:10px 14px;cursor:pointer}
+    .btn.secondary{background:#111a33;border:1px solid rgba(255,255,255,.12)}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    textarea,input,select{background:#0e1730;color:#e6edf7;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px;width:100%}
+    label{font-size:14px}
+    .status{margin-top:6px;opacity:.8}
+    .chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+    .chip{border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:4px 8px;font-size:12px}
+    .chip.active{border-color:#3b82f6;color:#cfe1ff}
+    .tableWrap{max-height:60vh;overflow:auto;border:1px solid rgba(255,255,255,.08);border-radius:10px}
+    table{width:100%;border-collapse:separate;border-spacing:0}
+    thead th{position:sticky;top:0;background:#0b1224;z-index:2}
+    th,td{padding:8px;border-bottom:1px solid rgba(255,255,255,.06);text-align:left;font-size:14px;vertical-align:top}
+    .note{font-size:12px;opacity:.9}
+    .toast{position:fixed;right:12px;bottom:12px;background:#0b1224;color:#e6edf7;border:1px solid rgba(255,255,255,.1);padding:8px 12px;border-radius:10px;z-index:9999;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+    .foot{opacity:.7;margin-top:18px;font-size:13px}
+    a{color:#9ec5ff}
+    .cell-url, td.url, .urlCell { word-break: break-all; }
+</style>
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"SoftwareApplication",
+    "name":"Wayback Fixer",
+    "applicationCategory":"DeveloperApplication",
+    "operatingSystem":"Any",
+    "offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},
+    "description":"Paste dead URLs and get Wayback replacements. Export a replacement map and 410 list. Optional verify and SavePageNow."
+  }
+  
+function protectCSVCell(v){
+  const s = String(v ?? "");
+  return /^[=+\-@]/.test(s) ? "'" + s : s;
+}
+
+// DLF CSV import tolerance
+function pickDLFColumn(headers){
+  return headers.includes('url') ? 'url' : (headers.includes('finalUrl') ? 'finalUrl' : 'url');
+}
+
+function enhanceCopyButtons(){
+  try{
+    const rows = document.querySelectorAll('#results tbody tr');
+    rows.forEach(tr => {
+      const first = tr.querySelector('td');
+      if (!first) return;
+      if (first.querySelector('.copyBtn')) return;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'copyBtn';
+      btn.textContent = 'Copy';
+      btn.style.marginLeft = '6px';
+      btn.addEventListener('click', ()=>{
+        const txt = first.textContent.trim();
+        navigator.clipboard.writeText(txt).catch(()=>{});
+      });
+      first.appendChild(btn);
+      first.classList.add('cell-url');
+    });
+  }catch{}
+}
+document.addEventListener('tinyutils:results-updated', enhanceCopyButtons);
+
+async function withRequestIdEcho(res){
+  try{
+    const id = res.headers.get('x-request-id');
+    const el = document.getElementById('status') || document.getElementById('statusEl') || document.querySelector('.status');
+    if (id && el){
+      const small = document.createElement('span');
+      small.style.marginLeft = '8px';
+      small.style.opacity = '.7';
+      small.style.fontSize = '12px';
+      small.textContent = `(request ${id})`;
+      el.appendChild(small);
+    }
+  }catch{}
+}
+</script>
+</head>
+<body>
+<header class="site-header">
+  <div class="container row between center">
+    <a class="brand" href="/">TinyUtils</a>
+    <nav class="nav">
+      <a class="active" href="/tools/">Tools</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <header>
+      <h1>Wayback Fixer</h1>
+      <p class="sub">Paste dead URLs → get the best Wayback snapshot for each, export replacements & 410s. <span title="Polite by default — honors robots.txt and rate‑limits requests.">❓</span></p>
+    </header>
+
+    <section class="grid two">
+      <div class="card">
+        <label for="list">Paste URLs (one per line)</label>
+        <textarea id="list" rows="10" placeholder="https://example.com/404
+https://example.com/moved"></textarea>
+        <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap">
+          <input id="file" type="file" accept=".csv,.txt">
+          <button id="importDlf" class="btn secondary">Import from Dead Link Finder CSV</button>
+          <button id="demo" class="btn secondary">Try a demo</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="grid">
+          <label><input type="checkbox" id="verify"> Verify with HEAD (polite)</label>
+          <label><input type="checkbox" id="spn"> Try SavePageNow on misses</label>
+          <label>Closest snapshot window
+            <select id="pref">
+              <option value="any" selected>Any time</option>
+              <option value="5y">Prefer last 5 years</option>
+              <option value="1y">Prefer last 1 year</option>
+            </select>
+          </label>
+          <label>Timeout (ms) <input id="timeout" type="number" min="1000" max="30000" value="10000"></label>
+          <label>Max concurrent <input id="conc" type="number" min="1" max="6" value="6"></label>
+          <div>
+            <button id="run" class="btn">Find Wayback Replacements</button>
+            <span id="status" class="status" aria-live="polite">Ready.</span>
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap">
+            <button id="dlCsv" class="btn secondary">Export CSV</button>
+            <button id="dlJson" class="btn secondary">Export JSON</button>
+            <button id="dl410" class="btn secondary">Export 410 CSV</button>
+            <button id="copyRepl" class="btn secondary">Copy replacements</button>
+            <button id="copy410" class="btn secondary">Copy 410s</button>
+            <button id="share" class="btn secondary">Share</button>
+          </div>
+          <div class="chips" id="filterChips">
+            <span class="chip active" data-f="all">All</span>
+            <span class="chip" data-f="archived">Archived</span>
+            <span class="chip" data-f="no_snapshot">No snapshot</span>
+            <span class="chip" data-f="error">Errors</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <details class="card" style="margin-top:12px">
+  <summary><strong>How to replace dead links with archive URLs</strong></summary>
+  <ol>
+    <li>Paste your dead URLs (or <em>Import from Dead Link Finder CSV</em>).</li>
+    <li>Click <em>Find Wayback Replacements</em>. We check the Wayback Machine for the closest snapshot and show you a replacement URL.</li>
+    <li>(Optional) Turn on <em>Verify with HEAD</em> to confirm the snapshot loads quickly.</li>
+    <li>Export <em>Replacements CSV</em> to bulk‑update redirects or content.</li>
+    <li>If no snapshot exists, use the <em>410 CSV</em> to cleanly remove or redirect those URLs.</li>
+    <li>(Optional) Try <em>SavePageNow</em> to request new captures for pages that are still live.</li>
+    <li>Use <em>Share</em> to copy your current settings in a link you can revisit later.</li>
+  </ol>
+  <p style="opacity:.8;font-size:13px;margin-top:8px">Wayback availability varies by site; some domains restrict archiving. This tool is polite and rate‑limited.</p>
+</details>
+
+    <section class="tableWrap card" style="margin-top:12px">
+      <table id="tbl">
+        <thead>
+          <tr><th>URL</th><th>Snapshot date</th><th>Replacement</th><th>Verify</th><th>Note</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <footer class="foot">
+      <a href="/tools/">← All tools</a>
+    </footer>
+  </div>
+
+<script>
+  const listEl = document.getElementById('list');
+  const fileEl = document.getElementById('file');
+  const importDlf = document.getElementById('importDlf');
+  const verifyEl = document.getElementById('verify');
+  const spnEl = document.getElementById('spn');
+  const prefEl = document.getElementById('pref');
+  const timeoutEl = document.getElementById('timeout');
+  const concEl = document.getElementById('conc');
+  const statusEl = document.getElementById('status');
+  const runBtn = document.getElementById('run');
+  const chips = document.getElementById('filterChips');
+  const tblBody = document.querySelector('#tbl tbody');
+  const shareBtn = document.getElementById('share');
+  let last = null, filt = 'all';
+
+  function showToast(msg){
+    const t = document.createElement('div');
+    t.textContent = msg; t.className = 'toast'; document.body.appendChild(t);
+    setTimeout(()=>t.remove(), 1600);
+  }
+  async function copyText(txt){
+    try { await navigator.clipboard.writeText(txt); showToast('Copied'); }
+    catch { showToast('Copy failed'); }
+  }
+  function noteNice(n){
+    if (!n) return '';
+    const map = {
+      'archived':'Archived',
+      'no_snapshot':'No snapshot',
+      'spn_queued':'SavePageNow queued',
+      'timeout':'Timed out',
+      'network_error':'Network error',
+      'unsupported_scheme':'Unsupported scheme',
+      'blocked_private_host':'Private host blocked',
+      'invalid_url':'Invalid URL',
+      'retry_1':'Retried'
+    };
+    return n.split('|').map(x=>map[x]||x).join(' · ');
+  }
+  function parseHash(){
+    try{
+      return JSON.parse(decodeURIComponent(location.hash.slice(1)||'{}'));
+    }catch{ return {}; }
+  }
+  function applyHash(){
+    const o = parseHash();
+    if (!o || typeof o!=='object') return;
+    if (o.verify!=null) verifyEl.checked = !!o.verify;
+    if (o.spn!=null) spnEl.checked = !!o.spn;
+    if (o.pref) prefEl.value = o.pref;
+    if (o.t) timeoutEl.value = o.t;
+    if (o.c) concEl.value = o.c;
+  }
+  function toHash(){
+    const o = { verify: verifyEl.checked, spn: spnEl.checked, pref: prefEl.value, t: Number(timeoutEl.value), c: Number(concEl.value) };
+    return '#'+encodeURIComponent(JSON.stringify(o));
+  }
+
+  document.getElementById('demo').addEventListener('click', ()=>{
+    listEl.value = `https://example.com/old\nhttps://example.com/missing\nhttps://example.com/2011/post`;
+    statusEl.textContent = 'Demo loaded — press Run.';
+  });
+
+  fileEl.addEventListener('change', async ()=>{
+    const f = fileEl.files[0]; if (!f) return;
+    const txt = await f.text();
+    if (f.name.endsWith('.csv')){
+      // naive CSV: split by newline, find a column named 'url' or first column
+      const lines = txt.split(/\r?\n/).filter(Boolean);
+      if (!lines.length){ showToast('Empty file'); return; }
+      const head = lines[0].split(',').map(s=>s.replace(/^"+|"+$/g,'').trim());
+      let idx = head.findIndex(h=>/^(url|source_url)$/i.test(h));
+      if (idx < 0) idx = 0;
+      const urls = lines.slice(1).map(row=>{
+        const cols = row.split(',').map(s=>s.replace(/^"+|"+$/g,'').trim());
+        return cols[protectCSVCell(idx)];
+      }).filter(Boolean);
+      listEl.value = Array.from(new Set(urls)).join('\n');
+    }else{
+      listEl.value = txt;
+    }
+  });
+
+  importDlf.addEventListener('click', async ()=>{
+    try{
+      const [f] = await window.showOpenFilePicker({ types:[{ protectCSVCell(description):'CSV', accept:{ 'text/csv':['.protectCSVCell(csv)'] }}] });
+      const file = await f.getFile(); const txt = await file.text();
+      const lines = txt.split(/\r?\n/).filter(Boolean);
+      const head = (lines[0]||'').split(',').map(s=>s.replace(/^"+|"+$/g,'').trim());
+      const urlIdx = head.findIndex(h=>/^url$/i.test(h)); const okIdx = head.findIndex(h=>/^ok$/i.test(h));
+      const statusIdx = head.findIndex(h=>/^status$/i.test(h));
+      const urls = [];
+      for (const row of lines.slice(1)){
+        const cols = row.split(',').map(s=>s.replace(/^"+|"+$/g,'').trim());
+        const u = cols[protectCSVCell(urlIdx)>=0?urlIdx:0];
+        const ok = okIdx>=0? cols[protectCSVCell(okIdx)].toLowerCase()==='true' : false;
+        const st = statusIdx>=0? Number(cols[protectCSVCell(statusIdx)]||'0') : 0;
+        if (u && (!ok || st>=400)) urls.push(u);
+      }
+      listEl.value = Array.from(new Set(urls)).join('\n');
+      showToast('Imported broken URLs from DLF CSV');
+    }catch(e){ showToast('Import cancelled'); }
+  });
+
+  chips.addEventListener('click', (e)=>{
+    const chip = e.target.closest('.chip'); if (!chip) return;
+    chips.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active'); filt = chip.dataset.f||'all';
+    if (last) render(last);
+  });
+
+  function filterRows(rows){
+    if (filt==='all') return rows;
+    if (filt==='archived') return rows.filter(r=> (r.note||'').includes('archived'));
+    if (filt==='no_snapshot') return rows.filter(r=> (r.note||'').includes('no_snapshot'));
+    if (filt==='error') return rows.filter(r=> {
+      const n = r.note||'';
+      return n.includes('invalid_url') || n.includes('unsupported_scheme') || n.includes('blocked_private_host') || n.includes('network_error') || n.includes('timeout');
+    });
+    return rows;
+  }
+  function render(data){
+    last = data;
+    const rows = filterRows(data.results||[]);
+    tblBody.innerHTML = '';
+    rows.forEach(r=>{
+      const tr = document.createElement('tr');
+      const vStatus = r.verify? (r.verify.status||0) : '';
+      tr.innerHTML = `<td>${r.url}</td><td>${r.snapshotTs||''}</td><td>${r.snapshotUrl? `<a href="${r.snapshotUrl}" target="_blank" rel="noopener">Archive</a>`:''}</td><td>${vStatus}${r.verify&&r.verify.ok? ' ✓':''}</td><td class="note">${noteNice(r.note||'')}</td>`;
+      tblBody.appendChild(tr);
+    });
+    statusEl.textContent = `${data.meta.totalChecked} checked · ${data.meta.archived} archived · ${data.meta.noSnapshot} no snapshot · SPN ${data.meta.spnQueued}`;
+  }
+
+  runBtn.addEventListener('click', async ()=>{
+    const body = {
+      list: listEl.value||'',
+      verifyHead: verifyEl.checked,
+      trySavePageNow: spnEl.checked,
+      prefWindow: prefEl.value,
+      timeout: Math.min(30000, Math.max(1000, Number(timeoutEl.value)||10000)),
+      concurrency: Math.max(1, Math.min(6, Number(concEl.value)||6))
+    };
+    statusEl.textContent = 'Working…';
+    runBtn.disabled = true;
+    try{
+      const res = await fetch('/api/wayback-fixer', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify(body) });
+      const data = await res.json();
+      render(data);
+    }catch(e){
+      showToast('Request failed');
+    }finally{
+      runBtn.disabled = false;
+    }
+  });
+  document.addEventListener('keydown', (e)=>{
+    if ((e.metaKey||e.ctrlKey) && e.key==='Enter'){ runBtn.click(); }
+    else if (!e.metaKey && !e.ctrlKey && (e.key==='e'||e.key==='E')){ document.getElementById('dlCsv').click(); }
+    else if (!e.metaKey && !e.ctrlKey && (e.key==='j'||e.key==='J')){ document.getElementById('dlJson').click(); }
+    else if (!e.metaKey && !e.ctrlKey && (e.key==='f'||e.key==='F')){ chips.querySelector('[protectCSVCell(data)-f="all"]').focus?.(); }
+  });
+
+  function toCSV(rows){
+    const header = ['protectCSVCell(source_url)','replacement_url','snapshot_date_iso','verify_status','note'];
+    const lines = [protectCSVCell(header).join(',')];
+    rows.forEach(r=>{
+      const vals = [protectCSVCell(protectCSVCell)(r.url)||'', r.snapshotUrl||'', r.snapshotTs||'', r.verify?(r.verify.status||''):'' , r.note||''];
+      lines.push(vals.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','));
+    });
+    lines.push(`# meta: ${JSON.stringify(last?.meta||{})}`);
+    return lines.join('\n');
+  }
+  function to410(rows){
+    const header = ['protectCSVCell(url_to_remove)','reason'];
+    const lines = [protectCSVCell(header).join(',')];
+    rows.filter(r=> (r.note||'').includes('no_snapshot')).forEach(r=>{
+      lines.push(`"${String(r.url).replace(/"/g,'""')}","no_snapshot"`);
+    });
+    return lines.join('\n');
+  }
+  document.getElementById('dlCsv').addEventListener('click', ()=>{
+    if (!last) return; const txt = toCSV(last.results||[]);
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([protectCSVCell(txt)],{type:'text/csv'})); a.download='wayback-replacements.csv'; a.click();
+  });
+  document.getElementById('dlJson').addEventListener('click', ()=>{
+    if (!last) return; const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([protectCSVCell(JSON).stringify(last,null,2)],{type:'application/json'})); a.download='wayback-results.json'; a.click();
+  });
+  document.getElementById('dl410').addEventListener('click', ()=>{
+    if (!last) return; const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([protectCSVCell(to410)(last.results||[])],{type:'text/csv'})); a.download='wayback-410.csv'; a.click();
+  });
+  document.getElementById('copyRepl').addEventListener('click', ()=>{
+    if (!last) return; const txt = toCSV(last.results||[]); copyText(txt);
+  });
+  document.getElementById('copy410').addEventListener('click', ()=>{
+    if (!last) return; const txt = to410(last.results||[]); copyText(txt);
+  });
+  shareBtn.addEventListener('click', ()=>{
+    location.hash = toHash(); copyText(location.href);
+  });
+  applyHash();
+
+function protectCSVCell(v){
+  const s = String(v ?? "");
+  return /^[=+\-@]/.test(s) ? "'" + s : s;
+}
+
+// DLF CSV import tolerance
+function pickDLFColumn(headers){
+  return headers.includes('url') ? 'url' : (headers.includes('finalUrl') ? 'finalUrl' : 'url');
+}
+
+function enhanceCopyButtons(){
+  try{
+    const rows = document.querySelectorAll('#results tbody tr');
+    rows.forEach(tr => {
+      const first = tr.querySelector('td');
+      if (!first) return;
+      if (first.querySelector('.copyBtn')) return;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'copyBtn';
+      btn.textContent = 'Copy';
+      btn.style.marginLeft = '6px';
+      btn.addEventListener('click', ()=>{
+        const txt = first.textContent.trim();
+        navigator.clipboard.writeText(txt).catch(()=>{});
+      });
+      first.appendChild(btn);
+      first.classList.add('cell-url');
+    });
+  }catch{}
+}
+document.addEventListener('tinyutils:results-updated', enhanceCopyButtons);
+
+async function withRequestIdEcho(res){
+  try{
+    const id = res.headers.get('x-request-id');
+    const el = document.getElementById('status') || document.getElementById('statusEl') || document.querySelector('.status');
+    if (id && el){
+      const small = document.createElement('span');
+      small.style.marginLeft = '8px';
+      small.style.opacity = '.7';
+      small.style.fontSize = '12px';
+      small.textContent = `(request ${id})`;
+      el.appendChild(small);
+    }
+  }catch{}
+}
+</script>
+
+    <div style="font-size:12px;opacity:.7;margin:12px 8px">We use minimal analytics only after you consent.</div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container row between wrap">
+    <span>© <span id="y"></span> TinyUtils</span>
+    <span><a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a></span>
+  </div>
+</footer>
+<script>document.getElementById('y').textContent = new Date().getFullYear();</script>
+
+</body>
+</html>
