@@ -32,8 +32,13 @@ function isPrivateHost(hostname) {
 }
 
 function normalize(raw) {
+  let value = String(raw || '').trim();
+  if (!value) return { ok: false, note: 'invalid_url' };
+  if (value.startsWith('//')) value = 'https:' + value;
+  if (!/^[a-zA-Z][a-zA-Z0-9+\.\-]*:/.test(value)) value = 'https://' + value;
+
   try {
-    const url = new URL(raw);
+    const url = new URL(value);
     if (url.protocol !== 'http:' && url.protocol !== 'https:') return { ok: false, note: 'unsupported_scheme' };
     if (isPrivateHost(url.hostname)) return { ok: false, note: 'private_host' };
     url.hash = '';
