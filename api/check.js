@@ -1,4 +1,4 @@
-export const runtime = 'edge';
+export const config = { runtime: 'edge' };
 
 const UA = 'TinyUtils-DeadLinkChecker/1.0 (+https://tinyutils.net; hello@tinyutils.net)';
 const TLDS = ['.gov', '.mil', '.bank', '.edu'];
