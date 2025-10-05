@@ -1,0 +1,81 @@
+<!doctype html><html lang='en'><head>
+<meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
+<title>Sitemap Generator — TinyUtils</title>
+<link rel='stylesheet' href='/public/styles.css'>
+<link rel="icon" href="/public/favicon.ico" sizes="any">
+</head>
+<body>
+<header class='nav'>
+  <div class='brand'><img src='/public/logo.svg' width='28' height='28'><span class='name'>TinyUtils</span></div>
+  <nav class='links'><a href='/'>Dead Link Finder</a><a href='/tools/'>Tools</a></nav>
+</header>
+<div class='container'>
+  <h1>Sitemap Generator</h1>
+  <div class='card'>
+    <label for='base'>Base site (optional)</label>
+    <input id='base' type='url' placeholder='https://example.com'>
+    <label for='paths'>URLs or paths (one per line)</label>
+    <textarea id='paths' placeholder='/\n/about\n/blog/post-1 or full URLs'></textarea>
+    <div class='grid grid-3'>
+      <div><label>Default changefreq<select id='cf'><option>weekly</option><option>daily</option><option>monthly</option><option>yearly</option><option>never</option></select></label></div>
+      <div><label>Default priority<input id='prio' type='number' min='0' max='1' step='0.1' value='0.5'></label></div>
+      <div><label><input id='lastmod' type='checkbox' checked> Include <code>lastmod</code> (today)</label></div>
+    </div>
+    <div style='margin-top:10px;display:flex;gap:8px'>
+      <button id='build'>Build sitemap.xml</button>
+      <button id='download' class='secondary' disabled>Download</button>
+      <button id='copy' class='ghost' disabled>Copy</button>
+    </div>
+    <div class='tableWrap' style='margin-top:10px'><pre id='out' style='white-space:pre-wrap;padding:12px'></pre></div>
+  </div>
+</div>
+<script>
+function normalize(base, line){
+  line = line.trim();
+  if (!line) return null;
+  try {
+    if (/^https?:\/\//i.test(line)) return new URL(line).href;
+    if (base) return new URL(line, base).href;
+  } catch(e){}
+  return line;
+}
+function xmlEscape(s){return s.replace(/[<>&"']/g, c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&apos;'}[c]));}
+document.getElementById('build').addEventListener('click', ()=>{
+  const base = document.getElementById('base').value.trim();
+  const prio = Math.min(1, Math.max(0, Number(document.getElementById('prio').value)||0.5));
+  const cf = document.getElementById('cf').value;
+  const lm = document.getElementById('lastmod').checked ? new Date().toISOString().slice(0,10) : null;
+  const raw = document.getElementById('paths').value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+  const urls = [];
+  const seen = new Set();
+  for (const line of raw){
+    const u = normalize(base, line);
+    if (u && !seen.has(u)){ seen.add(u); urls.push(u); }
+  }
+  if (urls.length===0){ alert('Please add at least one URL or path.'); return; }
+  const lines = ['<?xml version="1.0" encoding="UTF-8"?>','<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'];
+  for (const u of urls){
+    lines.push('  <url>'); 
+    lines.push('    <loc>'+xmlEscape(u)+'</loc>');
+    if (lm) lines.push('    <lastmod>'+lm+'</lastmod>');
+    lines.push('    <changefreq>'+cf+'</changefreq>');
+    lines.push('    <priority>'+prio.toFixed(1)+'</priority>');
+    lines.push('  </url>');
+  }
+  lines.push('</urlset>');
+  const xml = lines.join('\n');
+  document.getElementById('out').textContent = xml;
+  document.getElementById('copy').disabled = false;
+  document.getElementById('download').disabled = false;
+  window._xml = xml;
+});
+document.getElementById('copy').addEventListener('click', async ()=>{
+  await navigator.clipboard.writeText(window._xml||'');
+  document.getElementById('copy').textContent='Copied'; setTimeout(()=>document.getElementById('copy').textContent='Copy',1000);
+});
+document.getElementById('download').addEventListener('click', ()=>{
+  const blob = new Blob([window._xml||''], {type:'application/xml'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download='sitemap.xml'; a.click();
+});
+</script>
+</body></html>
