@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dead Link Finder — TinyUtils</title>
+  <meta name="description" content="Check URLs, crawl a page, or compare a sitemap to find broken links fast.">
+  <link rel="canonical" href="/tools/dead-link-finder/">
+  <meta property="og:title" content="Dead Link Finder — TinyUtils">
+  <meta property="og:description" content="Paste URLs, crawl a page or sitemap, export CSV/JSON, and queue Wayback snapshots.">
+  <meta property="og:image" content="/public/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/public/favicon.ico">
+  <link rel="stylesheet" href="/public/styles.css">
+  <link rel="stylesheet" href="/styles/site.css">
+  <script defer src="/scripts/consent.js"></script>
+  <style>
+    .hidden{display:none}
+    main{padding:32px 0 48px}
+    h1{margin:8px 0 4px}
+    .subtitle{color:var(--muted);margin:0 0 20px}
+    .badge{display:inline-flex;align-items:center;gap:6px;background:rgba(59,130,246,.12);color:var(--brand);border-radius:999px;padding:4px 10px;font-size:13px}
+    .cta{color:var(--brand)}
+    .card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:24px}
+    label{display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--muted)}
+    label.checkbox{flex-direction:row;align-items:center;gap:8px;font-size:14px;color:var(--text)}
+    textarea,input[type="url"],input[type="number"],input[type="search"],select{background:#0f1118;border:1px solid var(--border);color:var(--text);border-radius:10px;padding:10px;font-size:14px;width:100%}
+    textarea{min-height:160px;resize:vertical}
+    .mode-switch{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px}
+    .mode-switch label{flex-direction:row;align-items:center;gap:8px;color:var(--text);font-weight:600}
+    .options{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:16px}
+    .inline-controls{display:flex;flex-wrap:wrap;gap:12px;margin-top:16px;align-items:center}
+    button{border-radius:999px;border:1px solid var(--border);padding:10px 18px;background:var(--panel);color:var(--text);cursor:pointer;font-size:14px}
+    button.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+    button.primary:disabled{opacity:.6;cursor:progress}
+    button.secondary{background:transparent}
+    .tableWrap{overflow:auto;max-height:70vh}
+    table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+    thead th{position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--border);padding:10px;text-align:left;font-size:13px;color:var(--muted)}
+    tbody td{padding:10px;border-bottom:1px solid var(--border);font-size:13px}
+    tbody tr:nth-child(odd){background:#10131a}
+    .filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    .filters label{flex-direction:row;align-items:center;color:var(--muted);gap:6px;font-size:13px}
+    .filters input{width:auto}
+    .status-ok{color:#4ade80}
+    .status-bad{color:#f97316}
+    footer{margin-top:32px;border-top:1px solid var(--border);padding:18px 0;color:var(--muted)}
+    @media (max-width:720px){
+      .options{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+    }
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <div class="container row between center">
+    <a class="brand" href="/">TinyUtils</a>
+    <nav class="nav">
+      <a class="active" href="/tools/">Tools</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+    <div class="chips" id="runChips" aria-live="polite"></div>
+    <h1>Dead Link Finder</h1>
+    <p class="subtitle">Paste URLs or crawl a page/sitemap → check status → export CSV/JSON. <span class="badge">Wayback snapshots</span></p>
+    <p><a class="cta" href="/tools/">See all tools →</a> <span class="small">Support: <a href="/support.html">buy me a coffee</a></span></p>
+
+    <section class="card" aria-labelledby="inputHeading">
+      <h2 id="inputHeading">Input</h2>
+      <div class="mode-switch" role="radiogroup" aria-label="Input mode">
+        <label><input type="radio" name="mode" value="list" checked> Paste list</label>
+        <label><input type="radio" name="mode" value="crawl"> Crawl a page</label>
+        <label><input type="radio" name="mode" value="sitemap"> Sitemap URL</label>
+      </div>
+
+      <div id="listMode" class="mode-panel">
+        <label for="urls">Paste URLs (one per line)</label>
+        <textarea id="urls" placeholder="https://example.com/page-one
+https://example.com/page-two"></textarea>
+      </div>
+
+      <div id="crawlMode" class="mode-panel hidden">
+        <label for="pageUrl">Page to crawl</label>
+        <input type="url" id="pageUrl" placeholder="https://example.com/page" autocomplete="off">
+        <label class="checkbox"><input type="checkbox" id="includeAssets"> Include assets (img/script/css)</label>
+      </div>
+
+      <div id="sitemapMode" class="mode-panel hidden">
+        <label for="sitemapUrl">Sitemap URL</label>
+        <input type="url" id="sitemapUrl" placeholder="https://example.com/sitemap.xml" autocomplete="off">
+      </div>
+
+      <div class="options" style="margin-top:20px">
+        <label>Timeout (ms)
+          <input type="number" id="timeout" value="10000" min="1000" step="500">
+        </label>
+        <label>Concurrency
+          <input type="number" id="concurrency" value="10" min="1" max="20">
+        </label>
+        <label>Scope
+          <select id="scope">
+            <option value="internal" selected>Internal only</option>
+            <option value="all">All links on page</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="options">
+        <label class="checkbox"><input type="checkbox" id="includeArchive" checked> Fetch Wayback snapshot when broken</label>
+        <label class="checkbox"><input type="checkbox" id="respectRobots" checked> Respect robots.txt</label>
+        <label class="checkbox"><input type="checkbox" id="onlyBroken"> Show only broken</label>
+        <label class="checkbox"><input type="checkbox" id="headFirst" checked> Try HEAD before GET</label>
+        <label class="checkbox"><input type="checkbox" id="retryHttp"> Retry over HTTP if HTTPS fails</label>
+      </div>
+
+      <p class="small">Soft limit: first 1000 links per run to stay polite. Use multiple runs for huge sites.</p>
+
+      <div class="inline-controls">
+        <button id="runBtn" class="primary" title="Run (Ctrl/Cmd+Enter)">Check links</button>
+        <button id="clearBtn" class="secondary">Clear</button>
+        <div id="progress" aria-live="polite"></div>
+        <span id="spin" class="spinner hidden" aria-hidden="true"></span>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="resultsHeading">
+      <div class="row between center" style="flex-wrap:wrap;gap:12px">
+        <h2 id="resultsHeading" style="margin:0">Results</h2>
+        <div class="filters">
+          <label><input type="checkbox" class="filt" data-range="2" checked>2xx</label>
+          <label><input type="checkbox" class="filt" data-range="3" checked>3xx</label>
+          <label><input type="checkbox" class="filt" data-range="4" checked>4xx</label>
+          <label><input type="checkbox" class="filt" data-range="5" checked>5xx</label>
+          <label><input type="checkbox" id="showUnknown" checked>Unknown</label>
+          <input type="search" id="search" placeholder="Filter results…" aria-label="Filter results">
+        </div>
+        <div class="inline-controls">
+          <button id="exportCsv" class="secondary" disabled>Export CSV</button>
+          <button id="copyCsv" class="secondary" disabled>Copy CSV</button>
+          <button id="exportJson" class="secondary" disabled>Export JSON</button>
+        </div>
+      </div>
+      <p id="summary" class="small" style="margin:12px 0 16px"></p>
+      <div class="tableWrap">
+        <table id="results">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>URL</th>
+              <th>Status</th>
+              <th>OK?</th>
+              <th>Final URL</th>
+              <th>Wayback</th>
+              <th>Note</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="container row between wrap">
+    <span>© <span id="year"></span> TinyUtils</span>
+    <span><a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a> · <a href="/sitemap.xml">Sitemap</a></span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  const modeInputs = document.querySelectorAll('input[name="mode"]');
+  const panels = {
+    list: document.getElementById('listMode'),
+    crawl: document.getElementById('crawlMode'),
+    sitemap: document.getElementById('sitemapMode')
+  };
+  const urlsEl = document.getElementById('urls');
+  const pageUrlEl = document.getElementById('pageUrl');
+  const sitemapUrlEl = document.getElementById('sitemapUrl');
+  const includeAssetsEl = document.getElementById('includeAssets');
+  const includeArchiveEl = document.getElementById('includeArchive');
+  const respectRobotsEl = document.getElementById('respectRobots');
+  const headFirstEl = document.getElementById('headFirst');
+  const retryHttpEl = document.getElementById('retryHttp');
+  const scopeEl = document.getElementById('scope');
+  const timeoutEl = document.getElementById('timeout');
+  const concurrencyEl = document.getElementById('concurrency');
+  const onlyBrokenEl = document.getElementById('onlyBroken');
+  const runBtn = document.getElementById('runBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const progressEl = document.getElementById('progress');
+  const spinner = document.getElementById('spin');
+  const summaryEl = document.getElementById('summary');
+  const tableBody = document.querySelector('#results tbody');
+  const exportCsvBtn = document.getElementById('exportCsv');
+  const exportJsonBtn = document.getElementById('exportJson');
+  const copyCsvBtn = document.getElementById('copyCsv');
+  const filterCheckboxes = document.querySelectorAll('.filt');
+  const showUnknownEl = document.getElementById('showUnknown');
+  const searchEl = document.getElementById('search');
+  const chips = document.getElementById('runChips');
+  let lastResults = [];
+  let lastMeta = null;
+
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  function setMode(mode){
+    Object.keys(panels).forEach(key => {
+      panels[key].classList.toggle('hidden', key !== mode);
+    });
+  }
+  modeInputs.forEach(input => {
+    input.addEventListener('change', () => setMode(input.value));
+  });
+  setMode('list');
+
+  function cleanList(text){
+    return text.split(/\r?\n/).map(s => s.trim()).filter(Boolean).slice(0, 1000);
+  }
+
+  function prefixCsvCell(value){
+    const str = String(value ?? '');
+    return /^[=+\-@]/.test(str) ? "'" + str : str;
+  }
+
+  function toggleLoading(isLoading){
+    runBtn.disabled = isLoading;
+    spinner.classList.toggle('hidden', !isLoading);
+    spinner.textContent = isLoading ? '⏳' : '';
+    progressEl.textContent = isLoading ? 'Checking…' : '';
+  }
+
+  function renderSummary(meta, count){
+    if (!meta) {
+      summaryEl.textContent = '';
+      return;
+    }
+    const items = [
+      `${count} URLs checked`,
+      `mode: ${meta.mode || 'list'}`,
+      meta.timeoutMs ? `timeout ${meta.timeoutMs}ms` : null,
+      meta.httpFallback ? 'HTTP fallback on' : null,
+      meta.wayback ? 'Wayback enabled' : null
+    ].filter(Boolean);
+    summaryEl.textContent = items.join(' · ');
+  }
+
+  function rowStatusGroup(status){
+    if (status == null || status === '') return 'unknown';
+    const n = Number(status) || 0;
+    if (n >= 200 && n < 300) return '2';
+    if (n >= 300 && n < 400) return '3';
+    if (n >= 400 && n < 500) return '4';
+    if (n >= 500 && n < 600) return '5';
+    return 'unknown';
+  }
+
+  function applyFilters(){
+    const allowed = new Set(Array.from(filterCheckboxes).filter(cb => cb.checked).map(cb => cb.dataset.range));
+    const showUnknown = showUnknownEl.checked;
+    const query = searchEl.value.trim().toLowerCase();
+    Array.from(tableBody.querySelectorAll('tr')).forEach(tr => {
+      const group = tr.dataset.group || 'unknown';
+      const ok = tr.dataset.ok === 'true';
+      let visible = true;
+      if (group === 'unknown' && !showUnknown) visible = false;
+      if (group !== 'unknown' && !allowed.has(group)) visible = false;
+      if (onlyBrokenEl.checked && ok) visible = false;
+      if (query && !tr.dataset.url.includes(query) && !tr.dataset.note.includes(query)) visible = false;
+      tr.style.display = visible ? '' : 'none';
+    });
+  }
+
+  function renderResults(results){
+    tableBody.innerHTML = '';
+    results.forEach((row, index) => {
+      const tr = document.createElement('tr');
+      const group = rowStatusGroup(row.status);
+      tr.dataset.group = group;
+      tr.dataset.ok = row.ok ? 'true' : 'false';
+      tr.dataset.url = (row.url || '').toLowerCase();
+      tr.dataset.note = (row.note || '').toLowerCase();
+      const statusClass = row.ok ? 'status-ok' : 'status-bad';
+      const waybackLink = row.archive && row.archive.url ? `<a href="${row.archive.url}" target="_blank" rel="noopener">snapshot</a>` : '';
+      const finalLink = row.finalUrl ? `<a href="${row.finalUrl}" target="_blank" rel="noopener">open</a>` : '';
+      tr.innerHTML = `
+        <td>${index + 1}</td>
+        <td><a href="${row.url}" target="_blank" rel="noopener">${row.url}</a></td>
+        <td class="${statusClass}">${row.status ?? ''}</td>
+        <td>${row.ok ? '✅' : '❌'}</td>
+        <td>${finalLink}</td>
+        <td>${waybackLink}</td>
+        <td>${row.note || ''}</td>
+      `;
+      tableBody.appendChild(tr);
+    });
+    applyFilters();
+  }
+
+  function toCSV(rows, meta){
+    const header = ['url','status','ok','finalUrl','archiveUrl','note','chain'];
+    const lines = [header.join(',')];
+    rows.forEach(r => {
+      const values = [
+        prefixCsvCell(r.url || ''),
+        r.status ?? '',
+        r.ok ? 'true' : 'false',
+        r.finalUrl || '',
+        (r.archive && r.archive.url) || '',
+        r.note || '',
+        typeof r.chain === 'number' ? r.chain : ''
+      ];
+      const escaped = values.map(val => '"' + String(val).replace(/"/g,'""') + '"');
+      lines.push(escaped.join(','));
+    });
+    if (meta) lines.push('# meta: ' + JSON.stringify(meta));
+    return lines.join('\n');
+  }
+
+  async function copyToClipboard(text){
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (err) {
+      alert('Copy failed: ' + err.message);
+      return false;
+    }
+  }
+
+  function enableExports(enabled){
+    exportCsvBtn.disabled = !enabled;
+    exportJsonBtn.disabled = !enabled;
+    copyCsvBtn.disabled = !enabled;
+  }
+
+  async function runCheck(){
+    const mode = Array.from(modeInputs).find(i => i.checked)?.value || 'list';
+    let payload = {
+      mode,
+      includeArchive: includeArchiveEl.checked,
+      headFirst: headFirstEl.checked,
+      retryHttp: retryHttpEl.checked,
+      timeout: Number(timeoutEl.value) || 10000,
+      concurrency: Number(concurrencyEl.value) || 10,
+      scope: scopeEl.value,
+      respectRobots: respectRobotsEl.checked,
+      includeAssets: includeAssetsEl?.checked || false
+    };
+
+    if (mode === 'list') {
+      const urls = cleanList(urlsEl.value);
+      if (!urls.length) {
+        alert('Please paste at least one URL.');
+        return;
+      }
+      payload.urls = urls;
+    } else if (mode === 'crawl') {
+      const page = pageUrlEl.value.trim();
+      if (!page) { alert('Enter a page URL to crawl.'); return; }
+      payload.pageUrl = page;
+    } else if (mode === 'sitemap') {
+      const sm = sitemapUrlEl.value.trim();
+      if (!sm) { alert('Enter a sitemap URL.'); return; }
+      payload.sitemapUrl = sm;
+    }
+
+    toggleLoading(true);
+    enableExports(false);
+    chips.textContent = '';
+    try {
+      const response = await fetch('/api/check', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data && data.message ? data.message : 'Request failed');
+      }
+      lastResults = Array.isArray(data.results) ? data.results : [];
+      lastMeta = data.meta || null;
+      renderResults(lastResults);
+      renderSummary(lastMeta, lastResults.length);
+      enableExports(lastResults.length > 0);
+      if (data.meta && data.meta.truncated) {
+        chips.textContent = 'ℹ️ Truncated to first ' + data.meta.totalChecked + ' URLs';
+      }
+    } catch (err) {
+      alert('Check failed: ' + err.message);
+    } finally {
+      toggleLoading(false);
+    }
+  }
+
+  runBtn.addEventListener('click', runCheck);
+  clearBtn.addEventListener('click', () => {
+    urlsEl.value = '';
+    pageUrlEl.value = '';
+    sitemapUrlEl.value = '';
+    tableBody.innerHTML = '';
+    summaryEl.textContent = '';
+    chips.textContent = '';
+    lastResults = [];
+    lastMeta = null;
+    enableExports(false);
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+      event.preventDefault();
+      runBtn.click();
+    }
+  });
+
+  filterCheckboxes.forEach(cb => cb.addEventListener('change', applyFilters));
+  showUnknownEl.addEventListener('change', applyFilters);
+  onlyBrokenEl.addEventListener('change', applyFilters);
+  searchEl.addEventListener('input', applyFilters);
+
+  exportCsvBtn.addEventListener('click', () => {
+    const csv = toCSV(lastResults, lastMeta);
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'dead-links.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  exportJsonBtn.addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify({ meta: lastMeta, results: lastResults }, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'dead-links.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  copyCsvBtn.addEventListener('click', async () => {
+    const csv = toCSV(lastResults, lastMeta);
+    const ok = await copyToClipboard(csv);
+    if (ok) {
+      copyCsvBtn.textContent = 'Copied!';
+      setTimeout(() => { copyCsvBtn.textContent = 'Copy CSV'; }, 1200);
+    }
+  });
+})();
+</script>
+</body>
+</html>
