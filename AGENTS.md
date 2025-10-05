@@ -114,8 +114,12 @@ Edge APIs must respond:
 - **URL normalization**: accept bare domains (`facebook.com`) or `https://domain` with/without `www` and normalize automatically (prefer `https`, maintain/insert `www` only if target resolves that way).
 - Keep the table header **sticky** and ensure the results table sits inside a single `.tableWrap` container.
 
+
 ---
 
 ## Reporting format on PR
 - If everything passes: comment **“Preview GREEN; ready for owner approval.”** and attach screenshots of each page + API JSON samples.
 - If not: list **file:line** with a minimal proposed diff (unified patch format preferred) and attach a failing screenshot/log.
+
+## Note
+- Once you fix any issues listed here, you can update this file and marked them as fixed. Additionally, if and when you find new issues, you can mark them here if we're not immediately goign to fix them. Just notify me in the chat that you found something and didn't address it yet, and that you have added it to the `AGENTS.md` file.
