@@ -3,8 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "echo \"static project: no build step\"",
-    "start": "serve ."
+    "vercel-build": "echo 'static + edge'"
   },
-  "devDependencies": {}
+  "engines": {
+    "node": "20.x"
+  }
 }
