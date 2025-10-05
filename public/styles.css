@@ -1,6 +1,8 @@
-body{font-family:system-ui;background:#0a1022;color:#e8ecf3;margin:0}
+body{font-family:system-ui;background:#0a1022;color:#e8ecf3;margin:0;line-height:1.6}
+.container{max-width:960px;margin:0 auto;padding:1rem}
+.cell-url{word-break:break-all}
 /* Sticky header & zebra */
-.tableWrap{max-height:60vh;overflow:auto;border:1px solid #223055;border-radius:10px}
+.tableWrap{max-height:70vh;overflow:auto;border:1px solid #223055;border-radius:10px}
 table{width:100%;border-collapse:collapse}
 thead th{position:sticky;top:0;background:#0d1836;z-index:2}
 tbody tr:nth-child(odd){background:rgba(255,255,255,.02)}
@@ -18,15 +20,3 @@ th,td{padding:8px 10px;border-bottom:1px solid #152448;vertical-align:top}
 @keyframes spin{to{transform:rotate(360deg)}}
 /* Search box */
 #search{max-width:320px}
-
-/* Sticky header & zebra */
-.tableWrap{max-height:60vh;overflow:auto;border:1px solid #223055;border-radius:10px}
-table{width:100%;border-collapse:collapse}
-thead th{position:sticky;top:0;background:#0d1836;z-index:2}
-tbody tr:nth-child(odd){background:rgba(255,255,255,.02)}
-tbody tr:hover{background:rgba(255,255,255,.04)}
-th,td{padding:8px 10px;border-bottom:1px solid #152448;vertical-align:top}
-
-/* Sticky results header */
-.tableWrap { overflow:auto; max-height:70vh; }
-#results thead th { position: sticky; top: 0; z-index: 2; background:#0d1836; }
