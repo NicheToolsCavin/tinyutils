@@ -69,3 +69,572 @@
 <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
 </body>
 </html>
+<!doctype html><html lang="en"><head>
+<!-- Optional: Google Funding Choices CMP (replace PUB_ID and uncomment)
+<script async src="https://fundingchoicesmessages.google.com/i/pub-REPLACE_ME?ers=1">
+function protectCSVCell(v){
+  const s = String(v ?? "");
+  return /^[=+\-@]/.test(s) ? "'" + s : s;
+}
+</script>
+-->
+
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dead Link Finder — TinyUtils</title>
+<meta name="description" content="Find broken links fast. Paste URLs, crawl a page or a sitemap, export CSV/JSON, and grab Wayback snapshots.">
+<link rel="canonical" href="https://tinyutils.net/">
+<meta name="robots" content="index,follow">
+<meta property="og:title" content="Dead Link Finder — TinyUtils">
+<meta property="og:description" content="Find broken links fast. List, crawl, or sitemap input. Export CSV/JSON and fetch Wayback snapshots.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://tinyutils.net/public/og.png">
+<meta property="og:url" content="https://tinyutils.net/">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="preload" href="/public/styles.css" as="style">
+<link rel="stylesheet" href="/public/styles.css">
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Dead Link Finder \u2014 TinyUtils",
+  "operatingSystem": "Web",
+  "applicationCategory": "BusinessApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "url": "https://tinyutils.net/",
+  "author": {
+    "@type": "Organization",
+    "name": "TinyUtils"
+  },
+  "description": "Check URLs, crawl pages or sitemaps, detect broken links, export CSV/JSON, and fetch Wayback snapshots."
+}
+function protectCSVCell(v){
+  const s = String(v ?? "");
+  return /^[=+\-@]/.test(s) ? "'" + s : s;
+}
+</script>
+<style>
+.tu-consent{position:fixed;right:16px;bottom:16px;max-width:340px;background:#0e1530;color:#e8ecf3;border:1px solid #263464;border-radius:12px;padding:12px 12px 10px;box-shadow:0 12px 30px rgba(0,0,0,.35);z-index:9999}
+.tu-consent h4{margin:0 0 6px;font-size:14px}
+.tu-consent p{margin:0 0 8px;font-size:13px;opacity:.9}
+.tu-consent .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
+.tu-consent button{padding:8px 10px;border-radius:10px;border:1px solid #2b6ef6;background:#0e1530;color:#cfe0ff;cursor:pointer}
+.tu-consent button.primary{background:#2b6ef6;color:#fff;border:none}
+.tu-consent .link{font-size:12px;opacity:.85}
+.tu-ads-toggle{margin-left:auto;display:inline-flex;gap:6px;align-items:center;font-size:12px;opacity:.85}
+.tu-ads-toggle input{transform:translateY(1px)}
+
+  .cell-url, td.url, .urlCell { word-break: break-all; }
+</style>
+
+<script>
+// --- Consent Mode + EU-friendly toast (very low-profile) ---
+(function(){
+  const EU_LANG = ['protectCSVCell(bg)','cs','da','de','el','en-GB','es','et','fi','fr','ga','hr','hu','it','lt','lv','mt','nl','pl','pt','ro','sk','sl','sv','is','no','tr','uk'];
+  const isEUByLang = (navigator.languages||[protectCSVCell(navigator).language||'']).some(l => EU_LANG.some(e => l.startsWith(e.toLowerCase())));
+  const isEUByTZ = (Intl && Intl.DateTimeFormat && /(^|\/)Europe\//.test(Intl.DateTimeFormat().resolvedOptions().timeZone||''));
+  const shouldPrompt = isEUByLang || isEUByTZ; // heuristic without IP lookup
+  const LS_KEY = 'tu-consent';
+  const ADS_KEY = 'tu-ads-hidden';
+  // Consent defaults (denied) so pages behave conservatively in EU until the user decides
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  window.gtag = window.gtag || gtag;
+  gtag('consent','default', {ad_storage:'denied', ad_user_data:'denied', ad_personalization:'denied', analytics_storage:'denied'});
+
+  function saveConsent(val){ try{ localStorage.setItem(LS_KEY, val); }catch{} }
+  function loadConsent(){ try{ return localStorage.getItem(LS_KEY); }catch{ return null; } }
+
+  function enableAll(){
+    gtag('consent','update', {ad_storage:'granted', ad_user_data:'granted', ad_personalization:'granted', analytics_storage:'granted'});
+    // load Plausible if not already loaded
+    if (!document.getElementById('plausible')) {
+      const s = document.createElement('script'); s.id='plausible'; s.defer=true;
+      s.setAttribute('data-domain','tinyutils.net'); s.src='https://plausible.io/js/script.js';
+      document.head.appendChild(s);
+    }
+  }
+  function denyAll(){
+    gtag('consent','update', {ad_storage:'denied', ad_user_data:'denied', ad_personalization:'denied', analytics_storage:'denied'});
+  }
+
+  function mountToast(){
+    if (!shouldPrompt) { // outside EU: honor persisted choice if any but don't block UX
+      const c = loadConsent();
+      if (c === 'granted') enableAll(); else denyAll();
+      return;
+    }
+    // If already decided, apply and exit
+    const decided = loadConsent();
+    if (decided) { if (decided==='granted') enableAll(); else denyAll(); return; }
+
+    const div = document.createElement('div');
+    div.className='tu-consent';
+    div.innerHTML = '<h4>Privacy choices</h4><p>We use cookie‑free analytics and show Google Ads to keep TinyUtils free. Choose your preference for analytics & ads.</p><div class="row"><a class="link" href="/privacy.html">Privacy</a><button class="secondary" id="tu-decline">Decline</button> <span title="Polite by default — honors robots.txt, per-origin caps, and timeouts.">❓</span><button class="primary" id="tu-accept">Accept</button></div>';
+    document.body.appendChild(div);
+    document.getElementById('tu-accept').onclick = function(){ saveConsent('granted'); enableAll(); div.remove(); };
+    document.getElementById('tu-decline').onclick = function(){ saveConsent('denied'); denyAll(); div.remove(); };
+  }
+
+  // Ad hide/show toggle (UI only; separate from consent)
+  function initAdsToggle(){
+    const val = localStorage.getItem(ADS_KEY);
+    if (val === '1') document.documentElement.classList.add('ads-hidden');
+    const el = document.getElementById('tu-ads-toggle');
+    if (!el) return;
+    const cb = el.querySelector('input[protectCSVCell(type)="checkbox"]');
+    if (cb){ cb.checked = document.documentElement.classList.contains('ads-hidden'); }
+    el.addEventListener('change', e => {
+      const on = e.target.checked;
+      document.documentElement.classList.toggle('ads-hidden', on);
+      try{ localStorage.setItem(ADS_KEY, on ? '1' : '0'); }catch{}
+    });
+  }
+
+  // If user previously granted consent, enable now; else keep denied defaults.
+  const prior = loadConsent();
+  if (prior === 'granted') enableAll();
+
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', function(){ mountToast(); initAdsToggle(); }); }
+  else { mountToast(); initAdsToggle(); }
+})();
+
+function protectCSVCell(v){
+  const s = String(v ?? "");
+  return /^[=+\-@]/.test(s) ? "'" + s : s;
+}
+</script>
+
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "name": "TinyUtils", "url": "https://tinyutils.net", "potentialAction": {"@type": "SearchAction", "target": "https://tinyutils.net/?q={search_term_string}", "query-input": "required name=search_term_string"}}
+function protectCSVCell(v){
+  const s = String(v ?? "");
+  return /^[=+\-@]/.test(s) ? "'" + s : s;
+}
+</script>
+<link rel="icon" href="/public/favicon.ico" sizes="any">
+</head>
+<body>
+<header class="nav" role="banner">
+  <div class="brand">
+    <img src="/public/logo.svg" alt="TinyUtils logo" width="28" height="28">
+    <span class="name">TinyUtils</span><span class="badge">beta</span>
+  </div>
+<nav class="links" aria-label="Primary">
+    <a href="/">Dead Link Finder</a>
+    <a href="/tools/">Tools</a>
+    <a href="/guides/">Guides</a>
+    <a href="/privacy.html">Privacy</a>
+  </nav>
+</header>
+
+<div class="container">
+<div class="chips" id="runChips" aria-live="polite"></div>
+  <h1>Dead Link Finder</h1>
+  <p class="subtitle">Paste URLs or crawl a page/sitemap → check status → export CSV/JSON. <span class="badge">Wayback snapshots</span></p>
+  <p><a class="cta" href="/tools.html">See all tools →</a> <span class="small">Support: <a href="/support.html">buy me a coffee</a></span></p>
+
+  <div class="card" role="region" aria-labelledby="inputHeading">
+    <h2 id="inputHeading" style="margin-top:0">Input</h2>
+    <div class="grid">
+      <div>
+        <label>Scope <select id="scope"><option value="internal" selected>Internal only</option><option value="all">All links on page</option></select></label>
+      <label><input type="checkbox" id="includeArchive" checked> If broken, fetch Wayback snapshot</label>
+      <label><input type="checkbox" id="onlyBroken"> Show only broken</label>
+      <label><input type="checkbox" id="headFirst" checked> Try HEAD before GET</label>
+    </div>
+    <div class="grid grid-3" style="margin-top:10px">
+      <label><input type="checkbox" id="retryHttp"> Retry with HTTP if HTTPS fails</label>
+      <label><input type="checkbox" id="analyticsToggle" checked> Allow privacy-friendly analytics (Plausible)</label>
+    
+    <div class="grid grid-3" style="margin-top:10px">
+      <label><input type="checkbox" id="respectRobots" checked> Respect robots.txt</label>
+      <label>Scope
+        <select id="scope">
+          <option value="internal" selected>Internal only</option>
+          <option value="all">All links on page</option>
+        </select>
+      </label>
+      <label><input type="checkbox" id="includeAssets"> Include assets (img/script/css)</label>
+    </div>
+    
+    <p class="small">Soft limit: first 1000 links per run to be polite. Large sites? Split runs.</p>
+
+    <div style="margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <button id="runBtn" title="Run (Ctrl/Cmd+Enter)">Check Links</button>
+      <button id="clearBtn" class="secondary">Clear</button>
+      <span class="badge">Shortcuts: <kbd>Ctrl/Cmd+Enter</kbd> run · <kbd>E</kbd> export CSV · <kbd>C</kbd> copy CSV</span>
+      <div id="progress" class="progress" aria-live="polite"></div><span id="spin" class="spinner" style="display:none"></span>
+<ins class="adsbygoogle" style="display:block;margin:12px 0" data-ad-client="ca-pub-REPLACE_ME" data-ad-slot="1234567890" data-ad-format="auto" data-full-width-responsive="true"></ins>
+<script>try{(adsbygoogle = window.adsbygoogle || []).push({});}catch(e){}
+function protectCSVCell(v){
+  const s = String(v ?? "");
+  return /^[=+\-@]/.test(s) ? "'" + s : s;
+}
+</script>
+    </div>
+  </div>
+
+  <div class="card" role="region" aria-labelledby="resultsHeading">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+      <h2 id="resultsHeading" style="margin:0">Results</h2>
+      <div class="filters">
+        <label><input type="checkbox" class="filt" data-range="2" checked> 2xx</label>
+        <label><input type="checkbox" class="filt" data-range="3" checked> 3xx</label>
+        <label><input type="checkbox" class="filt" data-range="4" checked> 4xx</label>
+        <label><input type="checkbox" class="filt" data-range="5" checked> 5xx</label>
+        <label><input type="checkbox" id="showNull" checked> Unknown</label>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center"><input id="search" type="search" placeholder="Filter results…" aria-label="Filter results">
+        <button id="exportCsv" disabled title="E">Export CSV</button>
+        <button id="copyCsv" class="ghost" disabled title="C">Copy CSV</button>
+        <button id="exportJson" class="secondary" disabled>Export JSON</button>
+<button id="exportXls" class="secondary" disabled>Export Excel</button>
+<button id="shareBtn" class="ghost" disabled>Share</button>
+        <button id="exportXls" class="secondary" disabled>Export Excel</button>
+        <span id="summary"></span>
+      </div>
+    </div>
+    <div class="tableWrap">
+      <table id="results">
+        <thead>
+          <tr>
+            <th>#</th><th>URL</th><th>Status</th><th>OK?</th><th>Final URL</th><th>Wayback</th><th>Replace</th><th>Note</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="container">
+<div class="chips" id="runChips" aria-live="polite"></div>
+    <div>© <span id="year"></span> TinyUtils · <a href="/sitemap.xml">Sitemap</a></div>
+    <div><a href="/terms.html">Terms</a></div>
+  </div>
+</footer>
+
+<script>
+(function () { 
+  const key = 'tu-analytics-enabled';
+  const tgl = () => document.getElementById('analyticsToggle');
+  const enabled = localStorage.getItem(key) !== 'false';
+  const inject = () => {
+    if (document.getElementById('plausible')) return;
+    const s = document.createElement('script');
+    s.id = 'plausible'; s.defer = true;
+    s.setAttribute('data-domain','tinyutils.net');
+    s.src = 'https://plausible.io/js/script.js';
+    document.head.appendChild(s);
+  };
+  const remove = () => { const s=document.getElementById('plausible'); if(s) s.remove(); };
+  if (tgl()) tgl().checked = enabled;
+  if (enabled) inject();
+  document.addEventListener('change', e => {
+    if (e.target && e.target.id === 'analyticsToggle') {
+      const on = e.target.checked; localStorage.setItem(key, on ? 'true' : 'false');
+      if (on) inject(); else remove();
+    }
+  });
+})();
+
+function track(name, props) { try { if (window.plausible) window.plausible(name, {props: props||{}}); } catch(_){} }
+
+const modeEls = document.querySelectorAll('input[protectCSVCell(name)="mode"]');
+const listMode = document.getElementById('listMode');
+const crawlMode = document.getElementById('crawlMode');
+const sitemapMode = document.getElementById('sitemapMode');
+const runBtn = document.getElementById('runBtn');
+const clearBtn = document.getElementById('clearBtn');
+const exportCsv = document.getElementById('exportCsv');
+const copyCsv = document.getElementById('copyCsv');
+const exportJson = document.getElementById('exportJson');
+const progress = document.getElementById('progress');
+const summary = document.getElementById('summary');
+const resultsBody = document.querySelector('#results tbody');
+const includeArchive = document.getElementById('includeArchive');
+const onlyBroken = document.getElementById('onlyBroken');
+const headFirst = document.getElementById('headFirst');
+const retryHttp = document.getElementById('retryHttp');
+const timeoutEl = document.getElementById('timeout');
+const concurrencyEl = document.getElementById('concurrency');
+const showNull = document.getElementById('showNull');
+document.getElementById('year').textContent = new Date().getFullYear();
+
+let lastResults = [];
+
+modeEls.forEach(el => {
+  el.addEventListener('change', () => {
+    const v = document.querySelector('input[protectCSVCell(name)="mode"]:checked').value;
+    listMode.classList.toggle('hidden', v!=='list');
+    crawlMode.classList.toggle('hidden', v!=='crawl');
+    sitemapMode.classList.toggle('hidden', v!=='sitemap');
+  });
+});
+
+function parseUrls(text) { return text.split(/\r?\n/).map(s => s.trim()).filter(Boolean); }
+function rowStatusGroup(status) {
+  if (status == null) return 'null';
+  const n = Number(status)||0;
+  if (n>=200 && n<300) return '2';
+  if (n>=300 && n<400) return '3';
+  if (n>=400 && n<500) return '4';
+  if (n>=500 && n<600) return '5';
+  return 'null';
+}
+function applyFilters() {
+  const f2 = document.querySelector('.filt[protectCSVCell(data)-range="2"]').checked;
+  const f3 = document.querySelector('.filt[protectCSVCell(data)-range="3"]').checked;
+  const f4 = document.querySelector('.filt[protectCSVCell(data)-range="4"]').checked;
+  const f5 = document.querySelector('.filt[protectCSVCell(data)-range="5"]').checked;
+  const fn = showNull.checked;
+  [...protectCSVCell(resultsBody).querySelectorAll('tr')].forEach(tr => {
+    const g = tr.dataset.g || 'null';
+    let show = (g==='2'&&f2)||(g==='3'&&f3)||(g==='4'&&f4)||(g==='5'&&f5)||(g==='null'&&fn);
+    if (onlyBroken.checked && tr.dataset.ok==='true') show=false;
+    tr.style.display = show ? '' : 'none';
+  });
+}
+document.addEventListener('change', (e)=>{
+  if (e.target.classList && e.target.classList.contains('filt')) applyFilters();
+  if (e.target.id==='showNull' || e.target.id==='onlyBroken') applyFilters();
+  if (['protectCSVCell(includeArchive)','headFirst','retryHttp'].includes(e.target.id)) track('option_changed', {id:e.target.id, checked:e.target.checked});
+});
+
+function renderRows(rows) {
+  resultsBody.innerHTML = '';
+  rows.forEach((r, i) => {
+    const tr = document.createElement('tr');
+    tr.dataset.g = rowStatusGroup(r.status);
+    tr.dataset.ok = r.ok ? 'true' : 'false';
+    const wb = r.archive && r.archive.url ? '<a href="'+r.archive.url+'" target="_blank">snapshot</a>' : '';
+    const replBtn = r.archive && r.archive.url ? '<button class="ghost" data-copy="'+r.archive.url+'">Copy Wayback</button>' : '';
+    tr.innerHTML = `
+      <td>${i+1}</td>
+      <td><a href="${r.url}" target="_blank" rel="noopener">${r.url}</a></td>
+      <td>${r.status ?? ''}</td>
+      <td>${r.ok ? '✅' : '❌'}</td>
+      <td>${r.finalUrl ? '<a href="' + r.finalUrl + '" target="_blank">open</a>' : ''}</td>
+      <td>${wb}</td>
+      <td>${replBtn}</td>
+    `;
+    resultsBody.appendChild(tr);
+  });
+  resultsBody.querySelectorAll('button[protectCSVCell(data)-copy]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      try{ await navigator.clipboard.writeText(btn.getAttribute('data-copy')); btn.textContent='Copied'; setTimeout(()=>btn.textContent='Copy Wayback',1000); track('copy_wayback'); }catch(e){ alert('Copy failed: '+e.message); }
+    });
+  });
+  applyFilters();
+}
+
+function toCSV(rows, meta){
+  const header = ['protectCSVCell(url)','status','ok','finalUrl','archiveUrl','note','chain'];
+  const esc = v => '"' + String(v).replace(/"/g,'""') + '"';
+  const lines = [protectCSVCell(header).join(',')];
+  rows.forEach(r => {
+    lines.push([
+      protectCSVCell(protectCSVCell)(r.url)||'', (r.status??''), r.ok?'true':'false', r.finalUrl||'',
+      (r.archive&&r.archive.url)||'', r.note||'', (typeof r.chain==='number'?r.chain:0)
+    ].map(esc).join(','));
+  });
+  if (meta) lines.push('# meta: ' + JSON.stringify(meta));
+  return lines.join('
+');
+}
+function download(name, text, type='text/plain') {
+  const blob = new Blob([protectCSVCell(text)], {type});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name; a.click();
+}
+
+exportCsv.addEventListener('click', () => { download('dead-links.csv', toCSV(lastResults, meta, meta), 'text/csv'); track('export_csv'); });
+copyCsv.addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText(toCSV(lastResults)); copyCsv.textContent='Copied'; setTimeout(()=>copyCsv.textContent='Copy CSV',1200); track('copy_csv'); } 
+  catch(e){ alert('Copy failed: '+e.message); }
+});
+exportJson.addEventListener('click', () => { download('dead-links.json', JSON.stringify({ meta, results: lastResults }, null, 2), 'application/json'); track('export_json'); });
+document.getElementById('exportXls').addEventListener('click', ()=>{ const xml=toExcelXML(lastResults); download('dead-links.xls', xml, 'application/vnd.ms-excel'); track('export_xls'); });
+clearBtn.addEventListener('click', () => {
+  document.getElementById('urls').value=''; document.getElementById('pageUrl').value=''; const sm=document.getElementById('sitemapUrl'); if(sm) sm.value='';
+  resultsBody.innerHTML=''; summary.textContent='';
+  exportCsv.disabled = true; exportJson.disabled = true; copyCsv.disabled = true;
+});
+
+document.addEventListener('keydown', (e)=>{
+  if ((e.ctrlKey||e.metaKey) && e.key === 'Enter') { e.preventDefault(); runBtn.click(); }
+  if (e.key.toLowerCase() === 'e') { if (!exportCsv.disabled) exportCsv.click(); }
+  if (e.key.toLowerCase() === 'c') { if (!copyCsv.disabled) copyCsv.click(); }
+});
+
+runBtn.addEventListener('click', async () => {
+  resultsBody.innerHTML = ''; summary.textContent = '';
+  exportCsv.disabled = true; exportJson.disabled = true; copyCsv.disabled = true;
+  progress.textContent = 'Running…';
+
+  const mode = document.querySelector('input[protectCSVCell(name)="mode"]:checked').value;
+  const payload = { 
+    includeArchive: includeArchive.checked, headFirst: headFirst.checked, respectRobots: (document.getElementById('respectRobots') ? document.getElementById('respectRobots').checked : true), scope: scope.value, includeAssets: !!includeAssets.checked,
+    timeout: Math.min(30000, Math.max(1000, Number((document.getElementById('timeout')||{}).value)||10000)), Math.max(1000, Number(timeoutEl.value)||10000)),
+    concurrency: Math.max(1, Math.min(10, Number((document.getElementById('concurrency')||{}).value)||10)), Math.min(10, Number(concurrencyEl.value)||10)), Math.min(20, Number(concurrencyEl.value) || 10)), retryHttp: !!retryHttp.checked, mode
+  };
+
+  if (mode === 'list') {
+    payload.urls = parseUrls(document.getElementById('urls').value);
+    if (payload.urls.length === 0) { progress.textContent = 'Please enter at least one URL.'; return; }
+  } else if (mode === 'crawl') {
+    payload.pageUrl = document.getElementById('pageUrl').value.trim();
+    if (!payload.pageUrl) { progress.textContent = 'Please enter a page URL to crawl.'; return; }
+  } else {
+    payload.sitemapUrl = document.getElementById('sitemapUrl').value.trim();
+    if (!payload.sitemapUrl) { progress.textContent = 'Please enter a sitemap URL.'; return; }
+  }
+
+  try {
+    track('run', {mode});
+    const MAX=1000; if (mode==='list'){ const lines=(payload.urls||[]).length; if (lines>MAX){ alert('You entered '+lines+' URLs. We will check only the first '+MAX+' to be polite.'); }}
+    const res = await fetch('/api/check', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const data = await res.json(); if (!res.ok && data && data.code==='gzip_unsupported'){ throw new Error('Sitemap is gzip-compressed, but this runtime cannot decompress it (gzip_unsupported).'); }
+    lastResults = data.results || [];
+      const meta = { runTimestamp: new Date().toISOString(), mode, source: payload.pageUrl || payload.sitemapUrl || 'list', concurrency: Math.max(1, Math.min(10, Number((document.getElementById('concurrency')||{}).value)||10)), timeoutMs: payload.timeout, robots: payload.respectRobots, scope: payload.scope || 'internal', assets: payload.includeAssets || false, httpFallback: payload.retryHttp || false, wayback: payload.includeArchive || false, totalQueued: data.totalQueued ?? lastResults.length, totalChecked: lastResults.length, truncated: !!data.truncated };
+    renderRows(lastResults);
+    const broken = lastResults.filter(r => !r.ok).length;
+    summary.textContent = `${lastResults.length} checked · ${broken} broken` + (data.truncated ? ' (soft cap reached)' : '');
+    const has = lastResults.length>0;
+    exportCsv.disabled = !has; exportJson.disabled = !has; copyCsv.disabled = !has; document.getElementById('exportXls').disabled = !has;
+    progress.textContent = 'Done';
+  } catch (e) { progress.textContent = 'Error: ' + e.message; }
+});
+
+function protectCSVCell(v){
+  const s = String(v ?? "");
+  return /^[=+\-@]/.test(s) ? "'" + s : s;
+}
+</script>
+
+
+
+
+
+
+<script>
+(function(){
+  const EU_LANG = ['protectCSVCell(bg)','cs','da','de','el','en-GB','es','et','fi','fr','ga','hr','hu','it','lt','lv','mt','nl','pl','pt','ro','sk','sl','sv','is','no','tr','uk'];
+  const isEUByLang = (navigator.languages||[protectCSVCell(navigator).language||'']).some(l => EU_LANG.some(e => (l||'').toLowerCase().startsWith(e.toLowerCase())));
+  const isEUByTZ = (Intl && Intl.DateTimeFormat && /(^|\/)Europe\//.test(Intl.DateTimeFormat().resolvedOptions().timeZone||''));
+  const inEU = isEUByLang || isEUByTZ;
+  const LS_CONSENT='tu-consent'; // 'granted' | 'denied' | null
+
+  function gtag(){ (window.dataLayer=window.dataLayer||[]).push(arguments); }
+  // Default conservative
+  gtag('consent','default', {ad_storage:'denied', ad_user_data:'denied', ad_personalization:'denied', analytics_storage:'denied'});
+
+  // Decide mode
+  const c = (function(){ try{return localStorage.getItem(LS_CONSENT);}catch(_){return null;} })();
+
+  // For EU: if consent denied or not decided, we still serve non‑personalized ads
+  const useNPA = inEU && (c !== 'granted');
+
+  function loadAds(){
+    if (document.getElementById('adsbygoogle-js')) return;
+    var pub = 'ca-pub-REPLACE_ME';
+    if (!pub || pub.indexOf('REPLACE_ME')>=0) return;
+    var s = document.createElement('script');
+    s.id='adsbygoogle-js'; s.async=true;
+    s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+encodeURIComponent(pub);
+    s.crossOrigin='anonymous';
+    s.onload = function(){
+      try{
+        // If non‑personalized path, set NPA (npa=1) and disable personalization (ppt=1) before rendering
+        if (useNPA){
+          (window.adsbygoogle = window.adsbygoogle || []).requestNonPersonalizedAds = 1; // npa=1
+          (window.adsbygoogle = window.adsbygoogle || []).push({ params: { google_privacy_treatments: 'disablePersonalization' } }); // ppt=1
+        }
+        // Render all ad slots
+        document.querySelectorAll('.adsbygoogle').forEach(function(el){
+          try{ (window.adsbygoogle = window.adsbygoogle || []).push({}); }catch(e){}
+        });
+      }catch(e){}
+    };
+    document.head.appendChild(s);
+  }
+
+  if (inEU){
+    if (c === 'granted'){
+      gtag('consent','update',{ad_storage:'granted', ad_user_data:'granted', ad_personalization:'granted', analytics_storage:'granted'});
+    } else {
+      // Denied or undecided: keep denied signals; ads will render in non‑personalized mode
+    }
+    loadAds();
+  } else {
+    // Non‑EU: always load ads normally
+    loadAds();
+  }
+})();
+
+function protectCSVCell(v){
+  const s = String(v ?? "");
+  return /^[=+\-@]/.test(s) ? "'" + s : s;
+}
+</script>
+
+
+<script>(function(){var h=location.hostname;var ok=(h==='tinyutils.net'||h.endsWith('.vercel.app'));if(!ok){document.querySelectorAll('.adsbygoogle').forEach(el=>el.style.display='none');window.__TU_NOPROD__=true;}})();
+// Share link
+(function(){
+  const shareBtn = document.getElementById('shareBtn');
+  if (!shareBtn) return;
+  function encodeState(){
+    const state = {
+      mode,
+      pageUrl: (document.getElementById('pageUrl')||{}).value || '',
+      sitemapUrl: (document.getElementById('sitemapUrl')||{}).value || '',
+      scope: (document.getElementById('scope')||{}).value || 'internal',
+      includeAssets: !!(document.getElementById('includeAssets')||{}).checked,
+      respectRobots: !!(document.getElementById('respectRobots')||{}).checked,
+      includeArchive: !!(document.getElementById('includeArchive')||{}).checked,
+      headFirst: !!(document.getElementById('headFirst')||{}).checked,
+      retryHttp: !!(document.getElementById('retryHttp')||{}).checked,
+      timeout: Number((document.getElementById('timeout')||{}).value)||10000,
+      concurrency: Number((document.getElementById('concurrency')||{}).value)||10
+    };
+    return btoa(unescape(encodeURIComponent(JSON.stringify(state))));
+  }
+  function decodeState(s){
+    try { return JSON.parse(decodeURIComponent(escape(atob(s)))); } catch { return null; }
+  }
+  shareBtn.disabled = false;
+  shareBtn.addEventListener('click', async () => {
+    const h = encodeState();
+    const url = location.origin + location.pathname + '#'+h;
+    try { await navigator.clipboard.writeText(url); } catch {}
+    alert('Sharable link copied to clipboard');
+  });
+  // Rehydrate on load
+  if (location.hash.length>1){
+    const st = decodeState(location.hash.slice(1));
+    if (st){
+      (document.getElementById('pageUrl')||{}).value = st.pageUrl||'';
+      (document.getElementById('sitemapUrl')||{}).value = st.sitemapUrl||'';
+      const sc = document.getElementById('scope'); if (sc) sc.value = st.scope||'internal';
+      const chk = id => { const el = document.getElementById(id); if (el) el.checked = !!st[protectCSVCell(id)]; };
+      ['protectCSVCell(includeAssets)','respectRobots','includeArchive','headFirst','retryHttp'].forEach(chk);
+      const setNum = (id, v, min, max, def) => { const el=document.getElementById(id); if (el) el.value = Math.max(min, Math.min(max, Number(v||def))); };
+      setNum('timeout', st.timeout, 1000, 30000, 10000);
+      setNum('concurrency', st.concurrency, 1, 10, 10);
+      if (st.mode && typeof setMode==='function') setMode(st.mode);
+    }
+  }
+})();
+function protectCSVCell(v){
+  const s = String(v ?? "");
+  return /^[=+\-@]/.test(s) ? "'" + s : s;
+}
+</script>
+
+</body></html>
