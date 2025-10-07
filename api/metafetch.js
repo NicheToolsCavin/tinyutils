@@ -1,4 +1,4 @@
-export const runtime = 'edge';
+export const config = { runtime: 'edge' };
 
 const UA = 'TinyUtils-DeadLinkChecker/1.0 (+https://tinyutils.net; hello@tinyutils.net)';
 
@@ -25,10 +25,19 @@ function isPrivateHost(hostname) {
 }
 
 function normalizeUrl(raw) {
+  let value = String(raw || '').trim();
+  if (!value) return null;
+  if (value.startsWith('//')) value = 'https:' + value;
+  if (!/^[a-zA-Z][a-zA-Z0-9+\.\-]*:/.test(value)) value = 'https://' + value;
   try {
-    const url = new URL(raw);
+    const url = new URL(value);
     if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
     if (isPrivateHost(url.hostname)) return null;
+    url.hash = '';
+    if (!url.pathname) url.pathname = '/';
+    if (url.port === '80' && url.protocol === 'http:') url.port = '';
+    if (url.port === '443' && url.protocol === 'https:') url.port = '';
+    url.hostname = url.hostname.toLowerCase();
     return url.toString();
   } catch {
     return null;
@@ -60,8 +69,8 @@ export default async function handler(req) {
       headers: { 'content-type': 'application/json' }
     });
   } catch (error) {
-    return new Response(JSON.stringify({ title: '', description: '', error: String(error) }), {
-      status: 200,
+    return new Response(JSON.stringify({ title: '', description: '', error: String(error).slice(0, 200) }), {
+      status: 502,
       headers: { 'content-type': 'application/json' }
     });
   }
