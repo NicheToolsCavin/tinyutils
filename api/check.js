@@ -4,6 +4,7 @@ const UA = 'TinyUtils-DeadLinkChecker/1.0 (+https://tinyutils.net; hello@tinyuti
 const TLDS = ['.gov', '.mil', '.bank', '.edu'];
 const MAX_URLS = 200;
 const MAX_REDIRECTS = 5;
+const MAX_SITEMAP_FETCHES = 16;
 
 function badScheme(input) {
   return /^(javascript:|data:|mailto:)/i.test(input || '');
@@ -237,10 +238,14 @@ export default async function handler(req) {
     const retryHttp = !!body.retryHttp;
 
     let urls = [];
+    let sitemapInfo = null;
+    let inputCount = 0;
+    let sitemapSource = null;
 
     if (body.mode === 'list') {
       const raw = Array.isArray(body.urls) ? body.urls : String(body.list || '').split(/\r?\n/);
       urls = raw.map(value => String(value || '').trim()).filter(Boolean);
+      inputCount = urls.length;
     } else if (body.mode === 'crawl') {
       const sourceUrl = normalize(body.pageUrl || '');
       if (!sourceUrl.ok || !sourceUrl.url) {
@@ -252,6 +257,7 @@ export default async function handler(req) {
       });
       const html = await response.text();
       urls = collectLinks(html, sourceUrl.url, !!body.includeAssets);
+      inputCount = urls.length;
     } else if (body.mode === 'sitemap') {
       const sitemapUrl = normalize(body.sitemapUrl || '');
       if (!sitemapUrl.ok || !sitemapUrl.url) {
@@ -324,12 +330,13 @@ export default async function handler(req) {
     }
 
     const totalResults = responses.length + prefilled.length;
-    const truncated = queue.length >= MAX_URLS && (urls.length > (queue.length + prefilled.length));
+    let truncated = queue.length >= MAX_URLS && (inputCount > (queue.length + prefilled.length));
+    if (sitemapInfo?.truncated) truncated = true;
 
     const meta = {
       runTimestamp: new Date().toISOString(),
       mode: body.mode || 'list',
-      source: body.pageUrl || body.sitemapUrl || 'list',
+      source: sitemapSource || body.pageUrl || body.sitemapUrl || 'list',
       concurrency: Number(body.concurrency) || 10,
       timeoutMs: timeout,
       robots: body.respectRobots !== false,
