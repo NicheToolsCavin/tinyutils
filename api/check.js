@@ -204,105 +204,24 @@ function decodeXmlEntities(value) {
   });
 }
 
-function stripCdata(value) {
-  return value.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/gi, '$1');
-}
-
-function resolveSitemapValue(raw, baseUrl) {
-  const cleaned = decodeXmlEntities(stripCdata(String(raw || ''))).trim();
-  if (!cleaned) return '';
-  try {
-    return new URL(cleaned, baseUrl).href;
-  } catch {
-    if (cleaned.startsWith('//')) return 'https:' + cleaned;
-    if (/^[a-zA-Z][a-zA-Z0-9+\.\-]*:/.test(cleaned)) return cleaned;
-    return '';
-  }
-}
-
-function extractSitemapData(xml, baseUrl) {
-  const pageUrls = [];
-  const sitemapUrls = [];
-
-  const urlMatches = xml.matchAll(/<url\b[^>]*>([\s\S]*?)<\/url>/gi);
-  for (const [, block] of urlMatches) {
+function extractSitemapUrls(xml) {
+  const urls = [];
+  const matches = xml.matchAll(/<url\b[^>]*>([\s\S]*?)<\/url>/gi);
+  for (const [, block] of matches) {
     const locMatch = block.match(/<loc\b[^>]*>([\s\S]*?)<\/loc>/i);
     if (!locMatch) continue;
-    const resolved = resolveSitemapValue(locMatch[1], baseUrl);
-    if (resolved) pageUrls.push(resolved);
+    let value = locMatch[1].replace(/<!\[CDATA\[([\s\S]*?)\]\]>/gi, '$1').trim();
+    if (!value) continue;
+    value = decodeXmlEntities(value);
+    if (value) urls.push(value.trim());
   }
-
-  const sitemapMatches = xml.matchAll(/<sitemap\b[^>]*>([\s\S]*?)<\/sitemap>/gi);
-  for (const [, block] of sitemapMatches) {
-    const locMatch = block.match(/<loc\b[^>]*>([\s\S]*?)<\/loc>/i);
-    if (!locMatch) continue;
-    const resolved = resolveSitemapValue(locMatch[1], baseUrl);
-    if (resolved) sitemapUrls.push(resolved);
+  if (!urls.length) {
+    return [...xml.matchAll(/<url>\s*<loc>([^<]+)<\/loc>/gi)].map(match => {
+      const raw = match[1].replace(/<!\[CDATA\[([\s\S]*?)\]\]>/gi, '$1').trim();
+      return decodeXmlEntities(raw);
+    }).filter(Boolean);
   }
-
-  if (!pageUrls.length && !sitemapUrls.length) {
-    for (const [, raw] of xml.matchAll(/<loc\b[^>]*>([\s\S]*?)<\/loc>/gi)) {
-      const resolved = resolveSitemapValue(raw, baseUrl);
-      if (resolved) pageUrls.push(resolved);
-    }
-  }
-
-  return { pageUrls, sitemapUrls };
-}
-
-async function gatherSitemapUrls(entryUrl) {
-  const toVisit = [entryUrl];
-  const queued = new Set(toVisit);
-  const visited = new Set();
-  const pageSet = new Set();
-  let truncated = false;
-
-  while (toVisit.length && visited.size < MAX_SITEMAP_FETCHES && pageSet.size < MAX_URLS) {
-    const current = toVisit.shift();
-    if (!current || visited.has(current)) continue;
-    visited.add(current);
-
-    let xml;
-    try {
-      xml = await loadSitemap(current);
-    } catch (error) {
-      throw error;
-    }
-
-    const { pageUrls, sitemapUrls } = extractSitemapData(xml, current);
-
-    if (!pageUrls.length && !sitemapUrls.length && visited.size === 1 && toVisit.length === 0) {
-      return { urls: [], truncated: false, empty: true };
-    }
-
-    for (const child of sitemapUrls) {
-      const normalized = normalize(child);
-      if (!normalized.ok || !normalized.url) continue;
-      const target = normalized.url;
-      if (visited.has(target) || queued.has(target)) continue;
-      if ((visited.size + queued.size) >= MAX_SITEMAP_FETCHES) {
-        truncated = true;
-        continue;
-      }
-      toVisit.push(target);
-      queued.add(target);
-    }
-
-    let limitReached = false;
-    for (const pageUrl of pageUrls) {
-      pageSet.add(pageUrl);
-      if (pageSet.size >= MAX_URLS) {
-        truncated = true;
-        limitReached = true;
-        break;
-      }
-    }
-    if (limitReached) {
-      break;
-    }
-  }
-
-  return { urls: Array.from(pageSet), truncated, empty: pageSet.size === 0 };
+  return urls;
 }
 
 export default async function handler(req) {
@@ -344,9 +263,9 @@ export default async function handler(req) {
       if (!sitemapUrl.ok || !sitemapUrl.url) {
         return new Response('bad sitemapUrl', { status: 400 });
       }
-      sitemapSource = sitemapUrl.url;
+      let xml;
       try {
-        sitemapInfo = await gatherSitemapUrls(sitemapUrl.url);
+        xml = await loadSitemap(sitemapUrl.url);
       } catch (error) {
         const status = typeof error?.status === 'number' ? error.status : 502;
         const note = error?.message || 'fetch_failed';
@@ -355,15 +274,7 @@ export default async function handler(req) {
           headers: { 'content-type': 'application/json', 'x-request-id': reqId }
         });
       }
-      if (!sitemapInfo || sitemapInfo.empty) {
-        return new Response(JSON.stringify({ message: 'Sitemap returned no URLs', note: 'empty_sitemap' }), {
-          status: 422,
-          headers: { 'content-type': 'application/json', 'x-request-id': reqId }
-        });
-      }
-      urls = sitemapInfo.urls;
-      inputCount = urls.length;
-      body.sitemapUrl = sitemapSource;
+      urls = extractSitemapUrls(xml);
     } else {
       return new Response('bad mode', { status: 400 });
     }
