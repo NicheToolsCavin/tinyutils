@@ -170,7 +170,57 @@ async function loadSitemap(url) {
     headers: { 'user-agent': UA },
     signal: AbortSignal.timeout(10000)
   });
+  if (!res.ok) {
+    const error = new Error(`sitemap_status_${res.status}`);
+    error.status = res.status;
+    throw error;
+  }
   return res.text();
+}
+
+function decodeXmlEntities(value) {
+  const named = {
+    amp: '&',
+    lt: '<',
+    gt: '>',
+    quot: String.fromCharCode(34),
+    apos: String.fromCharCode(39)
+  };
+  return value.replace(/&(#x[0-9a-f]+|#[0-9]+|[a-z]+);/gi, (full, entity) => {
+    if (!entity) return full;
+    if (entity.startsWith('#')) {
+      const hex = entity[1] === 'x' || entity[1] === 'X';
+      const codePoint = Number.parseInt(entity.slice(hex ? 2 : 1), hex ? 16 : 10);
+      if (!Number.isFinite(codePoint)) return full;
+      try {
+        return String.fromCodePoint(codePoint);
+      } catch {
+        return full;
+      }
+    }
+    const replacement = named[entity.toLowerCase()];
+    return replacement !== undefined ? replacement : full;
+  });
+}
+
+function extractSitemapUrls(xml) {
+  const urls = [];
+  const matches = xml.matchAll(/<url\b[^>]*>([\s\S]*?)<\/url>/gi);
+  for (const [, block] of matches) {
+    const locMatch = block.match(/<loc\b[^>]*>([\s\S]*?)<\/loc>/i);
+    if (!locMatch) continue;
+    let value = locMatch[1].replace(/<!\[CDATA\[([\s\S]*?)\]\]>/gi, '$1').trim();
+    if (!value) continue;
+    value = decodeXmlEntities(value);
+    if (value) urls.push(value.trim());
+  }
+  if (!urls.length) {
+    return [...xml.matchAll(/<url>\s*<loc>([^<]+)<\/loc>/gi)].map(match => {
+      const raw = match[1].replace(/<!\[CDATA\[([\s\S]*?)\]\]>/gi, '$1').trim();
+      return decodeXmlEntities(raw);
+    }).filter(Boolean);
+  }
+  return urls;
 }
 
 export default async function handler(req) {
@@ -207,8 +257,18 @@ export default async function handler(req) {
       if (!sitemapUrl.ok || !sitemapUrl.url) {
         return new Response('bad sitemapUrl', { status: 400 });
       }
-      const xml = await loadSitemap(sitemapUrl.url);
-      urls = [...xml.matchAll(/<url>\s*<loc>([^<]+)<\/loc>/gi)].map(match => match[1].trim());
+      let xml;
+      try {
+        xml = await loadSitemap(sitemapUrl.url);
+      } catch (error) {
+        const status = typeof error?.status === 'number' ? error.status : 502;
+        const note = error?.message || 'fetch_failed';
+        return new Response(JSON.stringify({ message: 'Failed to load sitemap', note }), {
+          status,
+          headers: { 'content-type': 'application/json', 'x-request-id': reqId }
+        });
+      }
+      urls = extractSitemapUrls(xml);
     } else {
       return new Response('bad mode', { status: 400 });
     }
