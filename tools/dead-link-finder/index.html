@@ -40,7 +40,7 @@
     .export-group button:disabled { opacity: 0.4; cursor: not-allowed; }
     .toast { position: fixed; right: 16px; bottom: 16px; background: #0b1224; color: #e6edf7; border: 1px solid rgba(255,255,255,0.12); padding: 10px 14px; border-radius: 10px; z-index: 9999; box-shadow: 0 12px 30px rgba(0,0,0,0.35); }
     .tableWrap { margin-top: 1rem; max-height: 70vh; overflow: auto; border: 1px solid #eee; border-radius: 8px; }
-    #results thead th { position: sticky; top: 0; z-index: 2; background: #fff; box-shadow: 0 1px 0 rgba(0,0,0,0.05); color: #0f172a; font-weight: 600; }
+    #results thead th { position: sticky; top: 0; z-index: 2; background: #fff; box-shadow: 0 1px 0 rgba(0,0,0,0.05); }
     td .url-text { word-break: break-all; display: inline-block; max-width: 420px; }
     .cell-url { word-break: break-all; }
     .visually-hidden { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
@@ -68,11 +68,11 @@
         <h2 id="inputHeading">Input</h2>
         <fieldset class="mode-group" aria-label="Mode">
           <legend>Mode</legend>
-          <label for="modeSitemap"><input type="radio" name="mode" id="modeSitemap" value="sitemap" checked> Sitemap</label>
-          <label for="modePages"><input type="radio" name="mode" id="modePages" value="pages"> Pages</label>
+          <label for="modePages"><input type="radio" name="mode" id="modePages" value="pages" checked> Pages</label>
+          <label for="modeSitemap"><input type="radio" name="mode" id="modeSitemap" value="sitemap"> Sitemap</label>
         </fieldset>
 
-        <div class="mode-field hidden" data-mode="pages">
+        <div class="mode-field" data-mode="pages">
           <label for="targetsInput">URLs of pages you want to examine
             <span class="help">Paste one or many. Newlines, commas, or semicolons are all fine. Comments starting with # or // are ignored.</span>
           </label>
@@ -258,7 +258,7 @@
 
     function getSelectedMode() {
       const checked = document.querySelector('input[name="mode"]:checked');
-      return checked ? checked.value : 'sitemap';
+      return checked ? checked.value : 'pages';
     }
 
     function updateModeVisibility() {
@@ -456,10 +456,7 @@
     }
 
     function applyState(state) {
-      const rawMode = state.mode;
-      const mode = rawMode === 'sitemap' ? 'sitemap'
-        : (rawMode === 'pages' || rawMode === 'list' || rawMode === 'crawl') ? 'pages'
-        : 'sitemap';
+      const mode = state.mode === 'sitemap' ? 'sitemap' : 'pages';
       const radio = document.querySelector(`input[name="mode"][value="${mode}"]`);
       if (radio) radio.checked = true;
       if (targetsInputEl) {
@@ -479,7 +476,7 @@
     }
 
     const defaultState = {
-      mode: 'sitemap',
+      mode: 'pages',
       targets: '',
       sitemapUrl: '',
       scope: 'internal',
