@@ -74,17 +74,19 @@
 
         <div class="mode-field" data-mode="pages">
           <label for="targetsInput">URLs of pages you want to examine
-            <span class="help">Paste one or many. Newlines, commas, or semicolons are all fine. Comments starting with # or // are ignored.</span>
+            <span class="help">Paste one or many. Newlines, commas, or semicolons work. Lines may end with comments (# or //).</span>
           </label>
           <textarea id="targetsInput" rows="10" placeholder="https://example.com/page\nhttps://example.org/another"></textarea>
         </div>
         <div class="mode-field" data-mode="sitemap">
-          <label for="sitemapUrl">Sitemap URL</label>
+          <label for="sitemapUrl">Sitemap URL or site (we’ll auto-find /sitemap.xml)
+            <span class="help">You can paste a sitemap URL (.xml or .xml.gz), a sitemap index, or just a site like example.com.</span>
+          </label>
           <input id="sitemapUrl" placeholder="https://example.com/sitemap.xml">
         </div>
 
         <div class="options-grid" aria-label="Options">
-          <label for="scope">Scope
+          <label for="scope">Scope <abbr title="Internal only: only links on the same registrable domain (example.com). All links on page: includes external links too.">(?)</abbr>
             <select id="scope">
               <option value="internal" selected>Internal only</option>
               <option value="all">All links on page</option>
@@ -104,8 +106,8 @@
           <details>
             <summary>Advanced options</summary>
             <div class="advanced-grid">
-              <label for="headFirst"><input type="checkbox" id="headFirst" checked> Try HEAD before GET</label>
-              <label for="retryHttp"><input type="checkbox" id="retryHttp"> Retry with HTTP if HTTPS fails</label>
+              <label for="headFirst"><input type="checkbox" id="headFirst" checked> Try HEAD before GET <abbr title="Sends a lightweight HEAD first; if status looks good, follow with GET to confirm. Faster &amp; polite.">(?)</abbr></label>
+              <label for="retryHttp"><input type="checkbox" id="retryHttp"> Retry with HTTP if HTTPS fails <abbr title="If HTTPS fetch fails and site is not HSTS-only, retry once over HTTP to diagnose mixed/proto issues. HSTS: Strict-Transport-Security tells browsers to use HTTPS only. We won’t downgrade such hosts.">(?)</abbr></label>
               <label for="includeArchive"><input type="checkbox" id="includeArchive"> Include Wayback helper</label>
             </div>
           </details>
@@ -114,7 +116,7 @@
         <div class="actions-row">
           <button id="runBtn" class="primary" type="button">Run check</button>
           <button id="clearBtn" class="secondary" type="button">Clear</button>
-          <span class="badge">Shortcuts: <kbd>Ctrl/Cmd + Enter</kbd> run · <kbd>E</kbd> export CSV · <kbd>C</kbd> copy CSV</span>
+          <span class="badge">Shortcuts: <kbd>Ctrl/Cmd + Enter</kbd> run · <kbd>Ctrl/Cmd + E</kbd> export CSV · <kbd>Ctrl/Cmd + C</kbd> copy CSV</span>
         </div>
         <div id="progress" aria-live="polite"></div>
       </section>
@@ -183,6 +185,24 @@
       if (s.startsWith('//')) s = 'https:' + s;
       if (!/^[a-zA-Z][a-zA-Z0-9+.\-]*:/.test(s)) s = 'https://' + s;
       return s;
+    }
+
+    function interpretSitemapInput(raw) {
+      const cleaned = stripInlineComments(raw);
+      const value = cleaned.trim();
+      if (!value) return null;
+      let working = value;
+      if (working.startsWith('//')) working = 'https:' + working;
+      if (!/^[a-zA-Z][a-zA-Z0-9+.\-]*:/.test(working)) working = 'https://' + working;
+      try {
+        const url = new URL(working);
+        if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
+        const sitemapLike = /\.xml(\.gz)?(\?|$)/i.test(url.pathname);
+        const primary = sitemapLike ? url.href : `${url.origin}/sitemap.xml`;
+        return { original: value, primary, origin: url.origin, sitemapLike };
+      } catch {
+        return null;
+      }
     }
 
     function splitMulti(val) {
@@ -428,6 +448,7 @@
         mode: getSelectedMode(),
         targets: targetsInputEl ? targetsInputEl.value : '',
         sitemapUrl: sitemapUrlEl ? sitemapUrlEl.value.trim() : '',
+        sitemapInput: sitemapUrlEl ? sitemapUrlEl.value.trim() : '',
         scope: scopeEl ? scopeEl.value : 'internal',
         includeAssets: includeAssetsEl ? includeAssetsEl.checked : false,
         respectRobots: respectRobotsEl ? respectRobotsEl.checked : true,
@@ -463,7 +484,7 @@
         const fromState = state.targets ?? state.pageUrl ?? state.list ?? '';
         targetsInputEl.value = fromState;
       }
-      if (sitemapUrlEl) sitemapUrlEl.value = state.sitemapUrl || state.sitemap || '';
+      if (sitemapUrlEl) sitemapUrlEl.value = state.sitemapInput || state.sitemapUrl || state.sitemap || '';
       if (scopeEl) scopeEl.value = state.scope === 'all' ? 'all' : 'internal';
       if (includeAssetsEl) includeAssetsEl.checked = !!state.includeAssets;
       if (respectRobotsEl) respectRobotsEl.checked = state.respectRobots !== false;
@@ -479,6 +500,7 @@
       mode: 'pages',
       targets: '',
       sitemapUrl: '',
+      sitemapInput: '',
       scope: 'internal',
       includeAssets: false,
       respectRobots: true,
@@ -511,7 +533,7 @@
       const mode = payload.mode || base.mode || 'list';
       base.runTimestamp = base.runTimestamp || new Date().toISOString();
       base.mode = mode;
-      const source = payload.pageUrl || payload.sitemapUrl || (mode === 'list' ? 'list' : '');
+      const source = payload.pageUrl || payload.sitemapInput || payload.sitemapUrl || (mode === 'list' ? 'list' : '');
       base.source = source || base.source || 'list';
       base.concurrency = clamp(concurrencyEl ? concurrencyEl.value : 10, 1, 10, 10);
       base.timeoutMs = clamp(timeoutEl ? timeoutEl.value : 10000, 1000, 30000, 10000);
@@ -541,11 +563,15 @@
       const mode = getSelectedMode();
       if (mode === 'sitemap') {
         const raw = sitemapUrlEl ? sitemapUrlEl.value : '';
-        const value = coerceUrl(stripInlineComments(raw));
-        if (!value) {
-          throw new Error('Please enter a sitemap URL.');
+        const interpreted = interpretSitemapInput(raw);
+        if (!interpreted) {
+          throw new Error('Please enter a valid sitemap URL or site.');
         }
-        return { ...base, mode: 'sitemap', sitemapUrl: value };
+        const payload = { ...base, mode: 'sitemap', sitemapUrl: interpreted.primary, sitemapInput: interpreted.original };
+        if (!interpreted.sitemapLike) {
+          payload.sitemapOrigin = interpreted.origin;
+        }
+        return payload;
       }
 
       const rawTargets = targetsInputEl ? targetsInputEl.value : '';
