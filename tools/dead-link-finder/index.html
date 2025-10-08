@@ -38,6 +38,9 @@
     .export-group { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
     .export-group button { border-radius: 0.6rem; padding: 0.5rem 1rem; border: 1px solid rgba(255,255,255,0.18); background: transparent; color: inherit; cursor: pointer; }
     .export-group button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .meta-info { display: flex; flex-direction: column; gap: 0.25rem; min-width: 200px; }
+    .meta-line { color: var(--muted, #97a3c2); font-size: 0.85rem; word-break: break-word; }
+    .meta-line-row { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
     .toast { position: fixed; right: 16px; bottom: 16px; background: #0b1224; color: #e6edf7; border: 1px solid rgba(255,255,255,0.12); padding: 10px 14px; border-radius: 10px; z-index: 9999; box-shadow: 0 12px 30px rgba(0,0,0,0.35); }
     .tableWrap { margin-top: 1rem; max-height: 70vh; overflow: auto; border: 1px solid #eee; border-radius: 8px; }
     #results thead th { position: sticky; top: 0; z-index: 2; background: #fff; box-shadow: 0 1px 0 rgba(0,0,0,0.05); }
@@ -110,7 +113,7 @@
         <div class="actions-row">
           <button id="runBtn" class="primary" type="button">Run check</button>
           <button id="clearBtn" class="secondary" type="button">Clear</button>
-          <span class="badge">Shortcuts: <kbd>Ctrl/Cmd + Enter</kbd> run · <kbd>Ctrl/Cmd + E</kbd> export CSV · <kbd>Ctrl/Cmd + C</kbd> copy CSV</span>
+          <span class="badge">Shortcuts: <kbd>Ctrl/Cmd + Enter</kbd> run · <kbd>Ctrl/Cmd + E</kbd> export CSV · <kbd>Ctrl/Cmd + Shift + C</kbd> copy CSV</span>
         </div>
         <div id="progress" aria-live="polite"></div>
       </section>
@@ -130,11 +133,17 @@
           </div>
           <div class="export-group">
             <button id="exportCsv" disabled>Export CSV</button>
-            <button id="copyCsv" class="ghost" disabled>Copy CSV</button>
+            <button id="copyCsv" class="ghost" disabled title="Copy CSV (Cmd/Ctrl+Shift+C)">Copy CSV</button>
             <button id="exportJson" class="secondary" disabled>Export JSON</button>
             <button id="exportXls" class="secondary" disabled>Export Excel</button>
             <button id="shareBtn" class="ghost" disabled>Share</button>
-            <span id="summary"></span>
+            <div class="meta-info">
+              <span id="summary"></span>
+              <div class="meta-line-row">
+                <span id="metaLine" class="meta-line"></span>
+                <button id="copyStatus" class="ghost" type="button" aria-label="Copy status line" title="Copy status line" disabled>Copy status</button>
+              </div>
+            </div>
           </div>
         </div>
         <div class="tableWrap">
@@ -241,7 +250,9 @@
     const clearBtn = document.getElementById('clearBtn');
     const progressEl = document.getElementById('progress');
     const summaryEl = document.getElementById('summary');
+    const metaLineEl = document.getElementById('metaLine');
     const resultsBody = document.querySelector('#results tbody');
+    const copyStatusBtn = document.getElementById('copyStatus');
     const exportCsvBtn = document.getElementById('exportCsv');
     const copyCsvBtn = document.getElementById('copyCsv');
     const exportJsonBtn = document.getElementById('exportJson');
@@ -258,6 +269,14 @@
         if (btn) btn.disabled = !enabled;
       });
     }
+
+    function syncStatusCopyAvailability() {
+      if (!copyStatusBtn) return;
+      const text = metaLineEl ? metaLineEl.textContent.trim() : '';
+      copyStatusBtn.disabled = text.length === 0;
+    }
+
+    syncStatusCopyAvailability();
 
     let lastResults = [];
     let meta = null;
@@ -376,6 +395,16 @@
 
     window.exportCSV = () => { if (!exportCsvBtn?.disabled) exportCsvBtn?.click(); };
     window.copyCSV = () => { if (!copyCsvBtn?.disabled) copyCsvBtn?.click(); };
+    copyStatusBtn?.addEventListener('click', async () => {
+      const text = metaLineEl ? metaLineEl.textContent.trim() : '';
+      if (!text) return;
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast('Status line copied');
+      } catch (err) {
+        showToast('Copy failed: ' + (err?.message || 'Unknown error'));
+      }
+    });
 
     exportCsvBtn.addEventListener('click', () => {
       if (!lastResults.length) return;
@@ -505,11 +534,11 @@
     function ensureMeta(payload, data) {
       const base = data && data.meta ? { ...data.meta } : {};
       const mode = payload.mode || base.mode || 'crawl';
-      const apiStage = data?.stage || base.stage || 'complete';
+      const apiStage = data?.stage || base.stage || 'done';
       base.mode = mode;
       base.stage = apiStage;
       base.requestId = base.requestId || data?.requestId || data?.meta?.requestId || '';
-      base.robotsStatus = base.robotsStatus || data?.meta?.robotsStatus || (payload.respectRobots !== false ? 'applied' : 'ignored');
+      base.robotsStatus = base.robotsStatus || data?.meta?.robotsStatus || (payload.respectRobots !== false ? 'applied' : 'off');
       base.runTimestamp = base.runTimestamp || new Date().toISOString();
       const source = payload.pageUrl || (mode === 'list' ? 'list' : '');
       const defaultSource = mode === 'list' ? 'list' : 'page';
@@ -569,6 +598,8 @@
     runBtn?.addEventListener('click', async (event) => {
       event.preventDefault();
       progressEl.textContent = '';
+      if (metaLineEl) metaLineEl.textContent = '';
+      syncStatusCopyAvailability();
       runBtn.disabled = true;
       let timeoutId = null;
       let controller = null;
@@ -578,6 +609,10 @@
         setExportState(false);
         resultsBody.innerHTML = '';
         summaryEl.textContent = '';
+        if (metaLineEl) metaLineEl.textContent = '';
+        syncStatusCopyAvailability();
+        lastResults = [];
+        meta = null;
 
         controller = new AbortController();
         timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
@@ -590,26 +625,29 @@
             signal: controller.signal
           });
           const contentType = res.headers.get('content-type') || '';
-          if (!/application\/json/i.test(contentType)) {
-            const text = await res.text();
-            const snippet = text ? `: ${text.slice(0, 200)}` : '';
-            throw new Error(`Unexpected response (${res.status})${snippet}`);
+          let parsed;
+          if (contentType.includes('application/json')) {
+            parsed = await res.json();
+          } else {
+            const fallback = await res.text();
+            throw new Error(fallback || `Non-JSON response (${res.status})`);
           }
-          const parsed = await res.json();
           if (!res.ok || !parsed?.ok) {
-            const requestId = parsed?.requestId || parsed?.meta?.requestId;
+            const msg = parsed?.message ? String(parsed.message) : `Request failed (${res.status})`;
+            const requestId = parsed?.requestId || parsed?.meta?.requestId || '';
             const stageInfo = parsed?.stage || parsed?.meta?.stage;
-            const extras = [];
-            if (parsed?.detail) extras.push(parsed.detail);
-            if (requestId) extras.push(`requestId=${requestId}`);
-            if (stageInfo) extras.push(`stage=${stageInfo}`);
-            const suffix = extras.length ? ` — ${extras.join(' · ')}` : '';
-            throw new Error(`${parsed?.message || `Request failed (${res.status})`}${suffix}`);
+            const error = new Error(msg + (requestId ? ` (ReqID: ${requestId})` : ''));
+            if (requestId) error.requestId = requestId;
+            if (stageInfo) error.stage = stageInfo;
+            if (parsed?.detail) error.detail = parsed.detail;
+            throw error;
           }
           data = parsed;
         } catch (error) {
           if (error?.name === 'AbortError') {
-            throw new Error('Request timed out. Please try again.');
+            const timeoutError = new Error('Request timed out. Please try again.');
+            timeoutError.code = 'timeout';
+            throw timeoutError;
           }
           throw error;
         } finally {
@@ -624,15 +662,24 @@
         renderRows(lastResults);
         const broken = lastResults.filter((row) => !row.ok).length;
         const truncatedLabel = meta.truncated ? ' (soft cap reached)' : '';
-        const reqLabel = meta.requestId ? ` · req ${meta.requestId}` : '';
-        const stageLabel = meta.stage ? ` · stage ${meta.stage}` : '';
-        const robotsLabel = meta.robotsStatus ? ` · robots ${meta.robotsStatus}` : '';
-        summaryEl.textContent = `${lastResults.length} checked · ${broken} broken${truncatedLabel}${reqLabel}${stageLabel}${robotsLabel}`;
+        summaryEl.textContent = `${lastResults.length} checked · ${broken} broken${truncatedLabel}`;
         setExportState(lastResults.length > 0);
-        progressEl.textContent = `Done${reqLabel}${stageLabel}`;
+        const reqLabel = meta.requestId ? meta.requestId : '—';
+        const robotsLabel = meta.robotsStatus || 'unknown';
+        if (metaLineEl) {
+          metaLineEl.textContent = `ReqID: ${reqLabel} · Robots: ${robotsLabel}`;
+        }
+        syncStatusCopyAvailability();
+        const stageLabel = meta.stage && meta.stage !== 'done' ? ` (stage: ${meta.stage})` : '';
+        progressEl.textContent = `Done${stageLabel}`;
       } catch (err) {
-        progressEl.textContent = 'Error: ' + (err?.message || 'Run failed');
-        alert(err?.message || 'Run failed');
+        const message = err?.message || 'Run failed';
+        const stageHint = err?.stage ? ` [stage: ${err.stage}]` : '';
+        const needsReqId = err?.requestId && !(message.includes('ReqID') || message.includes('reqid'));
+        const rid = needsReqId ? ` (ReqID: ${err.requestId})` : '';
+        progressEl.textContent = `Error: ${message}${rid}${stageHint}`;
+        if (metaLineEl) metaLineEl.textContent = '';
+        syncStatusCopyAvailability();
         lastResults = [];
         meta = null;
       } finally {
@@ -650,6 +697,8 @@
       resultsBody.innerHTML = '';
       summaryEl.textContent = '';
       progressEl.textContent = '';
+      if (metaLineEl) metaLineEl.textContent = '';
+      syncStatusCopyAvailability();
       lastResults = [];
       meta = null;
       setExportState(false);
@@ -663,7 +712,7 @@
       const k = e.key.toLowerCase();
       if (k === 'enter') { e.preventDefault(); runBtn?.click(); }
       if (k === 'e')     { e.preventDefault(); window.exportCSV?.(); }
-      if (k === 'c')     { e.preventDefault(); window.copyCSV?.(); }
+      if (k === 'c' && e.shiftKey) { e.preventDefault(); window.copyCSV?.(); }
     });
 
     if (location.hash.length > 1) {
