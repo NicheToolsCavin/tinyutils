@@ -67,6 +67,76 @@ Edge APIs must respond:
 
 ---
 
+## Tool Descriptions & Change Logs
+
+**Purpose:** Keep behavior specs and change history in sync so we avoid accidental drift, can roll back quickly, and give Cavin a clear non-coder summary of what changed.
+
+**Locations:**
+- `./tool_desc_deadlinkfinder.md`
+- `./tool_desc_sitemapdelta.md`
+- `./tool_desc_waybackfixer.md`
+
+Add new tool files at the repository root using the naming pattern `tool_desc_<kebab-or-snake-slug>.md` (lowercase).
+
+**Logging rules:**
+- **Log** when user-visible behavior shifts: inputs/options/defaults, output schema/exports, network flow (HEAD/GET, redirects, concurrency, timeouts), scope/robots guards, performance caps, external APIs/dependencies, or security guard rails that change what users can do.
+- **Optional log** (under “Minor changes”) for UX polish that changes flow or clarifies exports without breaking them.
+- **Skip** pure refactors, copy/style/comment-only edits, and test/CI changes unless they alter the behaviors above.
+- Always record timestamps in Europe/Madrid using the 24-hour clock and explicit UTC offset (e.g., `2025-10-08 21:05 CEST (UTC+02:00)`).
+- Append-only: never rewrite existing entries; if you need to correct something, add a follow-up note.
+
+**Format for entries:**
+- Append a new section headed `### Major changes — <YYYY-MM-DD [HH:MM] ZZZ (UTC±HH:MM)>`.
+- Include subsections for **Added**, **Removed**, and **Modified** (use `•` bullet lists; leave `•` followed by `None` if empty).
+- Provide a **Human-readable summary** paragraph for non-coders.
+- Provide an **Impact** bullet list covering user-visible effects and migration notes.
+
+**Procedure for devs/agents:**
+1. Before merging or deploying any change that alters a tool’s observable behavior, append the formatted entry to the matching `tool_desc_*.md` file.
+2. When adding a **new tool**:
+   - Create `tool_desc_<slug>.md` at the repo root using the template below.
+   - Add that file’s path to the **Locations** list above.
+3. Commit the change using `docs(tool): log change in <tool> — <one-line summary>`.
+
+**Template (for new tools):**
+
+```
+tool_desc_.md
+
+Date: <Month Day, Year>  (original spec)
+
+Purpose
+
+<what the tool is for, 2–4 sentences>
+
+Inputs (UI)
+	•	…
+
+Processing (server)
+	1.	…
+	2.	…
+
+Output
+	•	…
+
+UI/UX
+	•	…
+
+Success criteria / examples
+	•	…
+
+Non-goals
+	•	…
+
+Human-readable description
+
+<Explain like I’m not coding: what it does, what I’ll see, any gotchas.>
+```
+
+If code changes a tool’s observable behavior and no matching log entry is found for today’s date, DO NOT MERGE.
+
+---
+
 ## Preview smoke test (report results with screenshots)
 ### Dead Link Finder (`/tools/dead-link-finder/`)
 - HSTS guard prevents HTTP fallback on HSTS sites.
