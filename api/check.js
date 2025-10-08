@@ -505,6 +505,7 @@ export default async function handler(req) {
     }
 
     const responses = [];
+    let fallbackUsed = false;
     for (const item of queue) {
       let state = await follow(item.url, timeout, headFirst);
       if (state.status && (state.status === 429 || state.status >= 500)) {
@@ -516,6 +517,7 @@ export default async function handler(req) {
         if (fallback.skipped) {
           state.note = (state.note ? `${state.note}|` : '') + fallback.reason;
         } else if (fallback.result) {
+          fallbackUsed = true;
           state = { ...fallback.result, note: (state.note ? `${state.note}|` : '') + 'http_fallback_used' };
         }
       }
@@ -546,7 +548,7 @@ export default async function handler(req) {
       robots: body.respectRobots !== false,
       scope: body.scope || 'internal',
       assets: !!body.includeAssets,
-      httpFallback: !!body.retryHttp,
+      httpFallback: fallbackUsed,
       wayback: !!body.includeArchive,
       totalQueued: queue.length + prefilled.length,
       totalChecked: totalResults,
