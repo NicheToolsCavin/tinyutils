@@ -1,19 +1,18 @@
 export const config = { runtime: 'edge' };
 
-function makeRequestId() {
+function rid() {
   return Math.random().toString(16).slice(2, 10);
 }
 
-function json(headers, status, bodyObj) {
-  return new Response(JSON.stringify(bodyObj), {
+function json(status, body) {
+  return new Response(JSON.stringify(body), {
     status,
-    headers: { 'content-type': 'application/json; charset=utf-8', ...headers }
+    headers: { 'content-type': 'application/json; charset=utf-8' }
   });
 }
 
-function jsonError(status, code, message, detail = null, stage = null, requestId = null) {
-  const headers = requestId ? { 'x-request-id': requestId } : {};
-  return json(headers, status, { ok: false, code, message, detail, stage, requestId });
+function jerr(status, code, message, detail, stage, requestId) {
+  return json(status, { ok: false, code, message, detail, stage, requestId });
 }
 
 function withTimeout(ms, externalSignal) {
@@ -160,7 +159,7 @@ function isAllowedByRobots(rules, url) {
 }
 
 function badScheme(input) {
-  return /^(javascript:|data:|mailto:)/i.test(input || '');
+  return /^(?:javascript:|data:|mailto:|tel:|fb:|fb:\/\/|whatsapp:|tg:|intent:|itms:)/i.test(input || '');
 }
 
 function isPrivateHost(hostname) {
@@ -567,23 +566,23 @@ function classifySitemapInput(body) {
 }
 
 export default async function handler(req) {
-  const requestId = makeRequestId();
+  const requestId = rid();
   const startedAt = new Date();
-  let stage = 'init';
+  let stage = 'normalize_input';
   const setStage = (value) => {
     stage = value;
   };
 
   try {
     if (req.method !== 'POST') {
-      return jsonError(405, 'method_not_allowed', 'Only POST is supported', null, stage, requestId);
+      return jerr(405, 'method_not_allowed', 'Only POST is supported', null, stage, requestId);
     }
 
     let rawBody = '';
     try {
       rawBody = await req.text();
     } catch (error) {
-      return jsonError(400, 'body_read_failed', 'Unable to read request body', error?.message || null, stage, requestId);
+      return jerr(400, 'body_read_failed', 'Unable to read request body', error?.message || null, stage, requestId);
     }
 
     let body = {};
@@ -591,14 +590,17 @@ export default async function handler(req) {
       try {
         body = JSON.parse(rawBody);
       } catch (error) {
-        return jsonError(400, 'invalid_json', 'Request body must be valid JSON', error?.message || null, stage, requestId);
+        return jerr(400, 'invalid_json', 'Request body must be valid JSON', error?.message || null, stage, requestId);
       }
     }
     if (!body || typeof body !== 'object') body = {};
 
     setStage('normalize_input');
 
-    const timeout = Math.min(30000, Math.max(1000, Number(body.timeout) || 10000));
+    const requestedTimeout = Number(body.timeout);
+    const timeout = Number.isFinite(requestedTimeout)
+      ? Math.max(1000, Math.min(8000, requestedTimeout))
+      : 8000;
     const headFirst = body.headFirst !== false;
     const retryHttp = !!body.retryHttp;
     const respectRobots = body.respectRobots !== false;
@@ -615,7 +617,7 @@ export default async function handler(req) {
     } else if (body.mode === 'crawl' || !body.mode) {
       const sourceUrl = assertPublicHttp(body.pageUrl || '');
       if (!sourceUrl.ok || !sourceUrl.url) {
-        return jsonError(400, 'invalid_page_url', 'pageUrl must be a valid http(s) URL', sourceUrl.note || null, stage, requestId);
+        return jerr(400, 'invalid_page_url', 'pageUrl must be a valid http(s) URL', sourceUrl.note || null, stage, requestId);
       }
       let response;
       try {
@@ -624,15 +626,16 @@ export default async function handler(req) {
           headers: { 'user-agent': UA }
         }, 15000);
       } catch (error) {
-        const code = error?.name === 'AbortError' ? 'page_timeout' : 'page_fetch_failed';
-        const status = error?.name === 'AbortError' ? 504 : 502;
-        return jsonError(status, code, 'Failed to fetch page HTML', error?.message || null, stage, requestId);
+        if (error?.name === 'AbortError') {
+          return jerr(504, 'timeout', 'Request timed out', { step: stage }, stage, requestId);
+        }
+        return jerr(502, 'page_fetch_failed', 'Failed to fetch page HTML', error?.message || null, stage, requestId);
       }
       let html;
       try {
         html = await response.text();
       } catch (error) {
-        return jsonError(500, 'page_read_failed', 'Failed to read page HTML', error?.message || null, stage, requestId);
+        return jerr(500, 'page_read_failed', 'Failed to read page HTML', error?.message || null, stage, requestId);
       }
       setStage('parse_links');
       urls = collectLinks(html, sourceUrl.url, !!body.includeAssets);
@@ -640,7 +643,7 @@ export default async function handler(req) {
     } else if (body.mode === 'sitemap') {
       const classified = classifySitemapInput(body);
       if (!classified.ok) {
-        return jsonError(400, 'invalid_sitemap_input', 'Invalid sitemap input', classified.note || null, stage, requestId);
+        return jerr(400, 'invalid_sitemap_input', 'Invalid sitemap input', classified.note || null, stage, requestId);
       }
       sitemapSource = classified.raw;
 
@@ -679,7 +682,7 @@ export default async function handler(req) {
         truncated: discovery.truncated
       };
     } else {
-      return jsonError(400, 'invalid_mode', 'Unsupported mode', body.mode || null, stage, requestId);
+      return jerr(400, 'invalid_mode', 'Unsupported mode', body.mode || null, stage, requestId);
     }
 
     const seen = new Set();
@@ -704,7 +707,7 @@ export default async function handler(req) {
     }
 
     const robotsCache = new Map();
-    let robotsStatus = respectRobots ? 'applied' : 'ignored';
+    let robotsStatus = respectRobots ? 'applied' : 'off';
 
     const getRobotsRules = async (origin) => {
       if (!respectRobots) return { status: 'ignored', rules: [] };
@@ -720,10 +723,16 @@ export default async function handler(req) {
           return value;
         }
         const text = await res.text();
-        const rules = parseRobots(text);
-        const value = { status: 'ok', rules };
-        robotsCache.set(origin, value);
-        return value;
+        try {
+          const rules = parseRobots(text);
+          const value = { status: 'ok', rules };
+          robotsCache.set(origin, value);
+          return value;
+        } catch (error) {
+          const value = { status: 'error', rules: [], error };
+          robotsCache.set(origin, value);
+          return value;
+        }
       } catch (error) {
         const value = { status: 'error', rules: [], error };
         robotsCache.set(origin, value);
@@ -802,7 +811,7 @@ export default async function handler(req) {
     const endedAt = new Date();
     const durationMs = endedAt.getTime() - startedAt.getTime();
 
-    setStage('complete');
+    setStage('done');
 
     const meta = {
       requestId,
@@ -824,13 +833,15 @@ export default async function handler(req) {
       totalChecked: totalResults,
       truncated,
       sitemap: sitemapInfo,
-      stage: 'complete'
+      stage: 'done'
     };
 
-    const payload = { ok: true, stage: 'complete', meta, rows: [...prefilled, ...responses] };
-    return json({ 'x-request-id': requestId }, 200, payload);
+    const payload = { ok: true, requestId, stage: 'done', meta, rows: [...prefilled, ...responses] };
+    return json(200, payload);
   } catch (error) {
-    const detail = error instanceof Error ? error.message : String(error);
-    return jsonError(500, 'internal_error', 'Unexpected server error', detail, stage, requestId);
+    const detail = error instanceof Error
+      ? { message: error.message }
+      : { message: String(error) };
+    return jerr(500, 'server_error', 'Unexpected server error', detail, stage, requestId);
   }
 }
