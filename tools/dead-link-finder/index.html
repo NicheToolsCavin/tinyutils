@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Dead Link Finder — TinyUtils</title>
-  <meta name="description" content="Find broken links fast. Crawl a page, paste a list, or load a sitemap. Export CSV/JSON/XLSX and grab Wayback snapshots.">
+  <meta name="description" content="Find broken links fast. Crawl a page or paste a list. Export CSV/JSON/XLSX and grab Wayback snapshots.">
   <link rel="canonical" href="https://tinyutils.net/tools/dead-link-finder/">
   <link rel="icon" href="/public/favicon.ico">
   <meta property="og:title" content="Dead Link Finder — TinyUtils">
-  <meta property="og:description" content="Find broken links fast. Crawl a page, paste a list, or load a sitemap. Export CSV/JSON/XLSX and grab Wayback snapshots.">
+  <meta property="og:description" content="Find broken links fast. Crawl a page or paste a list. Export CSV/JSON/XLSX and grab Wayback snapshots.">
   <meta property="og:type" content="website">
   <meta property="og:image" content="/public/og.png">
   <meta name="twitter:card" content="summary_large_image">
@@ -20,15 +20,15 @@
     .tool-intro h1 { margin-bottom: 0.25rem; }
     .tool-intro p { margin-top: 0; color: var(--muted, #97a3c2); }
     .card { margin-top: 1rem; }
-    .mode-group { display: flex; gap: 1rem; flex-wrap: wrap; }
-    .mode-field { margin-top: 1rem; }
-    .mode-field.hidden { display: none; }
+    .mode-primary { margin-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+    .mode-primary input { width: 100%; max-width: 100%; }
     .options-grid { display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-top: 1rem; }
     .actions-row { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin-top: 1rem; }
     .actions-row button.primary { background: var(--brand, #3b82f6); color: #fff; border: none; padding: 0.65rem 1.4rem; border-radius: 0.75rem; cursor: pointer; }
     .actions-row button.primary[disabled] { opacity: 0.6; cursor: not-allowed; }
     .actions-row button.secondary { background: transparent; color: inherit; border: 1px solid rgba(255,255,255,0.2); border-radius: 0.75rem; padding: 0.55rem 1.25rem; cursor: pointer; }
     .advanced details { margin-top: 1rem; }
+    .advanced-inputs { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
     .advanced-grid { display: grid; gap: 0.5rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-top: 0.75rem; }
     label span.help { color: var(--muted, #97a3c2); font-size: 0.8rem; display: block; margin-top: 0.2rem; }
     textarea { min-height: 160px; }
@@ -61,28 +61,16 @@
   <main>
     <div class="container tool-intro">
       <h1>🔍 Dead Link Finder</h1>
-      <p>Paste URLs, crawl a page, or load a sitemap. Check response codes, respect robots, and export results with Wayback helpers.</p>
+      <p>Crawl a page or paste a list. Check response codes, respect robots, and export results with Wayback helpers.</p>
       <p><a class="cta" href="/tools/">See all tools →</a></p>
 
       <section class="card" role="region" aria-labelledby="inputHeading">
         <h2 id="inputHeading">Input</h2>
-        <fieldset class="mode-group" aria-label="Mode">
-          <legend>Mode</legend>
-          <label for="modePages"><input type="radio" name="mode" id="modePages" value="pages" checked> Pages</label>
-          <label for="modeSitemap"><input type="radio" name="mode" id="modeSitemap" value="sitemap"> Sitemap</label>
-        </fieldset>
-
-        <div class="mode-field" data-mode="pages">
-          <label for="targetsInput">URLs of pages you want to examine
-            <span class="help">Paste one or many. Newlines, commas, or semicolons work. Lines may end with comments (# or //).</span>
+        <div class="mode-primary">
+          <label for="pageUrl">Page URL to crawl
+            <span class="help">We’ll fetch this page, follow its links (respecting scope), and check them for issues.</span>
           </label>
-          <textarea id="targetsInput" rows="10" placeholder="https://example.com/page\nhttps://example.org/another"></textarea>
-        </div>
-        <div class="mode-field" data-mode="sitemap">
-          <label for="sitemapUrl">Sitemap URL or site (we’ll auto-find /sitemap.xml)
-            <span class="help">You can paste a sitemap URL (.xml or .xml.gz), a sitemap index, or just a site like example.com.</span>
-          </label>
-          <input id="sitemapUrl" placeholder="https://example.com/sitemap.xml">
+          <input id="pageUrl" placeholder="https://example.com/page">
         </div>
 
         <div class="options-grid" aria-label="Options">
@@ -105,6 +93,12 @@
         <div class="advanced">
           <details>
             <summary>Advanced options</summary>
+            <div class="advanced-inputs">
+              <label for="targetsInput">Pages (list)
+                <span class="help">Paste URLs to check directly (max 200). Leave blank to crawl the page above. Newlines, commas, or semicolons work. Lines may end with comments (# or //).</span>
+              </label>
+              <textarea id="targetsInput" rows="8" placeholder="https://example.com/page\nhttps://example.org/another"></textarea>
+            </div>
             <div class="advanced-grid">
               <label for="headFirst"><input type="checkbox" id="headFirst" checked> Try HEAD before GET <abbr title="Sends a lightweight HEAD first; if status looks good, follow with GET to confirm. Faster &amp; polite.">(?)</abbr></label>
               <label for="retryHttp"><input type="checkbox" id="retryHttp"> Retry with HTTP if HTTPS fails <abbr title="If HTTPS fetch fails and site is not HSTS-only, retry once over HTTP to diagnose mixed/proto issues. HSTS: Strict-Transport-Security tells browsers to use HTTPS only. We won’t downgrade such hosts.">(?)</abbr></label>
@@ -187,24 +181,6 @@
       return s;
     }
 
-    function interpretSitemapInput(raw) {
-      const cleaned = stripInlineComments(raw);
-      const value = cleaned.trim();
-      if (!value) return null;
-      let working = value;
-      if (working.startsWith('//')) working = 'https:' + working;
-      if (!/^[a-zA-Z][a-zA-Z0-9+.\-]*:/.test(working)) working = 'https://' + working;
-      try {
-        const url = new URL(working);
-        if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
-        const sitemapLike = /\.xml(\.gz)?(\?|$)/i.test(url.pathname);
-        const primary = sitemapLike ? url.href : `${url.origin}/sitemap.xml`;
-        return { original: value, primary, origin: url.origin, sitemapLike };
-      } catch {
-        return null;
-      }
-    }
-
     function splitMulti(val) {
       return String(val || '')
         .split(/[\r\n,;]+/)
@@ -248,10 +224,9 @@
       setTimeout(() => { div.remove(); }, 4000);
     }
 
-    const modeRadios = document.querySelectorAll('input[name="mode"]');
-    const modeFields = document.querySelectorAll('.mode-field');
+    const pageUrlEl = document.getElementById('pageUrl');
     const targetsInputEl = document.getElementById('targetsInput');
-    const sitemapUrlEl = document.getElementById('sitemapUrl');
+    const advancedDetailsEl = document.querySelector('.advanced details');
     const scopeEl = document.getElementById('scope');
     const includeAssetsEl = document.getElementById('includeAssets');
     const respectRobotsEl = document.getElementById('respectRobots');
@@ -275,23 +250,6 @@
     const statusFilters = document.querySelectorAll('.statusFilter');
 
     document.getElementById('year').textContent = new Date().getFullYear();
-
-    function getSelectedMode() {
-      const checked = document.querySelector('input[name="mode"]:checked');
-      return checked ? checked.value : 'pages';
-    }
-
-    function updateModeVisibility() {
-      const current = getSelectedMode();
-      modeFields.forEach((field) => {
-        field.classList.toggle('hidden', field.getAttribute('data-mode') !== current);
-      });
-    }
-
-    modeRadios.forEach((radio) => {
-      radio.addEventListener('change', updateModeVisibility);
-    });
-    updateModeVisibility();
 
     function setExportState(enabled) {
       [exportCsvBtn, copyCsvBtn, exportJsonBtn, exportXlsBtn].forEach((btn) => {
@@ -444,11 +402,14 @@
     });
 
     function encodeState() {
+      const listValue = targetsInputEl ? targetsInputEl.value : '';
+      const pageValue = pageUrlEl ? pageUrlEl.value : '';
+      const mode = listValue && listValue.trim().length > 0 ? 'list' : 'crawl';
       const state = {
-        mode: getSelectedMode(),
-        targets: targetsInputEl ? targetsInputEl.value : '',
-        sitemapUrl: sitemapUrlEl ? sitemapUrlEl.value.trim() : '',
-        sitemapInput: sitemapUrlEl ? sitemapUrlEl.value.trim() : '',
+        mode,
+        pageUrl: pageValue,
+        targets: listValue,
+        list: listValue,
         scope: scopeEl ? scopeEl.value : 'internal',
         includeAssets: includeAssetsEl ? includeAssetsEl.checked : false,
         respectRobots: respectRobotsEl ? respectRobotsEl.checked : true,
@@ -477,14 +438,22 @@
     }
 
     function applyState(state) {
-      const mode = state.mode === 'sitemap' ? 'sitemap' : 'pages';
-      const radio = document.querySelector(`input[name="mode"][value="${mode}"]`);
-      if (radio) radio.checked = true;
-      if (targetsInputEl) {
-        const fromState = state.targets ?? state.pageUrl ?? state.list ?? '';
-        targetsInputEl.value = fromState;
+      const stateMode = state.mode;
+      let pageValue = state.pageUrl ?? state.page ?? state.pageInput ?? '';
+      let listValue = state.list ?? state.targets ?? state.urls ?? '';
+      if (!pageValue && listValue && stateMode !== 'list') {
+        const parsed = splitMulti(listValue);
+        if (parsed.length === 1) {
+          pageValue = parsed[0];
+          listValue = '';
+        }
       }
-      if (sitemapUrlEl) sitemapUrlEl.value = state.sitemapInput || state.sitemapUrl || state.sitemap || '';
+      if (pageUrlEl) {
+        pageUrlEl.value = pageValue;
+      }
+      if (targetsInputEl) {
+        targetsInputEl.value = listValue;
+      }
       if (scopeEl) scopeEl.value = state.scope === 'all' ? 'all' : 'internal';
       if (includeAssetsEl) includeAssetsEl.checked = !!state.includeAssets;
       if (respectRobotsEl) respectRobotsEl.checked = state.respectRobots !== false;
@@ -493,14 +462,17 @@
       if (includeArchiveEl) includeArchiveEl.checked = !!state.includeArchive;
       if (timeoutEl) timeoutEl.value = clamp(state.timeout, 1000, 30000, 10000);
       if (concurrencyEl) concurrencyEl.value = clamp(state.concurrency, 1, 10, 10);
-      updateModeVisibility();
+      if (advancedDetailsEl) {
+        const shouldOpen = !!(targetsInputEl && targetsInputEl.value && targetsInputEl.value.trim());
+        advancedDetailsEl.open = shouldOpen;
+      }
     }
 
     const defaultState = {
-      mode: 'pages',
+      mode: 'crawl',
+      pageUrl: '',
       targets: '',
-      sitemapUrl: '',
-      sitemapInput: '',
+      list: '',
       scope: 'internal',
       includeAssets: false,
       respectRobots: true,
@@ -530,18 +502,24 @@
 
     function ensureMeta(payload, data) {
       const base = data && data.meta ? { ...data.meta } : {};
-      const mode = payload.mode || base.mode || 'list';
+      const mode = payload.mode || base.mode || 'crawl';
       base.runTimestamp = base.runTimestamp || new Date().toISOString();
       base.mode = mode;
-      const source = payload.pageUrl || payload.sitemapInput || payload.sitemapUrl || (mode === 'list' ? 'list' : '');
-      base.source = source || base.source || 'list';
+      const source = payload.pageUrl || (mode === 'list' ? 'list' : '');
+      const defaultSource = mode === 'list' ? 'list' : 'page';
+      base.source = source || base.source || defaultSource;
       base.concurrency = clamp(concurrencyEl ? concurrencyEl.value : 10, 1, 10, 10);
       base.timeoutMs = clamp(timeoutEl ? timeoutEl.value : 10000, 1000, 30000, 10000);
       base.robots = payload.respectRobots !== false;
       base.scope = payload.scope || 'internal';
       base.assets = !!payload.includeAssets;
-      base.httpFallback = payload.retryHttp || false;
-      base.wayback = payload.includeArchive || false;
+      const fallbackUsed = typeof base.httpFallback === 'boolean'
+        ? base.httpFallback
+        : lastResults.some((row) => typeof row.note === 'string' && row.note.includes('http_fallback_used'));
+      base.httpFallback = !!fallbackUsed;
+      if (typeof base.wayback !== 'boolean') {
+        base.wayback = payload.includeArchive || false;
+      }
       base.totalQueued = base.totalQueued ?? data?.totalQueued ?? lastResults.length;
       base.totalChecked = base.totalChecked ?? lastResults.length;
       base.truncated = base.truncated ?? !!data?.truncated;
@@ -560,20 +538,6 @@
         concurrency: clamp(concurrencyEl ? concurrencyEl.value : 10, 1, 10, 10)
       };
 
-      const mode = getSelectedMode();
-      if (mode === 'sitemap') {
-        const raw = sitemapUrlEl ? sitemapUrlEl.value : '';
-        const interpreted = interpretSitemapInput(raw);
-        if (!interpreted) {
-          throw new Error('Please enter a valid sitemap URL or site.');
-        }
-        const payload = { ...base, mode: 'sitemap', sitemapUrl: interpreted.primary, sitemapInput: interpreted.original };
-        if (!interpreted.sitemapLike) {
-          payload.sitemapOrigin = interpreted.origin;
-        }
-        return payload;
-      }
-
       const rawTargets = targetsInputEl ? targetsInputEl.value : '';
       let urls = splitMulti(rawTargets);
       const unique = Array.from(new Set(urls));
@@ -582,15 +546,18 @@
       }
       urls = unique.slice(0, 200);
 
-      if (urls.length === 0) {
-        throw new Error('Please enter at least one URL.');
+      if (urls.length > 0) {
+        return { ...base, mode: 'list', list: urls.join('\n') };
       }
 
-      if (urls.length === 1) {
-        return { ...base, mode: 'crawl', pageUrl: urls[0] };
+      const rawPage = pageUrlEl ? pageUrlEl.value : '';
+      const cleanedPage = stripInlineComments(rawPage);
+      const pageUrl = coerceUrl(cleanedPage);
+      if (!pageUrl) {
+        throw new Error('Please enter a valid page URL.');
       }
 
-      return { ...base, mode: 'list', list: urls.join('\n') };
+      return { ...base, mode: 'crawl', pageUrl };
     }
 
     runBtn?.addEventListener('click', async (event) => {
@@ -632,8 +599,9 @@
     });
 
     clearBtn?.addEventListener('click', () => {
+      if (pageUrlEl) pageUrlEl.value = '';
       if (targetsInputEl) targetsInputEl.value = '';
-      if (sitemapUrlEl) sitemapUrlEl.value = '';
+      if (advancedDetailsEl) advancedDetailsEl.open = false;
       resultsBody.innerHTML = '';
       summaryEl.textContent = '';
       progressEl.textContent = '';
@@ -657,6 +625,9 @@
       const parsed = decodeState(location.hash.slice(1));
       if (parsed) {
         applyState(parsed);
+        if (parsed.mode === 'sitemap' || parsed.sitemapUrl || parsed.sitemapInput) {
+          showToast('Sitemap mode now lives in Sitemap Delta.');
+        }
       } else {
         resetState();
         showToast('Invalid share link. Defaults restored.');
