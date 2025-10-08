@@ -224,6 +224,8 @@
       setTimeout(() => { div.remove(); }, 4000);
     }
 
+    const REQUEST_TIMEOUT_MS = 40000;
+
     const pageUrlEl = document.getElementById('pageUrl');
     const targetsInputEl = document.getElementById('targetsInput');
     const advancedDetailsEl = document.querySelector('.advanced details');
@@ -339,7 +341,7 @@
     }
 
     function toJSONPayload(rows, metaInfo) {
-      return JSON.stringify({ meta: metaInfo, results: rows }, null, 2);
+      return JSON.stringify({ meta: metaInfo, rows }, null, 2);
     }
 
     function toExcelXML(rows) {
@@ -503,16 +505,20 @@
     function ensureMeta(payload, data) {
       const base = data && data.meta ? { ...data.meta } : {};
       const mode = payload.mode || base.mode || 'crawl';
-      base.runTimestamp = base.runTimestamp || new Date().toISOString();
+      const apiStage = data?.stage || base.stage || 'complete';
       base.mode = mode;
+      base.stage = apiStage;
+      base.requestId = base.requestId || data?.requestId || data?.meta?.requestId || '';
+      base.robotsStatus = base.robotsStatus || data?.meta?.robotsStatus || (payload.respectRobots !== false ? 'applied' : 'ignored');
+      base.runTimestamp = base.runTimestamp || new Date().toISOString();
       const source = payload.pageUrl || (mode === 'list' ? 'list' : '');
       const defaultSource = mode === 'list' ? 'list' : 'page';
-      base.source = source || base.source || defaultSource;
-      base.concurrency = clamp(concurrencyEl ? concurrencyEl.value : 10, 1, 10, 10);
-      base.timeoutMs = clamp(timeoutEl ? timeoutEl.value : 10000, 1000, 30000, 10000);
+      base.source = base.source || source || defaultSource;
+      base.concurrency = typeof base.concurrency === 'number' ? base.concurrency : clamp(concurrencyEl ? concurrencyEl.value : 10, 1, 10, 10);
+      base.timeoutMs = typeof base.timeoutMs === 'number' ? base.timeoutMs : clamp(timeoutEl ? timeoutEl.value : 10000, 1000, 30000, 10000);
       base.robots = payload.respectRobots !== false;
-      base.scope = payload.scope || 'internal';
-      base.assets = !!payload.includeAssets;
+      base.scope = base.scope || payload.scope || 'internal';
+      base.assets = typeof base.assets === 'boolean' ? base.assets : !!payload.includeAssets;
       const fallbackUsed = typeof base.httpFallback === 'boolean'
         ? base.httpFallback
         : lastResults.some((row) => typeof row.note === 'string' && row.note.includes('http_fallback_used'));
@@ -520,9 +526,9 @@
       if (typeof base.wayback !== 'boolean') {
         base.wayback = payload.includeArchive || false;
       }
-      base.totalQueued = base.totalQueued ?? data?.totalQueued ?? lastResults.length;
-      base.totalChecked = base.totalChecked ?? lastResults.length;
-      base.truncated = base.truncated ?? !!data?.truncated;
+      base.totalQueued = typeof base.totalQueued === 'number' ? base.totalQueued : data?.meta?.totalQueued ?? lastResults.length;
+      base.totalChecked = typeof base.totalChecked === 'number' ? base.totalChecked : lastResults.length;
+      base.truncated = typeof base.truncated === 'boolean' ? base.truncated : !!data?.meta?.truncated;
       return base;
     }
 
@@ -564,6 +570,8 @@
       event.preventDefault();
       progressEl.textContent = '';
       runBtn.disabled = true;
+      let timeoutId = null;
+      let controller = null;
       try {
         const payload = await buildPayload();
         progressEl.textContent = 'Running…';
@@ -571,29 +579,66 @@
         resultsBody.innerHTML = '';
         summaryEl.textContent = '';
 
-        const res = await fetch('/api/check', {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data && data.message ? data.message : `Request failed (${res.status})`);
+        controller = new AbortController();
+        timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+        let data;
+        try {
+          const res = await fetch('/api/check', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify(payload),
+            signal: controller.signal
+          });
+          const contentType = res.headers.get('content-type') || '';
+          if (!/application\/json/i.test(contentType)) {
+            const text = await res.text();
+            const snippet = text ? `: ${text.slice(0, 200)}` : '';
+            throw new Error(`Unexpected response (${res.status})${snippet}`);
+          }
+          const parsed = await res.json();
+          if (!res.ok || !parsed?.ok) {
+            const requestId = parsed?.requestId || parsed?.meta?.requestId;
+            const stageInfo = parsed?.stage || parsed?.meta?.stage;
+            const extras = [];
+            if (parsed?.detail) extras.push(parsed.detail);
+            if (requestId) extras.push(`requestId=${requestId}`);
+            if (stageInfo) extras.push(`stage=${stageInfo}`);
+            const suffix = extras.length ? ` — ${extras.join(' · ')}` : '';
+            throw new Error(`${parsed?.message || `Request failed (${res.status})`}${suffix}`);
+          }
+          data = parsed;
+        } catch (error) {
+          if (error?.name === 'AbortError') {
+            throw new Error('Request timed out. Please try again.');
+          }
+          throw error;
+        } finally {
+          if (timeoutId) {
+            clearTimeout(timeoutId);
+            timeoutId = null;
+          }
         }
-        lastResults = Array.isArray(data.results) ? data.results : [];
+
+        lastResults = Array.isArray(data.rows) ? data.rows : [];
         meta = ensureMeta(payload, data);
         renderRows(lastResults);
         const broken = lastResults.filter((row) => !row.ok).length;
         const truncatedLabel = meta.truncated ? ' (soft cap reached)' : '';
-        summaryEl.textContent = `${lastResults.length} checked · ${broken} broken${truncatedLabel}`;
+        const reqLabel = meta.requestId ? ` · req ${meta.requestId}` : '';
+        const stageLabel = meta.stage ? ` · stage ${meta.stage}` : '';
+        const robotsLabel = meta.robotsStatus ? ` · robots ${meta.robotsStatus}` : '';
+        summaryEl.textContent = `${lastResults.length} checked · ${broken} broken${truncatedLabel}${reqLabel}${stageLabel}${robotsLabel}`;
         setExportState(lastResults.length > 0);
-        progressEl.textContent = 'Done';
+        progressEl.textContent = `Done${reqLabel}${stageLabel}`;
       } catch (err) {
         progressEl.textContent = 'Error: ' + (err?.message || 'Run failed');
         alert(err?.message || 'Run failed');
         lastResults = [];
         meta = null;
       } finally {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
         runBtn.disabled = false;
       }
     });
