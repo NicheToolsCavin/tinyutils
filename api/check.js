@@ -32,7 +32,7 @@ function isPrivateHost(hostname) {
   return false;
 }
 
-function normalize(raw) {
+function assertPublicHttp(raw) {
   let value = String(raw || '').trim();
   if (!value) return { ok: false, note: 'invalid_url' };
   if (value.startsWith('//')) value = 'https:' + value;
@@ -47,7 +47,7 @@ function normalize(raw) {
     if (!url.pathname) url.pathname = '/';
     if (url.port === '80' && url.protocol === 'http:') url.port = '';
     if (url.port === '443' && url.protocol === 'https:') url.port = '';
-    return { ok: true, url: url.toString() };
+    return { ok: true, url: url.toString(), origin: url.origin, urlObj: url };
   } catch {
     return { ok: false, note: 'invalid_url' };
   }
@@ -71,6 +71,29 @@ async function fetchGet(u, timeout) {
   });
 }
 
+async function loadSingleSitemap(url) {
+  let response;
+  try {
+    response = await fetch(url, {
+      headers: { 'user-agent': UA },
+      signal: AbortSignal.timeout(10000)
+    });
+  } catch {
+    const error = new Error('sitemap_fetch_failed');
+    error.code = 'sitemap_fetch_failed';
+    throw error;
+  }
+
+  if (!response.ok) {
+    const error = new Error(`sitemap_status_${response.status}`);
+    error.code = `sitemap_status_${response.status}`;
+    error.status = response.status;
+    throw error;
+  }
+
+  return readSitemapBody(response, url);
+}
+
 async function follow(url, timeout, headFirst) {
   let current = url;
   let chain = 0;
@@ -86,10 +109,18 @@ async function follow(url, timeout, headFirst) {
         continue;
       }
       if (response.status >= 200 && response.status < 300) {
-        response = await fetchGet(current, timeout);
+        try {
+          response = await fetchGet(current, timeout);
+        } catch (error) {
+          return { status: null, ok: false, finalUrl: current, note: 'network_error', chain, headers: null };
+        }
       }
     } else {
-      response = await fetchGet(current, timeout);
+      try {
+        response = await fetchGet(current, timeout);
+      } catch (error) {
+        return { status: null, ok: false, finalUrl: current, note: 'network_error', chain, headers: null };
+      }
     }
 
     if (response.status >= 300 && response.status < 400) {
@@ -166,19 +197,6 @@ function collectLinks(html, baseUrl, includeAssets) {
   return Array.from(new Set(urls));
 }
 
-async function loadSitemap(url) {
-  const res = await fetch(url, {
-    headers: { 'user-agent': UA },
-    signal: AbortSignal.timeout(10000)
-  });
-  if (!res.ok) {
-    const error = new Error(`sitemap_status_${res.status}`);
-    error.status = res.status;
-    throw error;
-  }
-  return res.text();
-}
-
 function decodeXmlEntities(value) {
   const named = {
     amp: '&',
@@ -224,6 +242,165 @@ function extractSitemapUrls(xml) {
   return urls;
 }
 
+function extractSitemapIndex(xml) {
+  const urls = [];
+  const matches = xml.matchAll(/<sitemap\b[^>]*>([\s\S]*?)<\/sitemap>/gi);
+  for (const [, block] of matches) {
+    const locMatch = block.match(/<loc\b[^>]*>([\s\S]*?)<\/loc>/i);
+    if (!locMatch) continue;
+    let value = locMatch[1].replace(/<!\[CDATA\[([\s\S]*?)\]\]>/gi, '$1').trim();
+    if (!value) continue;
+    value = decodeXmlEntities(value);
+    if (value) urls.push(value.trim());
+    if (urls.length >= MAX_SITEMAP_FETCHES) break;
+  }
+  if (!urls.length) {
+    return [...xml.matchAll(/<sitemap>\s*<loc>([^<]+)<\/loc>/gi)].map((match) => {
+      const raw = match[1].replace(/<!\[CDATA\[([\s\S]*?)\]\]>/gi, '$1').trim();
+      return decodeXmlEntities(raw);
+    }).filter(Boolean);
+  }
+  return urls;
+}
+
+async function readSitemapBody(response, url) {
+  const contentType = response.headers.get('content-type') || '';
+  const isGzip = /\.gz(\?|$)/i.test(new URL(url).pathname) || /gzip/i.test(contentType);
+  if (isGzip) {
+    if (typeof DecompressionStream !== 'function' || !response.body) {
+      const error = new Error('gz_not_supported');
+      error.code = 'gz_not_supported';
+      throw error;
+    }
+    const stream = response.body.pipeThrough(new DecompressionStream('gzip'));
+    return new Response(stream).text();
+  }
+  return response.text();
+}
+
+async function fetchRobotsSitemaps(origin) {
+  const robotsUrl = `${origin.replace(/\/$/, '')}/robots.txt`;
+  try {
+    const res = await fetch(robotsUrl, {
+      headers: { 'user-agent': UA },
+      signal: AbortSignal.timeout(8000)
+    });
+    if (!res.ok) {
+      return { urls: [], note: `robots_status_${res.status}`, robotsUrl };
+    }
+    const text = await res.text();
+    const urls = [];
+    const lines = text.split(/\r?\n/);
+    for (const line of lines) {
+      const match = line.match(/^\s*sitemap:\s*(.+)$/i);
+      if (!match) continue;
+      const raw = match[1].trim();
+      if (!raw) continue;
+      try {
+        const resolved = new URL(raw, origin).href;
+        const normalized = assertPublicHttp(resolved);
+        if (normalized.ok && !urls.includes(normalized.url)) {
+          urls.push(normalized.url);
+          if (urls.length >= 2) break;
+        }
+      } catch {}
+    }
+    return { urls, note: urls.length ? null : 'robots_none', robotsUrl };
+  } catch {
+    return { urls: [], note: 'robots_unknown', robotsUrl };
+  }
+}
+
+async function collectSitemapUrls(candidates) {
+  const queue = Array.from(new Set(candidates));
+  const visited = new Set();
+  const seenUrls = new Set();
+  const urls = [];
+  const notes = new Set();
+  let truncated = false;
+
+  while (queue.length && visited.size < MAX_SITEMAP_FETCHES) {
+    const next = queue.shift();
+    if (visited.has(next)) continue;
+    visited.add(next);
+
+    let res;
+    try {
+      res = await fetch(next, {
+        headers: { 'user-agent': UA },
+        signal: AbortSignal.timeout(10000)
+      });
+    } catch {
+      notes.add('sitemap_fetch_failed');
+      continue;
+    }
+
+    if (!res.ok) {
+      notes.add(`sitemap_status_${res.status}`);
+      continue;
+    }
+
+    let xml;
+    try {
+      xml = await readSitemapBody(res, next);
+    } catch (error) {
+      if (error?.code === 'gz_not_supported') {
+        notes.add('gz_not_supported');
+      } else {
+        notes.add('sitemap_fetch_failed');
+      }
+      continue;
+    }
+
+    if (/<sitemapindex\b/i.test(xml)) {
+      const children = extractSitemapIndex(xml);
+      for (const child of children) {
+        const normalized = assertPublicHttp(child);
+        if (!normalized.ok) continue;
+        if (visited.has(normalized.url) || queue.includes(normalized.url)) continue;
+        if (visited.size + queue.length >= MAX_SITEMAP_FETCHES) {
+          truncated = true;
+          continue;
+        }
+        queue.push(normalized.url);
+      }
+      continue;
+    }
+
+    const locs = extractSitemapUrls(xml);
+    for (const loc of locs) {
+      const normalized = assertPublicHttp(loc);
+      if (!normalized.ok) continue;
+      if (!seenUrls.has(normalized.url)) {
+        seenUrls.add(normalized.url);
+        urls.push(normalized.url);
+      }
+    }
+  }
+
+  if (queue.length && visited.size >= MAX_SITEMAP_FETCHES) {
+    truncated = true;
+  }
+
+  return {
+    urls,
+    notes: Array.from(notes),
+    fetched: Array.from(visited),
+    truncated
+  };
+}
+
+function classifySitemapInput(body) {
+  const raw = String(body?.sitemapInput || body?.sitemapUrl || '').trim();
+  if (!raw) return { ok: false, note: 'invalid_url' };
+  const normalized = assertPublicHttp(raw);
+  if (!normalized.ok || !normalized.urlObj) {
+    return { ok: false, note: normalized.note || 'invalid_url' };
+  }
+  const sitemapLike = /\.xml(\.gz)?(\?|$|\/)/i.test(normalized.urlObj.pathname);
+  return { ok: true, raw, normalized, sitemapLike };
+}
+
 export default async function handler(req) {
   if (req.method !== 'POST') {
     return new Response('Method Not Allowed', { status: 405 });
@@ -247,7 +424,7 @@ export default async function handler(req) {
       urls = raw.map(value => String(value || '').trim()).filter(Boolean);
       inputCount = urls.length;
     } else if (body.mode === 'crawl') {
-      const sourceUrl = normalize(body.pageUrl || '');
+      const sourceUrl = assertPublicHttp(body.pageUrl || '');
       if (!sourceUrl.ok || !sourceUrl.url) {
         return new Response('bad pageUrl', { status: 400 });
       }
@@ -259,22 +436,85 @@ export default async function handler(req) {
       urls = collectLinks(html, sourceUrl.url, !!body.includeAssets);
       inputCount = urls.length;
     } else if (body.mode === 'sitemap') {
-      const sitemapUrl = normalize(body.sitemapUrl || '');
-      if (!sitemapUrl.ok || !sitemapUrl.url) {
-        return new Response('bad sitemapUrl', { status: 400 });
-      }
-      let xml;
-      try {
-        xml = await loadSitemap(sitemapUrl.url);
-      } catch (error) {
-        const status = typeof error?.status === 'number' ? error.status : 502;
-        const note = error?.message || 'fetch_failed';
-        return new Response(JSON.stringify({ message: 'Failed to load sitemap', note }), {
-          status,
+      const classified = classifySitemapInput(body);
+      if (!classified.ok) {
+        return new Response(JSON.stringify({ message: 'bad sitemap input', note: classified.note || 'invalid_sitemap' }), {
+          status: 400,
           headers: { 'content-type': 'application/json', 'x-request-id': reqId }
         });
       }
-      urls = extractSitemapUrls(xml);
+      sitemapSource = classified.raw;
+
+      const candidates = [];
+      if (classified.sitemapLike) {
+        candidates.push(classified.normalized.url);
+      } else {
+        candidates.push(`${classified.normalized.origin}/sitemap.xml`);
+      }
+      if (body.sitemapUrl && typeof body.sitemapUrl === 'string') {
+        const hinted = assertPublicHttp(body.sitemapUrl);
+        if (hinted.ok) {
+          candidates.push(hinted.url);
+        }
+      }
+
+      let robotsMeta = null;
+      if (!classified.sitemapLike) {
+        robotsMeta = await fetchRobotsSitemaps(classified.normalized.origin);
+        candidates.push(...robotsMeta.urls);
+      }
+
+      const discovery = await collectSitemapUrls(candidates);
+      urls = discovery.urls;
+      inputCount = urls.length;
+      const notes = new Set(discovery.notes);
+      const fetchedSet = new Set(discovery.fetched);
+      let fallbackUsed = false;
+
+      if (!urls.length && classified.sitemapLike) {
+        try {
+          const xml = await loadSingleSitemap(classified.normalized.url);
+          const fallbackLocs = extractSitemapUrls(xml);
+          const normalizedFallback = [];
+          for (const loc of fallbackLocs) {
+            const normalized = assertPublicHttp(loc);
+            if (!normalized.ok || !normalized.url) continue;
+            if (!normalizedFallback.includes(normalized.url)) {
+              normalizedFallback.push(normalized.url);
+            }
+          }
+          if (normalizedFallback.length) {
+            urls = normalizedFallback;
+            inputCount = urls.length;
+            fallbackUsed = true;
+            fetchedSet.add(classified.normalized.url);
+            notes.add('sitemap_fallback_used');
+          } else {
+            notes.add('sitemap_empty');
+          }
+        } catch (error) {
+          if (error?.code) {
+            notes.add(error.code);
+          } else if (error?.message) {
+            notes.add(error.message);
+          } else {
+            notes.add('sitemap_fetch_failed');
+          }
+        }
+      }
+
+      if (robotsMeta?.note) notes.add(robotsMeta.note);
+      sitemapInfo = {
+        input: classified.raw,
+        origin: classified.normalized.origin,
+        candidates: Array.from(new Set(candidates)),
+        robotsUrl: robotsMeta?.robotsUrl || null,
+        robotsListed: robotsMeta?.urls || [],
+        notes: Array.from(notes).filter(Boolean),
+        fetched: Array.from(fetchedSet),
+        truncated: discovery.truncated,
+        fallbackUsed
+      };
     } else {
       return new Response('bad mode', { status: 400 });
     }
@@ -288,7 +528,7 @@ export default async function handler(req) {
         prefilled.push({ url: raw, status: null, ok: false, finalUrl: null, note: 'unsupported_scheme', chain: 0, archive: null });
         continue;
       }
-      const result = normalize(raw);
+      const result = assertPublicHttp(raw);
       if (!result.ok || !result.url) {
         const note = result.note || 'invalid_url';
         prefilled.push({ url: raw, status: null, ok: false, finalUrl: null, note, chain: 0, archive: null });
@@ -346,7 +586,8 @@ export default async function handler(req) {
       wayback: !!body.includeArchive,
       totalQueued: queue.length + prefilled.length,
       totalChecked: totalResults,
-      truncated
+      truncated,
+      sitemap: sitemapInfo
     };
 
     const payload = { meta, results: [...prefilled, ...responses] };
