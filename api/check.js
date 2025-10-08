@@ -71,6 +71,29 @@ async function fetchGet(u, timeout) {
   });
 }
 
+async function loadSingleSitemap(url) {
+  let response;
+  try {
+    response = await fetch(url, {
+      headers: { 'user-agent': UA },
+      signal: AbortSignal.timeout(10000)
+    });
+  } catch {
+    const error = new Error('sitemap_fetch_failed');
+    error.code = 'sitemap_fetch_failed';
+    throw error;
+  }
+
+  if (!response.ok) {
+    const error = new Error(`sitemap_status_${response.status}`);
+    error.code = `sitemap_status_${response.status}`;
+    error.status = response.status;
+    throw error;
+  }
+
+  return readSitemapBody(response, url);
+}
+
 async function follow(url, timeout, headFirst) {
   let current = url;
   let chain = 0;
