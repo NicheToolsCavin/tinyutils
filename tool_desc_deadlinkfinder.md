@@ -54,3 +54,27 @@ Given **one page URL**, fetch that page, **extract every link on that page**, an
 Type or paste one page URL. The tool opens that page, grabs every link it finds (optionally image/script/style assets), and pings each one to see whether it’s alive, redirected, or broken. You get a table you can sort/filter and export. Use “Internal only” to focus on your own domain; flip to “All links” to also check outbound links. If HTTPS fails and the site allows it, it can try HTTP once (marked in “Note”).
 
 ---
+
+### Major changes — 2025-10-08 21:05 CEST (UTC+02:00)
+
+**Added**
+• Request telemetry (`requestId`, `stage`) returned by the API and surfaced alongside results in the UI meta line.
+• Client-side abort guard (40 s) to stop long-running checks from leaving the UI stuck on “Running…”.
+
+**Removed**
+• None
+
+**Modified**
+• Edge API now emits JSON for every outcome with structured error codes, stage breadcrumbs, and consistent telemetry metadata.
+• Robots.txt handling uses safe globbing, downgrades gracefully on parse/fetch issues (`robotsStatus` set to `unknown`), and enforces stricter 15 s page / 8 s link timeouts.
+• Front-end inspects `content-type`, reads `rows` instead of `results`, and shows readable error prompts including request IDs and stages.
+
+**Human-readable summary**
+Errors now come back as tidy JSON with the same telemetry as successful runs, robots parsing can’t crash the checker, and the UI times out politely while showing you the request ID + stage for every run. If something goes wrong you get a clear message instead of a stuck spinner.
+
+**Impact**
+• API consumers must read `rows` + `meta` and check `ok` instead of assuming success payloads.
+• Any integrations relying on plain-text errors need to handle structured JSON responses (with request IDs and stages).
+• Robots-aware workflows now see `robotsStatus` updates and should expect disallowed links to be skipped before network fetches.
+
+---
