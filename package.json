@@ -1,0 +1,11 @@
+{
+  "name": "tinyutils",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "vercel-build": "echo 'static + edge'"
+  },
+  "engines": {
+    "node": "20.x"
+  }
+}
