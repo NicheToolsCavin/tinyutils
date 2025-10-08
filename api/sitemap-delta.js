@@ -1,4 +1,4 @@
-export const runtime = 'edge';
+export const config = { runtime: 'edge' };
 
 const UA = 'TinyUtils-SitemapDelta/1.0 (+https://tinyutils.net)';
 const HARD_CAP = 200;
@@ -45,9 +45,19 @@ function normUrl(u) {
 
 async function fetchMaybeGzip(url) {
   const res = await fetch(url, { headers: { 'user-agent': UA }, signal: AbortSignal.timeout(12000) });
+  if (!res.ok) {
+    const error = new Error(`status_${res.status}`);
+    error.status = res.status;
+    throw error;
+  }
   const ct = (res.headers.get('content-type') || '').toLowerCase();
   const looksGz = url.endsWith('.gz') || ct.includes('application/gzip') || ct.includes('application/x-gzip');
-  if (looksGz && typeof DecompressionStream !== 'undefined') {
+  if (looksGz) {
+    if (typeof DecompressionStream !== 'function' || !res.body) {
+      const error = new Error('gz_not_supported');
+      error.code = 'gz_not_supported';
+      throw error;
+    }
     const ds = new DecompressionStream('gzip');
     return new Response(res.body.pipeThrough(ds)).text();
   }
@@ -171,7 +181,16 @@ async function loadSitemapFromUrl(rawUrl) {
   if (!normalized) {
     throw new Error('bad_sitemap_url');
   }
-  return fetchMaybeGzip(normalized);
+  try {
+    return await fetchMaybeGzip(normalized);
+  } catch (error) {
+    if (error?.code === 'gz_not_supported') {
+      const err = new Error('gz_not_supported');
+      err.note = 'gz_not_supported';
+      throw err;
+    }
+    throw error;
+  }
 }
 
 export default async function handler(req) {
@@ -309,16 +328,18 @@ export default async function handler(req) {
       { headers: { 'content-type': 'application/json' } }
     );
   } catch (error) {
+    const note = error?.note || (error?.code === 'gz_not_supported' ? 'gz_not_supported' : null);
+    const status = typeof error?.status === 'number' ? error.status : note === 'gz_not_supported' ? 400 : 500;
     return new Response(
       JSON.stringify({
-        meta: { runTimestamp: new Date().toISOString(), error: String(error).slice(0, 200) },
+        meta: { runTimestamp: new Date().toISOString(), error: String(error).slice(0, 200), note },
         added: [],
         removed: [],
         pairs: [],
         unmapped: [],
         rules: []
       }),
-      { status: 500, headers: { 'content-type': 'application/json' } }
+      { status, headers: { 'content-type': 'application/json' } }
     );
   }
 }
