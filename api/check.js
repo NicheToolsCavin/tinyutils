@@ -468,41 +468,6 @@ export default async function handler(req) {
       urls = discovery.urls;
       inputCount = urls.length;
       const notes = new Set(discovery.notes);
-      const fetchedSet = new Set(discovery.fetched);
-      let fallbackUsed = false;
-
-      if (!urls.length && classified.sitemapLike) {
-        try {
-          const xml = await loadSingleSitemap(classified.normalized.url);
-          const fallbackLocs = extractSitemapUrls(xml);
-          const normalizedFallback = [];
-          for (const loc of fallbackLocs) {
-            const normalized = assertPublicHttp(loc);
-            if (!normalized.ok || !normalized.url) continue;
-            if (!normalizedFallback.includes(normalized.url)) {
-              normalizedFallback.push(normalized.url);
-            }
-          }
-          if (normalizedFallback.length) {
-            urls = normalizedFallback;
-            inputCount = urls.length;
-            fallbackUsed = true;
-            fetchedSet.add(classified.normalized.url);
-            notes.add('sitemap_fallback_used');
-          } else {
-            notes.add('sitemap_empty');
-          }
-        } catch (error) {
-          if (error?.code) {
-            notes.add(error.code);
-          } else if (error?.message) {
-            notes.add(error.message);
-          } else {
-            notes.add('sitemap_fetch_failed');
-          }
-        }
-      }
-
       if (robotsMeta?.note) notes.add(robotsMeta.note);
       sitemapInfo = {
         input: classified.raw,
@@ -511,9 +476,8 @@ export default async function handler(req) {
         robotsUrl: robotsMeta?.robotsUrl || null,
         robotsListed: robotsMeta?.urls || [],
         notes: Array.from(notes).filter(Boolean),
-        fetched: Array.from(fetchedSet),
-        truncated: discovery.truncated,
-        fallbackUsed
+        fetched: discovery.fetched,
+        truncated: discovery.truncated
       };
     } else {
       return new Response('bad mode', { status: 400 });
