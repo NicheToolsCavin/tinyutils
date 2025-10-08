@@ -1,10 +1,163 @@
 export const config = { runtime: 'edge' };
 
+function makeRequestId() {
+  return Math.random().toString(16).slice(2, 10);
+}
+
+function json(headers, status, bodyObj) {
+  return new Response(JSON.stringify(bodyObj), {
+    status,
+    headers: { 'content-type': 'application/json; charset=utf-8', ...headers }
+  });
+}
+
+function jsonError(status, code, message, detail = null, stage = null, requestId = null) {
+  const headers = requestId ? { 'x-request-id': requestId } : {};
+  return json(headers, status, { ok: false, code, message, detail, stage, requestId });
+}
+
+function withTimeout(ms, externalSignal) {
+  const ctrl = new AbortController();
+  const timeout = setTimeout(() => {
+    if (!ctrl.signal.aborted) {
+      ctrl.abort();
+    }
+  }, ms);
+  const cleanup = () => clearTimeout(timeout);
+  if (externalSignal) {
+    if (externalSignal.aborted) {
+      ctrl.abort();
+    } else {
+      externalSignal.addEventListener('abort', () => ctrl.abort(), { once: true });
+    }
+  }
+  return { signal: ctrl.signal, cancel: cleanup, controller: ctrl };
+}
+
+async function timedFetch(url, options, timeoutMs) {
+  const { signal, cancel } = withTimeout(timeoutMs, options?.signal);
+  try {
+    const response = await fetch(url, { ...options, signal });
+    cancel();
+    return response;
+  } catch (error) {
+    cancel();
+    throw error;
+  }
+}
+
 const UA = 'TinyUtils-DeadLinkChecker/1.0 (+https://tinyutils.net; hello@tinyutils.net)';
 const TLDS = ['.gov', '.mil', '.bank', '.edu'];
 const MAX_URLS = 200;
 const MAX_REDIRECTS = 5;
 const MAX_SITEMAP_FETCHES = 16;
+
+function sanitizeRobotsPattern(value) {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  const hasAnchor = trimmed.endsWith('$');
+  const raw = hasAnchor ? trimmed.slice(0, -1) : trimmed;
+  const normalized = raw.startsWith('/') ? raw : `/${raw}`;
+  const segments = normalized.split('*').map(segment => segment.replace(/[.+?^${}()|[\]\\]/g, '\\$&'));
+  const pattern = segments.join('.*');
+  const regexSource = `^${pattern}${hasAnchor ? '$' : '.*'}`;
+  let regex;
+  try {
+    regex = new RegExp(regexSource);
+  } catch {
+    return null;
+  }
+  return { pattern: normalized, regex, length: normalized.length, anchor: hasAnchor };
+}
+
+function buildRobotsRule(type, value) {
+  const sanitized = sanitizeRobotsPattern(value);
+  if (!sanitized) return null;
+  return { type, regex: sanitized.regex, length: sanitized.length };
+}
+
+function parseRobots(content) {
+  const lines = String(content || '').split(/\r?\n/);
+  const groups = [];
+  let currentAgents = [];
+  let currentRules = [];
+  const pushGroup = () => {
+    if (!currentAgents.length) return;
+    groups.push({ agents: currentAgents, rules: currentRules });
+    currentAgents = [];
+    currentRules = [];
+  };
+
+  for (const rawLine of lines) {
+    const line = rawLine.split('#')[0].trim();
+    if (!line) continue;
+    const index = line.indexOf(':');
+    if (index === -1) continue;
+    const key = line.slice(0, index).trim().toLowerCase();
+    const value = line.slice(index + 1).trim();
+    if (key === 'user-agent') {
+      const agent = value.toLowerCase();
+      if (!agent) continue;
+      if (!currentAgents.length || currentRules.length === 0) {
+        currentAgents.push(agent);
+      } else {
+        pushGroup();
+        currentAgents = [agent];
+      }
+      continue;
+    }
+    if (key === 'allow' || key === 'disallow') {
+      if (!currentAgents.length) continue;
+      const rule = buildRobotsRule(key, value);
+      if (rule) currentRules.push(rule);
+      continue;
+    }
+  }
+  pushGroup();
+
+  if (!groups.length) return [];
+
+  const ua = UA.toLowerCase();
+  const fallbackAgents = ['tinyutils-deadlinkchecker', 'tinyutils'];
+  const matchGroups = (matcher) => groups.filter(group => group.agents.some(agent => matcher(agent)));
+  let applicable = matchGroups(agent => agent === ua);
+  if (!applicable.length) {
+    applicable = matchGroups(agent => fallbackAgents.includes(agent));
+  }
+  if (!applicable.length) {
+    applicable = matchGroups(agent => agent === '*');
+  }
+
+  const rules = [];
+  for (const group of applicable) {
+    for (const rule of group.rules) {
+      if (rule) rules.push(rule);
+    }
+  }
+  return rules;
+}
+
+function isAllowedByRobots(rules, url) {
+  if (!Array.isArray(rules) || !rules.length) return true;
+  let parsed;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return true;
+  }
+  const path = `${parsed.pathname || '/' }${parsed.search || ''}`;
+  let winner = null;
+  for (const rule of rules) {
+    if (!rule?.regex) continue;
+    if (!rule.regex.test(path)) continue;
+    if (!winner || rule.length > winner.length || (rule.length === winner.length && rule.type === 'allow' && winner.type !== 'allow')) {
+      winner = rule;
+    }
+  }
+  if (!winner) return true;
+  return winner.type !== 'disallow';
+}
 
 function badScheme(input) {
   return /^(javascript:|data:|mailto:)/i.test(input || '');
@@ -54,30 +207,27 @@ function assertPublicHttp(raw) {
 }
 
 async function fetchHead(u, timeout) {
-  return fetch(u, {
+  return timedFetch(u, {
     method: 'HEAD',
     redirect: 'manual',
-    headers: { 'user-agent': UA },
-    signal: AbortSignal.timeout(timeout)
-  });
+    headers: { 'user-agent': UA }
+  }, timeout);
 }
 
 async function fetchGet(u, timeout) {
-  return fetch(u, {
+  return timedFetch(u, {
     method: 'GET',
     redirect: 'manual',
-    headers: { 'user-agent': UA },
-    signal: AbortSignal.timeout(timeout)
-  });
+    headers: { 'user-agent': UA }
+  }, timeout);
 }
 
 async function loadSingleSitemap(url) {
   let response;
   try {
-    response = await fetch(url, {
-      headers: { 'user-agent': UA },
-      signal: AbortSignal.timeout(10000)
-    });
+    response = await timedFetch(url, {
+      headers: { 'user-agent': UA }
+    }, 10000);
   } catch {
     const error = new Error('sitemap_fetch_failed');
     error.code = 'sitemap_fetch_failed';
@@ -94,32 +244,45 @@ async function loadSingleSitemap(url) {
   return readSitemapBody(response, url);
 }
 
-async function follow(url, timeout, headFirst) {
+async function follow(url, timeout, headFirst, setStage) {
   let current = url;
   let chain = 0;
   let usedGet = !headFirst;
 
   while (chain <= MAX_REDIRECTS) {
-    let response;
+    let response = null;
+    let fromHead = false;
     if (!usedGet) {
       try {
+        if (setStage) setStage('head_check');
         response = await fetchHead(current, timeout);
-      } catch {
+        fromHead = true;
+      } catch (error) {
         usedGet = true;
-        continue;
-      }
-      if (response.status >= 200 && response.status < 300) {
-        try {
-          response = await fetchGet(current, timeout);
-        } catch (error) {
-          return { status: null, ok: false, finalUrl: current, note: 'network_error', chain, headers: null };
+        if (error?.name === 'AbortError') {
+          return { status: null, ok: false, finalUrl: current, note: 'timeout', chain, headers: null };
         }
       }
-    } else {
+      if (response && response.status >= 200 && response.status < 300) {
+        try {
+          if (setStage) setStage('get_check');
+          response = await fetchGet(current, timeout);
+          usedGet = true;
+          fromHead = false;
+        } catch (error) {
+          const note = error?.name === 'AbortError' ? 'timeout' : 'network_error';
+          return { status: null, ok: false, finalUrl: current, note, chain, headers: null };
+        }
+      }
+    }
+    if (!response || (fromHead && (response.status === 405 || response.status === 501))) {
       try {
+        if (setStage) setStage('get_check');
         response = await fetchGet(current, timeout);
+        usedGet = true;
       } catch (error) {
-        return { status: null, ok: false, finalUrl: current, note: 'network_error', chain, headers: null };
+        const note = error?.name === 'AbortError' ? 'timeout' : 'network_error';
+        return { status: null, ok: false, finalUrl: current, note, chain, headers: null };
       }
     }
 
@@ -143,7 +306,7 @@ async function follow(url, timeout, headFirst) {
   return { status: null, ok: false, finalUrl: current, note: 'redirect_loop', chain, headers: null };
 }
 
-async function httpFallback(url, headers, timeout) {
+async function httpFallback(url, headers, timeout, setStage) {
   try {
     const parsed = new URL(url);
     const host = parsed.hostname.toLowerCase();
@@ -158,7 +321,7 @@ async function httpFallback(url, headers, timeout) {
       if (isPrivateHost(parsed.hostname)) {
         return { skipped: true, reason: 'private_host' };
       }
-      const result = await follow(parsed.href, timeout, false);
+      const result = await follow(parsed.href, timeout, false, setStage);
       return { skipped: false, result };
     }
   } catch {
@@ -172,6 +335,7 @@ function collectLinks(html, baseUrl, includeAssets) {
   const base = baseUrl;
   const anchorRe = /<a\b[^>]*href=["']([^"']+)["']/gi;
   html.replace(anchorRe, (_, value) => {
+    if (badScheme(value)) return _;
     try {
       urls.push(new URL(value, base).href);
     } catch {}
@@ -182,14 +346,17 @@ function collectLinks(html, baseUrl, includeAssets) {
     const scriptRe = /<script\b[^>]*src=["']([^"']+)["']/gi;
     const linkRe = /<link\b[^>]*href=["']([^"']+)["']/gi;
     html.replace(imgRe, (_, value) => {
+      if (badScheme(value)) return _;
       try { urls.push(new URL(value, base).href); } catch {}
       return _;
     });
     html.replace(scriptRe, (_, value) => {
+      if (badScheme(value)) return _;
       try { urls.push(new URL(value, base).href); } catch {}
       return _;
     });
     html.replace(linkRe, (_, value) => {
+      if (badScheme(value)) return _;
       try { urls.push(new URL(value, base).href); } catch {}
       return _;
     });
@@ -281,10 +448,9 @@ async function readSitemapBody(response, url) {
 async function fetchRobotsSitemaps(origin) {
   const robotsUrl = `${origin.replace(/\/$/, '')}/robots.txt`;
   try {
-    const res = await fetch(robotsUrl, {
-      headers: { 'user-agent': UA },
-      signal: AbortSignal.timeout(8000)
-    });
+    const res = await timedFetch(robotsUrl, {
+      headers: { 'user-agent': UA }
+    }, 8000);
     if (!res.ok) {
       return { urls: [], note: `robots_status_${res.status}`, robotsUrl };
     }
@@ -326,10 +492,9 @@ async function collectSitemapUrls(candidates) {
 
     let res;
     try {
-      res = await fetch(next, {
-        headers: { 'user-agent': UA },
-        signal: AbortSignal.timeout(10000)
-      });
+      res = await timedFetch(next, {
+        headers: { 'user-agent': UA }
+      }, 10000);
     } catch {
       notes.add('sitemap_fetch_failed');
       continue;
@@ -402,17 +567,41 @@ function classifySitemapInput(body) {
 }
 
 export default async function handler(req) {
-  if (req.method !== 'POST') {
-    return new Response('Method Not Allowed', { status: 405 });
-  }
-
-  const reqId = Math.random().toString(36).slice(2, 8);
+  const requestId = makeRequestId();
+  const startedAt = new Date();
+  let stage = 'init';
+  const setStage = (value) => {
+    stage = value;
+  };
 
   try {
-    const body = await req.json();
+    if (req.method !== 'POST') {
+      return jsonError(405, 'method_not_allowed', 'Only POST is supported', null, stage, requestId);
+    }
+
+    let rawBody = '';
+    try {
+      rawBody = await req.text();
+    } catch (error) {
+      return jsonError(400, 'body_read_failed', 'Unable to read request body', error?.message || null, stage, requestId);
+    }
+
+    let body = {};
+    if (rawBody) {
+      try {
+        body = JSON.parse(rawBody);
+      } catch (error) {
+        return jsonError(400, 'invalid_json', 'Request body must be valid JSON', error?.message || null, stage, requestId);
+      }
+    }
+    if (!body || typeof body !== 'object') body = {};
+
+    setStage('normalize_input');
+
     const timeout = Math.min(30000, Math.max(1000, Number(body.timeout) || 10000));
     const headFirst = body.headFirst !== false;
     const retryHttp = !!body.retryHttp;
+    const respectRobots = body.respectRobots !== false;
 
     let urls = [];
     let sitemapInfo = null;
@@ -423,25 +612,35 @@ export default async function handler(req) {
       const raw = Array.isArray(body.urls) ? body.urls : String(body.list || '').split(/\r?\n/);
       urls = raw.map(value => String(value || '').trim()).filter(Boolean);
       inputCount = urls.length;
-    } else if (body.mode === 'crawl') {
+    } else if (body.mode === 'crawl' || !body.mode) {
       const sourceUrl = assertPublicHttp(body.pageUrl || '');
       if (!sourceUrl.ok || !sourceUrl.url) {
-        return new Response('bad pageUrl', { status: 400 });
+        return jsonError(400, 'invalid_page_url', 'pageUrl must be a valid http(s) URL', sourceUrl.note || null, stage, requestId);
       }
-      const response = await fetch(sourceUrl.url, {
-        headers: { 'user-agent': UA },
-        signal: AbortSignal.timeout(10000)
-      });
-      const html = await response.text();
+      let response;
+      try {
+        setStage('fetch_html');
+        response = await timedFetch(sourceUrl.url, {
+          headers: { 'user-agent': UA }
+        }, 15000);
+      } catch (error) {
+        const code = error?.name === 'AbortError' ? 'page_timeout' : 'page_fetch_failed';
+        const status = error?.name === 'AbortError' ? 504 : 502;
+        return jsonError(status, code, 'Failed to fetch page HTML', error?.message || null, stage, requestId);
+      }
+      let html;
+      try {
+        html = await response.text();
+      } catch (error) {
+        return jsonError(500, 'page_read_failed', 'Failed to read page HTML', error?.message || null, stage, requestId);
+      }
+      setStage('parse_links');
       urls = collectLinks(html, sourceUrl.url, !!body.includeAssets);
       inputCount = urls.length;
     } else if (body.mode === 'sitemap') {
       const classified = classifySitemapInput(body);
       if (!classified.ok) {
-        return new Response(JSON.stringify({ message: 'bad sitemap input', note: classified.note || 'invalid_sitemap' }), {
-          status: 400,
-          headers: { 'content-type': 'application/json', 'x-request-id': reqId }
-        });
+        return jsonError(400, 'invalid_sitemap_input', 'Invalid sitemap input', classified.note || null, stage, requestId);
       }
       sitemapSource = classified.raw;
 
@@ -480,7 +679,7 @@ export default async function handler(req) {
         truncated: discovery.truncated
       };
     } else {
-      return new Response('bad mode', { status: 400 });
+      return jsonError(400, 'invalid_mode', 'Unsupported mode', body.mode || null, stage, requestId);
     }
 
     const seen = new Set();
@@ -504,25 +703,86 @@ export default async function handler(req) {
       if (queue.length >= MAX_URLS) break;
     }
 
+    const robotsCache = new Map();
+    let robotsStatus = respectRobots ? 'applied' : 'ignored';
+
+    const getRobotsRules = async (origin) => {
+      if (!respectRobots) return { status: 'ignored', rules: [] };
+      if (!origin) return { status: 'ignored', rules: [] };
+      if (robotsCache.has(origin)) return robotsCache.get(origin);
+      setStage('robots_fetch');
+      const robotsUrl = `${origin.replace(/\/$/, '')}/robots.txt`;
+      try {
+        const res = await timedFetch(robotsUrl, { headers: { 'user-agent': UA } }, 5000);
+        if (!res.ok) {
+          const value = { status: 'error', rules: [], statusCode: res.status };
+          robotsCache.set(origin, value);
+          return value;
+        }
+        const text = await res.text();
+        const rules = parseRobots(text);
+        const value = { status: 'ok', rules };
+        robotsCache.set(origin, value);
+        return value;
+      } catch (error) {
+        const value = { status: 'error', rules: [], error };
+        robotsCache.set(origin, value);
+        return value;
+      }
+    };
+
     const responses = [];
     let fallbackUsed = false;
     for (const item of queue) {
-      let state = await follow(item.url, timeout, headFirst);
+      if (respectRobots) {
+        setStage('robots_evaluate');
+        let origin = null;
+        try {
+          origin = new URL(item.url).origin;
+        } catch {
+          origin = null;
+        }
+        if (origin) {
+          const robotsInfo = await getRobotsRules(origin);
+          if (robotsInfo.status === 'error') {
+            robotsStatus = 'unknown';
+          }
+          if (robotsInfo.status === 'ok') {
+            const allowed = isAllowedByRobots(robotsInfo.rules, item.url);
+            if (!allowed) {
+              responses.push({
+                url: item.url,
+                status: null,
+                ok: false,
+                finalUrl: null,
+                archive: null,
+                note: 'disallowed_by_robots',
+                chain: 0
+              });
+              continue;
+            }
+          }
+        }
+      }
+
+      let state = await follow(item.url, timeout, headFirst, setStage);
       if (state.status && (state.status === 429 || state.status >= 500)) {
-        state = await follow(item.url, timeout, false);
-        state.note = (state.note ? `${state.note}|` : '') + 'retry_1';
+        const retryState = await follow(item.url, timeout, false, setStage);
+        state = { ...retryState, note: retryState.note ? `${retryState.note}|retry_1` : 'retry_1' };
       }
       if (!state.ok && retryHttp) {
-        const fallback = await httpFallback(item.url, state.headers, timeout);
+        const fallback = await httpFallback(item.url, state.headers, timeout, setStage);
         if (fallback.skipped) {
-          state.note = (state.note ? `${state.note}|` : '') + fallback.reason;
+          const reason = fallback.reason || 'http_fallback_skipped';
+          state.note = state.note ? `${state.note}|${reason}` : reason;
         } else if (fallback.result) {
           fallbackUsed = true;
-          state = { ...fallback.result, note: (state.note ? `${state.note}|` : '') + 'http_fallback_used' };
+          const mergedNote = state.note ? `${state.note}|http_fallback_used` : 'http_fallback_used';
+          state = { ...fallback.result, note: mergedNote };
         }
       }
       if (state.status === 410) {
-        state.note = (state.note ? `${state.note}|` : '') + 'gone';
+        state.note = state.note ? `${state.note}|gone` : 'gone';
       }
       responses.push({
         url: item.url,
@@ -539,13 +799,23 @@ export default async function handler(req) {
     let truncated = queue.length >= MAX_URLS && (inputCount > (queue.length + prefilled.length));
     if (sitemapInfo?.truncated) truncated = true;
 
+    const endedAt = new Date();
+    const durationMs = endedAt.getTime() - startedAt.getTime();
+
+    setStage('complete');
+
     const meta = {
-      runTimestamp: new Date().toISOString(),
+      requestId,
+      startedAtIso: startedAt.toISOString(),
+      endedAtIso: endedAt.toISOString(),
+      durationMs,
+      robotsStatus,
+      runTimestamp: startedAt.toISOString(),
       mode: body.mode || 'list',
       source: sitemapSource || body.pageUrl || body.sitemapUrl || 'list',
       concurrency: Number(body.concurrency) || 10,
       timeoutMs: timeout,
-      robots: body.respectRobots !== false,
+      robots: respectRobots,
       scope: body.scope || 'internal',
       assets: !!body.includeAssets,
       httpFallback: fallbackUsed,
@@ -553,20 +823,14 @@ export default async function handler(req) {
       totalQueued: queue.length + prefilled.length,
       totalChecked: totalResults,
       truncated,
-      sitemap: sitemapInfo
+      sitemap: sitemapInfo,
+      stage: 'complete'
     };
 
-    const payload = { meta, results: [...prefilled, ...responses] };
-    return new Response(JSON.stringify(payload), {
-      headers: {
-        'content-type': 'application/json',
-        'x-request-id': reqId
-      }
-    });
+    const payload = { ok: true, stage: 'complete', meta, rows: [...prefilled, ...responses] };
+    return json({ 'x-request-id': requestId }, 200, payload);
   } catch (error) {
-    return new Response(JSON.stringify({ message: 'Server error', error: String(error).slice(0, 200) }), {
-      status: 500,
-      headers: { 'content-type': 'application/json', 'x-request-id': reqId }
-    });
+    const detail = error instanceof Error ? error.message : String(error);
+    return jsonError(500, 'internal_error', 'Unexpected server error', detail, stage, requestId);
   }
 }
