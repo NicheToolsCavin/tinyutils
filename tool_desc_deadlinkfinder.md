@@ -55,6 +55,23 @@ Type or paste one page URL. The tool opens that page, grabs every link it finds 
 
 ---
 
+### Major changes — 2025-10-08 22:30 CEST (UTC+02:00)
+
+**Added**
+- JSON error envelope from API with `requestId` and `stage`.
+- Content-type aware client: falls back to text error when non-JSON.
+- Timeouts: 15s (HTML) and 8s (per-link).
+- UI shows `ReqID` and robots status; “Copy status” button.
+
+**Modified**
+- Robots handling via safe-glob regex (no URLPattern); parsing failures no longer crash runs (`robotsStatus: 'unknown'`).
+- Unsupported schemes filtered before URL parse; try/catch around `new URL(...)`.
+- Spinner reliably stops on errors; readable UI errors replace generic alerts.
+- CSV copy hotkey remapped to Cmd/Ctrl+Shift+C; normal Cmd/Ctrl+C works as expected.
+
+**Human-readable summary**
+Runs no longer hang or explode with “Unexpected token … not valid JSON.” Errors are returned as structured JSON with a Request ID so they’re easy to report. Robots files with funky patterns no longer crash the scan. Copying is saner: Shift+C copies the CSV; the new button copies the status line.
+
 ### Major changes — 2025-10-08 21:05 CEST (UTC+02:00)
 
 **Added**
