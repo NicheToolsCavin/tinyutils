@@ -13,7 +13,7 @@ function json(status, body, requestId) {
   });
 }
 
-function jerr(status, code, message, detail, stage, requestId, extraMeta) {
+function jerr(status, code, message, detail, stage, requestId) {
   return json(status, {
     ok: false,
     message,
@@ -21,8 +21,7 @@ function jerr(status, code, message, detail, stage, requestId, extraMeta) {
     meta: {
       requestId,
       stage: stage || null,
-      detail: detail || null,
-      ...(extraMeta || {})
+      detail: detail || null
     }
   }, requestId);
 }
@@ -63,38 +62,7 @@ const MAX_URLS = 200;
 const MAX_REDIRECTS = 5;
 const MAX_SITEMAP_FETCHES = 16;
 const MAX_SERVER_CONCURRENCY = 6;
-const MAX_PER_ORIGIN = 2;
-const JITTER_MS_MIN = 60;
-const JITTER_MS_MAX = 220;
 const ROBOTS_TIMEOUT_MS = 3000;
-
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-const jitter = () => Math.floor(JITTER_MS_MIN + Math.random() * (JITTER_MS_MAX - JITTER_MS_MIN + 1));
-
-const createSemaphore = (cap) => {
-  let available = cap;
-  const queue = [];
-  return {
-    acquire() {
-      return new Promise(resolve => {
-        if (available > 0) {
-          available -= 1;
-          resolve();
-        } else {
-          queue.push(resolve);
-        }
-      });
-    },
-    release() {
-      if (queue.length) {
-        const next = queue.shift();
-        next();
-      } else {
-        available += 1;
-      }
-    }
-  };
-};
 
 function sanitizeRobotsPattern(value) {
   if (typeof value !== 'string') return null;
@@ -901,71 +869,12 @@ export default async function handler(req) {
       };
     };
 
-    const globalSem = createSemaphore(concurrency);
-    const perOriginMap = new Map();
-    const results = new Array(queue.length);
-
-    let globalInFlight = 0;
-    let globalMaxInFlightObserved = 0;
-    const perOriginInFlight = new Map();
-    const perOriginMaxObserved = new Map();
-
-    const incr = (origin) => {
-      globalInFlight += 1;
-      if (globalInFlight > globalMaxInFlightObserved) {
-        globalMaxInFlightObserved = globalInFlight;
-      }
-
-      const current = (perOriginInFlight.get(origin) || 0) + 1;
-      perOriginInFlight.set(origin, current);
-      const priorMax = perOriginMaxObserved.get(origin) || 0;
-      if (current > priorMax) {
-        perOriginMaxObserved.set(origin, current);
-      }
-    };
-
-    const decr = (origin) => {
-      globalInFlight = Math.max(0, globalInFlight - 1);
-      const current = Math.max(0, (perOriginInFlight.get(origin) || 0) - 1);
-      perOriginInFlight.set(origin, current);
-    };
-
-    const taskAt = (idx) => (async () => {
-      const item = queue[idx];
-      let originKey = 'misc';
-      try {
-        originKey = new URL(item.url).origin;
-      } catch {}
-      let originSem = perOriginMap.get(originKey);
-      if (!originSem) {
-        originSem = createSemaphore(MAX_PER_ORIGIN);
-        perOriginMap.set(originKey, originSem);
-      }
-      await globalSem.acquire();
-      await originSem.acquire();
-      try {
-        incr(originKey);
-        await sleep(jitter());
-        results[idx] = await processItem(item);
-      } finally {
-        decr(originKey);
-        originSem.release();
-        globalSem.release();
-      }
-    })();
-
-    try {
-      await Promise.all(queue.map((_, i) => taskAt(i)));
-    } finally {
-      schedulerData = {
-        globalCap: concurrency,
-        perOriginCap: MAX_PER_ORIGIN,
-        globalMaxInFlightObserved,
-        perOriginMaxObserved: Object.fromEntries(perOriginMaxObserved.entries())
-      };
+    const responses = [];
+    for (let i = 0; i < queue.length; i += concurrency) {
+      const slice = queue.slice(i, i + concurrency);
+      const chunk = await Promise.all(slice.map(processItem));
+      responses.push(...chunk);
     }
-
-    const responses = results;
 
     if (!respectRobots) {
       robotsStatus = 'ignored';
@@ -997,7 +906,6 @@ export default async function handler(req) {
       durationMs,
       robotsStatus,
       ...(robotsStatus !== 'applied' ? { robotsReason: robotsReason || null } : {}),
-      scheduler: schedulerData,
       runTimestamp: startedAt.toISOString(),
       mode: body.mode || 'list',
       source: sitemapSource || body.pageUrl || body.sitemapUrl || 'list',
