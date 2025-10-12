@@ -1,0 +1,14 @@
+{
+  "name": "tinyutils",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "vercel-build": "echo 'static + edge'",
+    "test": "node --test",
+    "smoke:local": "node scripts/smoke_dlf_local.mjs",
+    "smoke:preview": "node scripts/smoke_dlf_preview.mjs"
+  },
+  "engines": {
+    "node": "20.x"
+  }
+}
