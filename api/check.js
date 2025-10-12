@@ -62,38 +62,7 @@ const MAX_URLS = 200;
 const MAX_REDIRECTS = 5;
 const MAX_SITEMAP_FETCHES = 16;
 const MAX_SERVER_CONCURRENCY = 6;
-const MAX_PER_ORIGIN = 2;
-const JITTER_MS_MIN = 60;
-const JITTER_MS_MAX = 220;
 const ROBOTS_TIMEOUT_MS = 3000;
-
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-const jitter = () => Math.floor(JITTER_MS_MIN + Math.random() * (JITTER_MS_MAX - JITTER_MS_MIN + 1));
-
-const createSemaphore = (cap) => {
-  let available = cap;
-  const queue = [];
-  return {
-    acquire() {
-      return new Promise(resolve => {
-        if (available > 0) {
-          available -= 1;
-          resolve();
-        } else {
-          queue.push(resolve);
-        }
-      });
-    },
-    release() {
-      if (queue.length) {
-        const next = queue.shift();
-        next();
-      } else {
-        available += 1;
-      }
-    }
-  };
-};
 
 function sanitizeRobotsPattern(value) {
   if (typeof value !== 'string') return null;
@@ -899,34 +868,12 @@ export default async function handler(req) {
       };
     };
 
-    const globalSem = createSemaphore(concurrency);
-    const perOriginMap = new Map();
-    const results = new Array(queue.length);
-
-    const taskAt = (idx) => (async () => {
-      const item = queue[idx];
-      let originKey = 'misc';
-      try {
-        originKey = new URL(item.url).origin;
-      } catch {}
-      let originSem = perOriginMap.get(originKey);
-      if (!originSem) {
-        originSem = createSemaphore(MAX_PER_ORIGIN);
-        perOriginMap.set(originKey, originSem);
-      }
-      await globalSem.acquire();
-      await originSem.acquire();
-      try {
-        await sleep(jitter());
-        results[idx] = await processItem(item);
-      } finally {
-        originSem.release();
-        globalSem.release();
-      }
-    })();
-
-    await Promise.all(queue.map((_, i) => taskAt(i)));
-    const responses = results;
+    const responses = [];
+    for (let i = 0; i < queue.length; i += concurrency) {
+      const slice = queue.slice(i, i + concurrency);
+      const chunk = await Promise.all(slice.map(processItem));
+      responses.push(...chunk);
+    }
 
     if (!respectRobots) {
       robotsStatus = 'ignored';
