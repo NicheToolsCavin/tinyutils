@@ -41,6 +41,13 @@
     .meta-info { display: flex; flex-direction: column; gap: 0.25rem; min-width: 200px; }
     .meta-line { color: var(--muted, #97a3c2); font-size: 0.85rem; word-break: break-word; }
     .meta-line-row { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    .debug-panel { margin-top: 1rem; border: 1px solid rgba(255,255,255,0.15); border-radius: 0.75rem; padding: 0.5rem 0.75rem; background: rgba(11,18,36,0.35); }
+    .debug-panel summary { cursor: pointer; font-weight: 600; }
+    .debug-content { display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-top: 0.5rem; }
+    .debug-list { margin: 0; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; font-size: 0.85rem; }
+    .debug-list dt { font-weight: 600; }
+    .debug-list dd { margin: 0 0 0.5rem 0; word-break: break-all; }
+    .debug-meta { margin: 0; padding: 0.5rem; background: rgba(12,19,32,0.5); border-radius: 0.5rem; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; font-size: 0.85rem; max-height: 240px; overflow: auto; }
     .toast { position: fixed; right: 16px; bottom: 16px; background: #0b1224; color: #e6edf7; border: 1px solid rgba(255,255,255,0.12); padding: 10px 14px; border-radius: 10px; z-index: 9999; box-shadow: 0 12px 30px rgba(0,0,0,0.35); }
     .tableWrap { margin-top: 1rem; max-height: 70vh; overflow: auto; border: 1px solid #eee; border-radius: 8px; }
     #results thead th { position: sticky; top: 0; z-index: 2; background: #fff; box-shadow: 0 1px 0 rgba(0,0,0,0.05); }
@@ -200,7 +207,8 @@
 
     function protectCSVCell(value) {
       const str = String(value ?? '');
-      return /^[=+\-@]/.test(str) ? "'" + str : str;
+      const trimmed = str.trimStart();
+      return /^[=+\-@]/.test(trimmed) ? "'" + str : str;
     }
 
     function escapeHtml(value) {
@@ -233,6 +241,53 @@
       setTimeout(() => { div.remove(); }, 4000);
     }
 
+    function resetDebug() {
+      if (!debugMode || !debugHeadersList || !debugMetaPre) return;
+      debugHeadersList.innerHTML = '';
+      const dd = document.createElement('dd');
+      dd.textContent = 'Waiting for response…';
+      debugHeadersList.appendChild(dd);
+      debugMetaPre.textContent = '—';
+    }
+
+    function renderDebug(headersSnapshot, metaSnapshot) {
+      if (!debugMode || !debugHeadersList || !debugMetaPre) return;
+      debugHeadersList.innerHTML = '';
+      const entries = [];
+      if (headersSnapshot && typeof headersSnapshot === 'object') {
+        Object.entries(headersSnapshot).forEach(([key, value]) => {
+          if (value !== undefined && value !== null && String(value).length) {
+            entries.push([key, String(value)]);
+          }
+        });
+      }
+      if (!entries.length) {
+        const dd = document.createElement('dd');
+        dd.textContent = 'No headers captured.';
+        debugHeadersList.appendChild(dd);
+      } else {
+        entries.forEach(([key, value]) => {
+          const dt = document.createElement('dt');
+          dt.textContent = key;
+          const dd = document.createElement('dd');
+          dd.textContent = value;
+          debugHeadersList.append(dt, dd);
+        });
+      }
+      debugMetaPre.textContent = metaSnapshot ? JSON.stringify(metaSnapshot, null, 2) : '—';
+    }
+
+    function snapshotHeaders(res) {
+      if (!res || typeof res.headers?.get !== 'function') return null;
+      const headers = {};
+      headers.status = res.statusText ? `${res.status} ${res.statusText}`.trim() : String(res.status);
+      ['content-type', 'x-request-id', 'x-vercel-id', 'x-vercel-cache', 'age'].forEach((key) => {
+        const value = res.headers.get(key);
+        if (value) headers[key] = value;
+      });
+      return headers;
+    }
+
     const REQUEST_TIMEOUT_MS = 40000;
 
     const pageUrlEl = document.getElementById('pageUrl');
@@ -262,6 +317,49 @@
     const onlyBrokenEl = document.getElementById('onlyBroken');
     const statusFilters = document.querySelectorAll('.statusFilter');
 
+    const debugMode = new URLSearchParams(location.search).get('debug') === '1';
+    let debugDetails = null;
+    let debugHeadersList = null;
+    let debugMetaPre = null;
+    if (debugMode) {
+      const resultsCard = document.getElementById('resultsHeading')?.closest('.card');
+      if (resultsCard) {
+        debugDetails = document.createElement('details');
+        debugDetails.className = 'debug-panel';
+        const summary = document.createElement('summary');
+        summary.textContent = 'Debug';
+        debugDetails.appendChild(summary);
+        const wrapper = document.createElement('div');
+        wrapper.className = 'debug-content';
+
+        const headersSection = document.createElement('div');
+        const headersTitle = document.createElement('h3');
+        headersTitle.textContent = 'Response headers';
+        headersSection.appendChild(headersTitle);
+        debugHeadersList = document.createElement('dl');
+        debugHeadersList.className = 'debug-list';
+        headersSection.appendChild(debugHeadersList);
+        wrapper.appendChild(headersSection);
+
+        const metaSection = document.createElement('div');
+        const metaTitle = document.createElement('h3');
+        metaTitle.textContent = 'Response meta';
+        metaSection.appendChild(metaTitle);
+        debugMetaPre = document.createElement('pre');
+        debugMetaPre.className = 'debug-meta';
+        debugMetaPre.textContent = '—';
+        metaSection.appendChild(debugMetaPre);
+        wrapper.appendChild(metaSection);
+
+        debugDetails.appendChild(wrapper);
+        resultsCard.appendChild(debugDetails);
+      }
+    }
+
+    if (debugMode) {
+      resetDebug();
+    }
+
     document.getElementById('year').textContent = new Date().getFullYear();
 
     function setExportState(enabled) {
@@ -280,6 +378,7 @@
 
     let lastResults = [];
     let meta = null;
+    let lastRequestPayload = null;
 
     function renderRows(rows) {
       resultsBody.innerHTML = '';
@@ -353,14 +452,33 @@
           row.chain ?? 0
         ].map(escapeCell).join(','));
       });
-      if (metaInfo) {
-        lines.push('# meta: ' + JSON.stringify(metaInfo));
+      if (metaInfo && typeof metaInfo === 'object') {
+        lines.push('');
+        lines.push(['meta_key', 'meta_value'].map(escapeCell).join(','));
+        Object.entries(metaInfo)
+          .filter(([, value]) => value !== undefined)
+          .forEach(([key, value]) => {
+            const serialized = typeof value === 'string' ? value : JSON.stringify(value);
+            lines.push([key, serialized].map(escapeCell).join(','));
+          });
       }
-      return lines.join('\n');
+      const csv = lines.join('\n');
+      return `\ufeff${csv}`;
     }
 
-    function toJSONPayload(rows, metaInfo) {
-      return JSON.stringify({ meta: metaInfo, rows }, null, 2);
+    function toJSONPayload(rows, metaInfo, settings) {
+      const timestampISO = (metaInfo && metaInfo.runTimestamp) || new Date().toISOString();
+      const payload = {
+        ok: true,
+        meta: {
+          tool: 'dead-link-finder',
+          timestampISO,
+          settings: settings || {},
+          run: metaInfo || null
+        },
+        rows
+      };
+      return JSON.stringify(payload, null, 2);
     }
 
     function toExcelXML(rows) {
@@ -377,6 +495,47 @@
           <td>${escapeCell(row.chain ?? 0)}</td>
         </tr>`).join('');
       return `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body><table><thead><tr>${header.map((h) => `<th>${escapeCell(h)}</th>`).join('')}</tr></thead><tbody>${tableRows}</tbody></table></body></html>`;
+    }
+
+    function buildSettings(metaInfo, requestPayload) {
+      const settings = {};
+      if (metaInfo && typeof metaInfo === 'object') {
+        if (metaInfo.mode !== undefined) settings.mode = metaInfo.mode;
+        if (metaInfo.source !== undefined) settings.source = metaInfo.source;
+        settings.respectRobots = metaInfo.robots !== false;
+        if (metaInfo.robotsStatus !== undefined) settings.robotsStatus = metaInfo.robotsStatus;
+        if (metaInfo.robotsStatus !== 'applied' && metaInfo.robotsReason) {
+          settings.robotsReason = metaInfo.robotsReason;
+        }
+        if (metaInfo.concurrency !== undefined) settings.concurrency = metaInfo.concurrency;
+        if (metaInfo.timeoutMs !== undefined) settings.timeoutMs = metaInfo.timeoutMs;
+        if (metaInfo.scope !== undefined) settings.scope = metaInfo.scope;
+        settings.includeAssets = !!metaInfo.assets;
+        settings.includeArchive = !!metaInfo.wayback;
+        settings.httpFallback = !!metaInfo.httpFallback;
+        if (metaInfo.totalQueued !== undefined) settings.totalQueued = metaInfo.totalQueued;
+        if (metaInfo.totalChecked !== undefined) settings.totalChecked = metaInfo.totalChecked;
+        settings.truncated = !!metaInfo.truncated;
+        if (metaInfo.requestId !== undefined) settings.requestId = metaInfo.requestId;
+      }
+      if (requestPayload && typeof requestPayload === 'object') {
+        settings.retryHttp = !!requestPayload.retryHttp;
+        settings.headFirst = requestPayload.headFirst !== false;
+        if (typeof requestPayload.scope === 'string' && !settings.scope) {
+          settings.scope = requestPayload.scope;
+        }
+      }
+      Object.keys(settings).forEach((key) => {
+        if (settings[key] === null) {
+          delete settings[key];
+        }
+      });
+      return settings;
+    }
+
+    function makeDatedFilename(base, ext) {
+      const stamp = new Date().toISOString().slice(0, 10);
+      return `${base}-${stamp}.${ext}`;
     }
 
     function download(name, text, type = 'text/plain') {
@@ -408,13 +567,15 @@
 
     exportCsvBtn.addEventListener('click', () => {
       if (!lastResults.length) return;
-      download('dead-links.csv', toCSV(lastResults, meta), 'text/csv');
+      const csv = toCSV(lastResults, meta);
+      download(makeDatedFilename('dead-link-finder', 'csv'), csv, 'text/csv');
     });
 
     copyCsvBtn.addEventListener('click', async () => {
       if (!lastResults.length) return;
       try {
-        await navigator.clipboard.writeText(toCSV(lastResults, meta));
+        const csv = toCSV(lastResults, meta);
+        await navigator.clipboard.writeText(csv);
         copyCsvBtn.textContent = 'Copied';
         setTimeout(() => { copyCsvBtn.textContent = 'Copy CSV'; }, 1200);
       } catch (err) {
@@ -424,7 +585,9 @@
 
     exportJsonBtn.addEventListener('click', () => {
       if (!lastResults.length) return;
-      download('dead-links.json', toJSONPayload(lastResults, meta), 'application/json');
+      const settings = buildSettings(meta, lastRequestPayload);
+      const payload = toJSONPayload(lastResults, meta, settings);
+      download(makeDatedFilename('dead-link-finder', 'json'), payload, 'application/json');
     });
 
     exportXlsBtn.addEventListener('click', () => {
@@ -538,14 +701,32 @@
       base.mode = mode;
       base.stage = apiStage;
       base.requestId = base.requestId || data?.requestId || data?.meta?.requestId || '';
-      base.robotsStatus = base.robotsStatus || data?.meta?.robotsStatus || (payload.respectRobots !== false ? 'applied' : 'off');
+      const robotsStatusFromApi = data?.meta?.robotsStatus || base.robotsStatus;
+      if (robotsStatusFromApi) {
+        base.robotsStatus = robotsStatusFromApi;
+      } else {
+        base.robotsStatus = payload.respectRobots !== false ? 'applied' : 'ignored';
+      }
+      if (data?.meta?.robotsReason !== undefined) {
+        base.robotsReason = data.meta.robotsReason;
+      } else if (base.robotsStatus !== 'applied' && base.robotsReason === undefined) {
+        base.robotsReason = payload.respectRobots === false ? 'toggle_off' : null;
+      }
       base.runTimestamp = base.runTimestamp || new Date().toISOString();
       const source = payload.pageUrl || (mode === 'list' ? 'list' : '');
       const defaultSource = mode === 'list' ? 'list' : 'page';
       base.source = base.source || source || defaultSource;
-      base.concurrency = typeof base.concurrency === 'number' ? base.concurrency : clamp(concurrencyEl ? concurrencyEl.value : 10, 1, 10, 10);
-      base.timeoutMs = typeof base.timeoutMs === 'number' ? base.timeoutMs : clamp(timeoutEl ? timeoutEl.value : 10000, 1000, 30000, 10000);
-      base.robots = payload.respectRobots !== false;
+      if (typeof base.concurrency !== 'number') {
+        base.concurrency = typeof data?.meta?.concurrency === 'number'
+          ? data.meta.concurrency
+          : clamp(concurrencyEl ? concurrencyEl.value : 10, 1, 10, 10);
+      }
+      base.timeoutMs = typeof base.timeoutMs === 'number'
+        ? base.timeoutMs
+        : clamp(timeoutEl ? timeoutEl.value : 10000, 1000, 30000, 10000);
+      if (typeof base.robots !== 'boolean') {
+        base.robots = payload.respectRobots !== false;
+      }
       base.scope = base.scope || payload.scope || 'internal';
       base.assets = typeof base.assets === 'boolean' ? base.assets : !!payload.includeAssets;
       const fallbackUsed = typeof base.httpFallback === 'boolean'
@@ -604,7 +785,10 @@
       let timeoutId = null;
       let controller = null;
       try {
+        if (debugMode) resetDebug();
+        lastRequestPayload = null;
         const payload = await buildPayload();
+        lastRequestPayload = payload;
         progressEl.textContent = 'Running…';
         setExportState(false);
         resultsBody.innerHTML = '';
@@ -618,18 +802,30 @@
         timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
         let data;
         try {
+          let debugHeadersSnapshot = null;
+          let debugMetaSnapshot = null;
           const res = await fetch('/api/check', {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify(payload),
             signal: controller.signal
           });
+          if (debugMode) {
+            debugHeadersSnapshot = snapshotHeaders(res);
+          }
           const contentType = res.headers.get('content-type') || '';
           let parsed;
           if (contentType.includes('application/json')) {
             parsed = await res.json();
+            if (debugMode) {
+              debugMetaSnapshot = parsed?.meta || null;
+              renderDebug(debugHeadersSnapshot, debugMetaSnapshot);
+            }
           } else {
             const fallback = await res.text();
+            if (debugMode && debugHeadersSnapshot) {
+              renderDebug(debugHeadersSnapshot, null);
+            }
             throw new Error(fallback || `Non-JSON response (${res.status})`);
           }
           if (!res.ok || !parsed?.ok) {
@@ -666,8 +862,17 @@
         setExportState(lastResults.length > 0);
         const reqLabel = meta.requestId ? meta.requestId : '—';
         const robotsLabel = meta.robotsStatus || 'unknown';
+        const robotsPart = meta.robotsStatus !== 'applied' && meta.robotsReason
+          ? `robots ${robotsLabel} (${meta.robotsReason})`
+          : `robots ${robotsLabel}`;
+        const statusParts = [
+          `${lastResults.length} checked`,
+          `${broken} broken${meta.truncated ? ' (soft cap reached)' : ''}`,
+          robotsPart,
+          `req ${reqLabel}`
+        ];
         if (metaLineEl) {
-          metaLineEl.textContent = `ReqID: ${reqLabel} · Robots: ${robotsLabel}`;
+          metaLineEl.textContent = statusParts.join(' · ');
         }
         syncStatusCopyAvailability();
         const stageLabel = meta.stage && meta.stage !== 'done' ? ` (stage: ${meta.stage})` : '';
@@ -701,6 +906,7 @@
       syncStatusCopyAvailability();
       lastResults = [];
       meta = null;
+      lastRequestPayload = null;
       setExportState(false);
     });
 
@@ -712,7 +918,11 @@
       const k = e.key.toLowerCase();
       if (k === 'enter') { e.preventDefault(); runBtn?.click(); }
       if (k === 'e')     { e.preventDefault(); window.exportCSV?.(); }
-      if (k === 'c' && e.shiftKey) { e.preventDefault(); window.copyCSV?.(); }
+      if (k === 'c' && e.shiftKey) {
+        if (!lastResults.length) return;
+        e.preventDefault();
+        window.copyCSV?.();
+      }
     });
 
     if (location.hash.length > 1) {

@@ -4,15 +4,26 @@ function rid() {
   return Math.random().toString(16).slice(2, 10);
 }
 
-function json(status, body) {
+function json(status, body, requestId) {
+  const headers = new Headers({ 'content-type': 'application/json; charset=utf-8' });
+  if (requestId) headers.set('x-request-id', requestId);
   return new Response(JSON.stringify(body), {
     status,
-    headers: { 'content-type': 'application/json; charset=utf-8' }
+    headers
   });
 }
 
 function jerr(status, code, message, detail, stage, requestId) {
-  return json(status, { ok: false, code, message, detail, stage, requestId });
+  return json(status, {
+    ok: false,
+    message,
+    code: code || null,
+    meta: {
+      requestId,
+      stage: stage || null,
+      detail: detail || null
+    }
+  }, requestId);
 }
 
 function withTimeout(ms, externalSignal) {
@@ -50,6 +61,8 @@ const TLDS = ['.gov', '.mil', '.bank', '.edu'];
 const MAX_URLS = 200;
 const MAX_REDIRECTS = 5;
 const MAX_SITEMAP_FETCHES = 16;
+const MAX_SERVER_CONCURRENCY = 6;
+const ROBOTS_TIMEOUT_MS = 3000;
 
 function sanitizeRobotsPattern(value) {
   if (typeof value !== 'string') return null;
@@ -706,43 +719,95 @@ export default async function handler(req) {
       if (queue.length >= MAX_URLS) break;
     }
 
+    const requestedConcurrencyRaw = Number(body.concurrency);
+    const normalizedRequestedConcurrency = Number.isFinite(requestedConcurrencyRaw)
+      ? Math.max(1, Math.floor(requestedConcurrencyRaw))
+      : 10;
+    const concurrency = Math.min(normalizedRequestedConcurrency, MAX_SERVER_CONCURRENCY);
+
     const robotsCache = new Map();
-    let robotsStatus = respectRobots ? 'applied' : 'off';
+    let robotsApplied = false;
+    let robotsIssue = null;
+    let robotsStatus = respectRobots ? null : 'ignored';
+    let robotsReason = respectRobots ? null : 'toggle_off';
+
+    if (respectRobots && queue.length === 0) {
+      robotsApplied = true;
+    }
+
+    const markRobotsIssue = (reason) => {
+      if (!reason) return;
+      if (!robotsIssue || robotsIssue === 'fetch_failed' || reason === 'timeout') {
+        robotsIssue = reason;
+      }
+    };
+
+    const markRobotsApplied = () => {
+      robotsApplied = true;
+    };
 
     const getRobotsRules = async (origin) => {
-      if (!respectRobots) return { status: 'ignored', rules: [] };
-      if (!origin) return { status: 'ignored', rules: [] };
-      if (robotsCache.has(origin)) return robotsCache.get(origin);
+      if (!respectRobots || !origin) {
+        return { status: 'ignored', rules: [] };
+      }
+      if (robotsCache.has(origin)) {
+        const cached = robotsCache.get(origin);
+        if (cached.status === 'unavailable') {
+          markRobotsIssue(cached.reason || 'fetch_failed');
+        }
+        if (cached.status === 'applied') {
+          markRobotsApplied();
+        }
+        return cached;
+      }
       setStage('robots_fetch');
       const robotsUrl = `${origin.replace(/\/$/, '')}/robots.txt`;
       try {
-        const res = await timedFetch(robotsUrl, { headers: { 'user-agent': UA } }, 5000);
+        const res = await timedFetch(robotsUrl, { headers: { 'user-agent': UA } }, ROBOTS_TIMEOUT_MS);
         if (!res.ok) {
-          const value = { status: 'error', rules: [], statusCode: res.status };
+          markRobotsIssue('fetch_failed');
+          const value = { status: 'unavailable', reason: 'fetch_failed', rules: [], statusCode: res.status };
           robotsCache.set(origin, value);
           return value;
         }
-        const text = await res.text();
+        let text;
+        try {
+          text = await res.text();
+        } catch (error) {
+          markRobotsIssue('fetch_failed');
+          const value = { status: 'unavailable', reason: 'fetch_failed', rules: [], error };
+          robotsCache.set(origin, value);
+          return value;
+        }
         try {
           const rules = parseRobots(text);
-          const value = { status: 'ok', rules };
+          const value = { status: 'applied', rules };
+          markRobotsApplied();
           robotsCache.set(origin, value);
           return value;
         } catch (error) {
-          const value = { status: 'error', rules: [], error };
+          markRobotsIssue('parse_failed');
+          const value = { status: 'unavailable', reason: 'parse_failed', rules: [], error };
           robotsCache.set(origin, value);
           return value;
         }
       } catch (error) {
-        const value = { status: 'error', rules: [], error };
+        if (error?.name === 'AbortError') {
+          markRobotsIssue('timeout');
+          const value = { status: 'unavailable', reason: 'timeout', rules: [] };
+          robotsCache.set(origin, value);
+          return value;
+        }
+        markRobotsIssue('fetch_failed');
+        const value = { status: 'unavailable', reason: 'fetch_failed', rules: [], error };
         robotsCache.set(origin, value);
         return value;
       }
     };
 
-    const responses = [];
     let fallbackUsed = false;
-    for (const item of queue) {
+
+    const processItem = async (item) => {
       if (respectRobots) {
         setStage('robots_evaluate');
         let origin = null;
@@ -753,13 +818,13 @@ export default async function handler(req) {
         }
         if (origin) {
           const robotsInfo = await getRobotsRules(origin);
-          if (robotsInfo.status === 'error') {
-            robotsStatus = 'unknown';
+          if (robotsInfo.status === 'unavailable') {
+            markRobotsIssue(robotsInfo.reason || 'fetch_failed');
           }
-          if (robotsInfo.status === 'ok') {
+          if (robotsInfo.status === 'applied') {
             const allowed = isAllowedByRobots(robotsInfo.rules, item.url);
             if (!allowed) {
-              responses.push({
+              return {
                 url: item.url,
                 status: null,
                 ok: false,
@@ -767,8 +832,7 @@ export default async function handler(req) {
                 archive: null,
                 note: 'disallowed_by_robots',
                 chain: 0
-              });
-              continue;
+              };
             }
           }
         }
@@ -793,7 +857,7 @@ export default async function handler(req) {
       if (state.status === 410) {
         state.note = state.note ? `${state.note}|gone` : 'gone';
       }
-      responses.push({
+      return {
         url: item.url,
         status: state.status,
         ok: state.ok,
@@ -801,7 +865,28 @@ export default async function handler(req) {
         archive: null,
         note: state.note || null,
         chain: state.chain || 0
-      });
+      };
+    };
+
+    const responses = [];
+    for (let i = 0; i < queue.length; i += concurrency) {
+      const slice = queue.slice(i, i + concurrency);
+      const chunk = await Promise.all(slice.map(processItem));
+      responses.push(...chunk);
+    }
+
+    if (!respectRobots) {
+      robotsStatus = 'ignored';
+      robotsReason = 'toggle_off';
+    } else if (robotsIssue) {
+      robotsStatus = 'unavailable';
+      robotsReason = robotsIssue;
+    } else if (robotsApplied) {
+      robotsStatus = 'applied';
+      robotsReason = null;
+    } else {
+      robotsStatus = 'unavailable';
+      robotsReason = 'fetch_failed';
     }
 
     const totalResults = responses.length + prefilled.length;
@@ -819,10 +904,11 @@ export default async function handler(req) {
       endedAtIso: endedAt.toISOString(),
       durationMs,
       robotsStatus,
+      ...(robotsStatus !== 'applied' ? { robotsReason: robotsReason || null } : {}),
       runTimestamp: startedAt.toISOString(),
       mode: body.mode || 'list',
       source: sitemapSource || body.pageUrl || body.sitemapUrl || 'list',
-      concurrency: Number(body.concurrency) || 10,
+      concurrency,
       timeoutMs: timeout,
       robots: respectRobots,
       scope: body.scope || 'internal',
@@ -837,7 +923,7 @@ export default async function handler(req) {
     };
 
     const payload = { ok: true, requestId, stage: 'done', meta, rows: [...prefilled, ...responses] };
-    return json(200, payload);
+    return json(200, payload, requestId);
   } catch (error) {
     const detail = error instanceof Error
       ? { message: error.message }
