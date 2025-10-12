@@ -585,6 +585,7 @@ export default async function handler(req) {
   const setStage = (value) => {
     stage = value;
   };
+  let schedulerData = null;
 
   try {
     if (req.method !== 'POST') {
@@ -928,6 +929,6 @@ export default async function handler(req) {
     const detail = error instanceof Error
       ? { message: error.message }
       : { message: String(error) };
-    return jerr(500, 'server_error', 'Unexpected server error', detail, stage, requestId);
+    return jerr(500, 'server_error', 'Unexpected server error', detail, stage, requestId, schedulerData ? { scheduler: schedulerData } : null);
   }
 }
