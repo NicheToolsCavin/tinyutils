@@ -13,16 +13,18 @@ function json(status, body, requestId) {
   });
 }
 
-function jerr(status, code, message, detail, stage, requestId) {
+function jerr(status, code, message, detail, stage, requestId, metaExtras) {
+  const meta = {
+    requestId,
+    stage: stage || null,
+    detail: detail || null,
+    ...(metaExtras || {})
+  };
   return json(status, {
     ok: false,
     message,
     code: code || null,
-    meta: {
-      requestId,
-      stage: stage || null,
-      detail: detail || null
-    }
+    meta
   }, requestId);
 }
 
@@ -62,7 +64,19 @@ const MAX_URLS = 200;
 const MAX_REDIRECTS = 5;
 const MAX_SITEMAP_FETCHES = 16;
 const MAX_SERVER_CONCURRENCY = 6;
+const PER_ORIGIN_CONCURRENCY = 2;
 const ROBOTS_TIMEOUT_MS = 3000;
+const SAME_ORIGIN_JITTER_MIN_MS = 30;
+const SAME_ORIGIN_JITTER_MAX_MS = 120;
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function randomJitterMs() {
+  const span = SAME_ORIGIN_JITTER_MAX_MS - SAME_ORIGIN_JITTER_MIN_MS;
+  return SAME_ORIGIN_JITTER_MIN_MS + Math.random() * (span > 0 ? span : 0);
+}
 
 function sanitizeRobotsPattern(value) {
   if (typeof value !== 'string') return null;
@@ -585,18 +599,23 @@ export default async function handler(req) {
   const setStage = (value) => {
     stage = value;
   };
-  let schedulerData = null;
+  let schedulerData = {
+    globalCap: MAX_SERVER_CONCURRENCY,
+    perOriginCap: PER_ORIGIN_CONCURRENCY,
+    globalMaxInFlightObserved: 0,
+    perOriginMaxObserved: {}
+  };
 
   try {
     if (req.method !== 'POST') {
-      return jerr(405, 'method_not_allowed', 'Only POST is supported', null, stage, requestId);
+      return jerr(405, 'method_not_allowed', 'Only POST is supported', null, stage, requestId, { scheduler: schedulerData });
     }
 
     let rawBody = '';
     try {
       rawBody = await req.text();
     } catch (error) {
-      return jerr(400, 'body_read_failed', 'Unable to read request body', error?.message || null, stage, requestId);
+      return jerr(400, 'body_read_failed', 'Unable to read request body', error?.message || null, stage, requestId, { scheduler: schedulerData });
     }
 
     let body = {};
@@ -604,12 +623,58 @@ export default async function handler(req) {
       try {
         body = JSON.parse(rawBody);
       } catch (error) {
-        return jerr(400, 'invalid_json', 'Request body must be valid JSON', error?.message || null, stage, requestId);
+        return jerr(400, 'invalid_json', 'Request body must be valid JSON', error?.message || null, stage, requestId, { scheduler: schedulerData });
       }
     }
     if (!body || typeof body !== 'object') body = {};
 
     setStage('normalize_input');
+
+    const trim = (value) => (typeof value === 'string' ? value.trim() : '');
+    const rawPageUrlInput = trim(body.pageUrl);
+    const rawUrlInput = trim(body.url);
+    let canonicalPageUrl = rawPageUrlInput || rawUrlInput || '';
+    let metaWarning = null;
+    if (rawPageUrlInput && rawUrlInput && rawPageUrlInput !== rawUrlInput) {
+      metaWarning = 'both_pageUrl_and_url_received';
+    }
+
+    const pickFirstPage = () => {
+      if (Array.isArray(body.pages)) {
+        for (const entry of body.pages) {
+          const trimmed = trim(entry);
+          if (trimmed) return trimmed;
+        }
+        return '';
+      }
+      if (typeof body.pages === 'string') {
+        const tokens = body.pages.split(/[\r\n;,]+/);
+        for (const token of tokens) {
+          const trimmed = trim(token);
+          if (trimmed) return trimmed;
+        }
+      }
+      return '';
+    };
+
+    if (!canonicalPageUrl) {
+      const fallbackPage = pickFirstPage();
+      if (fallbackPage) {
+        canonicalPageUrl = fallbackPage;
+      }
+    }
+    if (canonicalPageUrl) {
+      body.pageUrl = canonicalPageUrl;
+    }
+
+    if (!body.mode && (Array.isArray(body.pages) || typeof body.pages === 'string')) {
+      body.mode = 'list';
+    }
+    if (Array.isArray(body.pages) && !Array.isArray(body.urls)) {
+      body.urls = body.pages.slice();
+    } else if (typeof body.pages === 'string' && !body.list) {
+      body.list = body.pages;
+    }
 
     const requestedTimeout = Number(body.timeout);
     const timeout = Number.isFinite(requestedTimeout)
@@ -618,6 +683,23 @@ export default async function handler(req) {
     const headFirst = body.headFirst !== false;
     const retryHttp = !!body.retryHttp;
     const respectRobots = body.respectRobots !== false;
+
+    const requestedConcurrencyRaw = Number(body.concurrency);
+    const normalizedRequestedConcurrency = Number.isFinite(requestedConcurrencyRaw)
+      ? Math.max(1, Math.floor(requestedConcurrencyRaw))
+      : 10;
+    const concurrency = Math.min(normalizedRequestedConcurrency, MAX_SERVER_CONCURRENCY);
+    const perOriginMaxObserved = new Map();
+    const schedulerBase = {
+      globalCap: concurrency,
+      perOriginCap: PER_ORIGIN_CONCURRENCY,
+      globalMaxInFlightObserved: 0
+    };
+    const snapshotScheduler = () => ({
+      ...schedulerBase,
+      perOriginMaxObserved: Object.fromEntries(perOriginMaxObserved)
+    });
+    schedulerData = snapshotScheduler();
 
     let urls = [];
     let sitemapInfo = null;
@@ -629,9 +711,12 @@ export default async function handler(req) {
       urls = raw.map(value => String(value || '').trim()).filter(Boolean);
       inputCount = urls.length;
     } else if (body.mode === 'crawl' || !body.mode) {
+      if (!body.pageUrl) {
+        return jerr(400, 'missing_page_url', 'missing pageUrl/url', null, stage, requestId, { scheduler: snapshotScheduler() });
+      }
       const sourceUrl = assertPublicHttp(body.pageUrl || '');
       if (!sourceUrl.ok || !sourceUrl.url) {
-        return jerr(400, 'invalid_page_url', 'pageUrl must be a valid http(s) URL', sourceUrl.note || null, stage, requestId);
+        return jerr(400, 'invalid_page_url', 'pageUrl must be a valid http(s) URL', sourceUrl.note || null, stage, requestId, { scheduler: snapshotScheduler() });
       }
       let response;
       try {
@@ -641,15 +726,15 @@ export default async function handler(req) {
         }, 15000);
       } catch (error) {
         if (error?.name === 'AbortError') {
-          return jerr(504, 'timeout', 'Request timed out', { step: stage }, stage, requestId);
+          return jerr(504, 'timeout', 'Request timed out', { step: stage }, stage, requestId, { scheduler: snapshotScheduler() });
         }
-        return jerr(502, 'page_fetch_failed', 'Failed to fetch page HTML', error?.message || null, stage, requestId);
+        return jerr(502, 'page_fetch_failed', 'Failed to fetch page HTML', error?.message || null, stage, requestId, { scheduler: snapshotScheduler() });
       }
       let html;
       try {
         html = await response.text();
       } catch (error) {
-        return jerr(500, 'page_read_failed', 'Failed to read page HTML', error?.message || null, stage, requestId);
+        return jerr(500, 'page_read_failed', 'Failed to read page HTML', error?.message || null, stage, requestId, { scheduler: snapshotScheduler() });
       }
       setStage('parse_links');
       urls = collectLinks(html, sourceUrl.url, !!body.includeAssets);
@@ -657,7 +742,7 @@ export default async function handler(req) {
     } else if (body.mode === 'sitemap') {
       const classified = classifySitemapInput(body);
       if (!classified.ok) {
-        return jerr(400, 'invalid_sitemap_input', 'Invalid sitemap input', classified.note || null, stage, requestId);
+        return jerr(400, 'invalid_sitemap_input', 'Invalid sitemap input', classified.note || null, stage, requestId, { scheduler: snapshotScheduler() });
       }
       sitemapSource = classified.raw;
 
@@ -696,7 +781,7 @@ export default async function handler(req) {
         truncated: discovery.truncated
       };
     } else {
-      return jerr(400, 'invalid_mode', 'Unsupported mode', body.mode || null, stage, requestId);
+      return jerr(400, 'invalid_mode', 'Unsupported mode', body.mode || null, stage, requestId, { scheduler: snapshotScheduler() });
     }
 
     const seen = new Set();
@@ -716,16 +801,9 @@ export default async function handler(req) {
       }
       if (seen.has(result.url)) continue;
       seen.add(result.url);
-      queue.push({ raw, url: result.url });
+      queue.push({ raw, url: result.url, origin: result.origin });
       if (queue.length >= MAX_URLS) break;
     }
-
-    const requestedConcurrencyRaw = Number(body.concurrency);
-    const normalizedRequestedConcurrency = Number.isFinite(requestedConcurrencyRaw)
-      ? Math.max(1, Math.floor(requestedConcurrencyRaw))
-      : 10;
-    const concurrency = Math.min(normalizedRequestedConcurrency, MAX_SERVER_CONCURRENCY);
-
     const robotsCache = new Map();
     let robotsApplied = false;
     let robotsIssue = null;
@@ -869,12 +947,79 @@ export default async function handler(req) {
       };
     };
 
-    const responses = [];
-    for (let i = 0; i < queue.length; i += concurrency) {
-      const slice = queue.slice(i, i + concurrency);
-      const chunk = await Promise.all(slice.map(processItem));
-      responses.push(...chunk);
+    const scheduledQueue = queue.map((item, index) => ({
+      ...item,
+      index,
+      running: false,
+      done: false
+    }));
+    const responses = new Array(queue.length);
+    const perOriginInFlight = new Map();
+    let globalInFlight = 0;
+    let completed = 0;
+
+    async function worker() {
+      while (true) {
+        let candidate = null;
+        for (const entry of scheduledQueue) {
+          if (entry.done || entry.running) continue;
+          const origin = entry.origin || 'unknown';
+          const inFlightOrigin = perOriginInFlight.get(origin) || 0;
+          if (inFlightOrigin >= PER_ORIGIN_CONCURRENCY) continue;
+          entry.running = true;
+          const previousCount = inFlightOrigin;
+          perOriginInFlight.set(origin, previousCount + 1);
+          globalInFlight += 1;
+          if (schedulerBase.globalMaxInFlightObserved < globalInFlight) {
+            schedulerBase.globalMaxInFlightObserved = globalInFlight;
+          }
+          const newCount = previousCount + 1;
+          const existingMax = perOriginMaxObserved.get(origin) || 0;
+          if (newCount > existingMax) {
+            perOriginMaxObserved.set(origin, newCount);
+          }
+          if (previousCount > 0) {
+            await sleep(randomJitterMs());
+          }
+          candidate = entry;
+          break;
+        }
+        if (!candidate) {
+          if (completed >= scheduledQueue.length) {
+            break;
+          }
+          await sleep(20);
+          continue;
+        }
+        try {
+          const result = await processItem(candidate);
+          responses[candidate.index] = result;
+        } finally {
+          candidate.done = true;
+          candidate.running = false;
+          completed += 1;
+          const origin = candidate.origin || 'unknown';
+          const current = perOriginInFlight.get(origin) || 0;
+          if (current <= 1) {
+            perOriginInFlight.delete(origin);
+          } else {
+            perOriginInFlight.set(origin, current - 1);
+          }
+          globalInFlight = Math.max(0, globalInFlight - 1);
+        }
+      }
     }
+
+    const workerCount = Math.min(concurrency, scheduledQueue.length || 1);
+    const workers = [];
+    for (let i = 0; i < workerCount; i += 1) {
+      workers.push(worker());
+    }
+    await Promise.all(workers);
+
+    const resolvedResponses = responses.filter(Boolean);
+    const schedulerMeta = snapshotScheduler();
+    schedulerData = schedulerMeta;
 
     if (!respectRobots) {
       robotsStatus = 'ignored';
@@ -890,7 +1035,7 @@ export default async function handler(req) {
       robotsReason = 'fetch_failed';
     }
 
-    const totalResults = responses.length + prefilled.length;
+    const totalResults = resolvedResponses.length + prefilled.length;
     let truncated = queue.length >= MAX_URLS && (inputCount > (queue.length + prefilled.length));
     if (sitemapInfo?.truncated) truncated = true;
 
@@ -923,12 +1068,17 @@ export default async function handler(req) {
       stage: 'done'
     };
 
-    const payload = { ok: true, requestId, stage: 'done', meta, rows: [...prefilled, ...responses] };
+    if (metaWarning) {
+      meta.warning = metaWarning;
+    }
+    meta.scheduler = schedulerMeta;
+
+    const payload = { ok: true, requestId, stage: 'done', meta, rows: [...prefilled, ...resolvedResponses] };
     return json(200, payload, requestId);
   } catch (error) {
     const detail = error instanceof Error
       ? { message: error.message }
       : { message: String(error) };
-    return jerr(500, 'server_error', 'Unexpected server error', detail, stage, requestId, schedulerData ? { scheduler: schedulerData } : null);
+    return jerr(500, 'server_error', 'Unexpected server error', detail, stage, requestId, { scheduler: schedulerData });
   }
 }

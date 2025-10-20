@@ -29,3 +29,22 @@
 
 ### Revert plan
 - `git revert <sha>` of this commit.
+
+### Major changes — 2025-10-20 20:24 CEST (UTC+02:00)
+**Added**
+• `/api/check` now accepts legacy payload keys (`url`, `pages`) alongside `pageUrl`, auto-canonicalising to keep historic clients working.
+• Every JSON response includes `meta.scheduler` with the active caps and observed concurrency; the debug drawer surfaces a one-line summary when `?debug=1`.
+
+**Removed**
+• None
+
+**Modified**
+• Politeness scheduler enforces the existing global/per-origin caps with jitter while tracking maxima, and the API returns a warning if both `pageUrl` and `url` disagree.
+
+**Human-readable summary**
+Older integrations can keep sending `url` or `pages` and still get a crawl, and the API now reports exactly how many concurrent checks ran (globally and per origin). Flip on `?debug=1` and you’ll see those caps right in the UI.
+
+**Impact**
+• API callers receive `meta.scheduler` and should ignore or log it as needed; existing success/error envelopes remain JSON-compatible.
+• If both `pageUrl` and `url` are supplied, the request still runs but a warning is returned so clients can tidy their payloads.
+• No schema changes to exports or CLI tooling; only additive meta/compatibility tweaks.

@@ -9,7 +9,7 @@ Edge APIs must respond:
 ---
 
 ## Constraints
-- **Branch + PR only.** No DNS or Production deploys. No repository secrets.
+- **Branch + PR only.** No DNS or Production deploys. No repository secrets. **The exception being when you are asked to push to production, in which case you will do so. Thanks.
 - **Minimal diffs.** No new dependencies unless strictly required & justified in the PR.
 - **Static site, Framework = Other.** No build step; **Output directory = root**.
 - **`vercel.json` = headers only.** Remove any `functions`/`runtime` blocks. (Those trigger “Function Runtimes must have a valid version…” errors.)
@@ -58,9 +58,16 @@ Edge APIs must respond:
 - **CSV hardening:** prefix values beginning with `=` `+` `-` `@` with a single quote to prevent spreadsheet injection.
 - **Responses:** always return `content-type: application/json`.
 
+### API payload keys
+| Request key | Notes |
+| --- | --- |
+| `pageUrl` | Canonical input for crawl mode; preferred. |
+| `url` | Legacy alias accepted for compatibility; auto-mapped to `pageUrl`. |
+| `pages` | Optional list/textarea input; first entry falls back to `pageUrl` when needed. |
+
 ---
 
-## Open PR and obtain Preview URL
+## Open PR and obtain Preview URL (if you aren't prompted to push to production)
 1. Create a branch: `fix/preview-boot` (or similar).
 2. Commit minimal fixes. Push and open a PR.
 3. Wait for Vercel bot to post the **Preview URL** as a PR comment.
