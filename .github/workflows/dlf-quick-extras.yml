@@ -1,0 +1,18 @@
+name: DLF Quick Extras
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ensure jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+      - name: API smokes (extras)
+        env:
+          TINYUTILS_BASE: https://tinyutils-eight.vercel.app
+        run: bash scripts/smoke_dlf_extras.sh
