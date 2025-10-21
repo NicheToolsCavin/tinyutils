@@ -18,6 +18,7 @@ Optional UI sanity (local, uses Tiny-Reactive):
 ```bash
 tiny-reactive serve --host 127.0.0.1 --port 5566 --headful --debug
 pnpm ui:smoke:dlf
+# override controller URL with `TINY_REACTIVE_URL` if the server isn’t on localhost
 ```
 
 Artifacts save to `./.debug/` (e.g., `dlf-ui.png`).
