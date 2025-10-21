@@ -6,7 +6,9 @@
     "vercel-build": "echo 'static + edge'",
     "test": "node --test",
     "smoke:local": "node scripts/smoke_dlf_local.mjs",
-    "smoke:preview": "node scripts/smoke_dlf_preview.mjs"
+    "smoke:preview": "node scripts/smoke_dlf_preview.mjs",
+    "smoke:extras": "bash scripts/smoke_dlf_extras.sh",
+    "ui:smoke:dlf": "node scripts/ui_smoke_dlf.mjs"
   },
   "engines": {
     "node": "20.x"
