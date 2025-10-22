@@ -75,7 +75,15 @@ async function run() {
   await cmd({
     id: 'wait-debug',
     cmd: 'waitFor',
-    args: { selector: '.debug-scheduler', timeout: 120000 }
+    args: { selector: '.debug-scheduler', state: 'attached', timeout: 120000 }
+  });
+
+  await cmd({
+    id: 'reveal-debug',
+    cmd: 'evaluate',
+    args: {
+      js: "() => { const el = document.querySelector('.debug-scheduler'); if (el) { el.style.display = 'block'; el.style.visibility = 'visible'; } return el?.textContent || ''; }"
+    }
   });
 
   const debugDir = new URL('../.debug/', import.meta.url);
