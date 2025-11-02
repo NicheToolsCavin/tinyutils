@@ -75,9 +75,8 @@ function protectCSVCell(v){
         <label class="lbl">Sitemap B (after)</label>
         <input id="smB" type="url" placeholder="https://example.com/sitemap.xml">
         <details><summary>or paste XML</summary>
-          <div style="margin:6px 0"><input id="fileA" type="file" accept=".xml,.gz"></div>
-          <textarea id="smBText"
-          ><div style="margin:6px 0"><input id="fileB" type="file" accept=".xml,.gz"></div placeholder="&lt;urlset&gt;...&lt;/urlset&gt;"></textarea>
+          <div style="margin:6px 0"><input id="fileB" type="file" accept=".xml,.gz"></div>
+          <textarea id="smBText" placeholder="&lt;urlset&gt;...&lt;/urlset&gt;"></textarea>
         </details>
       </div>
     </section>
@@ -290,6 +289,7 @@ function protectCSVCell(v){
     });
     return { pairs, unmapped, rules };
   }
+    const filtered = computeFiltered(data);
     const meta = data.meta || {};
     summaryEl.innerHTML = \`
       <div class="chips">
@@ -343,8 +343,13 @@ function protectCSVCell(v){
     if (lastResults && lastResults.meta){ lastResults.meta.threshold = confThr; lastResults.meta.sameDomainGuard = document.getElementById('sameReg').checked; }
 
     if (!lastResults) return;
-    const rows = [['protectCSVCell(from_url)','to_url','confidence','note']];
-    (lastResults.pairs||[]).forEach(p=> rows.push([p.protectCSVCell(from),p.to,(p.confidence||0).toFixed(3),p.note||'']));
+    const rows = [['from_url','to_url','confidence','note']];
+    (lastResults.pairs||[]).forEach(p=> rows.push([
+      protectCSVCell(p.from||''),
+      protectCSVCell(p.to||''),
+      (p.confidence||0).toFixed(3),
+      protectCSVCell(p.note||'')
+    ]));
     const metaLine = '# meta: ' + JSON.stringify(lastResults.meta||{});
     const csv = rows.map(r=> r.map(v => '"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n') + '\n' + metaLine;
     downloadFile('sitemap-delta-redirects.csv', 'text/csv', csv);
@@ -359,13 +364,14 @@ function protectCSVCell(v){
     copyText(`# nginx\n${pr}\n\n# Apache\n${ex}`);
   });
   document.getElementById('dlJson').addEventListener('click', ()=>{
-    if (lastResults && lastResults.meta){ lastResults.meta.threshold = confThr; lastResults.meta.sameDomainGuard = document.getElementById('sameReg').checked; }
-
+    if (!lastResults) return;
+    if (lastResults.meta){ lastResults.meta.threshold = confThr; lastResults.meta.sameDomainGuard = document.getElementById('sameReg').checked; }
+    downloadFile('sitemap-delta-results.json', 'application/json', JSON.stringify(lastResults, null, 2));
   });
 
   document.getElementById('dl410').addEventListener('click', ()=>{
     if (!lastResults) return;
-    const rows = [['protectCSVCell(url)','action']];
+    const rows = [['url','action']];
     const filtered = computeFiltered(lastResults);
     (filtered.unmapped||[]).forEach(u=> rows.push([u,'410']));
     const csv = rows.map(r=> r.map(v => '"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
@@ -409,10 +415,6 @@ function protectCSVCell(v){
     });
     downloadFile('redirects-apache.conf', 'text/plain', lines.join('\n'));
   });
-
-    if (!lastResults) return;
-    downloadFile('sitemap-delta-results.json', 'application/json', JSON.stringify(lastResults,null,2));
-  });
   document.getElementById('share').addEventListener('click', async ()=>{
     const url = location.origin + location.pathname + paramsToHash();
     await navigator.clipboard.writeText(url);
@@ -430,7 +432,7 @@ function protectCSVCell(v){
   async function copyText(txt){ try{ await navigator.clipboard.writeText(txt); showToast('Copied'); }catch{ showToast('Copy failed'); }}
   function showToast(msg){ const t=document.createElement('div'); t.textContent=msg; t.className='toast'; document.body.appendChild(t); setTimeout(()=>t.remove(),1600); }
   function downloadFile(name, type, data){
-    const blob = new Blob([protectCSVCell(data)], { type });
+    const blob = new Blob([data], { type });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = name;

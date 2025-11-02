@@ -268,7 +268,7 @@ https://example.com/moved"></textarea>
       if (idx < 0) idx = 0;
       const urls = lines.slice(1).map(row=>{
         const cols = row.split(',').map(s=>s.replace(/^"+|"+$/g,'').trim());
-        return cols[protectCSVCell(idx)];
+        return cols[idx];
       }).filter(Boolean);
       listEl.value = Array.from(new Set(urls)).join('\n');
     }else{
@@ -278,7 +278,7 @@ https://example.com/moved"></textarea>
 
   importDlf.addEventListener('click', async ()=>{
     try{
-      const [f] = await window.showOpenFilePicker({ types:[{ protectCSVCell(description):'CSV', accept:{ 'text/csv':['.protectCSVCell(csv)'] }}] });
+      const [f] = await window.showOpenFilePicker({ types:[{ description:'CSV', accept:{ 'text/csv':['.csv'] } }] });
       const file = await f.getFile(); const txt = await file.text();
       const lines = txt.split(/\r?\n/).filter(Boolean);
       const head = (lines[0]||'').split(',').map(s=>s.replace(/^"+|"+$/g,'').trim());
@@ -287,9 +287,9 @@ https://example.com/moved"></textarea>
       const urls = [];
       for (const row of lines.slice(1)){
         const cols = row.split(',').map(s=>s.replace(/^"+|"+$/g,'').trim());
-        const u = cols[protectCSVCell(urlIdx)>=0?urlIdx:0];
-        const ok = okIdx>=0? cols[protectCSVCell(okIdx)].toLowerCase()==='true' : false;
-        const st = statusIdx>=0? Number(cols[protectCSVCell(statusIdx)]||'0') : 0;
+        const u = cols[(urlIdx>=0?urlIdx:0)];
+        const ok = okIdx>=0 ? (cols[okIdx]||'').toLowerCase()==='true' : false;
+        const st = statusIdx>=0 ? Number(cols[statusIdx]||'0') : 0;
         if (u && (!ok || st>=400)) urls.push(u);
       }
       listEl.value = Array.from(new Set(urls)).join('\n');
@@ -352,22 +352,28 @@ https://example.com/moved"></textarea>
     if ((e.metaKey||e.ctrlKey) && e.key==='Enter'){ runBtn.click(); }
     else if (!e.metaKey && !e.ctrlKey && (e.key==='e'||e.key==='E')){ document.getElementById('dlCsv').click(); }
     else if (!e.metaKey && !e.ctrlKey && (e.key==='j'||e.key==='J')){ document.getElementById('dlJson').click(); }
-    else if (!e.metaKey && !e.ctrlKey && (e.key==='f'||e.key==='F')){ chips.querySelector('[protectCSVCell(data)-f="all"]').focus?.(); }
+    else if (!e.metaKey && !e.ctrlKey && (e.key==='f'||e.key==='F')){ chips.querySelector('[data-f="all"]').focus?.(); }
   });
 
   function toCSV(rows){
-    const header = ['protectCSVCell(source_url)','replacement_url','snapshot_date_iso','verify_status','note'];
-    const lines = [protectCSVCell(header).join(',')];
+    const header = ['source_url','replacement_url','snapshot_date_iso','verify_status','note'];
+    const lines = [header.join(',')];
     rows.forEach(r=>{
-      const vals = [protectCSVCell(protectCSVCell)(r.url)||'', r.snapshotUrl||'', r.snapshotTs||'', r.verify?(r.verify.status||''):'' , r.note||''];
+      const vals = [
+        protectCSVCell(r.url||''),
+        protectCSVCell(r.snapshotUrl||''),
+        protectCSVCell(r.snapshotTs||''),
+        protectCSVCell(r.verify?(r.verify.status||''):'') ,
+        protectCSVCell(r.note||'')
+      ];
       lines.push(vals.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','));
     });
     lines.push(`# meta: ${JSON.stringify(last?.meta||{})}`);
     return lines.join('\n');
   }
   function to410(rows){
-    const header = ['protectCSVCell(url_to_remove)','reason'];
-    const lines = [protectCSVCell(header).join(',')];
+    const header = ['url_to_remove','reason'];
+    const lines = [header.join(',')];
     rows.filter(r=> (r.note||'').includes('no_snapshot')).forEach(r=>{
       lines.push(`"${String(r.url).replace(/"/g,'""')}","no_snapshot"`);
     });
@@ -375,13 +381,13 @@ https://example.com/moved"></textarea>
   }
   document.getElementById('dlCsv').addEventListener('click', ()=>{
     if (!last) return; const txt = toCSV(last.results||[]);
-    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([protectCSVCell(txt)],{type:'text/csv'})); a.download='wayback-replacements.csv'; a.click();
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt],{type:'text/csv'})); a.download='wayback-replacements.csv'; a.click();
   });
   document.getElementById('dlJson').addEventListener('click', ()=>{
-    if (!last) return; const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([protectCSVCell(JSON).stringify(last,null,2)],{type:'application/json'})); a.download='wayback-results.json'; a.click();
+    if (!last) return; const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(last,null,2)],{type:'application/json'})); a.download='wayback-results.json'; a.click();
   });
   document.getElementById('dl410').addEventListener('click', ()=>{
-    if (!last) return; const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([protectCSVCell(to410)(last.results||[])],{type:'text/csv'})); a.download='wayback-410.csv'; a.click();
+    if (!last) return; const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([to410(last.results||[])],{type:'text/csv'})); a.download='wayback-410.csv'; a.click();
   });
   document.getElementById('copyRepl').addEventListener('click', ()=>{
     if (!last) return; const txt = toCSV(last.results||[]); copyText(txt);
