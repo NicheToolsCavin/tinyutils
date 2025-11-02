@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sitemap Delta + Redirect Mapper — TinyUtils</title>
+  <meta name="description" content="Compare two sitemaps (or paste XML), see added/removed URLs, and auto-suggest 301 mappings with confidence scores. Export CSV/JSON.">
+  <link rel="canonical" href="/tools/sitemap-delta/">
+  <link rel="icon" href="/public/favicon.ico">
+  <meta property="og:title" content="Sitemap Delta + Redirect Mapper — TinyUtils">
+  <meta property="og:description" content="Compare two sitemaps, export a 301 redirect plan, and fix migrations fast.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="/public/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/public/styles.css">
+  <link rel="stylesheet" href="/styles/site.css">
+  <script defer src="/scripts/consent.js"></script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Sitemap Delta + Redirect Mapper",
+  "applicationCategory": "SEO Tool",
+  "operatingSystem": "Web",
+  "url": "https://tinyutils.net/tools/sitemap-delta/",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "publisher": { "@type": "Organization", "name": "TinyUtils" }
+}
+
+function protectCSVCell(v){
+  const s = String(v ?? "");
+  return /^[=+\-@]/.test(s) ? "'" + s : s;
+}
+</script>
+
+<style>.toast{position:fixed;right:12px;bottom:12px;background:#0b1224;color:#e6edf7;border:1px solid rgba(255,255,255,.1);padding:8px 12px;border-radius:10px;z-index:9999;box-shadow:0 6px 20px rgba(0,0,0,.25)}  .cell-url, td.url, .urlCell { word-break: break-all; }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="container row between center">
+    <a class="brand" href="/">TinyUtils</a>
+    <nav class="nav">
+      <a class="active" href="/tools/">Tools</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="container tool-hero">
+    <h1>🧭 Sitemap Delta + Redirect Mapper</h1>
+    <p class="sub">Compare two sitemaps (or paste XML), detect <b>added / removed</b> URLs, and auto-suggest <b>301</b> mappings. Export CSV/JSON.</p>
+  </section>
+
+  <section class="container card">
+  <header class="container">
+    <h1>🧭 Sitemap Delta + Redirect Mapper</h1>
+    <p class="sub">Compare two sitemaps (or paste XML), detect <b>added / removed</b> URLs, and auto-suggest <b>301</b> mappings. Export CSV/JSON.</p>
+  </header>
+
+  <main class="container card">
+    <section class="grid">
+      <div>
+        <label class="lbl">Sitemap A (before)</label>
+        <input id="smA" type="url" placeholder="https://example.com/sitemap.xml">
+        <details><summary>or paste XML</summary>
+          <div style="margin:6px 0"><input id="fileA" type="file" accept=".xml,.gz"></div>
+          <textarea id="smAText" placeholder="&lt;urlset&gt;...&lt;/urlset&gt;"></textarea>
+        </details>
+      </div>
+      <div>
+        <label class="lbl">Sitemap B (after)</label>
+        <input id="smB" type="url" placeholder="https://example.com/sitemap.xml">
+        <details><summary>or paste XML</summary>
+          <div style="margin:6px 0"><input id="fileB" type="file" accept=".xml,.gz"></div>
+          <textarea id="smBText" placeholder="&lt;urlset&gt;...&lt;/urlset&gt;"></textarea>
+        </details>
+      </div>
+    </section>
+
+    <section class="grid options">
+      <label><input id="verify" type="checkbox"> Verify target URLs (HEAD/GET, polite)</label>
+      <label>Timeout (ms) <input id="timeout" type="number" min="1000" max="30000" value="10000"></label>
+      <label>Max compare <input id="limit" type="number" min="100" max="5000" value="2000"></label>
+      <button id="runBtn" class="btn">Compare</button> <button id="demoBtn" class="btn secondary">Try a demo</button> <span title="Polite by default — sitemaps only; optional HEAD verification uses per-origin caps and timeouts." aria-label="Polite mode">❓</span>
+    </section>
+
+    
+    <section class="container" style="margin-top:8px">
+      <label><input id="sameReg" type="checkbox" checked> Limit mappings to the same registrable domain</label>
+      <div class="chips" id="confChips" style="margin-top:6px">
+        <span class="chip chip-active" data-thr="0">All</span>
+        <span class="chip" data-thr="0.85">≥85%</span>
+        <span class="chip" data-thr="0.70">≥70%</span>
+      </div>
+    </section>
+
+    <section id="status" class="status">Ready.</section>
+    <section id="summary" class="summary hidden"></section>
+
+    <section class="actions hidden" id="actions">
+      <button id="dl410" class="btn secondary">Export Unmapped as 410 CSV</button>
+      <button id="dlNginx" class="btn secondary">Export nginx rewrites</button>
+      <button id="dlApache" class="btn secondary">Export Apache redirects</button>
+      <button id="dlCsv" class="btn secondary">Export CSV</button>
+      <button id="dlJson" class="btn secondary">Export JSON</button>
+      <button id="copySummary" class="btn secondary">Copy summary</button>
+      <button id="copyRules" class="btn secondary">Copy rewrites</button>
+      <button id="share" class="btn">Share settings</button>
+    </section>
+
+    <section id="tables" class="hidden">
+      <h3>Suggested 301 mappings</h3>
+      <div class="tableWrap">
+        <table id="mapTable">
+          <thead><tr><th>From (removed)</th><th>To (best match)</th><th>Confidence</th><th>Note</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <h3>Unmapped (consider 410)</h3>
+      <div class="tableWrap">
+        <table id="unmappedTable"><thead><tr><th>URL</th></tr></thead><tbody></tbody></table>
+      </div>
+
+      <h3>Added URLs</h3>
+      <div class="tableWrap">
+        <table id="addedTable"><thead><tr><th>URL</th></tr></thead><tbody></tbody></table>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:14px">
+      <details>
+        <summary>🔧 Suggested rewrite rules (nginx & Apache)</summary>
+        <h4>Prefix rules</h4>
+        <pre id="prefixRules" style="white-space:pre-wrap;background:#0b1224;border:1px solid rgba(255,255,255,.08);padding:10px;border-radius:8px"></pre>
+        <h4>Exact mappings</h4>
+        <pre id="exactRules" style="white-space:pre-wrap;background:#0b1224;border:1px solid rgba(255,255,255,.08);padding:10px;border-radius:8px"></pre>
+      </details>
+    </section>
+
+    <section class="card" style="margin-top:14px">
+      <details>
+        <summary>📋 Migration checklist</summary>
+        <ol>
+          <li>Upload 301 redirects (prefix + exact) to your web server.</li>
+          <li>Re-crawl key templates & high-traffic pages; confirm 2xx.</li>
+          <li>Fix remaining 4xx/5xx; re-run Dead Link Finder on top nav/footer.</li>
+          <li>Regenerate & submit sitemap; remove legacy sitemaps.</li>
+          <li>Monitor 404/5xx and redirect chains (&lt;= 1 hop) for 48 hours.</li>
+          <li>Update canonical/hreflang if structure changed.</li>
+        </ol>
+      </details>
+    </section>
+
+    <footer class="foot">
+      <small>We fetch sitemaps and (optionally) verify target URLs. No aggressive crawling; per-origin throttling applies in verification.</small>
+    </footer>
+  </section>
+
+</main>
+  </main>
+
+  <script>
+  const statusEl = document.getElementById('status');
+  const runBtn = document.getElementById('runBtn');
+  const verifyEl = document.getElementById('verify');
+  const timeoutEl = document.getElementById('timeout');
+  const limitEl = document.getElementById('limit');
+  const smA = document.getElementById('smA');
+  const smB = document.getElementById('smB');
+  const smAText = document.getElementById('smAText');
+  const smBText = document.getElementById('smBText');
+
+  const summaryEl = document.getElementById('summary');
+  const actionsEl = document.getElementById('actions');
+  const tablesEl = document.getElementById('tables');
+
+  let lastResults = null;
+
+  async function fileToText(file){
+    if (!file) return '';
+    const buf = await file.arrayBuffer();
+    if (file.name.endsWith('.gz') && typeof DecompressionStream !== 'undefined'){
+      const ds = new DecompressionStream('gzip');
+      const txt = await new Response((new Response(buf)).body.pipeThrough(ds)).text();
+      return txt;
+    }
+    return new TextDecoder('utf-8').decode(new Uint8Array(buf));
+  }
+  const fileA = document.getElementById('fileA'); const fileB = document.getElementById('fileB');
+  if (fileA) fileA.addEventListener('change', async ()=>{ smAText.value = await fileToText(fileA.files[0]); });
+  if (fileB) fileB.addEventListener('change', async ()=>{ smBText.value = await fileToText(fileB.files[0]); });
+
+
+  const sameRegEl = document.getElementById('sameReg');
+  const confChips = document.getElementById('confChips');
+  let confThr = 0;
+
+  function registrable(host){
+    const parts = (host||'').toLowerCase().split('.');
+    return parts.slice(-2).join('.');
+  }
+  function sameRegDomain(a,b){
+    try{
+      const A = new URL(a).hostname, B = new URL(b).hostname;
+      return registrable(A) === registrable(B);
+    }catch{return false}
+  }
+  confChips.addEventListener('click', (e)=>{
+    const chip = e.target.closest('.chip'); if (!chip) return;
+    confThr = Number(chip.dataset.thr||'0');
+    confChips.querySelectorAll('.chip').forEach(c=>c.classList.remove('chip-active'));
+    chip.classList.add('chip-active');
+    if (lastResults) render(lastResults); // re-render with threshold
+  });
+  document.addEventListener('keydown', (e)=>{
+    if ((e.metaKey||e.ctrlKey) && e.key === 'Enter'){ runBtn.click(); }
+    else if (!e.metaKey && !e.ctrlKey && (e.key==='e'||e.key==='E')){ document.getElementById('dlCsv').click(); }
+    else if (!e.metaKey && !e.ctrlKey && (e.key==='j'||e.key==='J')){ document.getElementById('dlJson').click(); }
+  });
+
+
+  function parseHash(){ try{ return JSON.parse(decodeURIComponent(location.hash.slice(1)||'{}')); }catch{ return {}; } }
+  function paramsToHash(){
+    const obj = { a: smA.value||undefined, b: smB.value||undefined, v: verifyEl.checked||undefined, t: Number(timeoutEl.value)||10000, l: Number(limitEl.value)||2000 };
+    return '#' + encodeURIComponent(JSON.stringify(obj));
+  }
+  function hashToParams(){
+    if (!location.hash || location.hash.length < 2) return;
+    try {
+      const obj = JSON.parse(decodeURIComponent(location.hash.slice(1)));
+      if (obj.a) smA.value = obj.a;
+      if (obj.b) smB.value = obj.b;
+      if (obj.v!=null) verifyEl.checked = !!obj.v;
+      if (obj.t) timeoutEl.value = obj.t;
+      if (obj.l) limitEl.value = obj.l;
+    } catch {}
+  }
+  const raw = parseHash(); if (raw && typeof raw==='object'){ try{ if (raw.a) smA.value=raw.a; if (raw.b) smB.value=raw.b; if (raw.v!=null) verifyEl.checked=!!raw.v; if (raw.t) timeoutEl.value=raw.t; if (raw.l) limitEl.value=raw.l; }catch{} } else { showToast('Restored defaults'); }
+
+  runBtn.addEventListener('click', async ()=>{
+    statusEl.textContent = 'Working…';
+    summaryEl.classList.add('hidden'); actionsEl.classList.add('hidden'); tablesEl.classList.add('hidden');
+    const body = {
+      sitemapAUrl: smA.value.trim()||null,
+      sitemapBUrl: smB.value.trim()||null,
+      sitemapAText: smAText.value.trim()||null,
+      sitemapBText: smBText.value.trim()||null,
+      verifyTargets: verifyEl.checked,
+      timeout: Math.min(30000, Math.max(1000, Number(timeoutEl.value)||10000)),
+      maxCompare: Math.min(5000, Math.max(100, Number(limitEl.value)||2000)),
+      sameRegDomainOnly: document.getElementById('sameReg').checked
+    };
+    try {
+      const res = await fetch('/api/sitemap-delta', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify(body) });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error||('HTTP '+res.status));
+      lastResults = data;
+      render(data);
+      statusEl.textContent = 'Done.';
+      history.replaceState(null,'', paramsToHash());
+    } catch(e){
+      console.error(e);
+      statusEl.textContent = 'Error: ' + (e.message||String(e));
+    }
+  });
+
+  function noteLabel(n){
+    const map={hsts:'HSTS (no HTTP fallback)',robots_blocked:'Robots-blocked',robots_unknown:'Robots unknown (proceeded)',unsupported_scheme:'Unsupported scheme',blocked_private_host:'Private host blocked',gzip_unsupported:'.gz not supported here',timeout:'Timed out',bad_redirect:'Bad redirect',gone:'410 Gone',invalid_url:'Invalid URL'}; return map[n]||n||'';}
+  function render(data){
+
+  function computeFiltered(data){
+    const guard = document.getElementById('sameReg').checked;
+    const thr = confThr;
+    const pairs = (data.pairs||[]).filter(p => (p.confidence||0) >= thr && (!guard || sameRegDomain(p.from,p.to)));
+    const mapped = new Set(pairs.map(p=>p.from));
+    const unmapped = (data.removed||[]).filter(u => !mapped.has(u));
+    // Prefix rules: only keep rules whose prefixes live within guard if enabled
+    const rules = (data.rules||[]).filter(r => {
+      if (!guard) return true;
+      try{
+        const f = new URL('http://x'+r.fromPrefix.replace(/^\//,'')); // dummy host to parse path fallback
+        return true; // keep all; domain neutrality for prefix
+      }catch{return true}
+    });
+    return { pairs, unmapped, rules };
+  }
+    const filtered = computeFiltered(data);
+    const meta = data.meta || {};
+    summaryEl.innerHTML = \`
+      <div class="chips">
+        <span class="chip">Removed: <b>\${meta.removedCount||0}</b></span>
+        <span class="chip">Added: <b>\${meta.addedCount||0}</b></span>
+        <span class="chip">Suggested 301s: <b>\${data.pairs?.length||0}</b></span>
+        <span class="chip">Unmapped: <b>\${data.unmapped?.length||0}</b></span>
+        <span class="chip">\${meta.truncated?'Truncated: YES':'Truncated: NO'}</span>
+      </div>\`;
+    summaryEl.classList.remove('hidden');
+    actionsEl.classList.remove('hidden');
+    tablesEl.classList.remove('hidden');
+
+    const mapBody = document.querySelector('#mapTable tbody'); mapBody.innerHTML = '';
+    (data.pairs||[]).forEach(p=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = \`<td><a href="\${p.from}" target="_blank" rel="noopener">\${p.from}</a></td>
+        <td><a href="\${p.to}" target="_blank" rel="noopener">\${p.to}</a></td>
+        <td>\${Math.round((p.confidence||0)*100)}%</td>
+        <td>\${p.note||''}\${p.verifyStatus?(' · head '+p.verifyStatus):''}</td>\`;
+      mapBody.appendChild(tr);
+    });
+
+    const unmBody = document.querySelector('#unmappedTable tbody'); unmBody.innerHTML = '';
+    (filtered.unmapped||[]).forEach(u=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = \`<td><a href="\${u}" target="_blank" rel="noopener">\${u}</a></td>\`;
+      unmBody.appendChild(tr);
+    });
+
+    const addBody = document.querySelector('#addedTable tbody'); addBody.innerHTML = '';
+    (data.added||[]).slice(0,500).forEach(u=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = \`<td><a href="\${u}" target="_blank" rel="noopener">\${u}</a></td>\`;
+      addBody.appendChild(tr);
+    });
+
+    // Render rule snippets
+    const pref = (filtered.rules||[]).map(r => `# support ${r.support||''}\nrewrite ^${r.fromPrefix}(.*)$ ${r.toPrefix}$1 permanent;`).join('\n');
+    const exact = (filtered.pairs||[]).map(p => {
+      try{ const f = new URL(p.from), t = new URL(p.to);
+        return (f.host===t.host) ? `Redirect 301 ${f.pathname} ${t.pathname}` : `Redirect 301 ${f.pathname} ${t.href}`;
+      }catch{return `# ${p.from} -> ${p.to}`}
+    }).join('\n');
+    const pre1 = document.getElementById('prefixRules'); if (pre1) pre1.textContent = pref || '# (no strong prefix patterns inferred yet)';
+    const pre2 = document.getElementById('exactRules'); if (pre2) pre2.textContent = exact || '# (no exact mappings yet)';
+
+  }
+
+  document.getElementById('dlCsv').addEventListener('click', ()=>{
+    if (lastResults && lastResults.meta){ lastResults.meta.threshold = confThr; lastResults.meta.sameDomainGuard = document.getElementById('sameReg').checked; }
+
+    if (!lastResults) return;
+    const rows = [['from_url','to_url','confidence','note']];
+    (lastResults.pairs||[]).forEach(p=> rows.push([
+      protectCSVCell(p.from||''),
+      protectCSVCell(p.to||''),
+      (p.confidence||0).toFixed(3),
+      protectCSVCell(p.note||'')
+    ]));
+    const metaLine = '# meta: ' + JSON.stringify(lastResults.meta||{});
+    const csv = rows.map(r=> r.map(v => '"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n') + '\n' + metaLine;
+    downloadFile('sitemap-delta-redirects.csv', 'text/csv', csv);
+  });
+  document.getElementById('copySummary').addEventListener('click', ()=>{
+    if (!lastResults) return; const m=lastResults.meta||{};
+    const txt=`Removed: ${m.removedCount||0}\nAdded: ${m.addedCount||0}\nSuggested 301s: ${lastResults.pairs?.length||0}\nUnmapped: ${lastResults.unmapped?.length||0}`;
+    copyText(txt);
+  });
+  document.getElementById('copyRules').addEventListener('click', ()=>{
+    const pr=(document.getElementById('prefixRules')||{}).textContent||''; const ex=(document.getElementById('exactRules')||{}).textContent||'';
+    copyText(`# nginx\n${pr}\n\n# Apache\n${ex}`);
+  });
+  document.getElementById('dlJson').addEventListener('click', ()=>{
+    if (!lastResults) return;
+    if (lastResults.meta){ lastResults.meta.threshold = confThr; lastResults.meta.sameDomainGuard = document.getElementById('sameReg').checked; }
+    downloadFile('sitemap-delta-results.json', 'application/json', JSON.stringify(lastResults, null, 2));
+  });
+
+  document.getElementById('dl410').addEventListener('click', ()=>{
+    if (!lastResults) return;
+    const rows = [['url','action']];
+    const filtered = computeFiltered(lastResults);
+    (filtered.unmapped||[]).forEach(u=> rows.push([u,'410']));
+    const csv = rows.map(r=> r.map(v => '"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+    downloadFile('unmapped-410.csv', 'text/csv', csv);
+  });
+  document.getElementById('dlNginx').addEventListener('click', ()=>{
+    if (!lastResults) return;
+    const { pairs, rules } = computeFiltered(lastResults);
+    const lines = [];
+    (rules||[]).forEach(r=> lines.push(`rewrite ^${r.fromPrefix}(.*)$ ${r.toPrefix}$1 permanent;`));
+    (pairs||[]).forEach(p=>{
+      try{
+        const from = new URL(p.from); const to = new URL(p.to);
+        if (from.host === to.host){
+          lines.push(`rewrite ^${from.pathname}$ ${to.pathname} permanent;`);
+        } else {
+          lines.push(`rewrite ^${from.pathname}$ ${to.href} permanent;`);
+        }
+      }catch{
+        lines.push(`# ${p.from} -> ${p.to}`);
+      }
+    });
+    downloadFile('redirects-nginx.conf', 'text/plain', lines.join('\n'));
+  });
+  document.getElementById('dlApache').addEventListener('click', ()=>{
+    if (!lastResults) return;
+    const { pairs, rules } = computeFiltered(lastResults);
+    const lines = [];
+    (rules||[]).forEach(r=> lines.push(`# Prefix: ${r.fromPrefix} -> ${r.toPrefix}`));
+    (pairs||[]).forEach(p=>{
+      try{
+        const from = new URL(p.from); const to = new URL(p.to);
+        if (from.host === to.host){
+          lines.push(`Redirect 301 ${from.pathname} ${to.pathname}`);
+        } else {
+          lines.push(`Redirect 301 ${from.pathname} ${to.href}`);
+        }
+      }catch{
+        lines.push(`# ${p.from} -> ${p.to}`);
+      }
+    });
+    downloadFile('redirects-apache.conf', 'text/plain', lines.join('\n'));
+  });
+  document.getElementById('share').addEventListener('click', async ()=>{
+    const url = location.origin + location.pathname + paramsToHash();
+    await navigator.clipboard.writeText(url);
+    alert('Share link copied');
+  });
+
+
+  document.getElementById('demoBtn').addEventListener('click', ()=>{
+    smAText.value = '<urlset><url><loc>https://example.com/blog/how-to-bake</loc></url><url><loc>https://example.com/blog/old-post</loc></url></urlset>';
+    smBText.value = '<urlset><url><loc>https://example.com/articles/how-to-bake</loc></url><url><loc>https://example.com/blog/new</loc></url></urlset>';
+    smA.value = ''; smB.value = '';
+    statusEl.textContent = 'Demo loaded — press Compare';
+  });
+
+  async function copyText(txt){ try{ await navigator.clipboard.writeText(txt); showToast('Copied'); }catch{ showToast('Copy failed'); }}
+  function showToast(msg){ const t=document.createElement('div'); t.textContent=msg; t.className='toast'; document.body.appendChild(t); setTimeout(()=>t.remove(),1600); }
+  function downloadFile(name, type, data){
+    const blob = new Blob([data], { type });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+  
+function protectCSVCell(v){
+  const s = String(v ?? "");
+  return /^[=+\-@]/.test(s) ? "'" + s : s;
+}
+</script>
+
+<script>
+(function(){
+  const PROD = /tinyutils\.net$/.test(location.hostname);
+  // minimal consent bar (bottom-right)
+  const needsConsent = PROD && !localStorage.getItem('consent');
+  if (needsConsent){
+    const bar = document.createElement('div');
+    bar.style.cssText='position:fixed;right:12px;bottom:12px;background:#0b1224;color:#e6edf7;border:1px solid rgba(255,255,255,.1);padding:10px 12px;border-radius:10px;z-index:9999;font:14px system-ui';
+    bar.innerHTML = 'Analytics & ads help keep this free. <button id="c-yes" style="margin-left:8px">OK</button> <button id="c-no" style="margin-left:4px">No</button>';
+    document.body.appendChild(bar);
+    bar.querySelector('#c-yes').onclick=function(){ localStorage.setItem('consent','yes'); bar.remove(); loadProd(); };
+    bar.querySelector('#c-no').onclick=function(){ localStorage.setItem('consent','no'); bar.remove(); };
+  } else if (PROD && localStorage.getItem('consent')==='yes'){ loadProd(); }
+
+  function loadProd(){
+    // Plausible (privacy-first)
+    var s=document.createElement('script'); s.defer=true; s.setAttribute('data-domain','tinyutils.net');
+    s.src='https://plausible.io/js/script.js'; document.head.appendChild(s);
+    // AdSense (auto ads) — only if explicitly allowed and non-EU in your prod config.
+    if (localStorage.getItem('ads')==='on'){
+      var ads=document.createElement('script');
+      ads.async=true; ads.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX';
+      ads.crossOrigin='anonymous'; document.head.appendChild(ads);
+    }
+  }
+})();
+
+function protectCSVCell(v){
+  const s = String(v ?? "");
+  return /^[=+\-@]/.test(s) ? "'" + s : s;
+}
+</script>
+
+<footer class="site-footer">
+  <div class="container row between wrap">
+    <span>© <span id="y"></span> TinyUtils</span>
+    <span><a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a></span>
+  </div>
+</footer>
+<script>document.getElementById('y').textContent = new Date().getFullYear();</script>
+
+</body>
+</html>

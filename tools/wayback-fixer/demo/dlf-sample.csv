@@ -1,0 +1,6 @@
+url,status,ok,finalUrl,archiveUrl,note,chain
+https://example.com/this-should-404-xyz,404,false,,,
+https://www.iana.org/not-a-real-path-xyz,404,false,,,
+https://httpstat.us/410,410,false,,,
+https://httpstat.us/404,404,false,,,
+https://www.wikipedia.org/this-page-should-not-exist-xyz,404,false,,,
