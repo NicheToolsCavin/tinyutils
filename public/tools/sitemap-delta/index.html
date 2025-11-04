@@ -27,11 +27,6 @@
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
   "publisher": { "@type": "Organization", "name": "TinyUtils" }
 }
-
-function protectCSVCell(v){
-  const s = String(v ?? "");
-  return /^[=+\-@]/.test(s) ? "'" + s : s;
-}
 </script>
 
 <style>.toast{position:fixed;right:12px;bottom:12px;background:#0b1224;color:#e6edf7;border:1px solid rgba(255,255,255,.1);padding:8px 12px;border-radius:10px;z-index:9999;box-shadow:0 6px 20px rgba(0,0,0,.25)}  .cell-url, td.url, .urlCell { word-break: break-all; }
@@ -56,12 +51,6 @@ function protectCSVCell(v){
   </section>
 
   <section class="container card">
-  <header class="container">
-    <h1>🧭 Sitemap Delta + Redirect Mapper</h1>
-    <p class="sub">Compare two sitemaps (or paste XML), detect <b>added / removed</b> URLs, and auto-suggest <b>301</b> mappings. Export CSV/JSON.</p>
-  </header>
-
-  <main class="container card">
     <section class="grid">
       <div>
         <label class="lbl">Sitemap A (before)</label>
@@ -162,7 +151,6 @@ function protectCSVCell(v){
   </section>
 
 </main>
-  </main>
 
   <script>
   const statusEl = document.getElementById('status');
@@ -174,255 +162,19 @@ function protectCSVCell(v){
   const smB = document.getElementById('smB');
   const smAText = document.getElementById('smAText');
   const smBText = document.getElementById('smBText');
-  const demoBtn = document.getElementById('demoBtn');
-
+  const sameRegEl = document.getElementById('sameReg');
+  const confChips = document.getElementById('confChips');
   const summaryEl = document.getElementById('summary');
   const actionsEl = document.getElementById('actions');
   const tablesEl = document.getElementById('tables');
-
-  let lastResults = null;
-
-  async function fileToText(file){
-    if (!file) return '';
-    const buf = await file.arrayBuffer();
-    if (file.name.endsWith('.gz') && typeof DecompressionStream !== 'undefined'){
-      const ds = new DecompressionStream('gzip');
-      const txt = await new Response((new Response(buf)).body.pipeThrough(ds)).text();
-      return txt;
-    }
-    return new TextDecoder('utf-8').decode(new Uint8Array(buf));
-  }
-  const fileA = document.getElementById('fileA'); const fileB = document.getElementById('fileB');
-  if (fileA) fileA.addEventListener('change', async ()=>{ smAText.value = await fileToText(fileA.files[0]); });
-  if (fileB) fileB.addEventListener('change', async ()=>{ smBText.value = await fileToText(fileB.files[0]); });
-
-
-  const sameRegEl = document.getElementById('sameReg');
-  const confChips = document.getElementById('confChips');
-  let confThr = 0;
-
-  function registrable(host){
-    const parts = (host||'').toLowerCase().split('.');
-    return parts.slice(-2).join('.');
-  }
-  function sameRegDomain(a,b){
-    try{
-      const A = new URL(a).hostname, B = new URL(b).hostname;
-      return registrable(A) === registrable(B);
-    }catch{return false}
-  }
-  confChips.addEventListener('click', (e)=>{
-    const chip = e.target.closest('.chip'); if (!chip) return;
-    confThr = Number(chip.dataset.thr||'0');
-    confChips.querySelectorAll('.chip').forEach(c=>c.classList.remove('chip-active'));
-    chip.classList.add('chip-active');
-    if (lastResults) render(lastResults); // re-render with threshold
-  });
-  document.addEventListener('keydown', (e)=>{
-    if ((e.metaKey||e.ctrlKey) && e.key === 'Enter'){ runBtn.click(); }
-    else if (!e.metaKey && !e.ctrlKey && (e.key==='e'||e.key==='E')){ document.getElementById('dlCsv').click(); }
-    else if (!e.metaKey && !e.ctrlKey && (e.key==='j'||e.key==='J')){ document.getElementById('dlJson').click(); }
-  });
-
-
-  function parseHash(){ try{ return JSON.parse(decodeURIComponent(location.hash.slice(1)||'{}')); }catch{ return {}; } }
-  function paramsToHash(){
-    const obj = { a: smA.value||undefined, b: smB.value||undefined, v: verifyEl.checked||undefined, t: Number(timeoutEl.value)||10000, l: Number(limitEl.value)||2000 };
-    return '#' + encodeURIComponent(JSON.stringify(obj));
-  }
-  function hashToParams(){
-    if (!location.hash || location.hash.length < 2) return;
-    try {
-      const obj = JSON.parse(decodeURIComponent(location.hash.slice(1)));
-      if (obj.a) smA.value = obj.a;
-      if (obj.b) smB.value = obj.b;
-      if (obj.v!=null) verifyEl.checked = !!obj.v;
-      if (obj.t) timeoutEl.value = obj.t;
-      if (obj.l) limitEl.value = obj.l;
-    } catch {}
-  }
-  const raw = parseHash(); if (raw && typeof raw==='object'){ try{ if (raw.a) smA.value=raw.a; if (raw.b) smB.value=raw.b; if (raw.v!=null) verifyEl.checked=!!raw.v; if (raw.t) timeoutEl.value=raw.t; if (raw.l) limitEl.value=raw.l; }catch{} } else { showToast('Restored defaults'); }
-
-  runBtn.addEventListener('click', async ()=>{
-    statusEl.textContent = 'Working…';
-    summaryEl.classList.add('hidden'); actionsEl.classList.add('hidden'); tablesEl.classList.add('hidden');
-    const body = {
-      sitemapAUrl: smA.value.trim()||null,
-      sitemapBUrl: smB.value.trim()||null,
-      sitemapAText: smAText.value.trim()||null,
-      sitemapBText: smBText.value.trim()||null,
-      verifyTargets: verifyEl.checked,
-      timeout: Math.min(30000, Math.max(1000, Number(timeoutEl.value)||10000)),
-      maxCompare: Math.min(5000, Math.max(100, Number(limitEl.value)||2000)),
-      sameRegDomainOnly: document.getElementById('sameReg').checked
-    };
-    try {
-      const res = await fetch('/api/sitemap-delta', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify(body) });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error||('HTTP '+res.status));
-      lastResults = data;
-      render(data);
-      statusEl.textContent = 'Done.';
-      history.replaceState(null,'', paramsToHash());
-    } catch(e){
-      console.error(e);
-      statusEl.textContent = 'Error: ' + (e.message||String(e));
-    }
-  });
-
-  function noteLabel(n){
-    const map={hsts:'HSTS (no HTTP fallback)',robots_blocked:'Robots-blocked',robots_unknown:'Robots unknown (proceeded)',unsupported_scheme:'Unsupported scheme',blocked_private_host:'Private host blocked',gzip_unsupported:'.gz not supported here',timeout:'Timed out',bad_redirect:'Bad redirect',gone:'410 Gone',invalid_url:'Invalid URL'}; return map[n]||n||'';}
-  function render(data){
-
-  function computeFiltered(data){
-    const guard = document.getElementById('sameReg').checked;
-    const thr = confThr;
-    const pairs = (data.pairs||[]).filter(p => (p.confidence||0) >= thr && (!guard || sameRegDomain(p.from,p.to)));
-    const mapped = new Set(pairs.map(p=>p.from));
-    const unmapped = (data.removed||[]).filter(u => !mapped.has(u));
-    // Prefix rules: only keep rules whose prefixes live within guard if enabled
-    const rules = (data.rules||[]).filter(r => {
-      if (!guard) return true;
-      try{
-        const f = new URL('http://x'+r.fromPrefix.replace(/^\//,'')); // dummy host to parse path fallback
-        return true; // keep all; domain neutrality for prefix
-      }catch{return true}
-    });
-    return { pairs, unmapped, rules };
-  }
-    const filtered = computeFiltered(data);
-    const meta = data.meta || {};
-    summaryEl.innerHTML = \`
-      <div class="chips">
-        <span class="chip">Removed: <b>\${meta.removedCount||0}</b></span>
-        <span class="chip">Added: <b>\${meta.addedCount||0}</b></span>
-        <span class="chip">Suggested 301s: <b>\${data.pairs?.length||0}</b></span>
-        <span class="chip">Unmapped: <b>\${data.unmapped?.length||0}</b></span>
-        <span class="chip">\${meta.truncated?'Truncated: YES':'Truncated: NO'}</span>
-      </div>\`;
-    summaryEl.classList.remove('hidden');
-    actionsEl.classList.remove('hidden');
-    tablesEl.classList.remove('hidden');
-
-    const mapBody = document.querySelector('#mapTable tbody'); mapBody.innerHTML = '';
-    (data.pairs||[]).forEach(p=>{
-      const tr = document.createElement('tr');
-      tr.innerHTML = \`<td><a href="\${p.from}" target="_blank" rel="noopener">\${p.from}</a></td>
-        <td><a href="\${p.to}" target="_blank" rel="noopener">\${p.to}</a></td>
-        <td>\${Math.round((p.confidence||0)*100)}%</td>
-        <td>\${p.note||''}\${p.verifyStatus?(' · head '+p.verifyStatus):''}</td>\`;
-      mapBody.appendChild(tr);
-    });
-
-    const unmBody = document.querySelector('#unmappedTable tbody'); unmBody.innerHTML = '';
-    (filtered.unmapped||[]).forEach(u=>{
-      const tr = document.createElement('tr');
-      tr.innerHTML = \`<td><a href="\${u}" target="_blank" rel="noopener">\${u}</a></td>\`;
-      unmBody.appendChild(tr);
-    });
-
-    const addBody = document.querySelector('#addedTable tbody'); addBody.innerHTML = '';
-    (data.added||[]).slice(0,500).forEach(u=>{
-      const tr = document.createElement('tr');
-      tr.innerHTML = \`<td><a href="\${u}" target="_blank" rel="noopener">\${u}</a></td>\`;
-      addBody.appendChild(tr);
-    });
-
-    // Render rule snippets
-    const pref = (filtered.rules||[]).map(r => `# support ${r.support||''}\nrewrite ^${r.fromPrefix}(.*)$ ${r.toPrefix}$1 permanent;`).join('\n');
-    const exact = (filtered.pairs||[]).map(p => {
-      try{ const f = new URL(p.from), t = new URL(p.to);
-        return (f.host===t.host) ? `Redirect 301 ${f.pathname} ${t.pathname}` : `Redirect 301 ${f.pathname} ${t.href}`;
-      }catch{return `# ${p.from} -> ${p.to}`}
-    }).join('\n');
-    const pre1 = document.getElementById('prefixRules'); if (pre1) pre1.textContent = pref || '# (no strong prefix patterns inferred yet)';
-    const pre2 = document.getElementById('exactRules'); if (pre2) pre2.textContent = exact || '# (no exact mappings yet)';
-
-  }
-
-  document.getElementById('dlCsv').addEventListener('click', ()=>{
-    if (lastResults && lastResults.meta){ lastResults.meta.threshold = confThr; lastResults.meta.sameDomainGuard = document.getElementById('sameReg').checked; }
-
-    if (!lastResults) return;
-    const rows = [['from_url','to_url','confidence','note']];
-    (lastResults.pairs||[]).forEach(p=> rows.push([
-      protectCSVCell(p.from||''),
-      protectCSVCell(p.to||''),
-      (p.confidence||0).toFixed(3),
-      protectCSVCell(p.note||'')
-    ]));
-    const metaLine = '# meta: ' + JSON.stringify(lastResults.meta||{});
-    const csv = rows.map(r=> r.map(v => '"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n') + '\n' + metaLine;
-    downloadFile('sitemap-delta-redirects.csv', 'text/csv', csv);
-  });
-  document.getElementById('copySummary').addEventListener('click', ()=>{
-    if (!lastResults) return; const m=lastResults.meta||{};
-    const txt=`Removed: ${m.removedCount||0}\nAdded: ${m.addedCount||0}\nSuggested 301s: ${lastResults.pairs?.length||0}\nUnmapped: ${lastResults.unmapped?.length||0}`;
-    copyText(txt);
-  });
-  document.getElementById('copyRules').addEventListener('click', ()=>{
-    const pr=(document.getElementById('prefixRules')||{}).textContent||''; const ex=(document.getElementById('exactRules')||{}).textContent||'';
-    copyText(`# nginx\n${pr}\n\n# Apache\n${ex}`);
-  });
-  document.getElementById('dlJson').addEventListener('click', ()=>{
-    if (!lastResults) return;
-    if (lastResults.meta){ lastResults.meta.threshold = confThr; lastResults.meta.sameDomainGuard = document.getElementById('sameReg').checked; }
-    downloadFile('sitemap-delta-results.json', 'application/json', JSON.stringify(lastResults, null, 2));
-  });
-
-  document.getElementById('dl410').addEventListener('click', ()=>{
-    if (!lastResults) return;
-    const rows = [['url','action']];
-    const filtered = computeFiltered(lastResults);
-    (filtered.unmapped||[]).forEach(u=> rows.push([u,'410']));
-    const csv = rows.map(r=> r.map(v => '"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
-    downloadFile('unmapped-410.csv', 'text/csv', csv);
-  });
-  document.getElementById('dlNginx').addEventListener('click', ()=>{
-    if (!lastResults) return;
-    const { pairs, rules } = computeFiltered(lastResults);
-    const lines = [];
-    (rules||[]).forEach(r=> lines.push(`rewrite ^${r.fromPrefix}(.*)$ ${r.toPrefix}$1 permanent;`));
-    (pairs||[]).forEach(p=>{
-      try{
-        const from = new URL(p.from); const to = new URL(p.to);
-        if (from.host === to.host){
-          lines.push(`rewrite ^${from.pathname}$ ${to.pathname} permanent;`);
-        } else {
-          lines.push(`rewrite ^${from.pathname}$ ${to.href} permanent;`);
-        }
-      }catch{
-        lines.push(`# ${p.from} -> ${p.to}`);
-      }
-    });
-    downloadFile('redirects-nginx.conf', 'text/plain', lines.join('\n'));
-  });
-  document.getElementById('dlApache').addEventListener('click', ()=>{
-    if (!lastResults) return;
-    const { pairs, rules } = computeFiltered(lastResults);
-    const lines = [];
-    (rules||[]).forEach(r=> lines.push(`# Prefix: ${r.fromPrefix} -> ${r.toPrefix}`));
-    (pairs||[]).forEach(p=>{
-      try{
-        const from = new URL(p.from); const to = new URL(p.to);
-        if (from.host === to.host){
-          lines.push(`Redirect 301 ${from.pathname} ${to.pathname}`);
-        } else {
-          lines.push(`Redirect 301 ${from.pathname} ${to.href}`);
-        }
-      }catch{
-        lines.push(`# ${p.from} -> ${p.to}`);
-      }
-    });
-    downloadFile('redirects-apache.conf', 'text/plain', lines.join('\n'));
-  });
-  document.getElementById('share').addEventListener('click', async ()=>{
-    const url = location.origin + location.pathname + paramsToHash();
-    await navigator.clipboard.writeText(url);
-    alert('Share link copied');
-  });
-
-
+  const shareBtn = document.getElementById('share');
+  const mapBody = document.querySelector('#mapTable tbody');
+  const unmappedBody = document.querySelector('#unmappedTable tbody');
+  const addedBody = document.querySelector('#addedTable tbody');
+  const exportBtnIds = ['dl410','dlNginx','dlApache','dlCsv','dlJson'];
+  const exportButtons = exportBtnIds.map(id => document.getElementById(id)).filter(Boolean);
+  const demoBtn = document.getElementById('demoBtn');
+  const LINE_BREAK = '\\r\\n';
   const DEMO_SITEMAPS = {
     before: '/tools/sitemap-delta/demo/before.xml',
     after: '/tools/sitemap-delta/demo/after.xml'
@@ -432,40 +184,85 @@ function protectCSVCell(v){
     after: '<urlset><url><loc>https://example.com/articles/how-to-bake</loc></url><url><loc>https://example.com/blog/new</loc></url></urlset>'
   };
 
-  if (demoBtn) {
-    demoBtn.addEventListener('click', async ()=>{
-      statusEl.textContent = 'Loading demo…';
-      try{
-        const [beforeXml, afterXml] = await Promise.all([
-          fetchDemoAsset(DEMO_SITEMAPS.before),
-          fetchDemoAsset(DEMO_SITEMAPS.after)
-        ]);
-        applyDemoXml(beforeXml, afterXml);
-        statusEl.textContent = 'Demo loaded — press Compare';
-      }catch(err){
-        console.warn('Demo fetch failed; using fallback sample', err);
-        applyDemoXml(DEMO_FALLBACK.before, DEMO_FALLBACK.after);
-        statusEl.textContent = 'Demo fallback loaded — press Compare';
-      }
+  const protectCSVCell = (value) => {
+    const str = String(value ?? '');
+    return /^[=+\-@]/.test(str.trimStart()) ? "'" + str : str;
+  };
+
+  const computeFiltered = (data) => {
+    if (!data) return { pairs: [], unmapped: [], added: [], rules: [], meta: {} };
+    const guard = sameRegEl.checked;
+    const thr = confThreshold;
+    const pairs = (data.pairs || []).filter(p => (p.confidence || 0) >= thr && (!guard || sameRegDomain(p.from, p.to)));
+    const mapped = new Set(pairs.map(p => p.from));
+    const unmapped = (data.removed || []).filter(u => !mapped.has(u));
+    return {
+      pairs,
+      unmapped,
+      added: data.added || [],
+      rules: data.rules || [],
+      meta: data.meta || {}
+    };
+  };
+
+  let lastResults = null;
+  let confThreshold = 0;
+
+  function setExportsEnabled(enabled) {
+    exportButtons.forEach(btn => {
+      if (!btn) return;
+      btn.disabled = !enabled;
+      btn.setAttribute('aria-disabled', String(!enabled));
     });
   }
+  setExportsEnabled(false);
 
-  async function fetchDemoAsset(path){
-    const res = await fetch(path, { cache: 'no-store' });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.text();
+  async function withRequestIdEcho(res) {
+    try {
+      const id = res.headers.get('x-request-id');
+      if (!id) return;
+      const host = statusEl || document.querySelector('.status');
+      if (!host) return;
+      const prev = host.querySelector('.requestIdEcho');
+      if (prev) prev.remove();
+      const small = document.createElement('span');
+      small.className = 'requestIdEcho';
+      small.style.marginLeft = '8px';
+      small.style.opacity = '.7';
+      small.style.fontSize = '12px';
+      small.textContent = `(request ${id})`;
+      host.appendChild(small);
+    } catch {}
   }
 
-  function applyDemoXml(before, after){
-    smAText.value = (before || '').trim();
-    smBText.value = (after || '').trim();
-    smA.value = '';
-    smB.value = '';
+  async function fileToText(file) {
+    if (!file) return '';
+    const buf = await file.arrayBuffer();
+    if (file.name.endsWith('.gz') && typeof DecompressionStream !== 'undefined') {
+      const ds = new DecompressionStream('gzip');
+      return new Response((new Response(buf)).body.pipeThrough(ds)).text();
+    }
+    return new TextDecoder('utf-8').decode(new Uint8Array(buf));
   }
 
-  async function copyText(txt){ try{ await navigator.clipboard.writeText(txt); showToast('Copied'); }catch{ showToast('Copy failed'); }}
-  function showToast(msg){ const t=document.createElement('div'); t.textContent=msg; t.className='toast'; document.body.appendChild(t); setTimeout(()=>t.remove(),1600); }
-  function downloadFile(name, type, data){
+  const copyText = async (txt) => {
+    try {
+      await navigator.clipboard.writeText(txt);
+      showToast('Copied');
+    } catch {
+      showToast('Copy failed');
+    }
+  };
+
+  function showToast(msg) {
+    const t = document.createElement('div');
+    t.textContent = msg;
+    t.className = 'toast';
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 1600);
+  }
+
+  function downloadFile(name, type, data) {
     const blob = new Blob([data], { type });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -473,12 +270,348 @@ function protectCSVCell(v){
     a.click();
     URL.revokeObjectURL(a.href);
   }
-  
-function protectCSVCell(v){
-  const s = String(v ?? "");
-  return /^[=+\-@]/.test(s) ? "'" + s : s;
-}
-</script>
+
+  function buildHashPayload() {
+    return {
+      a: smA.value || undefined,
+      b: smB.value || undefined,
+      v: verifyEl.checked || undefined,
+      t: Number(timeoutEl.value) || undefined,
+      l: Number(limitEl.value) || undefined
+    };
+  }
+
+  function paramsToHash() {
+    return '#' + encodeURIComponent(JSON.stringify(buildHashPayload()));
+  }
+
+  function restoreFromHash(initial = false) {
+    if (!location.hash) return;
+    try {
+      const payload = JSON.parse(decodeURIComponent(location.hash.slice(1)));
+      if (typeof payload !== 'object' || payload === null) throw new Error('bad share payload');
+      if ('a' in payload) smA.value = payload.a || '';
+      if ('b' in payload) smB.value = payload.b || '';
+      if ('v' in payload) verifyEl.checked = !!payload.v;
+      if ('t' in payload && Number.isFinite(Number(payload.t))) timeoutEl.value = Number(payload.t);
+      if ('l' in payload && Number.isFinite(Number(payload.l))) limitEl.value = Number(payload.l);
+      if (!initial) showToast('Share settings loaded');
+    } catch {
+      location.hash = '';
+      if (!initial) showToast('Share link invalid — defaults restored');
+    }
+  }
+
+  window.addEventListener('hashchange', () => restoreFromHash(false));
+
+  const fileInputA = document.getElementById('fileA');
+  if (fileInputA) {
+    fileInputA.addEventListener('change', async () => {
+      smAText.value = await fileToText(fileInputA.files[0]);
+    });
+  }
+
+  const fileInputB = document.getElementById('fileB');
+  if (fileInputB) {
+    fileInputB.addEventListener('change', async () => {
+      smBText.value = await fileToText(fileInputB.files[0]);
+    });
+  }
+
+  confChips.addEventListener('click', (e) => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    confThreshold = Number(chip.dataset.thr || '0');
+    confChips.querySelectorAll('.chip').forEach(c => c.classList.remove('chip-active'));
+    chip.classList.add('chip-active');
+    renderTables();
+  });
+
+  sameRegEl.addEventListener('change', () => {
+    renderTables();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); runBtn.click(); }
+    else if (!e.metaKey && !e.ctrlKey && (e.key === 'e' || e.key === 'E')) { document.getElementById('dlCsv').click(); }
+    else if (!e.metaKey && !e.ctrlKey && (e.key === 'j' || e.key === 'J')) { document.getElementById('dlJson').click(); }
+  });
+
+  function registrable(host) {
+    const parts = (host || '').toLowerCase().split('.');
+    return parts.slice(-2).join('.');
+  }
+
+  function sameRegDomain(a, b) {
+    try {
+      const A = new URL(a).hostname;
+      const B = new URL(b).hostname;
+      return registrable(A) === registrable(B);
+    } catch {
+      return false;
+    }
+  }
+
+  function renderTables() {
+    if (!lastResults) return;
+    const filtered = computeFiltered(lastResults);
+    const meta = filtered.meta;
+
+    summaryEl.innerHTML = `
+      <div class="chips">
+        <span class="chip">Removed: <b>${meta.removedCount || 0}</b></span>
+        <span class="chip">Added: <b>${meta.addedCount || 0}</b></span>
+        <span class="chip">Suggested 301s: <b>${filtered.pairs.length}</b></span>
+        <span class="chip">Unmapped: <b>${filtered.unmapped.length}</b></span>
+        <span class="chip">${meta.truncated ? 'Truncated: YES' : 'Truncated: NO'}</span>
+      </div>`;
+    summaryEl.classList.remove('hidden');
+    actionsEl.classList.remove('hidden');
+    tablesEl.classList.remove('hidden');
+
+    mapBody.innerHTML = '';
+    filtered.pairs.forEach(p => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td><a href="${p.from}" target="_blank" rel="noopener">${p.from}</a></td>
+        <td><a href="${p.to}" target="_blank" rel="noopener">${p.to}</a></td>
+        <td>${Math.round((p.confidence || 0) * 100)}%</td>
+        <td>${p.note || ''}${p.verifyStatus ? ' · head ' + p.verifyStatus : ''}</td>`;
+      mapBody.appendChild(tr);
+    });
+
+    unmappedBody.innerHTML = '';
+    filtered.unmapped.forEach(u => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td><a href="${u}" target="_blank" rel="noopener">${u}</a></td>`;
+      unmappedBody.appendChild(tr);
+    });
+
+    addedBody.innerHTML = '';
+    filtered.added.slice(0, 500).forEach(u => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td><a href="${u}" target="_blank" rel="noopener">${u}</a></td>`;
+      addedBody.appendChild(tr);
+    });
+
+    const prefixRulesEl = document.getElementById('prefixRules');
+    const exactRulesEl = document.getElementById('exactRules');
+    if (prefixRulesEl) {
+      const lines = (filtered.rules || []).map(r => `# support ${r.support || ''}\nrewrite ^${r.fromPrefix}(.*)$ ${r.toPrefix}$1 permanent;`);
+      prefixRulesEl.textContent = lines.length ? lines.join('\n') : '# (no strong prefix patterns inferred yet)';
+    }
+    if (exactRulesEl) {
+      const lines = filtered.pairs.map(p => {
+        try {
+          const from = new URL(p.from);
+          const to = new URL(p.to);
+          return from.host === to.host
+            ? `Redirect 301 ${from.pathname} ${to.pathname}`
+            : `Redirect 301 ${from.pathname} ${to.href}`;
+        } catch {
+          return `# ${p.from} -> ${p.to}`;
+        }
+      });
+      exactRulesEl.textContent = lines.length ? lines.join('\n') : '# (no exact mappings yet)';
+    }
+  }
+
+  runBtn.addEventListener('click', async () => {
+    const body = {
+      sitemapAUrl: smA.value.trim() || null,
+      sitemapBUrl: smB.value.trim() || null,
+      sitemapAText: smAText.value.trim() || null,
+      sitemapBText: smBText.value.trim() || null,
+      verifyTargets: verifyEl.checked,
+      timeout: Math.min(30000, Math.max(1000, Number(timeoutEl.value) || 10000)),
+      maxCompare: Math.min(5000, Math.max(100, Number(limitEl.value) || 2000)),
+      sameRegDomainOnly: sameRegEl.checked
+    };
+
+    if (!(body.sitemapAUrl || body.sitemapAText) || !(body.sitemapBUrl || body.sitemapBText)) {
+      showToast('Provide sitemap URLs or XML for both sides.');
+      statusEl.textContent = 'Waiting for input.';
+      return;
+    }
+
+    statusEl.textContent = 'Working…';
+    summaryEl.classList.add('hidden');
+    actionsEl.classList.add('hidden');
+    tablesEl.classList.add('hidden');
+    const hadResults = !!lastResults;
+    setExportsEnabled(false);
+
+    try {
+      const res = await fetch('/api/sitemap-delta', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.meta?.note || data?.error || `HTTP ${res.status}`);
+      lastResults = data;
+      renderTables();
+      statusEl.textContent = 'Done.';
+      await withRequestIdEcho(res);
+      setExportsEnabled(true);
+      history.replaceState(null, '', paramsToHash());
+      document.dispatchEvent(new CustomEvent('tinyutils:results-updated'));
+    } catch (error) {
+      console.error('[sitemap-delta]', error);
+      if (hadResults && lastResults) setExportsEnabled(true);
+      statusEl.textContent = 'Error: ' + (error.message || String(error));
+    }
+  });
+
+  document.getElementById('dlCsv').addEventListener('click', () => {
+    if (!lastResults) return;
+    const filtered = computeFiltered(lastResults);
+    const rows = [['from_url','to_url','confidence','note']];
+    filtered.pairs.forEach(p => {
+      rows.push([
+        protectCSVCell(p.from || ''),
+        protectCSVCell(p.to || ''),
+        protectCSVCell((p.confidence || 0).toFixed(3)),
+        protectCSVCell(p.note || '')
+      ]);
+    });
+    const metaLine = '# meta: ' + JSON.stringify({
+      ...lastResults.meta,
+      threshold: confThreshold,
+      sameDomainGuard: sameRegEl.checked
+    });
+    const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join(LINE_BREAK);
+    downloadFile('sitemap-delta-redirects.csv', 'text/csv', `${csv}${LINE_BREAK}${metaLine}`);
+  });
+
+  document.getElementById('dlJson').addEventListener('click', () => {
+    if (!lastResults) return;
+    const payload = {
+      ...lastResults,
+      meta: {
+        ...lastResults.meta,
+        threshold: confThreshold,
+        sameDomainGuard: sameRegEl.checked
+      }
+    };
+    downloadFile('sitemap-delta-results.json', 'application/json', JSON.stringify(payload, null, 2));
+  });
+
+  document.getElementById('dl410').addEventListener('click', () => {
+    if (!lastResults) return;
+    const filtered = computeFiltered(lastResults);
+    const rows = [['url_to_remove','reason']];
+    filtered.unmapped.forEach(u => {
+      rows.push([
+        protectCSVCell(u),
+        protectCSVCell('410')
+      ]);
+    });
+    const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join(LINE_BREAK);
+    downloadFile('unmapped-410.csv', 'text/csv', csv);
+  });
+
+  document.getElementById('dlNginx').addEventListener('click', () => {
+    if (!lastResults) return;
+    const { pairs, rules } = computeFiltered(lastResults);
+    const lines = [];
+    (rules || []).forEach(r => lines.push(`rewrite ^${r.fromPrefix}(.*)$ ${r.toPrefix}$1 permanent;`));
+    (pairs || []).forEach(p => {
+      try {
+        const from = new URL(p.from);
+        const to = new URL(p.to);
+        if (from.host === to.host) {
+          lines.push(`rewrite ^${from.pathname}$ ${to.pathname} permanent;`);
+        } else {
+          lines.push(`rewrite ^${from.pathname}$ ${to.href} permanent;`);
+        }
+      } catch {
+        lines.push(`# ${p.from} -> ${p.to}`);
+      }
+    });
+    downloadFile('redirects-nginx.conf', 'text/plain', lines.join('\n'));
+  });
+
+  document.getElementById('dlApache').addEventListener('click', () => {
+    if (!lastResults) return;
+    const { pairs, rules } = computeFiltered(lastResults);
+    const lines = [];
+    (rules || []).forEach(r => lines.push(`# Prefix: ${r.fromPrefix} -> ${r.toPrefix}`));
+    (pairs || []).forEach(p => {
+      try {
+        const from = new URL(p.from);
+        const to = new URL(p.to);
+        if (from.host === to.host) {
+          lines.push(`Redirect 301 ${from.pathname} ${to.pathname}`);
+        } else {
+          lines.push(`Redirect 301 ${from.pathname} ${to.href}`);
+        }
+      } catch {
+        lines.push(`# ${p.from} -> ${p.to}`);
+      }
+    });
+    downloadFile('redirects-apache.conf', 'text/plain', lines.join('\n'));
+  });
+
+  document.getElementById('copySummary').addEventListener('click', () => {
+    if (!lastResults) return;
+    const filtered = computeFiltered(lastResults);
+    const meta = filtered.meta || {};
+    const txt = [
+      `Removed: ${meta.removedCount || 0}`,
+      `Added: ${meta.addedCount || 0}`,
+      `Suggested 301s: ${filtered.pairs.length}`,
+      `Unmapped: ${filtered.unmapped.length}`
+    ].join('\n');
+    copyText(txt);
+  });
+
+  document.getElementById('copyRules').addEventListener('click', () => {
+    const prefix = (document.getElementById('prefixRules') || {}).textContent || '';
+    const exact = (document.getElementById('exactRules') || {}).textContent || '';
+    copyText(`# nginx\n${prefix}\n\n# Apache\n${exact}`);
+  });
+
+  shareBtn.addEventListener('click', async () => {
+    const hash = paramsToHash();
+    location.hash = hash;
+    await copyText(location.href);
+  });
+
+  if (demoBtn) {
+    demoBtn.addEventListener('click', async () => {
+      statusEl.textContent = 'Loading demo…';
+      try {
+        const [beforeXml, afterXml] = await Promise.all([
+          fetchDemoAsset(DEMO_SITEMAPS.before),
+          fetchDemoAsset(DEMO_SITEMAPS.after)
+        ]);
+        applyDemoXml(beforeXml, afterXml);
+        statusEl.textContent = 'Demo loaded — press Compare';
+      } catch (error) {
+        console.warn('Demo fetch failed; falling back to inline sample', error);
+        applyDemoXml(DEMO_FALLBACK.before, DEMO_FALLBACK.after);
+        statusEl.textContent = 'Demo fallback loaded — press Compare';
+      }
+    });
+  }
+
+  async function fetchDemoAsset(path) {
+    const res = await fetch(path, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.text();
+  }
+
+  function applyDemoXml(before, after) {
+    smAText.value = (before || '').trim();
+    smBText.value = (after || '').trim();
+    smA.value = '';
+    smB.value = '';
+  }
+
+  restoreFromHash(true);
+  renderTables();
+  </script>
+
 
 <script>
 (function(){
@@ -507,10 +640,6 @@ function protectCSVCell(v){
   }
 })();
 
-function protectCSVCell(v){
-  const s = String(v ?? "");
-  return /^[=+\-@]/.test(s) ? "'" + s : s;
-}
 </script>
 
 <footer class="site-footer">

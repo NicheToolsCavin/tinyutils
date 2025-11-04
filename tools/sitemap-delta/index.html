@@ -189,6 +189,22 @@
     return /^[=+\-@]/.test(str.trimStart()) ? "'" + str : str;
   };
 
+  const computeFiltered = (data) => {
+    if (!data) return { pairs: [], unmapped: [], added: [], rules: [], meta: {} };
+    const guard = sameRegEl.checked;
+    const thr = confThreshold;
+    const pairs = (data.pairs || []).filter(p => (p.confidence || 0) >= thr && (!guard || sameRegDomain(p.from, p.to)));
+    const mapped = new Set(pairs.map(p => p.from));
+    const unmapped = (data.removed || []).filter(u => !mapped.has(u));
+    return {
+      pairs,
+      unmapped,
+      added: data.added || [],
+      rules: data.rules || [],
+      meta: data.meta || {}
+    };
+  };
+
   let lastResults = null;
   let confThreshold = 0;
 
@@ -334,22 +350,6 @@
     } catch {
       return false;
     }
-  }
-
-  function computeFiltered(data) {
-    if (!data) return { pairs: [], unmapped: [], added: [], rules: [], meta: {} };
-    const guard = sameRegEl.checked;
-    const thr = confThreshold;
-    const pairs = (data.pairs || []).filter(p => (p.confidence || 0) >= thr && (!guard || sameRegDomain(p.from, p.to)));
-    const mapped = new Set(pairs.map(p => p.from));
-    const unmapped = (data.removed || []).filter(u => !mapped.has(u));
-    return {
-      pairs,
-      unmapped,
-      added: data.added || [],
-      rules: data.rules || [],
-      meta: data.meta || {}
-    };
   }
 
   function renderTables() {
