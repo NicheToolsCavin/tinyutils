@@ -114,3 +114,22 @@ Sitemap Delta’s API now uses your requested timeout and respects a per-run com
 **Impact**
 • Large migrations can dial back `maxCompare` to keep preview runs under Edge limits without editing the sitemap files themselves.
 • Demo/testing flows better match production behavior because both XML inputs are fetched from the same path the UI will hit in preview builds.
+
+### Major changes — 2025-11-04 [18:25] CET (UTC+01:00)
+
+**Added**
+• Status banner now carries `aria-live="polite"` announcements and emits `tinyutils:results-updated` when tables render so downstream copy helpers refresh automatically.
+
+**Removed**
+• Global keyboard shortcuts that fired exports while users edited URL inputs or XML textareas.
+
+**Modified**
+• Shortcut handlers now require Cmd/Ctrl for CSV/JSON exports and ignore keystrokes from focused form controls; export buttons stay disabled until fresh results arrive.
+• Verify HEAD queue enforces the documented ≤10 global / ≤2 per-origin caps with jitter, keeping polite behavior aligned with Dead Link Finder/Wayback API guardrails.
+
+**Human-readable summary**
+Sitemap Delta no longer steals keypresses while you paste URLs—the export shortcuts only run with Cmd/Ctrl, the status text announces progress for assistive tech, and the verify HEAD step now throttles per origin to match our network safety rules.
+
+**Impact**
+• Users can paste/edit sitemap URLs without surprise CSV downloads, and accessibility tools get live progress updates.
+• HEAD verification respects politeness limits, reducing the risk of overloading target hosts while still reporting retries/timeouts via metadata.

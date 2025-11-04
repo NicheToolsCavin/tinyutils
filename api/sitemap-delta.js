@@ -1,6 +1,6 @@
 export const config = { runtime: 'edge' };
 
-const UA = 'TinyUtils-SitemapDelta/1.0 (+https://tinyutils.net)';
+const UA = 'TinyUtils-SitemapDelta/1.0 (+https://tinyutils-eight.vercel.app)';
 const HARD_CAP = 200;
 const CHILD_SITEMAPS_LIMIT = 50;
 const VERIFY_CONCURRENCY = 6;
@@ -279,43 +279,55 @@ function sameRegDomain(a, b) {
 }
 
 async function verifyTargets(pairs, timeout) {
+  if (!pairs.length) return [];
   const out = new Array(pairs.length);
-  let idx = 0;
-  const pool = Math.min(VERIFY_CONCURRENCY, pairs.length || 1);
-  async function worker() {
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      const current = idx;
-      idx += 1;
-      if (current >= pairs.length) return;
-      const p = pairs[current];
-      const noteParts = p.note ? p.note.split('|') : [];
-      try {
-        const res = await fetchWithRetry(
-          p.to,
-          timeout,
-          { method: 'HEAD', redirect: 'manual', headers: { 'user-agent': UA } }
-        );
-        if (res.__retried && !noteParts.includes('retry_1')) noteParts.push('retry_1');
-        out[current] = {
-          ...p,
-          note: noteParts.length ? noteParts.join('|') : null,
-          verifyStatus: res.status,
-          verifyOk: (res.status >= 200 && res.status < 300) || (res.status >= 301 && res.status <= 308)
-        };
-      } catch (error) {
-        if (error?.__retried && !noteParts.includes('retry_1')) noteParts.push('retry_1');
-        noteParts.push('timeout');
-        out[current] = {
-          ...p,
-          note: noteParts.join('|'),
-          verifyStatus: 0,
-          verifyOk: false
-        };
-      }
+  const queue = pairs.map((pair, index) => ({ pair, index, url: pair.to }));
+  const perOrigin = new Map();
+  const maxWorkers = Math.min(VERIFY_CONCURRENCY, queue.length, GLOBAL_FETCH_CAP);
+
+  async function processNext() {
+    const item = queue.shift();
+    if (!item) return;
+    const origin = safeOrigin(item.url);
+    if ((perOrigin.get(origin) || 0) >= PER_ORIGIN_FETCH_CAP) {
+      queue.push(item);
+      await delay(15 + Math.random() * 35);
+      return processNext();
     }
+
+    perOrigin.set(origin, (perOrigin.get(origin) || 0) + 1);
+    const noteParts = item.pair.note ? item.pair.note.split('|') : [];
+    try {
+      const res = await fetchWithRetry(
+        item.url,
+        timeout,
+        { method: 'HEAD', redirect: 'manual', headers: { 'user-agent': UA } }
+      );
+      if (res.__retried && !noteParts.includes('retry_1')) noteParts.push('retry_1');
+      out[item.index] = {
+        ...item.pair,
+        note: noteParts.length ? noteParts.join('|') : null,
+        verifyStatus: res.status,
+        verifyOk: (res.status >= 200 && res.status < 300) || (res.status >= 301 && res.status <= 308)
+      };
+    } catch (error) {
+      if (error?.__retried && !noteParts.includes('retry_1')) noteParts.push('retry_1');
+      if (!noteParts.includes('timeout')) noteParts.push('timeout');
+      out[item.index] = {
+        ...item.pair,
+        note: noteParts.join('|'),
+        verifyStatus: 0,
+        verifyOk: false
+      };
+    } finally {
+      perOrigin.set(origin, Math.max(0, (perOrigin.get(origin) || 1) - 1));
+      await delay(10 + Math.random() * 30);
+    }
+
+    return processNext();
   }
-  await Promise.all(Array.from({ length: pool }, () => worker()));
+
+  await Promise.all(Array.from({ length: maxWorkers }, () => processNext()));
   return out;
 }
 

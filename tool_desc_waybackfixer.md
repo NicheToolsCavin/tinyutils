@@ -107,3 +107,21 @@ Every Wayback Fixer API response now exposes a request ID in both the body and t
 **Impact**
 • Support can ask users for the on-screen request ID and plug it straight into logs without guessing.
 • Monitoring tools no longer see “header-less” 405/500 replies, keeping observability consistent with the other APIs.
+
+### Major changes — 2025-11-04 [18:20] CET (UTC+01:00)
+
+**Added**
+• Status banner now exposes `aria-live="polite"` updates and emits the `tinyutils:results-updated` event after every render so clipboard helpers stay hydrated.
+
+**Removed**
+• Global keyboard shortcuts firing while users typed in textareas/inputs; exports remain disabled until the latest results finish rendering.
+
+**Modified**
+• Shortcut handling now requires Cmd/Ctrl for CSV/JSON actions and ignores keystrokes when focus is inside a form control, while exports/copy buttons only enable after fresh results load (and re-disable on retry).
+
+**Human-readable summary**
+Wayback Fixer no longer hijacks typing—keyboard shortcuts only trigger with Cmd/Ctrl and only after the latest results render, while the status area announces progress for assistive tech and keeps copy buttons synced.
+
+**Impact**
+• Spreadsheet-style shortcuts work without breaking text entry, improving UX for long URL lists.
+• Assistive tech users hear progress updates, and exports always reflect the newest crawl output.

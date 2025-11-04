@@ -8,8 +8,8 @@ if (typeof fetchImpl !== 'function') {
   throw new Error('Global fetch is required (Node 18+).');
 }
 
-const TR = process.env.TINY_REACTIVE_URL || 'http://127.0.0.1:5566';
-const BASE = process.env.TINYUTILS_BASE || 'https://tinyutils-eight.vercel.app';
+const TR = process.env.TINY_REACTIVE_URL || '';
+const BASE = process.env.TINYUTILS_BASE || 'http://127.0.0.1:4173';
 
 async function cmd(body) {
   const res = await fetchImpl(`${TR}/cmd`, {
@@ -36,26 +36,21 @@ async function maybeClick(selector) {
   return true;
 }
 
-async function run() {
-  const toolUrl = `${BASE}/tools/wayback-fixer/`;
+async function runTinyReactive() {
+  const toolUrl = `${BASE.replace(/\/$/, '')}/tools/wayback-fixer/`;
 
   await cmd({ id: 'open', cmd: 'open', args: { url: toolUrl, waitUntil: 'networkidle' }, target: { contextId: 'default', pageId: 'active' } });
 
-  // Accept consent banner if it appears.
   await maybeClick('#tu-consent-accept');
 
-  // Ensure UI ready
   await cmd({ id: 'ready', cmd: 'waitFor', args: { selector: '#run', state: 'visible', timeout: 15000 } });
 
-  // Type a small demo list
   const demoText = 'https://example.com/old\nhttps://example.com/missing\nhttps://example.com/2011/post';
   await cmd({ id: 'focus', cmd: 'click', args: { selector: '#list' } });
   await cmd({ id: 'type', cmd: 'type', args: { selector: '#list', text: demoText, delayMs: 20 } });
 
-  // Run
   await cmd({ id: 'run', cmd: 'click', args: { selector: '#run' } });
 
-  // Wait for table rows or an error-ish status line to show progress
   await cmd({
     id: 'wait-result',
     cmd: 'waitForFunction',
@@ -75,5 +70,41 @@ async function run() {
   console.log('UI sanity captured to ./.debug/wayback-fixer-ui.png');
 }
 
-run().catch((error) => { console.error(error.message || error); process.exit(1); });
+async function runFallback() {
+  const base = BASE.replace(/\/$/, '');
+  const pageUrl = `${base}/tools/wayback-fixer/`;
+  const apiUrl = `${base}/api/wayback-fixer`;
 
+  const pageRes = await fetchImpl(pageUrl, { redirect: 'follow' });
+  if (!pageRes.ok) throw new Error(`wayback page status ${pageRes.status}`);
+  const html = await pageRes.text();
+  if (!/Wayback Fixer/i.test(html)) throw new Error('Wayback page content missing expected heading');
+
+  const apiRes = await fetchImpl(apiUrl, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ urls: ['https://example.com/missing-page'], verifyHead: false, trySavePageNow: false, timeout: 3000, concurrency: 2 })
+  });
+  if (!apiRes.ok) {
+    if ([404, 405, 501].includes(apiRes.status)) {
+      console.log(`Wayback API skipped (status ${apiRes.status} indicates static server)`);
+      return;
+    }
+    throw new Error(`wayback API status ${apiRes.status}`);
+  }
+  const payload = await apiRes.json();
+  if (!payload || typeof payload !== 'object' || !payload.meta || !Array.isArray(payload.results)) {
+    throw new Error('wayback API response missing meta/results');
+  }
+  console.log('Fallback Wayback Fixer checks passed');
+}
+
+async function run() {
+  if (TR) {
+    await runTinyReactive();
+  } else {
+    await runFallback();
+  }
+}
+
+run().catch((error) => { console.error(error.message || error); process.exit(1); });

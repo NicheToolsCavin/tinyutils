@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://tinyutils.net/</loc></url>
-  <url><loc>https://tinyutils.net/tools/</loc></url>
-  <url><loc>https://tinyutils.net/tools/dead-link-finder/</loc></url>
-  <url><loc>https://tinyutils.net/tools/sitemap-delta/</loc></url>
-  <url><loc>https://tinyutils.net/tools/wayback-fixer/</loc></url>
+  <url><loc>https://tinyutils-eight.vercel.app/</loc></url>
+  <url><loc>https://tinyutils-eight.vercel.app/tools/</loc></url>
+  <url><loc>https://tinyutils-eight.vercel.app/tools/dead-link-finder/</loc></url>
+  <url><loc>https://tinyutils-eight.vercel.app/tools/sitemap-delta/</loc></url>
+  <url><loc>https://tinyutils-eight.vercel.app/tools/wayback-fixer/</loc></url>
 </urlset>

@@ -1,6 +1,6 @@
 export const config = { runtime: 'edge' };
 
-const UA = 'TinyUtils-DeadLinkChecker/1.0 (+https://tinyutils.net; hello@tinyutils.net)';
+const UA = 'TinyUtils-DeadLinkChecker/1.0 (+https://tinyutils-eight.vercel.app; hello@tinyutils.net)';
 
 function rid() {
   return Math.random().toString(16).slice(2, 10);

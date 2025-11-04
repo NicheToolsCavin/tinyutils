@@ -24,6 +24,7 @@ function jerr(status, code, message, detail, stage, requestId, metaExtras) {
     ok: false,
     message,
     code: code || null,
+    requestId,
     meta
   }, requestId);
 }
@@ -58,7 +59,7 @@ async function timedFetch(url, options, timeoutMs) {
   }
 }
 
-const UA = 'TinyUtils-DeadLinkChecker/1.0 (+https://tinyutils.net; hello@tinyutils.net)';
+const UA = 'TinyUtils-DeadLinkChecker/1.0 (+https://tinyutils-eight.vercel.app; hello@tinyutils.net)';
 const TLDS = ['.gov', '.mil', '.bank', '.edu'];
 const MAX_URLS = 200;
 const MAX_REDIRECTS = 5;

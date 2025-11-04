@@ -23,7 +23,7 @@
   "name": "Sitemap Delta + Redirect Mapper",
   "applicationCategory": "SEO Tool",
   "operatingSystem": "Web",
-  "url": "https://tinyutils.net/tools/sitemap-delta/",
+  "url": "https://tinyutils-eight.vercel.app/tools/sitemap-delta/",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
   "publisher": { "@type": "Organization", "name": "TinyUtils" }
 }
@@ -87,7 +87,7 @@
       </div>
     </section>
 
-    <section id="status" class="status">Ready.</section>
+    <section id="status" class="status" aria-live="polite">Ready.</section>
     <section id="summary" class="summary hidden"></section>
 
     <section class="actions hidden" id="actions">
@@ -332,9 +332,12 @@
   });
 
   document.addEventListener('keydown', (e) => {
+    const tag = (e.target && e.target.tagName) || '';
+    const inField = /^(INPUT|TEXTAREA|SELECT)$/.test(tag) || !!(e.target && e.target.isContentEditable);
+    if (inField) return;
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); runBtn.click(); }
-    else if (!e.metaKey && !e.ctrlKey && (e.key === 'e' || e.key === 'E')) { document.getElementById('dlCsv').click(); }
-    else if (!e.metaKey && !e.ctrlKey && (e.key === 'j' || e.key === 'J')) { document.getElementById('dlJson').click(); }
+    else if ((e.metaKey || e.ctrlKey) && (e.key === 'e' || e.key === 'E')) { e.preventDefault(); document.getElementById('dlCsv').click(); }
+    else if ((e.metaKey || e.ctrlKey) && (e.key === 'j' || e.key === 'J')) { e.preventDefault(); document.getElementById('dlJson').click(); }
   });
 
   function registrable(host) {
@@ -413,6 +416,10 @@
       });
       exactRulesEl.textContent = lines.length ? lines.join('\n') : '# (no exact mappings yet)';
     }
+
+    const totalRows = filtered.pairs.length + filtered.unmapped.length + filtered.added.length;
+    document.dispatchEvent(new CustomEvent('tinyutils:results-updated', { detail: { total: totalRows, meta } }));
+    setExportsEnabled(totalRows > 0);
   }
 
   runBtn.addEventListener('click', async () => {
@@ -446,15 +453,13 @@
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(body)
       });
+      await withRequestIdEcho(res);
       const data = await res.json();
       if (!res.ok) throw new Error(data?.meta?.note || data?.error || `HTTP ${res.status}`);
       lastResults = data;
       renderTables();
       statusEl.textContent = 'Done.';
-      await withRequestIdEcho(res);
-      setExportsEnabled(true);
       history.replaceState(null, '', paramsToHash());
-      document.dispatchEvent(new CustomEvent('tinyutils:results-updated'));
     } catch (error) {
       console.error('[sitemap-delta]', error);
       if (hadResults && lastResults) setExportsEnabled(true);
@@ -629,7 +634,7 @@
 
   function loadProd(){
     // Plausible (privacy-first)
-    var s=document.createElement('script'); s.defer=true; s.setAttribute('data-domain','tinyutils.net');
+    var s=document.createElement('script'); s.defer=true; s.setAttribute('data-domain','tinyutils-eight.vercel.app');
     s.src='https://plausible.io/js/script.js'; document.head.appendChild(s);
     // AdSense (auto ads) — only if explicitly allowed and non-EU in your prod config.
     if (localStorage.getItem('ads')==='on'){

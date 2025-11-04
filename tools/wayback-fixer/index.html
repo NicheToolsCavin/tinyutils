@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Wayback Fixer — TinyUtils</title>
   <meta name="description" content="Paste dead URLs and get Wayback replacements. Export a replacement map and 410 list.">
-  <link rel="canonical" href="https://tinyutils.net/tools/wayback-fixer/">
+  <link rel="canonical" href="https://tinyutils-eight.vercel.app/tools/wayback-fixer/">
   <link rel="icon" href="/public/favicon.ico">
   <meta property="og:title" content="Wayback Fixer — TinyUtils">
   <meta property="og:description" content="Paste dead URLs and get Wayback replacements. Optional verify and SavePageNow.">
@@ -347,7 +347,10 @@ https://example.com/moved"></textarea>
       tr.innerHTML = `<td>${r.url}</td><td>${r.snapshotTs||''}</td><td>${r.snapshotUrl? `<a href="${r.snapshotUrl}" target="_blank" rel="noopener">Archive</a>`:''}</td><td>${vStatus}${r.verify&&r.verify.ok? ' ✓':''}</td><td class="note">${noteNice(r.note||'')}</td>`;
       tblBody.appendChild(tr);
     });
-    statusEl.textContent = `${data.meta.totalChecked} checked · ${data.meta.archived} archived · ${data.meta.noSnapshot} no snapshot · SPN ${data.meta.spnQueued}`;
+    const meta = data.meta || {};
+    statusEl.textContent = `${meta.totalChecked ?? rows.length} checked · ${meta.archived ?? 0} archived · ${meta.noSnapshot ?? 0} no snapshot · SPN ${meta.spnQueued ?? 0}`;
+    document.dispatchEvent(new CustomEvent('tinyutils:results-updated', { detail: { total: rows.length, meta } }));
+    setExportsEnabled(Boolean(data?.results?.length));
   }
 
   runBtn.addEventListener('click', async ()=>{
@@ -368,8 +371,6 @@ https://example.com/moved"></textarea>
       const data = await res.json();
       render(data);
       await withRequestIdEcho(res);
-      document.dispatchEvent(new CustomEvent('tinyutils:results-updated', { detail: { total: data?.results?.length || 0 } }));
-      setExportsEnabled(true);
     }catch(e){
       showToast('Request failed');
       if (hadResults && last) setExportsEnabled(true);
@@ -378,9 +379,12 @@ https://example.com/moved"></textarea>
     }
   });
   document.addEventListener('keydown', (e)=>{
-    if ((e.metaKey||e.ctrlKey) && e.key==='Enter'){ runBtn.click(); }
-    else if (!e.metaKey && !e.ctrlKey && (e.key==='e'||e.key==='E')){ document.getElementById('dlCsv').click(); }
-    else if (!e.metaKey && !e.ctrlKey && (e.key==='j'||e.key==='J')){ document.getElementById('dlJson').click(); }
+    const tag = (e.target && e.target.tagName) || '';
+    const inField = /^(INPUT|TEXTAREA|SELECT)$/.test(tag) || !!(e.target && e.target.isContentEditable);
+    if (inField) return;
+    if ((e.metaKey||e.ctrlKey) && e.key==='Enter'){ e.preventDefault(); runBtn.click(); }
+    else if ((e.metaKey||e.ctrlKey) && (e.key==='e'||e.key==='E')){ e.preventDefault(); document.getElementById('dlCsv').click(); }
+    else if ((e.metaKey||e.ctrlKey) && (e.key==='j'||e.key==='J')){ e.preventDefault(); document.getElementById('dlJson').click(); }
     else if (!e.metaKey && !e.ctrlKey && (e.key==='f'||e.key==='F')){ chips?.querySelector('[data-f="all"]')?.focus?.(); }
   });
 

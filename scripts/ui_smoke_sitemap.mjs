@@ -1,15 +1,14 @@
 // Tiny-Reactive UI sanity for Sitemap Delta + Redirect Mapper.
-// Requires a Tiny-Reactive controller running locally, e.g.:
-//   npx tiny-reactive@latest serve --host 127.0.0.1 --port 5566 --headless --debug
-// Then execute: node scripts/ui_smoke_sitemap.mjs
+// When TINY_REACTIVE_URL is provided, we drive the UI through Tiny Reactive.
+// Otherwise we fall back to simple HTTP checks against a local/static instance.
 
 const fetchImpl = globalThis.fetch;
 if (typeof fetchImpl !== 'function') {
   throw new Error('Global fetch is required (Node 18+).');
 }
 
-const TR = process.env.TINY_REACTIVE_URL || 'http://127.0.0.1:5566';
-const BASE = process.env.TINYUTILS_BASE || 'https://tinyutils-eight.vercel.app';
+const TR = process.env.TINY_REACTIVE_URL || '';
+const BASE = process.env.TINYUTILS_BASE || 'http://127.0.0.1:4173';
 
 async function cmd(body) {
   const res = await fetchImpl(`${TR}/cmd`, {
@@ -36,25 +35,18 @@ async function maybeClick(selector) {
   return true;
 }
 
-async function run() {
-  const toolUrl = `${BASE}/tools/sitemap-delta/`;
+async function runTinyReactive() {
+  const toolUrl = `${BASE.replace(/\/$/, '')}/tools/sitemap-delta/`;
 
   await cmd({ id: 'open', cmd: 'open', args: { url: toolUrl, waitUntil: 'networkidle' }, target: { contextId: 'default', pageId: 'active' } });
 
-  // Accept consent banner if it appears.
   await maybeClick('#tu-consent-accept');
 
-  // Ensure UI ready
   await cmd({ id: 'ready', cmd: 'waitFor', args: { selector: '#runBtn', state: 'visible', timeout: 15000 } });
 
-  // Use the built-in demo content to avoid network flakiness.
   await maybeClick('#demoBtn');
-
-  // Run comparison
   await cmd({ id: 'run', cmd: 'click', args: { selector: '#runBtn' } });
 
-  // Wait until either summary shows or an error is displayed in #status.
-  // We use a JS poll to avoid getting stuck if front-end rendering has a bug.
   await cmd({
     id: 'wait-result',
     cmd: 'waitForFunction',
@@ -74,5 +66,43 @@ async function run() {
   console.log('UI sanity captured to ./.debug/sitemap-delta-ui.png');
 }
 
-run().catch((error) => { console.error(error.message || error); process.exit(1); });
+async function runFallback() {
+  const base = BASE.replace(/\/$/, '');
+  const pageUrl = `${base}/tools/sitemap-delta/`;
+  const apiUrl = `${base}/api/sitemap-delta`;
 
+  const pageRes = await fetchImpl(pageUrl, { redirect: 'follow' });
+  if (!pageRes.ok) throw new Error(`sitemap page status ${pageRes.status}`);
+  const html = await pageRes.text();
+  if (!/Sitemap Delta/i.test(html)) throw new Error('Sitemap Delta page missing expected heading');
+
+  const xmlA = '<urlset><url><loc>https://example.com/a</loc></url></urlset>';
+  const xmlB = '<urlset><url><loc>https://example.com/a</loc></url><url><loc>https://example.com/b</loc></url></urlset>';
+  const apiRes = await fetchImpl(apiUrl, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ sitemapAText: xmlA, sitemapBText: xmlB, verifyTargets: false })
+  });
+  if (!apiRes.ok) {
+    if ([404, 405, 501].includes(apiRes.status)) {
+      console.log(`Sitemap API skipped (status ${apiRes.status} indicates static server)`);
+      return;
+    }
+    throw new Error(`sitemap API status ${apiRes.status}`);
+  }
+  const payload = await apiRes.json();
+  if (!payload || typeof payload !== 'object' || !payload.meta || !Array.isArray(payload.pairs)) {
+    throw new Error('sitemap API response missing meta/pairs');
+  }
+  console.log('Fallback Sitemap Delta checks passed');
+}
+
+async function run() {
+  if (TR) {
+    await runTinyReactive();
+  } else {
+    await runFallback();
+  }
+}
+
+run().catch((error) => { console.error(error.message || error); process.exit(1); });

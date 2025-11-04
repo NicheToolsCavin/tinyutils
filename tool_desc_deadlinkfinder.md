@@ -95,3 +95,20 @@ Errors now come back as tidy JSON with the same telemetry as successful runs, ro
 • Robots-aware workflows now see `robotsStatus` updates and should expect disallowed links to be skipped before network fetches.
 
 ---
+
+### Major changes — 2025-11-04 [18:30] CET (UTC+01:00)
+
+**Added**
+• Error envelopes now include the `requestId` at the top level (alongside the existing `meta.requestId`) so clients can grab it without drilling into metadata.
+
+**Removed**
+• None
+
+**Modified**
+• `/api/check` reuses the same JSON contract across success and failure paths: `ok`, `code`, `message`, `requestId`, and `meta` always exist, keeping parity with the other edge APIs.
+
+**Human-readable summary**
+When Dead Link Finder returns an error, the request ID is now right on the root JSON object, making it easier for support or logs to match a failing run without digging into nested meta fields.
+
+**Impact**
+• Monitoring/clients that only looked at `meta.requestId` can keep doing so, but they now have a shortcut via `payload.requestId` for correlating errors.
