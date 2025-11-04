@@ -49,55 +49,7 @@
     "offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},
     "description":"Paste dead URLs and get Wayback replacements. Export a replacement map and 410 list. Optional verify and SavePageNow."
   }
-  
-function protectCSVCell(v){
-  const s = String(v ?? "");
-  return /^[=+\-@]/.test(s) ? "'" + s : s;
-}
-
-// DLF CSV import tolerance
-function pickDLFColumn(headers){
-  return headers.includes('url') ? 'url' : (headers.includes('finalUrl') ? 'finalUrl' : 'url');
-}
-
-function enhanceCopyButtons(){
-  try{
-    const rows = document.querySelectorAll('#results tbody tr');
-    rows.forEach(tr => {
-      const first = tr.querySelector('td');
-      if (!first) return;
-      if (first.querySelector('.copyBtn')) return;
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'copyBtn';
-      btn.textContent = 'Copy';
-      btn.style.marginLeft = '6px';
-      btn.addEventListener('click', ()=>{
-        const txt = first.textContent.trim();
-        navigator.clipboard.writeText(txt).catch(()=>{});
-      });
-      first.appendChild(btn);
-      first.classList.add('cell-url');
-    });
-  }catch{}
-}
-document.addEventListener('tinyutils:results-updated', enhanceCopyButtons);
-
-async function withRequestIdEcho(res){
-  try{
-    const id = res.headers.get('x-request-id');
-    const el = document.getElementById('status') || document.getElementById('statusEl') || document.querySelector('.status');
-    if (id && el){
-      const small = document.createElement('span');
-      small.style.marginLeft = '8px';
-      small.style.opacity = '.7';
-      small.style.fontSize = '12px';
-      small.textContent = `(request ${id})`;
-      el.appendChild(small);
-    }
-  }catch{}
-}
-</script>
+  </script>
 </head>
 <body>
 <header class="site-header">
@@ -206,7 +158,65 @@ https://example.com/moved"></textarea>
   const chips = document.getElementById('filterChips');
   const tblBody = document.querySelector('#tbl tbody');
   const shareBtn = document.getElementById('share');
+  const demoBtn = document.getElementById('demo');
+  const exportBtnIds = ['dlCsv','dlJson','dl410','copyRepl','copy410'];
+  const exportButtons = exportBtnIds.map(id => document.getElementById(id)).filter(Boolean);
+  const LINE_BREAK = '\\r\\n';
   let last = null, filt = 'all';
+
+  function protectCSVCell(value){
+    const s = String(value ?? '');
+    return /^[=+\-@]/.test(s) ? "'" + s : s;
+  }
+
+  function enhanceCopyButtons(){
+    try{
+      const rows = document.querySelectorAll('#tbl tbody tr');
+      rows.forEach(tr => {
+        const first = tr.querySelector('td');
+        if (!first || first.querySelector('.copyBtn')) return;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'copyBtn';
+        btn.textContent = 'Copy';
+        btn.style.marginLeft = '6px';
+        btn.addEventListener('click', ()=>{
+          const txt = first.textContent.trim();
+          navigator.clipboard.writeText(txt).catch(()=>{});
+        });
+        first.appendChild(btn);
+        first.classList.add('cell-url');
+      });
+    }catch{}
+  }
+  document.addEventListener('tinyutils:results-updated', enhanceCopyButtons);
+
+  async function withRequestIdEcho(res){
+    try{
+      const id = res.headers.get('x-request-id');
+      if (!id) return;
+      const host = statusEl || document.getElementById('status') || document.querySelector('.status');
+      if (!host) return;
+      const prev = host.querySelector('.requestIdEcho');
+      if (prev) prev.remove();
+      const small = document.createElement('span');
+      small.className = 'requestIdEcho';
+      small.style.marginLeft = '8px';
+      small.style.opacity = '.7';
+      small.style.fontSize = '12px';
+      small.textContent = `(request ${id})`;
+      host.appendChild(small);
+    }catch{}
+  }
+
+  function setExportsEnabled(enabled){
+    exportButtons.forEach(btn => {
+      if (!btn) return;
+      btn.disabled = !enabled;
+      btn.setAttribute('aria-disabled', String(!enabled));
+    });
+  }
+  setExportsEnabled(false);
 
   function showToast(msg){
     const t = document.createElement('div');
@@ -251,10 +261,21 @@ https://example.com/moved"></textarea>
     return '#'+encodeURIComponent(JSON.stringify(o));
   }
 
-  document.getElementById('demo').addEventListener('click', ()=>{
-    listEl.value = `https://example.com/old\nhttps://example.com/missing\nhttps://example.com/2011/post`;
-    statusEl.textContent = 'Demo loaded — press Run.';
-  });
+  if (demoBtn) {
+    demoBtn.addEventListener('click', async ()=>{
+      statusEl.textContent = 'Loading demo…';
+      try{
+        const res = await fetch('/tools/wayback-fixer/demo/demo-urls.txt', { cache: 'no-store' });
+        const txt = await res.text();
+        if (!res.ok) throw new Error('demo fetch failed');
+        listEl.value = txt.trim();
+        statusEl.textContent = 'Demo loaded — press Run.';
+      }catch{
+        listEl.value = `https://example.com/old\nhttps://example.com/missing\nhttps://example.com/2011/post`;
+        statusEl.textContent = 'Demo failed — fallback inserted.';
+      }
+    });
+  }
 
   fileEl.addEventListener('change', async ()=>{
     const f = fileEl.files[0]; if (!f) return;
@@ -268,7 +289,7 @@ https://example.com/moved"></textarea>
       if (idx < 0) idx = 0;
       const urls = lines.slice(1).map(row=>{
         const cols = row.split(',').map(s=>s.replace(/^"+|"+$/g,'').trim());
-        return cols[protectCSVCell(idx)];
+        return cols[idx];
       }).filter(Boolean);
       listEl.value = Array.from(new Set(urls)).join('\n');
     }else{
@@ -278,7 +299,7 @@ https://example.com/moved"></textarea>
 
   importDlf.addEventListener('click', async ()=>{
     try{
-      const [f] = await window.showOpenFilePicker({ types:[{ protectCSVCell(description):'CSV', accept:{ 'text/csv':['.protectCSVCell(csv)'] }}] });
+      const [f] = await window.showOpenFilePicker({ types:[{ description:'CSV', accept:{ 'text/csv':['.csv'] } }] });
       const file = await f.getFile(); const txt = await file.text();
       const lines = txt.split(/\r?\n/).filter(Boolean);
       const head = (lines[0]||'').split(',').map(s=>s.replace(/^"+|"+$/g,'').trim());
@@ -287,9 +308,9 @@ https://example.com/moved"></textarea>
       const urls = [];
       for (const row of lines.slice(1)){
         const cols = row.split(',').map(s=>s.replace(/^"+|"+$/g,'').trim());
-        const u = cols[protectCSVCell(urlIdx)>=0?urlIdx:0];
-        const ok = okIdx>=0? cols[protectCSVCell(okIdx)].toLowerCase()==='true' : false;
-        const st = statusIdx>=0? Number(cols[protectCSVCell(statusIdx)]||'0') : 0;
+        const u = cols[urlIdx>=0?urlIdx:0];
+        const ok = okIdx>=0? cols[okIdx].toLowerCase()==='true' : false;
+        const st = statusIdx>=0? Number(cols[statusIdx]||'0') : 0;
         if (u && (!ok || st>=400)) urls.push(u);
       }
       listEl.value = Array.from(new Set(urls)).join('\n');
@@ -297,12 +318,14 @@ https://example.com/moved"></textarea>
     }catch(e){ showToast('Import cancelled'); }
   });
 
-  chips.addEventListener('click', (e)=>{
-    const chip = e.target.closest('.chip'); if (!chip) return;
-    chips.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
-    chip.classList.add('active'); filt = chip.dataset.f||'all';
-    if (last) render(last);
-  });
+  if (chips) {
+    chips.addEventListener('click', (e)=>{
+      const chip = e.target.closest('.chip'); if (!chip) return;
+      chips.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+      chip.classList.add('active'); filt = chip.dataset.f||'all';
+      if (last) render(last);
+    });
+  }
 
   function filterRows(rows){
     if (filt==='all') return rows;
@@ -338,12 +361,18 @@ https://example.com/moved"></textarea>
     };
     statusEl.textContent = 'Working…';
     runBtn.disabled = true;
+    const hadResults = !!last;
+    setExportsEnabled(false);
     try{
       const res = await fetch('/api/wayback-fixer', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify(body) });
       const data = await res.json();
       render(data);
+      await withRequestIdEcho(res);
+      document.dispatchEvent(new CustomEvent('tinyutils:results-updated', { detail: { total: data?.results?.length || 0 } }));
+      setExportsEnabled(true);
     }catch(e){
       showToast('Request failed');
+      if (hadResults && last) setExportsEnabled(true);
     }finally{
       runBtn.disabled = false;
     }
@@ -352,36 +381,42 @@ https://example.com/moved"></textarea>
     if ((e.metaKey||e.ctrlKey) && e.key==='Enter'){ runBtn.click(); }
     else if (!e.metaKey && !e.ctrlKey && (e.key==='e'||e.key==='E')){ document.getElementById('dlCsv').click(); }
     else if (!e.metaKey && !e.ctrlKey && (e.key==='j'||e.key==='J')){ document.getElementById('dlJson').click(); }
-    else if (!e.metaKey && !e.ctrlKey && (e.key==='f'||e.key==='F')){ chips.querySelector('[protectCSVCell(data)-f="all"]').focus?.(); }
+    else if (!e.metaKey && !e.ctrlKey && (e.key==='f'||e.key==='F')){ chips?.querySelector('[data-f="all"]')?.focus?.(); }
   });
 
   function toCSV(rows){
-    const header = ['protectCSVCell(source_url)','replacement_url','snapshot_date_iso','verify_status','note'];
-    const lines = [protectCSVCell(header).join(',')];
+    const header = ['source_url','replacement_url','snapshot_date_iso','verify_status','note'];
+    const lines = [header.join(',')];
     rows.forEach(r=>{
-      const vals = [protectCSVCell(protectCSVCell)(r.url)||'', r.snapshotUrl||'', r.snapshotTs||'', r.verify?(r.verify.status||''):'' , r.note||''];
-      lines.push(vals.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','));
+      const vals = [
+        protectCSVCell(r.url||''),
+        protectCSVCell(r.snapshotUrl||''),
+        protectCSVCell(r.snapshotTs||''),
+        protectCSVCell(r.verify?(r.verify.status||''):'') ,
+        protectCSVCell(r.note||'')
+      ].map(v=>`"${String(v).replace(/"/g,'""')}"`);
+      lines.push(vals.join(','));
     });
     lines.push(`# meta: ${JSON.stringify(last?.meta||{})}`);
-    return lines.join('\n');
+    return lines.join(LINE_BREAK);
   }
   function to410(rows){
-    const header = ['protectCSVCell(url_to_remove)','reason'];
-    const lines = [protectCSVCell(header).join(',')];
+    const header = ['url_to_remove','reason'];
+    const lines = [header.join(',')];
     rows.filter(r=> (r.note||'').includes('no_snapshot')).forEach(r=>{
-      lines.push(`"${String(r.url).replace(/"/g,'""')}","no_snapshot"`);
+      lines.push(`"${String(protectCSVCell(r.url||'')).replace(/"/g,'""')}","no_snapshot"`);
     });
-    return lines.join('\n');
+    return lines.join(LINE_BREAK);
   }
   document.getElementById('dlCsv').addEventListener('click', ()=>{
     if (!last) return; const txt = toCSV(last.results||[]);
-    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([protectCSVCell(txt)],{type:'text/csv'})); a.download='wayback-replacements.csv'; a.click();
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt],{type:'text/csv'})); a.download='wayback-replacements.csv'; a.click();
   });
   document.getElementById('dlJson').addEventListener('click', ()=>{
-    if (!last) return; const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([protectCSVCell(JSON).stringify(last,null,2)],{type:'application/json'})); a.download='wayback-results.json'; a.click();
+    if (!last) return; const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(last,null,2)],{type:'application/json'})); a.download='wayback-results.json'; a.click();
   });
   document.getElementById('dl410').addEventListener('click', ()=>{
-    if (!last) return; const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([protectCSVCell(to410)(last.results||[])],{type:'text/csv'})); a.download='wayback-410.csv'; a.click();
+    if (!last) return; const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([to410(last.results||[])],{type:'text/csv'})); a.download='wayback-410.csv'; a.click();
   });
   document.getElementById('copyRepl').addEventListener('click', ()=>{
     if (!last) return; const txt = toCSV(last.results||[]); copyText(txt);
@@ -393,54 +428,6 @@ https://example.com/moved"></textarea>
     location.hash = toHash(); copyText(location.href);
   });
   applyHash();
-
-function protectCSVCell(v){
-  const s = String(v ?? "");
-  return /^[=+\-@]/.test(s) ? "'" + s : s;
-}
-
-// DLF CSV import tolerance
-function pickDLFColumn(headers){
-  return headers.includes('url') ? 'url' : (headers.includes('finalUrl') ? 'finalUrl' : 'url');
-}
-
-function enhanceCopyButtons(){
-  try{
-    const rows = document.querySelectorAll('#results tbody tr');
-    rows.forEach(tr => {
-      const first = tr.querySelector('td');
-      if (!first) return;
-      if (first.querySelector('.copyBtn')) return;
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'copyBtn';
-      btn.textContent = 'Copy';
-      btn.style.marginLeft = '6px';
-      btn.addEventListener('click', ()=>{
-        const txt = first.textContent.trim();
-        navigator.clipboard.writeText(txt).catch(()=>{});
-      });
-      first.appendChild(btn);
-      first.classList.add('cell-url');
-    });
-  }catch{}
-}
-document.addEventListener('tinyutils:results-updated', enhanceCopyButtons);
-
-async function withRequestIdEcho(res){
-  try{
-    const id = res.headers.get('x-request-id');
-    const el = document.getElementById('status') || document.getElementById('statusEl') || document.querySelector('.status');
-    if (id && el){
-      const small = document.createElement('span');
-      small.style.marginLeft = '8px';
-      small.style.opacity = '.7';
-      small.style.fontSize = '12px';
-      small.textContent = `(request ${id})`;
-      el.appendChild(small);
-    }
-  }catch{}
-}
 </script>
 
     <div style="font-size:12px;opacity:.7;margin:12px 8px">We use minimal analytics only after you consent.</div>

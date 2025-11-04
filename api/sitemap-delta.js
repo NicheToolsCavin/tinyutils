@@ -4,6 +4,36 @@ const UA = 'TinyUtils-SitemapDelta/1.0 (+https://tinyutils.net)';
 const HARD_CAP = 200;
 const CHILD_SITEMAPS_LIMIT = 50;
 const VERIFY_CONCURRENCY = 6;
+const GLOBAL_FETCH_CAP = 10;
+const PER_ORIGIN_FETCH_CAP = 2;
+
+function rid() {
+  return Math.random().toString(16).slice(2, 10);
+}
+
+function jsonResponse(status, payload, requestId) {
+  const headers = new Headers({ 'content-type': 'application/json; charset=utf-8' });
+  if (requestId) headers.set('x-request-id', requestId);
+  return new Response(JSON.stringify(payload), { status, headers });
+}
+
+function requestIdFrom(req) {
+  try {
+    const incoming = req.headers.get('x-request-id');
+    if (incoming) return incoming.trim().slice(0, 64);
+  } catch {}
+  return rid();
+}
+
+function readUrlModeInput(value) {
+  if (!value) return '';
+  if (typeof value === 'string') return value.trim();
+  if (typeof value !== 'object') return '';
+  const mode = typeof value.mode === 'string' ? value.mode.toLowerCase() : null;
+  if (mode && mode !== 'url') return '';
+  const candidate = value.url ?? value.href ?? value.value;
+  return typeof candidate === 'string' ? candidate.trim() : '';
+}
 
 function isPrivateHost(hostname) {
   const host = (hostname || '').toLowerCase();
@@ -43,19 +73,56 @@ function normUrl(u) {
   }
 }
 
-async function fetchMaybeGzip(url) {
-  const res = await fetch(url, { headers: { 'user-agent': UA }, signal: AbortSignal.timeout(12000) });
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function safeOrigin(url) {
+  try {
+    return new URL(url).origin;
+  } catch {
+    return 'invalid';
+  }
+}
+
+async function fetchWithRetry(url, timeoutMs, options = {}) {
+  const attempt = () => fetch(url, { ...options, signal: AbortSignal.timeout(timeoutMs) });
+  let retried = false;
+  try {
+    let res = await attempt();
+    if (res.status === 429 || res.status >= 500) {
+      retried = true;
+      await delay(50 + Math.random() * 150);
+      res = await attempt();
+    }
+    res.__retried = retried;
+    return res;
+  } catch (error) {
+    if (retried) throw error;
+    retried = true;
+    await delay(50 + Math.random() * 150);
+    const res = await attempt();
+    res.__retried = true;
+    return res;
+  }
+}
+
+async function fetchMaybeGzip(url, timeoutMs, notes) {
+  const res = await fetchWithRetry(url, timeoutMs, { headers: { 'user-agent': UA } });
   if (!res.ok) {
     const error = new Error(`status_${res.status}`);
     error.status = res.status;
+    if (notes && res.__retried) notes.add('retry_1');
     throw error;
   }
+  if (notes && res.__retried) notes.add('retry_1');
   const ct = (res.headers.get('content-type') || '').toLowerCase();
   const looksGz = url.endsWith('.gz') || ct.includes('application/gzip') || ct.includes('application/x-gzip');
   if (looksGz) {
     if (typeof DecompressionStream !== 'function' || !res.body) {
       const error = new Error('gz_not_supported');
       error.code = 'gz_not_supported';
+      error.note = 'gz_not_supported';
       throw error;
     }
     const ds = new DecompressionStream('gzip');
@@ -64,13 +131,13 @@ async function fetchMaybeGzip(url) {
   return res.text();
 }
 
-function extractLocs(xml) {
+function extractLocs(xml, limit = HARD_CAP) {
   const locs = [];
   const urlRe = /<url>\s*<loc>([^<]+)<\/loc>[\s\S]*?<\/url>/gi;
   let m;
   while ((m = urlRe.exec(xml))) {
     locs.push(m[1].trim());
-    if (locs.length >= HARD_CAP) break;
+    if (locs.length >= limit) break;
   }
   if (locs.length) return { isIndex: false, items: locs };
   const sm = [];
@@ -80,6 +147,73 @@ function extractLocs(xml) {
     if (sm.length >= CHILD_SITEMAPS_LIMIT) break;
   }
   return { isIndex: true, items: sm };
+}
+
+async function runFetchQueue(urls, worker) {
+  const queue = urls.slice();
+  const perOrigin = new Map();
+  const maxWorkers = Math.min(GLOBAL_FETCH_CAP, queue.length);
+  const workers = [];
+  const results = [];
+
+  async function takeNext() {
+    const url = queue.shift();
+    if (!url) return;
+    const origin = safeOrigin(url);
+    if ((perOrigin.get(origin) || 0) >= PER_ORIGIN_FETCH_CAP) {
+      queue.push(url);
+      await delay(10);
+      return takeNext();
+    }
+    perOrigin.set(origin, (perOrigin.get(origin) || 0) + 1);
+    try {
+      const result = await worker(url);
+      if (result !== undefined) results.push(result);
+    } finally {
+      perOrigin.set(origin, (perOrigin.get(origin) || 0) - 1);
+    }
+    return takeNext();
+  }
+
+  for (let i = 0; i < maxWorkers; i += 1) {
+    workers.push(takeNext());
+  }
+  await Promise.all(workers);
+  return results;
+}
+
+async function expandIndex(children, timeoutMs, notes, limit = HARD_CAP) {
+  const limited = children.slice(0, CHILD_SITEMAPS_LIMIT);
+  if (!limited.length) return [];
+  const normalized = [];
+  for (const child of limited) {
+    const norm = normUrl(child);
+    if (!norm) {
+      notes?.add('invalid_child_url');
+      continue;
+    }
+    normalized.push(norm);
+  }
+  if (!normalized.length) return [];
+  const results = await runFetchQueue(normalized, async (url) => {
+    try {
+      const xml = await fetchMaybeGzip(url, timeoutMs, notes);
+      const locs = extractLocs(xml, limit);
+      if (locs.isIndex) {
+        notes?.add('nested_sitemap_index');
+        return [];
+      }
+      return locs.items;
+    } catch (error) {
+      if (error?.note === 'gz_not_supported' || error?.code === 'gz_not_supported') {
+        notes?.add('gz_not_supported');
+      } else {
+        notes?.add('sitemap_fetch_error');
+      }
+      return [];
+    }
+  });
+  return results.flat().slice(0, limit);
 }
 
 function pathOf(u) {
@@ -155,20 +289,29 @@ async function verifyTargets(pairs, timeout) {
       idx += 1;
       if (current >= pairs.length) return;
       const p = pairs[current];
+      const noteParts = p.note ? p.note.split('|') : [];
       try {
-        const r = await fetch(p.to, {
-          method: 'HEAD',
-          redirect: 'manual',
-          headers: { 'user-agent': UA },
-          signal: AbortSignal.timeout(timeout)
-        });
+        const res = await fetchWithRetry(
+          p.to,
+          timeout,
+          { method: 'HEAD', redirect: 'manual', headers: { 'user-agent': UA } }
+        );
+        if (res.__retried && !noteParts.includes('retry_1')) noteParts.push('retry_1');
         out[current] = {
           ...p,
-          verifyStatus: r.status,
-          verifyOk: (r.status >= 200 && r.status < 300) || (r.status >= 301 && r.status <= 308)
+          note: noteParts.length ? noteParts.join('|') : null,
+          verifyStatus: res.status,
+          verifyOk: (res.status >= 200 && res.status < 300) || (res.status >= 301 && res.status <= 308)
         };
-      } catch {
-        out[current] = { ...p, verifyStatus: 0, verifyOk: false, note: (p.note ? `${p.note}|` : '') + 'timeout' };
+      } catch (error) {
+        if (error?.__retried && !noteParts.includes('retry_1')) noteParts.push('retry_1');
+        noteParts.push('timeout');
+        out[current] = {
+          ...p,
+          note: noteParts.join('|'),
+          verifyStatus: 0,
+          verifyOk: false
+        };
       }
     }
   }
@@ -176,17 +319,21 @@ async function verifyTargets(pairs, timeout) {
   return out;
 }
 
-async function loadSitemapFromUrl(rawUrl) {
+async function loadSitemapFromUrl(rawUrl, timeoutMs, notes) {
   const normalized = normUrl(rawUrl);
   if (!normalized) {
-    throw new Error('bad_sitemap_url');
+    const err = new Error('bad_sitemap_url');
+    err.code = 'bad_sitemap_url';
+    err.note = 'bad_sitemap_url';
+    throw err;
   }
   try {
-    return await fetchMaybeGzip(normalized);
+    return await fetchMaybeGzip(normalized, timeoutMs, notes);
   } catch (error) {
     if (error?.code === 'gz_not_supported') {
       const err = new Error('gz_not_supported');
       err.note = 'gz_not_supported';
+      err.code = 'gz_not_supported';
       throw err;
     }
     throw error;
@@ -194,64 +341,64 @@ async function loadSitemapFromUrl(rawUrl) {
 }
 
 export default async function handler(req) {
+  const requestId = requestIdFrom(req);
+
   if (req.method !== 'POST') {
-    return new Response('Method Not Allowed', { status: 405 });
+    return jsonResponse(405, { error: 'method_not_allowed', details: { message: 'Only POST is supported' } }, requestId);
   }
 
+  let parsed;
   try {
-    const body = await req.json();
-    const timeout = Math.min(30000, Math.max(1000, Number(body.timeout) || 10000));
-    const verify = !!body.verifyTargets;
-    const sameReg = body.sameRegDomainOnly !== false;
+    parsed = await req.json();
+  } catch (error) {
+    return jsonResponse(400, { error: 'invalid_json', details: { message: error?.message || 'Invalid JSON' } }, requestId);
+  }
 
+  const body = parsed && typeof parsed === 'object' ? parsed : {};
+  const timeout = Math.min(30000, Math.max(1000, Number(body.timeout) || 10000));
+  const verify = !!body.verifyTargets;
+  const sameReg = body.sameRegDomainOnly !== false;
+  const notes = new Set();
+  const sitemapAUrlInput = readUrlModeInput(body.sitemapAUrl);
+  const sitemapBUrlInput = readUrlModeInput(body.sitemapBUrl);
+  const requestedMax = Number(body.maxCompare);
+  const maxCompare = Number.isFinite(requestedMax)
+    ? Math.min(HARD_CAP, Math.max(1, Math.floor(requestedMax)))
+    : HARD_CAP;
+
+  try {
     let listA = [];
     if (body.sitemapAText) {
-      const blk = extractLocs(body.sitemapAText);
+      const blk = extractLocs(body.sitemapAText, maxCompare);
       listA = blk.isIndex ? [] : blk.items;
-    } else if (body.sitemapAUrl) {
-      const xml = await loadSitemapFromUrl(body.sitemapAUrl);
-      const blk = extractLocs(xml);
+    } else if (sitemapAUrlInput) {
+      const xml = await loadSitemapFromUrl(sitemapAUrlInput, timeout, notes);
+      const blk = extractLocs(xml, maxCompare);
       if (blk.isIndex) {
-        const agg = [];
-        for (const child of blk.items.slice(0, CHILD_SITEMAPS_LIMIT)) {
-          try {
-            const text = await loadSitemapFromUrl(child);
-            const urls = extractLocs(text);
-            if (!urls.isIndex) agg.push(...urls.items);
-          } catch {}
-          if (agg.length >= HARD_CAP) break;
-        }
-        listA = agg.slice(0, HARD_CAP);
+        listA = (await expandIndex(blk.items, timeout, notes, maxCompare)).slice(0, maxCompare);
       } else {
-        listA = blk.items.slice(0, HARD_CAP);
+        listA = blk.items.slice(0, maxCompare);
       }
     }
 
     let listB = [];
     if (body.sitemapBText) {
-      const blk = extractLocs(body.sitemapBText);
+      const blk = extractLocs(body.sitemapBText, maxCompare);
       listB = blk.isIndex ? [] : blk.items;
-    } else if (body.sitemapBUrl) {
-      const xml = await loadSitemapFromUrl(body.sitemapBUrl);
-      const blk = extractLocs(xml);
+    } else if (sitemapBUrlInput) {
+      const xml = await loadSitemapFromUrl(sitemapBUrlInput, timeout, notes);
+      const blk = extractLocs(xml, maxCompare);
       if (blk.isIndex) {
-        const agg = [];
-        for (const child of blk.items.slice(0, CHILD_SITEMAPS_LIMIT)) {
-          try {
-            const text = await loadSitemapFromUrl(child);
-            const urls = extractLocs(text);
-            if (!urls.isIndex) agg.push(...urls.items);
-          } catch {}
-          if (agg.length >= HARD_CAP) break;
-        }
-        listB = agg.slice(0, HARD_CAP);
+        listB = (await expandIndex(blk.items, timeout, notes, maxCompare)).slice(0, maxCompare);
       } else {
-        listB = blk.items.slice(0, HARD_CAP);
+        listB = blk.items.slice(0, maxCompare);
       }
     }
 
-    const A = Array.from(new Set(listA.map(normUrl).filter(Boolean))).slice(0, HARD_CAP);
-    const B = Array.from(new Set(listB.map(normUrl).filter(Boolean))).slice(0, HARD_CAP);
+    const normalizedA = Array.from(new Set(listA.map(normUrl).filter(Boolean)));
+    const normalizedB = Array.from(new Set(listB.map(normUrl).filter(Boolean)));
+    const A = normalizedA.slice(0, maxCompare);
+    const B = normalizedB.slice(0, maxCompare);
 
     const setA = new Set(A);
     const setB = new Set(B);
@@ -270,6 +417,7 @@ export default async function handler(req) {
     const allAdded = added.slice();
     const pairs = [];
     for (const r of removed) {
+      if (pairs.length >= maxCompare) break;
       let candidates = [];
       try {
         const h = new URL(r).host;
@@ -314,32 +462,45 @@ export default async function handler(req) {
 
     const meta = {
       runTimestamp: new Date().toISOString(),
+      requestId,
       removedCount: removed.length,
       addedCount: added.length,
       suggestedMappings: deduped.length,
-      truncated: A.length >= HARD_CAP || B.length >= HARD_CAP,
+      truncated: normalizedA.length > maxCompare || normalizedB.length > maxCompare,
       verify,
       timeoutMs: timeout,
-      sameRegDomainOnly: sameReg
+      sameRegDomainOnly: sameReg,
+      maxCompare,
+      fetchCaps: { global: GLOBAL_FETCH_CAP, perOrigin: PER_ORIGIN_FETCH_CAP },
+      notes: Array.from(notes)
     };
 
-    return new Response(
-      JSON.stringify({ meta, added, removed, pairs: deduped, unmapped, rules: [] }),
-      { headers: { 'content-type': 'application/json' } }
-    );
+    return jsonResponse(200, { meta, added, removed, pairs: deduped, unmapped, rules: [] }, requestId);
   } catch (error) {
     const note = error?.note || (error?.code === 'gz_not_supported' ? 'gz_not_supported' : null);
-    const status = typeof error?.status === 'number' ? error.status : note === 'gz_not_supported' ? 400 : 500;
-    return new Response(
-      JSON.stringify({
-        meta: { runTimestamp: new Date().toISOString(), error: String(error).slice(0, 200), note },
-        added: [],
-        removed: [],
-        pairs: [],
-        unmapped: [],
-        rules: []
-      }),
-      { status, headers: { 'content-type': 'application/json' } }
-    );
+    const code = note || (typeof error?.code === 'string' ? error.code : 'server_error');
+    const clientErrors = new Set(['bad_sitemap_url', 'gz_not_supported', 'invalid_sitemap_input']);
+    const meta = {
+      runTimestamp: new Date().toISOString(),
+      requestId,
+      note,
+      error: String(error).slice(0, 200)
+    };
+    const status = clientErrors.has(code)
+      ? 400
+      : typeof error?.status === 'number'
+        ? 400
+        : 500;
+
+    return jsonResponse(status, {
+      error: code,
+      details: { message: error?.message || null, note, meta },
+      meta,
+      added: [],
+      removed: [],
+      pairs: [],
+      unmapped: [],
+      rules: []
+    }, requestId);
   }
 }
