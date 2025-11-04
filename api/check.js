@@ -5,7 +5,10 @@ function rid() {
 }
 
 function json(status, body, requestId) {
-  const headers = new Headers({ 'content-type': 'application/json; charset=utf-8' });
+  const headers = new Headers({
+    'content-type': 'application/json; charset=utf-8',
+    'cache-control': 'no-store'
+  });
   if (requestId) headers.set('x-request-id', requestId);
   return new Response(JSON.stringify(body), {
     status,
