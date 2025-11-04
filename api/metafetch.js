@@ -2,6 +2,16 @@ export const config = { runtime: 'edge' };
 
 const UA = 'TinyUtils-DeadLinkChecker/1.0 (+https://tinyutils.net; hello@tinyutils.net)';
 
+function rid() {
+  return Math.random().toString(16).slice(2, 10);
+}
+
+function json(status, body, requestId) {
+  const headers = new Headers({ 'content-type': 'application/json; charset=utf-8' });
+  if (requestId) headers.set('x-request-id', requestId);
+  return new Response(JSON.stringify(body), { status, headers });
+}
+
 function isPrivateHost(hostname) {
   const host = (hostname || '').toLowerCase();
   if (!host) return true;
@@ -44,34 +54,48 @@ function normalizeUrl(raw) {
   }
 }
 
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function fetchWithRetry(url, timeoutMs) {
+  const attempt = () => fetch(url, { headers: { 'user-agent': UA }, signal: AbortSignal.timeout(timeoutMs) });
+  let retried = false;
+  try {
+    let res = await attempt();
+    if (res.status === 429 || res.status >= 500) {
+      retried = true;
+      await delay(50 + Math.random() * 150);
+      res = await attempt();
+    }
+    return res;
+  } catch (error) {
+    if (retried) throw error;
+    retried = true;
+    await delay(50 + Math.random() * 150);
+    return attempt();
+  }
+}
+
 export default async function handler(req) {
+  const requestId = rid();
+
   if (req.method !== 'POST') {
-    return new Response('Method Not Allowed', { status: 405 });
+    return json(405, { ok: false, message: 'Only POST is supported', meta: { requestId } }, requestId);
   }
 
   try {
     const { url } = await req.json();
     const normalized = normalizeUrl(url);
     if (!normalized) {
-      return new Response(JSON.stringify({ title: '', description: '', error: 'invalid_url' }), {
-        status: 400,
-        headers: { 'content-type': 'application/json' }
-      });
+      return json(400, { title: '', description: '', error: 'invalid_url', meta: { requestId } }, requestId);
     }
-    const res = await fetch(normalized, {
-      headers: { 'user-agent': UA },
-      signal: AbortSignal.timeout(8000)
-    });
+    const res = await fetchWithRetry(normalized, 8000);
     const html = await res.text();
     const title = (html.match(/<title[^>]*>([^<]*)<\/title>/i) || [])[1] || '';
     const desc = (html.match(/<meta[^>]+name=["']description["'][^>]*content=["']([^"']*)["']/i) || [])[1] || '';
-    return new Response(JSON.stringify({ title, description: desc }), {
-      headers: { 'content-type': 'application/json' }
-    });
+    return json(200, { title, description: desc, meta: { requestId } }, requestId);
   } catch (error) {
-    return new Response(JSON.stringify({ title: '', description: '', error: String(error).slice(0, 200) }), {
-      status: 502,
-      headers: { 'content-type': 'application/json' }
-    });
+    return json(502, { title: '', description: '', error: String(error).slice(0, 200), meta: { requestId } }, requestId);
   }
 }

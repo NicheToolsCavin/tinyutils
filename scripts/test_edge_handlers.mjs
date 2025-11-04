@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 import sitemapDelta from '../api/sitemap-delta.js';
 import waybackFixer from '../api/wayback-fixer.js';
+import metafetch from '../api/metafetch.js';
+import checkHandler from '../api/check.js';
 
 const originalFetch = globalThis.fetch;
 
@@ -26,6 +28,22 @@ globalThis.fetch = async (url, init = {}) => {
 
   if (typeof url === 'string' && url.startsWith('https://web.archive.org/web/')) {
     return new Response(null, { status: 200, headers: { 'content-type': 'text/plain' } });
+  }
+
+  if (typeof url === 'string' && url.startsWith('https://example.com/robots.txt')) {
+    return new Response('User-agent: *\nAllow: /', { status: 200, headers: { 'content-type': 'text/plain' } });
+  }
+
+  if (typeof url === 'string' && url.startsWith('https://example.com')) {
+    const method = (init.method || 'GET').toUpperCase();
+    if (method === 'HEAD') {
+      return new Response(null, { status: 200, headers: { 'content-type': 'text/html; charset=utf-8' } });
+    }
+    const html = `<!doctype html><html><head><title>Example</title><meta name="description" content="Demo page"></head><body>
+      <a href="https://example.com/about">About</a>
+      <a href="https://example.com/contact">Contact</a>
+    </body></html>`;
+    return new Response(html, { status: 200, headers: { 'content-type': 'text/html; charset=utf-8' } });
   }
 
   if (originalFetch) {
@@ -97,10 +115,53 @@ async function testWaybackFixer() {
   if (!res.headers.get('x-request-id')) throw new Error('wayback-fixer missing x-request-id');
 }
 
+async function testMetafetch() {
+  const payload = { url: 'https://example.com/' };
+  const req = createRequest('https://tinyutils.net/api/metafetch', payload);
+  const res = await metafetch(req);
+  const data = await res.json();
+
+  console.log('--- /api/metafetch');
+  console.log('status:', res.status);
+  console.log('content-type:', res.headers.get('content-type'));
+  console.log('x-request-id:', res.headers.get('x-request-id'));
+  console.log('meta.requestId:', data?.meta?.requestId);
+  console.log('title:', data?.title, 'description length:', data?.description?.length ?? 0);
+  console.log();
+
+  if (![200, 400].includes(res.status)) throw new Error('metafetch returned unexpected status');
+  if (res.headers.get('content-type')?.includes('application/json') !== true) throw new Error('metafetch missing JSON content-type');
+  if (!res.headers.get('x-request-id')) console.warn('metafetch missing x-request-id header');
+}
+
+async function testCheck() {
+  const payload = {
+    pageUrl: 'https://example.com/',
+    mode: 'page'
+  };
+  const req = createRequest('https://tinyutils.net/api/check', payload);
+  const res = await checkHandler(req);
+  const data = await res.json();
+
+  console.log('--- /api/check');
+  console.log('status:', res.status);
+  console.log('content-type:', res.headers.get('content-type'));
+  console.log('x-request-id:', res.headers.get('x-request-id'));
+  console.log('meta.requestId:', data?.meta?.requestId);
+  console.log('rows:', Array.isArray(data?.rows) ? data.rows.length : 'n/a');
+  console.log();
+
+  if (![200, 400].includes(res.status)) throw new Error('check API returned unexpected status');
+  if (res.headers.get('content-type')?.includes('application/json') !== true) throw new Error('check missing JSON content-type');
+  if (!res.headers.get('x-request-id')) throw new Error('check missing x-request-id');
+}
+
 async function main() {
   try {
     await testSitemapDelta();
     await testWaybackFixer();
+    await testMetafetch();
+    await testCheck();
     console.log('Handler smoke tests completed successfully.');
   } finally {
     globalThis.fetch = originalFetch;
