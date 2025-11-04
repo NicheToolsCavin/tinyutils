@@ -22,6 +22,12 @@ This guide gets a private preview online so you can run the 7‑step smoke befor
 - `/api/wayback-fixer` responds to POST
 - Page routes open: `/`, `/tools/sitemap-delta/`, `/tools/wayback-fixer/`
 
+## Preview fence for beta tools
+- In Vercel → **Settings → Environment Variables**, set `PREVIEW_SECRET` (same value across preview/prod as needed).
+- Beta utilities (`/tools/keyword-density`, `/tools/meta-preview`, `/tools/sitemap-generator`) now require the secret.
+  - Access once with `?preview_secret=<your secret>` or header `x-preview-secret: <secret>`; a short-lived `tu_preview_secret` cookie keeps the session.
+  - Public GA tools (Dead Link Finder, Sitemap Delta, Wayback Fixer) stay open.
+
 ## Consent / analytics / ads
 - Plausible only loads after consent on **production** domains.
 - Ads are disabled unless you manually run in devtools: `localStorage.setItem('ads','on')`.
