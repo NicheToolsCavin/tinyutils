@@ -27,6 +27,32 @@ This guide gets a private preview online so you can run the 7‑step smoke befor
 - Beta utilities (`/tools/keyword-density`, `/tools/meta-preview`, `/tools/sitemap-generator`) now require the secret.
   - Access once with `?preview_secret=<your secret>` or header `x-preview-secret: <secret>`; a short-lived `tu_preview_secret` cookie keeps the session.
   - Public GA tools (Dead Link Finder, Sitemap Delta, Wayback Fixer) stay open.
+- Evidence lives under `tinyutils/artifacts/pr3-fence/<YYYYMMDD>/` (smoke.txt, 401/200 curl captures).
+- Quick verification (CET timestamps):
+  1. `curl -I https://tinyutils-eight.vercel.app/tools/keyword-density` → `401 preview_required`
+  2. `curl -c cookies.txt "https://tinyutils-eight.vercel.app/api/fence?preview_secret=$PREVIEW_SECRET&target=/tools/keyword-density"`
+  3. `curl -b cookies.txt -I https://tinyutils-eight.vercel.app/tools/keyword-density` → `200 OK`
+
+## Release validation rundown (PR1–PR4)
+
+- **PR1 — Security headers & caching**
+  - `vercel.json` injects a sitewide CSP plus `/public/(.*)` cache-control. After deploy run:
+    ```bash
+    export TZ=Europe/Madrid; TODAY=$(date +%Y%m%d); ART=tinyutils/artifacts/pr1-security-cache/$TODAY; mkdir -p "$ART"
+    for path in / "/public/styles.css" /api/check; do \
+      slug=$(printf '%s' "$path" | tr '/:' '-') \
+      slug=${slug:-root} \
+      curl -sS -D "$ART/headers${slug}.txt" -o /dev/null "https://tinyutils-eight.vercel.app${path}"; \
+    done
+    ```
+  - Expect `content-security-policy` + HSTS on `/`, cache-control on `/public`, and JSON security headers on `/api/check`.
+- **PR2 — Noindex + debug hook**
+  - Beta shells ship with `<meta name="robots" content="noindex">`; confirm via `rg 'robots" content="noindex' tools/`.
+  - Dead Link Finder debug paragraph uses `data-testid="debug-scheduler"` for smoke tooling. Evidence snapshots: `tinyutils/artifacts/pr2-ux-noindex-debug/<date>/`.
+- **PR3 — Preview fence**
+  - Run the smoke + manual curl captures above; archive under `tinyutils/artifacts/pr3-fence/<date>/`.
+- **PR4 — Regression tests**
+  - Run `pnpm install --silent && pnpm test` (Node ≥20). Attach logs to `tinyutils/artifacts/pr4-tests/<date>/` and reference them in the deploy checklist.
 
 ## Consent / analytics / ads
 - Plausible only loads after consent on **production** domains.

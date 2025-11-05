@@ -378,6 +378,11 @@ https://example.com/moved"></textarea>
     }
   });
   document.addEventListener('keydown', (e)=>{
+    if (e.defaultPrevented) return;
+    const target = e.target;
+    if (target && typeof target.closest === 'function' && target.closest('input, textarea, select, [contenteditable="true"]')){
+      return;
+    }
     if ((e.metaKey||e.ctrlKey) && e.key==='Enter'){ runBtn.click(); }
     else if (!e.metaKey && !e.ctrlKey && (e.key==='e'||e.key==='E')){ document.getElementById('dlCsv').click(); }
     else if (!e.metaKey && !e.ctrlKey && (e.key==='j'||e.key==='J')){ document.getElementById('dlJson').click(); }
