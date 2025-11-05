@@ -1,0 +1,23 @@
+HTTP/2 200 
+accept-ranges: bytes
+access-control-allow-origin: *
+age: 4304
+cache-control: public, max-age=0, must-revalidate
+content-disposition: inline; filename="styles.css"
+content-type: text/css; charset=utf-8
+cross-origin-opener-policy: same-origin
+cross-origin-resource-policy: same-origin
+date: Tue, 04 Nov 2025 23:12:33 GMT
+etag: "bb0c6852e22e008f5ba553934419ce1e"
+last-modified: Tue, 04 Nov 2025 22:00:48 GMT
+permissions-policy: geolocation=(), camera=(), microphone=(), usb=(), payment=(), browsing-topics=()
+referrer-policy: strict-origin-when-cross-origin
+server: Vercel
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+x-content-type-options: nosniff
+x-dns-prefetch-control: off
+x-frame-options: DENY
+x-vercel-cache: HIT
+x-vercel-id: iad1::2pgtv-1762297953156-9f01247cd253
+content-length: 1245
+

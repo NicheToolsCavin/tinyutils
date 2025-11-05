@@ -378,6 +378,7 @@
         metaSection.appendChild(metaTitle);
         debugSchedulerSummary = document.createElement('p');
         debugSchedulerSummary.className = 'debug-scheduler';
+        debugSchedulerSummary.setAttribute('data-testid', 'debug-scheduler');
         debugSchedulerSummary.textContent = 'scheduler: —';
         metaSection.appendChild(debugSchedulerSummary);
         debugMetaPre = document.createElement('pre');

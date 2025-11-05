@@ -1,0 +1,14 @@
+Page checks:
+  / -> 200 OK
+  /tools/ -> 200 OK
+  /tools/dead-link-finder/ -> 200 OK
+  /tools/sitemap-delta/ -> 200 OK
+  /tools/wayback-fixer/ -> 200 OK
+
+API checks:
+  /api/check -> 200 JSON=true RID=true OK
+  /api/metafetch -> 200 JSON=true RID=true OK
+  /api/sitemap-delta -> 200 JSON=true RID=true OK
+  /api/wayback-fixer -> 200 JSON=true RID=true OK
+
+Preview smoke: PASS

@@ -1,0 +1,3 @@
+tools/sitemap-generator.html:2:<meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><meta name="robots" content="noindex">
+tools/meta-preview.html:2:<meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><meta name="robots" content="noindex">
+tools/keyword-density.html:2:<meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><meta name="robots" content="noindex">

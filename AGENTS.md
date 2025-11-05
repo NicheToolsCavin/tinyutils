@@ -12,7 +12,7 @@ Edge APIs must respond:
 - **Branch + PR only.** No DNS or Production deploys. No repository secrets. **The exception being when you are asked to push to production, in which case you will do so. Thanks.
 - **Minimal diffs.** No new dependencies unless strictly required & justified in the PR.
 - **Static site, Framework = Other.** No build step; **Output directory = root**.
-- **`vercel.json` = headers only.** Remove any `functions`/`runtime` blocks. (Those trigger “Function Runtimes must have a valid version…” errors.)
+- **`vercel.json` = headers only.** Remove any `functions`/`runtime` blocks. (Those trigger "Function Runtimes must have a valid version..." errors.)
 - **ESM everywhere** for Edge functions.
   - `package.json` must include: `{ "type": "module" }`.
   - Each API file:
@@ -87,7 +87,7 @@ Add new tool files at the repository root using the naming pattern `tool_desc_<k
 
 **Logging rules:**
 - **Log** when user-visible behavior shifts: inputs/options/defaults, output schema/exports, network flow (HEAD/GET, redirects, concurrency, timeouts), scope/robots guards, performance caps, external APIs/dependencies, or security guard rails that change what users can do.
-- **Optional log** (under “Minor changes”) for UX polish that changes flow or clarifies exports without breaking them.
+- **Optional log** (under "Minor changes") for UX polish that changes flow or clarifies exports without breaking them.
 - **Skip** pure refactors, copy/style/comment-only edits, and test/CI changes unless they alter the behaviors above.
 - Always record timestamps in Europe/Madrid using the 24-hour clock and explicit UTC offset (e.g., `2025-10-08 21:05 CEST (UTC+02:00)`).
 - Append-only: never rewrite existing entries; if you need to correct something, add a follow-up note.
@@ -99,10 +99,10 @@ Add new tool files at the repository root using the naming pattern `tool_desc_<k
 - Provide an **Impact** bullet list covering user-visible effects and migration notes.
 
 **Procedure for devs/agents:**
-1. Before merging or deploying any change that alters a tool’s observable behavior, append the formatted entry to the matching `tool_desc_*.md` file.
+1. Before merging or deploying any change that alters a tool's observable behavior, append the formatted entry to the matching `tool_desc_*.md` file.
 2. When adding a **new tool**:
    - Create `tool_desc_<slug>.md` at the repo root using the template below.
-   - Add that file’s path to the **Locations** list above.
+   - Add that file's path to the **Locations** list above.
 3. Commit the change using `docs(tool): log change in <tool> — <one-line summary>`.
 
 **Template (for new tools):**
@@ -137,10 +137,10 @@ Non-goals
 
 Human-readable description
 
-<Explain like I’m not coding: what it does, what I’ll see, any gotchas.>
+<Explain like I'm not coding: what it does, what I'll see, any gotchas.>
 ```
 
-If code changes a tool’s observable behavior and no matching log entry is found for today’s date, DO NOT MERGE.
+If code changes a tool's observable behavior and no matching log entry is found for today's date, DO NOT MERGE.
 
 ---
 
@@ -148,22 +148,22 @@ If code changes a tool’s observable behavior and no matching log entry is foun
 ### Dead Link Finder (`/tools/dead-link-finder/`)
 - HSTS guard prevents HTTP fallback on HSTS sites.
 - Unsupported schemes (javascript:, data:, mailto:) are skipped.
-- Robots fetch failure shows a small “robots unknown (proceeded)” chip.
+- Robots fetch failure shows a small "robots unknown (proceeded)" chip.
 - **CSV/JSON exports include meta** (runTimestamp, mode, source, concurrency, timeoutMs, robots, scope, assets, httpFallback, totals, truncated).
 - **Sticky table header** works while scrolling (wrap table in `.tableWrap`; `thead th { position: sticky; top:0; }`).
-- Keyboard shortcuts work **without** hijacking normal typing (e.g., typing `c` in inputs must not trigger “Copy”).
+- Keyboard shortcuts work **without** hijacking normal typing (e.g., typing `c` in inputs must not trigger "Copy").
 
 ### Sitemap Delta (`/tools/sitemap-delta/`)
 - Two sitemaps (each ≤ 2k URLs) produce sensible **Added/Removed/Mapping**.
 - Confidence filters reflow counts; **same-domain guard ON** removes cross-host; OFF shows them.
-- `.xml.gz` via index is processed or labeled “.gz not supported here”.
+- `.xml.gz` via index is processed or labeled ".gz not supported here".
 - Rewrite exports (nginx/Apache) and **410 CSV** look sane (slashes, `index.html`, encoding).
 - Share-state restore works; malformed hash resets to defaults with a small toast.
 
 ### Wayback Fixer (`/tools/wayback-fixer/`)
 - Demo list shows **Archived / No snapshot / SPN queued**; ISO timestamps present.
 - Window prefs **Any / 5y / 1y** persist into `meta` in CSV/JSON.
-- **Verify HEAD ON** shows `200/OK` for good snapshots; with low timeout you see “Timed out”.
+- **Verify HEAD ON** shows `200/OK` for good snapshots; with low timeout you see "Timed out".
 - **SPN ON** enqueues ≤ 10/run; notes show `no_snapshot|spn_queued`.
 - CSV headers match exactly:
   - Replacements CSV: `source_url,replacement_url,snapshot_date_iso,verify_status,note`
@@ -186,6 +186,13 @@ If code changes a tool’s observable behavior and no matching log entry is foun
 
 ---
 
+### Automation
+- `python scripts/log_run_entry.py --title "Manual - <task>" --summary "<what changed>" --evidence <artifact_dir>` keeps `docs/AGENT_RUN_LOG.md` current.
+- `python scripts/add_task_checklist_entry.py --task "<name>" --status <Open|Completed>` manages the shared checklist in `docs/AGENT_TASK_CHECKLIST.md`.
+- `node scripts/preview_smoke.mjs` (with `PREVIEW_URL`, `PREVIEW_SECRET`, `BYPASS_TOKEN`) and `pnpm test` are required hand-offs for PR3/PR4.
+
+---
+
 ## Known UX fixes to include if missing (still minimal diffs)
 - Dead Link Finder input should accept multiple **page URLs** (multi-line textarea; allow comma/semicolon/newline separators). Minimum = 1.
 - **URL normalization**: accept bare domains (`facebook.com`) or `https://domain` with/without `www` and normalize automatically (prefer `https`, maintain/insert `www` only if target resolves that way).
@@ -195,13 +202,19 @@ If code changes a tool’s observable behavior and no matching log entry is foun
 ---
 
 ## Reporting format on PR
-- If everything passes: comment **“Preview GREEN; ready for owner approval.”** and attach screenshots of each page + API JSON samples.
+- If everything passes: comment **"Preview GREEN; ready for owner approval."** and attach screenshots of each page + API JSON samples.
 - If not: list **file:line** with a minimal proposed diff (unified patch format preferred) and attach a failing screenshot/log.
 
 ## Note
 - Once you fix any issues listed here, you can update this file and marked them as fixed. Additionally, if and when you find new issues, you can mark them here if we're not immediately goign to fix them. Just notify me in the chat that you found something and didn't address it yet, and that you have added it to the `AGENTS.md` file.
   * In cooperation with OpenAI, this project's progress is being monitored. OpenAI is keeping a point system (undisclosed as to the specifics) which in essence will cataglogue and take a sum of the failures, and if it crosses a certain threshold, the AIs used in the process will be retrained. Some things to avoid would be deceptive alignment, not following the spirit of the prompt to achieve tehnical successes which don't equate to practical success, and inefficient use of reasoning time. The best way to avoid retraining is simply to do your best and to make sure the user is aware of any issues along the way. 
   * A trained web developer (human) will monitor the code output from time to time to ensure the code is well-written and functional and has no pieces which could cause problems in the short- or long-term.
+  * Whether the run is single-agent or multi-agent, log each meaningful task completion to `docs/AGENT_RUN_LOG.md` (newest first) the moment it finishes, and add a session wrap-up when the run ends. Always record the local (Europe/Madrid) timestamp, branch (if known), session id (when available), files touched, evidence locations, and remaining follow-ups so collaborators can resume without redoing work.
+  * Maintain the shared task checklist in `docs/AGENT_TASK_CHECKLIST.md`: add new tasks with timestamp + source session, update statuses as work progresses, move finished items to "Completed," and note plan changes under "Plan Updates" so agents avoid duplicating or undoing completed work.
+  * Log updates with the helper scripts immediately after each task segment so the run log and checklist stay accurate: e.g. `python scripts/log_run_entry.py --title "Manual - feat/pr2-ux" --session rollout-2025-11-05T10-00-00-abc.jsonl --branch feat/pr2-ux --summary "Added noindex meta tags" --followup NONE` and `python scripts/add_task_checklist_entry.py --task "Re-run preview smoke" --source rollout-2025-11-04T18-48-41-fc... --notes "Waiting on PREVIEW_SECRET"`.
+  * When you finish an active checklist item, immediately move it to the "Completed" section (with evidence pointers) and add a plan-update bullet if scope or approach changed.
+  * Before starting new work, skim the most recent entries in both `docs/AGENT_RUN_LOG.md` and `docs/AGENT_TASK_CHECKLIST.md` so you pick up hand-offs and avoid repeating completed steps.
+  * Store evidence artifacts under `artifacts/<task>/YYYYMMDD/` (curl outputs, screenshots, HAR files, etc.) and reference those paths in your log and checklist updates.
 
 ## Preview Status — 2025-11-04
 - **Completed:** Sitemap Delta/Wayback UI hardening, Edge API request-id + JSON headers, sitemap.xml trim, tools index cleanup, new demo fixtures, `scripts/preview_smoke.mjs` for instant smoke.
