@@ -1,0 +1,145 @@
+--- /dev/null
++++ b/tests/dlf_envelope_invariants.test.mjs
+--- /dev/null+++ b/tests/dlf_envelope_invariants.test.mjs@@ -0,0 +1,19 @@+import test from 'node:test';
++import assert from 'node:assert/strict';
++import handler from '../api/check.js';
++
++test('DLF GET returns JSON error envelope with scheduler meta', async () => {
++  const req = new Request('https://example.test/api/check', { method: 'GET' });
++  const res = await handler(req);
++
++  assert.equal(res.status, 405, 'should be 405 for GET');
++  const ct = res.headers.get('content-type') || '';
++  assert.ok(ct.includes('application/json'), 'content-type should be JSON');
++  const payload = await res.json();
++  assert.equal(payload.ok, false);
++  assert.equal(typeof payload.code, 'string');
++  assert.equal(typeof payload.message, 'string');
++  assert.equal(typeof payload.requestId, 'string');
++  assert.ok(payload.meta && typeof payload.meta === 'object', 'meta should be object');
++  assert.ok(payload.meta.scheduler && typeof payload.meta.scheduler === 'object', 'meta.scheduler should be present');
++});
+
+--- /dev/null
++++ b/tests/api_contracts.test.mjs
+--- /dev/null+++ b/tests/api_contracts.test.mjs@@ -0,0 +1,97 @@+import test from 'node:test';
++import assert from 'node:assert/strict';
++import sitemapDelta from '../api/sitemap-delta.js';
++import waybackFixer from '../api/wayback-fixer.js';
++import metafetch from '../api/metafetch.js';
++
++// Save original fetch
++const realFetch = globalThis.fetch;
++
++test.beforeEach(() => {
++  globalThis.fetch = async (url, init = {}) => {
++    const u = typeof url === 'string' ? url : String(url?.url || url);
++    // Metafetch test HTML
++    if (u.startsWith('https://example.com/html')) {
++      return new Response('<!doctype html><html><head><title>Example Title</title><meta name="description" content="DESC"></head><body>OK</body></html>', {
++        status: 200,
++        headers: { 'content-type': 'text/html; charset=utf-8' }
++      });
++    }
++    // Sitemaps
++    if (u.endsWith('/sitemap-a.xml')) {
++      return new Response('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://a.example.com/1</loc></url></urlset>', {
++        status: 200,
++        headers: { 'content-type': 'application/xml' }
++      });
++    }
++    if (u.endsWith('/sitemap-b.xml')) {
++      return new Response('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://a.example.com/2</loc></url></urlset>', {
++        status: 200,
++        headers: { 'content-type': 'application/xml' }
++      });
++    }
++    // Wayback availability
++    if (u.startsWith('https://archive.org/wayback/available')) {
++      return new Response(JSON.stringify({ archived_snapshots: { closest: { available: true, url: "https://web.archive.org/web/20240101010101/https://example.com/old" } } }), {
++        status: 200,
++        headers: { 'content-type': 'application/json' }
++      });
++    }
++    if (u.startsWith('https://web.archive.org/web/')) {
++      return new Response(null, { status: 200, headers: { 'content-type': 'text/plain' } });
++    }
++    // Default
++    return realFetch(url, init);
++  };
++});
++
++test.afterEach(() => {
++  globalThis.fetch = realFetch;
++});
++
++test('metafetch returns JSON with meta.requestId', async () => {
++  const req = new Request('https://example.test/api/metafetch', {
++    method: 'POST',
++    headers: { 'content-type': 'application/json' },
++    body: JSON.stringify({ url: 'https://example.com/html' })
++  });
++  const res = await metafetch(req);
++  assert.equal(res.status, 200);
++  assert.ok((res.headers.get('content-type') || '').includes('application/json'));
++  const body = await res.json();
++  assert.equal(body.title, 'Example Title');
++  assert.ok(body.meta && typeof body.meta.requestId === 'string');
++});
++
++test('sitemap-delta returns consistent JSON shape', async () => {
++  const req = new Request('https://example.test/api/sitemap-delta', {
++    method: 'POST',
++    headers: { 'content-type': 'application/json' },
++    body: JSON.stringify({
++      mode: 'url',
++      a: 'https://a.example.com/sitemap-a.xml',
++      b: 'https://a.example.com/sitemap-b.xml'
++    })
++  });
++  const res = await sitemapDelta(req);
++  assert.equal(res.status, 200);
++  assert.ok((res.headers.get('content-type') || '').includes('application/json'));
++  const body = await res.json();
++  assert.ok(body.meta && typeof body.meta.requestId === 'string');
++  assert.ok(Array.isArray(body.added) && Array.isArray(body.removed));
++  assert.ok(Array.isArray(body.pairs) && Array.isArray(body.unmapped));
++});
++
++test('wayback-fixer returns results with meta', async () => {
++  const req = new Request('https://example.test/api/wayback-fixer', {
++    method: 'POST',
++    headers: { 'content-type': 'application/json' },
++    body: JSON.stringify({ urls: ['https://example.com/old'] })
++  });
++  const res = await waybackFixer(req);
++  assert.equal(res.status, 200);
++  assert.ok((res.headers.get('content-type') || '').includes('application/json'));
++  const body = await res.json();
++  assert.ok(Array.isArray(body.results));
++  assert.ok(body.meta && typeof body.meta.requestId === 'string');
++});
+
+--- /dev/null
++++ b/tests/csv_hardening.unit.test.mjs
+--- /dev/null+++ b/tests/csv_hardening.unit.test.mjs@@ -0,0 +1,21 @@+import test from 'node:test';
++import assert from 'node:assert/strict';
++
++// Minimal copy of the client-side CSV protection logic:
++function protectCSVCell(value) {
++  const str = String(value ?? '');
++  const trimmed = str.trimStart();
++  return /^[=+\-@]/.test(trimmed) ? "'" + str : str;
++}
++
++test('protectCSVCell prefixes dangerous formulas', () => {
++  for (const input of ['=1+2', '+SUM(A1:A2)', '-1', '@HYPERLINK("x","y")']) {
++    assert.ok(protectCSVCell(input).startsWith("'"));
++  }
++});
++
++test('protectCSVCell keeps normal cells unchanged', () => {
++  for (const input of ['hello', '  space', '1234', 'http://example.com']) {
++    assert.equal(protectCSVCell(input), input);
++  }
++});
