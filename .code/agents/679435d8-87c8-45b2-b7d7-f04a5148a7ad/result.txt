@@ -1,0 +1,222 @@
+[2025-11-04T21:47:34] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-produce-unified-diff
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-04T21:47:34] User instructions:
+Context: 
+
+Agent: Produce a unified diff patch for tinyutils/vercel.json adding CSP and a /public cache rule per PR1 while preserving existing content, plus a short curl-based verification checklist with expected headers.
+
+Context:
+- Repo root: /Users/cav/dev/TinyUtils/tinyutils
+- Guidance: use diffs_recs/pr1-security-caching.diff for intent; preserve all existing headers and rewrites, only adding the missing CSP entry and /public/(.*) caching rule.
+- Output: (1) unified diff patch for tinyutils/vercel.json that applies cleanly on current file, (2) concise verification checklist listing curl commands + expected headers for `/`, `/public/<asset>`, `/api/check`.
+
+Constraints:
+- Do not write files in the worktree; just output the patch content and checklist.
+- CSP must remain strict but compatible with current tooling.
+- Call out any assumptions or follow-ups needed.
+
+[2025-11-04T21:47:34] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-produce-unified-diff
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-04T21:47:34] User instructions:
+Context: 
+
+Agent: Produce a unified diff patch for tinyutils/vercel.json adding CSP and a /public cache rule per PR1 while preserving existing content, plus a short curl-based verification checklist with expected headers.
+
+Context:
+- Repo root: /Users/cav/dev/TinyUtils/tinyutils
+- Guidance: use diffs_recs/pr1-security-caching.diff for intent; preserve all existing headers and rewrites, only adding the missing CSP entry and /public/(.*) caching rule.
+- Output: (1) unified diff patch for tinyutils/vercel.json that applies cleanly on current file, (2) concise verification checklist listing curl commands + expected headers for `/`, `/public/<asset>`, `/api/check`.
+
+Constraints:
+- Do not write files in the worktree; just output the patch content and checklist.
+- CSP must remain strict but compatible with current tooling.
+- Call out any assumptions or follow-ups needed.
+
+
+[2025-11-04T21:47:38] thinking
+
+**Verifying working directory and file access**
+[2025-11-04T21:47:38] exec /bin/pwd in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-produce-unified-diff
+[2025-11-04T21:47:38] /bin/pwd succeeded in 35ms:
+/Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-produce-unified-diff
+[2025-11-04T21:47:38] tokens used: 5,639
+
+[2025-11-04T21:47:40] thinking
+
+**Checking repo root for vercel.json**
+[2025-11-04T21:47:41] exec ls in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-produce-unified-diff
+[2025-11-04T21:47:41] ls succeeded in 16ms:
+[2025-11-04T21:47:41] tokens used: 6,706
+
+[2025-11-04T21:47:43] thinking
+
+**Checking repository accessibility and path issues**
+[2025-11-04T21:47:44] exec ls /Users/cav/dev/TinyUtils in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-produce-unified-diff
+[2025-11-04T21:47:44] ls /Users/cav/dev/TinyUtils succeeded in 6ms:
+code-cli-tinyutils-recs.md
+diffs_recs
+docs
+PATH
+print1
+test_results_nov4.md
+tinyutils
+tinyutils.zip
+TinyUtilsCodexContext
+[2025-11-04T21:47:44] tokens used: 6,947
+
+[2025-11-04T21:47:46] thinking
+
+**Locating and preparing to read vercel.json**
+[2025-11-04T21:47:46] exec cat vercel.json in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:47:46] cat vercel.json succeeded in 7ms:
+{
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "geolocation=(), camera=(), microphone=(), usb=(), payment=(), browsing-topics=()" },
+        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+        { "key": "Cross-Origin-Resource-Policy", "value": "same-origin" },
+        { "key": "X-DNS-Prefetch-Control", "value": "off" }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" },
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+[2025-11-04T21:47:46] tokens used: 7,215
+
+[2025-11-04T21:47:47] thinking
+
+**Preparing to add CSP header**
+[2025-11-04T21:47:48] exec cat diffs_recs/pr1-security-caching.diff in /Users/cav/dev/TinyUtils
+[2025-11-04T21:47:48] cat diffs_recs/pr1-security-caching.diff succeeded in 7ms:
+--- a/vercel.json+++ b/vercel.json@@ -3,15 +3,87 @@     {
+       "source": "/(.*)",
+       "headers": [
+-        { "key": "X-Content-Type-Options", "value": "nosniff" },
+-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
++        {
++          "key": "X-Content-Type-Options",
++          "value": "nosniff"
++        },
++        {
++          "key": "Referrer-Policy",
++          "value": "strict-origin-when-cross-origin"
++        },
++        {
++          "key": "Strict-Transport-Security",
++          "value": "max-age=63072000; includeSubDomains; preload"
++        },
++        {
++          "key": "X-Frame-Options",
++          "value": "DENY"
+[2025-11-04T21:47:48] tokens used: 14,375
+
+[2025-11-04T21:48:25] thinking
+
+**Adding security and caching headers**
+
+I'll add a new Content-Security-Policy header into the main catch-all route’s headers array right after Permissions-Policy, and insert a new caching header block for `/public/(.*)` assets with max-age=600. Both changes keep existing header order and formatting in `tinyutils/vercel.json`, and I’ll provide a manual patch plus verification commands to confirm the new headers are applied correctly.
+
+**Patch**
+```diff
+--- a/vercel.json
++++ b/vercel.json
+@@ -6,7 +6,8 @@
+         { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+         { "key": "X-Frame-Options", "value": "DENY" },
+         { "key": "X-Content-Type-Options", "value": "nosniff" },
+         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+         { "key": "Permissions-Policy", "value": "geolocation=(), camera=(), microphone=(), usb=(), payment=(), browsing-topics=()" },
++        { "key": "Content-Security-Policy", "value": "default-src 'self'; img-src 'self' data: https:; script-src 'self' 'unsafe-inline' https://plausible.io; connect-src 'self' https://plausible.io https://archive.org https://web.archive.org; style-src 'self' 'unsafe-inline'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'" },
+         { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+@@ -32,9 +33,15 @@
+     {
+       "source": "/tools/wayback-fixer/demo/(.*)",
+       "headers": [
+         { "key": "Cache-Control", "value": "public, max-age=600" }
+       ]
+-    }
++    },
++    {
++      "source": "/public/(.*)",
++      "headers": [
++        { "key": "Cache-Control", "value": "public, max-age=600" }
++      ]
++    }
+   ],
+```
+
+**Verification**  
+- Run `curl -I <base-url>/` and check response headers include the full Content-Security-Policy as above plus existing headers like Strict-Transport-Security and Permissions-Policy.  
+- Run `curl -I <base-url>/public/some-asset` to verify `Cache-Control: public, max-age=600`.  
+- Run `curl -I <base-url>/tools/wayback-fixer/demo/some-path` to verify existing Cache-Control header remains unchanged.  
+- Run `curl -I <base-url>/api/any-endpoint` to confirm existing API cache policies are unaffected.
+
+**Assumptions**  
+- `<base-url>` should be replaced with the actual deployment domain (e.g., `https://tinyutils.vercel.app`).  
+- The patch is manual as the file is read-only, so it must be applied externally.  
+- Existing rewrites and other parts of the config remain untouched.
+[2025-11-04T21:48:37] codex
+
+Added a CSP header for all routes and a `/public/(.*)` cache rule while preserving existing directives in `tinyutils/vercel.json:6` and `tinyutils/vercel.json:35`.
+
+```diff
+--- a/vercel.json
++++ b/vercel.json
+@@ -7,6 +7,7 @@
+         { "key": "X-Frame-Options", "value": "DENY" },
+         { "key": "X-Content-Type-Options", "value": "nosniff" },
+         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+         { "key": "Permissions-Policy", "value": "geolocation=(), camera=(), microphone=(), usb=(), payment=(), browsing-topics=()" },
++        { "key": "Content-Security-Policy", "value": "default-src 'self'; img-src 'self' data: https:; script-src 'self' 'unsafe-inline' https://plausible.io; connect-src 'self' https://plausible.io https://archive.org https://web.archive.org; style-src 'self' 'unsafe-inline'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'" },
+         { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+         { "key": "Cross-Origin-Resource-Policy", "value": "same-origin" },
+         { "key": "X-DNS-Prefetch-Control", "value": "off" }
+@@ -32,6 +33,12 @@
+       "source": "/tools/wayback-fixer/demo/(.*)",
+       "headers": [
+         { "key": "Cache-Control", "value": "public, max-age=600" }
+       ]
+-    }
++    },
++    {
++      "source": "/public/(.*)",
++      "headers": [
++        { "key": "Cache-Control", "value": "public, max-age=600" }
++      ]
++    }
+   ],
+   "rewrites": [
+```
+
+**Verification**
+- `curl -sS -D- <base-url>/ -o /dev/null | grep -i 'content-security-policy'` → expect the CSP value `default-src 'self'; img-src 'self' data: https:; script-src 'self' 'unsafe-inline' https://plausible.io; connect-src 'self' https://plausible.io https://archive.org https://web.archive.org; style-src 'self' 'unsafe-inline'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'`.
+- `curl -sS -D- <base-url>/public/<asset> -o /dev/null | grep -i 'cache-control'` → expect `Cache-Control: public, max-age=600`.
+- `curl -sS -D- <base-url>/api/check -o /dev/null | grep -i 'cache-control'` → expect `Cache-Control: no-store` (from existing API policy).
+
+**Assumptions**
+- Replace `<base-url>` with the deployed TinyUtils host (e.g., production Vercel domain); adjust `<asset>` to a real file under `/public`.
+[2025-11-04T21:48:38] tokens used: 19,847

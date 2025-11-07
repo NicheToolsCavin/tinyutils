@@ -1,0 +1,800 @@
+[2025-11-04T21:52:19] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-short-shell
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-04T21:52:19] User instructions:
+Context: 
+
+Agent: Draft a short shell block that 1) exports TODAY in CET, 2) ensures `tinyutils/artifacts/pr1-security-cache/$TODAY` exists, 3) captures headers for $URL/, $URL/public/styles.css (or another existing public asset), and $URL/api/check into separate files with CET timestamps, and 4) appends a run log entry via `python3 tinyutils/scripts/log_run_entry.py` summarizing the capture. Make it portable for bash/zsh/fish and avoid destructive commands.
+
+Context:
+- Repo root: /Users/cav/dev/TinyUtils/tinyutils
+- After PR1 patch lands, we must collect evidence for preview/prod URLs.
+- Use CET timestamps (via `TZ=Europe/Madrid`).
+- Log entry should reference artifact paths and mark follow-up as NONE.
+
+Constraints:
+- Output only the shell block text (no file writes).
+- Use env vars for URL input (e.g., `PREVIEW_URL`, `PROD_URL`).
+- Append to run log using helper script with relevant summary/evidence.
+- Ensure compatibility with shells by avoiding bash-specific arrays; simple POSIX commands preferred.
+
+[2025-11-04T21:52:19] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-short-shell
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-04T21:52:19] User instructions:
+Context: 
+
+Agent: Draft a short shell block that 1) exports TODAY in CET, 2) ensures `tinyutils/artifacts/pr1-security-cache/$TODAY` exists, 3) captures headers for $URL/, $URL/public/styles.css (or another existing public asset), and $URL/api/check into separate files with CET timestamps, and 4) appends a run log entry via `python3 tinyutils/scripts/log_run_entry.py` summarizing the capture. Make it portable for bash/zsh/fish and avoid destructive commands.
+
+Context:
+- Repo root: /Users/cav/dev/TinyUtils/tinyutils
+- After PR1 patch lands, we must collect evidence for preview/prod URLs.
+- Use CET timestamps (via `TZ=Europe/Madrid`).
+- Log entry should reference artifact paths and mark follow-up as NONE.
+
+Constraints:
+- Output only the shell block text (no file writes).
+- Use env vars for URL input (e.g., `PREVIEW_URL`, `PROD_URL`).
+- Append to run log using helper script with relevant summary/evidence.
+- Ensure compatibility with shells by avoiding bash-specific arrays; simple POSIX commands preferred.
+
+
+[2025-11-04T21:53:04] thinking
+
+**Designing cross-shell export script**
+**Struggling with cross-shell syntax compatibility**
+
+This is quite a tricky puzzle! I’m weighing how to export a CET-based TODAY variable in a single shell snippet that works unmodified in bash, zsh, and fish, given their very different syntax—especially around conditionals and variable assignment. I’m exploring approaches like dual commands (`export` and `set -gx`), shell detection with `if`/`test`, and using Python to generate the value, but each hits syntax incompatibility or environment export scope issues. It feels like a best-effort snippet that sets the variable in both bash-style and fish-style, ignoring harmless errors, might be the closest practical solution.
+**Contemplating python3-driven cross-shell snippet**
+
+I'm considering a shell block that leans on a python3 script to produce the CET date, handle directory creation, HTTP captures, and logging, while outputting appropriate export commands for bash/zsh or fish. Since true automatic cross-shell export is tricky, the snippet would generate shell-compatible export or `set -gx` lines dynamically, letting the user eval or source them. This approach balances portability and the requirement for a single shell block doing all steps without destructive commands.
+**Evaluating cross-shell export complexities**
+
+I’m working through ways to produce a shell block that sets the TODAY variable and runs the required tasks across bash, zsh, and fish. The challenge is crafting syntax valid in all three shells, especially since fish handles variables and control flow differently. I’m considering a python3-driven approach that performs all operations and prints appropriate export or set commands, but actually auto-exporting TODAY in the parent shell is fundamentally limited. Balancing portability with the export requirement is tricky, so I’m leaning toward a python3-centric block that runs the tasks and outputs shell-specific export instructions for the user to apply.
+**Considering shell logic to cover all environments**
+
+I'm exploring various ways to write a universal snippet that sets the TODAY variable and runs the required commands across bash, zsh, and fish. Since their syntaxes differ significantly, I’m weighing solutions like splitting logic by detecting the shell, swallowing errors for unsupported commands, or relying mainly on python3 to do the heavy lifting while including both export styles together. It’s clear there's no perfect universal syntax, so I’m leaning toward a best-effort approach combining bash-friendly commands with fish alternatives commented or conditionally executed, aiming to fulfill the user’s requirements as practically as possible.
+[2025-11-04T21:55:59] codex
+**Struggling with cross-shell syntax compatibility**
+
+This is quite a tricky puzzle! I’m weighing how to export a CET-based TODAY variable in a single shell snippet that works unmodified in bash, zsh, and fish, given their very different syntax—especially around conditionals and variable assignment. I’m exploring approaches like dual commands (`export` and `set -gx`), shell detection with `if`/`test`, and using Python to generate the value, but each hits syntax incompatibility or environment export scope issues. It feels like a best-effort snippet that sets the variable in both bash-style and fish-style, ignoring harmless errors, might be the closest practical solution.
+[2025-11-04T21:55:59] codex
+**Contemplating python3-driven cross-shell snippet**
+
+I'm considering a shell block that leans on a python3 script to produce the CET date, handle directory creation, HTTP captures, and logging, while outputting appropriate export commands for bash/zsh or fish. Since true automatic cross-shell export is tricky, the snippet would generate shell-compatible export or `set -gx` lines dynamically, letting the user eval or source them. This approach balances portability and the requirement for a single shell block doing all steps without destructive commands.
+[2025-11-04T21:55:59] codex
+**Evaluating cross-shell export complexities**
+
+I’m working through ways to produce a shell block that sets the TODAY variable and runs the required tasks across bash, zsh, and fish. The challenge is crafting syntax valid in all three shells, especially since fish handles variables and control flow differently. I’m considering a python3-driven approach that performs all operations and prints appropriate export or set commands, but actually auto-exporting TODAY in the parent shell is fundamentally limited. Balancing portability with the export requirement is tricky, so I’m leaning toward a python3-centric block that runs the tasks and outputs shell-specific export instructions for the user to apply.
+[2025-11-04T21:55:59] codex
+**Considering shell logic to cover all environments**
+
+I'm exploring various ways to write a universal snippet that sets the TODAY variable and runs the required commands across bash, zsh, and fish. Since their syntaxes differ significantly, I’m weighing solutions like splitting logic by detecting the shell, swallowing errors for unsupported commands, or relying mainly on python3 to do the heavy lifting while including both export styles together. It’s clear there's no perfect universal syntax, so I’m leaning toward a best-effort approach combining bash-friendly commands with fish alternatives commented or conditionally executed, aiming to fulfill the user’s requirements as practically as possible.
+[2025-11-04T21:55:59] exec bash -lc ls in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-short-shell/.
+[2025-11-04T21:55:59] bash -lc ls succeeded in 116ms:
+[2025-11-04T21:55:59] tokens used: 24,867
+
+[2025-11-04T21:56:02] thinking
+
+**Investigating directory access issues**
+[2025-11-04T21:56:03] exec bash -lc pwd in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-short-shell/.
+[2025-11-04T21:56:03] bash -lc pwd succeeded in 108ms:
+/Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-short-shell
+[2025-11-04T21:56:03] tokens used: 25,154
+
+[2025-11-04T21:56:05] thinking
+
+**Checking directory structure**
+[2025-11-04T21:56:05] exec bash -lc ls in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-short-shell
+[2025-11-04T21:56:05] bash -lc ls succeeded in 109ms:
+[2025-11-04T21:56:05] tokens used: 25,324
+
+[2025-11-04T21:56:07] thinking
+
+**Checking parent directory contents**
+[2025-11-04T21:56:08] exec bash -lc ls in /Users/cav/.code/working/tinyutils/branches
+[2025-11-04T21:56:08] bash -lc ls succeeded in 112ms:
+code-code-draft-concise-acceptance
+code-code-draft-concise-description
+code-code-draft-pr3-description
+code-code-gpt-5-codex-draft-short-shell
+code-code-gpt-5-codex-extract-expected-orchestrator
+code-code-gpt-5-codex-inspect-four-diff
+code-code-gpt-5-codex-list-available-diff
+code-code-gpt-5-codex-list-scripts--lockfiles
+code-code-gpt-5-codex-locate-existing-fence-auth
+code-code-gpt-5-codex-parse-pr3-diff
+code-code-gpt-5-codex-prepare-compact-smoke
+code-code-gpt-5-codex-produce-concise-route
+code-code-gpt-5-codex-produce-exact-bash
+code-code-gpt-5-codex-produce-exact-commands
+code-code-gpt-5-codex-produce-per-diff-touched-file
+code-code-gpt-5-codex-produce-unified-diff
+code-code-gpt-5-codex-propose-concrete-patch
+code-code-gpt-5-codex-review-tinyutils-vercel-json-against
+code-code-gpt-5-codex-review-vercel-json-against
+code-code-gpt-5-codex-suggest-minimal-diffs
+[2025-11-04T21:56:08] tokens used: 25,574
+
+[2025-11-04T21:56:13] thinking
+
+**Investigating repo directory access**
+[2025-11-04T21:56:15] exec bash -lc ls in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:56:15] bash -lc ls succeeded in 112ms:
+ads.txt
+ADSENSE_SETUP.md
+AGENTS.md
+api
+artifacts
+CHANGES-v1.3.0-rc2.txt
+CHANGES-v1.3.0-rc3.txt
+DEPLOY_PRODUCTION_CHECKLIST.md
+docs
+feedback.html
+guides
+index.html
+offering-to-the-triple-goddess.txt
+package.json
+PREVIEW_SMOKE_CHECKLIST.md
+privacy.html
+public
+README_DEPLOY.md
+README-VERCEL.md
+README.md
+[2025-11-04T21:56:15] tokens used: 26,313
+
+[2025-11-04T21:56:33] thinking
+
+**Analyzing path and environment variable handling**
+[2025-11-04T21:56:34] exec bash -lc "sed -n '1,200p' tinyutils/scripts/log_run_entry.py" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:56:34] bash -lc "sed -n '1,200p' tinyutils/scripts/log_run_entry.py" exited 1 in 109ms:
+ERROR
+sed: tinyutils/scripts/log_run_entry.py: No such file or directory
+[2025-11-04T21:56:34] tokens used: 28,188
+
+[2025-11-04T21:56:36] thinking
+
+**Checking script location**
+[2025-11-04T21:56:37] exec bash -lc "sed -n '1,200p' scripts/log_run_entry.py" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:56:37] bash -lc "sed -n '1,200p' scripts/log_run_entry.py" succeeded in 116ms:
+#!/usr/bin/env python3
+"""Insert a structured entry into docs/AGENT_RUN_LOG.md."""
+
+import argparse
+from datetime import datetime
+from pathlib import Path
+
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:  # pragma: no cover
+    ZoneInfo = None  # type: ignore
+
+ROOT = Path(__file__).resolve().parents[1]
+LOG_PATH = ROOT / "docs" / "AGENT_RUN_LOG.md"
+SESSIONS_MARKER = "## Sessions\n\n"
+
+
+def format_timestamp(ts: datetime) -> str:
+    if ZoneInfo is None:
+        return ts.strftime("%Y-%m-%d %H:%M CET")
+[2025-11-04T21:56:37] tokens used: 28,385
+
+[2025-11-04T21:57:18] thinking
+
+**Designing cross-shell Python-driven capture script**
+
+I’m working out how to create a Python script that sets and uses a CET-based TODAY environment variable internally for subprocess commands, captures headers and assets via curl with fallback logic, and produces a run log entry referencing artifact paths—all while ensuring compatibility across fish and bash shells despite environment read-only constraints. I’m figuring out how to locate repo root paths reliably and handle the user’s requirements around summary info, timestamps, and fallback asset detection in this setup.
+**Implementing asset checks and repo root detection**
+
+I’m figuring out how to use curl to check asset availability with HTTP status codes and implement fallback logic for capturing headers, while also reliably detecting the repository root by searching upward for key scripts so I can run logging commands correctly relative to the workspace.
+**Creating cross-shell environment setup and header capture script**
+
+I’m designing a Python script that detects the user’s shell to write a corresponding environment setup file for the TODAY variable, performs asset availability checks with curl, captures HTTP headers into timestamped artifacts, logs the results by running the repo’s logging script from the proper workspace root, and finally outputs a minimal cross-shell shell snippet to source and clean up the env file—so the process works smoothly across different shells and environments.
+**Detailing Python script for repo root, asset check, and header capture**
+
+I’m assembling a robust Python script that locates the tinyutils repo root and workspace, verifies required environment variables, finds a suitable asset via curl, captures HTTP headers into timestamped artifact files, writes a TODAY environment file adapted per shell, and logs the capture results by invoking the repo’s log script—all while carefully handling paths, errors, and cross-shell compatibility in a read-only-safe manner.
+```sh
+python3 - <<'PY'
+from __future__ import annotations
+
+import os
+import sys
+import shutil
+import subprocess
+from pathlib import Path
+from datetime import datetime, timedelta, timezone
+
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:
+    ZoneInfo = None
+
+def fail(message: str) -> None:
+    sys.stderr.write(f"[pr1-capture] {message}\n")
+    raise SystemExit(1)
+
+if ZoneInfo is not None:
+    cet_tz = ZoneInfo("Europe/Madrid")
+else:
+    cet_tz = timezone(timedelta(hours=1))
+now = datetime.now(cet_tz)
+today = now.strftime("%Y-%m-%d")
+timestamp = now.strftime("%Y%m%dT%H%M%S%z")
+
+shell_name = Path(os.environ.get("SHELL", "")).name.lower()
+env_file = Path(".tinyutils_set_today")
+if os.environ.get("FISH_VERSION") or shell_name == "fish":
+    env_file.write_text(f'set -gx TODAY "{today}"\n', encoding="utf-8")
+else:
+    env_file.write_text(f'export TODAY="{today}"\n', encoding="utf-8")
+
+target_url = None
+for key in ("PREVIEW_URL", "PROD_URL", "URL"):
+    value = os.environ.get(key)
+    if value:
+        target_url = value.strip()
+        break
+if not target_url:
+    fail("Set PREVIEW_URL or PROD_URL (or URL) before running.")
+target_url = target_url.rstrip("/")
+if not target_url.startswith(("http://", "https://")):
+    fail(f"URL must include scheme: {target_url}")
+
+cwd = Path.cwd()
+repo_root = None
+workspace_root = None
+for candidate in [cwd] + list(cwd.parents):
+    direct = candidate / "scripts" / "log_run_entry.py"
+    nested = candidate / "tinyutils" / "scripts" / "log_run_entry.py"
+    if direct.exists():
+        repo_root = candidate
+        workspace_root = candidate.parent if candidate.name == "tinyutils" else candidate
+        break
+    if nested.exists():
+        repo_root = candidate / "tinyutils"
+        workspace_root = candidate
+        break
+if repo_root is None:
+    fail("Unable to locate tinyutils repository root from current directory.")
+
+if (workspace_root / "tinyutils").is_dir():
+    artifact_rel_dir = Path("tinyutils") / "artifacts" / "pr1-security-cache" / today
+    artifact_dir = workspace_root / artifact_rel_dir
+else:
+    artifact_rel_dir = Path("artifacts") / "pr1-security-cache" / today
+    artifact_dir = repo_root / "artifacts" / "pr1-security-cache" / today
+
+artifact_dir.mkdir(parents=True, exist_ok=True)
+
+if shutil.which("curl") is None:
+    fail("curl is required but not available in PATH.")
+
+def compose(base: str, suffix: str) -> str:
+    base_clean = base.rstrip("/")
+    suffix_clean = suffix.lstrip("/")
+    return f"{base_clean}/{suffix_clean}" if suffix_clean else f"{base_clean}/"
+
+def display_path(suffix: str) -> str:
+    suffix_clean = suffix.lstrip("/")
+    return f"/{suffix_clean}" if suffix_clean else "/"
+
+cmd_env = os.environ.copy()
+cmd_env["TODAY"] = today
+
+asset_candidates = [
+    "public/styles.css",
+    "public/main.css",
+    "public/assets/styles.css",
+    "public/css/styles.css",
+    "public/favicon.ico",
+    "public/robots.txt",
+]
+asset_suffix = None
+for candidate in asset_candidates:
+    probe_cmd = ["curl", "-sS", "-o", os.devnull, "-w", "%{http_code}", compose(target_url, candidate)]
+    probe = subprocess.run(probe_cmd, capture_output=True, text=True, env=cmd_env)
+    if probe.returncode != 0:
+        continue
+    code = probe.stdout.strip()[:3]
+    if code.isdigit() and code[0] in {"2", "3"}:
+        asset_suffix = candidate
+        break
+if asset_suffix is None:
+    asset_suffix = "public/styles.css"
+
+captures = [
+    ("root", ""),
+    ("asset", asset_suffix),
+    ("api", "api/check"),
+]
+
+records = []
+for label, suffix in captures:
+    full_url = compose(target_url, suffix)
+    headers_path = artifact_dir / f"{label}-headers-{timestamp}.txt"
+    curl_cmd = [
+        "curl",
+        "-sS",
+        "-D",
+        str(headers_path),
+        "-o",
+        os.devnull,
+        "-L",
+        "-H",
+        "Cache-Control: no-cache",
+        "-H",
+        "Pragma: no-cache",
+        full_url,
+    ]
+    result = subprocess.run(curl_cmd, env=cmd_env)
+    if result.returncode != 0:
+        fail(f"curl failed for {full_url}")
+    status_line = "unknown"
+    try:
+        with headers_path.open("r", encoding="utf-8", errors="replace") as stream:
+            for line in stream:
+                line = line.strip()
+                if line.upper().startswith("HTTP/"):
+                    status_line = line
+    except FileNotFoundError:
+        fail(f"Header file missing for {full_url}")
+    records.append(
+        {
+            "label": label,
+            "suffix": suffix,
+            "display": display_path(suffix),
+            "url": full_url,
+            "headers_path": headers_path,
+            "status": status_line,
+        }
+    )
+
+artifact_rel_paths = []
+for record in records:
+    try:
+        rel_path = record["headers_path"].relative_to(workspace_root)
+    except ValueError:
+        rel_path = artifact_rel_dir / record["headers_path"].name
+    artifact_rel_paths.append(str(rel_path).replace("\\", "/"))
+
+summary_lines = [
+    f"Captured headers for {', '.join(r['display'] for r in records)} on {target_url}.",
+    "Statuses: " + ", ".join(f"{r['display']} -> {r['status']}" for r in records),
+]
+
+timestamp_str = now.strftime("%Y-%m-%d %H:%M CET")
+log_cmd = [
+    "python3",
+    "tinyutils/scripts/log_run_entry.py",
+    "--title",
+    "PR1 security cache capture",
+    "--summary",
+    summary_lines[0],
+    "--summary",
+    summary_lines[1],
+    "--evidence",
+    ", ".join(artifact_rel_paths),
+    "--followup",
+    "NONE",
+    "--timestamp",
+    timestamp_str,
+]
+subprocess.run(log_cmd, check=True, cwd=str(workspace_root), env=cmd_env)
+PY
+source .tinyutils_set_today
+rm -f .tinyutils_set_today
+```
+[2025-11-04T22:00:27] codex
+**Implementing asset checks and repo root detection**
+
+I’m figuring out how to use curl to check asset availability with HTTP status codes and implement fallback logic for capturing headers, while also reliably detecting the repository root by searching upward for key scripts so I can run logging commands correctly relative to the workspace.
+[2025-11-04T22:00:27] codex
+**Creating cross-shell environment setup and header capture script**
+
+I’m designing a Python script that detects the user’s shell to write a corresponding environment setup file for the TODAY variable, performs asset availability checks with curl, captures HTTP headers into timestamped artifacts, logs the results by running the repo’s logging script from the proper workspace root, and finally outputs a minimal cross-shell shell snippet to source and clean up the env file—so the process works smoothly across different shells and environments.
+[2025-11-04T22:00:27] codex
+**Detailing Python script for repo root, asset check, and header capture**
+
+I’m assembling a robust Python script that locates the tinyutils repo root and workspace, verifies required environment variables, finds a suitable asset via curl, captures HTTP headers into timestamped artifact files, writes a TODAY environment file adapted per shell, and logs the capture results by invoking the repo’s log script—all while carefully handling paths, errors, and cross-shell compatibility in a read-only-safe manner.
+[2025-11-04T22:00:27] codex
+```sh
+python3 - <<'PY'
+from __future__ import annotations
+
+import os
+import sys
+import shutil
+import subprocess
+from pathlib import Path
+from datetime import datetime, timedelta, timezone
+
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:
+    ZoneInfo = None
+
+def fail(message: str) -> None:
+    sys.stderr.write(f"[pr1-capture] {message}\n")
+    raise SystemExit(1)
+
+if ZoneInfo is not None:
+    cet_tz = ZoneInfo("Europe/Madrid")
+else:
+    cet_tz = timezone(timedelta(hours=1))
+now = datetime.now(cet_tz)
+today = now.strftime("%Y-%m-%d")
+timestamp = now.strftime("%Y%m%dT%H%M%S%z")
+
+shell_name = Path(os.environ.get("SHELL", "")).name.lower()
+env_file = Path(".tinyutils_set_today")
+if os.environ.get("FISH_VERSION") or shell_name == "fish":
+    env_file.write_text(f'set -gx TODAY "{today}"\n', encoding="utf-8")
+else:
+    env_file.write_text(f'export TODAY="{today}"\n', encoding="utf-8")
+
+target_url = None
+for key in ("PREVIEW_URL", "PROD_URL", "URL"):
+    value = os.environ.get(key)
+    if value:
+        target_url = value.strip()
+        break
+if not target_url:
+    fail("Set PREVIEW_URL or PROD_URL (or URL) before running.")
+target_url = target_url.rstrip("/")
+if not target_url.startswith(("http://", "https://")):
+    fail(f"URL must include scheme: {target_url}")
+
+cwd = Path.cwd()
+repo_root = None
+workspace_root = None
+for candidate in [cwd] + list(cwd.parents):
+    direct = candidate / "scripts" / "log_run_entry.py"
+    nested = candidate / "tinyutils" / "scripts" / "log_run_entry.py"
+    if direct.exists():
+        repo_root = candidate
+        workspace_root = candidate.parent if candidate.name == "tinyutils" else candidate
+        break
+    if nested.exists():
+        repo_root = candidate / "tinyutils"
+        workspace_root = candidate
+        break
+if repo_root is None:
+    fail("Unable to locate tinyutils repository root from current directory.")
+
+if (workspace_root / "tinyutils").is_dir():
+    artifact_rel_dir = Path("tinyutils") / "artifacts" / "pr1-security-cache" / today
+    artifact_dir = workspace_root / artifact_rel_dir
+else:
+    artifact_rel_dir = Path("artifacts") / "pr1-security-cache" / today
+    artifact_dir = repo_root / "artifacts" / "pr1-security-cache" / today
+
+artifact_dir.mkdir(parents=True, exist_ok=True)
+
+if shutil.which("curl") is None:
+    fail("curl is required but not available in PATH.")
+
+def compose(base: str, suffix: str) -> str:
+    base_clean = base.rstrip("/")
+    suffix_clean = suffix.lstrip("/")
+    return f"{base_clean}/{suffix_clean}" if suffix_clean else f"{base_clean}/"
+
+def display_path(suffix: str) -> str:
+    suffix_clean = suffix.lstrip("/")
+    return f"/{suffix_clean}" if suffix_clean else "/"
+
+cmd_env = os.environ.copy()
+cmd_env["TODAY"] = today
+
+asset_candidates = [
+    "public/styles.css",
+    "public/main.css",
+    "public/assets/styles.css",
+    "public/css/styles.css",
+    "public/favicon.ico",
+    "public/robots.txt",
+]
+asset_suffix = None
+for candidate in asset_candidates:
+    probe_cmd = ["curl", "-sS", "-o", os.devnull, "-w", "%{http_code}", compose(target_url, candidate)]
+    probe = subprocess.run(probe_cmd, capture_output=True, text=True, env=cmd_env)
+    if probe.returncode != 0:
+        continue
+    code = probe.stdout.strip()[:3]
+    if code.isdigit() and code[0] in {"2", "3"}:
+        asset_suffix = candidate
+        break
+if asset_suffix is None:
+    asset_suffix = "public/styles.css"
+
+captures = [
+    ("root", ""),
+    ("asset", asset_suffix),
+    ("api", "api/check"),
+]
+
+records = []
+for label, suffix in captures:
+    full_url = compose(target_url, suffix)
+    headers_path = artifact_dir / f"{label}-headers-{timestamp}.txt"
+    curl_cmd = [
+        "curl",
+        "-sS",
+        "-D",
+        str(headers_path),
+        "-o",
+        os.devnull,
+        "-L",
+        "-H",
+        "Cache-Control: no-cache",
+        "-H",
+        "Pragma: no-cache",
+        full_url,
+    ]
+    result = subprocess.run(curl_cmd, env=cmd_env)
+    if result.returncode != 0:
+        fail(f"curl failed for {full_url}")
+    status_line = "unknown"
+    try:
+        with headers_path.open("r", encoding="utf-8", errors="replace") as stream:
+            for line in stream:
+                line = line.strip()
+                if line.upper().startswith("HTTP/"):
+                    status_line = line
+    except FileNotFoundError:
+        fail(f"Header file missing for {full_url}")
+    records.append(
+        {
+            "label": label,
+            "suffix": suffix,
+            "display": display_path(suffix),
+            "url": full_url,
+            "headers_path": headers_path,
+            "status": status_line,
+        }
+    )
+
+artifact_rel_paths = []
+for record in records:
+    try:
+        rel_path = record["headers_path"].relative_to(workspace_root)
+    except ValueError:
+        rel_path = artifact_rel_dir / record["headers_path"].name
+    artifact_rel_paths.append(str(rel_path).replace("\\", "/"))
+
+summary_lines = [
+    f"Captured headers for {', '.join(r['display'] for r in records)} on {target_url}.",
+    "Statuses: " + ", ".join(f"{r['display']} -> {r['status']}" for r in records),
+]
+
+timestamp_str = now.strftime("%Y-%m-%d %H:%M CET")
+log_cmd = [
+    "python3",
+    "tinyutils/scripts/log_run_entry.py",
+    "--title",
+    "PR1 security cache capture",
+    "--summary",
+    summary_lines[0],
+    "--summary",
+    summary_lines[1],
+    "--evidence",
+    ", ".join(artifact_rel_paths),
+    "--followup",
+    "NONE",
+    "--timestamp",
+    timestamp_str,
+]
+subprocess.run(log_cmd, check=True, cwd=str(workspace_root), env=cmd_env)
+PY
+source .tinyutils_set_today
+rm -f .tinyutils_set_today
+```
+[2025-11-04T22:00:27] codex
+
+```sh
+python3 - <<'PY'
+from __future__ import annotations
+
+import os
+import sys
+import shutil
+import subprocess
+from pathlib import Path
+from datetime import datetime, timedelta, timezone
+
+try:
+    from zoneinfo import ZoneInfo  # type: ignore
+except ImportError:
+    ZoneInfo = None  # type: ignore
+
+
+def fail(message: str) -> None:
+    sys.stderr.write(f"[pr1-capture] {message}\n")
+    raise SystemExit(1)
+
+
+cet_tz = ZoneInfo("Europe/Madrid") if ZoneInfo is not None else timezone(timedelta(hours=1))
+now = datetime.now(cet_tz)
+today = now.strftime("%Y-%m-%d")
+timestamp = now.strftime("%Y%m%dT%H%M%S%z")
+
+shell_name = Path(os.environ.get("SHELL", "")).name.lower()
+env_file = Path(".tinyutils_set_today")
+if os.environ.get("FISH_VERSION") or shell_name == "fish":
+    env_file.write_text(f'set -gx TODAY "{today}"\n', encoding="utf-8")
+else:
+    env_file.write_text(f'export TODAY="{today}"\n', encoding="utf-8")
+
+target_url = None
+for key in ("PREVIEW_URL", "PROD_URL", "URL"):
+    value = os.environ.get(key)
+    if value:
+        target_url = value.strip()
+        break
+if not target_url:
+    fail("Set PREVIEW_URL or PROD_URL (or URL) before running.")
+target_url = target_url.rstrip("/")
+if not target_url.startswith(("http://", "https://")):
+    fail(f"URL must include scheme: {target_url}")
+
+cwd = Path.cwd()
+repo_root = None
+workspace_root = None
+for candidate in [cwd] + list(cwd.parents):
+    direct = candidate / "scripts" / "log_run_entry.py"
+    nested = candidate / "tinyutils" / "scripts" / "log_run_entry.py"
+    if direct.exists():
+        repo_root = candidate
+        workspace_root = candidate.parent if candidate.name == "tinyutils" else candidate
+        break
+    if nested.exists():
+        repo_root = candidate / "tinyutils"
+        workspace_root = candidate
+        break
+if repo_root is None:
+    fail("Unable to locate tinyutils repository root from current directory.")
+
+if (workspace_root / "tinyutils").is_dir():
+    artifact_rel_dir = Path("tinyutils") / "artifacts" / "pr1-security-cache" / today
+    artifact_dir = workspace_root / artifact_rel_dir
+else:
+    artifact_rel_dir = Path("artifacts") / "pr1-security-cache" / today
+    artifact_dir = repo_root / "artifacts" / "pr1-security-cache" / today
+
+artifact_dir.mkdir(parents=True, exist_ok=True)
+
+if shutil.which("curl") is None:
+    fail("curl is required but not available in PATH.")
+
+
+def compose(base: str, suffix: str) -> str:
+    base_clean = base.rstrip("/")
+    suffix_clean = suffix.lstrip("/")
+    return f"{base_clean}/{suffix_clean}" if suffix_clean else f"{base_clean}/"
+
+
+def display_path(suffix: str) -> str:
+    suffix_clean = suffix.lstrip("/")
+    return f"/{suffix_clean}" if suffix_clean else "/"
+
+
+cmd_env = os.environ.copy()
+cmd_env["TODAY"] = today
+
+asset_candidates = [
+    "public/styles.css",
+    "public/main.css",
+    "public/assets/styles.css",
+    "public/css/styles.css",
+    "public/favicon.ico",
+    "public/robots.txt",
+]
+asset_suffix = None
+for candidate in asset_candidates:
+    probe_cmd = ["curl", "-sS", "-o", os.devnull, "-w", "%{http_code}", compose(target_url, candidate)]
+    probe = subprocess.run(probe_cmd, capture_output=True, text=True, env=cmd_env)
+    if probe.returncode != 0:
+        continue
+    code = probe.stdout.strip()[:3]
+    if code.isdigit() and code[0] in {"2", "3"}:
+        asset_suffix = candidate
+        break
+if asset_suffix is None:
+    asset_suffix = "public/styles.css"
+
+captures = [
+    ("root", ""),
+    ("asset", asset_suffix),
+    ("api", "api/check"),
+]
+
+records = []
+for label, suffix in captures:
+    full_url = compose(target_url, suffix)
+    headers_path = artifact_dir / f"{label}-headers-{timestamp}.txt"
+    curl_cmd = [
+        "curl",
+        "-sS",
+        "-D",
+        str(headers_path),
+        "-o",
+        os.devnull,
+        "-L",
+        "-H",
+        "Cache-Control: no-cache",
+        "-H",
+        "Pragma: no-cache",
+        full_url,
+    ]
+    result = subprocess.run(curl_cmd, env=cmd_env)
+    if result.returncode != 0:
+        fail(f"curl failed for {full_url}")
+    status_line = "unknown"
+    try:
+        with headers_path.open("r", encoding="utf-8", errors="replace") as stream:
+            for line in stream:
+                line = line.strip()
+                if line.upper().startswith("HTTP/"):
+                    status_line = line
+    except FileNotFoundError:
+        fail(f"Header file missing for {full_url}")
+    records.append(
+        {
+            "label": label,
+            "suffix": suffix,
+            "display": display_path(suffix),
+            "url": full_url,
+            "headers_path": headers_path,
+            "status": status_line,
+        }
+    )
+
+artifact_rel_paths = []
+for record in records:
+    try:
+        rel_path = record["headers_path"].relative_to(workspace_root)
+    except ValueError:
+        rel_path = artifact_rel_dir / record["headers_path"].name
+    artifact_rel_paths.append(str(rel_path).replace("\\", "/"))
+
+summary_lines = [
+    f"Captured headers for {', '.join(r['display'] for r in records)} on {target_url}.",
+    "Statuses: " + ", ".join(f"{r['display']} -> {r['status']}" for r in records),
+]
+
+timestamp_str = now.strftime("%Y-%m-%d %H:%M CET")
+log_cmd = [
+    "python3",
+    "tinyutils/scripts/log_run_entry.py",
+    "--title",
+    "PR1 security cache capture",
+    "--summary",
+    summary_lines[0],
+    "--summary",
+    summary_lines[1],
+    "--evidence",
+    ", ".join(artifact_rel_paths),
+    "--followup",
+    "NONE",
+    "--timestamp",
+    timestamp_str,
+]
+subprocess.run(log_cmd, check=True, cwd=str(workspace_root), env=cmd_env)
+PY
+source .tinyutils_set_today
+rm -f .tinyutils_set_today
+```
+[2025-11-04T22:00:31] tokens used: 79,905

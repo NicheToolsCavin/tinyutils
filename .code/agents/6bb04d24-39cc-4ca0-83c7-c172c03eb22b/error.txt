@@ -1,0 +1,25 @@
+Command failed: [2025-11-05T00:49:36] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-teams-tarot-scan-repo-iframe-embed-cross-origin
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: auto
+--------
+[2025-11-05T00:49:36] User instructions:
+Scan the repo for iframe/embed/cross-origin usage and draft tinyutils/artifacts/phase2-roster/$TODAY/csp-risk-note.md with findings, recommended CSP directives, compatibility notes, and human-confirmation items. Use CET (today 2025-11-05) and keep it concise. Focus on tools/*.html, public/tools/*, and any external assets (analytics, fonts, scripts).
+[2025-11-05T00:49:36] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-teams-tarot-scan-repo-iframe-embed-cross-origin
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: auto
+--------
+[2025-11-05T00:49:36] User instructions:
+Scan the repo for iframe/embed/cross-origin usage and draft tinyutils/artifacts/phase2-roster/$TODAY/csp-risk-note.md with findings, recommended CSP directives, compatibility notes, and human-confirmation items. Use CET (today 2025-11-05) and keep it concise. Focus on tools/*.html, public/tools/*, and any external assets (analytics, fonts, scripts).
+[2025-11-05T00:49:36] ERROR: You've hit your usage limit. Try again in 4 days 14 hours 56 minutes.

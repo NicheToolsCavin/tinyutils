@@ -1,0 +1,241 @@
+[2025-11-04T12:05:40] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-draft-concise-acceptance
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-04T12:05:40] User instructions:
+Context: Goal: Define per-PR acceptance criteria from briefs/diffs. Inputs: diffs in ~/dev/TinyUtils/diffs_recs (PR1 security+caching, PR2 UX noindex/debug, PR3 preview fence depends on PR1, PR4 tests/contracts), public tools must remain open (Dead Link Finder, Sitemap Delta, Wayback Fixer), JSON endpoints must include content-type + cache-control: no-store, deploy via vercel non-interactive with preview→prod fallback.
+
+Agent: Draft a concise acceptance matrix for PR1–PR4 with exact checks (headers, gating behavior, public tool availability, test commands, deploy verification) and list the URLs/endpoints to probe post-deploy.
+[2025-11-04T12:05:40] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-draft-concise-acceptance
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-04T12:05:40] User instructions:
+Context: Goal: Define per-PR acceptance criteria from briefs/diffs. Inputs: diffs in ~/dev/TinyUtils/diffs_recs (PR1 security+caching, PR2 UX noindex/debug, PR3 preview fence depends on PR1, PR4 tests/contracts), public tools must remain open (Dead Link Finder, Sitemap Delta, Wayback Fixer), JSON endpoints must include content-type + cache-control: no-store, deploy via vercel non-interactive with preview→prod fallback.
+
+Agent: Draft a concise acceptance matrix for PR1–PR4 with exact checks (headers, gating behavior, public tool availability, test commands, deploy verification) and list the URLs/endpoints to probe post-deploy.
+
+[2025-11-04T12:05:44] thinking
+
+**Inspecting diff directories for acceptance matrix**
+[2025-11-04T12:05:45] exec bash -lc ls in /Users/cav/.code/working/tinyutils/branches/code-code-draft-concise-acceptance
+[2025-11-04T12:05:45] bash -lc ls succeeded in 130ms:
+[2025-11-04T12:05:45] tokens used: 5,645
+
+[2025-11-04T12:05:46] thinking
+
+**Checking directory contents thoroughly**
+[2025-11-04T12:05:47] exec bash -lc 'ls -a' in /Users/cav/.code/working/tinyutils/branches/code-code-draft-concise-acceptance
+[2025-11-04T12:05:47] bash -lc 'ls -a' succeeded in 151ms:
+.
+..
+.git
+[2025-11-04T12:05:47] tokens used: 5,911
+
+[2025-11-04T12:05:48] thinking
+
+**Checking repo diffs for acceptance matrix**
+[2025-11-04T12:05:49] exec bash -lc 'ls ~/dev/TinyUtils/diffs_recs' in /Users/cav/.code/working/tinyutils/branches/code-code-draft-concise-acceptance
+[2025-11-04T12:05:49] bash -lc 'ls ~/dev/TinyUtils/diffs_recs' succeeded in 138ms:
+pr1-security-caching.diff
+pr2-ux-noindex-debug.diff
+pr3-preview-fence.diff
+pr4-tests-contracts.diff
+Pro reasoning message nov 4.md
+[2025-11-04T12:05:49] tokens used: 6,163
+
+[2025-11-04T12:05:52] thinking
+
+**Reviewing diffs for acceptance criteria**
+[2025-11-04T12:05:52] exec bash -lc "sed -n '1,160p' ~/dev/TinyUtils/diffs_recs/pr1-security-caching.diff" in /Users/cav/.code/working/tinyutils/branches/code-code-draft-concise-acceptance
+[2025-11-04T12:05:52] bash -lc "sed -n '1,160p' ~/dev/TinyUtils/diffs_recs/pr1-security-caching.diff" succeeded in 148ms:
+--- a/vercel.json+++ b/vercel.json@@ -3,15 +3,87 @@     {
+       "source": "/(.*)",
+       "headers": [
+-        { "key": "X-Content-Type-Options", "value": "nosniff" },
+-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
++        {
++          "key": "X-Content-Type-Options",
++          "value": "nosniff"
++        },
++        {
++          "key": "Referrer-Policy",
++          "value": "strict-origin-when-cross-origin"
++        },
++        {
++          "key": "Strict-Transport-Security",
++          "value": "max-age=63072000; includeSubDomains; preload"
++        },
++        {
++          "key": "X-Frame-Options",
++          "value": "DENY"
+[2025-11-04T12:05:52] tokens used: 6,533
+
+[2025-11-04T12:05:57] thinking
+
+**Reviewing security and caching changes**
+[2025-11-04T12:05:57] exec bash -lc "sed -n '1,160p' ~/dev/TinyUtils/diffs_recs/pr2-ux-noindex-debug.diff" in /Users/cav/.code/working/tinyutils/branches/code-code-draft-concise-acceptance
+[2025-11-04T12:05:57] bash -lc "sed -n '1,160p' ~/dev/TinyUtils/diffs_recs/pr2-ux-noindex-debug.diff" succeeded in 144ms:
+--- a/tools/dead-link-finder/index.html+++ b/tools/dead-link-finder/index.html@@ -378,6 +378,7 @@         metaSection.appendChild(metaTitle);
+         debugSchedulerSummary = document.createElement('p');
+         debugSchedulerSummary.className = 'debug-scheduler';
++        debugSchedulerSummary.setAttribute('data-testid', 'debug-scheduler');
+         debugSchedulerSummary.textContent = 'scheduler: —';
+         metaSection.appendChild(debugSchedulerSummary);
+         debugMetaPre = document.createElement('pre');
+
+--- a/tools/keyword-density.html+++ b/tools/keyword-density.html@@ -1,5 +1,6 @@ <!doctype html><html lang='en'><head>
+-<meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
++
++<meta name=\"robots\" content=\"noindex\"><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
+ <title>Keyword Density — TinyUtils</title>
+ <link rel='stylesheet' href='/public/styles.css'><style>
+ .tu-consent{position:fixed;right:16px;bottom:16px;max-width:340px;background:#0e1530;color:#e8ecf3;border:1px solid #263464;border-radius:12px;padding:12px 12px 10px;box-shadow:0 12px 30px rgba(0,0,0,.35);z-index:9999}
+
+--- a/tools/meta-preview.html+++ b/tools/meta-preview.html@@ -1,5 +1,6 @@ <!doctype html><html lang='en'><head>
+-<meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
++
++<meta name=\"robots\" content=\"noindex\"><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
+[2025-11-04T12:05:57] tokens used: 8,346
+
+[2025-11-04T12:06:00] thinking
+
+**Adding test ID and meta robots tag**
+[2025-11-04T12:06:01] exec bash -lc "sed -n '1,200p' ~/dev/TinyUtils/diffs_recs/pr3-preview-fence.diff" in /Users/cav/.code/working/tinyutils/branches/code-code-draft-concise-acceptance
+[2025-11-04T12:06:01] bash -lc "sed -n '1,200p' ~/dev/TinyUtils/diffs_recs/pr3-preview-fence.diff" succeeded in 157ms:
+--- /dev/null
++++ b/api/fence.js
+--- /dev/null+++ b/api/fence.js@@ -0,0 +1,75 @@+export const config = { runtime: 'edge' };
++
++function rid() { return Math.random().toString(16).slice(2, 10); }
++
++function json(status, body, requestId, extraHeaders) {
++  const headers = new Headers({ 'content-type': 'application/json; charset=utf-8' });
++  headers.set('cache-control', 'no-store');
++  if (requestId) headers.set('x-request-id', requestId);
++  for (const [k, v] of Object.entries(extraHeaders || {})) {
++    headers.set(k, v);
++  }
++  return new Response(JSON.stringify(body), { status, headers });
++}
++
++function parseCookies(cookieHeader) {
++  const out = {};
++  const src = String(cookieHeader || '');
++  for (const part of src.split(/;\s*/)) {
+[2025-11-04T12:06:01] tokens used: 9,321
+
+[2025-11-04T12:06:03] thinking
+
+**Defining acceptance criteria for /api/fence gating**
+[2025-11-04T12:06:03] exec bash -lc "sed -n '1,200p' ~/dev/TinyUtils/diffs_recs/pr4-tests-contracts.diff" in /Users/cav/.code/working/tinyutils/branches/code-code-draft-concise-acceptance
+[2025-11-04T12:06:03] bash -lc "sed -n '1,200p' ~/dev/TinyUtils/diffs_recs/pr4-tests-contracts.diff" succeeded in 181ms:
+--- /dev/null
++++ b/tests/dlf_envelope_invariants.test.mjs
+--- /dev/null+++ b/tests/dlf_envelope_invariants.test.mjs@@ -0,0 +1,19 @@+import test from 'node:test';
++import assert from 'node:assert/strict';
++import handler from '../api/check.js';
++
++test('DLF GET returns JSON error envelope with scheduler meta', async () => {
++  const req = new Request('https://example.test/api/check', { method: 'GET' });
++  const res = await handler(req);
++
++  assert.equal(res.status, 405, 'should be 405 for GET');
++  const ct = res.headers.get('content-type') || '';
++  assert.ok(ct.includes('application/json'), 'content-type should be JSON');
++  const payload = await res.json();
++  assert.equal(payload.ok, false);
++  assert.equal(typeof payload.code, 'string');
++  assert.equal(typeof payload.message, 'string');
++  assert.equal(typeof payload.requestId, 'string');
++  assert.ok(payload.meta && typeof payload.meta === 'object', 'meta should be object');
++  assert.ok(payload.meta.scheduler && typeof payload.meta.scheduler === 'object', 'meta.scheduler should be present');
+[2025-11-04T12:06:06] tokens used: 11,203
+
+[2025-11-04T12:06:16] thinking
+
+**Drafting acceptance matrix plan**
+[2025-11-04T12:06:17] exec bash -lc ls in /Users/cav/.code/working/tinyutils
+[2025-11-04T12:06:17] bash -lc ls succeeded in 155ms:
+branches
+[2025-11-04T12:06:17] tokens used: 13,759
+
+[2025-11-04T12:06:23] thinking
+
+**Analyzing PR acceptance criteria**
+[2025-11-04T12:06:24] exec bash -lc "sed -n '1,160p' ~/dev/TinyUtils/diffs_recs/Pro reasoning message nov 4.md" in /Users/cav/.code/working/tinyutils/branches/code-code-draft-concise-acceptance
+[2025-11-04T12:06:24] bash -lc "sed -n '1,160p' ~/dev/TinyUtils/diffs_recs/Pro reasoning message nov 4.md" exited 1 in 173ms:
+ERROR
+sed: /Users/cav/dev/TinyUtils/diffs_recs/Pro: No such file or directory
+sed: reasoning: No such file or directory
+sed: message: No such file or directory
+sed: nov: No such file or directory
+sed: 4.md: No such file or directory
+[2025-11-04T12:06:24] tokens used: 14,469
+
+[2025-11-04T12:06:26] thinking
+
+**Handling file paths with spaces in commands**
+[2025-11-04T12:06:28] exec bash -lc "sed -n '1,200p' \""'$HOME/dev/TinyUtils/diffs_recs/Pro reasoning message nov 4.md"' in /Users/cav/.code/working/tinyutils/branches/code-code-draft-concise-acceptance
+[2025-11-04T12:06:28] bash -lc "sed -n '1,200p' \""'$HOME/dev/TinyUtils/diffs_recs/Pro reasoning message nov 4.md"' succeeded in 300ms:
+Cavin — dropping in with the full audit, concrete fixes, and PR‑ready patches you can apply today. I kept it opinionated, safe, and fast. Deliverables are all here: prioritized punch‑list, diffs, tests, and ops notes — with download links for each patch.
+
+------
+
+## 1) **Audit Report (MARKDOWN)**
+
+### TL;DR
+
+- **Core tools work** in prod (DLF, Sitemap Delta, Wayback Fixer). APIs respond with JSON, and robots/HSTS logic exists and is generally solid.
+- **Biggest gaps:** missing strict security headers/CSP, API responses are cacheable by intermediaries (yikes), a couple of beta tools should be behind a preview fence, and test coverage is thin (only one unit test).
+- **Quick wins shipped as patches:** Security headers (+ CSP), API `Cache-Control: no-store`, preview fence for half‑working pages, `data-testid` for scheduler debug, `noindex` on beta pages, and a small test bundle covering API contracts & DLF invariants.
+
+------
+
+### P0 (Must fix before more feature work)
+
+1. **APIs return cacheable JSON (no `Cache-Control`)**
+
+- **Finding**: `api/check.js`, `api/sitemap-delta.js`, `api/wayback-fixer.js`, `api/metafetch.js`, and `api/health.js` omit `cache-control` → intermediaries/CDNs can store responses.
+
+[2025-11-04T12:06:28] tokens used: 14,828
+
+[2025-11-04T12:07:00] thinking
+
+**Building acceptance criteria matrix**
+
+I'll organize a concise acceptance matrix covering each PR’s focus, explicit verification commands, gating and caching checks, plus deployment steps using vercel commands. Afterward, I'll list all relevant post-deploy URLs to probe, reminding to replace placeholder domains with actual ones. This way, the user has a well-structured overview to confirm each feature’s proper behavior across testing and deployment.
+[2025-11-04T12:07:01] codex
+
+**Acceptance Matrix**
+| PR | Scope | Required Checks | Post-deploy probes |
+| --- | --- | --- | --- |
+| PR1 – Security & caching | Hardens headers and API caching | • `curl -Is https://<preview-domain>/ | egrep -i 'strict-transport-security|max-age|x-frame-options|permissions-policy|content-security-policy'` → expect `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload`, `X-Frame-Options: DENY`, `Permissions-Policy: geolocation=(), camera=(), microphone=(), usb=(), payment=(), browsing-topics=()`, CSP exactly as in diff, plus existing `X-Content-Type-Options: nosniff` & `Referrer-Policy: strict-origin-when-cross-origin`.<br>• `curl -Is https://<preview-domain>/public/styles.css | grep -i 'cache-control'` and `curl -Is https://<preview-domain>/tools/wayback-fixer/demo/example | grep -i 'cache-control'` → expect `public, max-age=600`.<br>• For each JSON API (`/api/check`, `/api/sitemap-delta`, `/api/wayback-fixer`, `/api/metafetch`): `curl -isX POST … -H 'content-type: application/json' -d '{}' | egrep -i 'content-type|cache-control'` → expect `application/json; charset=utf-8` and `cache-control: no-store`.<br>• Non-interactive deploy: `vercel deploy --prebuilt --confirm` succeeds; capture returned preview URL for PR3/PR4 checks. | `/` (headers)<br>`/public/styles.css`<br>`/tools/wayback-fixer/demo/...` asset fetch<br>`/api/check` POST test<br>`/api/sitemap-delta` POST test<br>`/api/wayback-fixer` POST test<br>`/api/metafetch` POST test |
+| PR2 – UX noindex & debug hook | Keeps beta tools out of SERPs and stabilizes debug selector | • `curl -s https://<preview-domain>/tools/{keyword-density,meta-preview,sitemap-generator}.html | grep -i 'meta name="robots" content="noindex"'` → meta tag present once near top of document.<br>• `curl -s https://<preview-domain>/tools/dead-link-finder/index.html | grep 'data-testid="debug-scheduler"'` → attribute exists on the scheduler paragraph (works even without `?debug=1` since attribute is static).<br>• Confirm Dead Link Finder loads without auth: `curl -Is https://<preview-domain>/tools/dead-link-finder/ | head -n 1` → HTTP 200. | `/tools/keyword-density.html` source<br>`/tools/meta-preview.html` source<br>`/tools/sitemap-generator.html` source<br>`/tools/dead-link-finder/?debug=1` |
+| PR3 – Preview fence | Gates beta tools behind `PREVIEW_SECRET` while leaving public tools open | • Ensure `PREVIEW_SECRET` set in Vercel env (`vercel env ls --environment=production | grep PREVIEW_SECRET`).<br>• With secret unset: `curl -is https://<preview-domain>/tools/keyword-density/ | head -n 20` → expect `401` and `www-authenticate: Bearer realm="Preview"`. Repeat for `/tools/meta-preview/` and `/tools/sitemap-generator/`.<br>• With query secret: `curl -is "https://<preview-domain>/tools/keyword-density/?preview_secret=$PREVIEW_SECRET" | head -n 20` → expect `200`, `set-cookie: tu_preview_secret=...; HttpOnly; Secure; SameSite=Lax`. Subsequent request without query but with cookie should stay `200`.<br>• With header secret: `curl -is https://<preview-domain>/tools/meta-preview/ -H "x-preview-secret: $PREVIEW_SECRET"` → `200` and **no** `set-cookie` header.<br>• Public tools regression: `curl -Is https://<preview-domain>/tools/dead-link-finder/`, `/tools/sitemap-generator/` (legacy static), `/tools/wayback-fixer/` → still `200`.<br>• Deploy fallback ready: after preview validation, promote with `vercel promote <preview-deployment-url> --prod` (non-interactive). | `/tools/keyword-density/` (401)<br>`/tools/keyword-density/?preview_secret=…`<br>`/tools/meta-preview/` (401 + 200 with secret)<br>`/tools/sitemap-generator/` (401 + 200)<br>`/tools/dead-link-finder/` (200)<br>`/tools/wayback-fixer/` (200) |
+| PR4 – Tests & contracts | Adds automated coverage for APIs and CSV hardening | • Install deps (`pnpm install` or `npm install`) then run `pnpm test` (or `npm test`) → expect Node 20 `node --test` suite passes; no flaky fetch mocks.<br>• Validate CI step includes the new files (`tests/*.test.mjs` picked up by command).<br>• Gate deploy: ensure `vercel deploy --prebuilt --confirm` runs only after tests succeed; prod promotion as in PR3. | Local: `pnpm test` logs<br>CI: test job summary |
+
+**Post-Deploy Probes**
+- `GET https://<deploy-domain>/` – capture full response headers for security policies.
+- `GET https://<deploy-domain>/public/styles.css` – verify `Cache-Control: public, max-age=600`.
+- `POST https://<deploy-domain>/api/check` (sample body) – confirm `content-type` + `cache-control: no-store`.
+- `POST https://<deploy-domain>/api/sitemap-delta` – spot-check contract payload, `meta.requestId`.
+- `POST https://<deploy-domain>/api/wayback-fixer` – ensure response structure and headers.
+- `POST https://<deploy-domain>/api/metafetch` – confirm JSON contract.
+- `GET https://<deploy-domain>/tools/dead-link-finder/?debug=1` – page loads, debug hook present.
+- `GET https://<deploy-domain>/tools/keyword-density/` – 401 without secret.
+- `GET https://<deploy-domain>/tools/keyword-density/?preview_secret=<secret>` and repeat without query using returned cookie – should stay 200.
+- `GET https://<deploy-domain>/tools/meta-preview/` & `/tools/sitemap-generator/` with and without secret to ensure fence + access logic.
+[2025-11-04T12:07:14] tokens used: 21,500

@@ -1,0 +1,103 @@
+Here's a coordinated plan to reconcile the `TinyUtils` repository, integrating prior auto-mode sessions and outstanding diffs. This plan focuses on investigation, gap identification, and a conceptual remediation strategy, adhering to the read-only constraint.
+
+**Overall Goal:** Achieve a fully reconciled `TinyUtils` repository where all PR1-PR4 changes are applied, documentation is current, and logging accurately reflects progress, all while maintaining established conventions and orchestrator configurations.
+
+---
+
+### **Execution Plan**
+
+**Phase 1: Initial Assessment & Context Gathering**
+
+1.  **Review Agent Guidelines (`AGENTS.md`):**
+    *   **Action:** Read `/Users/cav/dev/TinyUtils/tinyutils/AGENTS.md` to understand logging etiquette, orchestrator configuration, and agent roles.
+    *   **Purpose:** Establish foundational rules for subsequent actions and logging.
+    *   **Dependency:** None.
+    2.  **Review Current Run Log and Checklist:**
+    *   **Action:** Read `/Users/cav/dev/TinyUtils/tinyutils/docs/AGENT_RUN_LOG.md` and `/Users/cav/dev/TinyUtils/tinyutils/docs/AGENT_TASK_CHECKLIST.md` to understand the latest recorded progress and outstanding tasks.
+    *   **Purpose:** Get an up-to-date picture of what has been done and what remains, identifying any discrepancies with the `AGENTS.md` summary.
+    *   **Dependency:** None.
+    
+3.  **Review Auto-mode History:**
+    *   **Action:** Read `~/dev/CodeProjects/code_config_hacks/.code/history.jsonl` to understand the specific actions and outcomes of previous auto-mode sessions around 2025-11-04 13:47 CET onward.
+    *   **Purpose:** Gain deeper insight into what was attempted, any errors encountered, or partial completions that might not be fully reflected in the `AGENT_RUN_LOG.md`.
+    *   **Dependency:** None.
+    4.  **Review Pro Reasoning Message:**
+    *   **Action:** Read `/Users/cav/dev/TinyUtils/diffs_recs/Pro reasoning message nov 4.md` to understand the overall context and instructions for PR1-PR4.
+    *   **Purpose:** Get the high-level intent and rationale behind the diffs.
+    *   **Dependency:** None.
+    I have reviewed `AGENTS.md`, `AGENT_RUN_LOG.md`, `AGENT_TASK_CHECKLIST.md`, and `Pro reasoning message nov 4.md`. I am unable to access `history.jsonl` due to sandbox restrictions.
+
+Here is the coordinated plan to reconcile the `TinyUtils` repository:
+
+### **Consolidated Reconciliation Roadmap**
+
+**Overall Goal:** Achieve a fully reconciled `TinyUtils` repository where all PR1-PR4 changes are applied, documentation (including `tool_desc_*.md` logs) is current, and `AGENT_RUN_LOG.md` and `AGENT_TASK_CHECKLIST.md` accurately reflect all progress and outstanding items. This will ensure adherence to logging etiquette (Europe/Madrid CET timestamps) and orchestrator configuration.
+
+---
+
+**Phase 1: Deep Dive - Diff Review & Current State Verification (Read-Only)**
+
+*   **Objective:** Pinpoint the exact outstanding code modifications and evidence needed for each PR, explicitly referencing the provided diffs and existing logs.
+
+1.  **Review All Provided Diff Files:**
+    *   **Action:** Conceptually review the full content for `pr1-security-caching.diff`, `pr2-ux-noindex-debug.diff`, `pr3-preview-fence.diff`, and `pr4-tests-contracts.diff` (using the descriptions and snippets in `Pro reasoning message nov 4.md` as I cannot `read_many_files` for outside the workspace).
+    *   **Purpose:** Gain granular understanding of *all* intended changes for PR1-PR4.
+    *   **Milestone:** Internal understanding of each diff's full scope.
+
+2.  **Compare Diffs to Current Status & Identify Gaps:**
+    *   **Action:** For each PR, cross-reference the `Pro reasoning message nov 4.md` (both the full descriptions and snippets), the summaries in `AGENT_RUN_LOG.md`, and the "Outstanding Roll-up"/Active Tasks in `AGENT_TASK_CHECKLIST.md`.
+    *   **Detailed Gap Identification:**
+        *   **PR1 (Security/Caching):** `AGENT_RUN_LOG.md` confirms CSP string and `/public/(.*)` cache rule are *missing*. All other headers (`Strict-Transport-Security`, `X-Frame-Options`, `Permissions-Policy`) and `Cache-Control: no-store` for APIs are assumed to be in place based on log entry "Strengthened headers and `cache-control: no-store` for APIs".
+        *   **PR2 (UX/Noindex/Debug):** Fully outstanding per `AGENT_TASK_CHECKLIST.md`. Need to add `noindex` meta tags to beta HTML shells (`tools/keyword-density.html`, `tools/meta-preview.html`, `tools/sitemap-generator.html`, `tools/dead-link-finder/index.html`) and `data-testid="debug-scheduler"` to the DLF debug paragraph.
+        *   **PR3 (Preview Fence):** `api/fence.js` and `vercel.json` rewrites are committed (13:47 CET log entry), but *evidence collection is pending*. This requires running `scripts/preview_smoke.mjs` with `PREVIEW_SECRET` and capturing curl headers.
+        *   **PR4 (Tests/Contracts):** Fully outstanding per `AGENT_TASK_CHECKLIST.md`. Need to import `tests/api_contracts.test.mjs`, `tests/dlf_envelope_invariants.test.mjs`, `tests/csv_hardening.unit.test.mjs`; update `package.json` scripts, and run `pnpm test`.
+        *   **Documentation Refresh:** (`README.md`, `README_DEPLOY.md`, `DEPLOY_PRODUCTION_CHECKLIST.md`, `TESTING.md`) is fully outstanding.
+        *   **Accessibility Follow-up:** The `AGENT_TASK_CHECKLIST.md` lists "Keyboard shortcut & a11y compliance fixes" as "Needs Review." This implies verification is needed, and potential fixes might be required if not implicitly handled by other PRs.
+    *   **Milestone:** A precise, itemized list of every outstanding code modification or verification task.
+
+---
+
+**Phase 2: Structured Remediation & Verification**
+
+*   **Objective:** Systematically address all identified gaps, collect required evidence, and ensure all logs and checklists are meticulously updated. All actions will respect existing project conventions (e.g., ESM for Edge functions).
+
+1.  **Prioritized Task Execution:**
+    *   **2.1. PR1 (Completion) & PR3 (Verification):**
+        *   **Task:** Apply the missing CSP string and `/public/(.*)` cache rule from `pr1-security-caching.diff` into `tinyutils/vercel.json`.
+        *   **Verification:** Conduct `curl` tests as per `Pro reasoning message` to confirm presence and correct values of all security headers (HSTS, XFO, Permissions-Policy, CSP) and `Cache-Control` for `/public/(.*)`.
+        *   **Task (PR3):** After PR1 completion, run `scripts/preview_smoke.mjs` with `PREVIEW_URL` and `PREVIEW_SECRET`. Capture curl headers (showing 401/200 + cookie proof) under `artifacts/pr3-fence/YYYYMMDD/`.
+        *   **Logging:** Use `scripts/log_run_entry.py` and `scripts/add_task_checklist_entry.py` to record PR1 completion, PR3 verification, and evidence locations. Update `DEPLOY_PRODUCTION_CHECKLIST.md` with new verification steps.
+    *   **2.2. PR2 (UX Enhancements):**
+        *   **Task:** Apply `pr2-ux-noindex-debug.diff` by adding `<meta name="robots" content="noindex">` to beta HTML shells and `data-testid="debug-scheduler"` to the DLF debug paragraph.
+        *   **Verification:** Manually inspect source code of affected pages. Open `/tools/dead-link-finder/?debug=1` and use browser DevTools to confirm `data-testid`.
+        *   **Logging:** Record completion and verification in logs/checklist.
+    *   **2.3. PR4 (Test Suite Integration):**
+        *   **Task:** Apply `pr4-tests-contracts.diff` by adding the new test files (`api_contracts.test.mjs`, `dlf_envelope_invariants.test.mjs`, `csv_hardening.unit.test.mjs`) and updating `tinyutils/package.json` scripts to run them.
+        *   **Verification:** Run `pnpm test` (or `npm test`) and capture logs, confirming all new tests pass.
+        *   **Logging:** Record completion, test results, and log locations.
+    *   **2.4. Documentation Refresh:**
+        *   **Task:** Update `README.md`, `README_DEPLOY.md`, `TESTING.md`, `DEPLOY_PRODUCTION_CHECKLIST.md` to reflect all new features, verification steps, and evidence locations (e.g., API contracts, security headers, preview fence, test setup). Also, update `tool_desc_*.md` files as mandated by `AGENTS.md` for any user-visible behavior shifts due to these PRs.
+        *   **Verification:** Manual review of all updated documentation for clarity and accuracy.
+        *   **Logging:** Record documentation updates.
+    *   **2.5. Accessibility Follow-up:**
+        *   **Task:** Investigate keyboard shortcut conflicts in Sitemap Delta/Wayback Fixer (as flagged in `AGENT_TASK_CHECKLIST.md`). If conflicts are present, implement fixes as per `AGENTS.md` guidelines for A11y/Keyboard.
+        *   **Verification:** Perform keyboard-only UI navigation and confirm expected behavior (e.g., typing in input fields does not trigger shortcuts).
+        *   **Logging:** Record findings and any implemented fixes, updating the checklist status.
+
+2.  **Continuous Logging and Checklist Updates:**
+    *   **Action:** For every sub-task or significant action within the above steps, immediately use `scripts/log_run_entry.py` to append an entry to `tinyutils/docs/AGENT_RUN_LOG.md`.
+    *   **Action:** Simultaneously use `scripts/add_task_checklist_entry.py` to update the status of relevant items in `tinyutils/docs/AGENT_TASK_CHECKLIST.md`, moving completed items to the "Completed Tasks" section with clear evidence pointers.
+    *   **Timezones:** All timestamps must be in Europe/Madrid (CET).
+    *   **Evidence:** Archive all `curl` outputs, screenshots (for UI/A11y), and test logs under `artifacts/<task-slug>/YYYYMMDD/`.
+
+---
+
+**Phase 3: Orchestrator Alignment**
+
+1.  **Confirm Agent Configuration:**
+    *   **Action:** Ensure that future orchestrations will consistently use `code-gpt-5 codex` + `code-gpt-5 agents`, the three "hacked" ChatGPT agents (as identified in the user's screenshot), and a Gemini agent (disabled if billing warnings appear).
+    *   **Purpose:** Maintain consistency and adhere to project requirements.
+
+---
+
+This plan provides a structured approach to reconcile the repository, prioritizing dependencies and incorporating verification and robust logging at each stage. I am ready for your next instruction.

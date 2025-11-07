@@ -1,0 +1,848 @@
+[2025-11-07T02:59:19] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-add-tinyutils-scripts-deploy-and-smoke-c
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-07T02:59:19] User instructions:
+Add tinyutils/scripts/deploy_and_smoke_convert.sh implementing the described flow. Use bash strict mode, avoid prompts, and handle missing creds by exiting 2 after writing deploy_status.txt.
+
+Context: Create a robust orchestrator script that 1) ensures Vercel CLI, 2) checks credentials or existing login (vercel whoami), 3) attempts preview deploy non-interactively, 4) parses the preview URL, 5) runs the converter preview smoke with PREVIEW_URL and stores artifacts under tinyutils/artifacts/convert/<YYYYMMDD>/smoke-preview-<MadridTs>, and 6) writes a concise status summary to the artifact folder. Do not modify docs here; the CLI will handle docs updates after this run.
+[2025-11-07T02:59:19] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-add-tinyutils-scripts-deploy-and-smoke-c
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-07T02:59:19] User instructions:
+Add tinyutils/scripts/deploy_and_smoke_convert.sh implementing the described flow. Use bash strict mode, avoid prompts, and handle missing creds by exiting 2 after writing deploy_status.txt.
+
+Context: Create a robust orchestrator script that 1) ensures Vercel CLI, 2) checks credentials or existing login (vercel whoami), 3) attempts preview deploy non-interactively, 4) parses the preview URL, 5) runs the converter preview smoke with PREVIEW_URL and stores artifacts under tinyutils/artifacts/convert/<YYYYMMDD>/smoke-preview-<MadridTs>, and 6) writes a concise status summary to the artifact folder. Do not modify docs here; the CLI will handle docs updates after this run.
+
+[2025-11-07T02:59:24] thinking
+
+**Evaluating write permission constraints**
+[2025-11-07T02:59:25] exec bash -lc ls in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-add-tinyutils-scripts-deploy-and-smoke-c
+[2025-11-07T02:59:25] bash -lc ls succeeded in 105ms:
+[2025-11-07T02:59:25] tokens used: 5,810
+
+[2025-11-07T02:59:26] thinking
+
+**Checking for hidden files**
+[2025-11-07T02:59:27] exec bash -lc 'ls -a' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-add-tinyutils-scripts-deploy-and-smoke-c
+[2025-11-07T02:59:27] bash -lc 'ls -a' succeeded in 101ms:
+.
+..
+.git
+[2025-11-07T02:59:27] tokens used: 6,081
+
+[2025-11-07T02:59:28] thinking
+
+**Checking repository status and structure**
+[2025-11-07T02:59:29] exec bash -lc 'git status -sb' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-add-tinyutils-scripts-deploy-and-smoke-c
+[2025-11-07T02:59:29] bash -lc 'git status -sb' succeeded in 117ms:
+## No commits yet on code-code-gpt-5-codex-add-tinyutils-scripts-deploy-and-smoke-c
+[2025-11-07T02:59:29] tokens used: 6,348
+
+[2025-11-07T02:59:30] thinking
+
+**Checking repository contents**
+[2025-11-07T02:59:31] exec bash -lc 'git ls-tree --name-only HEAD' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-add-tinyutils-scripts-deploy-and-smoke-c
+[2025-11-07T02:59:31] bash -lc 'git ls-tree --name-only HEAD' exited 128 in 139ms:
+ERROR
+fatal: Not a valid object name HEAD
+[2025-11-07T02:59:31] tokens used: 6,664
+
+[2025-11-07T02:59:32] thinking
+
+**Checking git repository status**
+[2025-11-07T02:59:33] exec bash -lc 'git rev-parse --is-bare-repository' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-add-tinyutils-scripts-deploy-and-smoke-c
+[2025-11-07T02:59:33] bash -lc 'git rev-parse --is-bare-repository' succeeded in 131ms:
+false
+[2025-11-07T02:59:33] tokens used: 7,239
+
+[2025-11-07T02:59:34] thinking
+
+**Checking sparse-checkout list**
+[2025-11-07T02:59:34] exec bash -lc 'git sparse-checkout list' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-add-tinyutils-scripts-deploy-and-smoke-c
+[2025-11-07T02:59:34] bash -lc 'git sparse-checkout list' exited 128 in 120ms:
+ERROR
+fatal: this worktree is not sparse
+[2025-11-07T02:59:34] tokens used: 7,965
+
+[2025-11-07T02:59:35] thinking
+
+**Checking local git branches**
+[2025-11-07T02:59:36] exec bash -lc 'git branch' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-add-tinyutils-scripts-deploy-and-smoke-c
+[2025-11-07T02:59:36] bash -lc 'git branch' succeeded in 112ms:
+[2025-11-07T02:59:36] tokens used: 8,812
+
+[2025-11-07T02:59:40] thinking
+
+**Investigating empty repository state**
+[2025-11-07T02:59:41] exec bash -lc 'cat .git/HEAD' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-add-tinyutils-scripts-deploy-and-smoke-c
+[2025-11-07T02:59:41] bash -lc 'cat .git/HEAD' exited 1 in 97ms:
+ERROR
+cat: .git/HEAD: Not a directory
+[2025-11-07T02:59:41] tokens used: 10,021
+
+[2025-11-07T02:59:43] thinking
+
+**Investigating .git file details**
+[2025-11-07T02:59:43] exec bash -lc 'ls -l .git' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-add-tinyutils-scripts-deploy-and-smoke-c
+[2025-11-07T02:59:43] bash -lc 'ls -l .git' succeeded in 104ms:
+-rw-r--r--@ 1 cav  staff  111 Nov  7 03:59 .git
+[2025-11-07T02:59:43] tokens used: 10,204
+
+[2025-11-07T02:59:44] thinking
+
+**Checking .git file contents**
+[2025-11-07T02:59:45] exec bash -lc 'cat .git' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-add-tinyutils-scripts-deploy-and-smoke-c
+[2025-11-07T02:59:45] bash -lc 'cat .git' succeeded in 102ms:
+gitdir: /Users/cav/dev/TinyUtils/.git/worktrees/code-code-gpt-5-codex-add-tinyutils-scripts-deploy-and-smoke-c
+[2025-11-07T02:59:45] tokens used: 10,416
+
+[2025-11-07T02:59:49] thinking
+
+**Investigating missing working tree files**
+[2025-11-07T02:59:49] exec bash -lc 'cat /Users/cav/dev/TinyUtils/.git/worktrees/code-code-gpt-5-codex-add-tinyutils-scripts-deploy-and-smoke-c/HEAD' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-add-tinyutils-scripts-deploy-and-smoke-c
+[2025-11-07T02:59:49] bash -lc 'cat /Users/cav/dev/TinyUtils/.git/worktrees/code-code-gpt-5-codex-add-tinyutils-scripts-deploy-and-smoke-c/HEAD' succeeded in 106ms:
+ref: refs/heads/code-code-gpt-5-codex-add-tinyutils-scripts-deploy-and-smoke-c
+[2025-11-07T02:59:49] tokens used: 11,131
+
+[2025-11-07T02:59:50] thinking
+
+**Checking current Git commit hash**
+[2025-11-07T02:59:51] exec bash -lc 'git rev-parse HEAD' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-add-tinyutils-scripts-deploy-and-smoke-c
+[2025-11-07T02:59:51] bash -lc 'git rev-parse HEAD' exited 128 in 130ms:
+HEAD
+
+ERROR
+fatal: ambiguous argument 'HEAD': unknown revision or path not in the working tree.
+Use '--' to separate paths from revisions, like this:
+'git <command> [<revision>...] -- [<file>...]'
+[2025-11-07T02:59:51] tokens used: 11,362
+
+[2025-11-07T02:59:53] thinking
+
+**Investigating branch and remote status**
+[2025-11-07T02:59:53] exec bash -lc 'git remote -v' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-add-tinyutils-scripts-deploy-and-smoke-c
+[2025-11-07T02:59:54] bash -lc 'git remote -v' succeeded in 127ms:
+[2025-11-07T02:59:54] tokens used: 11,686
+
+[2025-11-07T02:59:56] thinking
+
+**Checking parent directories for repo**
+[2025-11-07T02:59:56] exec bash -lc 'ls ..' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-add-tinyutils-scripts-deploy-and-smoke-c
+[2025-11-07T02:59:56] bash -lc 'ls ..' succeeded in 110ms:
+code-code-draft-concise-acceptance
+code-code-draft-concise-description
+code-code-draft-pr3-description
+code-code-gpt-5-codex-add-tests-under
+code-code-gpt-5-codex-add-tinyutils-convert-init-py-tinyutils
+code-code-gpt-5-codex-add-tinyutils-scripts-deploy-and-smoke-c
+code-code-gpt-5-codex-complete-converter-core
+code-code-gpt-5-codex-create-tinyutils-scripts-deploy-preview
+code-code-gpt-5-codex-fix-refine-fastapi
+code-code-gpt-5-codex-implement-tinyutils-convert--library
+code-code-gpt-5-codex-inspect-four-diff
+code-code-gpt-5-codex-integrate-fastapi-endpoint
+code-code-gpt-5-codex-list-available-diff
+code-code-gpt-5-codex-list-scripts--lockfiles
+code-code-gpt-5-codex-locate-existing-fence-auth
+code-code-gpt-5-codex-modify-tinyutils-api-convert-index-py-pa
+code-code-gpt-5-codex-parse-pr3-diff
+code-code-gpt-5-codex-prepare-compact-smoke
+code-code-gpt-5-codex-produce-concise-route
+code-code-gpt-5-codex-produce-exact-bash
+[2025-11-07T02:59:56] tokens used: 11,943
+
+[2025-11-07T02:59:58] thinking
+
+**Investigating multi-branch workspace structure**
+[2025-11-07T02:59:59] exec bash -lc 'ls ../code-code-gpt-5-codex-add-tests-under' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-add-tinyutils-scripts-deploy-and-smoke-c
+[2025-11-07T02:59:59] bash -lc 'ls ../code-code-gpt-5-codex-add-tests-under' succeeded in 95ms:
+[2025-11-07T02:59:59] tokens used: 12,836
+
+[2025-11-07T03:00:00] thinking
+
+**Checking hidden files**
+[2025-11-07T03:00:01] exec bash -lc 'ls -a ../code-code-gpt-5-codex-add-tests-under' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-add-tinyutils-scripts-deploy-and-smoke-c
+[2025-11-07T03:00:01] bash -lc 'ls -a ../code-code-gpt-5-codex-add-tests-under' succeeded in 106ms:
+.
+..
+.git
+[2025-11-07T03:00:01] tokens used: 13,103
+
+[2025-11-07T03:00:04] thinking
+
+**Examining Git worktree setup**
+[2025-11-07T03:00:04] exec bash -lc 'ls /Users/cav/dev/TinyUtils' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-add-tinyutils-scripts-deploy-and-smoke-c
+[2025-11-07T03:00:04] bash -lc 'ls /Users/cav/dev/TinyUtils' succeeded in 103ms:
+PATH
+print1
+tests
+tinyutils
+TinyUtilsCodexContext
+[2025-11-07T03:00:04] tokens used: 13,551
+
+[2025-11-07T03:00:08] thinking
+
+**Examining repository working directory**
+[2025-11-07T03:00:09] exec bash -lc ls in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-07T03:00:09] bash -lc ls succeeded in 107ms:
+__init__.py
+__pycache__
+ads.txt
+ADSENSE_SETUP.md
+AGENTS.md
+api
+artifacts
+CHANGES-v1.3.0-rc2.txt
+CHANGES-v1.3.0-rc3.txt
+config
+convert
+data
+DEPLOY_PRODUCTION_CHECKLIST.md
+docs
+feedback.html
+filters
+fixtures
+guides
+index
+index.html
+[2025-11-07T03:00:09] tokens used: 14,402
+
+[2025-11-07T03:00:10] thinking
+
+**Checking for .git directory**
+[2025-11-07T03:00:11] exec bash -lc 'ls -a' in /Users/cav/dev/TinyUtils
+[2025-11-07T03:00:11] bash -lc 'ls -a' succeeded in 100ms:
+.
+..
+.code
+.debug
+.DS_Store
+.git
+.pytest_cache
+.venv
+PATH
+print1
+tests
+tinyutils
+TinyUtilsCodexContext
+[2025-11-07T03:00:11] tokens used: 14,771
+
+[2025-11-07T03:00:14] thinking
+
+**Validating repo root and branch setup**
+[2025-11-07T03:00:14] exec bash -lc 'git status -sb' in /Users/cav/dev/TinyUtils
+[2025-11-07T03:00:14] bash -lc 'git status -sb' succeeded in 113ms:
+## No commits yet on feature/universal-converter-backend
+?? .DS_Store
+?? .code/
+?? PATH
+?? TinyUtilsCodexContext/
+?? print1
+?? tests/
+?? tinyutils/
+[2025-11-07T03:00:14] tokens used: 15,104
+
+[2025-11-07T03:00:16] thinking
+
+**Checking script files in directory**
+[2025-11-07T03:00:16] exec bash -lc 'ls scripts' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-07T03:00:16] bash -lc 'ls scripts' succeeded in 101ms:
+add_task_checklist_entry.py
+backup_repo.sh
+consent.js
+deploy_and_smoke_preview.sh
+deploy_preview.sh
+log_run_entry.py
+preview_smoke.mjs
+smoke_convert_preview.mjs
+smoke_dlf_extras.sh
+smoke_dlf_local.mjs
+smoke_dlf_preview.mjs
+test_edge_handlers.mjs
+ui_smoke_dlf.mjs
+ui_smoke_sitemap.mjs
+ui_smoke_wayback.mjs
+[2025-11-07T03:00:16] tokens used: 15,329
+
+[2025-11-07T03:00:18] thinking
+
+**Adding deployment script skeleton**
+[2025-11-07T03:00:20] exec bash -lc "sed -n '1,200p' scripts/deploy_and_smoke_preview.sh" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-07T03:00:20] bash -lc "sed -n '1,200p' scripts/deploy_and_smoke_preview.sh" succeeded in 101ms:
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}" )/.." && pwd)"
+LOG_FILE="${ROOT_DIR}/docs/AGENT_RUN_LOG.md"
+SMOKE_SCRIPT="${ROOT_DIR}/scripts/smoke_convert_preview.mjs"
+
+UTC_DATE="$(TZ=UTC date +%Y%m%d)"
+MAD_TS="$(TZ=Europe/Madrid date +%Y%m%dT%H%M%S)"
+ART_DIR="${ROOT_DIR}/artifacts/convert/${UTC_DATE}/smoke-preview-${MAD_TS}"
+mkdir -p "${ART_DIR}"
+
+append_log() {
+  local status="$1"
+  local preview_url="$2"
+  local artifact_path="$3"
+  local entry_ts="$(TZ=Europe/Madrid date '+%Y-%m-%d %H:%M CET')"
+  local rel_path="${artifact_path#${ROOT_DIR}/}"
+  rel_path="${rel_path:-n/a}"
+  local temp_file
+[2025-11-07T03:00:20] tokens used: 15,667
+
+[2025-11-07T03:00:22] thinking
+
+**Designing new deploy script**
+[2025-11-07T03:00:22] exec bash -lc "sed -n '1,200p' scripts/deploy_preview.sh" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-07T03:00:22] bash -lc "sed -n '1,200p' scripts/deploy_preview.sh" succeeded in 100ms:
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT_DIR"
+
+if ! command -v vercel >/dev/null 2>&1; then
+  npm install -g vercel@latest >/dev/null
+fi
+
+if [[ -z "${VERCEL_TOKEN:-}" ]]; then
+  echo "deploy_preview: VERCEL_TOKEN not set, skipping deploy." >&2
+  exit 0
+fi
+
+VERCEL_ARGS=(--token "$VERCEL_TOKEN")
+if [[ -n "${VERCEL_SCOPE:-}" ]]; then
+  VERCEL_ARGS+=(--scope "$VERCEL_SCOPE")
+fi
+
+[2025-11-07T03:00:22] tokens used: 16,921
+
+[2025-11-07T03:00:27] thinking
+
+**Outlining new deploy and smoke script**
+[2025-11-07T03:00:27] exec bash -lc "rg --files -g 'deploy_status.txt'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-07T03:00:28] bash -lc "rg --files -g 'deploy_status.txt'" exited 1 in 126ms:
+ERROR
+[2025-11-07T03:00:28] tokens used: 17,772
+
+[2025-11-07T03:00:55] thinking
+
+**Designing Vercel deploy script**
+
+I'm outlining a Bash script to automate Vercel preview deployment with careful credential handling, artifact creation, logging, and error status reporting. I want to ensure non-interactive commands, dynamic token and scope usage, capturing preview URLs, running a smoke test with the separate node script, and writing clear status files for each outcome. I'll next check the smoke test script for expected inputs to ensure smooth orchestration.
+[2025-11-07T03:00:56] exec bash -lc "sed -n '1,200p' scripts/smoke_convert_preview.mjs" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-07T03:00:56] bash -lc "sed -n '1,200p' scripts/smoke_convert_preview.mjs" succeeded in 99ms:
+#!/usr/bin/env node
+import { mkdir, writeFile } from 'node:fs/promises';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const previewUrl = process.env.PREVIEW_URL;
+
+if (!previewUrl) {
+  console.error('smoke_convert_preview: PREVIEW_URL not set; skipping.');
+  process.exit(0);
+}
+
+const base = previewUrl.replace(/\/$/, '');
+const endpoint = `${base}/api/convert`;
+
+const now = new Date();
+const fmt = (tz, opts) => new Intl.DateTimeFormat('en-CA', {
+  timeZone: tz,
+  ...opts,
+[2025-11-07T03:00:56] tokens used: 20,317
+
+[2025-11-07T03:01:56] thinking
+
+**Designing deployment and smoke test script**
+
+I'm piecing together a detailed bash script to deploy and run smoke tests with Vercel, handling environment variables, artifact paths, and status reporting. The script will check for necessary tools like Vercel CLI and Node, verify credentials with nuanced exit codes, execute deployment commands while logging outputs, and use a robust trap to write a final concise status file capturing success or failure with timestamps and preview URLs. I'll carefully ensure artifact paths align with expectations and that each step logs meaningfully for clarity. This will automate a clean deployment process with helpful feedback.
+**Detailing deployment script requirements**
+
+I'm making sure every aspect of the new deployment script is covered: handling credentials properly by exiting with specific codes, verifying and installing Vercel CLI while checking npm availability, setting environment variables and artifact paths using correct timezones, running commands with proper logging, capturing preview URLs, and writing a concise deploy status file. I'll organize the script setup carefully—defining variables, functions, error handling, and traps—to produce a robust, non-interactive deployment and smoke test automation that fits the required directory structure and environment constraints.
+**Drafting deployment script logic and error handling**
+
+I'm sketching the detailed script flow: checking and installing Vercel CLI if needed, verifying authentication robustly with clear status codes, running `vercel pull` and `vercel deploy` commands capturing logs with error detection, extracting the preview URL from deploy logs, running the smoke test node script with environment vars set, then setting final success or failure status messages accordingly. I'll also take care to handle arrays correctly in bash, manage artifact paths for log references, and prepare to add this script file using apply_patch.
+[2025-11-07T03:03:08] codex
+**Detailing deployment script requirements**
+
+I'm making sure every aspect of the new deployment script is covered: handling credentials properly by exiting with specific codes, verifying and installing Vercel CLI while checking npm availability, setting environment variables and artifact paths using correct timezones, running commands with proper logging, capturing preview URLs, and writing a concise deploy status file. I'll organize the script setup carefully—defining variables, functions, error handling, and traps—to produce a robust, non-interactive deployment and smoke test automation that fits the required directory structure and environment constraints.
+[2025-11-07T03:03:08] codex
+**Drafting deployment script logic and error handling**
+
+I'm sketching the detailed script flow: checking and installing Vercel CLI if needed, verifying authentication robustly with clear status codes, running `vercel pull` and `vercel deploy` commands capturing logs with error detection, extracting the preview URL from deploy logs, running the smoke test node script with environment vars set, then setting final success or failure status messages accordingly. I'll also take care to handle arrays correctly in bash, manage artifact paths for log references, and prepare to add this script file using apply_patch.
+[2025-11-07T03:03:18] tokens used: 33,415
+
+[2025-11-07T03:03:59] thinking
+
+**Summarizing script creation and environment constraints**
+[2025-11-07T03:04:10] exec bash -lc "python3 - <<'PY'
+script = \"\"\"#"'!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR='"\\\""'$(cd '"\\\""'$(dirname '"\\\""'${BASH_SOURCE[0]}'"\\\")/..\\\" && pwd)\\\"
+SMOKE_SCRIPT=\\\""'${ROOT_DIR}/scripts/smoke_convert_preview.mjs'"\\\"
+
+UTC_DATE=\\\""'$(TZ=UTC date +%Y%m%d)'"\\\"
+MAD_TS=\\\""'$(TZ=Europe/Madrid date +%Y%m%dT%H%M%S)'"\\\"
+ART_DIR=\\\""'${ROOT_DIR}/artifacts/convert/${UTC_DATE}/smoke-preview-${MAD_TS}'"\\\"
+mkdir -p \\\""'${ART_DIR}'"\\\"
+
+STATUS_FILE=\\\""'${ART_DIR}/deploy_status.txt'"\\\"
+REL_ARTIFACT=\\\""'${ART_DIR#${ROOT_DIR}/}'"\\\"
+STATUS=\\\"failed\\\"
+MESSAGE=\\\"Run did not complete\\\"
+PREVIEW_URL=\\\"\\\"
+
+log() {
+  printf '[deploy_and_smoke_convert] %s\\\\n' \\\""'$*'"\\\" >&2
+}
+
+write_status() {
+  local timestamp
+  timestamp=\\\""'$(TZ=Europe/Madrid date '"'+%Y-%m-%d %H:%M:%S %Z')\\\"
+  {
+    printf 'status: %s\\\\n' \\\""'$STATUS'"\\\"
+    printf 'message: %s\\\\n' \\\""'$MESSAGE'"\\\"
+    printf 'preview_url: %s\\\\n' \\\""'${PREVIEW_URL:-n/a}'"\\\"
+    printf 'artifact_dir: %s\\\\n' \\\""'${REL_ARTIFACT:-${ART_DIR}}'"\\\"
+    printf 'timestamp: %s\\\\n' \\\""'$timestamp'"\\\"
+  } >\\\""'$STATUS_FILE'"\\\"
+}
+
+finalize() {
+  local exit_code=\\\""'$1'"\\\"
+  write_status
+  trap - EXIT
+  exit \\\""'$exit_code'"\\\"
+}
+
+trap 'finalize "'$?'"' EXIT
+
+log \\\"Artifacts will be stored under "'${REL_ARTIFACT}'"\\\"
+
+if [[ "'! -f '"\\\""'$SMOKE_SCRIPT'"\\\" ]]; then
+  STATUS=\\\"setup_error\\\"
+  MESSAGE=\\\"Missing smoke_convert_preview.mjs\\\"
+  log \\\""'$MESSAGE'"\\\"
+  exit 1
+fi
+
+if "'! command -v node >/dev/null 2>&1; then
+  STATUS='"\\\"missing_node\\\"
+  MESSAGE=\\\"Node.js binary not found\\\"
+  log \\\""'$MESSAGE'"\\\"
+  exit 1
+fi
+
+if "'! command -v vercel >/dev/null 2>&1; then
+  log '"\\\"Installing Vercel CLI\\\"
+  if "'! command -v npm >/dev/null 2>&1; then
+    STATUS='"\\\"missing_npm\\\"
+    MESSAGE=\\\"npm not found; cannot install vercel CLI\\\"
+    log \\\""'$MESSAGE'"\\\"
+    exit 1
+  fi
+  if "'! npm install -g vercel@latest >'"\\\""'${ART_DIR}/vercel_install.log'"\\\" 2>&1; then
+    STATUS=\\\"vercel_install_failed\\\"
+    MESSAGE=\\\"npm install -g vercel@latest failed\\\"
+    log \\\""'$MESSAGE'"\\\"
+    exit 1
+  fi
+fi
+
+if "'! vercel --version >'"\\\""'${ART_DIR}/vercel_version.txt'"\\\" 2>&1; then
+  STATUS=\\\"vercel_version_failed\\\"
+  MESSAGE=\\\"Unable to determine vercel version\\\"
+  log \\\""'$MESSAGE'"\\\"
+  exit 1
+fi
+
+declare -a VERCEL_ARGS=()
+if [[ -n \\\""'${VERCEL_TOKEN:-}'"\\\" ]]; then
+  VERCEL_ARGS+=(--token \\\""'$VERCEL_TOKEN'"\\\")
+fi
+if [[ -n \\\""'${VERCEL_SCOPE:-}'"\\\" ]]; then
+  VERCEL_ARGS+=(--scope \\\""'$VERCEL_SCOPE'"\\\")
+fi
+
+WHOAMI_LOG=\\\""'${ART_DIR}/vercel_whoami.log'"\\\"
+if "'! vercel whoami '"\\\""'${VERCEL_ARGS[@]}'"\\\" >\\\""'$WHOAMI_LOG'"\\\" 2>&1; then
+  if [[ -z \\\""'${VERCEL_TOKEN:-}'"\\\" ]]; then
+    STATUS=\\\"missing_credentials\\\"
+    MESSAGE=\\\"No Vercel token and not logged in\\\"
+    log \\\""'$MESSAGE'"\\\"
+    exit 2
+  fi
+  STATUS=\\\"vercel_whoami_failed\\\"
+  MESSAGE=\\\"vercel whoami failed (see "'${REL_ARTIFACT}/$(basename '"\\\""'$WHOAMI_LOG'"\\\"))\\\"
+  log \\\""'$MESSAGE'"\\\"
+  exit 1
+fi
+
+PULL_LOG=\\\""'${ART_DIR}/vercel_pull.log'"\\\"
+if "'! (cd '"\\\""'$ROOT_DIR'"\\\" && vercel pull --environment=preview --yes \\\""'${VERCEL_ARGS[@]}'"\\\") &>\\\""'$PULL_LOG'"\\\"; then
+  STATUS=\\\"vercel_pull_failed\\\"
+  MESSAGE=\\\"vercel pull failed (see "'${REL_ARTIFACT}/$(basename '"\\\""'$PULL_LOG'"\\\"))\\\"
+  log \\\""'$MESSAGE'"\\\"
+  exit 1
+fi
+
+DEPLOY_LOG=\\\""'${ART_DIR}/vercel_deploy.log'"\\\"
+if "'! (cd '"\\\""'$ROOT_DIR'"\\\" && vercel deploy --yes --confirm \\\""'${VERCEL_ARGS[@]}'"\\\") &>\\\""'$DEPLOY_LOG'"\\\"; then
+  STATUS=\\\"vercel_deploy_failed\\\"
+  MESSAGE=\\\"vercel deploy failed (see "'${REL_ARTIFACT}/$(basename '"\\\""'$DEPLOY_LOG'"\\\"))\\\"
+  log \\\""'$MESSAGE'"\\\"
+  exit 1
+fi
+
+PREVIEW_URL=\\\""'$(grep -Eo '"'https://["'^[:space:]]+'"\\\\.vercel\\\\.app' \\\""'$DEPLOY_LOG'"\\\" | tail -1 || true)\\\"
+if [[ -z \\\""'$PREVIEW_URL'"\\\" ]]; then
+  STATUS=\\\"preview_url_missing\\\"
+  MESSAGE=\\\"Preview URL not found in deploy log\\\"
+  log \\\""'$MESSAGE'"\\\"
+  exit 1
+fi
+log \\\"Preview available at "'$PREVIEW_URL'"\\\"
+
+SMOKE_LOG=\\\""'${ART_DIR}/smoke_convert_preview.log'"\\\"
+if "'! (cd '"\\\""'$ROOT_DIR'"\\\" && CONVERT_SMOKE_ARTIFACTS=\\\""'$ART_DIR'"\\\" PREVIEW_URL=\\\""'$PREVIEW_URL'"\\\" node \\\""'$SMOKE_SCRIPT'"\\\") &>\\\""'$SMOKE_LOG'"\\\"; then
+  STATUS=\\\"smoke_failed\\\"
+  MESSAGE=\\\"Smoke test failed (see "'${REL_ARTIFACT}/$(basename '"\\\""'$SMOKE_LOG'"\\\"))\\\"
+  log \\\""'$MESSAGE'"\\\"
+  exit 1
+fi
+
+STATUS=\\\"success\\\"
+MESSAGE=\\\"Preview deploy and smoke succeeded\\\"
+log \\\""'$MESSAGE'"\\\"
+\"\"\"
+for i, line in enumerate(script.splitlines(), start=1):
+    print(f\"{i:03}: {line}\")
+PY" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-07T03:04:10] bash -lc "python3 - <<'PY'
+script = \"\"\"#"'!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR='"\\\""'$(cd '"\\\""'$(dirname '"\\\""'${BASH_SOURCE[0]}'"\\\")/..\\\" && pwd)\\\"
+SMOKE_SCRIPT=\\\""'${ROOT_DIR}/scripts/smoke_convert_preview.mjs'"\\\"
+
+UTC_DATE=\\\""'$(TZ=UTC date +%Y%m%d)'"\\\"
+MAD_TS=\\\""'$(TZ=Europe/Madrid date +%Y%m%dT%H%M%S)'"\\\"
+ART_DIR=\\\""'${ROOT_DIR}/artifacts/convert/${UTC_DATE}/smoke-preview-${MAD_TS}'"\\\"
+mkdir -p \\\""'${ART_DIR}'"\\\"
+
+STATUS_FILE=\\\""'${ART_DIR}/deploy_status.txt'"\\\"
+REL_ARTIFACT=\\\""'${ART_DIR#${ROOT_DIR}/}'"\\\"
+STATUS=\\\"failed\\\"
+MESSAGE=\\\"Run did not complete\\\"
+PREVIEW_URL=\\\"\\\"
+
+log() {
+  printf '[deploy_and_smoke_convert] %s\\\\n' \\\""'$*'"\\\" >&2
+}
+
+write_status() {
+  local timestamp
+  timestamp=\\\""'$(TZ=Europe/Madrid date '"'+%Y-%m-%d %H:%M:%S %Z')\\\"
+  {
+    printf 'status: %s\\\\n' \\\""'$STATUS'"\\\"
+    printf 'message: %s\\\\n' \\\""'$MESSAGE'"\\\"
+    printf 'preview_url: %s\\\\n' \\\""'${PREVIEW_URL:-n/a}'"\\\"
+    printf 'artifact_dir: %s\\\\n' \\\""'${REL_ARTIFACT:-${ART_DIR}}'"\\\"
+    printf 'timestamp: %s\\\\n' \\\""'$timestamp'"\\\"
+  } >\\\""'$STATUS_FILE'"\\\"
+}
+
+finalize() {
+  local exit_code=\\\""'$1'"\\\"
+  write_status
+  trap - EXIT
+  exit \\\""'$exit_code'"\\\"
+}
+
+trap 'finalize "'$?'"' EXIT
+
+log \\\"Artifacts will be stored under "'${REL_ARTIFACT}'"\\\"
+
+if [[ "'! -f '"\\\""'$SMOKE_SCRIPT'"\\\" ]]; then
+  STATUS=\\\"setup_error\\\"
+  MESSAGE=\\\"Missing smoke_convert_preview.mjs\\\"
+  log \\\""'$MESSAGE'"\\\"
+  exit 1
+fi
+
+if "'! command -v node >/dev/null 2>&1; then
+  STATUS='"\\\"missing_node\\\"
+  MESSAGE=\\\"Node.js binary not found\\\"
+  log \\\""'$MESSAGE'"\\\"
+  exit 1
+fi
+
+if "'! command -v vercel >/dev/null 2>&1; then
+  log '"\\\"Installing Vercel CLI\\\"
+  if "'! command -v npm >/dev/null 2>&1; then
+    STATUS='"\\\"missing_npm\\\"
+    MESSAGE=\\\"npm not found; cannot install vercel CLI\\\"
+    log \\\""'$MESSAGE'"\\\"
+    exit 1
+  fi
+  if "'! npm install -g vercel@latest >'"\\\""'${ART_DIR}/vercel_install.log'"\\\" 2>&1; then
+    STATUS=\\\"vercel_install_failed\\\"
+    MESSAGE=\\\"npm install -g vercel@latest failed\\\"
+    log \\\""'$MESSAGE'"\\\"
+    exit 1
+  fi
+fi
+
+if "'! vercel --version >'"\\\""'${ART_DIR}/vercel_version.txt'"\\\" 2>&1; then
+  STATUS=\\\"vercel_version_failed\\\"
+  MESSAGE=\\\"Unable to determine vercel version\\\"
+  log \\\""'$MESSAGE'"\\\"
+  exit 1
+fi
+
+declare -a VERCEL_ARGS=()
+if [[ -n \\\""'${VERCEL_TOKEN:-}'"\\\" ]]; then
+  VERCEL_ARGS+=(--token \\\""'$VERCEL_TOKEN'"\\\")
+fi
+if [[ -n \\\""'${VERCEL_SCOPE:-}'"\\\" ]]; then
+  VERCEL_ARGS+=(--scope \\\""'$VERCEL_SCOPE'"\\\")
+fi
+
+WHOAMI_LOG=\\\""'${ART_DIR}/vercel_whoami.log'"\\\"
+if "'! vercel whoami '"\\\""'${VERCEL_ARGS[@]}'"\\\" >\\\""'$WHOAMI_LOG'"\\\" 2>&1; then
+  if [[ -z \\\""'${VERCEL_TOKEN:-}'"\\\" ]]; then
+    STATUS=\\\"missing_credentials\\\"
+    MESSAGE=\\\"No Vercel token and not logged in\\\"
+    log \\\""'$MESSAGE'"\\\"
+    exit 2
+  fi
+  STATUS=\\\"vercel_whoami_failed\\\"
+  MESSAGE=\\\"vercel whoami failed (see "'${REL_ARTIFACT}/$(basename '"\\\""'$WHOAMI_LOG'"\\\"))\\\"
+  log \\\""'$MESSAGE'"\\\"
+  exit 1
+fi
+
+PULL_LOG=\\\""'${ART_DIR}/vercel_pull.log'"\\\"
+if "'! (cd '"\\\""'$ROOT_DIR'"\\\" && vercel pull --environment=preview --yes \\\""'${VERCEL_ARGS[@]}'"\\\") &>\\\""'$PULL_LOG'"\\\"; then
+  STATUS=\\\"vercel_pull_failed\\\"
+  MESSAGE=\\\"vercel pull failed (see "'${REL_ARTIFACT}/$(basename '"\\\""'$PULL_LOG'"\\\"))\\\"
+  log \\\""'$MESSAGE'"\\\"
+  exit 1
+fi
+
+DEPLOY_LOG=\\\""'${ART_DIR}/vercel_deploy.log'"\\\"
+if "'! (cd '"\\\""'$ROOT_DIR'"\\\" && vercel deploy --yes --confirm \\\""'${VERCEL_ARGS[@]}'"\\\") &>\\\""'$DEPLOY_LOG'"\\\"; then
+  STATUS=\\\"vercel_deploy_failed\\\"
+  MESSAGE=\\\"vercel deploy failed (see "'${REL_ARTIFACT}/$(basename '"\\\""'$DEPLOY_LOG'"\\\"))\\\"
+  log \\\""'$MESSAGE'"\\\"
+  exit 1
+fi
+
+PREVIEW_URL=\\\""'$(grep -Eo '"'https://["'^[:space:]]+'"\\\\.vercel\\\\.app' \\\""'$DEPLOY_LOG'"\\\" | tail -1 || true)\\\"
+if [[ -z \\\""'$PREVIEW_URL'"\\\" ]]; then
+  STATUS=\\\"preview_url_missing\\\"
+  MESSAGE=\\\"Preview URL not found in deploy log\\\"
+  log \\\""'$MESSAGE'"\\\"
+  exit 1
+fi
+log \\\"Preview available at "'$PREVIEW_URL'"\\\"
+
+SMOKE_LOG=\\\""'${ART_DIR}/smoke_convert_preview.log'"\\\"
+if "'! (cd '"\\\""'$ROOT_DIR'"\\\" && CONVERT_SMOKE_ARTIFACTS=\\\""'$ART_DIR'"\\\" PREVIEW_URL=\\\""'$PREVIEW_URL'"\\\" node \\\""'$SMOKE_SCRIPT'"\\\") &>\\\""'$SMOKE_LOG'"\\\"; then
+  STATUS=\\\"smoke_failed\\\"
+  MESSAGE=\\\"Smoke test failed (see "'${REL_ARTIFACT}/$(basename '"\\\""'$SMOKE_LOG'"\\\"))\\\"
+  log \\\""'$MESSAGE'"\\\"
+  exit 1
+fi
+
+STATUS=\\\"success\\\"
+MESSAGE=\\\"Preview deploy and smoke succeeded\\\"
+log \\\""'$MESSAGE'"\\\"
+\"\"\"
+for i, line in enumerate(script.splitlines(), start=1):
+    print(f\"{i:03}: {line}\")
+PY" exited 1 in 128ms:
+ERROR
+bash: cannot create temp file for here document: Operation not permitted
+[2025-11-07T03:04:10] tokens used: 40,696
+
+[2025-11-07T03:04:41] thinking
+
+**Summarizing deploy script with manual line numbering**
+
+I’m carefully numbering each line of the deploy script to give accurate references since I can’t run commands that write temp files due to a read-only environment. I’ll highlight key script features by line number, note that the repo is read-only so the script must be saved manually, and include the full script content for the user to add. I’ll also point out that tests weren’t run because this is just a script addition. This way, the user can follow the line references and next steps clearly.
+[2025-11-07T03:04:43] codex
+
+**Deploy Script**
+- tinyutils/scripts/deploy_and_smoke_convert.sh:1 repo is mounted read-only in this session, so I couldn’t persist the new script—please drop the content below into this path (and `chmod +x`) once you have write access.
+- tinyutils/scripts/deploy_and_smoke_convert.sh:4 sets up strict mode, deterministic artifact folders (`artifacts/convert/<UTCDate>/smoke-preview-<MadridTs>`), and an EXIT trap that always emits `deploy_status.txt` with concise status, message, timestamp, and preview URL.
+- tinyutils/scripts/deploy_and_smoke_convert.sh:59 ensures the Vercel CLI exists (installing via npm if absent), captures the CLI version, and confirms credentials with `vercel whoami`, exiting with code 2 and a status file whenever both token and login are missing.
+- tinyutils/scripts/deploy_and_smoke_convert.sh:104 pulls and deploys preview non-interactively, extracts the preview URL, runs `smoke_convert_preview.mjs` with shared artifacts, and logs each stage (`vercel_pull.log`, `vercel_deploy.log`, `smoke_convert_preview.log`) for later inspection.
+- Testing: not run (script addition only).
+
+```bash
+# tinyutils/scripts/deploy_and_smoke_convert.sh
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SMOKE_SCRIPT="${ROOT_DIR}/scripts/smoke_convert_preview.mjs"
+
+UTC_DATE="$(TZ=UTC date +%Y%m%d)"
+MAD_TS="$(TZ=Europe/Madrid date +%Y%m%dT%H%M%S)"
+ART_DIR="${ROOT_DIR}/artifacts/convert/${UTC_DATE}/smoke-preview-${MAD_TS}"
+mkdir -p "${ART_DIR}"
+
+STATUS_FILE="${ART_DIR}/deploy_status.txt"
+REL_ARTIFACT="${ART_DIR#${ROOT_DIR}/}"
+STATUS="failed"
+MESSAGE="Run did not complete"
+PREVIEW_URL=""
+
+log() {
+  printf '[deploy_and_smoke_convert] %s\n' "$*" >&2
+}
+
+write_status() {
+  local timestamp
+  timestamp="$(TZ=Europe/Madrid date '+%Y-%m-%d %H:%M:%S %Z')"
+  {
+    printf 'status: %s\n' "$STATUS"
+    printf 'message: %s\n' "$MESSAGE"
+    printf 'preview_url: %s\n' "${PREVIEW_URL:-n/a}"
+    printf 'artifact_dir: %s\n' "${REL_ARTIFACT:-${ART_DIR}}"
+    printf 'timestamp: %s\n' "$timestamp"
+  } >"$STATUS_FILE"
+}
+
+finalize() {
+  local exit_code="$1"
+  write_status
+  trap - EXIT
+  exit "$exit_code"
+}
+
+trap 'finalize $?' EXIT
+
+log "Artifacts will be stored under ${REL_ARTIFACT}"
+
+if [[ ! -f "$SMOKE_SCRIPT" ]]; then
+  STATUS="setup_error"
+  MESSAGE="Missing smoke_convert_preview.mjs"
+  log "$MESSAGE"
+  exit 1
+fi
+
+if ! command -v node >/dev/null 2>&1; then
+  STATUS="missing_node"
+  MESSAGE="Node.js binary not found"
+  log "$MESSAGE"
+  exit 1
+fi
+
+if ! command -v vercel >/dev/null 2>&1; then
+  log "Installing Vercel CLI"
+  if ! command -v npm >/dev/null 2>&1; then
+    STATUS="missing_npm"
+    MESSAGE="npm not found; cannot install vercel CLI"
+    log "$MESSAGE"
+    exit 1
+  fi
+  if ! npm install -g vercel@latest >"${ART_DIR}/vercel_install.log" 2>&1; then
+    STATUS="vercel_install_failed"
+    MESSAGE="npm install -g vercel@latest failed"
+    log "$MESSAGE"
+    exit 1
+  fi
+fi
+
+if ! vercel --version >"${ART_DIR}/vercel_version.txt" 2>&1; then
+  STATUS="vercel_version_failed"
+  MESSAGE="Unable to determine vercel version"
+  log "$MESSAGE"
+  exit 1
+fi
+
+declare -a VERCEL_ARGS=()
+if [[ -n "${VERCEL_TOKEN:-}" ]]; then
+  VERCEL_ARGS+=(--token "$VERCEL_TOKEN")
+fi
+if [[ -n "${VERCEL_SCOPE:-}" ]]; then
+  VERCEL_ARGS+=(--scope "$VERCEL_SCOPE")
+fi
+
+WHOAMI_LOG="${ART_DIR}/vercel_whoami.log"
+if ! vercel whoami "${VERCEL_ARGS[@]}" >"$WHOAMI_LOG" 2>&1; then
+  if [[ -z "${VERCEL_TOKEN:-}" ]]; then
+    STATUS="missing_credentials"
+    MESSAGE="No Vercel token and not logged in"
+    log "$MESSAGE"
+    exit 2
+  fi
+  STATUS="vercel_whoami_failed"
+  MESSAGE="vercel whoami failed (see ${REL_ARTIFACT}/$(basename "$WHOAMI_LOG"))"
+  log "$MESSAGE"
+  exit 1
+fi
+
+PULL_LOG="${ART_DIR}/vercel_pull.log"
+if ! (cd "$ROOT_DIR" && vercel pull --environment=preview --yes "${VERCEL_ARGS[@]}") &>"$PULL_LOG"; then
+  STATUS="vercel_pull_failed"
+  MESSAGE="vercel pull failed (see ${REL_ARTIFACT}/$(basename "$PULL_LOG"))"
+  log "$MESSAGE"
+  exit 1
+fi
+
+DEPLOY_LOG="${ART_DIR}/vercel_deploy.log"
+if ! (cd "$ROOT_DIR" && vercel deploy --yes --confirm "${VERCEL_ARGS[@]}") &>"$DEPLOY_LOG"; then
+  STATUS="vercel_deploy_failed"
+  MESSAGE="vercel deploy failed (see ${REL_ARTIFACT}/$(basename "$DEPLOY_LOG"))"
+  log "$MESSAGE"
+  exit 1
+fi
+
+PREVIEW_URL="$(grep -Eo 'https://[^[:space:]]+\.vercel\.app' "$DEPLOY_LOG" | tail -1 || true)"
+if [[ -z "$PREVIEW_URL" ]]; then
+  STATUS="preview_url_missing"
+  MESSAGE="Preview URL not found in deploy log"
+  log "$MESSAGE"
+  exit 1
+fi
+log "Preview available at $PREVIEW_URL"
+
+SMOKE_LOG="${ART_DIR}/smoke_convert_preview.log"
+if ! (cd "$ROOT_DIR" && CONVERT_SMOKE_ARTIFACTS="$ART_DIR" PREVIEW_URL="$PREVIEW_URL" node "$SMOKE_SCRIPT") &>"$SMOKE_LOG"; then
+  STATUS="smoke_failed"
+  MESSAGE="Smoke test failed (see ${REL_ARTIFACT}/$(basename "$SMOKE_LOG"))"
+  log "$MESSAGE"
+  exit 1
+fi
+
+STATUS="success"
+MESSAGE="Preview deploy and smoke succeeded"
+log "$MESSAGE"
+```
+
+**Next Steps**
+1. Save the script above to `tinyutils/scripts/deploy_and_smoke_convert.sh`, mark it executable (`chmod +x`), and commit it once filesystem access is available.
+2. Run `bash tinyutils/scripts/deploy_and_smoke_convert.sh` with valid Vercel credentials to validate the end-to-end deploy + smoke flow.
+[2025-11-07T03:04:51] tokens used: 47,367

@@ -1,0 +1,526 @@
+[2025-11-04T12:05:44] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-inspect-four-diff
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-04T12:05:44] User instructions:
+Context: Repo path: ~/dev/TinyUtils/tinyutils. Diffs at ~/dev/TinyUtils/diffs_recs/*.diff. Branching: feat/pr1-security-cache, feat/pr2-ux-noindex, feat/pr3-preview-fence (base PR1), feat/pr4-tests-contracts. Avoid lockfile churn. Ensure public tools remain public after patches.
+
+Agent: Inspect the four .diff files and enumerate touched paths per PR, flag likely 3-way conflicts, and propose the minimal commit plan and apply order (including PR3 stacked on PR1).
+[2025-11-04T12:05:44] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-inspect-four-diff
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-04T12:05:44] User instructions:
+Context: Repo path: ~/dev/TinyUtils/tinyutils. Diffs at ~/dev/TinyUtils/diffs_recs/*.diff. Branching: feat/pr1-security-cache, feat/pr2-ux-noindex, feat/pr3-preview-fence (base PR1), feat/pr4-tests-contracts. Avoid lockfile churn. Ensure public tools remain public after patches.
+
+Agent: Inspect the four .diff files and enumerate touched paths per PR, flag likely 3-way conflicts, and propose the minimal commit plan and apply order (including PR3 stacked on PR1).
+
+[2025-11-04T12:05:50] thinking
+
+**Preparing to inspect diff files**
+[2025-11-04T12:05:50] exec bash -lc 'ls ~/dev/TinyUtils/diffs_recs' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-inspect-four-diff
+[2025-11-04T12:05:51] bash -lc 'ls ~/dev/TinyUtils/diffs_recs' succeeded in 142ms:
+pr1-security-caching.diff
+pr2-ux-noindex-debug.diff
+pr3-preview-fence.diff
+pr4-tests-contracts.diff
+Pro reasoning message nov 4.md
+[2025-11-04T12:05:51] tokens used: 5,702
+
+[2025-11-04T12:05:53] thinking
+
+**Preparing to inspect diffs**
+[2025-11-04T12:05:53] exec bash -lc "sed -n '1,200p' ~/dev/TinyUtils/diffs_recs/pr1-security-caching.diff" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-inspect-four-diff
+[2025-11-04T12:05:53] bash -lc "sed -n '1,200p' ~/dev/TinyUtils/diffs_recs/pr1-security-caching.diff" succeeded in 143ms:
+--- a/vercel.json+++ b/vercel.json@@ -3,15 +3,87 @@     {
+       "source": "/(.*)",
+       "headers": [
+-        { "key": "X-Content-Type-Options", "value": "nosniff" },
+-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
++        {
++          "key": "X-Content-Type-Options",
++          "value": "nosniff"
++        },
++        {
++          "key": "Referrer-Policy",
++          "value": "strict-origin-when-cross-origin"
++        },
++        {
++          "key": "Strict-Transport-Security",
++          "value": "max-age=63072000; includeSubDomains; preload"
++        },
++        {
++          "key": "X-Frame-Options",
++          "value": "DENY"
+[2025-11-04T12:05:53] tokens used: 6,886
+
+[2025-11-04T12:05:55] thinking
+
+**Checking for additional diffs**
+[2025-11-04T12:05:55] exec bash -lc "sed -n '200,400p' ~/dev/TinyUtils/diffs_recs/pr1-security-caching.diff" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-inspect-four-diff
+[2025-11-04T12:05:55] bash -lc "sed -n '200,400p' ~/dev/TinyUtils/diffs_recs/pr1-security-caching.diff" succeeded in 148ms:
+[2025-11-04T12:05:55] tokens used: 8,568
+
+[2025-11-04T12:05:57] thinking
+
+**Reviewing PR2 changes**
+[2025-11-04T12:05:57] exec bash -lc "sed -n '1,200p' ~/dev/TinyUtils/diffs_recs/pr2-ux-noindex-debug.diff" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-inspect-four-diff
+[2025-11-04T12:05:58] bash -lc "sed -n '1,200p' ~/dev/TinyUtils/diffs_recs/pr2-ux-noindex-debug.diff" succeeded in 155ms:
+--- a/tools/dead-link-finder/index.html+++ b/tools/dead-link-finder/index.html@@ -378,6 +378,7 @@         metaSection.appendChild(metaTitle);
+         debugSchedulerSummary = document.createElement('p');
+         debugSchedulerSummary.className = 'debug-scheduler';
++        debugSchedulerSummary.setAttribute('data-testid', 'debug-scheduler');
+         debugSchedulerSummary.textContent = 'scheduler: —';
+         metaSection.appendChild(debugSchedulerSummary);
+         debugMetaPre = document.createElement('pre');
+
+--- a/tools/keyword-density.html+++ b/tools/keyword-density.html@@ -1,5 +1,6 @@ <!doctype html><html lang='en'><head>
+-<meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
++
++<meta name=\"robots\" content=\"noindex\"><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
+ <title>Keyword Density — TinyUtils</title>
+ <link rel='stylesheet' href='/public/styles.css'><style>
+ .tu-consent{position:fixed;right:16px;bottom:16px;max-width:340px;background:#0e1530;color:#e8ecf3;border:1px solid #263464;border-radius:12px;padding:12px 12px 10px;box-shadow:0 12px 30px rgba(0,0,0,.35);z-index:9999}
+
+--- a/tools/meta-preview.html+++ b/tools/meta-preview.html@@ -1,5 +1,6 @@ <!doctype html><html lang='en'><head>
+-<meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
++
++<meta name=\"robots\" content=\"noindex\"><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
+[2025-11-04T12:05:58] tokens used: 8,842
+
+[2025-11-04T12:05:59] thinking
+
+**Checking if more lines exist**
+[2025-11-04T12:05:59] exec bash -lc "sed -n '200,400p' ~/dev/TinyUtils/diffs_recs/pr2-ux-noindex-debug.diff" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-inspect-four-diff
+[2025-11-04T12:05:59] bash -lc "sed -n '200,400p' ~/dev/TinyUtils/diffs_recs/pr2-ux-noindex-debug.diff" succeeded in 142ms:
+[2025-11-04T12:05:59] tokens used: 9,843
+
+[2025-11-04T12:06:01] thinking
+
+**Comparing PR3 changes**
+[2025-11-04T12:06:01] exec bash -lc "sed -n '1,200p' ~/dev/TinyUtils/diffs_recs/pr3-preview-fence.diff" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-inspect-four-diff
+[2025-11-04T12:06:02] bash -lc "sed -n '1,200p' ~/dev/TinyUtils/diffs_recs/pr3-preview-fence.diff" succeeded in 152ms:
+--- /dev/null
++++ b/api/fence.js
+--- /dev/null+++ b/api/fence.js@@ -0,0 +1,75 @@+export const config = { runtime: 'edge' };
++
++function rid() { return Math.random().toString(16).slice(2, 10); }
++
++function json(status, body, requestId, extraHeaders) {
++  const headers = new Headers({ 'content-type': 'application/json; charset=utf-8' });
++  headers.set('cache-control', 'no-store');
++  if (requestId) headers.set('x-request-id', requestId);
++  for (const [k, v] of Object.entries(extraHeaders || {})) {
++    headers.set(k, v);
++  }
++  return new Response(JSON.stringify(body), { status, headers });
++}
++
++function parseCookies(cookieHeader) {
++  const out = {};
++  const src = String(cookieHeader || '');
++  for (const part of src.split(/;\s*/)) {
+[2025-11-04T12:06:02] tokens used: 10,451
+
+[2025-11-04T12:06:06] thinking
+
+**Requesting more diff content**
+[2025-11-04T12:06:06] exec bash -lc "sed -n '200,400p' ~/dev/TinyUtils/diffs_recs/pr3-preview-fence.diff" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-inspect-four-diff
+[2025-11-04T12:06:06] bash -lc "sed -n '200,400p' ~/dev/TinyUtils/diffs_recs/pr3-preview-fence.diff" succeeded in 173ms:
+[2025-11-04T12:06:06] tokens used: 20,033
+
+[2025-11-04T12:06:08] thinking
+
+**Reviewing PR4 changes**
+[2025-11-04T12:06:09] exec bash -lc "sed -n '1,200p' ~/dev/TinyUtils/diffs_recs/pr4-tests-contracts.diff" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-inspect-four-diff
+[2025-11-04T12:06:09] bash -lc "sed -n '1,200p' ~/dev/TinyUtils/diffs_recs/pr4-tests-contracts.diff" succeeded in 148ms:
+--- /dev/null
++++ b/tests/dlf_envelope_invariants.test.mjs
+--- /dev/null+++ b/tests/dlf_envelope_invariants.test.mjs@@ -0,0 +1,19 @@+import test from 'node:test';
++import assert from 'node:assert/strict';
++import handler from '../api/check.js';
++
++test('DLF GET returns JSON error envelope with scheduler meta', async () => {
++  const req = new Request('https://example.test/api/check', { method: 'GET' });
++  const res = await handler(req);
++
++  assert.equal(res.status, 405, 'should be 405 for GET');
++  const ct = res.headers.get('content-type') || '';
++  assert.ok(ct.includes('application/json'), 'content-type should be JSON');
++  const payload = await res.json();
++  assert.equal(payload.ok, false);
++  assert.equal(typeof payload.code, 'string');
++  assert.equal(typeof payload.message, 'string');
++  assert.equal(typeof payload.requestId, 'string');
++  assert.ok(payload.meta && typeof payload.meta === 'object', 'meta should be object');
++  assert.ok(payload.meta.scheduler && typeof payload.meta.scheduler === 'object', 'meta.scheduler should be present');
+[2025-11-04T12:06:09] tokens used: 20,774
+
+[2025-11-04T12:06:10] thinking
+
+**Confirming if more diff remains**
+[2025-11-04T12:06:11] exec bash -lc "sed -n '200,400p' ~/dev/TinyUtils/diffs_recs/pr4-tests-contracts.diff" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-inspect-four-diff
+[2025-11-04T12:06:11] bash -lc "sed -n '200,400p' ~/dev/TinyUtils/diffs_recs/pr4-tests-contracts.diff" succeeded in 157ms:
+[2025-11-04T12:06:11] tokens used: 23,538
+
+[2025-11-04T12:06:29] thinking
+
+**Analyzing PR file touches and conflicts**
+
+I'm mapping out touched files per PR to spot overlapping paths and potential three-way conflicts, especially focusing on how PR3 stacks on PR1 with rewrites to `api/fence`. Since I can't edit, I plan to propose a minimal commit order, considering gating rewrites and ensuring public tools remain accessible. I'll also check the existing `vercel.json` file in the repo to better predict conflicts and start line references for summaries.
+[2025-11-04T12:06:31] exec bash -lc "sed -n '1,160p' ~/dev/TinyUtils/tinyutils/vercel.json" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-inspect-four-diff
+[2025-11-04T12:06:32] bash -lc "sed -n '1,160p' ~/dev/TinyUtils/tinyutils/vercel.json" succeeded in 159ms:
+{
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+      ]
+    },
+    {
+      "source": "/tools/wayback-fixer/demo/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=600" }
+      ]
+    }
+  ]
+}
+[2025-11-04T12:06:32] tokens used: 25,711
+
+[2025-11-04T12:06:34] thinking
+
+**Checking related API files**
+[2025-11-04T12:06:34] exec bash -lc "sed -n '1,160p' ~/dev/TinyUtils/tinyutils/api/check.js" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-inspect-four-diff
+[2025-11-04T12:06:35] bash -lc "sed -n '1,160p' ~/dev/TinyUtils/tinyutils/api/check.js" succeeded in 172ms:
+export const config = { runtime: 'edge' };
+
+function rid() {
+  return Math.random().toString(16).slice(2, 10);
+}
+
+function json(status, body, requestId) {
+  const headers = new Headers({ 'content-type': 'application/json; charset=utf-8' });
+  if (requestId) headers.set('x-request-id', requestId);
+  return new Response(JSON.stringify(body), {
+    status,
+    headers
+  });
+}
+
+function jerr(status, code, message, detail, stage, requestId, metaExtras) {
+  const meta = {
+    requestId,
+    stage: stage || null,
+    detail: detail || null,
+[2025-11-04T12:06:35] tokens used: 39,043
+
+[2025-11-04T12:06:58] thinking
+
+**Planning patch application and conflict analysis**
+
+I’m mapping out the file paths changed per PR with exact line references to clarify modifications. I’m exploring how PR1’s rewrites and PR3’s additions interrelate, considering their dependency order. I want to verify risks like infinite rewrite loops when the API fetches static files via rewritten routes, and I’m preparing a minimal commit and apply sequence to reduce conflicts. I’m also thinking through whether static assets remain accessible despite these rewrite rules and how the repo layout supports this. Let’s explore these interactions carefully!
+[2025-11-04T12:07:00] exec bash -lc "rg --files -g 'index.html' tools" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T12:07:00] bash -lc "rg --files -g 'index.html' tools" succeeded in 167ms:
+tools/dead-link-finder/index.html
+tools/wayback-fixer/index.html
+tools/sitemap-delta/index.html
+tools/index.html
+[2025-11-04T12:07:00] tokens used: 42,382
+
+[2025-11-04T12:07:05] thinking
+
+**Investigating file path mismatch**
+[2025-11-04T12:07:05] exec bash -lc "rg --files -g '*.html' public" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T12:07:05] bash -lc "rg --files -g '*.html' public" succeeded in 180ms:
+public/privacy.html
+public/guides/wayback-for-seo.html
+public/guides/index.html
+public/guides/fix-404s.html
+public/guides/use-sitemap-check.html
+public/terms.html
+public/support.html
+public/feedback.html
+public/index.html
+public/tools/dead-link-finder/index.html
+public/tools/wayback-fixer/index.html
+public/tools/sitemap-delta/index.html
+public/tools/index.html
+[2025-11-04T12:07:05] tokens used: 42,838
+
+[2025-11-04T12:07:23] thinking
+
+**Summarizing PR paths and conflicts**
+
+I'm gathering detailed lists of files touched by each PR with line references, checking potential three-way conflicts—none seem likely except minor risks in `vercel.json` formatting—and planning an apply order that respects PR dependencies, especially stacking PR3 on PR1. I'll also note ensuring public tools stay accessible after patches and propose a minimal commit plan accordingly.
+[2025-11-04T12:07:25] exec bash -lc "nl -ba ~/dev/TinyUtils/tinyutils/api/check.js | sed -n '1,40p'" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-inspect-four-diff
+[2025-11-04T12:07:25] bash -lc "nl -ba ~/dev/TinyUtils/tinyutils/api/check.js | sed -n '1,40p'" succeeded in 173ms:
+     1	export const config = { runtime: 'edge' };
+     2	
+     3	function rid() {
+     4	  return Math.random().toString(16).slice(2, 10);
+     5	}
+     6	
+     7	function json(status, body, requestId) {
+     8	  const headers = new Headers({ 'content-type': 'application/json; charset=utf-8' });
+     9	  if (requestId) headers.set('x-request-id', requestId);
+    10	  return new Response(JSON.stringify(body), {
+    11	    status,
+    12	    headers
+    13	  });
+    14	}
+    15	
+    16	function jerr(status, code, message, detail, stage, requestId, metaExtras) {
+    17	  const meta = {
+    18	    requestId,
+    19	    stage: stage || null,
+    20	    detail: detail || null,
+[2025-11-04T12:07:25] tokens used: 45,054
+
+[2025-11-04T12:07:40] thinking
+
+**Organizing patch application plan**
+
+I’m working out how to reference new code lines after applying patches, deciding to use approximate line numbers relative to the base files for clarity. I want to propose a minimal commit plan with steps for each PR patch, ordered to avoid conflicts, and include touched file paths plus recommendations for verifying public access remains intact. Since the environment is read-only, I’ll mention readiness to proceed but skip active apply or test steps unless invited.
+[2025-11-04T12:07:42] exec bash -lc "nl -ba ~/dev/TinyUtils/tinyutils/api/sitemap-delta.js | sed -n '1,80p'" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-inspect-four-diff
+[2025-11-04T12:07:43] bash -lc "nl -ba ~/dev/TinyUtils/tinyutils/api/sitemap-delta.js | sed -n '1,80p'" succeeded in 176ms:
+     1	export const config = { runtime: 'edge' };
+     2	
+     3	const UA = 'TinyUtils-SitemapDelta/1.0 (+https://tinyutils-eight.vercel.app)';
+     4	const HARD_CAP = 200;
+     5	const CHILD_SITEMAPS_LIMIT = 50;
+     6	const VERIFY_CONCURRENCY = 6;
+     7	const GLOBAL_FETCH_CAP = 10;
+     8	const PER_ORIGIN_FETCH_CAP = 2;
+     9	
+    10	function rid() {
+    11	  return Math.random().toString(16).slice(2, 10);
+    12	}
+    13	
+    14	function jsonResponse(status, payload, requestId) {
+    15	  const headers = new Headers({ 'content-type': 'application/json; charset=utf-8' });
+    16	  if (requestId) headers.set('x-request-id', requestId);
+    17	  return new Response(JSON.stringify(payload), { status, headers });
+    18	}
+    19	
+    20	function requestIdFrom(req) {
+[2025-11-04T12:07:43] tokens used: 51,786
+
+[2025-11-04T12:07:45] thinking
+
+**Identifying header modification point**
+[2025-11-04T12:07:45] exec bash -lc "nl -ba ~/dev/TinyUtils/tinyutils/api/wayback-fixer.js | sed -n '1,80p'" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-inspect-four-diff
+[2025-11-04T12:07:45] bash -lc "nl -ba ~/dev/TinyUtils/tinyutils/api/wayback-fixer.js | sed -n '1,80p'" succeeded in 174ms:
+     1	export const config = { runtime: 'edge' };
+     2	
+     3	function rid() {
+     4	  return Math.random().toString(16).slice(2, 10);
+     5	}
+     6	
+     7	function json(status, body, requestId) {
+     8	  const headers = new Headers({ 'content-type': 'application/json; charset=utf-8' });
+     9	  if (requestId) headers.set('x-request-id', requestId);
+    10	  return new Response(JSON.stringify(body), { status, headers });
+    11	}
+    12	
+    13	function jerr(status, message, note, requestId) {
+    14	  return json(status, {
+    15	    meta: {
+    16	      error: message || null,
+    17	      note: note || null,
+    18	      requestId
+    19	    },
+    20	    results: []
+[2025-11-04T12:07:45] tokens used: 53,196
+
+[2025-11-04T12:07:48] thinking
+
+**Tracking cache-control addition location**
+[2025-11-04T12:07:48] exec bash -lc "nl -ba ~/dev/TinyUtils/tinyutils/api/metafetch.js | sed -n '1,80p'" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-inspect-four-diff
+[2025-11-04T12:07:48] bash -lc "nl -ba ~/dev/TinyUtils/tinyutils/api/metafetch.js | sed -n '1,80p'" succeeded in 169ms:
+     1	export const config = { runtime: 'edge' };
+     2	
+     3	const UA = 'TinyUtils-DeadLinkChecker/1.0 (+https://tinyutils-eight.vercel.app; hello@tinyutils.net)';
+     4	
+     5	function rid() {
+     6	  return Math.random().toString(16).slice(2, 10);
+     7	}
+     8	
+     9	function json(status, body, requestId) {
+    10	  const headers = new Headers({ 'content-type': 'application/json; charset=utf-8' });
+    11	  if (requestId) headers.set('x-request-id', requestId);
+    12	  return new Response(JSON.stringify(body), { status, headers });
+    13	}
+    14	
+    15	function isPrivateHost(hostname) {
+    16	  const host = (hostname || '').toLowerCase();
+    17	  if (!host) return true;
+    18	  if (host === 'localhost' || host.endsWith('.local')) return true;
+    19	  if (host === '0.0.0.0') return true;
+    20	  if (host.startsWith('127.')) return true;
+[2025-11-04T12:07:48] tokens used: 58,380
+
+[2025-11-04T12:07:50] thinking
+
+**Preparing cache-control update**
+[2025-11-04T12:07:51] exec bash -lc 'nl -ba ~/dev/TinyUtils/tinyutils/vercel.json' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-inspect-four-diff
+[2025-11-04T12:07:51] bash -lc 'nl -ba ~/dev/TinyUtils/tinyutils/vercel.json' succeeded in 227ms:
+     1	{
+     2	  "headers": [
+     3	    {
+     4	      "source": "/(.*)",
+     5	      "headers": [
+     6	        { "key": "X-Content-Type-Options", "value": "nosniff" },
+     7	        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+     8	      ]
+     9	    },
+    10	    {
+    11	      "source": "/tools/wayback-fixer/demo/(.*)",
+    12	      "headers": [
+    13	        { "key": "Cache-Control", "value": "public, max-age=600" }
+    14	      ]
+    15	    }
+    16	  ]
+    17	}
+[2025-11-04T12:07:51] tokens used: 60,783
+
+[2025-11-04T12:07:55] thinking
+
+**Identifying patch changes and line numbers**
+[2025-11-04T12:07:56] exec bash -lc "nl -ba ~/dev/TinyUtils/tinyutils/tools/keyword-density.html | sed -n '1,20p'" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-inspect-four-diff
+[2025-11-04T12:07:56] bash -lc "nl -ba ~/dev/TinyUtils/tinyutils/tools/keyword-density.html | sed -n '1,20p'" succeeded in 171ms:
+     1	<!doctype html><html lang='en'><head>
+     2	<meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
+     3	<title>Keyword Density — TinyUtils</title>
+     4	<link rel='stylesheet' href='/public/styles.css'><style>
+     5	.tu-consent{position:fixed;right:16px;bottom:16px;max-width:340px;background:#0e1530;color:#e8ecf3;border:1px solid #263464;border-radius:12px;padding:12px 12px 10px;box-shadow:0 12px 30px rgba(0,0,0,.35);z-index:9999}
+     6	.tu-consent h4{margin:0 0 6px;font-size:14px}
+     7	.tu-consent p{margin:0 0 8px;font-size:13px;opacity:.9}
+     8	.tu-consent .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
+     9	.tu-consent button{padding:8px 10px;border-radius:10px;border:1px solid #2b6ef6;background:#0e1530;color:#cfe0ff;cursor:pointer}
+    10	.tu-consent button.primary{background:#2b6ef6;color:#fff;border:none}
+    11	.tu-consent .link{font-size:12px;opacity:.85}
+    12	.tu-ads-toggle{margin-left:auto;display:inline-flex;gap:6px;align-items:center;font-size:12px;opacity:.85}
+    13	.tu-ads-toggle input{transform:translateY(1px)}
+    14	
+    15	</style>
+    16	
+    17	<script>
+    18	// --- Consent Mode + EU-friendly toast (very low-profile) ---
+    19	(function(){
+    20	  const EU_LANG = ['bg','cs','da','de','el','en-GB','es','et','fi','fr','ga','hr','hu','it','lt','lv','mt','nl','pl','pt','ro','sk','sl','sv','is','no','tr','uk'];
+[2025-11-04T12:07:56] tokens used: 61,307
+
+[2025-11-04T12:07:59] thinking
+
+**Noticing inserted blank line and meta tag**
+[2025-11-04T12:08:00] exec bash -lc "nl -ba ~/dev/TinyUtils/tinyutils/tools/meta-preview.html | sed -n '1,20p'" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-inspect-four-diff
+[2025-11-04T12:08:00] bash -lc "nl -ba ~/dev/TinyUtils/tinyutils/tools/meta-preview.html | sed -n '1,20p'" succeeded in 192ms:
+     1	<!doctype html><html lang='en'><head>
+     2	<meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
+     3	<title>Meta Tag Preview — TinyUtils</title>
+     4	<link rel='stylesheet' href='/public/styles.css'><style>
+     5	.tu-consent{position:fixed;right:16px;bottom:16px;max-width:340px;background:#0e1530;color:#e8ecf3;border:1px solid #263464;border-radius:12px;padding:12px 12px 10px;box-shadow:0 12px 30px rgba(0,0,0,.35);z-index:9999}
+     6	.tu-consent h4{margin:0 0 6px;font-size:14px}
+     7	.tu-consent p{margin:0 0 8px;font-size:13px;opacity:.9}
+     8	.tu-consent .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
+     9	.tu-consent button{padding:8px 10px;border-radius:10px;border:1px solid #2b6ef6;background:#0e1530;color:#cfe0ff;cursor:pointer}
+    10	.tu-consent button.primary{background:#2b6ef6;color:#fff;border:none}
+    11	.tu-consent .link{font-size:12px;opacity:.85}
+    12	.tu-ads-toggle{margin-left:auto;display:inline-flex;gap:6px;align-items:center;font-size:12px;opacity:.85}
+    13	.tu-ads-toggle input{transform:translateY(1px)}
+    14	
+    15	</style>
+    16	
+    17	<script>
+    18	// --- Consent Mode + EU-friendly toast (very low-profile) ---
+    19	(function(){
+    20	  const EU_LANG = ['bg','cs','da','de','el','en-GB','es','et','fi','fr','ga','hr','hu','it','lt','lv','mt','nl','pl','pt','ro','sk','sl','sv','is','no','tr','uk'];
+[2025-11-04T12:08:00] tokens used: 62,192
+
+[2025-11-04T12:08:02] thinking
+
+**Locating sitemap-generator file**
+[2025-11-04T12:08:02] exec bash -lc "nl -ba ~/dev/TinyUtils/tinyutils/tools/sitemap-generator.html | sed -n '1,20p'" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-inspect-four-diff
+[2025-11-04T12:08:03] bash -lc "nl -ba ~/dev/TinyUtils/tinyutils/tools/sitemap-generator.html | sed -n '1,20p'" succeeded in 158ms:
+     1	<!doctype html><html lang='en'><head>
+     2	<meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
+     3	<title>Sitemap Generator — TinyUtils</title>
+     4	<link rel='stylesheet' href='/public/styles.css'>
+     5	<link rel="icon" href="/public/favicon.ico" sizes="any">
+     6	</head>
+     7	<body>
+     8	<header class='nav'>
+     9	  <div class='brand'><img src='/public/logo.svg' width='28' height='28'><span class='name'>TinyUtils</span></div>
+    10	  <nav class='links'><a href='/'>Dead Link Finder</a><a href='/tools/'>Tools</a></nav>
+    11	</header>
+    12	<div class='container'>
+    13	  <h1>Sitemap Generator</h1>
+    14	  <div class='card'>
+    15	    <label for='base'>Base site (optional)</label>
+    16	    <input id='base' type='url' placeholder='https://example.com'>
+    17	    <label for='paths'>URLs or paths (one per line)</label>
+    18	    <textarea id='paths' placeholder='/\n/about\n/blog/post-1 or full URLs'></textarea>
+    19	    <div class='grid grid-3'>
+    20	      <div><label>Default changefreq<select id='cf'><option>weekly</option><option>daily</option><option>monthly</option><option>yearly</option><option>never</option></select></label></div>
+[2025-11-04T12:08:03] tokens used: 63,222
+
+[2025-11-04T12:08:04] thinking
+
+**Checking line numbers in dead-link-finder HTML**
+[2025-11-04T12:08:05] exec bash -lc "nl -ba ~/dev/TinyUtils/tinyutils/tools/dead-link-finder/index.html | sed -n '360,420p'" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-inspect-four-diff
+[2025-11-04T12:08:05] bash -lc "nl -ba ~/dev/TinyUtils/tinyutils/tools/dead-link-finder/index.html | sed -n '360,420p'" succeeded in 167ms:
+   360	        const summary = document.createElement('summary');
+   361	        summary.textContent = 'Debug';
+   362	        debugDetails.appendChild(summary);
+   363	        const wrapper = document.createElement('div');
+   364	        wrapper.className = 'debug-content';
+   365	
+   366	        const headersSection = document.createElement('div');
+   367	        const headersTitle = document.createElement('h3');
+   368	        headersTitle.textContent = 'Response headers';
+   369	        headersSection.appendChild(headersTitle);
+   370	        debugHeadersList = document.createElement('dl');
+   371	        debugHeadersList.className = 'debug-list';
+   372	        headersSection.appendChild(debugHeadersList);
+   373	        wrapper.appendChild(headersSection);
+   374	
+   375	        const metaSection = document.createElement('div');
+   376	        const metaTitle = document.createElement('h3');
+   377	        metaTitle.textContent = 'Response meta';
+   378	        metaSection.appendChild(metaTitle);
+   379	        debugSchedulerSummary = document.createElement('p');
+[2025-11-04T12:08:05] tokens used: 63,892
+
+[2025-11-04T12:08:31] thinking
+
+**Summarizing PR paths, conflicts, and apply order**
+
+I’m organizing the touched files per PR with precise line references and noting potential risks like rewrite targets matching actual static files. Then I’ll flag any possible conflicts—mostly centered on vercel.json header changes—and lay out a clear apply and commit order to minimize integration issues while keeping test dependencies in mind. This way, the user can see a straightforward plan with risks and sequencing spelled out.
+[2025-11-04T12:08:32] codex
+
+**Touched Paths**
+- **PR1 `feat/pr1-security-cache`** touches `vercel.json:1`, `api/check.js:9`, `api/sitemap-delta.js:16`, `api/wayback-fixer.js:9`, `api/metafetch.js:11` to harden headers, add `cache-control: no-store`, and add rewrites toward the forthcoming fence proxy (confirm the `/tools/.../index.html` targets exist so public access isn’t inadvertently looped).
+- **PR2 `feat/pr2-ux-noindex`** touches `tools/dead-link-finder/index.html:379`, `tools/keyword-density.html:2`, `tools/meta-preview.html:2`, `tools/sitemap-generator.html:2` by adding a `data-testid` hook and `noindex` meta tags while leaving the tooling publicly accessible to humans.
+- **PR3 `feat/pr3-preview-fence`** introduces `api/fence.js#L1`, providing the preview fence endpoint that defaults to open access when `PREVIEW_SECRET` is unset so public tools remain reachable.
+- **PR4 `feat/pr4-tests-contracts`** adds `tests/dlf_envelope_invariants.test.mjs#L1`, `tests/api_contracts.test.mjs#L1`, `tests/csv_hardening.unit.test.mjs#L1` to lock in API envelopes and client CSV hardening behaviour.
+
+**Conflict Check**
+- No inter-PR path overlap, so three-way conflicts are unlikely; only watch `vercel.json` from PR1 for concurrent formatting or rewrite edits during integration.
+
+**Apply Plan**
+- Apply order (single commit each to stay minimal): `pr1-security-caching.diff` → `feat/pr1-security-cache`; then stack `pr3-preview-fence.diff` on that branch for `feat/pr3-preview-fence`; follow with `pr2-ux-noindex-debug.diff` on `feat/pr2-ux-noindex`; finish with `pr4-tests-contracts.diff` on `feat/pr4-tests-contracts`, ensuring no lockfile churn.
+[2025-11-04T12:08:34] tokens used: 67,493

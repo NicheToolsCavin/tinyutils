@@ -1,0 +1,178 @@
+Here is a detailed implementation plan for adding the Universal Document Converter and Find & Replace utility to the TinyUtils project:
+
+**I. Project Structure & Setup**
+
+1.  **New Directories:**
+    *   `/app/converter/`: Next.js/React UI for the document converter.
+    *   `/app/findreplace/`: Next.js/React UI for the find & replace utility.
+    *   `/api/convert/`: Python serverless functions for document conversion.
+    *   `/api/findreplace/`: Python serverless functions for find & replace operations.
+    *   `/filters/`: Lua Pandoc filters.
+    *   `/tests/fixtures/`: Test files for smoke tests.
+2.  **Dependencies:**
+    *   Ensure `vercel.json` is configured for Python runtime.
+    *   Add necessary Python packages (e.g., `pandocfilters`, `python-magic` for MIME type detection, `diff-match-patch` for diffing) to `requirements.txt` in the Python API directories.
+    *   Add Vercel Blob SDK to frontend (if not already present).
+
+**II. Universal Document Converter**
+
+1.  **Frontend (`/app/converter/`):**
+    *   **UI Component (`index.tsx`):**
+        *   Drag-and-drop file upload area.
+        *   Input for selecting source and target document formats (dropdowns).
+        *   "Convert" button.
+        *   Loading state indicator.
+        *   Display download link for the converted file.
+        *   Error message display.
+    *   **File Upload:** Implement direct browser upload to Vercel Blob using Vercel Blob SDK. This avoids proxying large files through the serverless function.
+    *   **API Interaction:**
+        *   On "Convert," make an API call to `/api/convert/index.py` with the Vercel Blob URL of the uploaded file, source format, and target format.
+        *   Receive a manifest JSON response containing the Blob URL of the converted file.
+    *   **SEO Landing Pages:**
+        *   Create static Next.js pages (e.g., `/docx-to-markdown.tsx`, `/pdf-to-text.tsx`) that link to or embed the main converter UI, pre-filling format options where appropriate.
+        *   These pages will have SEO-friendly content.
+
+2.  **Backend (`/api/convert/index.py`):**
+    *   **Vercel Serverless Function:**
+        *   Receive `POST` request with `blobUrl`, `sourceFormat`, `targetFormat`.
+        *   **Input Validation:** Validate formats and `blobUrl`.
+        *   **Download from Blob:** Use Vercel Blob SDK to download the input file from the provided `blobUrl` to a temporary file.
+        *   **Pandoc Execution:**
+            *   Construct a `subprocess` command to run Pandoc.
+            *   Include appropriate input/output format flags (`-f`, `-t`).
+            *   Integrate Lua filters using `--lua-filter /filters/my_filter.lua`.
+            *   Handle potential Pandoc errors (e.g., unsupported conversion).
+        *   **Upload to Blob:** Upload the converted output file to Vercel Blob.
+        *   **Response:** Return a JSON object with:
+            *   `status: 'success' | 'error'`
+            *   `convertedFileBlobUrl`: URL of the converted file in Vercel Blob.
+            *   `originalFileName`: Original file name.
+            *   `convertedFileName`: Converted file name.
+            *   `mimeType`: MIME type of the converted file.
+            *   `size`: Size of the converted file.
+            *   `message`: (Optional) success or error message.
+        *   **Error Handling:** Catch exceptions during file download, Pandoc execution, and Blob upload. Return informative error messages.
+        *   **Logging:** Log conversion events (input/output formats, success/failure) without PII.
+        *   **Max File Size:** Implement checks for maximum allowed file size before processing to prevent resource exhaustion. Return an error if exceeded.
+        *   **Deterministic Cleanup:** Ensure all temporary files created during the process are deterministically removed after the function completes, regardless of success or failure.
+
+3.  **Pandoc Filters (`/filters/*.lua`):**
+    *   Create Lua scripts (e.g., `markdown_cleanup.lua`, `custom_formatting.lua`) to address specific conversion nuances or enhance output quality.
+    *   These will be referenced by the Python serverless function.
+
+**III. Find & Replace Utility**
+
+1.  **Frontend (`/app/findreplace/`):**
+    *   **UI Component (`index.tsx`):**
+        *   Textarea for direct text input OR file upload area (direct to Vercel Blob).
+        *   Input field for regex pattern.
+        *   Input field for replacement string.
+        *   Checkbox for case-sensitive/insensitive.
+        *   "Preview Changes" button.
+        *   "Apply Changes" button.
+        *   Display area for diffs (for preview).
+        *   Display download link for the modified file (after apply).
+        *   Error message display.
+    *   **File Upload:** Similar to the converter, implement direct browser upload to Vercel Blob.
+    *   **API Interaction:**
+        *   **Preview:** Call `/api/findreplace/preview.py` with text/Blob URL, regex, replacement, and case-sensitivity. Display the returned diffs.
+        *   **Apply:** Call `/api/findreplace/apply.py` with text/Blob URL, regex, replacement, and case-sensitivity. Display the download link for the modified file.
+
+2.  **Backend (`/api/findreplace/{preview,apply}`):**
+    *   **`/api/findreplace/preview.py` (Vercel Serverless Function):**
+        *   Receive `POST` request with `content` (text) or `blobUrl`, `regexPattern`, `replacementString`, `caseSensitive`.
+        *   **Input Validation:** Validate inputs.
+        *   **Content Retrieval:** If `blobUrl` is provided, download content from Vercel Blob. Otherwise, use `content` directly.
+        *   **Regex Processing:** Perform regex find and replacement on the content.
+        *   **Diff Generation:** Use a library like `diff-match-patch` to generate a diff between the original and modified content.
+        *   **Response:** Return a JSON object with:
+            *   `status: 'success' | 'error'`
+            *   `diffs`: Array of diff objects (e.g., `[{ type: 'equal', value: '...' }, { type: 'insert', value: '...' }]`).
+            *   `message`: (Optional) success or error message.
+        *   **Deterministic Cleanup:** Remove temporary files.
+    *   **`/api/findreplace/apply.py` (Vercel Serverless Function):**
+        *   Receive `POST` request with `content` (text) or `blobUrl`, `regexPattern`, `replacementString`, `caseSensitive`.
+        *   **Input Validation:** Validate inputs.
+        *   **Content Retrieval:** If `blobUrl` is provided, download content from Vercel Blob. Otherwise, use `content` directly.
+        *   **Regex Processing:** Perform regex find and replacement.
+        *   **Upload to Blob:** Upload the modified content to Vercel Blob.
+        *   **Response:** Return a JSON object with:
+            *   `status: 'success' | 'error'`
+            *   `modifiedFileBlobUrl`: URL of the modified file in Vercel Blob.
+            *   `originalFileName`: Original file name.
+            *   `modifiedFileName`: Modified file name.
+            *   `mimeType`: MIME type of the modified file.
+            *   `size`: Size of the modified file.
+            *   `message`: (Optional) success or error message.
+        *   **Error Handling:** Catch exceptions.
+        *   **Logging:** Log events without PII.
+        *   **Deterministic Cleanup:** Remove temporary files.
+
+**IV. Vercel Blob Integration**
+
+1.  **Client-side Direct Uploads:** Implement using Vercel Blob SDK for secure, direct uploads from the browser to Blob storage.
+2.  **Server-side Storage/Retrieval:** Use Vercel Blob SDK within Python serverless functions to download input files and upload processed output files.
+3.  **Cleanup Strategy:**
+    *   Implement a lifecycle policy for Vercel Blob to automatically delete old or temporary files after a certain period (e.g., 24 hours).
+    *   Ensure serverless functions clean up local temporary files immediately after use.
+
+**V. Vercel Configuration (`vercel.json`)**
+
+1.  **Security Headers:** Review and update existing security headers to ensure compatibility with new routes and Blob storage.
+2.  **API Routes:**
+    *   Configure `functions` to map `/api/convert/**` and `/api/findreplace/**` to Python runtimes.
+    *   Example:
+        ```json
+        {
+          "functions": {
+            "api/convert/*.py": { "runtime": "python@3.9" },
+            "api/findreplace/*.py": { "runtime": "python@3.9" }
+          },
+          "routes": [
+            // Existing routes
+            { "src": "/app/converter/(.*)", "dest": "/app/converter/index.html" },
+            { "src": "/app/findreplace/(.*)", "dest": "/app/findreplace/index.html" },
+            { "src": "/docx-to-markdown", "dest": "/app/converter/docx-to-markdown.html" },
+            // ... other SEO landers
+            { "src": "/api/convert/(.*)", "dest": "/api/convert/$1" },
+            { "src": "/api/findreplace/(.*)", "dest": "/api/findreplace/$1" }
+          ]
+        }
+        ```
+3.  **Redirects/Rewrites:** Configure redirects or rewrites for SEO landing pages (e.g., `/docx-to-markdown`) to point to the appropriate Next.js UI component.
+
+**VI. CI/CD & Testing**
+
+1.  **Fixtures (`/tests/fixtures/`):**
+    *   Create sample input files for both converter (e.g., `.docx`, `.pdf`, `.md`) and find & replace (e.g., `.txt`, `.js` with known patterns).
+    *   Create expected output files for verification.
+2.  **GitHub Actions Update:**
+    *   Modify existing GitHub Actions workflows (or create new ones) to include:
+        *   **Unit Tests:** For Python serverless functions (e.g., using `pytest`).
+        *   **Integration/Smoke Tests:**
+            *   Deploy a preview environment.
+            *   Use `curl` or a simple Python script to interact with the deployed `/api/convert` and `/api/findreplace` endpoints.
+            *   Upload a fixture file, trigger conversion/find-replace, download the result from Blob, and compare with expected output.
+            *   Test SEO landing page accessibility.
+
+**VII. SEO & Sitemap**
+
+1.  **Sitemap Update (`sitemap.xml`):**
+    *   Add new URLs for the SEO landing pages (e.g., `/docx-to-markdown`, `/pdf-to-text`).
+    *   Ensure the sitemap is dynamically generated or manually updated as new landing pages are added.
+
+**VIII. Environment Variables**
+
+1.  **Vercel Project Settings:**
+    *   Define `BLOB_READ_WRITE_TOKEN` (or similar) for Vercel Blob access.
+    *   Define any other necessary configuration variables for Pandoc or regex processing.
+    *   Ensure these are securely managed in Vercel environment variables.
+
+**IX. AI-Ready Architecture Hooks**
+
+1.  **Manifest JSON Responses:** Ensure all API responses (especially for conversion and find/replace) return structured manifest JSON that clearly describes the output, including file types, sizes, and Blob URLs. This structured data will be easier for an AI layer to consume and interpret.
+2.  **Clear API Contracts:** Define clear input and output schemas for all new API endpoints to facilitate future integration with an AI planning layer.
+3.  **Modular Design:** Keep the Python serverless functions modular, separating concerns like file handling, Pandoc execution, and regex processing. This allows for easier modification or replacement of components by an AI.
+4.  **Logging:** Continue with robust, PII-free logging that provides sufficient detail for an AI to diagnose issues or understand execution flow.
+
+This plan provides a comprehensive roadmap for implementing the new features while adhering to the specified constraints and future-proofing considerations.

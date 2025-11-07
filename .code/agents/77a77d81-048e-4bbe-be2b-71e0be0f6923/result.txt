@@ -1,0 +1,391 @@
+[2025-11-04T12:00:27] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/dev/TinyUtils
+model: gpt-5
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-04T12:00:27] User instructions:
+You are part of an orchestrated agent team planning the "CODEX AUTOPILOT – TinyUtils Full Audit Implementation". Produce a detailed, actionable plan for how the Autopilot should coordinate the specialized agents (Planner, RepoSurgeon, Verifier, Deployer, CISetter, Scribe) to deliver four PRs using provided diffs, run tests, and deploy via Vercel without prompts. Context:
+
+Repository root: ~/dev/TinyUtils/tinyutils (Node.js project without lockfile; package.json present; public web tools under /public + HTML pages). Diffs located at ~/dev/TinyUtils/diffs_recs/*.diff for PR1 security+caching, PR2 UX noindex/debug gating, PR3 preview fence, PR4 tests/contracts. Audit briefs exist in the same folder as Markdown.
+
+Requirements summary:
+1. Apply each diff on its own thematic branch; PR3 stacked on PR1 (or clearly dependent). Use clean commits.
+2. Run appropriate tests/smoke checks to verify functionality; capture logs/evidence.
+3. Ensure public tools (Dead Link Finder, Sitemap Delta, Wayback Fixer) remain public; beta tools behind preview secrets after patches.
+4. Deploy via authenticated vercel CLI — prefer preview deployment, fall back to production if preview requires human approval. Deployment must be non-interactive. Capture URLs and response headers.
+5. Node.js 20.x runtime; prefer pnpm if lockfile exists, else npm. `vercel link --yes` already safe.
+6. PRs must include acceptance criteria + evidence (headers, JSON snippets, logs) pasted into description/comment.
+7. JSON responses from public endpoints must include content-type and cache-control: no-store.
+
+Also note: tests folder `tests/`, vercel.json present. Repo contains static HTML pages and tools directory; ensure gating changes don’t break public ones.
+
+Deliverable: Provide a step-by-step plan sequencing the agents’ work (include branching, diff application, test/deploy order, evidence capture, PR documentation). Mention risk mitigations and validation steps. Feel free to reference key files (package.json, vercel.json, tests/) but let executors inspect details. Highlight dependencies, especially PR3 relying on PR1.
+
+
+[Running in read-only mode - no modifications allowed]
+[2025-11-04T12:00:27] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/dev/TinyUtils
+model: gpt-5
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-04T12:00:27] User instructions:
+You are part of an orchestrated agent team planning the "CODEX AUTOPILOT – TinyUtils Full Audit Implementation". Produce a detailed, actionable plan for how the Autopilot should coordinate the specialized agents (Planner, RepoSurgeon, Verifier, Deployer, CISetter, Scribe) to deliver four PRs using provided diffs, run tests, and deploy via Vercel without prompts. Context:
+
+Repository root: ~/dev/TinyUtils/tinyutils (Node.js project without lockfile; package.json present; public web tools under /public + HTML pages). Diffs located at ~/dev/TinyUtils/diffs_recs/*.diff for PR1 security+caching, PR2 UX noindex/debug gating, PR3 preview fence, PR4 tests/contracts. Audit briefs exist in the same folder as Markdown.
+
+Requirements summary:
+1. Apply each diff on its own thematic branch; PR3 stacked on PR1 (or clearly dependent). Use clean commits.
+2. Run appropriate tests/smoke checks to verify functionality; capture logs/evidence.
+3. Ensure public tools (Dead Link Finder, Sitemap Delta, Wayback Fixer) remain public; beta tools behind preview secrets after patches.
+4. Deploy via authenticated vercel CLI — prefer preview deployment, fall back to production if preview requires human approval. Deployment must be non-interactive. Capture URLs and response headers.
+5. Node.js 20.x runtime; prefer pnpm if lockfile exists, else npm. `vercel link --yes` already safe.
+6. PRs must include acceptance criteria + evidence (headers, JSON snippets, logs) pasted into description/comment.
+7. JSON responses from public endpoints must include content-type and cache-control: no-store.
+
+Also note: tests folder `tests/`, vercel.json present. Repo contains static HTML pages and tools directory; ensure gating changes don’t break public ones.
+
+Deliverable: Provide a step-by-step plan sequencing the agents’ work (include branching, diff application, test/deploy order, evidence capture, PR documentation). Mention risk mitigations and validation steps. Feel free to reference key files (package.json, vercel.json, tests/) but let executors inspect details. Highlight dependencies, especially PR3 relying on PR1.
+
+
+[Running in read-only mode - no modifications allowed]
+
+[2025-11-04T12:00:43] thinking
+
+**Planning deployment commands**
+
+Alright, so I need to think through the commands for this deployment. If there's a `pnpm-lock.yaml`, I'll go with `pnpm i`. If not, the fallback will be `npm ci` or `npm install`, but since there’s no lockfile, I’ll use `npm install`. I’ll ensure to include `npx vercel` while setting the `VERCEL_TOKEN` for non-interactive use. It sounds like I need to capture URLs and response headers with `curl -I` and `curl -s` too!
+**Verifying headers and access**
+
+I need to capture the `x-vercel-id` and other headers for validation. JSON responses from public endpoints should include `content-type` and `cache-control: no-store`. I’ll verify by curling the endpoint and checking headers to ensure everything is correct. Additionally, we want to make sure that beta tools are gated behind preview secrets after patches. 
+
+It's also important to confirm that tools like Dead Link Finder and others remain accessible without authentication. I’ll provide checks for gating, noting how to open PRs with acceptance criteria and necessary evidence.
+**Creating PR templates and CI plans**
+
+I need to include a template for PR descriptions that asks for evidence like logs and header JSON snippets. I’ll assign the "Verifier" role to gather this evidence. It’s important to mention "CISetter" to ensure that the CI pipeline is set up correctly with Node 20, running tests and perhaps `vercel build` for previews. I’ll also need to add workflows in GitHub Actions YAML to run these tests. 
+
+The plan is to coordinate the Autopilot agents to handle four PRs seamlessly, ensuring that deployment via Vercel happens without prompts!
+**Structuring the deployment process**
+
+I need to create a clear timeline for our deployment workflow. This will involve pre-flight scanning and verifying the environment, followed by branching to apply diffs, committing changes, and running tests and smoke checks. After that, we'll fix any issues and create a PR.
+
+For applying diffs, I’ll propose using `git apply -p0 < diff` or `patch -p1`, and I should include checks like `git apply --check` before applying. Since the repo is a Node environment without a lockfile, I’ll suggest using `npm ci` only if `package-lock.json` is present; otherwise, we’ll go with `npm install`. Additionally, I’ll list our test commands found in the `tests/` directory.
+**Detailing deployment steps and roles**
+
+I need to outline a structured deployment plan that includes testing commands such as `npm test` or `node --test` based on conditions in `package.json`. We'll propose checks via `curl` to verify public tools and ensure gating is in place without breaking functionality. 
+
+I must define roles, like the Planner orchestrating tasks, while the RepoSurgeon creates branches and applies diffs. The Verifier will run tests and checks, and the Deployer handles the Vercel process. Each role has distinct responsibilities, ensuring a smooth deployment with necessary validations. 
+
+I’ll also address risk mitigations, ensuring that environment variables are set and confirming proper configurations for Node 20.x.
+**Crafting the implementation plan**
+
+I’m putting together a structured plan for the TinyUtils Full Audit Implementation. I'll use headers to organize this into clear sections, such as Overall Flow, Branching and PR mapping, and Agent Roles.
+
+I’ll detail the steps for each PR, like PR1, PR2, etc., and include a Tests and Verification Plan with commands and smoke checks. I need to ensure to capture evidence and provide checklists, risk mitigation strategies, and a success criteria section.
+
+I aim to keep everything succinct and include sample commands with clear paths, like `/dev/TinyUtils/tinyutils`.
+**Drafting the implementation plan**
+
+I’m putting together a structured implementation plan for the audit project within the repo, particularly focusing on the diffs located at `/dev/TinyUtils/diffs_recs/*.diff`.  
+
+For the preflight phase, I'll provide specific git commands for applying diffs and managing branches, including fallbacks. I need to instruct on installing dependencies as there's no lockfile, and emphasize running tests effectively. 
+
+The plan must also address Vercel deployment steps, evidence capture via curl, and strategies for gating. I’ll ensure to emphasize coordination among agents, with "Kanban style tasks" and handoff artifacts.  
+
+Every section will be clear with headers, concise bullet points, and relevant commands. I need to keep the final output concise while ensuring it remains informative and detailed enough to guide everyone through this process effectively.
+[2025-11-04T12:01:48] codex
+**Verifying headers and access**
+
+I need to capture the `x-vercel-id` and other headers for validation. JSON responses from public endpoints should include `content-type` and `cache-control: no-store`. I’ll verify by curling the endpoint and checking headers to ensure everything is correct. Additionally, we want to make sure that beta tools are gated behind preview secrets after patches. 
+
+It's also important to confirm that tools like Dead Link Finder and others remain accessible without authentication. I’ll provide checks for gating, noting how to open PRs with acceptance criteria and necessary evidence.
+[2025-11-04T12:01:48] codex
+**Creating PR templates and CI plans**
+
+I need to include a template for PR descriptions that asks for evidence like logs and header JSON snippets. I’ll assign the "Verifier" role to gather this evidence. It’s important to mention "CISetter" to ensure that the CI pipeline is set up correctly with Node 20, running tests and perhaps `vercel build` for previews. I’ll also need to add workflows in GitHub Actions YAML to run these tests. 
+
+The plan is to coordinate the Autopilot agents to handle four PRs seamlessly, ensuring that deployment via Vercel happens without prompts!
+[2025-11-04T12:01:48] codex
+**Structuring the deployment process**
+
+I need to create a clear timeline for our deployment workflow. This will involve pre-flight scanning and verifying the environment, followed by branching to apply diffs, committing changes, and running tests and smoke checks. After that, we'll fix any issues and create a PR.
+
+For applying diffs, I’ll propose using `git apply -p0 < diff` or `patch -p1`, and I should include checks like `git apply --check` before applying. Since the repo is a Node environment without a lockfile, I’ll suggest using `npm ci` only if `package-lock.json` is present; otherwise, we’ll go with `npm install`. Additionally, I’ll list our test commands found in the `tests/` directory.
+[2025-11-04T12:01:48] codex
+**Detailing deployment steps and roles**
+
+I need to outline a structured deployment plan that includes testing commands such as `npm test` or `node --test` based on conditions in `package.json`. We'll propose checks via `curl` to verify public tools and ensure gating is in place without breaking functionality. 
+
+I must define roles, like the Planner orchestrating tasks, while the RepoSurgeon creates branches and applies diffs. The Verifier will run tests and checks, and the Deployer handles the Vercel process. Each role has distinct responsibilities, ensuring a smooth deployment with necessary validations. 
+
+I’ll also address risk mitigations, ensuring that environment variables are set and confirming proper configurations for Node 20.x.
+[2025-11-04T12:01:48] codex
+**Crafting the implementation plan**
+
+I’m putting together a structured plan for the TinyUtils Full Audit Implementation. I'll use headers to organize this into clear sections, such as Overall Flow, Branching and PR mapping, and Agent Roles.
+
+I’ll detail the steps for each PR, like PR1, PR2, etc., and include a Tests and Verification Plan with commands and smoke checks. I need to ensure to capture evidence and provide checklists, risk mitigation strategies, and a success criteria section.
+
+I aim to keep everything succinct and include sample commands with clear paths, like `/dev/TinyUtils/tinyutils`.
+[2025-11-04T12:01:48] codex
+**Drafting the implementation plan**
+
+I’m putting together a structured implementation plan for the audit project within the repo, particularly focusing on the diffs located at `/dev/TinyUtils/diffs_recs/*.diff`.  
+
+For the preflight phase, I'll provide specific git commands for applying diffs and managing branches, including fallbacks. I need to instruct on installing dependencies as there's no lockfile, and emphasize running tests effectively. 
+
+The plan must also address Vercel deployment steps, evidence capture via curl, and strategies for gating. I’ll ensure to emphasize coordination among agents, with "Kanban style tasks" and handoff artifacts.  
+
+Every section will be clear with headers, concise bullet points, and relevant commands. I need to keep the final output concise while ensuring it remains informative and detailed enough to guide everyone through this process effectively.
+[2025-11-04T12:01:48] codex
+
+Here’s a concrete, end‑to‑end plan for how the Autopilot should coordinate the agent team to land four PRs from the provided diffs, verify them with tests/smoke checks, and deploy via Vercel non‑interactively. It assumes the repository is at `~/dev/TinyUtils/tinyutils`, diffs and briefs are at `~/dev/TinyUtils/diffs_recs/`, Node 20.x, and that `vercel link --yes` is safe.
+
+Key files to be mindful of: `tinyutils/package.json`, `tinyutils/vercel.json`, `tinyutils/tests/`, `tinyutils/public/`, static HTML pages in `tinyutils/public/`, and any serverless routes under `tinyutils/api/` or similar.
+
+**Overall Flow**
+- Phase 0: Preflight and environment checks (Planner → RepoSurgeon → CISetter).
+- Phase 1: Apply diffs into branches, commit cleanly (RepoSurgeon).
+- Phase 2: Local/unit tests + static checks (Verifier).
+- Phase 3: Preview deploy (Deployer) and smoke tests (Verifier), capture evidence (Scribe).
+- Phase 4: Open PRs with acceptance criteria + evidence (Scribe).
+- Phase 5: CI setup and status signals (CISetter).
+- Phase 6: Stack dependency PR (PR3 → PR1) and repeat Phases 2–4.
+- Phase 7: Final production deploy (Deployer) if preview blocked or upon merges.
+
+**Branching Strategy**
+- PR1 security + caching: `feat/pr1-security-caching` (from `master`).
+- PR2 UX noindex + debug gating: `feat/pr2-ux-noindex-debug` (from `master`).
+- PR3 preview fence: `feat/pr3-preview-fence` (from `feat/pr1-security-caching`; target PR1 branch).
+- PR4 tests + contracts: `feat/pr4-tests-contracts` (from `master`; if tests require PR1/PR3 APIs, rebase onto them and note dependency).
+- Commit rules: one commit to apply the diff, optional follow‑up “fixup: apply with node20/test harness” only if necessary to make tests/deploy pass. No unrelated refactors.
+
+**Agent Roles**
+- Planner: Read audit briefs, define acceptance criteria and per‑PR test matrix; decide target files to validate.
+- RepoSurgeon: Create branches, apply diffs with `git apply --check`/`git am`, resolve trivial offsets, commit with clear message, push, open PR placeholders.
+- Verifier: Determine test runner from `package.json`, run unit/contract tests; perform smoke tests against preview/prod URLs; verify headers, JSON shape, and gating behavior; save artifacts.
+- Deployer: Use authenticated `vercel` CLI, non‑interactive preview deploys; fallback to production deploy if preview requires manual approval; capture URLs and headers.
+- CISetter: Ensure Node 20.x in CI; run test matrix; gate merge on tests; optionally run `vercel build` in CI for sanity; post PR checks.
+- Scribe: Draft PR descriptions with acceptance criteria, link to briefs, embed logs/headers/JSON snippets; annotate PR3 as stacked on PR1.
+
+**Phase 0 — Preflight (Planner, RepoSurgeon, CISetter)**
+- Confirm repo and diffs presence:
+  - `cd ~/dev/TinyUtils/tinyutils`
+  - `ls ~/dev/TinyUtils/diffs_recs/*.diff`
+- Record project metadata (for PR context):
+  - Node engine from `tinyutils/package.json`, existence of lockfile, scripts.test presence, framework detection (static/public + serverless).
+- Package manager selection:
+  - If `pnpm-lock.yaml` exists, use pnpm; else use npm (no lockfile present → npm).
+- Vercel availability:
+  - Assume `VERCEL_TOKEN` is exported in CI/agent shell; ensure `.vercel` or run `vercel link --yes --token $VERCEL_TOKEN`.
+- CI baseline:
+  - Ensure CI runs Node 20.x; install deps; run `npm test` if defined; otherwise fallback to `node --test` if tests exist in `tests/`.
+
+**Phase 1 — Apply Diffs and Commit (RepoSurgeon)**
+- Common snippet (per PR):
+  - `git fetch origin`
+  - `git checkout -b <branch>`
+  - Dry‑run: `git apply --check ~/dev/TinyUtils/diffs_recs/PRX*.diff || git am --signoff ~/dev/TinyUtils/diffs_recs/PRX*.diff --reject`
+  - Apply with 3‑way if needed: `git apply -3 ~/dev/TinyUtils/diffs_recs/PRX*.diff`
+  - `git add -A && git commit -m "PRX: <title> (audit patch)"` (minimal clean message)
+- Branch creation:
+  - PR1: `feat/pr1-security-caching` from `master`.
+  - PR2: `feat/pr2-ux-noindex-debug` from `master`.
+  - PR3: `feat/pr3-preview-fence` from `feat/pr1-security-caching` (set PR base to PR1 branch).
+  - PR4: `feat/pr4-tests-contracts` from `master` (rebase onto PR1/PR3 only if diffs require new endpoints; otherwise leave independent).
+
+**Phase 2 — Local Install and Tests (Verifier)**
+- Install (Node 20.x):
+  - `node -v` (should be 20.x)
+  - `npm install --no-audit --no-fund`
+- Test runner detection:
+  - If `package.json` contains `scripts.test`, run `npm test --silent`.
+  - If no test script and `tests/` exists, try `node --test` or `npm run test:e2e` if present.
+- Linting:
+  - Only lint changed files; dry‑run first; run actual lint only if configured and limited to staged diffs.
+- Save logs:
+  - Capture stdout/stderr of tests to `artifacts/prX-tests.log`.
+
+**Phase 3 — Preview Deploy + Smoke Checks (Deployer, Verifier)**
+- Preview deploy (non‑interactive):
+  - `vercel link --yes --token $VERCEL_TOKEN` (idempotent)
+  - `vercel pull --yes --environment=preview --token $VERCEL_TOKEN`
+  - Build locally or in cloud:
+    - Preferred: `vercel build --token $VERCEL_TOKEN`
+    - Deploy: `DEPLOY_URL=$(vercel deploy --prebuilt --token $VERCEL_TOKEN | tail -1)`
+  - Fallback to production if preview is blocked by org policy:
+    - `PROD_URL=$(vercel deploy --prod --token $VERCEL_TOKEN | tail -1)`
+- Smoke checks (Verifier):
+  - Enumerate public tools in `public/` (HTML pages for Dead Link Finder, Sitemap Delta, Wayback Fixer) and hit them:
+    - `curl -I $DEPLOY_URL/public/<tool>.html` expecting 200, `content-type: text/html`.
+  - For JSON endpoints under `api/` or tool HTTP handlers:
+    - `curl -i $DEPLOY_URL/api/<endpoint>` and verify:
+      - `content-type: application/json` present.
+      - `cache-control: no-store` present (public endpoints requirement).
+      - Status codes appropriate (200 for public endpoints).
+  - Gating checks (PR2/PR3):
+    - Ensure debug pages now have `<meta name="robots" content="noindex, nofollow">` (fetch HTML and grep).
+    - Verify beta tools behind preview fence:
+      - On preview: unauthenticated → 401/403/redirect per diff spec.
+      - With preview secret/header/query per diff: 200.
+      - On production: public tools remain public; beta still gated per requirements (if specified).
+  - Capture headers and JSON snippets:
+    - `curl -sI $DEPLOY_URL/... > artifacts/prX-headers.txt`
+    - `curl -s $DEPLOY_URL/... | head -c 1000 > artifacts/prX-body.json`
+  - Persist `x-vercel-id`, `server`, and cache headers for evidence.
+
+**Phase 4 — PR Authoring with Evidence (Scribe)**
+- Create PRs (RepoSurgeon or `gh`):
+  - Titles: “PR1: Security + caching hardening”, “PR2: UX noindex + debug gating”, “PR3: Preview fence (stacked on PR1)”, “PR4: Tests + contracts”.
+  - PR3 base branch: `feat/pr1-security-caching`.
+  - PR dependencies: include “Depends-On: #<PR1 number>” in PR3 description if targetting master.
+- Acceptance criteria template (include in each PR):
+  - Summary of changes from audit brief.
+  - Tests:
+    - Unit/contract tests passed: attach `artifacts/prX-tests.log` tail with summary.
+  - Headers:
+    - Paste `curl -I` for relevant endpoints (show `content-type`, `cache-control`, `x-vercel-id`).
+  - JSON snippet:
+    - First 1–10 properties of a representative response.
+  - Public tools:
+    - List each tool URL checked; status 200 and visible without auth.
+  - Preview fence (PR3):
+    - Show preview unauthenticated result (expected 401/403/redirect).
+    - Show authenticated result with secret/access path (200).
+  - Noindex/debug pages (PR2):
+    - Paste `<meta name="robots"...>` line from HTML.
+  - Deployment:
+    - Paste preview (or prod) URL(s) and timestamps.
+- Link to `~/dev/TinyUtils/diffs_recs/PRX*.md` audit brief as context.
+
+**Phase 5 — CI Setup (CISetter)**
+- Add/update GitHub Actions workflow to enforce Node 20.x and run tests:
+  - `on: [pull_request]`
+  - Steps: checkout → setup Node 20 → `npm install --no-audit --no-fund` → `npm test` (or `node --test` if no script)
+  - Optional: `vercel build` as a “build check” job for additional safety (skippable on forks).
+- Required checks:
+  - Mark tests job as required to merge for all PRs.
+- Artifacts:
+  - Upload `artifacts/prX-tests.log` and a minimal `artifacts/prX-headers.txt`.
+
+**PR‑Specific Details and Validation**
+
+- PR1 Security + Caching (base for PR3)
+  - Expected outcomes:
+    - JSON endpoints respond with `content-type: application/json` and `cache-control: no-store`.
+    - Security headers added if applicable (CSP, X‑Content‑Type‑Options, Referrer‑Policy).
+  - Verifier checks:
+    - `curl -I $DEPLOY_URL/api/*` for affected endpoints.
+    - Ensure no breakage to public HTML pages in `public/`.
+  - Risk mitigation:
+    - If any HTML route accidentally gets `no-store` where not desired, verify standard cache or `max-age` remains unchanged unless brief mandates.
+
+- PR2 UX Noindex + Debug Gating
+  - Expected outcomes:
+    - Debug pages carry `<meta name="robots" content="noindex, nofollow">`.
+    - Debug routes gated appropriately (e.g., behind env flag or query/header key).
+  - Verifier checks:
+    - Fetch debug HTML and assert robots meta present.
+    - Verify public tools (Dead Link Finder, Sitemap Delta, Wayback Fixer) remain accessible and ungated.
+  - Risk mitigation:
+    - Grep for gating hooks accidentally wrapping `public/` or known public endpoints; add negative tests.
+
+- PR3 Preview Fence (stacked on PR1)
+  - Branching:
+    - Branch off PR1, set PR base to PR1.
+  - Expected outcomes:
+    - Beta tools gated in preview behind secret/access control per diff.
+    - Production retains public access rules for public tools, beta still gated as required.
+  - Verifier checks:
+    - Preview URL unauthenticated access → 401/403/redirect for beta.
+    - Authenticated path (header/query/secret per diff brief) → 200.
+    - Public tools unaffected in both preview and production.
+  - Risk mitigation:
+    - If preview requires org protection bypass, prefer prod deploy for evidence of unchanged public routes; still validate gating logic locally (`vercel build` + `vercel deploy --prebuilt` to prod as documented).
+
+- PR4 Tests + Contracts
+  - Expected outcomes:
+    - New tests/contract checks pass locally and in CI.
+    - If contracts assert headers, verify JSON `cache-control: no-store` and `content-type`.
+  - Verifier checks:
+    - Run tests, collect coverage (if configured), upload logs as artifacts.
+  - Risk mitigation:
+    - If tests target PR1/PR3 APIs, rebase PR4 on top of those and state dependency in PR.
+
+**Deployment Protocol (Deployer)**
+- Non‑interactive preview deploy (preferred):
+  - `vercel link --yes --token $VERCEL_TOKEN`
+  - `vercel pull --yes --environment=preview --token $VERCEL_TOKEN`
+  - `vercel build --token $VERCEL_TOKEN`
+  - `DEPLOY_URL=$(vercel deploy --prebuilt --token $VERCEL_TOKEN | tail -1)`
+- Fallback non‑interactive production deploy if preview blocked:
+  - `PROD_URL=$(vercel deploy --prod --token $VERCEL_TOKEN | tail -1)`
+- Headers collection (store and paste in PRs):
+  - `curl -sI "$DEPLOY_URL/<public-json-endpoint>" | tee artifacts/prX-headers.txt`
+  - Capture `x-vercel-id`, `cache-control`, `content-type`, `server`.
+- Required env for preview fence:
+  - If diffs introduce `PREVIEW_SECRET` or similar, ensure it’s present in preview env (via `vercel pull`); otherwise document expected 401 and show local override evidence if necessary.
+
+**Evidence Capture (Verifier, Scribe)**
+- Logs: `artifacts/prX-tests.log`, `artifacts/prX-smoke.log`.
+- Headers: `artifacts/prX-headers.txt` (include at least one public JSON endpoint).
+- JSON snippet: `artifacts/prX-body.json` (first ~1KB).
+- URLs: Preview or production URL(s), timestamp, curl command used.
+- CI: Link to green checks; attach build summary.
+
+**Risk Mitigations**
+- Diff apply failures:
+  - Use `git apply -3` and inspect rejects; if any manual resolution is needed, keep fixups minimal and scoped; add a “fixup” commit referencing the hunk.
+- No lockfile:
+  - Prefer `npm install --no-audit --no-fund` and avoid upgrading packages unless required by diffs; do not introduce a new lockfile unless mandated.
+- Gating regression:
+  - Explicitly list public tools found in `public/` and verify they remain 200 OK without auth; add a simple route probe test into PR4 to guard.
+- Preview secrets:
+  - If secret not available via `vercel pull`, document in PR3 and show local simulation or prod confirmation that public pages are unaffected; fallback to production deploy for public route sanity.
+- CI noise:
+  - Lint only changed files; cache npm; run tests with `--silent` to keep logs readable; upload artifacts.
+
+**Validation Checklist (per PR)**
+- Branching correct; clean commits; PR titles and base as defined.
+- Tests pass locally and in CI under Node 20.
+- Preview or production deploy URL captured.
+- For JSON public endpoints: `content-type: application/json` and `cache-control: no-store`.
+- Public tools (three named) load without auth.
+- PR2: noindex meta present on debug pages.
+- PR3: preview fence enforces gating; authenticated path works; production unaffected.
+- PR description includes acceptance criteria and embedded evidence.
+
+**Suggested Commands (reference)**
+- Create and apply PR1:
+  - `git checkout -b feat/pr1-security-caching`
+  - `git apply --check ~/dev/TinyUtils/diffs_recs/PR1*.diff || git am ~/dev/TinyUtils/diffs_recs/PR1*.diff`
+  - `git add -A && git commit -m "PR1: Security + caching (audit patch)"`
+- Install + test:
+  - `npm install --no-audit --no-fund`
+  - `npm test --silent || node --test`
+- Deploy preview:
+  - `vercel link --yes --token $VERCEL_TOKEN`
+  - `vercel pull --yes --environment=preview --token $VERCEL_TOKEN`
+  - `vercel build --token $VERCEL_TOKEN`
+  - `DEPLOY_URL=$(vercel deploy --prebuilt --token $VERCEL_TOKEN | tail -1)`
+- Headers + JSON:
+  - `curl -sI "$DEPLOY_URL/api/<endpoint>" | tee artifacts/pr1-headers.txt`
+  - `curl -s "$DEPLOY_URL/api/<endpoint>" | head -c 1000 > artifacts/pr1-body.json`
+
+**Handoff and Sequencing**
+- Day 0: Planner finalizes acceptance criteria and test matrix; RepoSurgeon lands PR1 and PR2 branches; Verifier runs tests; Deployer publishes previews; Scribe opens PRs with evidence.
+- Day 1: RepoSurgeon stacks PR3 on PR1; Verifier + Deployer repeat tests/deploy; Scribe opens PR3 with dependency note.
+- Day 2: RepoSurgeon applies PR4; CISetter ensures workflows; Verifier validates tests/contracts; Scribe finalizes PR4 with coverage or logs.
+- Merge order: PR1 → PR3 (stacked) and PR2 independently; PR4 merges when green and not blocked by stack needs.
+
+This plan gives each agent a clear sequence, precise commands, acceptance criteria, and evidence expectations, while guarding against the main risks: diff conflicts, gating regressions, missing headers, and preview deploy friction.
+[2025-11-04T12:02:29] tokens used: 18,200

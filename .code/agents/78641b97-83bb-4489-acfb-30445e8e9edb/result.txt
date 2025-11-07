@@ -1,0 +1,485 @@
+I'll help you create a concrete implementation plan for the multi-file/multi-target converter backend. Let me first explore the repository structure to understand the current implementation better.
+
+Let me explore the tinyutils directory structure to understand the current implementation:
+
+Now let me check the specific directories mentioned in the context:
+
+Let me check the current convert API implementation and the _lib directory:
+
+Now let me examine the convert module:
+
+Let me also check the test structure:
+
+Let me examine the current implementation files to understand the current state:
+
+Now let me examine the convert service and types:
+
+Let me also check the supporting libraries:
+
+Let me also check the other supporting modules:
+
+Let me check how the pandoc runner works:
+
+Let me check the test files to understand the expected behavior:
+
+Let me also check the other test files:
+
+Let me check the main API integration test:
+
+Let me also check the UI and documentation files:
+
+Let me also check the documentation files mentioned:
+
+Let me also check if there are any existing fixtures:
+
+Let me look at the existing fixtures to understand the pattern:
+
+Now that I've explored the current codebase, I'll create a comprehensive implementation plan for the multi-file/multi-target converter backend:
+
+Now I'll complete the implementation plan based on my analysis of the codebase:
+
+# Multi-File/Multi-Target Universal Converter Backend Implementation Plan
+
+## Key Assumptions/Questions
+1. The current implementation already supports batch conversion via `convert_batch()` in the service layer
+2. The API already accepts multiple inputs and targets (via `inputs` array and `targets` list)
+3. Blob upload/download and size limits are already in place
+4. Need clarification on whether to support ZIP archives for batch outputs
+5. Need to determine how to handle preview selection across multiple files
+
+## Architecture & Module Boundaries
+- `tinyutils/convert/service.py` - Core conversion logic (already mostly completed)
+- `tinyutils/convert/types.py` - Type definitions (already established)
+- `tinyutils/api/convert/index.py` - API layer that coordinates between blob, service, and response formatting
+- `tinyutils/api/_lib/` - Supporting modules (blob, pandoc_runner, utils, etc.)
+
+## 5-10 Actionable Implementation Steps
+
+1. **Harden the service layer** - Improve error handling and add comprehensive tests for edge cases
+2. **Enhance API schema validation** - Add proper validation for multi-file/multi-target scenarios
+3. **Implement batch size enforcement** - Add validation to prevent batches exceeding size limits
+4. **Refine preview selection logic** - Implement deterministic selection of preview from multiple files
+5. **Update UI to support multi-file uploads** - Modify the HTML UI to allow multiple file selection
+6. **Extend tests** - Add integration tests for batch scenarios and error conditions
+7. **Add logging and instrumentation** - Enhance logging for debugging batch processing
+8. **Create documentation updates** - Update API documentation for batch operations
+9. **Set up artifacts directory** - Establish conversion-specific evidence storage
+10. **Implement media handling for batch** - Ensure media ZIPs are handled properly for multiple inputs
+
+## Testing & Evidence Strategy
+
+### Python Tests:
+- Extend `tests/convert/test_service.py` with batch conversion tests
+- Add `tests/convert/test_api_convert_unit.py` for schema validation tests
+- Extend `tests/convert/test_api_convert.py` with integration tests
+- Create test fixtures in a new directory `tests/fixtures/convert/`
+
+### Node Tests:
+- Extend existing Node contract tests for batch operations
+- Add validation tests for the API envelope contract
+
+### Evidence Strategy:
+- Create artifacts directory `tinyutils/artifacts/convert/<date>/` for each conversion run
+- Store inputs, outputs, logs, and error reports for debugging
+- Add checksums and metadata for auditability
+
+## Top Risks & Mitigations
+
+1. **Risk:** Large batch processing causing memory exhaustion
+   - **Mitigation:** Implement strict size limits and streaming where possible
+
+2. **Risk:** Timeout during batch processing
+   - **Mitigation:** Add progress tracking and potentially async processing for large batches
+
+3. **Risk:** Blob storage limits exceeded
+   - **Mitigation:** Check total batch size before processing and implement cleanup policies
+
+4. **Risk:** Complex error handling across multiple files
+   - **Mitigation:** Ensure errors per file are preserved and communicated clearly
+
+5. **Risk:** Preview selection becomes inconsistent across files
+   - **Mitigation:** Implement deterministic preview selection based on file priority
+
+## Library Structure & Responsibilities
+
+The current library structure is already well-defined:
+
+### `tinyutils/convert/types.py`
+- **Purpose**: Define data structures for the conversion process
+- **Current state**: Well-designed with `InputPayload`, `ConversionResult`, `BatchResult`, etc.
+- **Responsibilities**: 
+  - Data modeling for inputs, outputs, errors, and previews
+  - Defining conversion options and artifacts
+  - Type safety across the conversion pipeline
+
+### `tinyutils/convert/service.py`
+- **Purpose**: Core business logic for conversion
+- **Current state**: Already implements `convert_one` and `convert_batch`
+- **Responsibilities**:
+  - `convert_one`: Handle single document conversion with all targets
+  - `convert_batch`: Process multiple inputs with error isolation
+  - Media extraction and ZIP creation
+  - Preview generation with headings/snippets/images
+  - Integration with pandoc and text cleaning utilities
+
+### Integration with `_lib` helpers:
+- `pandoc_runner`: Actual document conversion via pandoc
+- `text_clean`: Post-processing of converted content
+- `blob`: Upload/download of converted artifacts
+- `utils`: General utilities and workspace management
+
+The service layer already properly delegates to these helper modules, creating a clean separation of concerns.
+
+## API Schema & Validation Updates
+
+The current API in `tinyutils/api/convert/index.py` already supports the multi-file/multi-target functionality:
+
+### Current Schema (`ConvertRequest`):
+```python
+class ConvertRequest(BaseModel):
+    inputs: List[InputItem]     # Already supports multiple inputs
+    source_format: Optional[str] = Field(default=None, alias="from")
+    targets: List[str] = Field(default_factory=lambda: ["md"], alias="to")  # Already supports multiple targets
+    options: Options = Options()
+```
+
+### Required Updates:
+1. **Enhanced validation**: Add validation to ensure reasonable batch sizes (total input files and total data size)
+2. **Target validation**: Ensure supported targets and avoid duplicates
+3. **Envelope contract preservation**: The existing response contract already supports the requirements:
+   - `jobId`: Unique identifier for the batch job
+   - `toolVersions`: Pandoc version information
+   - `outputs`: List of all converted artifacts with proper metadata
+   - `preview`: Selected preview data (headings/snippets/images)
+   - `logs`: Batch-wide and per-file logging
+   - `errors`: Per-file error information
+
+### Validation Enhancements Needed:
+- Batch size limits: Verify total number of files doesn't exceed a threshold (e.g., 100 files)
+- Total data size limits: Validate that the sum of all input files fits within `MAX_BATCH_MB`
+- Target format validation: Ensure all requested targets are supported
+- Input validation: Verify blob URLs are properly formatted and accessible
+
+The API already follows the envelope contract pattern, requiring only validation enhancements rather than structural changes.
+
+## Blob/Download Strategy, Size Enforcement, and Metadata Selection
+
+### Current Blob Strategy:
+- The `blob.py` module already handles both input download and output upload
+- Uses data URLs as fallback when Vercel Blob is unavailable
+- Provides `download_to_path()` and `upload_bytes()` functions
+
+### Size Enforcement:
+- `utils.py` defines `MAX_FILE_MB` (default 100MB) and `MAX_BATCH_MB` (default 1024MB)
+- `ensure_within_limits()` function validates individual files
+- Need to add batch-level validation for total size
+
+### Required Enhancements:
+
+1. **Batch-Level Size Validation**:
+   - Calculate cumulative size of all inputs before processing
+   - Add validation in the API layer before calling the service
+   - Return clear error messages when batch limits are exceeded
+
+2. **Deterministic Preview Selection**:
+   - Currently, `_select_preview()` picks the first available preview from any result
+   - For production use, implement a priority system:
+     - Prioritize the first successfully converted file
+     - Fall back to files with most content if multiple succeed
+     - Ensure consistent behavior across requests
+
+3. **Blob Upload Optimization**:
+   - Consider parallel uploads for outputs to improve performance
+   - Add metadata to blob uploads to track file relationships
+   - Implement cleanup policies for old uploads
+
+4. **Media ZIP Handling**:
+   - Each input file can generate its own media ZIP
+   - Ensure proper naming to distinguish between files
+   - Consider bundling all media into a single archive for batch operations
+
+### Metadata Selection Strategy:
+- **Headings**: Use first successful conversion's headings for preview
+- **Snippets**: Select most representative snippets from first successful file
+- **Images**: Prioritize images from first successful conversion
+- Include metadata about which file the preview represents
+
+## Testing Approach & Evidence Strategy
+
+### Python Testing (Pytest):
+
+1. **Unit Tests (`tests/convert/test_service.py`)**:
+   - Test `convert_batch` with various input scenarios
+   - Test error handling when individual files fail
+   - Test media ZIP creation for batch operations
+   - Test preview selection logic for multiple files
+   - Test size limit enforcement
+
+2. **API Unit Tests (`tests/convert/test_api_convert_unit.py`)**:
+   - Test schema validation for batch inputs
+   - Test error responses for invalid batches
+   - Test preview selection from multiple files
+   - Test API contract compliance
+
+3. **Integration Tests (`tests/convert/test_api_convert.py`)**:
+   - End-to-end tests with mocked pandoc operations
+   - Test multiple targets with multiple inputs
+   - Test mixed success/failure scenarios
+   - Test blob upload/download flows
+
+### Node Contract Tests (JavaScript):
+
+1. **API Contract Tests** (`tinyutils/tests/*.mjs`):
+   - Verify response envelope structure remains consistent
+   - Test batch request/response patterns
+   - Validate error handling contracts
+   - Test backwards compatibility with single-file requests
+
+### Fixtures Layout:
+
+1. **Input Fixtures** (`tests/fixtures/convert/inputs/`):
+   - Small sample documents in various formats (docx, odt, html, md)
+   - Edge case documents (with tracked changes, with media, etc.)
+   - Error case documents (corrupted, extremely large)
+
+2. **Expected Output Fixtures** (`tests/fixtures/convert/expected/`):
+   - Pre-converted outputs for comparison
+   - Validation of conversion quality
+
+### Evidence Artifacts:
+
+1. **Per-Run Artifacts** (`tinyutils/artifacts/convert/<date>/YYYYMMDD_HHMM/`):
+   - Input files used in the test run
+   - Converted outputs (for manual verification)
+   - Log files from each conversion
+   - Performance metrics (processing time, resource usage)
+   - Error reports if any occurred
+
+2. **Test Execution Logs**:
+   - Test coverage reports
+   - Performance benchmarks
+   - Memory usage during batch processing
+
+### Specific Test Suites:
+
+1. **Core Services**:
+   - Run `pytest tests/convert/test_service.py -v` for service-level tests
+   - Focus on batch processing edge cases
+
+2. **API Integration**:
+   - Run `pytest tests/convert/test_api_convert*.py -v` 
+   - Verify API contract compliance
+
+3. **Regression Tests**:
+   - Run existing Node tests to ensure backwards compatibility
+   - Run full test suite to catch unintended side effects
+
+## Documentation, Logging & Instrumentation Updates
+
+### Documentation Updates:
+
+1. **AGENT_RUN_LOG.md** (`tinyutils/docs/AGENT_RUN_LOG.md`):
+   - Add entries for converter implementation sessions
+   - Document decisions made during hardening phase
+   - Record any deviations from the original plan
+   - Include pointers to artifacts created during development
+
+2. **AGENT_TASK_CHECKLIST.md** (`tinyutils/docs/AGENT_TASK_CHECKLIST.md`):
+   - Update status of converter development tasks
+   - Add entries for testing and validation work
+   - Document completion of hardening activities
+
+3. **API Documentation**:
+   - Update API endpoint documentation to reflect batch capabilities
+   - Add examples for multi-file/multi-target requests
+   - Document limits (max files, max batch size, supported formats)
+   - Update error response documentation
+
+4. **UI Updates** (`tools/convert/index.html`):
+   - Modify file input to support multiple file selection
+   - Update UI to handle batch operations
+   - Add batch status indicators
+   - Update response handling to show multiple outputs
+
+5. **README Updates**:
+   - Document new batch conversion capabilities
+   - Add usage examples for batch operations
+   - Update feature matrix to reflect multi-file support
+
+### Logging & Instrumentation:
+
+1. **Enhanced Logging** (`tinyutils/api/_lib/utils.py`):
+   - Add batch-level logging with job IDs
+   - Include performance metrics (processing time per file)
+   - Log size information for batches
+   - Add structured logging for debugging batch failures
+
+2. **Metrics Collection**:
+   - Track successful/failed conversions per batch
+   - Monitor processing times for different file types
+   - Track most popular conversion targets
+   - Monitor resource usage during batch processing
+
+3. **Error Reporting**:
+   - Improve error messages for batch validation failures
+   - Include file-specific error context
+   - Add debugging information for media extraction failures
+
+4. **Audit Trail**:
+   - Log all conversion requests with job IDs
+   - Track which files were processed in each batch
+   - Record conversion options used
+   - Store checksums for inputs and outputs for integrity
+
+### Production Checklists:
+
+1. **PREVIEW_SMOKE_CHECKLIST.md**:
+   - Add batch conversion test scenarios
+   - Include multi-target validation
+   - Test error handling for partial failures
+
+2. **DEPLOY_PRODUCTION_CHECKLIST.md**:
+   - Add batch processing validation steps
+   - Include stress testing for batch size limits
+   - Verify blob storage handling for large batches
+
+## Dependencies, Sequencing, Risks & Mitigations
+
+### Dependencies:
+1. **Pandoc**: Core conversion engine (via pypandoc package)
+2. **FastAPI**: Web framework for API endpoints
+3. **Pydantic**: Request/response validation
+4. **Requests**: For blob download operations
+5. **Python standard library**: Path handling, JSON, etc.
+
+### Sequencing:
+
+1. **Phase 1: Library Hardening** (`tinyutils/convert/`):
+   - Complete service implementation
+   - Add comprehensive error handling
+   - Implement media ZIP functionality
+   - Add performance optimizations
+
+2. **Phase 2: API Integration** (`tinyutils/api/convert/`):
+   - Add batch validation logic
+   - Enhance response formatting
+   - Update schema validation
+   - Add size enforcement
+
+3. **Phase 3: Testing** (`tests/convert/`):
+   - Extend unit tests
+   - Add integration tests
+   - Create comprehensive fixtures
+   - Run regression tests
+
+4. **Phase 4: UI Updates** (`tools/convert/`):
+   - Modify UI for multi-file support
+   - Update response handling
+   - Add batch status indicators
+
+5. **Phase 5: Documentation & Deployment**:
+   - Update docs
+   - Add production checklists
+   - Prepare for deployment
+
+### Risks & Mitigations:
+
+1. **Risk: Resource Exhaustion**
+   - **Impact**: Large batches could consume excessive memory/CPU
+   - **Mitigation**: 
+     - Implement strict size limits (MAX_BATCH_MB)
+     - Add streaming processing where possible
+     - Include memory monitoring and early termination
+     - Process files sequentially rather than in parallel to control resource usage
+
+2. **Risk: Timeout Failures**
+   - **Impact**: Long-running batch operations may timeout
+   - **Mitigation**:
+     - Add async processing with job status polling
+     - Implement chunked processing for very large batches
+     - Set appropriate timeout values (configurable via environment)
+     - Provide progress updates for long-running operations
+
+3. **Risk: Blob Storage Limits**
+   - **Impact**: Large outputs may exceed storage limits
+   - **Mitigation**:
+     - Validate output sizes before upload
+     - Implement automatic cleanup of old files
+     - Add fallback storage mechanisms
+     - Compress large outputs where appropriate
+
+4. **Risk: Inconsistent Preview Selection**
+   - **Impact**: Users may receive unexpected preview content
+   - **Mitigation**:
+     - Implement deterministic preview selection logic
+     - Always document which file the preview represents
+     - Provide clear indication when preview comes from a specific file in the batch
+     - Allow users to select which file to preview in the UI
+
+5. **Risk: Complex Error Handling**
+   - **Impact**: Mixed success/failure scenarios may confuse users
+   - **Mitigation**:
+     - Provide clear per-file error reporting
+     - Return partial results when some files succeed
+     - Include detailed error messages with actionable information
+     - Group similar errors to avoid overwhelming users
+
+6. **Risk: Backward Compatibility**
+   - **Impact**: Changes may break existing single-file clients
+   - **Mitigation**:
+     - Maintain API envelope contract
+     - Ensure single-file requests continue to work unchanged
+     - Run comprehensive regression tests
+     - Provide versioned API paths if needed
+
+7. **Risk: Security Vulnerabilities**
+   - **Impact**: Malicious files could compromise system
+   - **Mitigation**:
+     - Strict file type validation
+     - Size limits enforced at multiple levels
+     - Isolated processing environment (temporary directories)
+     - Input sanitization and validation
+
+8. **Risk: Performance Degradation**
+   - **Impact**: Conversion service may slow down for all users
+   - **Mitigation**:
+     - Queue-based processing for large batches
+     - Rate limiting to prevent abuse
+     - Monitoring and alerting on performance metrics
+     - Horizontal scaling support for processing workers
+
+### Critical Path Dependencies:
+- Pandoc installation and configuration
+- Blob storage integration
+- Proper isolation of temporary files between requests
+- Environment variable configuration for limits
+
+The implementation is already well-structured, with the main remaining work being the hardening of the existing library, adding comprehensive validation, and extending test coverage.
+
+Based on my analysis of the TinyUtils repository, I've developed a comprehensive implementation plan for the multi-file/multi-target converter backend. Here's my complete analysis and recommendations:
+
+## Implementation Plan Summary
+
+The current implementation already supports most of the required functionality:
+- The `tinyutils/convert/service.py` library has `convert_batch()` function
+- The API at `tinyutils/api/convert/index.py` already accepts multiple inputs and targets
+- Size limits and blob handling are implemented
+- Preview, media ZIP, and error handling are available
+
+## Key Findings
+
+1. **Architecture is sound**: The separation between service layer and API layer is clean
+2. **API schema is ready**: The current schema supports batch operations via `inputs: List[InputItem]` and `targets: List[str]`
+3. **Blob strategy is in place**: Download/upload functionality exists with fallback mechanisms
+4. **Testing foundation exists**: Test files are already created and follow proper patterns
+
+## Recommended Next Steps
+
+1. **Complete hardening of the service layer** with additional error handling and validation
+2. **Extend test coverage** with batch-specific scenarios and edge cases
+3. **Add batch size validation** to prevent resource exhaustion
+4. **Improve preview selection logic** for deterministic behavior across multiple files
+5. **Update the UI** to support multi-file uploads in `tools/convert/index.html`
+6. **Add comprehensive documentation** for batch operations
+
+The implementation is already well-structured and primarily needs hardening and comprehensive testing rather than major architectural changes. The library is production-ready with these final improvements.

@@ -1,0 +1,75 @@
+Here's a plan to complete the universal converter backend, addressing service completion, API integration, testing, deployment automation, documentation, and verification:
+
+**Project Plan: Universal Converter Backend Completion**
+
+**Objective:** Deliver a fully functional universal converter backend, including a robust converter library, a FastAPI endpoint, comprehensive tests, automated artifact generation, and an unattended preview deployment with smoke tests.
+
+**Steps:**
+
+1.  **Codebase Analysis and Gap Identification**
+    *   **Rationale:** Understand the existing structure, conventions, and incomplete areas within `tinyutils/convert/`, `tinyutils/api/convert/index.py`, and `tests/convert/`. This initial review will inform subsequent implementation steps, ensuring adherence to existing patterns and identifying specific functionalities to be built or refined.
+    *   **Actionable Steps:**
+        *   Review `tinyutils/convert/` for existing conversion utilities, caching mechanisms, and error handling.
+        *   Examine `tinyutils/api/convert/index.py` to understand the current FastAPI endpoint structure, input parsing, and response formatting.
+        *   Analyze `tests/convert/` to identify existing test coverage and areas requiring new or expanded tests.
+
+2.  **Implement Core Converter Service Logic**
+    *   **Rationale:** Complete the `tinyutils/convert/` module by implementing all specified functionalities. This includes the core conversion logic, markdown cleanup, preview snippet generation, optional media zipping, deterministic caching, and a structured error handling system to meet the defined constraints (e.g., inputs ≤100MB, batch ≤1GB).
+    *   **Actionable Steps:**
+        *   Develop or refine conversion functions for various `to` formats.
+        *   Implement markdown cleanup and preview snippet generation utilities.
+        *   Integrate media zipping functionality for optional media outputs.
+        *   Establish deterministic caching mechanisms for conversion results.
+        *   Design and implement a structured error handling system for the converter service.
+
+3.  **Develop FastAPI Endpoint and Blob Integration**
+    *   **Rationale:** Integrate the completed converter service with the FastAPI endpoint in `tinyutils/api/convert/index.py`. This involves correctly handling API requests, processing conversions, managing the JSON envelope, and securely uploading artifacts via a blob helper.
+    *   **Actionable Steps:**
+        *   Modify the FastAPI endpoint to accept `to` as either a string or a list of strings.
+        *   Ensure the API response adheres to the specified JSON envelope (`requestId`, `logs`, `errors`, `preview`, `outputs`).
+        *   Integrate with the blob helper for uploading conversion artifacts, ensuring no inline blobs.
+        *   Implement async-safe cleanup procedures for temporary files or resources.
+
+4.  **Comprehensive Testing with Pytest and FastAPI TestClient**
+    *   **Rationale:** Expand the test suite in `tests/convert/` to ensure the robustness, correctness, and reliability of both the converter service and the FastAPI endpoint. This includes covering various scenarios, edge cases, and error conditions.
+    *   **Actionable Steps:**
+        *   Write new `pytest` unit tests for the core converter logic, including markdown cleanup, preview generation, and caching.
+        *   Develop integration tests using FastAPI's `TestClient` to verify the API endpoint's behavior, input parsing, response structure, and artifact generation.
+        *   Include tests for error handling and edge cases (e.g., large inputs, invalid `to` formats).
+
+5.  **Automate Deployment and Smoke Testing**
+    *   **Rationale:** Enhance the existing deployment scripts to enable unattended `vercel preview` deployment and subsequent smoke testing. This is crucial for continuous integration and overnight verification.
+    *   **Actionable Steps:**
+        *   Modify `scripts/deploy_and_smoke_convert.sh` to perform an unattended `vercel preview` deployment.
+        *   Ensure the script correctly sources `tinyutils/.env.preview` for the `PREVIEW_FENCE_HEADER`.
+        *   Integrate `vercel_check.sh` into the deployment script to perform readiness smoke tests, explicitly skipping `tiny-reactive` checks.
+
+6.  **Artifact Generation and Documentation Updates**
+    *   **Rationale:** Implement the necessary logic to generate and organize conversion artifacts and update project documentation to reflect the agent's activities and task status.
+    *   **Actionable Steps:**
+        *   Implement artifact generation to store outputs in `tinyutils/artifacts/convert/<YYYYMMDD>/...`.
+        *   Update `docs/AGENT_RUN_LOG.md` with details of each agent run, including timestamps and outcomes.
+        *   Update `docs/AGENT_TASK_CHECKLIST` to reflect the completion status of tasks related to the universal converter backend.
+
+7.  **Final Verification and Evidence Collection**
+    *   **Rationale:** Perform a final round of checks to ensure all code adheres to quality standards, all tests pass, and the automated deployment and smoke tests provide clear evidence of successful operation.
+    *   **Actionable Steps:**
+        *   Run local linting and type-checking commands (e.g., `ruff check .`, `mypy .`) across the codebase.
+        *   Execute all `pytest tests/convert/*` to confirm full test suite pass.
+        *   Verify that the automated deployment and smoke tests (from Step 5) run successfully and produce expected results.
+        *   Confirm the correct generation and content of artifacts in `tinyutils/artifacts/convert/<YYYYMMDD>/...`.
+
+**Verification Commands & Artifact Outputs:**
+
+*   **Local Verification:**
+    *   `pytest tests/convert/` (to run all converter-related tests)
+    *   `ruff check .` (for linting)
+    *   `mypy .` (for type checking)
+*   **Deployment & Smoke Test Verification:**
+    *   `./tinyutils/scripts/deploy_and_smoke_convert.sh` (observe output for successful Vercel deployment and smoke test results)
+*   **Expected Artifact Outputs:**
+    *   `tinyutils/artifacts/convert/<YYYYMMDD>/<requestId>/output.<ext>` (converted files)
+    *   `tinyutils/artifacts/convert/<YYYYMMDD>/<requestId>/preview.txt` (preview snippets)
+    *   `tinyutils/artifacts/convert/<YYYYMMDD>/<requestId>/media.zip` (optional media zip)
+    *   Updated `docs/AGENT_RUN_LOG.md`
+    *   Updated `docs/AGENT_TASK_CHECKLIST`

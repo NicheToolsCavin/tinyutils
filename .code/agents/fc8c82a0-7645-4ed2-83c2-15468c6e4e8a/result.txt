@@ -1,0 +1,5 @@
+I have successfully completed the following:
+- Created three Lua filter files: `filters/softbreak_to_space.lua`, `filters/strip_empty_spans.lua`, and `filters/normalize_lists.lua`.
+- Created `requirements.txt` with the specified pinned Python package versions.
+- Created `vercel.json` to configure the Python runtime for API functions and preserve existing headers/rewrites.
+- Created `api/_lib/blob.py` with `download_url` and `upload_bytes` helper functions, including placeholder logic for blob integration and a data URL fallback.

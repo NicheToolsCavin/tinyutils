@@ -1,0 +1,25 @@
+Command failed: [2025-11-05T00:41:39] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-teams-personal-scan-artifacts-pr1-pr4
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: auto
+--------
+[2025-11-05T00:41:39] User instructions:
+Scan artifacts for PR1–PR4 evidence and write tinyutils/artifacts/audit/$TODAY/evidence-status.md with a found/missing checklist per task including exact file paths. Today is 2025-11-05 CET. Check these directories: tinyutils/artifacts/pr1-security-cache, pr2-ux-noindex-debug, pr3-fence, pr4-tests (prefer 20251105 if present). Ensure the report lists each PR (PR1 Security Headers, PR2 Noindex, PR3 Preview Fence, PR4 Tests) with bullet points showing required files and whether they were found. Do not alter artifacts; just report.
+[2025-11-05T00:41:39] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-teams-personal-scan-artifacts-pr1-pr4
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: auto
+--------
+[2025-11-05T00:41:39] User instructions:
+Scan artifacts for PR1–PR4 evidence and write tinyutils/artifacts/audit/$TODAY/evidence-status.md with a found/missing checklist per task including exact file paths. Today is 2025-11-05 CET. Check these directories: tinyutils/artifacts/pr1-security-cache, pr2-ux-noindex-debug, pr3-fence, pr4-tests (prefer 20251105 if present). Ensure the report lists each PR (PR1 Security Headers, PR2 Noindex, PR3 Preview Fence, PR4 Tests) with bullet points showing required files and whether they were found. Do not alter artifacts; just report.
+[2025-11-05T00:41:39] ERROR: You've hit your usage limit. Try again in 2 hours 3 minutes.

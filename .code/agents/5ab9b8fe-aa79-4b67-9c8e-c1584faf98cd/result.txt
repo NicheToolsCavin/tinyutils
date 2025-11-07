@@ -1,0 +1,45 @@
+[2025-11-07T03:32:08] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/dev/TinyUtils
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-07T03:32:08] User instructions:
+Project: TinyUtils universal converter backend (branch feature/universal-converter-backend, repo /Users/cav/dev/TinyUtils). Context: converter library + FastAPI API now pass pytest; local smoke artifacts exist. Outstanding goals: deploy current build to Vercel preview unattended, capture converter-specific preview smoke artifacts, append Madrid-timestamped doc entries, and resolve remaining automation gaps (Vercel creds, scripts). Need a concrete 5–8 step plan covering: (1) enabling credentials / CLI auth, (2) reliable preview deploy (retry logic vs build wait), (3) converter preview smoke + artifact capture, (4) documentation + checklist updates, (5) rollback/bench policy for deploy lane, and (6) verification evidence. Provide actionable steps with rationale + verification guidance.
+
+[Running in read-only mode - no modifications allowed]
+[2025-11-07T03:32:08] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/dev/TinyUtils
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-07T03:32:08] User instructions:
+Project: TinyUtils universal converter backend (branch feature/universal-converter-backend, repo /Users/cav/dev/TinyUtils). Context: converter library + FastAPI API now pass pytest; local smoke artifacts exist. Outstanding goals: deploy current build to Vercel preview unattended, capture converter-specific preview smoke artifacts, append Madrid-timestamped doc entries, and resolve remaining automation gaps (Vercel creds, scripts). Need a concrete 5–8 step plan covering: (1) enabling credentials / CLI auth, (2) reliable preview deploy (retry logic vs build wait), (3) converter preview smoke + artifact capture, (4) documentation + checklist updates, (5) rollback/bench policy for deploy lane, and (6) verification evidence. Provide actionable steps with rationale + verification guidance.
+
+[Running in read-only mode - no modifications allowed]
+
+[2025-11-07T03:32:10] thinking
+
+**Outlining a clear plan**
+[2025-11-07T03:32:10] codex
+
+**Action Plan**
+
+- Enable Vercel credentials & CLI auth: create a non-interactive token in Vercel, store it in the repo’s secret manager (e.g., 1Password CLI, local env template) plus `.env.preview`; document export commands and add a `scripts/vercel_login.sh` that validates token presence via `vercel whoami`. Verify with `vercel whoami --token $VERCEL_TOKEN`.
+- Reliable preview deploy flow: write `scripts/deploy_preview.sh` that wraps `vercel deploy --prebuilt --token $VERCEL_TOKEN`, includes exponential backoff retries (e.g., 3 tries, 30/60/120 s), and surfaces build URLs; gate script with FastAPI & converter smoke artifacts existing. Verify script by running once and capturing exit code + URL.
+- Converter preview smoke & artifacts: extend existing smoke test runner to accept the deployed preview URL, run converter-specific cases (currency, temperature, compound), and store JSON/CSV outputs under `artifacts/converter-preview/<timestamp>/`. Use `curl` for endpoints, compare with golden samples, and persist log + diff. Verification: confirm artifacts directory contains timestamped files and git status shows new artifacts (or uploaded to storage bucket).
+- Documentation & checklist updates: append Madrid-time entries to deployment runbook (`docs/deploy-log.md`) noting token location, script usage, smoke outputs, and preview URL; update checklist with new steps for token check, retry deploy, artifact capture, and doc update. Validate by ensuring docs include `Europe/Madrid` timestamps.
+- Rollback / bench policy: define criteria in `docs/deploy-policy.md`—keep last two preview URLs, rollback by running `vercel alias` back to prior build if smoke fails, and bench policy (freeze deploys) when two consecutive smoke runs fail. Verification: doc contains explicit commands and decision table.
+- Verification evidence bundle: capture CLI transcripts (`scripts/logs/preview-<timestamp>.log`) from deploy + smoke, include artifact checksums, and reference them in docs. Verify by ensuring logs exist and checklist points to them.
+
+Next steps: implement scripts/docs, run deploy + smoke, gather artifacts/logs, and update documentation with Madrid timestamps. Tests to run after implementation: `./scripts/deploy_preview.sh` (success), `./scripts/run_smoke_preview.sh <url>` (artifacts created), linters if touched files include Python/TS.
+[2025-11-07T03:32:15] tokens used: 5,907

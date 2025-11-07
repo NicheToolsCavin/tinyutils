@@ -1,0 +1,31 @@
+--- a/tools/dead-link-finder/index.html+++ b/tools/dead-link-finder/index.html@@ -378,6 +378,7 @@         metaSection.appendChild(metaTitle);
+         debugSchedulerSummary = document.createElement('p');
+         debugSchedulerSummary.className = 'debug-scheduler';
++        debugSchedulerSummary.setAttribute('data-testid', 'debug-scheduler');
+         debugSchedulerSummary.textContent = 'scheduler: —';
+         metaSection.appendChild(debugSchedulerSummary);
+         debugMetaPre = document.createElement('pre');
+
+--- a/tools/keyword-density.html+++ b/tools/keyword-density.html@@ -1,5 +1,6 @@ <!doctype html><html lang='en'><head>
+-<meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
++
++<meta name=\"robots\" content=\"noindex\"><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
+ <title>Keyword Density — TinyUtils</title>
+ <link rel='stylesheet' href='/public/styles.css'><style>
+ .tu-consent{position:fixed;right:16px;bottom:16px;max-width:340px;background:#0e1530;color:#e8ecf3;border:1px solid #263464;border-radius:12px;padding:12px 12px 10px;box-shadow:0 12px 30px rgba(0,0,0,.35);z-index:9999}
+
+--- a/tools/meta-preview.html+++ b/tools/meta-preview.html@@ -1,5 +1,6 @@ <!doctype html><html lang='en'><head>
+-<meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
++
++<meta name=\"robots\" content=\"noindex\"><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
+ <title>Meta Tag Preview — TinyUtils</title>
+ <link rel='stylesheet' href='/public/styles.css'><style>
+ .tu-consent{position:fixed;right:16px;bottom:16px;max-width:340px;background:#0e1530;color:#e8ecf3;border:1px solid #263464;border-radius:12px;padding:12px 12px 10px;box-shadow:0 12px 30px rgba(0,0,0,.35);z-index:9999}
+
+--- a/tools/sitemap-generator.html+++ b/tools/sitemap-generator.html@@ -1,5 +1,6 @@ <!doctype html><html lang='en'><head>
+-<meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
++
++<meta name=\"robots\" content=\"noindex\"><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
+ <title>Sitemap Generator — TinyUtils</title>
+ <link rel='stylesheet' href='/public/styles.css'>
+ <link rel="icon" href="/public/favicon.ico" sizes="any">

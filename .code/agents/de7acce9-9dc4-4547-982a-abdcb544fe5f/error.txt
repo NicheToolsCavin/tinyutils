@@ -1,0 +1,25 @@
+Command failed: [2025-11-05T00:41:33] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-teams-tarot-create-tinyutils-artifacts-phase2-roster
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: auto
+--------
+[2025-11-05T00:41:33] User instructions:
+Create tinyutils/artifacts/phase2-roster/$TODAY/roster-status.md summarizing the orchestrator roster and billing guardrails from AGENTS.md. Use Europe/Madrid timestamps (today is 2025-11-05 CET). Outline active agents (code-gpt-5-codex, code-teams-personal, code-teams-tarot, qwen-3-coder), disallowed ones (code-teams-teacher), Gemini fallback guidance (only if no billing/quota warnings), logging reminders, and note any drift risks or unknowns because no config.toml exists. Do not touch secrets.
+[2025-11-05T00:41:33] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-teams-tarot-create-tinyutils-artifacts-phase2-roster
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: auto
+--------
+[2025-11-05T00:41:33] User instructions:
+Create tinyutils/artifacts/phase2-roster/$TODAY/roster-status.md summarizing the orchestrator roster and billing guardrails from AGENTS.md. Use Europe/Madrid timestamps (today is 2025-11-05 CET). Outline active agents (code-gpt-5-codex, code-teams-personal, code-teams-tarot, qwen-3-coder), disallowed ones (code-teams-teacher), Gemini fallback guidance (only if no billing/quota warnings), logging reminders, and note any drift risks or unknowns because no config.toml exists. Do not touch secrets.
+[2025-11-05T00:41:34] ERROR: You've hit your usage limit. Try again in 4 days 15 hours 4 minutes.

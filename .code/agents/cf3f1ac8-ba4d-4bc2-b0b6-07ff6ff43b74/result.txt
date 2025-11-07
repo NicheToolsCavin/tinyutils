@@ -1,0 +1,868 @@
+[2025-11-04T15:26:36] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/dev/TinyUtils
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: auto
+--------
+[2025-11-04T15:26:36] User instructions:
+We need to determine remaining work after implementing PR3 Preview Fence in the TinyUtils repo. Current status: PR1 (security+caching) completed and deployed, PR3 (preview fence) implemented on branch feat/pr3-preview-fence. Need to identify next steps (e.g., PR1 evidence, PR2 UX quick wins, PR4 tests, deployment validation, documentation updates). Review repo at ~/dev/TinyUtils/tinyutils and diffs in ~/dev/TinyUtils/diffs_recs/. Produce a step-by-step plan covering outstanding tasks, dependencies, testing/deployment requirements, and documentation updates.
+
+[Running in read-only mode - no modifications allowed]
+[2025-11-04T15:26:36] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/dev/TinyUtils
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: auto
+--------
+[2025-11-04T15:26:36] User instructions:
+We need to determine remaining work after implementing PR3 Preview Fence in the TinyUtils repo. Current status: PR1 (security+caching) completed and deployed, PR3 (preview fence) implemented on branch feat/pr3-preview-fence. Need to identify next steps (e.g., PR1 evidence, PR2 UX quick wins, PR4 tests, deployment validation, documentation updates). Review repo at ~/dev/TinyUtils/tinyutils and diffs in ~/dev/TinyUtils/diffs_recs/. Produce a step-by-step plan covering outstanding tasks, dependencies, testing/deployment requirements, and documentation updates.
+
+[Running in read-only mode - no modifications allowed]
+
+[2025-11-04T15:26:39] thinking
+
+**Analyzing remaining tasks after PR3**
+[2025-11-04T15:26:40] exec bash -lc ls in /Users/cav/dev/TinyUtils
+[2025-11-04T15:26:40] bash -lc ls succeeded in 129ms:
+code-cli-tinyutils-recs.md
+diffs_recs
+PATH
+print1
+test_results_nov4.md
+tinyutils
+tinyutils.zip
+TinyUtilsCodexContext
+[2025-11-04T15:26:40] tokens used: 5,372
+
+[2025-11-04T15:26:41] thinking
+
+**Locating tinyutils repository**
+[2025-11-04T15:26:42] exec bash -lc 'ls tinyutils' in /Users/cav/dev/TinyUtils
+[2025-11-04T15:26:42] bash -lc 'ls tinyutils' succeeded in 117ms:
+ads.txt
+ADSENSE_SETUP.md
+AGENTS.md
+api
+CHANGES-v1.3.0-rc2.txt
+CHANGES-v1.3.0-rc3.txt
+DEPLOY_PRODUCTION_CHECKLIST.md
+docs
+feedback.html
+guides
+index.html
+offering-to-the-triple-goddess.txt
+package.json
+PREVIEW_SMOKE_CHECKLIST.md
+privacy.html
+public
+README_DEPLOY.md
+README-VERCEL.md
+README.md
+robots.txt
+[2025-11-04T15:26:42] tokens used: 10,891
+
+[2025-11-04T15:26:44] thinking
+
+**Searching for PR-related documentation**
+[2025-11-04T15:26:45] exec bash -lc 'rg -n "PR[1-4]" -n' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T15:26:45] bash -lc 'rg -n "PR[1-4]" -n' exited 1 in 153ms:
+ERROR
+[2025-11-04T15:26:45] tokens used: 11,345
+
+[2025-11-04T15:26:47] thinking
+
+**Checking diffs directory**
+[2025-11-04T15:26:48] exec bash -lc 'ls diffs_recs' in /Users/cav/dev/TinyUtils
+[2025-11-04T15:26:48] bash -lc 'ls diffs_recs' succeeded in 135ms:
+pr1-security-caching.diff
+pr2-ux-noindex-debug.diff
+pr3-preview-fence.diff
+pr4-tests-contracts.diff
+Pro reasoning message nov 4.md
+[2025-11-04T15:26:48] tokens used: 12,005
+
+[2025-11-04T15:26:50] thinking
+
+**Inspecting diffs and documentation**
+[2025-11-04T15:26:51] exec bash -lc "sed -n '1,160p' pr3-preview-fence.diff" in /Users/cav/dev/TinyUtils/diffs_recs
+[2025-11-04T15:26:51] bash -lc "sed -n '1,160p' pr3-preview-fence.diff" succeeded in 127ms:
+--- /dev/null
++++ b/api/fence.js
+--- /dev/null+++ b/api/fence.js@@ -0,0 +1,75 @@+export const config = { runtime: 'edge' };
++
++function rid() { return Math.random().toString(16).slice(2, 10); }
++
++function json(status, body, requestId, extraHeaders) {
++  const headers = new Headers({ 'content-type': 'application/json; charset=utf-8' });
++  headers.set('cache-control', 'no-store');
++  if (requestId) headers.set('x-request-id', requestId);
++  for (const [k, v] of Object.entries(extraHeaders || {})) {
++    headers.set(k, v);
++  }
++  return new Response(JSON.stringify(body), { status, headers });
++}
++
++function parseCookies(cookieHeader) {
++  const out = {};
++  const src = String(cookieHeader || '');
++  for (const part of src.split(/;\s*/)) {
+[2025-11-04T15:26:51] tokens used: 12,354
+
+[2025-11-04T15:26:53] thinking
+
+**Verifying file truncation and gathering context**
+[2025-11-04T15:26:54] exec bash -lc "sed -n '1,200p' pr1-security-caching.diff" in /Users/cav/dev/TinyUtils/diffs_recs
+[2025-11-04T15:26:54] bash -lc "sed -n '1,200p' pr1-security-caching.diff" succeeded in 138ms:
+--- a/vercel.json+++ b/vercel.json@@ -3,15 +3,87 @@     {
+       "source": "/(.*)",
+       "headers": [
+-        { "key": "X-Content-Type-Options", "value": "nosniff" },
+-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
++        {
++          "key": "X-Content-Type-Options",
++          "value": "nosniff"
++        },
++        {
++          "key": "Referrer-Policy",
++          "value": "strict-origin-when-cross-origin"
++        },
++        {
++          "key": "Strict-Transport-Security",
++          "value": "max-age=63072000; includeSubDomains; preload"
++        },
++        {
++          "key": "X-Frame-Options",
++          "value": "DENY"
+[2025-11-04T15:26:54] tokens used: 13,462
+
+[2025-11-04T15:26:56] thinking
+
+**Reviewing security headers and rewrite rules**
+[2025-11-04T15:26:57] exec bash -lc "sed -n '1,200p' pr2-ux-noindex-debug.diff" in /Users/cav/dev/TinyUtils/diffs_recs
+[2025-11-04T15:26:57] bash -lc "sed -n '1,200p' pr2-ux-noindex-debug.diff" succeeded in 129ms:
+--- a/tools/dead-link-finder/index.html+++ b/tools/dead-link-finder/index.html@@ -378,6 +378,7 @@         metaSection.appendChild(metaTitle);
+         debugSchedulerSummary = document.createElement('p');
+         debugSchedulerSummary.className = 'debug-scheduler';
++        debugSchedulerSummary.setAttribute('data-testid', 'debug-scheduler');
+         debugSchedulerSummary.textContent = 'scheduler: —';
+         metaSection.appendChild(debugSchedulerSummary);
+         debugMetaPre = document.createElement('pre');
+
+--- a/tools/keyword-density.html+++ b/tools/keyword-density.html@@ -1,5 +1,6 @@ <!doctype html><html lang='en'><head>
+-<meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
++
++<meta name=\"robots\" content=\"noindex\"><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
+ <title>Keyword Density — TinyUtils</title>
+ <link rel='stylesheet' href='/public/styles.css'><style>
+ .tu-consent{position:fixed;right:16px;bottom:16px;max-width:340px;background:#0e1530;color:#e8ecf3;border:1px solid #263464;border-radius:12px;padding:12px 12px 10px;box-shadow:0 12px 30px rgba(0,0,0,.35);z-index:9999}
+
+--- a/tools/meta-preview.html+++ b/tools/meta-preview.html@@ -1,5 +1,6 @@ <!doctype html><html lang='en'><head>
+-<meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
++
++<meta name=\"robots\" content=\"noindex\"><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
+[2025-11-04T15:26:57] tokens used: 15,131
+
+[2025-11-04T15:26:59] thinking
+
+**Preparing PR diff for tests**
+[2025-11-04T15:27:00] exec bash -lc "sed -n '1,200p' pr4-tests-contracts.diff" in /Users/cav/dev/TinyUtils/diffs_recs
+[2025-11-04T15:27:00] bash -lc "sed -n '1,200p' pr4-tests-contracts.diff" succeeded in 127ms:
+--- /dev/null
++++ b/tests/dlf_envelope_invariants.test.mjs
+--- /dev/null+++ b/tests/dlf_envelope_invariants.test.mjs@@ -0,0 +1,19 @@+import test from 'node:test';
++import assert from 'node:assert/strict';
++import handler from '../api/check.js';
++
++test('DLF GET returns JSON error envelope with scheduler meta', async () => {
++  const req = new Request('https://example.test/api/check', { method: 'GET' });
++  const res = await handler(req);
++
++  assert.equal(res.status, 405, 'should be 405 for GET');
++  const ct = res.headers.get('content-type') || '';
++  assert.ok(ct.includes('application/json'), 'content-type should be JSON');
++  const payload = await res.json();
++  assert.equal(payload.ok, false);
++  assert.equal(typeof payload.code, 'string');
++  assert.equal(typeof payload.message, 'string');
++  assert.equal(typeof payload.requestId, 'string');
++  assert.ok(payload.meta && typeof payload.meta === 'object', 'meta should be object');
++  assert.ok(payload.meta.scheduler && typeof payload.meta.scheduler === 'object', 'meta.scheduler should be present');
+[2025-11-04T15:27:00] tokens used: 19,920
+
+[2025-11-04T15:27:03] thinking
+
+**Planning task references and repo inspection**
+[2025-11-04T15:27:03] exec bash -lc "rg --files -g 'fence.js'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T15:27:03] bash -lc "rg --files -g 'fence.js'" succeeded in 135ms:
+api/fence.js
+[2025-11-04T15:27:03] tokens used: 22,145
+
+[2025-11-04T15:27:05] thinking
+
+**Reviewing file for features**
+[2025-11-04T15:27:06] exec bash -lc "sed -n '1,200p' api/fence.js" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T15:27:06] bash -lc "sed -n '1,200p' api/fence.js" succeeded in 136ms:
+export const config = { runtime: 'edge' };
+
+const COOKIE_NAME = 'tu_preview_secret';
+const COOKIE_MAX_AGE = 60 * 60 * 24; // 24 hours
+
+function rid() {
+  return Math.random().toString(16).slice(2, 10);
+}
+
+function json(status, body, requestId, extraHeaders = {}) {
+  const headers = new Headers({
+    'content-type': 'application/json; charset=utf-8',
+    'cache-control': 'no-store'
+  });
+  if (requestId) headers.set('x-request-id', requestId);
+  for (const [key, value] of Object.entries(extraHeaders)) {
+    headers.set(key, value);
+  }
+  return new Response(JSON.stringify(body), { status, headers });
+}
+[2025-11-04T15:27:06] tokens used: 22,286
+
+[2025-11-04T15:27:07] thinking
+
+**Planning with line numbers**
+[2025-11-04T15:27:08] exec bash -lc "nl -ba api/fence.js | sed -n '1,200p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T15:27:08] bash -lc "nl -ba api/fence.js | sed -n '1,200p'" succeeded in 153ms:
+     1	export const config = { runtime: 'edge' };
+     2	
+     3	const COOKIE_NAME = 'tu_preview_secret';
+     4	const COOKIE_MAX_AGE = 60 * 60 * 24; // 24 hours
+     5	
+     6	function rid() {
+     7	  return Math.random().toString(16).slice(2, 10);
+     8	}
+     9	
+    10	function json(status, body, requestId, extraHeaders = {}) {
+    11	  const headers = new Headers({
+    12	    'content-type': 'application/json; charset=utf-8',
+    13	    'cache-control': 'no-store'
+    14	  });
+    15	  if (requestId) headers.set('x-request-id', requestId);
+    16	  for (const [key, value] of Object.entries(extraHeaders)) {
+    17	    headers.set(key, value);
+    18	  }
+    19	  return new Response(JSON.stringify(body), { status, headers });
+    20	}
+[2025-11-04T15:27:08] tokens used: 23,743
+
+[2025-11-04T15:27:13] thinking
+
+**Outlining deployment and testing plan**
+
+I’m gathering info on pull request statuses and related documentation like checklists and deployment guides to create a clear plan covering evidence collection, UX improvements, tests, deployment validation, and documentation updates. I’ll inspect files such as PREVIEW_SMOKE_CHECKLIST.md and README_DEPLOY to understand dependencies and needed steps, including examining vercel.json rewrites and relevant logs.
+[2025-11-04T15:27:14] exec bash -lc "nl -ba vercel.json | sed -n '1,200p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T15:27:14] bash -lc "nl -ba vercel.json | sed -n '1,200p'" succeeded in 145ms:
+     1	{
+     2	  "headers": [
+     3	    {
+     4	      "source": "/(.*)",
+     5	      "headers": [
+     6	        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+     7	        { "key": "X-Frame-Options", "value": "DENY" },
+     8	        { "key": "X-Content-Type-Options", "value": "nosniff" },
+     9	        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+    10	        { "key": "Permissions-Policy", "value": "geolocation=(), camera=(), microphone=(), usb=(), payment=(), browsing-topics=()" },
+    11	        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+    12	        { "key": "Cross-Origin-Resource-Policy", "value": "same-origin" },
+    13	        { "key": "X-DNS-Prefetch-Control", "value": "off" }
+    14	      ]
+    15	    },
+    16	    {
+    17	      "source": "/api/(.*)",
+    18	      "headers": [
+    19	        { "key": "Cache-Control", "value": "no-store" },
+    20	        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+[2025-11-04T15:27:14] tokens used: 25,792
+
+[2025-11-04T15:27:16] thinking
+
+**Planning references and documentation check**
+[2025-11-04T15:27:17] exec bash -lc "nl -ba PREVIEW_SMOKE_CHECKLIST.md | sed -n '1,200p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T15:27:17] bash -lc "nl -ba PREVIEW_SMOKE_CHECKLIST.md | sed -n '1,200p'" succeeded in 136ms:
+     1	# TinyUtils — Private Preview 7‑Step Smoke
+     2	
+     3	Run these on your **Preview URL** (not public).
+     4	
+     5	1) **Dead Link Finder (/):**
+     6	   - HSTS guard behaves; unsupported schemes skipped; robots‑unknown chip appears on fetch failure.
+     7	   - CSV/JSON contain meta (runTimestamp, mode, etc.).
+     8	
+     9	2) **Sitemap Delta (/tools/sitemap-delta/):**
+    10	   - Two sitemaps ≤2k URLs → Added/Removed/Mapping sensible.
+    11	   - Confidence filters reflow counts; Same‑domain guard ON filters cross‑host; OFF shows them.
+    12	   - `.xml.gz` via sitemap index → either processed or labeled ".gz not supported here".
+    13	   - Exports: nginx/Apache rewrite blocks and 410 CSV sane (trailing slash, index.html, percent‑encoding).
+    14	   - Share‑link restore; malformed hash → defaults + toast.
+    15	
+    16	3) **Wayback Fixer (/tools/wayback-fixer/):**
+    17	   - Demo list → chips (Archived / No snapshot / SPN queued / Errors) match filters; ISO timestamps present.
+    18	   - Window prefs (Any/5y/1y) persist into meta in CSV/JSON.
+    19	   - Verify HEAD ON → 200/OK for good snapshots; forced low timeout shows "Timed out".
+    20	   - SPN ON enqueues ≤10/run; notes show `no_snapshot|spn_queued`.
+[2025-11-04T15:27:17] tokens used: 27,209
+
+[2025-11-04T15:27:19] thinking
+
+**Planning with test documentation**
+[2025-11-04T15:27:20] exec bash -lc "nl -ba DEPLOY_PRODUCTION_CHECKLIST.md | sed -n '1,200p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T15:27:20] bash -lc "nl -ba DEPLOY_PRODUCTION_CHECKLIST.md | sed -n '1,200p'" succeeded in 158ms:
+     1	# TinyUtils — Production Deploy Checklist
+     2	
+     3	Proceed only after the Preview 7‑Step Smoke is **GREEN**.
+     4	
+     5	## Attach domain in Vercel
+     6	1. Project → **Domains** → **Add** `tinyutils.net` and `www.tinyutils.net`.
+     7	2. At registrar:
+     8	   - Apex `tinyutils.net` → **A** record to `76.76.21.21` (Vercel edge).
+     9	   - `www` → **CNAME** to `cname.vercel-dns.com`.
+    10	3. Wait for **HTTPS** certs (automatic).
+    11	
+    12	## Final hygiene
+    13	- `robots.txt` references `/sitemap.xml`.
+    14	- OG/Twitter card renders (paste your URLs into any card checker).
+    15	- Consent banner shows; analytics loads only after accept.
+    16	- Ads remain manual toggle unless you explicitly enable them later.
+    17	
+    18	## Rollback
+    19	Vercel → **Deployments** → click the last GREEN preview → **Promote to Production** or revert in one click.
+[2025-11-04T15:27:20] tokens used: 28,176
+
+[2025-11-04T15:27:24] thinking
+
+**Outlining next project steps**
+[2025-11-04T15:27:24] exec bash -lc "nl -ba README_DEPLOY.md | sed -n '1,200p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T15:27:25] bash -lc "nl -ba README_DEPLOY.md | sed -n '1,200p'" succeeded in 148ms:
+     1	# TinyUtils — Dead Link Finder (Release 1.0)
+     2	
+     3	**Deploy quickstart (Vercel)**
+     4	1. Create a new Vercel project and import this folder.
+     5	2. Ensure the default framework is "Other" (static) and keep the root as `/`.
+     6	3. API routes live under `/api` and run on **Edge Runtime** (no env needed).
+     7	4. Build command: _none_. Output directory: `/`.
+     8	5. After deploy, test `/api/check` with a single-URL run.
+     9	
+    10	**Notes**
+    11	- robots.txt is honored by default; per-origin concurrency ≤2; global cap 10; 200 URLs/run.
+    12	- HTTPS→HTTP fallback is in Advanced (OFF) and guarded by TLD + HSTS.
+    13	- Exports include meta & redirect chain; sticky header CSS is in `public/styles.css`.
+[2025-11-04T15:27:25] tokens used: 29,798
+
+[2025-11-04T15:27:27] thinking
+
+**Planning documentation updates**
+[2025-11-04T15:27:28] exec bash -lc "nl -ba README.md | sed -n '1,200p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T15:27:28] bash -lc "nl -ba README.md | sed -n '1,200p'" succeeded in 138ms:
+     1	# tinyutils
+     2	TinyUtils
+     3	
+     4	## DLF Quick Extras (smokes)
+     5	
+     6	Run against production (override with `TINYUTILS_BASE`):
+     7	
+     8	```bash
+     9	pnpm smoke:extras
+    10	```
+    11	
+    12	Assertions:
+    13	- HSTS / hard-TLD guard — even with `retryHttpOnHttpsFail=true`, HTTP fallback is never used on guarded domains.
+    14	- Robots “unknown” (best-effort) — probes a small set of flaky hosts and always validates the JSON envelope; surfaces `robotsStatus=unknown` when reproducible.
+    15	
+    16	Optional UI sanity (local, uses Tiny-Reactive):
+    17	
+    18	```bash
+    19	tiny-reactive serve --host 127.0.0.1 --port 5566 --headful --debug
+    20	pnpm ui:smoke:dlf
+[2025-11-04T15:27:28] tokens used: 47,748
+
+[2025-11-04T15:27:32] thinking
+
+**Planning outstanding tasks and dependencies**
+[2025-11-04T15:27:33] exec bash -lc 'cat package.json' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T15:27:33] bash -lc 'cat package.json' succeeded in 128ms:
+{
+  "name": "tinyutils",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "vercel-build": "echo 'static + edge'",
+    "test": "node --test",
+    "smoke:local": "node scripts/smoke_dlf_local.mjs",
+    "smoke:preview": "node scripts/smoke_dlf_preview.mjs",
+    "smoke:extras": "bash scripts/smoke_dlf_extras.sh",
+    "ui:smoke:dlf": "node scripts/ui_smoke_dlf.mjs",
+    "ui:smoke:sd": "node scripts/ui_smoke_sitemap.mjs",
+    "ui:smoke:wbf": "node scripts/ui_smoke_wayback.mjs"
+  },
+  "engines": {
+    "node": "20.x"
+  }
+}
+[2025-11-04T15:27:33] tokens used: 48,502
+
+[2025-11-04T15:27:35] thinking
+
+**Reviewing test scripts for verification**
+[2025-11-04T15:27:36] exec bash -lc "nl -ba scripts/smoke_dlf_preview.mjs | sed -n '1,200p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T15:27:36] bash -lc "nl -ba scripts/smoke_dlf_preview.mjs | sed -n '1,200p'" succeeded in 145ms:
+     1	const previewUrl = process.env.PREVIEW_URL;
+     2	
+     3	if (!previewUrl) {
+     4	  console.log('PREVIEW_URL not set; skipping preview smoke.');
+     5	  process.exit(0);
+     6	}
+     7	
+     8	const endpoint = `${previewUrl.replace(/\/$/, '')}/api/check`;
+     9	
+    10	const response = await fetch(endpoint, {
+    11	  method: 'POST',
+    12	  headers: { 'content-type': 'application/json' },
+    13	  body: JSON.stringify({ mode: 'list', urls: ['https://example.com/'] })
+    14	});
+    15	
+    16	const contentType = response.headers.get('content-type') || '';
+    17	if (!contentType.includes('application/json')) {
+    18	  console.error(`Preview smoke failed: expected JSON but received "${contentType}"`);
+    19	  process.exit(1);
+    20	}
+[2025-11-04T15:27:36] tokens used: 50,385
+
+[2025-11-04T15:27:41] thinking
+
+**Planning test verification steps**
+[2025-11-04T15:27:42] exec bash -lc "nl -ba tools/keyword-density.html | sed -n '1,80p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T15:27:42] bash -lc "nl -ba tools/keyword-density.html | sed -n '1,80p'" succeeded in 129ms:
+     1	<!doctype html><html lang='en'><head>
+     2	<meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
+     3	<title>Keyword Density — TinyUtils</title>
+     4	<link rel='stylesheet' href='/public/styles.css'><style>
+     5	.tu-consent{position:fixed;right:16px;bottom:16px;max-width:340px;background:#0e1530;color:#e8ecf3;border:1px solid #263464;border-radius:12px;padding:12px 12px 10px;box-shadow:0 12px 30px rgba(0,0,0,.35);z-index:9999}
+     6	.tu-consent h4{margin:0 0 6px;font-size:14px}
+     7	.tu-consent p{margin:0 0 8px;font-size:13px;opacity:.9}
+     8	.tu-consent .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
+     9	.tu-consent button{padding:8px 10px;border-radius:10px;border:1px solid #2b6ef6;background:#0e1530;color:#cfe0ff;cursor:pointer}
+    10	.tu-consent button.primary{background:#2b6ef6;color:#fff;border:none}
+    11	.tu-consent .link{font-size:12px;opacity:.85}
+    12	.tu-ads-toggle{margin-left:auto;display:inline-flex;gap:6px;align-items:center;font-size:12px;opacity:.85}
+    13	.tu-ads-toggle input{transform:translateY(1px)}
+    14	
+    15	</style>
+    16	
+    17	<script>
+    18	// --- Consent Mode + EU-friendly toast (very low-profile) ---
+    19	(function(){
+    20	  const EU_LANG = ['bg','cs','da','de','el','en-GB','es','et','fi','fr','ga','hr','hu','it','lt','lv','mt','nl','pl','pt','ro','sk','sl','sv','is','no','tr','uk'];
+[2025-11-04T15:27:42] tokens used: 61,409
+
+[2025-11-04T15:27:46] thinking
+
+**Investigating meta robots noindex discrepancy**
+[2025-11-04T15:27:47] exec bash -lc "rg -n \"robots\\\" content=\\\"noindex\\\"\" -n" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T15:27:48] bash -lc "rg -n \"robots\\\" content=\\\"noindex\\\"\" -n" exited 1 in 144ms:
+ERROR
+[2025-11-04T15:27:48] tokens used: 64,556
+
+[2025-11-04T15:27:53] thinking
+
+**Reviewing PR integration status**
+[2025-11-04T15:27:53] exec bash -lc 'git status -sb' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T15:27:53] bash -lc 'git status -sb' succeeded in 141ms:
+## feat/pr3-preview-fence
+[2025-11-04T15:27:53] tokens used: 65,312
+
+[2025-11-04T15:28:00] thinking
+
+**Outlining next steps for PRs**
+[2025-11-04T15:28:01] exec bash -lc 'ls tests' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T15:28:01] bash -lc 'ls tests' succeeded in 148ms:
+dlf_api_error_json.test.mjs
+[2025-11-04T15:28:01] tokens used: 69,551
+
+[2025-11-04T15:28:03] thinking
+
+**Reviewing existing test file**
+[2025-11-04T15:28:04] exec bash -lc "nl -ba tests/dlf_api_error_json.test.mjs | sed -n '1,200p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T15:28:04] bash -lc "nl -ba tests/dlf_api_error_json.test.mjs | sed -n '1,200p'" succeeded in 146ms:
+     1	import test from 'node:test';
+     2	import assert from 'node:assert/strict';
+     3	
+     4	import handler from '../api/check.js';
+     5	
+     6	test('DLF API responds with JSON error envelopes', async () => {
+     7	  const request = new Request('https://tinyutils-eight.vercel.app/api/check', {
+     8	    method: 'GET'
+     9	  });
+    10	
+    11	  const response = await handler(request);
+    12	
+    13	  const contentType = response.headers.get('content-type') || '';
+    14	  assert.ok(
+    15	    contentType.includes('application/json'),
+    16	    `Expected JSON content-type, got "${contentType}"`
+    17	  );
+    18	
+    19	  const payload = await response.json();
+    20	  assert.strictEqual(typeof payload, 'object');
+[2025-11-04T15:28:04] tokens used: 70,176
+
+[2025-11-04T15:28:06] thinking
+
+**Planning incorporation of new tests**
+[2025-11-04T15:28:07] exec bash -lc 'ls docs' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T15:28:07] bash -lc 'ls docs' succeeded in 129ms:
+chatgpt-convo-2025-10-28.md
+features
+[2025-11-04T15:28:07] tokens used: 70,682
+
+[2025-11-04T15:28:08] thinking
+
+**Listing docs/features directory**
+[2025-11-04T15:28:09] exec bash -lc 'ls docs/features' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T15:28:09] bash -lc 'ls docs/features' succeeded in 132ms:
+dead-link-finder.md
+[2025-11-04T15:28:09] tokens used: 70,933
+
+[2025-11-04T15:28:13] thinking
+
+**Planning documentation and deployment updates**
+[2025-11-04T15:28:13] exec bash -lc 'rg -n "PREVIEW_SECRET" -n' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T15:28:13] bash -lc 'rg -n "PREVIEW_SECRET" -n' succeeded in 136ms:
+api/fence.js:53:    const expectedSecret = (process.env.PREVIEW_SECRET || '').trim();
+api/fence.js:77:        message: 'Preview access required. Provide PREVIEW_SECRET via ?preview_secret=… or header x-preview-secret.',
+README-VERCEL.md:26:- In Vercel → **Settings → Environment Variables**, set `PREVIEW_SECRET` (same value across preview/prod as needed).
+[2025-11-04T15:28:13] tokens used: 71,211
+
+[2025-11-04T15:28:15] thinking
+
+**Inspecting README-VERCEL**
+[2025-11-04T15:28:16] exec bash -lc "nl -ba README-VERCEL.md | sed -n '1,200p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T15:28:16] bash -lc "nl -ba README-VERCEL.md | sed -n '1,200p'" succeeded in 138ms:
+     1	# TinyUtils — Private Preview on Vercel (RC3)
+     2	
+     3	This guide gets a private preview online so you can run the 7‑step smoke before any public launch.
+     4	
+     5	## Option A — Import from GitHub (recommended)
+     6	1. Create a **new GitHub repo** (e.g., `tinyutils`).
+     7	2. Unzip this archive locally and push all files (include the **`/api`** folder at the project root).
+     8	3. In **Vercel** → **Add New… → Project** → Import your GitHub repo.
+     9	4. **Framework Preset:** `Other`
+    10	5. **Build Command:** *leave blank*
+    11	6. **Output Directory:** `/` (project root)
+    12	7. Click **Deploy**. Vercel gives you a **Preview URL** like `https://tinyutils-xxxx.vercel.app`.
+    13	
+    14	## Option B — Upload the ZIP directly
+    15	1. In Vercel → **Add New… → Project** → **Import Third‑Party Git Repository** → **Upload** → choose this ZIP.
+    16	2. Keep **Framework:** `Other`, **Build:** none, **Output:** `/`.
+    17	3. Deploy → get the **Preview URL**.
+    18	
+    19	## What to verify right away
+    20	- `/api/check` responds to POST (Dead Link Finder)
+[2025-11-04T15:28:16] tokens used: 71,440
+
+[2025-11-04T15:28:18] thinking
+
+**Checking documentation for testing references**
+[2025-11-04T15:28:19] exec bash -lc "nl -ba TESTING.md | sed -n '1,200p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T15:28:19] bash -lc "nl -ba TESTING.md | sed -n '1,200p'" succeeded in 162ms:
+     1	# Testing TinyUtils
+     2	
+     3	The project is static with Edge functions, so the only automated check is verifying the Vercel build hook:
+     4	
+     5	```bash
+     6	npm run vercel-build
+     7	```
+     8	
+     9	This echoes `static + edge`, confirming the configuration that Vercel expects.
+[2025-11-04T15:28:19] tokens used: 72,348
+
+[2025-11-04T15:28:22] thinking
+
+**Planning step-by-step tasks**
+[2025-11-04T15:28:23] exec bash -lc "sed -n '1,200p' code-cli-tinyutils-recs.md" in /Users/cav/dev/TinyUtils
+[2025-11-04T15:28:23] bash -lc "sed -n '1,200p' code-cli-tinyutils-recs.md" succeeded in 130ms:
+# TinyUtils QA Notes (2025-11-02)
+
+## Overview
+Manual smoke tests against https://tinyutils-eight.vercel.app on 2025-11-02 surfaced several regressions. Dead Link Finder still returns data, Wayback Fixer’s UI fails to render results, Sitemap Delta + Redirect Mapper never surfaces compare output, and several advertised tools 404. Findings below capture what to fix next.
+
+## Issues
+1. **Wayback Fixer front-end dead.** Clicking “Find Wayback Replacements” leaves the status stuck on `Ready.` and no `fetch` fires; programmatic clicks show the same. Yet `POST /api/wayback-fixer` succeeds (returns `note: "network_error"` for test URLs). Likely JS errors (duplicate `protectCSVCell` helpers, malformed template literals) stop the handler from binding. Need to restore the event listener and ensure CSV/JSON exports only enable once results load.
+2. **Sitemap Delta compare broken for URLs.** UI never changes from `Ready.` and the console shows no network call. Direct API POST with `sitemapAUrl`/`sitemapBUrl` returns HTTP 404, while raw XML text works. Client should surface the failure instead of silently idling, and the server must revive URL fetch support.
+3. **Missing demo assets.** UI references `sample-data/dead-links-demo.csv` and sitemap sample XML files that now 404. Update the buttons to use the checked-in `tools/wayback-fixer/demo` files or restore the assets on Vercel.
+4. **Sitemap Delta script bugs.** HTML duplicates `id="fileA"` inside both upload blocks and JS calls `filtered.unmapped` before `filtered` is declared, causing runtime errors. Clean up IDs and ensure `computeFiltered()` output is used when rendering tables/exports.
+5. **Stale tool links.** `/tools/wayback-index`, `/tools/indexed-urls`, and `/tools/redirect-plan` all 404. Either redeploy those tools or remove them from the listing to avoid dead navigation.
+6. **Global JS syntax regressions.** Multiple duplicate `protectCSVCell` definitions and broken expressions such as `protectCSVCell(JSON).stringify(...)` likely break bundling. Consolidate helper functions, lint, and rerun the build.
+
+## Suggested Next Steps
+- Restore working UI flows for Wayback Fixer and Sitemap Delta (buttons fire requests, status updates, errors surface politely).
+- Fix the `/api/sitemap-delta` handler to honor URL-based comparisons again.
+- Rehost or rewire demo/sample datasets so the “Try a demo” buttons work.
+- Remove or ship the missing tool pages before publishing links.
+- After script cleanup, run the project lint/test suite (e.g., `npm test` or `npm run lint`) to catch duplicate helper issues going forward.
+[2025-11-04T15:28:23] tokens used: 72,766
+
+[2025-11-04T15:28:33] thinking
+
+**Outlining verification and testing plan**
+
+I'm organizing a step-by-step plan that references outstanding PR tasks, focusing on verifying security headers, caching, preview fence functionality, new tests integration, deployment smoke checks, and documentation updates, while ensuring all dependencies and evidence sources are well cited from diffs and config files.
+[2025-11-04T15:28:34] exec bash -lc "nl -ba api/check.js | sed -n '1,160p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T15:28:34] bash -lc "nl -ba api/check.js | sed -n '1,160p'" succeeded in 154ms:
+     1	export const config = { runtime: 'edge' };
+     2	
+     3	function rid() {
+     4	  return Math.random().toString(16).slice(2, 10);
+     5	}
+     6	
+     7	function json(status, body, requestId) {
+     8	  const headers = new Headers({
+     9	    'content-type': 'application/json; charset=utf-8',
+    10	    'cache-control': 'no-store'
+    11	  });
+    12	  if (requestId) headers.set('x-request-id', requestId);
+    13	  return new Response(JSON.stringify(body), {
+    14	    status,
+    15	    headers
+    16	  });
+    17	}
+    18	
+    19	function jerr(status, code, message, detail, stage, requestId, metaExtras) {
+    20	  const meta = {
+[2025-11-04T15:28:34] tokens used: 74,057
+
+[2025-11-04T15:28:37] thinking
+
+**Checking cache-control additions**
+[2025-11-04T15:28:38] exec bash -lc "nl -ba api/sitemap-delta.js | sed -n '1,80p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T15:28:38] bash -lc "nl -ba api/sitemap-delta.js | sed -n '1,80p'" succeeded in 145ms:
+     1	export const config = { runtime: 'edge' };
+     2	
+     3	const UA = 'TinyUtils-SitemapDelta/1.0 (+https://tinyutils-eight.vercel.app)';
+     4	const HARD_CAP = 200;
+     5	const CHILD_SITEMAPS_LIMIT = 50;
+     6	const VERIFY_CONCURRENCY = 6;
+     7	const GLOBAL_FETCH_CAP = 10;
+     8	const PER_ORIGIN_FETCH_CAP = 2;
+     9	
+    10	function rid() {
+    11	  return Math.random().toString(16).slice(2, 10);
+    12	}
+    13	
+    14	function jsonResponse(status, payload, requestId) {
+    15	  const headers = new Headers({
+    16	    'content-type': 'application/json; charset=utf-8',
+    17	    'cache-control': 'no-store'
+    18	  });
+    19	  if (requestId) headers.set('x-request-id', requestId);
+    20	  return new Response(JSON.stringify(payload), { status, headers });
+[2025-11-04T15:28:38] tokens used: 76,346
+
+[2025-11-04T15:28:40] thinking
+
+**Reviewing cache-control and API code**
+[2025-11-04T15:28:41] exec bash -lc 'rg -n "debug-scheduler" -n tools/dead-link-finder/index.html' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T15:28:42] bash -lc 'rg -n "debug-scheduler" -n tools/dead-link-finder/index.html' succeeded in 128ms:
+51:    .debug-scheduler { margin: 0 0 0.5rem 0; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; font-size: 0.85rem; }
+380:        debugSchedulerSummary.className = 'debug-scheduler';
+[2025-11-04T15:28:42] tokens used: 77,765
+
+[2025-11-04T15:28:43] thinking
+
+**Checking for missing data-testid attributes**
+[2025-11-04T15:28:44] exec bash -lc "nl -ba tools/dead-link-finder/index.html | sed -n '360,420p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T15:28:45] bash -lc "nl -ba tools/dead-link-finder/index.html | sed -n '360,420p'" succeeded in 165ms:
+   360	        const summary = document.createElement('summary');
+   361	        summary.textContent = 'Debug';
+   362	        debugDetails.appendChild(summary);
+   363	        const wrapper = document.createElement('div');
+   364	        wrapper.className = 'debug-content';
+   365	
+   366	        const headersSection = document.createElement('div');
+   367	        const headersTitle = document.createElement('h3');
+   368	        headersTitle.textContent = 'Response headers';
+   369	        headersSection.appendChild(headersTitle);
+   370	        debugHeadersList = document.createElement('dl');
+   371	        debugHeadersList.className = 'debug-list';
+   372	        headersSection.appendChild(debugHeadersList);
+   373	        wrapper.appendChild(headersSection);
+   374	
+   375	        const metaSection = document.createElement('div');
+   376	        const metaTitle = document.createElement('h3');
+   377	        metaTitle.textContent = 'Response meta';
+   378	        metaSection.appendChild(metaTitle);
+   379	        debugSchedulerSummary = document.createElement('p');
+[2025-11-04T15:28:45] tokens used: 78,126
+
+[2025-11-04T15:28:47] thinking
+
+**Identifying missing data-testid and documentation checks**
+[2025-11-04T15:28:48] exec bash -lc "nl -ba tools/meta-preview.html | sed -n '1,20p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T15:28:49] bash -lc "nl -ba tools/meta-preview.html | sed -n '1,20p'" succeeded in 148ms:
+     1	<!doctype html><html lang='en'><head>
+     2	<meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
+     3	<title>Meta Tag Preview — TinyUtils</title>
+     4	<link rel='stylesheet' href='/public/styles.css'><style>
+     5	.tu-consent{position:fixed;right:16px;bottom:16px;max-width:340px;background:#0e1530;color:#e8ecf3;border:1px solid #263464;border-radius:12px;padding:12px 12px 10px;box-shadow:0 12px 30px rgba(0,0,0,.35);z-index:9999}
+     6	.tu-consent h4{margin:0 0 6px;font-size:14px}
+     7	.tu-consent p{margin:0 0 8px;font-size:13px;opacity:.9}
+     8	.tu-consent .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
+     9	.tu-consent button{padding:8px 10px;border-radius:10px;border:1px solid #2b6ef6;background:#0e1530;color:#cfe0ff;cursor:pointer}
+    10	.tu-consent button.primary{background:#2b6ef6;color:#fff;border:none}
+    11	.tu-consent .link{font-size:12px;opacity:.85}
+    12	.tu-ads-toggle{margin-left:auto;display:inline-flex;gap:6px;align-items:center;font-size:12px;opacity:.85}
+    13	.tu-ads-toggle input{transform:translateY(1px)}
+    14	
+    15	</style>
+    16	
+    17	<script>
+    18	// --- Consent Mode + EU-friendly toast (very low-profile) ---
+    19	(function(){
+    20	  const EU_LANG = ['bg','cs','da','de','el','en-GB','es','et','fi','fr','ga','hr','hu','it','lt','lv','mt','nl','pl','pt','ro','sk','sl','sv','is','no','tr','uk'];
+[2025-11-04T15:28:49] tokens used: 79,184
+
+[2025-11-04T15:28:51] thinking
+
+**Checking sitemap generator file**
+[2025-11-04T15:28:52] exec bash -lc "nl -ba tools/sitemap-generator.html | sed -n '1,20p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T15:28:52] bash -lc "nl -ba tools/sitemap-generator.html | sed -n '1,20p'" succeeded in 149ms:
+     1	<!doctype html><html lang='en'><head>
+     2	<meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
+     3	<title>Sitemap Generator — TinyUtils</title>
+     4	<link rel='stylesheet' href='/public/styles.css'>
+     5	<link rel="icon" href="/public/favicon.ico" sizes="any">
+     6	</head>
+     7	<body>
+     8	<header class='nav'>
+     9	  <div class='brand'><img src='/public/logo.svg' width='28' height='28'><span class='name'>TinyUtils</span></div>
+    10	  <nav class='links'><a href='/'>Dead Link Finder</a><a href='/tools/'>Tools</a></nav>
+    11	</header>
+    12	<div class='container'>
+    13	  <h1>Sitemap Generator</h1>
+    14	  <div class='card'>
+    15	    <label for='base'>Base site (optional)</label>
+    16	    <input id='base' type='url' placeholder='https://example.com'>
+    17	    <label for='paths'>URLs or paths (one per line)</label>
+    18	    <textarea id='paths' placeholder='/\n/about\n/blog/post-1 or full URLs'></textarea>
+    19	    <div class='grid grid-3'>
+    20	      <div><label>Default changefreq<select id='cf'><option>weekly</option><option>daily</option><option>monthly</option><option>yearly</option><option>never</option></select></label></div>
+[2025-11-04T15:28:52] tokens used: 79,985
+
+[2025-11-04T15:29:07] thinking
+
+**Outlining meta noindex and PR task plan**
+
+I’m organizing a detailed step-by-step plan covering meta noindex additions and outstanding PR tasks. It includes documenting PR1 evidence with verifications like security headers and caching, completing quick fixes in PR2, verifying preview fences in PR3, adding tests in PR4, and deployment validations. I’ll link tasks to relevant files, diffs, scripts, and docs, clarify dependencies, and note testing requirements like npm test and preview smoke checks. This plan also references verifying headers and cache-control lines in APIs and configuration files.
+[2025-11-04T15:29:08] exec bash -lc "rg -n \"cache-control'\" api -g\"*.js\"" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T15:29:09] bash -lc "rg -n \"cache-control'\" api -g\"*.js\"" succeeded in 176ms:
+api/health.js:8:      'cache-control': 'no-store'
+api/metafetch.js:12:    'cache-control': 'no-store'
+api/check.js:10:    'cache-control': 'no-store'
+api/fence.js:13:    'cache-control': 'no-store'
+api/fence.js:119:    responseHeaders.set('cache-control', 'no-store');
+api/wayback-fixer.js:10:    'cache-control': 'no-store'
+api/sitemap-delta.js:17:    'cache-control': 'no-store'
+[2025-11-04T15:29:09] tokens used: 81,429
+
+[2025-11-04T15:29:10] thinking
+
+**Preparing code snippet references**
+[2025-11-04T15:29:12] exec bash -lc "nl -ba api/metafetch.js | sed -n '1,60p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T15:29:12] bash -lc "nl -ba api/metafetch.js | sed -n '1,60p'" succeeded in 139ms:
+     1	export const config = { runtime: 'edge' };
+     2	
+     3	const UA = 'TinyUtils-DeadLinkChecker/1.0 (+https://tinyutils-eight.vercel.app; hello@tinyutils.net)';
+     4	
+     5	function rid() {
+     6	  return Math.random().toString(16).slice(2, 10);
+     7	}
+     8	
+     9	function json(status, body, requestId) {
+    10	  const headers = new Headers({
+    11	    'content-type': 'application/json; charset=utf-8',
+    12	    'cache-control': 'no-store'
+    13	  });
+    14	  if (requestId) headers.set('x-request-id', requestId);
+    15	  return new Response(JSON.stringify(body), { status, headers });
+    16	}
+    17	
+    18	function isPrivateHost(hostname) {
+    19	  const host = (hostname || '').toLowerCase();
+    20	  if (!host) return true;
+[2025-11-04T15:29:12] tokens used: 82,376
+
+[2025-11-04T15:29:14] thinking
+
+**Referencing TOT and cache-control**
+[2025-11-04T15:29:15] exec bash -lc "nl -ba api/wayback-fixer.js | sed -n '1,80p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T15:29:16] bash -lc "nl -ba api/wayback-fixer.js | sed -n '1,80p'" succeeded in 161ms:
+     1	export const config = { runtime: 'edge' };
+     2	
+     3	function rid() {
+     4	  return Math.random().toString(16).slice(2, 10);
+     5	}
+     6	
+     7	function json(status, body, requestId) {
+     8	  const headers = new Headers({
+     9	    'content-type': 'application/json; charset=utf-8',
+    10	    'cache-control': 'no-store'
+    11	  });
+    12	  if (requestId) headers.set('x-request-id', requestId);
+    13	  return new Response(JSON.stringify(body), { status, headers });
+    14	}
+    15	
+    16	function jerr(status, message, note, requestId) {
+    17	  return json(status, {
+    18	    meta: {
+    19	      error: message || null,
+    20	      note: note || null,
+[2025-11-04T15:29:16] tokens used: 83,470
+
+[2025-11-04T15:29:59] thinking
+
+**Outlining comprehensive next steps plan**
+
+I'm organizing a detailed, step-by-step plan covering outstanding tasks like PR1 evidence gathering, PR2 UX quick wins, PR3 preview fence hardening, PR4 tests, deployment validation, and documentation updates. My plan will include dependencies, testing actions, and relevant file references to map out clear next steps for the user's TinyUtils repo progress.
+[2025-11-04T15:30:00] codex
+
+**Next Steps Plan**
+
+- **PR1 evidence + hardening**
+  - Capture header/caching proof after the security patch: hit production (`curl -I https://tinyutils.net/`) and confirm the headers declared in `vercel.json:1-35` (HSTS, XFO, COOP/COEP, etc.) and the `Cache-Control: no-store` API overlay at `vercel.json:17-28`; save the command output + timestamps as audit evidence in `DEPLOY_PRODUCTION_CHECKLIST.md:5-18`.
+  - Verify asset caching rewrites promised in PR1 are live (there’s no `/public/(.*)` block in `vercel.json` yet even though `diffs_recs/pr1-security-caching.diff` adds one); if missing, add it when the tree is writable, redeploy, and re-run `curl -I https://tinyutils.net/public/styles.css` to prove `Cache-Control: public, max-age=600`.
+  - Document zero-cache enforcement for APIs using the helpers in `api/check.js:7-33`, `api/sitemap-delta.js:14-21`, `api/metafetch.js:9-16`, and `api/wayback-fixer.js:7-24`; include sample responses (401/405) showing the `cache-control: no-store` header per endpoint so reviewers can tie evidence back to code.
+
+- **PR2 UX quick wins (pre-merge)**
+  - Add `<meta name="robots" content="noindex">` to the beta tool entry points (`tools/keyword-density.html:1-5`, `tools/meta-preview.html:1-5`, `tools/sitemap-generator.html:1-6`) so search engines respect the preview fence even if it’s misconfigured.
+  - Tag the Dead Link Finder debug scheduler element with `data-testid="debug-scheduler"` (`tools/dead-link-finder/index.html:375-383`) to unblock UI smoke automation; update the associated UI scripts in `scripts/ui_smoke_*.mjs` if they expect the attribute.
+  - After applying these HTML edits, re-run the UI smokes (`pnpm ui:smoke:dlf`, `pnpm ui:smoke:sd`, `pnpm ui:smoke:wbf` from `package.json:4-16`) to ensure no regressions before the branch can merge.
+
+- **PR3 preview fence rollout**
+  - Validate the new edge handler (`api/fence.js:1-137`) end-to-end: without `PREVIEW_SECRET`, requests should 401 with `code: preview_required` and `www-authenticate`, and with the secret (query/header) they should proxy through while minting the `tu_preview_secret` cookie built at `api/fence.js:43-70`. Include negative tests for bad secrets and ensure the cookie path `/tools/` plus `SameSite=Lax` meets product expectations.
+  - Confirm the rewrite ladder in `vercel.json:37-64` doesn’t loop (the `preview_fence_proxy=1` guard and the `x-preview-fence-bypass` header at `api/fence.js:105-113` must stay in sync). Test all beta tool permutations (`/tools/<tool>`, trailing slash, `.html`, and nested paths) on the preview deployment before flipping production.
+  - Update operator docs with the new flow: expand `README-VERCEL.md:25-37`, `README_DEPLOY.md:3-12`, and `PREVIEW_SMOKE_CHECKLIST.md:1-37` to call out the secret, cookie behavior, and the requirement to run `pnpm smoke:preview` (`scripts/smoke_dlf_preview.mjs:1-35`) before every promotion. Include an explicit rollback note in `DEPLOY_PRODUCTION_CHECKLIST.md` that reminds teams to clear the preview secret if a rollback removes the fence.
+
+- **PR4 test suite uplift**
+  - Bring in the proposed contract/unit tests from `diffs_recs/pr4-tests-contracts.diff`: `tests/dlf_envelope_invariants.test.mjs`, `tests/api_contracts.test.mjs`, and `tests/csv_hardening.unit.test.mjs`, keeping the existing `tests/dlf_api_error_json.test.mjs:1-24`.
+  - Make sure the new tests stub `globalThis.fetch` safely (as shown in the diff) so they run under Node 20 (see `package.json:4-17`); extend `TESTING.md:3-9` to instruct contributors to run `npm test` locally instead of only the `vercel-build` echo.
+  - Once writable, run `npm install` (if needed) and `npm test`; capture the Node test output as PR4 evidence, then wire the command into CI if available so regressions in the Edge handlers are caught automatically.
+
+- **Deployment validation + documentation refresh**
+  - Sequence the smoke runs: (1) local `pnpm smoke:local` for quick regressions, (2) preview `pnpm smoke:preview` once the fence is in place, (3) manual steps from `PREVIEW_SMOKE_CHECKLIST.md`, and (4) production checks from `DEPLOY_PRODUCTION_CHECKLIST.md`. Note dependencies (preview smokes must pass before running the production checklist).
+  - Update `README.md:4-24` and `docs/features/dead-link-finder.md` (if needed) to reference the new preview-only tools and how to access them via the fence, and add a short “Preview Fence Troubleshooting” paragraph to `README-VERCEL.md` covering missing headers, cookie scope, and the `preview_fence_proxy` query guard.
+  - Prepare a short deployment validation report (tests executed, curl/header captures, npm test output, UI smoke screenshots) so stakeholders can sign off on PR1–PR3 before PR4 lands; store it next to `code-cli-tinyutils-recs.md` or in `docs/` for future audits.
+
+These steps keep PR1 provable, close out the small UX deltas from PR2, finish the preview fence story from PR3, and stage the expanded test coverage + doc updates needed for PR4 and future releases.
+[2025-11-04T15:30:19] tokens used: 89,360

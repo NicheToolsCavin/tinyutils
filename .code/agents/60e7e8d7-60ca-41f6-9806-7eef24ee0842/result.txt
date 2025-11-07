@@ -1,0 +1,1341 @@
+[2025-11-06T20:53:36] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-scaffold-universal-converter
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-06T20:53:36] User instructions:
+Context: Repository root: tinyutils/. Implement Universal Converter backend. Create/modify paths relative to tinyutils/: api/_lib/{utils.py,pandoc_runner.py,text_clean.py,manifests.py}, api/convert/index.py. Use FastAPI (app = FastAPI()) with POST handling JSON per spec (inputs[{blobUrl}], from, to, options). Download input (HTTP GET) to /tmp, sniff type with python-magic, enforce size caps via env (default MAX_FILE_MB=100). Convert via pypandoc to GFM with extra args (atx headers, wrap none, reference-links, track-changes accept if set, extract-media to tmp). Run second pass with Lua filters in filters/*.lua. Apply Unicode/whitespace cleanup (NFC, NBSP->space, zero-width removal optional, strip trailing spaces, squeeze blank lines). Build preview: first N headings, a few before/after snippets (difflib on small sample), image manifest from extracted media. Package outputs: for single file return converted .md; if media extracted, zip media dir. Upload result to Blob if env provides upload support; otherwise return data: URLs as temporary fallback. Return manifest {jobId, toolVersions, outputs[{name,size,blobUrl}], preview, logs, errors}. Add minimal error handling and logging (no PII).
+
+Agent: Scaffold Universal Converter backend and helpers. Add Lua filter usage hooks and cleanup steps. Target minimal working single-file flow with safe fallbacks.
+[2025-11-06T20:53:36] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-scaffold-universal-converter
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-06T20:53:36] User instructions:
+Context: Repository root: tinyutils/. Implement Universal Converter backend. Create/modify paths relative to tinyutils/: api/_lib/{utils.py,pandoc_runner.py,text_clean.py,manifests.py}, api/convert/index.py. Use FastAPI (app = FastAPI()) with POST handling JSON per spec (inputs[{blobUrl}], from, to, options). Download input (HTTP GET) to /tmp, sniff type with python-magic, enforce size caps via env (default MAX_FILE_MB=100). Convert via pypandoc to GFM with extra args (atx headers, wrap none, reference-links, track-changes accept if set, extract-media to tmp). Run second pass with Lua filters in filters/*.lua. Apply Unicode/whitespace cleanup (NFC, NBSP->space, zero-width removal optional, strip trailing spaces, squeeze blank lines). Build preview: first N headings, a few before/after snippets (difflib on small sample), image manifest from extracted media. Package outputs: for single file return converted .md; if media extracted, zip media dir. Upload result to Blob if env provides upload support; otherwise return data: URLs as temporary fallback. Return manifest {jobId, toolVersions, outputs[{name,size,blobUrl}], preview, logs, errors}. Add minimal error handling and logging (no PII).
+
+Agent: Scaffold Universal Converter backend and helpers. Add Lua filter usage hooks and cleanup steps. Target minimal working single-file flow with safe fallbacks.
+
+[2025-11-06T20:53:42] thinking
+
+**Assessing read-only constraints and next steps**
+
+I’m sorting out that my environment is strictly read-only with no approval for writes, so I can’t modify files directly. I think the best approach is to explore the repo, gather info, and produce code suggestions or patches that the user can apply themselves. I’ll start by inspecting the repo structure to understand what’s available.
+[2025-11-06T20:53:43] exec bash -lc ls in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-scaffold-universal-converter/.*
+[2025-11-06T20:53:43] bash -lc ls exited -1 in 3ms:
+ERROR
+No such file or directory (os error 2)
+[2025-11-06T20:53:43] tokens used: 5,844
+
+[2025-11-06T20:53:45] thinking
+
+**Correcting workdir path**
+[2025-11-06T20:53:46] exec bash -lc ls in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-scaffold-universal-converter
+[2025-11-06T20:53:46] bash -lc ls succeeded in 104ms:
+[2025-11-06T20:53:46] tokens used: 6,105
+
+[2025-11-06T20:53:47] thinking
+
+**Checking repository contents**
+[2025-11-06T20:53:48] exec bash -lc 'ls -a' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-scaffold-universal-converter
+[2025-11-06T20:53:48] bash -lc 'ls -a' succeeded in 122ms:
+.
+..
+.git
+[2025-11-06T20:53:48] tokens used: 12,210
+
+[2025-11-06T20:53:50] thinking
+
+**Checking repository root and git status**
+[2025-11-06T20:53:50] exec bash -lc 'git status -sb' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-scaffold-universal-converter
+[2025-11-06T20:53:50] bash -lc 'git status -sb' succeeded in 104ms:
+## No commits yet on code-code-gpt-5-codex-scaffold-universal-converter
+[2025-11-06T20:53:50] tokens used: 12,411
+
+[2025-11-06T20:54:14] thinking
+
+**Preparing detailed implementation plan**
+[2025-11-06T20:54:15] exec bash -lc 'ls tinyutils' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-scaffold-universal-converter
+[2025-11-06T20:54:15] bash -lc 'ls tinyutils' exited 1 in 96ms:
+ERROR
+ls: tinyutils: No such file or directory
+[2025-11-06T20:54:15] tokens used: 13,992
+
+[2025-11-06T20:54:21] thinking
+
+**Determining repository root and patching approach**
+[2025-11-06T20:54:23] tokens used: 16,257
+
+[2025-11-06T20:55:36] thinking
+
+**Outlining full converter code structure**
+
+I'm mapping out the detailed design and contents of each module and file for a standalone converter service, including utils for downloading and MIME sniffing, pandoc invocation with filters, markdown cleaning, manifest building, and a FastAPI app handler—all carefully planned since I can’t write or run code here.
+**Detailing core modules and app API**
+
+I’m fleshing out core implementations for logging capture, pandoc conversion with filters and media extraction, markdown cleaning, manifest generation with diffs and heading previews, plus FastAPI request handling—all carefully planned with type hints and error management to build a robust converter backend.
+**Drafting full implementation and patch**
+
+I'm creating detailed implementations for utility helpers, pandoc runner, markdown cleanup, manifest builders, and the FastAPI convert endpoint with robust error handling and logging. I'll produce a complete patch with all new files, ensuring PEP8 compliance and integration.
+**Finalizing FastAPI converter backend and utilities with patch**
+
+I’m addressing nuances in options handling, logging, and error management, optimizing the endpoint and helper modules for robustness and clarity. I’ll provide a full patch including all new files with clear module boundaries and docstrings, ready for manual application since file creation isn’t possible here.
+
+Implemented FastAPI universal converter backend with streaming download, Pandoc integration, Markdown cleanup, manifest generation, and upload fallbacks.
+
+- `api/convert/index.py:1` adds the main FastAPI app and POST endpoint integrating download, conversion, cleanup, manifest building, and error handling with detailed logging.
+- `api/_lib/utils.py:1` provides utilities for downloading blobs safely, upload attempts with fallback, logging capture, file size enforcement, directory zipping, and cleanup.
+- `api/_lib/pandoc_runner.py:1` wraps pypandoc calls with configured GFM output, Lua filter support, and track changes handling.
+- `api/_lib/text_clean.py:1` normalizes and cleans up Markdown text, removing zero-width characters, trailing whitespace, and squeezing blank lines.
+- `api/_lib/manifests.py:1` builds preview data including headings, diffs, sample lines, media manifests, plus complete and error manifests for API responses.
+
+Proposed patch:
+
+```diff
+diff --git a/api/_lib/utils.py b/api/_lib/utils.py
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/api/_lib/utils.py
+@@ -1,239 +1,239 @@
++"""Utility helpers for the universal converter backend."""
++
++from __future__ import annotations
++
++import base64
++import json
++import logging
++import mimetypes
++import os
++import shutil
++import uuid
++import zipfile
++from dataclasses import dataclass
++from pathlib import Path
++from typing import List, Optional, Tuple
++from urllib import request as urllib_request
++from urllib.error import HTTPError, URLError
++from urllib.parse import unquote_to_bytes, urlparse
++
++try:
++    import magic  # type: ignore
++except ImportError:  # pragma: no cover
++    magic = None
++
++try:
++    from importlib import metadata as _importlib_metadata  # type: ignore
++except ImportError:  # pragma: no cover
++    import importlib_metadata as _importlib_metadata  # type: ignore
++
++DEFAULT_MAX_FILE_MB = 100
++MAX_FILE_MB = int(os.getenv("MAX_FILE_MB", str(DEFAULT_MAX_FILE_MB)))
++MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024
++DOWNLOAD_TIMEOUT = float(os.getenv("DOWNLOAD_TIMEOUT_SECONDS", "30"))
++DOWNLOAD_CHUNK_SIZE = 1024 * 256
++DATA_URL_WARN_THRESHOLD = int(os.getenv("DATA_URL_WARN_THRESHOLD_BYTES", str(5 * 1024 * 1024)))
++BLOB_UPLOAD_URL = os.getenv("BLOB_UPLOAD_URL")
++BLOB_UPLOAD_TOKEN = os.getenv("BLOB_UPLOAD_TOKEN")
++USER_AGENT = os.getenv("CONVERTER_USER_AGENT", "tinyutils-universal-converter/1.0")
++
++__all__ = [
++    "ConverterError",
++    "DownloadError",
++    "FileTooLargeError",
++    "UploadError",
++    "DownloadResult",
++    "ListLogHandler",
++    "generate_job_id",
++    "download_blob_to_temp",
++    "sniff_mime_type",
++    "list_lua_filters",
++    "build_tool_versions",
++    "maybe_upload_file",
++    "path_to_data_url",
++    "zip_directory",
++    "cleanup_temp_path",
++    "get_logger",
++]
++
++class ConverterError(Exception):
++    """Base exception for converter utilities."""
++
++class DownloadError(ConverterError):
++    """Raised when a blob cannot be downloaded."""
++
++class FileTooLargeError(ConverterError):
++    """Raised when a file exceeds the maximum configured size."""
++
++class UploadError(ConverterError):
++    """Raised when a blob upload fails."""
++
++@dataclass
++class DownloadResult:
++    path: Path
++    mime_type: Optional[str]
++    size: int
++    original_name: str
++
++class ListLogHandler(logging.Handler):
++    """In-memory log handler so we can return log lines in the API response."""
++    def __init__(self, level: int = logging.INFO) -> None:
++        super().__init__(level)
++        self._records: List[str] = []
++
++    def emit(self, record: logging.LogRecord) -> None:  # pragma: no cover
++        msg = self.format(record)
++        self._records.append(msg)
++
++    def export(self) -> List[str]:
++        return list(self._records)
++
++def _ensure_logger(name: str = "tinyutils.converter") -> logging.Logger:
++    logger = logging.getLogger(name)
++    if not logger.handlers:
++        handler = logging.StreamHandler()
++        handler.setFormatter(logging.Formatter("%(levelname)s %(message)s"))
++        logger.addHandler(handler)
++    logger.setLevel(logging.INFO)
++    logger.propagate = False
++    return logger
++
++def get_logger(name: str = "tinyutils.converter") -> logging.Logger:
++    return _ensure_logger(name)
++
++def generate_job_id() -> str:
++    return uuid.uuid4().hex
++
++def _safe_filename(candidate: str, fallback: str = "input.bin") -> str:
++    candidate = candidate.strip() or fallback
++    sanitized = Path(candidate).name
++    return sanitized or fallback
++
++def _ensure_within_size(size_bytes: int) -> None:
++    if size_bytes > MAX_FILE_BYTES:
++        raise FileTooLargeError(
++            f"File exceeds maximum size of {MAX_FILE_MB} MB (received {size_bytes} bytes)."
++        )
++
++def _decode_data_url(url: str) -> Tuple[bytes, Optional[str], str]:
++    header, data_part = url.split(",", 1)
++    meta = header[len("data:") :]
++    mime_type = "application/octet-stream"
++    attrs: List[str] = []
++    if ";" in meta:
++        first, *attrs = meta.split(";")
++        if "/" in first:
++            mime_type = first
++    elif "/" in meta and meta:
++        mime_type = meta
++    is_base64 = False
++    suggested_name = "input.bin"
++    for attr in attrs:
++        if attr == "base64":
++            is_base64 = True
++        elif attr.startswith("name="):
++            suggested_name = attr.split("=", 1)[1].strip('"')
++    if is_base64:
++        payload = base64.b64decode(data_part)
++    else:
++        payload = unquote_to_bytes(data_part)
++    return payload, mime_type, suggested_name
++
++def download_blob_to_temp(url: str, job_dir: Path, logger: logging.Logger) -> DownloadResult:
++    job_dir.mkdir(parents=True, exist_ok=True)
++    parsed = urlparse(url)
++    if parsed.scheme == "data":
++        payload, mime_type, suggested_name = _decode_data_url(url)
++        _ensure_within_size(len(payload))
++        target = job_dir / _safe_filename(suggested_name)
++        target.write_bytes(payload)
++        return DownloadResult(
++            path=target,
++            mime_type=mime_type,
++            size=len(payload),
++            original_name=target.name,
++        )
++    if parsed.scheme not in {"http", "https"}:
++        raise DownloadError(f"Unsupported URL scheme: {parsed.scheme or 'unknown'}")
++    request = urllib_request.Request(url, headers={"User-Agent": USER_AGENT})
++    target_name = _safe_filename(Path(parsed.path).name or "input.bin")
++    target = job_dir / target_name
++    size = 0
++    mime_type: Optional[str] = None
++    try:
++        with urllib_request.urlopen(request, timeout=DOWNLOAD_TIMEOUT) as response:
++            disposition = response.headers.get("Content-Disposition")
++            if disposition:
++                target_name = _safe_filename(_filename_from_disposition(disposition), target_name)
++                target = job_dir / target_name
++            mime_type = response.headers.get("Content-Type")
++            with target.open("wb") as handle:
++                while True:
++                    chunk = response.read(DOWNLOAD_CHUNK_SIZE)
++                    if not chunk:
++                        break
++                    size += len(chunk)
++                    _ensure_within_size(size)
++                    handle.write(chunk)
++    except (HTTPError, URLError) as exc:
++        raise DownloadError(f"Failed to download input: {exc}") from exc
++    if size == 0:
++        raise DownloadError("Downloaded input is empty.")
++    return DownloadResult(
++        path=target,
++        mime_type=mime_type if mime_type else None,
++        size=size,
++        original_name=target.name,
++    )
++
++def _filename_from_disposition(disposition: str) -> str:
++    parts = disposition.split(";")
++    for part in parts:
++        part = part.strip()
++        if part.lower().startswith("filename="):
++            value = part.split("=", 1)[1].strip('"')
++            return value
++    return "input.bin
+**Preparing complete patch for converter backend**
+
+This chunk includes the full source for the main utility helpers, pandoc integration, text cleanup, manifest building, and the FastAPI entrypoint. I'll produce a detailed patch containing these key files so the user can apply the universal converter backend all at once. It covers Blob downloading, size checks, logging, pandoc markdown conversion, Lua filters, cleanups, preview diffs, zip packaging, and a robust FastAPI app handling conversion requests with structured responses and error management. The patch notes also mention missing tests due to the read-only environment and suggest manual application of the patch.
+
+Let's get this patch ready for the user!
+**Adding utility helpers for converter backend**
+**Explaining universal converter backend implementation**
+
+I've implemented a FastAPI-based universal converter service that downloads input blobs, invokes pandoc with optional Lua filters to convert documents to GitHub-flavored Markdown, cleans up the output, and assembles detailed manifests including preview diffs and media packaging. The changes span several files coordinating these tasks:
+
+- `api/_lib/utils.py` defines core utilities like downloading blobs, MIME sniffing, uploads, and logging.
+- `api/_lib/pandoc_runner.py` wraps pandoc invocation with media extraction and filter support.
+- `api/_lib/text_clean.py` normalizes and cleans Markdown output.
+- `api/_lib/manifests.py` builds comprehensive manifests covering outputs, previews, diffs, and errors.
+- `api/convert/index.py` provides the FastAPI endpoint orchestrating the conversion job lifecycle.
+
+Because the repository is read-only, I can't apply these patches directly. No tests have been run since the filesystem is read-only.
+
+Next steps could be:  
+1) Run this service locally or in a development environment to verify full functionality.  
+2) Add automated tests covering blob downloads, pandoc conversions, and manifest construction.  
+
+```diff
+<entire diff content as provided>
+```
+[2025-11-06T21:02:04] codex
+**Detailing core modules and app API**
+
+I’m fleshing out core implementations for logging capture, pandoc conversion with filters and media extraction, markdown cleaning, manifest generation with diffs and heading previews, plus FastAPI request handling—all carefully planned with type hints and error management to build a robust converter backend.
+[2025-11-06T21:02:04] codex
+**Drafting full implementation and patch**
+
+I'm creating detailed implementations for utility helpers, pandoc runner, markdown cleanup, manifest builders, and the FastAPI convert endpoint with robust error handling and logging. I'll produce a complete patch with all new files, ensuring PEP8 compliance and integration.
+[2025-11-06T21:02:04] codex
+**Finalizing FastAPI converter backend and utilities with patch**
+
+I’m addressing nuances in options handling, logging, and error management, optimizing the endpoint and helper modules for robustness and clarity. I’ll provide a full patch including all new files with clear module boundaries and docstrings, ready for manual application since file creation isn’t possible here.
+
+Implemented FastAPI universal converter backend with streaming download, Pandoc integration, Markdown cleanup, manifest generation, and upload fallbacks.
+
+- `api/convert/index.py:1` adds the main FastAPI app and POST endpoint integrating download, conversion, cleanup, manifest building, and error handling with detailed logging.
+- `api/_lib/utils.py:1` provides utilities for downloading blobs safely, upload attempts with fallback, logging capture, file size enforcement, directory zipping, and cleanup.
+- `api/_lib/pandoc_runner.py:1` wraps pypandoc calls with configured GFM output, Lua filter support, and track changes handling.
+- `api/_lib/text_clean.py:1` normalizes and cleans up Markdown text, removing zero-width characters, trailing whitespace, and squeezing blank lines.
+- `api/_lib/manifests.py:1` builds preview data including headings, diffs, sample lines, media manifests, plus complete and error manifests for API responses.
+
+Proposed patch:
+
+```diff
+diff --git a/api/_lib/utils.py b/api/_lib/utils.py
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/api/_lib/utils.py
+@@ -1,239 +1,239 @@
++"""Utility helpers for the universal converter backend."""
++
++from __future__ import annotations
++
++import base64
++import json
++import logging
++import mimetypes
++import os
++import shutil
++import uuid
++import zipfile
++from dataclasses import dataclass
++from pathlib import Path
++from typing import List, Optional, Tuple
++from urllib import request as urllib_request
++from urllib.error import HTTPError, URLError
++from urllib.parse import unquote_to_bytes, urlparse
++
++try:
++    import magic  # type: ignore
++except ImportError:  # pragma: no cover
++    magic = None
++
++try:
++    from importlib import metadata as _importlib_metadata  # type: ignore
++except ImportError:  # pragma: no cover
++    import importlib_metadata as _importlib_metadata  # type: ignore
++
++DEFAULT_MAX_FILE_MB = 100
++MAX_FILE_MB = int(os.getenv("MAX_FILE_MB", str(DEFAULT_MAX_FILE_MB)))
++MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024
++DOWNLOAD_TIMEOUT = float(os.getenv("DOWNLOAD_TIMEOUT_SECONDS", "30"))
++DOWNLOAD_CHUNK_SIZE = 1024 * 256
++DATA_URL_WARN_THRESHOLD = int(os.getenv("DATA_URL_WARN_THRESHOLD_BYTES", str(5 * 1024 * 1024)))
++BLOB_UPLOAD_URL = os.getenv("BLOB_UPLOAD_URL")
++BLOB_UPLOAD_TOKEN = os.getenv("BLOB_UPLOAD_TOKEN")
++USER_AGENT = os.getenv("CONVERTER_USER_AGENT", "tinyutils-universal-converter/1.0")
++
++__all__ = [
++    "ConverterError",
++    "DownloadError",
++    "FileTooLargeError",
++    "UploadError",
++    "DownloadResult",
++    "ListLogHandler",
++    "generate_job_id",
++    "download_blob_to_temp",
++    "sniff_mime_type",
++    "list_lua_filters",
++    "build_tool_versions",
++    "maybe_upload_file",
++    "path_to_data_url",
++    "zip_directory",
++    "cleanup_temp_path",
++    "get_logger",
++]
++
++class ConverterError(Exception):
++    """Base exception for converter utilities."""
++
++class DownloadError(ConverterError):
++    """Raised when a blob cannot be downloaded."""
++
++class FileTooLargeError(ConverterError):
++    """Raised when a file exceeds the maximum configured size."""
++
++class UploadError(ConverterError):
++    """Raised when a blob upload fails."""
++
++@dataclass
++class DownloadResult:
++    path: Path
++    mime_type: Optional[str]
++    size: int
++    original_name: str
++
++class ListLogHandler(logging.Handler):
++    """In-memory log handler so we can return log lines in the API response."""
++    def __init__(self, level: int = logging.INFO) -> None:
++        super().__init__(level)
++        self._records: List[str] = []
++
++    def emit(self, record: logging.LogRecord) -> None:  # pragma: no cover
++        msg = self.format(record)
++        self._records.append(msg)
++
++    def export(self) -> List[str]:
++        return list(self._records)
++
++def _ensure_logger(name: str = "tinyutils.converter") -> logging.Logger:
++    logger = logging.getLogger(name)
++    if not logger.handlers:
++        handler = logging.StreamHandler()
++        handler.setFormatter(logging.Formatter("%(levelname)s %(message)s"))
++        logger.addHandler(handler)
++    logger.setLevel(logging.INFO)
++    logger.propagate = False
++    return logger
++
++def get_logger(name: str = "tinyutils.converter") -> logging.Logger:
++    return _ensure_logger(name)
++
++def generate_job_id() -> str:
++    return uuid.uuid4().hex
++
++def _safe_filename(candidate: str, fallback: str = "input.bin") -> str:
++    candidate = candidate.strip() or fallback
++    sanitized = Path(candidate).name
++    return sanitized or fallback
++
++def _ensure_within_size(size_bytes: int) -> None:
++    if size_bytes > MAX_FILE_BYTES:
++        raise FileTooLargeError(
++            f"File exceeds maximum size of {MAX_FILE_MB} MB (received {size_bytes} bytes)."
++        )
++
++def _decode_data_url(url: str) -> Tuple[bytes, Optional[str], str]:
++    header, data_part = url.split(",", 1)
++    meta = header[len("data:") :]
++    mime_type = "application/octet-stream"
++    attrs: List[str] = []
++    if ";" in meta:
++        first, *attrs = meta.split(";")
++        if "/" in first:
++            mime_type = first
++    elif "/" in meta and meta:
++        mime_type = meta
++    is_base64 = False
++    suggested_name = "input.bin"
++    for attr in attrs:
++        if attr == "base64":
++            is_base64 = True
++        elif attr.startswith("name="):
++            suggested_name = attr.split("=", 1)[1].strip('"')
++    if is_base64:
++        payload = base64.b64decode(data_part)
++    else:
++        payload = unquote_to_bytes(data_part)
++    return payload, mime_type, suggested_name
++
++def download_blob_to_temp(url: str, job_dir: Path, logger: logging.Logger) -> DownloadResult:
++    job_dir.mkdir(parents=True, exist_ok=True)
++    parsed = urlparse(url)
++    if parsed.scheme == "data":
++        payload, mime_type, suggested_name = _decode_data_url(url)
++        _ensure_within_size(len(payload))
++        target = job_dir / _safe_filename(suggested_name)
++        target.write_bytes(payload)
++        return DownloadResult(
++            path=target,
++            mime_type=mime_type,
++            size=len(payload),
++            original_name=target.name,
++        )
++    if parsed.scheme not in {"http", "https"}:
++        raise DownloadError(f"Unsupported URL scheme: {parsed.scheme or 'unknown'}")
++    request = urllib_request.Request(url, headers={"User-Agent": USER_AGENT})
++    target_name = _safe_filename(Path(parsed.path).name or "input.bin")
++    target = job_dir / target_name
++    size = 0
++    mime_type: Optional[str] = None
++    try:
++        with urllib_request.urlopen(request, timeout=DOWNLOAD_TIMEOUT) as response:
++            disposition = response.headers.get("Content-Disposition")
++            if disposition:
++                target_name = _safe_filename(_filename_from_disposition(disposition), target_name)
++                target = job_dir / target_name
++            mime_type = response.headers.get("Content-Type")
++            with target.open("wb") as handle:
++                while True:
++                    chunk = response.read(DOWNLOAD_CHUNK_SIZE)
++                    if not chunk:
++                        break
++                    size += len(chunk)
++                    _ensure_within_size(size)
++                    handle.write(chunk)
++    except (HTTPError, URLError) as exc:
++        raise DownloadError(f"Failed to download input: {exc}") from exc
++    if size == 0:
++        raise DownloadError("Downloaded input is empty.")
++    return DownloadResult(
++        path=target,
++        mime_type=mime_type if mime_type else None,
++        size=size,
++        original_name=target.name,
++    )
++
++def _filename_from_disposition(disposition: str) -> str:
++    parts = disposition.split(";")
++    for part in parts:
++        part = part.strip()
++        if part.lower().startswith("filename="):
++            value = part.split("=", 1)[1].strip('"')
++            return value
++    return "input.bin
+[2025-11-06T21:02:04] codex
+**Preparing complete patch for converter backend**
+
+This chunk includes the full source for the main utility helpers, pandoc integration, text cleanup, manifest building, and the FastAPI entrypoint. I'll produce a detailed patch containing these key files so the user can apply the universal converter backend all at once. It covers Blob downloading, size checks, logging, pandoc markdown conversion, Lua filters, cleanups, preview diffs, zip packaging, and a robust FastAPI app handling conversion requests with structured responses and error management. The patch notes also mention missing tests due to the read-only environment and suggest manual application of the patch.
+
+Let's get this patch ready for the user!
+[2025-11-06T21:02:04] codex
+**Adding utility helpers for converter backend**
+[2025-11-06T21:02:04] codex
+**Explaining universal converter backend implementation**
+
+I've implemented a FastAPI-based universal converter service that downloads input blobs, invokes pandoc with optional Lua filters to convert documents to GitHub-flavored Markdown, cleans up the output, and assembles detailed manifests including preview diffs and media packaging. The changes span several files coordinating these tasks:
+
+- `api/_lib/utils.py` defines core utilities like downloading blobs, MIME sniffing, uploads, and logging.
+- `api/_lib/pandoc_runner.py` wraps pandoc invocation with media extraction and filter support.
+- `api/_lib/text_clean.py` normalizes and cleans Markdown output.
+- `api/_lib/manifests.py` builds comprehensive manifests covering outputs, previews, diffs, and errors.
+- `api/convert/index.py` provides the FastAPI endpoint orchestrating the conversion job lifecycle.
+
+Because the repository is read-only, I can't apply these patches directly. No tests have been run since the filesystem is read-only.
+
+Next steps could be:  
+1) Run this service locally or in a development environment to verify full functionality.  
+2) Add automated tests covering blob downloads, pandoc conversions, and manifest construction.  
+
+```diff
+<entire diff content as provided>
+```
+[2025-11-06T21:02:04] codex
+
+Implemented a FastAPI universal converter service that streams each input download, runs Pandoc (with a Lua-filter pass), normalises the Markdown, and packages manifest metadata plus upload fallbacks.
+
+- `api/convert/index.py:1` wires the POST endpoint, coordinates download → pandoc → cleanup, builds previews, and wraps errors into the manifest contract.
+- `api/_lib/utils.py:1` adds shared plumbing for job IDs, streaming downloads with size caps, MIME sniffing, blob uploads (or data-URL fallback), logging capture, and temp-dir cleanup.
+- `api/_lib/pandoc_runner.py:1` encapsulates the two-step Pandoc run with consistent GFM args and optional Lua filters/track-changes handling.
+- `api/_lib/text_clean.py:1` performs Unicode NFC normalisation, NBSP/zero-width stripping, trailing-space trimming, and blank-line squeezing.
+- `api/_lib/manifests.py:1` assembles heading previews, scoped diffs, media manifests, and top-level response payloads for both success and error cases.
+
+Proposed patch (filesystem is read-only here, so nothing was written):
+```diff
+diff --git a/api/_lib/utils.py b/api/_lib/utils.py
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/api/_lib/utils.py
+@@
++"""Utility helpers for the universal converter backend."""
++
++from __future__ import annotations
++
++import base64
++import json
++import logging
++import mimetypes
++import os
++import shutil
++import uuid
++import zipfile
++from dataclasses import dataclass
++from pathlib import Path
++from typing import List, Optional, Tuple
++from urllib import request as urllib_request
++from urllib.error import HTTPError, URLError
++from urllib.parse import unquote_to_bytes, urlparse
++
++try:
++    import magic  # type: ignore
++except ImportError:  # pragma: no cover
++    magic = None
++
++try:
++    from importlib import metadata as importlib_metadata  # type: ignore
++except ImportError:  # pragma: no cover
++    import importlib_metadata  # type: ignore
++
++DEFAULT_MAX_FILE_MB = 100
++MAX_FILE_MB = int(os.getenv("MAX_FILE_MB", str(DEFAULT_MAX_FILE_MB)))
++MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024
++DOWNLOAD_TIMEOUT = float(os.getenv("DOWNLOAD_TIMEOUT_SECONDS", "30"))
++DOWNLOAD_CHUNK_SIZE = 1024 * 256
++DATA_URL_WARN_THRESHOLD = int(
++    os.getenv("DATA_URL_WARN_THRESHOLD_BYTES", str(5 * 1024 * 1024))
++)
++BLOB_UPLOAD_URL = os.getenv("BLOB_UPLOAD_URL")
++BLOB_UPLOAD_TOKEN = os.getenv("BLOB_UPLOAD_TOKEN")
++USER_AGENT = os.getenv("CONVERTER_USER_AGENT", "tinyutils-universal-converter/1.0")
++
++__all__ = [
++    "ConverterError",
++    "DownloadError",
++    "FileTooLargeError",
++    "UploadError",
++    "DownloadResult",
++    "ListLogHandler",
++    "generate_job_id",
++    "get_logger",
++    "download_blob_to_temp",
++    "sniff_mime_type",
++    "list_lua_filters",
++    "build_tool_versions",
++    "maybe_upload_file",
++    "path_to_data_url",
++    "zip_directory",
++    "cleanup_temp_path",
++]
++
++
++class ConverterError(Exception):
++    """Base exception for converter utilities."""
++
++
++class DownloadError(ConverterError):
++    """Raised when a blob cannot be downloaded."""
++
++
++class FileTooLargeError(ConverterError):
++    """Raised when a file exceeds the maximum configured size."""
++
++
++class UploadError(ConverterError):
++    """Raised when a blob upload fails."""
++
++
++@dataclass
++class DownloadResult:
++    path: Path
++    mime_type: Optional[str]
++    size: int
++    original_name: str
++
++
++class ListLogHandler(logging.Handler):
++    """In-memory log handler so we can surface logs in API responses."""
++
++    def __init__(self, level: int = logging.INFO) -> None:
++        super().__init__(level)
++        self._records: List[str] = []
++
++    def emit(self, record: logging.LogRecord) -> None:  # pragma: no cover
++        message = self.format(record)
++        self._records.append(message)
++
++    def export(self) -> List[str]:
++        return list(self._records)
++
++
++def _ensure_logger(name: str = "tinyutils.converter") -> logging.Logger:
++    logger = logging.getLogger(name)
++    if not logger.handlers:
++        handler = logging.StreamHandler()
++        handler.setFormatter(logging.Formatter("%(levelname)s %(message)s"))
++        logger.addHandler(handler)
++    logger.setLevel(logging.INFO)
++    logger.propagate = False
++    return logger
++
++
++def get_logger(name: str = "tinyutils.converter") -> logging.Logger:
++    return _ensure_logger(name)
++
++
++def generate_job_id() -> str:
++    return uuid.uuid4().hex
++
++
++def _safe_filename(candidate: str, fallback: str = "input.bin") -> str:
++    candidate = candidate.strip() or fallback
++    sanitized = Path(candidate).name
++    return sanitized or fallback
++
++
++def _ensure_within_size(size_bytes: int) -> None:
++    if size_bytes > MAX_FILE_BYTES:
++        raise FileTooLargeError(
++            f"File exceeds maximum size of {MAX_FILE_MB} MB (received {size_bytes} bytes)."
++        )
++
++
++def _decode_data_url(url: str) -> Tuple[bytes, Optional[str], str]:
++    header, data_part = url.split(",", 1)
++    meta = header[len("data:") :]
++    mime_type = "application/octet-stream"
++    attrs: List[str] = []
++    if ";" in meta:
++        first, *attrs = meta.split(";")
++        if "/" in first:
++            mime_type = first
++    elif "/" in meta and meta:
++        mime_type = meta
++    is_base64 = False
++    suggested_name = "input.bin"
++    for attr in attrs:
++        if attr == "base64":
++            is_base64 = True
++        elif attr.startswith("name="):
++            suggested_name = attr.split("=", 1)[1].strip('"')
++    if is_base64:
++        payload = base64.b64decode(data_part)
++    else:
++        payload = unquote_to_bytes(data_part)
++    return payload, mime_type, suggested_name
++
++
++def download_blob_to_temp(
++    url: str, job_dir: Path, logger: logging.Logger
++) -> DownloadResult:
++    job_dir.mkdir(parents=True, exist_ok=True)
++    parsed = urlparse(url)
++    if parsed.scheme == "data":
++        payload, mime_type, suggested_name = _decode_data_url(url)
++        _ensure_within_size(len(payload))
++        target = job_dir / _safe_filename(suggested_name)
++        target.write_bytes(payload)
++        return DownloadResult(
++            path=target,
++            mime_type=mime_type,
++            size=len(payload),
++            original_name=target.name,
++        )
++    if parsed.scheme not in {"http", "https"}:
++        raise DownloadError(f"Unsupported URL scheme: {parsed.scheme or 'unknown'}")
++    request = urllib_request.Request(url, headers={"User-Agent": USER_AGENT})
++    target_name = _safe_filename(Path(parsed.path).name or "input.bin")
++    target = job_dir / target_name
++    size = 0
++    mime_type: Optional[str] = None
++    try:
++        with urllib_request.urlopen(request, timeout=DOWNLOAD_TIMEOUT) as response:
++            disposition = response.headers.get("Content-Disposition")
++            if disposition:
++                target_name = _safe_filename(
++                    _filename_from_disposition(disposition), target_name
++                )
++                target = job_dir / target_name
++            mime_type = response.headers.get("Content-Type")
++            with target.open("wb") as handle:
++                while True:
++                    chunk = response.read(DOWNLOAD_CHUNK_SIZE)
++                    if not chunk:
++                        break
++                    size += len(chunk)
++                    _ensure_within_size(size)
++                    handle.write(chunk)
++    except (HTTPError, URLError) as exc:
++        raise DownloadError(f"Failed to download input: {exc}") from exc
++    if size == 0:
++        raise DownloadError("Downloaded input is empty.")
++    logger.info("Downloaded %s bytes from %s", size, parsed.netloc or "source")
++    return DownloadResult(
++        path=target,
++        mime_type=mime_type if mime_type else None,
++        size=size,
++        original_name=target.name,
++    )
++
++
++def _filename_from_disposition(disposition: str) -> str:
++    parts = disposition.split(";")
++    for part in parts:
++        part = part.strip()
++        if part.lower().startswith("filename="):
++            value = part.split("=", 1)[1].strip('"')
++            return value
++    return "input.bin"
++
++
++def sniff_mime_type(path: Path, fallback: Optional[str] = None) -> str:
++    if magic is not None:
++        try:
++            analyser = magic.Magic(mime=True)
++            detected = analyser.from_file(str(path))
++            if detected:
++                return detected
++        except Exception:
++            pass
++    guessed, _ = mimetypes.guess_type(path.name)
++    return fallback or guessed or "application/octet-stream"
++
++
++def list_lua_filters(filters_dir: Path) -> List[str]:
++    if not filters_dir.exists():
++        return []
++    filters: List[str] = []
++    for path in sorted(filters_dir.glob("*.lua")):
++        if path.is_file():
++            filters.append(str(path))
++    return filters
++
++
++def build_tool_versions() -> dict:
++    versions: dict = {}
++    for package in ("fastapi", "pypandoc", "python-magic"):
++        try:
++            versions[package] = importlib_metadata.version(package)
++        except Exception:
++            versions[package] = "unknown"
++    return versions
++
++
++def maybe_upload_file(
++    path: Path, mime_type: Optional[str], logger: logging.Logger
++) -> Tuple[str, bool]:
++    content_type = mime_type or sniff_mime_type(path)
++    if BLOB_UPLOAD_URL:
++        try:
++            upload_url = _perform_upload(path, content_type)
++            logger.info("Uploaded %s via blob store", path.name)
++            return upload_url, True
++        except UploadError as exc:
++            logger.warning("Upload failed, falling back to data URL: %s", exc)
++    return path_to_data_url(path, content_type, logger), False
++
++
++def _perform_upload(path: Path, mime_type: str) -> str:
++    if not BLOB_UPLOAD_URL:
++        raise UploadError("No blob upload endpoint configured.")
++    data = path.read_bytes()
++    request = urllib_request.Request(
++        BLOB_UPLOAD_URL,
++        data=data,
++        method="POST",
++        headers={
++            "Content-Type": mime_type,
++            "Content-Length": str(len(data)),
++            "User-Agent": USER_AGENT,
++        },
++    )
++    if BLOB_UPLOAD_TOKEN:
++        request.add_header("Authorization", f"Bearer {BLOB_UPLOAD_TOKEN}")
++    try:
++        with urllib_request.urlopen(request, timeout=DOWNLOAD_TIMEOUT) as response:
++            location = response.headers.get("Location")
++            if location:
++                return location
++            payload = response.read()
++    except (HTTPError, URLError) as exc:
++        raise UploadError(str(exc)) from exc
++    if not payload:
++        raise UploadError("Blob store returned an empty response.")
++    try:
++        decoded = json.loads(payload.decode("utf-8"))
++    except (ValueError, UnicodeDecodeError) as exc:
++        raise UploadError(f"Blob store response was not valid JSON: {exc}") from exc
++    for key in ("blobUrl", "url", "href"):
++        if key in decoded and decoded[key]:
++            return decoded[key]
++    raise UploadError("Blob store response did not contain a blob URL.")
++
++
++def path_to_data_url(path: Path, mime_type: str, logger: logging.Logger) -> str:
++    payload = path.read_bytes()
++    if len(payload) > DATA_URL_WARN_THRESHOLD:
++        logger.warning(
++            "Embedding %s bytes into data URL (threshold %s); consider enabling blob uploads.",
++            len(payload),
++            DATA_URL_WARN_THRESHOLD,
++        )
++    encoded = base64.b64encode(payload).decode("ascii")
++    return f"data:{mime_type};base64,{encoded}"
++
++
++def zip_directory(source_dir: Path, destination: Path) -> Path:
++    destination.parent.mkdir(parents=True, exist_ok=True)
++    with zipfile.ZipFile(destination, "w", zipfile.ZIP_DEFLATED) as archive:
++        for file_path in sorted(source_dir.rglob("*")):
++            if file_path.is_file():
++                archive.write(
++                    file_path,
++                    arcname=file_path.relative_to(source_dir).as_posix(),
++                )
++    return destination
++
++
++def cleanup_temp_path(path: Path) -> None:
++    try:
++        if path.exists():
++            shutil.rmtree(path)
++    except OSError:
++        pass
+diff --git a/api/_lib/pandoc_runner.py b/api/_lib/pandoc_runner.py
+new file mode 100644
+index 0000000..2222222
+--- /dev/null
++++ b/api/_lib/pandoc_runner.py
+@@
++"""Pandoc execution helpers for the universal converter backend."""
++
++from __future__ import annotations
++
++import logging
++from pathlib import Path
++from typing import Dict, NamedTuple, Optional
++
++import pypandoc
++
++from . import utils
++
++PANDOC_TARGET_FORMAT = "gfm"
++PANDOC_EXTRA_ARGS = ["--wrap=none", "--atx-headers", "--reference-links"]
++
++
++class PandocConversionResult(NamedTuple):
++    raw_markdown: str
++    filtered_markdown: str
++    media_dir: Path
++
++
++def convert_document(
++    source_path: Path,
++    job_dir: Path,
++    source_format: Optional[str],
++    options: Dict[str, object],
++    filters_dir: Path,
++    logger: logging.Logger,
++) -> PandocConversionResult:
++    media_dir = job_dir / "media"
++    media_dir.mkdir(parents=True, exist_ok=True)
++    extra_args = list(PANDOC_EXTRA_ARGS)
++    extra_args.append(f"--extract-media={media_dir}")
++    if _should_accept_track_changes(options):
++        extra_args.append("--track-changes=accept")
++    logger.info(
++        "Running pandoc (%s -> %s)", source_format or "auto", PANDOC_TARGET_FORMAT
++    )
++    raw_markdown = pypandoc.convert_file(
++        str(source_path),
++        to=PANDOC_TARGET_FORMAT,
++        format=source_format,
++        extra_args=extra_args,
++    )
++    filtered_markdown = raw_markdown
++    filters = utils.list_lua_filters(filters_dir)
++    if filters:
++        logger.info("Applying %s Lua filter(s)", len(filters))
++        filtered_markdown = pypandoc.convert_text(
++            raw_markdown,
++            to=PANDOC_TARGET_FORMAT,
++            format=PANDOC_TARGET_FORMAT,
++            filters=filters,
++            extra_args=PANDOC_EXTRA_ARGS,
++        )
++    else:
++        logger.debug("No Lua filters found in %s", filters_dir)
++    return PandocConversionResult(raw_markdown, filtered_markdown, media_dir)
++
++
++def _should_accept_track_changes(options: Dict[str, object]) -> bool:
++    for key in ("trackChanges", "track_changes"):
++        value = options.get(key)
++        if isinstance(value, bool):
++            return value
++    return False
+diff --git a/api/_lib/text_clean.py b/api/_lib/text_clean.py
+new file mode 100644
+index 0000000..3333333
+--- /dev/null
++++ b/api/_lib/text_clean.py
+@@
++"""Markdown cleanup helpers for the universal converter backend."""
++
++from __future__ import annotations
++
++import unicodedata
++from typing import List
++
++ZERO_WIDTH = {
++    "\u200b",
++    "\u200c",
++    "\u200d",
++    "\ufeff",
++}
++
++
++def clean_markdown(markdown: str) -> str:
++    text = unicodedata.normalize("NFC", markdown)
++    text = text.replace("\xa0", " ")
++    text = text.replace("\r\n", "\n").replace("\r", "\n")
++    text = _remove_zero_width_chars(text)
++    lines = [line.rstrip(" \t") for line in text.split("\n")]
++    cleaned_lines: List[str] = []
++    previous_blank = False
++    for line in lines:
++        is_blank = line == ""
++        if is_blank and previous_blank:
++            continue
++        cleaned_lines.append(line)
++        previous_blank = is_blank
++    cleaned = "\n".join(cleaned_lines).strip("\n")
++    return cleaned + "\n"
++
++
++def _remove_zero_width_chars(text: str) -> str:
++    translation = {ord(char): None for char in ZERO_WIDTH}
++    return text.translate(translation)
+diff --git a/api/_lib/manifests.py b/api/_lib/manifests.py
+new file mode 100644
+index 0000000..4444444
+--- /dev/null
++++ b/api/_lib/manifests.py
+@@
++"""Helpers for building manifest dictionaries for the converter API."""
++
++from __future__ import annotations
++
++import difflib
++from pathlib import Path
++from typing import Dict, List, Sequence
++
++
++def _coerce_int(options: Dict[str, object], key: str, default: int) -> int:
++    value = options.get(key)
++    if value is None:
++        return default
++    try:
++        return int(value)
++    except (TypeError, ValueError):
++        return default
++
++
++def collect_headings(markdown: str, limit: int) -> List[str]:
++    headings: List[str] = []
++    for line in markdown.splitlines():
++        stripped = line.strip()
++        if stripped.startswith("#"):
++            headings.append(stripped)
++            if len(headings) >= limit:
++                break
++    return headings
++
++
++def build_diff(before: str, after: str, max_lines: int) -> List[str]:
++    diff = list(
++        difflib.unified_diff(
++            before.splitlines(),
++            after.splitlines(),
++            lineterm="",
++            n=3,
++        )
++    )
++    if len(diff) > max_lines:
++        return diff[:max_lines] + ["..."]
++    return diff
++
++
++def sample_lines(text: str, limit: int) -> List[str]:
++    lines = text.splitlines()
++    return lines[:limit]
++
++
++def collect_image_manifest(media_dir: Path) -> List[dict]:
++    if not media_dir.exists():
++        return []
++    manifest: List[dict] = []
++    for file_path in sorted(media_dir.rglob("*")):
++        if file_path.is_file():
++            manifest.append(
++                {
++                    "path": file_path.relative_to(media_dir).as_posix(),
++                    "size": file_path.stat().st_size,
++                }
++            )
++    return manifest
++
++
++def build_preview(
++    before_markdown: str,
++    after_markdown: str,
++    image_manifest: List[dict],
++    options: Dict[str, object],
++) -> dict:
++    heading_limit = _coerce_int(options, "headingLimit", 5)
++    diff_limit = _coerce_int(options, "diffSampleLines", 120)
++    sample_limit = _coerce_int(options, "sampleLines", 20)
++    return {
++        "headings": collect_headings(after_markdown, heading_limit),
++        "diff": build_diff(before_markdown, after_markdown, diff_limit),
++        "sample": {
++            "before": sample_lines(before_markdown, sample_limit),
++            "after": sample_lines(after_markdown, sample_limit),
++        },
++        "media": image_manifest,
++    }
++
++
++def build_manifest(
++    job_id: str,
++    tool_versions: dict,
++    outputs: List[dict],
++    preview: dict,
++    logs: Sequence[str],
++    errors: List[dict],
++) -> dict:
++    return {
++        "jobId": job_id,
++        "toolVersions": tool_versions,
++        "outputs": outputs,
++        "preview": preview,
++        "logs": list(logs),
++        "errors": errors,
++    }
++
++
++def build_error_manifest(
++    job_id: str,
++    tool_versions: dict,
++    logs: Sequence[str],
++    error_message: str,
++) -> dict:
++    return {
++        "jobId": job_id,
++        "toolVersions": tool_versions,
++        "outputs": [],
++        "preview": {},
++        "logs": list(logs),
++        "errors": [{"message": error_message}],
++    }
+diff --git a/api/convert/index.py b/api/convert/index.py
+new file mode 100644
+index 0000000..5555555
+--- /dev/null
++++ b/api/convert/index.py
+@@
++"""FastAPI entrypoint for the universal converter backend."""
++
++from __future__ import annotations
++
++import tempfile
++from pathlib import Path
++from typing import Any, Dict, List, Optional
++
++from fastapi import FastAPI, HTTPException
++from fastapi.responses import JSONResponse
++from pydantic import BaseModel, Field, validator
++
++from api._lib import manifests, pandoc_runner, text_clean, utils
++
++app = FastAPI(title="Universal Converter")
++
++logger = utils.get_logger()
++
++THIS_FILE = Path(__file__).resolve()
++REPO_ROOT = THIS_FILE.parents[2] if len(THIS_FILE.parents) >= 3 else THIS_FILE.parent
++FILTERS_DIR = REPO_ROOT / "filters"
++
++
++class InputPayload(BaseModel):
++    blob_url: str = Field(..., alias="blobUrl")
++    name: Optional[str] = None
++
++    class Config:
++        allow_population_by_field_name = True
++
++
++class ConvertRequest(BaseModel):
++    job_id: Optional[str] = Field(default=None, alias="jobId")
++    inputs: List[InputPayload]
++    source_format: Optional[str] = Field(default=None, alias="from")
++    target_format: str = Field(default="gfm", alias="to")
++    options: Dict[str, Any] = Field(default_factory=dict)
++
++    @validator("inputs")
++    def _validate_inputs(cls, value: List[InputPayload]) -> List[InputPayload]:
++        if not value:
++            raise ValueError("inputs must contain at least one item")
++        return value
++
++    @validator("target_format")
++    def _validate_target_format(cls, value: str) -> str:
++        if value.lower() != "gfm":
++            raise ValueError("Only 'gfm' output is currently supported")
++        return value
++
++    class Config:
++        allow_population_by_field_name = True
++
++
++@app.post("/")
++async def convert(request: ConvertRequest):
++    job_id = request.job_id or utils.generate_job_id()
++    log_handler = utils.ListLogHandler()
++    logger.addHandler(log_handler)
++    options = dict(request.options)
++    tool_versions = utils.build_tool_versions()
++    job_dir = Path(tempfile.mkdtemp(prefix=f"converter-{job_id}-"))
++    logger.info("Starting conversion job %s", job_id)
++    try:
++        primary_input = request.inputs[0]
++        download = utils.download_blob_to_temp(primary_input.blob_url, job_dir, logger)
++        source_format = request.source_format
++        if not source_format:
++            potential = options.get("from")
++            if isinstance(potential, str):
++                source_format = potential
++        conversion = pandoc_runner.convert_document(
++            download.path,
++            job_dir,
++            source_format,
++            options,
++            FILTERS_DIR,
++            logger,
++        )
++        cleaned_markdown = text_clean.clean_markdown(conversion.filtered_markdown)
++        output_path = job_dir / "converted.md"
++        output_path.write_text(cleaned_markdown, encoding="utf-8")
++        blob_url, uploaded = utils.maybe_upload_file(output_path, "text/markdown", logger)
++        outputs: List[dict] = [
++            {
++                "name": output_path.name,
++                "size": output_path.stat().st_size,
++                "blobUrl": blob_url,
++                "contentType": "text/markdown",
++                "uploaded": uploaded,
++            }
++        ]
++        image_manifest = manifests.collect_image_manifest(conversion.media_dir)
++        if image_manifest:
++            media_zip = job_dir / "converted-media.zip"
++            utils.zip_directory(conversion.media_dir, media_zip)
++            media_url, media_uploaded = utils.maybe_upload_file(
++                media_zip, "application/zip", logger
++            )
++            outputs.append(
++                {
++                    "name": media_zip.name,
++                    "size": media_zip.stat().st_size,
++                    "blobUrl": media_url,
++                    "contentType": "application/zip",
++                    "uploaded": media_uploaded,
++                }
++            )
++        preview = manifests.build_preview(
++            conversion.raw_markdown,
++            cleaned_markdown,
++            image_manifest,
++            options,
++        )
++        manifest = manifests.build_manifest(
++            job_id=job_id,
++            tool_versions=tool_versions,
++            outputs=outputs,
++            preview=preview,
++            logs=log_handler.export(),
++            errors=[],
++        )
++        return JSONResponse(content=manifest)
++    except utils.FileTooLargeError as exc:
++        manifest = manifests.build_manifest(
++            job_id=job_id,
++            tool_versions=tool_versions,
++            outputs=[],
++            preview={},
++            logs=log_handler.export(),
++            errors=[{"message": str(exc)}],
++        )
++        return JSONResponse(status_code=413, content=manifest)
++    except utils.DownloadError as exc:
++        logger.warning("Download error: %s", exc)
++        raise HTTPException(status_code=400, detail=str(exc)) from exc
++    except Exception as exc:
++        logger.exception("Conversion failed: %s", exc)
++        manifest = manifests.build_error_manifest(
++            job_id=job_id,
++            tool_versions=tool_versions,
++            logs=log_handler.export(),
++            error_message="Conversion failed; see logs for details.",
++        )
++        return JSONResponse(status_code=500, content=manifest)
++    finally:
++        logger.removeHandler(log_handler)
++        utils.cleanup_temp_path(job_dir)
+```
+
+Next steps (pick what I can do). Since environment read-only, we can't run tests. Suggest to apply patch and test.
+
+Next steps list maybe:
+
+1. Apply the patch (e.g. with `git apply`) and add Lua filters under `filters/` before running locally.
+2. Configure env (`MAX_FILE_MB`, `BLOB_UPLOAD_URL`, etc.) and start the API with `uvicorn api.convert.index:app --reload` to verify conversions and previews.
+
+Also mention no tests run due to read-only.
+
+Done.
+[2025-11-06T21:03:24] tokens used: 55,649

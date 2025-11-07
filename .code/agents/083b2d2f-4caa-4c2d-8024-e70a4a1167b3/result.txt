@@ -1,0 +1,35 @@
+Here's a 6-step action plan for completing the universal converter backend and automation, including rationale and verification for each step:
+
+### Universal Converter Backend Implementation Plan
+
+**Objective:** Finish the universal converter backend + automation for unattended overnight runs, preview deployment, and no manual follow-ups.
+
+**Step 1: Implement Core Converter Logic and Unit Tests**
+*   **Action:** Develop `convert_one` and `convert_batch` functions within `tinyutils/convert/`. This includes handling various input types, markdown cleanup, preview/snippet generation, deterministic caching, optional media zip bundles, and structured error handling with retry hints and log capture. Create comprehensive unit tests for these functions in `tests/convert/` using `pytest`.
+*   **Rationale:** Establishes the foundational conversion capabilities, ensuring individual components are robust, reliable, and correctly handle various scenarios, including errors.
+*   **Verification:** Run `pytest tests/convert/` and confirm all new unit tests pass. Review test coverage reports to ensure adequate coverage of the core converter logic.
+
+**Step 2: Develop FastAPI Endpoint and Integration Tests**
+*   **Action:** Create the FastAPI endpoint at `tinyutils/api/convert/index.py`. Implement logic to consume the converter library end-to-end, accept the `to` parameter (string or list), maintain the specified JSON envelope (`requestId`, `logs`, `errors`, `preview`, `outputs`), and upload all artifacts to Blob storage (no inline blobs). Integrate guardrails and async cleanup mechanisms. Write integration tests using `FastAPI TestClient` in `tests/convert/` to verify the endpoint's behavior, including correct input/output, error handling, and artifact storage.
+*   **Rationale:** Exposes the converter functionality via a robust API, making it accessible and ensuring correct interaction with the core library and external services like Blob storage.
+*   **Verification:** Execute `pytest tests/convert/` (including the new integration tests) and confirm all tests pass.
+
+**Step 3: Configure Testing Tooling and Run All Tests**
+*   **Action:** Wire the `pnpm test:convert` command to execute `pytest tests/convert/`. Ensure `pytest` is configured to capture code coverage. Run `pnpm test:convert` to execute all unit and integration tests, including targeted FastAPI smoke tests.
+*   **Rationale:** Standardizes the testing process, ensures consistent execution of all tests, and provides a clear measure of code quality and stability through coverage reports.
+*   **Verification:** Run `pnpm test:convert`. Confirm that all tests pass and a comprehensive coverage report is generated.
+
+**Step 4: Implement Artifact Persistence and Documentation Updates**
+*   **Action:** Modify the FastAPI endpoint or a dedicated utility to persist conversion manifests and logs under `tinyutils/artifacts/convert/<YYYYMMDD>/`. Update `docs/AGENT_RUN_LOG.md` and `docs/AGENT_TASK_CHECKLIST.md` with details of the new converter, its usage, and verification steps.
+*   **Rationale:** Ensures proper logging, traceability, and historical record-keeping of all conversion operations, and keeps project documentation current for operational clarity and future reference.
+*   **Verification:** After a successful conversion via the API, verify that new artifact files (manifests, logs) are created in the specified directory structure (`tinyutils/artifacts/convert/<YYYYMMDD>/`). Check `docs/AGENT_RUN_LOG.md` and `docs/AGENT_TASK_CHECKLIST.md` to confirm they accurately reflect the new converter.
+
+**Step 5: Deploy to Preview and Run Smoke Tests**
+*   **Action:** Push the completed changes to the repository. After successful CI/CD, verify the deployment to the preview environment. Execute internal browser smoke tests (without `tiny-reactive`) against the preview environment to confirm the end-to-end functionality of the converter API. Capture logs and screenshots from these smoke tests and attach them to the artifacts.
+*   **Rationale:** Validates the entire system in a production-like environment, catching any environment-specific issues or integration problems before full deployment.
+*   **Verification:** Confirm the preview deployment is live and accessible. Review the captured logs and screenshots from the smoke tests to ensure the converter functions as expected in the preview environment.
+
+**Step 6: Roster Monitoring and Final Review**
+*   **Action:** Ensure the roster policy is configured to keep all agents active and re-check every 10 minutes. Conduct a final review of the entire solution, ensuring adherence to all constraints (minimal diffs, no secrets in the repository, production-readiness, and working in preview).
+*   **Rationale:** Maintains operational readiness, ensures continuous agent activity, and confirms that the solution meets all project standards and requirements for a production environment.
+*   **Verification:** Confirm that the roster monitoring is active and correctly configured. Perform a final code review and configuration check to ensure all constraints are met.

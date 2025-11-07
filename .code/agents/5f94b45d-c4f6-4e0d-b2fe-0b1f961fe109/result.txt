@@ -1,0 +1,222 @@
+[2025-11-04T15:48:41] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-produce-exact-bash
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-04T15:48:41] User instructions:
+Produce exact bash for a production deploy and fence probe with artifacts and a brief summary footer. Requirements: ensure repo on feat/pr3-preview-fence and Vercel linked, set FENCE_SECRET=${PREVIEW_SECRET:-$(openssl rand -hex 16)} and export PREVIEW_SECRET, run vercel pull --yes --environment=production and vercel deploy --prod --yes --env PREVIEW_SECRET=$FENCE_SECRET, set PROD_URL=https://tinyutils-eight.vercel.app, curl -sS -D - -o /dev/null the three endpoints, write full and filtered headers into artifacts/pr3-fence-<ts>-prod/, and print summary of statuses and Set-Cookie presence. Keep script POSIX-compatible and macOS-friendly.
+[2025-11-04T15:48:41] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-produce-exact-bash
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-04T15:48:41] User instructions:
+Produce exact bash for a production deploy and fence probe with artifacts and a brief summary footer. Requirements: ensure repo on feat/pr3-preview-fence and Vercel linked, set FENCE_SECRET=${PREVIEW_SECRET:-$(openssl rand -hex 16)} and export PREVIEW_SECRET, run vercel pull --yes --environment=production and vercel deploy --prod --yes --env PREVIEW_SECRET=$FENCE_SECRET, set PROD_URL=https://tinyutils-eight.vercel.app, curl -sS -D - -o /dev/null the three endpoints, write full and filtered headers into artifacts/pr3-fence-<ts>-prod/, and print summary of statuses and Set-Cookie presence. Keep script POSIX-compatible and macOS-friendly.
+
+[2025-11-04T15:48:52] thinking
+
+**Outlining deployment script tasks**
+[2025-11-04T15:48:53] exec bash -lc 'ls -1' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-produce-exact-bash
+[2025-11-04T15:48:53] bash -lc 'ls -1' succeeded in 148ms:
+[2025-11-04T15:48:53] tokens used: 6,117
+
+[2025-11-04T15:48:56] thinking
+
+**Investigating empty directory output**
+[2025-11-04T15:48:56] exec bash -lc 'ls -a' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-produce-exact-bash
+[2025-11-04T15:48:57] bash -lc 'ls -a' succeeded in 155ms:
+.
+..
+.git
+[2025-11-04T15:48:57] tokens used: 6,348
+
+[2025-11-04T15:49:11] thinking
+
+**Designing POSIX-compatible deploy script**
+
+I'm working out how to craft a simple, portable bash script that ensures the repo is on the right branch, confirms Vercel linking, sets a secret environment variable properly, runs deploy commands, and finally outputs a concise status summary including presence of Set-Cookie headers from key endpoints. I want to avoid non-POSIX features like pipefail, keep macOS compatibility, and figure out best ways to check Vercel link status without too much interactivity. This is setting up all the pieces before assembling the final script.
+[2025-11-04T15:49:13] exec bash -lc 'git status -sb' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-produce-exact-bash
+[2025-11-04T15:49:13] bash -lc 'git status -sb' succeeded in 157ms:
+## No commits yet on code-code-gpt-5-codex-produce-exact-bash
+[2025-11-04T15:49:13] tokens used: 7,743
+
+[2025-11-04T15:49:15] thinking
+
+**Checking git branch on empty repo**
+[2025-11-04T15:49:16] exec bash -lc 'git rev-parse --abbrev-ref HEAD' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-produce-exact-bash
+[2025-11-04T15:49:16] bash -lc 'git rev-parse --abbrev-ref HEAD' exited 128 in 165ms:
+HEAD
+
+ERROR
+fatal: ambiguous argument 'HEAD': unknown revision or path not in the working tree.
+Use '--' to separate paths from revisions, like this:
+'git <command> [<revision>...] -- [<file>...]'
+[2025-11-04T15:49:16] tokens used: 8,031
+
+[2025-11-04T15:50:08] thinking
+
+**Designing fence probe deployment script**
+**Finalizing deploy-and-probe script with summary**
+
+I’m wrapping up the bash script to run production deploy, probe specified endpoints, save full and filtered headers as artifacts, and print a clear summarized footer showing each endpoint’s HTTP status and Set-Cookie presence—also allowing endpoint customization via an environment variable. I’m carefully handling POSIX shell compatibility and printable output formatting so the user can run this script directly to deploy and verify the fence probe endpoints.
+**Preparing final script with robust summary parsing**
+
+I’m finalizing the script to safely parse and print the endpoint summary using a simple `while read` loop combined with `cut` for tab-separated fields, ensuring broad POSIX compatibility and minimal dependencies while keeping output clear and user-friendly. Now I’m ready to produce the complete exact bash script for deployment and fence probing.
+[2025-11-04T15:51:10] codex
+**Finalizing deploy-and-probe script with summary**
+
+I’m wrapping up the bash script to run production deploy, probe specified endpoints, save full and filtered headers as artifacts, and print a clear summarized footer showing each endpoint’s HTTP status and Set-Cookie presence—also allowing endpoint customization via an environment variable. I’m carefully handling POSIX shell compatibility and printable output formatting so the user can run this script directly to deploy and verify the fence probe endpoints.
+[2025-11-04T15:51:10] codex
+**Preparing final script with robust summary parsing**
+
+I’m finalizing the script to safely parse and print the endpoint summary using a simple `while read` loop combined with `cut` for tab-separated fields, ensuring broad POSIX compatibility and minimal dependencies while keeping output clear and user-friendly. Now I’m ready to produce the complete exact bash script for deployment and fence probing.
+
+[2025-11-04T15:51:10] thinking
+
+**Preparing final message and script**
+[2025-11-04T15:51:10] codex
+
+Ensures the repo is on `feat/pr3-preview-fence`, confirms the Vercel link, sets the preview secret, deploys to production, probes the three endpoints, and stores both full and filtered headers with a short status summary.
+
+```sh
+#!/bin/sh
+set -eu
+
+if [ "${TRACE:-}" = "1" ]; then
+  set -x
+fi
+
+require_cmd() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    echo "error: required command '$1' not found in PATH" >&2
+    exit 1
+  fi
+}
+
+require_cmd git
+require_cmd vercel
+require_cmd openssl
+require_cmd curl
+require_cmd awk
+require_cmd sed
+require_cmd cut
+require_cmd date
+require_cmd mkdir
+
+REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || {
+  echo "error: not inside a git repository" >&2
+  exit 1
+}
+cd "$REPO_ROOT"
+
+branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || printf "")
+if [ -z "$branch" ]; then
+  echo "error: unable to determine git branch" >&2
+  exit 1
+fi
+if [ "$branch" != "feat/pr3-preview-fence" ]; then
+  echo "error: repository must be on branch 'feat/pr3-preview-fence' (current: $branch)" >&2
+  exit 1
+fi
+
+if [ ! -f ".vercel/project.json" ]; then
+  echo "Vercel project not linked locally; attempting automatic link..."
+  vercel link --yes || {
+    echo "error: failed to link Vercel project; run 'vercel link' manually" >&2
+    exit 1
+  }
+fi
+if [ ! -f ".vercel/project.json" ]; then
+  echo "error: Vercel project still not linked (.vercel/project.json missing)" >&2
+  exit 1
+fi
+
+if ! vercel whoami >/dev/null 2>&1; then
+  echo "error: please authenticate with Vercel (run 'vercel login')" >&2
+  exit 1
+fi
+
+FENCE_SECRET="${PREVIEW_SECRET:-$(openssl rand -hex 16)}"
+PREVIEW_SECRET="$FENCE_SECRET"
+export PREVIEW_SECRET
+export FENCE_SECRET
+
+secret_length=$(printf "%s" "$PREVIEW_SECRET" | wc -c | awk '{print $1}')
+printf "Using PREVIEW_SECRET length: %s bytes\n" "$secret_length"
+
+printf "Pulling production configuration...\n"
+vercel pull --yes --environment=production
+
+printf "Deploying to production...\n"
+vercel deploy --prod --yes --env "PREVIEW_SECRET=$FENCE_SECRET"
+
+PROD_URL="https://tinyutils-eight.vercel.app"
+ENDPOINTS="${FENCE_ENDPOINTS:-/ /api/fence /api/fence/status}"
+timestamp=$(date -u +"%Y%m%d%H%M%SZ")
+artifact_dir="artifacts/pr3-fence-${timestamp}-prod"
+mkdir -p "$artifact_dir"
+
+summary_data=""
+printf "Starting fence probes against %s\n" "$PROD_URL"
+
+old_ifs=$IFS
+IFS=' '
+for endpoint in $ENDPOINTS; do
+  url="${PROD_URL}${endpoint}"
+  safe_name=$(printf "%s" "$endpoint" | sed 's#^/$#root#; s#[^A-Za-z0-9._-]#_#g')
+  headers_file="$artifact_dir/${safe_name}_headers.txt"
+  filtered_file="$artifact_dir/${safe_name}_filtered.txt"
+
+  printf "Probing %s ...\n" "$url"
+  curl -sS -D "$headers_file" -o /dev/null "$url"
+
+  tr -d '\r' < "$headers_file" | awk 'tolower($1)=="set-cookie:" || /^HTTP\//' > "$filtered_file"
+
+  status_line=$(tr -d '\r' < "$headers_file" | grep -m1 '^HTTP/')
+  status_code=""
+  if [ -n "$status_line" ]; then
+    status_code=$(printf "%s\n" "$status_line" | awk '{print $2}')
+  fi
+  if [ -z "$status_code" ]; then
+    status_code="N/A"
+  fi
+
+  if tr -d '\r' < "$headers_file" | grep -i '^Set-Cookie:' >/dev/null; then
+    cookie_flag="present"
+  else
+    cookie_flag="absent"
+  fi
+
+  summary_data="${summary_data}${endpoint}\t${status_code}\t${cookie_flag}\n"
+done
+IFS=$old_ifs
+
+summary_file="$artifact_dir/summary.tsv"
+printf "%b" "$summary_data" > "$summary_file"
+
+printf "\nFence probe summary\n"
+printf "Artifacts directory: %s\n" "$artifact_dir"
+printf "%-28s %-6s %-10s\n" "Endpoint" "Status" "Set-Cookie"
+printf "%-28s %-6s %-10s\n" "--------" "------" "----------"
+printf "%b" "$summary_data" | while IFS= read -r line; do
+  endpoint=$(printf "%s" "$line" | cut -f1)
+  status_code=$(printf "%s" "$line" | cut -f2)
+  cookie_flag=$(printf "%s" "$line" | cut -f3)
+  printf "%-28s %-6s %-10s\n" "$endpoint" "$status_code" "$cookie_flag"
+done
+
+printf "\nDone.\n"
+```
+
+Set `FENCE_ENDPOINTS` beforehand if you want different probe paths; otherwise it defaults to `/`, `/api/fence`, and `/api/fence/status`.
+[2025-11-04T15:51:17] tokens used: 19,803

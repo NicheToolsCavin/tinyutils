@@ -1,0 +1,1145 @@
+[2025-11-06T22:02:49] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-scan-repository-existing
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-06T22:02:49] User instructions:
+Context: Repository root: /Users/cav/dev/TinyUtils/tinyutils. We need to add python serverless endpoints (api/convert). Examine current api directory for conventions: languages used, frameworks, response schemas, secrets, etc.
+
+Agent: Scan the repository for existing serverless endpoints under api/. Summarize file names, handler signatures, and response format patterns. Note any utilities under api/_lib or similar. Provide a concise pattern summary.
+[2025-11-06T22:02:49] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-scan-repository-existing
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-06T22:02:49] User instructions:
+Context: Repository root: /Users/cav/dev/TinyUtils/tinyutils. We need to add python serverless endpoints (api/convert). Examine current api directory for conventions: languages used, frameworks, response schemas, secrets, etc.
+
+Agent: Scan the repository for existing serverless endpoints under api/. Summarize file names, handler signatures, and response format patterns. Note any utilities under api/_lib or similar. Provide a concise pattern summary.
+
+[2025-11-06T22:02:55] thinking
+
+**Preparing to scan repository structure**
+[2025-11-06T22:02:56] exec bash -lc ls in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-scan-repository-existing
+[2025-11-06T22:02:56] bash -lc ls succeeded in 98ms:
+[2025-11-06T22:02:56] tokens used: 842
+
+[2025-11-06T22:02:58] thinking
+
+**Investigating empty directory listing**
+[2025-11-06T22:02:59] exec bash -lc pwd in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-scan-repository-existing
+[2025-11-06T22:02:59] bash -lc pwd succeeded in 88ms:
+/Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-scan-repository-existing
+[2025-11-06T22:02:59] tokens used: 6,583
+
+[2025-11-06T22:03:00] thinking
+
+**Checking for symlinked directory**
+[2025-11-06T22:03:01] exec bash -lc 'ls -a' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-scan-repository-existing
+[2025-11-06T22:03:01] bash -lc 'ls -a' succeeded in 99ms:
+.
+..
+.git
+[2025-11-06T22:03:01] tokens used: 6,852
+
+[2025-11-06T22:03:04] thinking
+
+**Investigating repository structure and git status**
+[2025-11-06T22:03:04] exec bash -lc 'git status -sb' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-scan-repository-existing
+[2025-11-06T22:03:04] bash -lc 'git status -sb' succeeded in 143ms:
+## No commits yet on code-code-gpt-5-codex-scan-repository-existing
+[2025-11-06T22:03:04] tokens used: 7,231
+
+[2025-11-06T22:03:06] thinking
+
+**Investigating repository state**
+[2025-11-06T22:03:07] exec bash -lc ls in /Users/cav/.code/working/tinyutils/branches
+[2025-11-06T22:03:07] bash -lc ls succeeded in 111ms:
+code-code-draft-concise-acceptance
+code-code-draft-concise-description
+code-code-draft-pr3-description
+code-code-gpt-5-codex-inspect-four-diff
+code-code-gpt-5-codex-list-available-diff
+code-code-gpt-5-codex-list-scripts--lockfiles
+code-code-gpt-5-codex-locate-existing-fence-auth
+code-code-gpt-5-codex-parse-pr3-diff
+code-code-gpt-5-codex-prepare-compact-smoke
+code-code-gpt-5-codex-produce-concise-route
+code-code-gpt-5-codex-produce-exact-bash
+code-code-gpt-5-codex-produce-exact-commands
+code-code-gpt-5-codex-produce-per-diff-touched-file
+code-code-gpt-5-codex-propose-concrete-patch
+code-code-gpt-5-codex-scan-repository-existing
+code-code-gpt-5-codex-suggest-minimal-diffs
+code-code-gpt-5-report-current-node
+code-code-propose-exact-header
+code-gemini-2-5-pro-create-minimal-hello
+code-qwen-3-coder-search-repo-mentions
+[2025-11-06T22:03:07] tokens used: 7,505
+
+[2025-11-06T22:03:11] thinking
+
+**Verifying repository root access**
+[2025-11-06T22:03:11] exec bash -lc ls in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:03:11] bash -lc ls succeeded in 112ms:
+ads.txt
+ADSENSE_SETUP.md
+AGENTS.md
+api
+artifacts
+CHANGES-v1.3.0-rc2.txt
+CHANGES-v1.3.0-rc3.txt
+config
+data
+DEPLOY_PRODUCTION_CHECKLIST.md
+docs
+feedback.html
+filters
+fixtures
+guides
+index
+index.html
+keys
+launchd
+locks
+[2025-11-06T22:03:11] tokens used: 8,560
+
+[2025-11-06T22:03:13] thinking
+
+**Exploring the API directory structure**
+[2025-11-06T22:03:13] exec bash -lc 'ls api' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:03:13] bash -lc 'ls api' succeeded in 110ms:
+__init__.py
+__pycache__
+_lib
+check.js
+convert
+fence.js
+findreplace
+health.js
+metafetch.js
+sitemap-delta.js
+wayback-fixer.js
+[2025-11-06T22:03:13] tokens used: 9,078
+
+[2025-11-06T22:03:17] thinking
+
+**Reviewing serverless API structure**
+[2025-11-06T22:03:17] exec bash -lc 'ls api/_lib' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:03:17] bash -lc 'ls api/_lib' succeeded in 121ms:
+__init__.py
+__pycache__
+blob.py
+manifests.py
+pandoc_runner.py
+regex_tools.py
+text_clean.py
+utils.py
+[2025-11-06T22:03:17] tokens used: 9,468
+
+[2025-11-06T22:03:19] thinking
+
+**Examining serverless endpoint files**
+[2025-11-06T22:03:19] exec bash -lc "sed -n '1,200p' api/check.js" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:03:19] bash -lc "sed -n '1,200p' api/check.js" succeeded in 108ms:
+export const config = { runtime: 'edge' };
+
+function rid() {
+  return Math.random().toString(16).slice(2, 10);
+}
+
+function json(status, body, requestId) {
+  const headers = new Headers({
+    'content-type': 'application/json; charset=utf-8',
+    'cache-control': 'no-store'
+  });
+  if (requestId) headers.set('x-request-id', requestId);
+  return new Response(JSON.stringify(body), {
+    status,
+    headers
+  });
+}
+
+function jerr(status, code, message, detail, stage, requestId, metaExtras) {
+  const meta = {
+[2025-11-06T22:03:19] tokens used: 9,745
+
+[2025-11-06T22:03:21] thinking
+
+**Summarizing handler signature details**
+[2025-11-06T22:03:22] exec bash -lc 'rg -n "export default" -n api/check.js' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:03:22] bash -lc 'rg -n "export default" -n api/check.js' succeeded in 136ms:
+599:export default async function handler(req) {
+[2025-11-06T22:03:22] tokens used: 12,526
+
+[2025-11-06T22:03:23] thinking
+
+**Navigating to line 599**
+[2025-11-06T22:03:24] exec bash -lc "sed -n '599,780p' api/check.js" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:03:24] bash -lc "sed -n '599,780p' api/check.js" succeeded in 137ms:
+export default async function handler(req) {
+  const requestId = rid();
+  const startedAt = new Date();
+  let stage = 'normalize_input';
+  const setStage = (value) => {
+    stage = value;
+  };
+  let schedulerData = {
+    globalCap: MAX_SERVER_CONCURRENCY,
+    perOriginCap: PER_ORIGIN_CONCURRENCY,
+    globalMaxInFlightObserved: 0,
+    perOriginMaxObserved: {}
+  };
+
+  try {
+    if (req.method !== 'POST') {
+      return jerr(405, 'method_not_allowed', 'Only POST is supported', null, stage, requestId, { scheduler: schedulerData });
+    }
+
+    let rawBody = '';
+[2025-11-06T22:03:24] tokens used: 13,361
+
+[2025-11-06T22:03:25] thinking
+
+**Continuing to review response structure**
+[2025-11-06T22:03:26] exec bash -lc "sed -n '1120,1260p' api/check.js" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:03:26] bash -lc "sed -n '1120,1260p' api/check.js" succeeded in 144ms:
+[2025-11-06T22:03:26] tokens used: 16,108
+
+[2025-11-06T22:03:27] thinking
+
+**Checking file line count**
+[2025-11-06T22:03:28] exec bash -lc 'wc -l api/check.js' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:03:28] bash -lc 'wc -l api/check.js' succeeded in 145ms:
+    1088 api/check.js
+[2025-11-06T22:03:28] tokens used: 16,767
+
+[2025-11-06T22:03:30] thinking
+
+**Waiting for complete response**
+[2025-11-06T22:03:31] exec bash -lc "sed -n '980,1088p' api/check.js" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:03:31] bash -lc "sed -n '980,1088p' api/check.js" succeeded in 113ms:
+          const newCount = previousCount + 1;
+          const existingMax = perOriginMaxObserved.get(origin) || 0;
+          if (newCount > existingMax) {
+            perOriginMaxObserved.set(origin, newCount);
+          }
+          if (previousCount > 0) {
+            await sleep(randomJitterMs());
+          }
+          candidate = entry;
+          break;
+        }
+        if (!candidate) {
+          if (completed >= scheduledQueue.length) {
+            break;
+          }
+          await sleep(20);
+          continue;
+        }
+        try {
+          const result = await processItem(candidate);
+[2025-11-06T22:03:31] tokens used: 23,798
+
+[2025-11-06T22:03:34] thinking
+
+**Reviewing response structure and API endpoints**
+[2025-11-06T22:03:34] exec bash -lc "sed -n '1,200p' api/fence.js" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:03:34] bash -lc "sed -n '1,200p' api/fence.js" succeeded in 118ms:
+export const config = { runtime: 'edge' };
+
+const COOKIE_NAME = 'tu_preview_secret';
+const COOKIE_MAX_AGE = 60 * 60 * 24; // 24 hours
+
+function rid() {
+  return Math.random().toString(16).slice(2, 10);
+}
+
+function json(status, body, requestId, extraHeaders = {}) {
+  const headers = new Headers({
+    'content-type': 'application/json; charset=utf-8',
+    'cache-control': 'no-store'
+  });
+  if (requestId) headers.set('x-request-id', requestId);
+  for (const [key, value] of Object.entries(extraHeaders)) {
+    headers.set(key, value);
+  }
+  return new Response(JSON.stringify(body), { status, headers });
+}
+[2025-11-06T22:03:34] tokens used: 25,129
+
+[2025-11-06T22:03:37] thinking
+
+**Reviewing handler signature and response patterns**
+[2025-11-06T22:03:38] exec bash -lc "sed -n '1,200p' api/health.js" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:03:38] bash -lc "sed -n '1,200p' api/health.js" succeeded in 122ms:
+export const config = { runtime: 'edge' };
+
+export default async function handler() {
+  return new Response(JSON.stringify({ ok: true }), {
+    status: 200,
+    headers: {
+      'content-type': 'application/json; charset=utf-8',
+      'cache-control': 'no-store'
+    }
+  });
+}
+[2025-11-06T22:03:38] tokens used: 26,610
+
+[2025-11-06T22:03:40] thinking
+
+**Navigating to api/metafetch.js**
+[2025-11-06T22:03:40] exec bash -lc "sed -n '1,200p' api/metafetch.js" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:03:40] bash -lc "sed -n '1,200p' api/metafetch.js" succeeded in 141ms:
+export const config = { runtime: 'edge' };
+
+const UA = 'TinyUtils-DeadLinkChecker/1.0 (+https://tinyutils-eight.vercel.app; hello@tinyutils.net)';
+
+function rid() {
+  return Math.random().toString(16).slice(2, 10);
+}
+
+function json(status, body, requestId) {
+  const headers = new Headers({
+    'content-type': 'application/json; charset=utf-8',
+    'cache-control': 'no-store'
+  });
+  if (requestId) headers.set('x-request-id', requestId);
+  return new Response(JSON.stringify(body), { status, headers });
+}
+
+function isPrivateHost(hostname) {
+  const host = (hostname || '').toLowerCase();
+  if (!host) return true;
+[2025-11-06T22:03:40] tokens used: 26,884
+
+[2025-11-06T22:03:41] thinking
+
+**Noting response shape details**
+[2025-11-06T22:03:42] exec bash -lc "sed -n '1,200p' api/sitemap-delta.js" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:03:42] bash -lc "sed -n '1,200p' api/sitemap-delta.js" succeeded in 131ms:
+export const config = { runtime: 'edge' };
+
+const UA = 'TinyUtils-SitemapDelta/1.0 (+https://tinyutils-eight.vercel.app)';
+const HARD_CAP = 200;
+const CHILD_SITEMAPS_LIMIT = 50;
+const VERIFY_CONCURRENCY = 6;
+const GLOBAL_FETCH_CAP = 10;
+const PER_ORIGIN_FETCH_CAP = 2;
+
+function rid() {
+  return Math.random().toString(16).slice(2, 10);
+}
+
+function jsonResponse(status, payload, requestId) {
+  const headers = new Headers({
+    'content-type': 'application/json; charset=utf-8',
+    'cache-control': 'no-store'
+  });
+  if (requestId) headers.set('x-request-id', requestId);
+  return new Response(JSON.stringify(payload), { status, headers });
+[2025-11-06T22:03:42] tokens used: 28,305
+
+[2025-11-06T22:03:43] thinking
+
+**Searching for entrypoint export**
+[2025-11-06T22:03:44] exec bash -lc 'rg -n "export default" api/sitemap-delta.js' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:03:44] bash -lc 'rg -n "export default" api/sitemap-delta.js' succeeded in 131ms:
+358:export default async function handler(req) {
+[2025-11-06T22:03:44] tokens used: 30,516
+
+[2025-11-06T22:03:45] thinking
+
+**Requesting further snippet**
+[2025-11-06T22:03:46] exec bash -lc "sed -n '358,520p' api/sitemap-delta.js" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:03:46] bash -lc "sed -n '358,520p' api/sitemap-delta.js" succeeded in 125ms:
+export default async function handler(req) {
+  const requestId = requestIdFrom(req);
+
+  if (req.method !== 'POST') {
+    return jsonResponse(405, { error: 'method_not_allowed', details: { message: 'Only POST is supported' } }, requestId);
+  }
+
+  let parsed;
+  try {
+    parsed = await req.json();
+  } catch (error) {
+    return jsonResponse(400, { error: 'invalid_json', details: { message: error?.message || 'Invalid JSON' } }, requestId);
+  }
+
+  const body = parsed && typeof parsed === 'object' ? parsed : {};
+  const timeout = Math.min(30000, Math.max(1000, Number(body.timeout) || 10000));
+  const verify = !!body.verifyTargets;
+  const sameReg = body.sameRegDomainOnly !== false;
+  const notes = new Set();
+  const sitemapAUrlInput = readUrlModeInput(body.sitemapAUrl);
+[2025-11-06T22:03:46] tokens used: 30,667
+
+[2025-11-06T22:03:47] thinking
+
+**Describing response structure**
+[2025-11-06T22:03:48] exec bash -lc "sed -n '1,200p' api/wayback-fixer.js" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:03:48] bash -lc "sed -n '1,200p' api/wayback-fixer.js" succeeded in 108ms:
+export const config = { runtime: 'edge' };
+
+function rid() {
+  return Math.random().toString(16).slice(2, 10);
+}
+
+function json(status, body, requestId) {
+  const headers = new Headers({
+    'content-type': 'application/json; charset=utf-8',
+    'cache-control': 'no-store'
+  });
+  if (requestId) headers.set('x-request-id', requestId);
+  return new Response(JSON.stringify(body), { status, headers });
+}
+
+function jerr(status, message, note, requestId) {
+  return json(status, {
+    meta: {
+      error: message || null,
+      note: note || null,
+[2025-11-06T22:03:48] tokens used: 32,552
+
+[2025-11-06T22:03:50] thinking
+
+**Searching for return statements**
+[2025-11-06T22:03:51] exec bash -lc "sed -n '360,520p' api/wayback-fixer.js" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:03:51] bash -lc "sed -n '360,520p' api/wayback-fixer.js" succeeded in 123ms:
+        invalid: invalidCount,
+        duplicates: duplicateCount
+      },
+      concurrency: {
+        requested: maxConc,
+        effective: workerCount,
+        perOriginCap: PER_ORIGIN_FETCH_CAP,
+        globalCap
+      },
+      network: {
+        timeoutMs: timeout,
+        retries: retryCount
+      },
+      spnLimit: SPN_CAP
+    };
+
+    meta.requestId = requestId;
+    return json(200, { meta, results }, requestId);
+  } catch (error) {
+    return jerr(500, String(error).slice(0, 200), error?.note || null, requestId);
+[2025-11-06T22:03:51] tokens used: 34,770
+
+[2025-11-06T22:03:52] thinking
+
+**Planning directory inspection**
+[2025-11-06T22:03:54] exec bash -lc 'ls api/convert' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:03:54] bash -lc 'ls api/convert' succeeded in 135ms:
+__init__.py
+__pycache__
+index.py
+[2025-11-06T22:03:54] tokens used: 35,575
+
+[2025-11-06T22:03:56] thinking
+
+**Opening convert API file**
+[2025-11-06T22:03:56] exec bash -lc "sed -n '1,200p' api/convert/index.py" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:03:57] bash -lc "sed -n '1,200p' api/convert/index.py" succeeded in 140ms:
+"""Universal document converter endpoint."""
+from __future__ import annotations
+
+import json
+import zipfile
+from pathlib import Path
+from typing import List, Optional
+
+import magic
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field, validator
+
+from .._lib import blob
+from .._lib.manifests import build_snippets, collect_headings, media_manifest
+from .._lib.pandoc_runner import (
+    DEFAULT_OUTPUT_FORMAT,
+    apply_lua_filters,
+    convert_to_markdown,
+    get_pandoc_version,
+)
+[2025-11-06T22:03:57] tokens used: 36,502
+
+[2025-11-06T22:03:58] thinking
+
+**Locating FastAPI utilities**
+[2025-11-06T22:03:58] exec bash -lc 'ls api/findreplace' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:03:58] bash -lc 'ls api/findreplace' succeeded in 140ms:
+__init__.py
+__pycache__
+apply.py
+preview.py
+[2025-11-06T22:03:58] tokens used: 38,064
+
+[2025-11-06T22:04:00] thinking
+
+**Preparing to open and preview**
+[2025-11-06T22:04:00] exec bash -lc "sed -n '1,200p' api/findreplace/preview.py" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:04:00] bash -lc "sed -n '1,200p' api/findreplace/preview.py" succeeded in 137ms:
+"""Find & replace preview endpoint."""
+from __future__ import annotations
+
+from pathlib import Path
+from typing import List, Optional
+
+import chardet
+import magic
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field
+
+from .._lib import blob
+from .._lib.regex_tools import (
+    RegexTimeoutError,
+    TooManyMatchesError,
+    compile_expression,
+    scan_text,
+)
+from .._lib.utils import (
+    DownloadMetadata,
+[2025-11-06T22:04:00] tokens used: 38,338
+
+[2025-11-06T22:04:02] thinking
+
+**Applying endpoint**
+[2025-11-06T22:04:03] exec bash -lc "sed -n '1,200p' api/findreplace/apply.py" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:04:03] bash -lc "sed -n '1,200p' api/findreplace/apply.py" succeeded in 126ms:
+"""Find & replace apply endpoint."""
+from __future__ import annotations
+
+import difflib
+from pathlib import Path
+from typing import List, Optional
+
+import chardet
+import magic
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field
+
+from .._lib import blob
+from .._lib.regex_tools import (
+    RegexTimeoutError,
+    TooManyMatchesError,
+    apply_replacement,
+    compile_expression,
+)
+from .._lib.utils import (
+[2025-11-06T22:04:03] tokens used: 39,595
+
+[2025-11-06T22:04:06] thinking
+
+**Reviewing FastAPI endpoints and internal libraries**
+[2025-11-06T22:04:07] exec bash -lc "sed -n '1,200p' api/_lib/blob.py" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:04:07] bash -lc "sed -n '1,200p' api/_lib/blob.py" succeeded in 186ms:
+"""Helpers for downloading inputs and uploading outputs.
+
+The real blob integration will eventually use Vercel Blob signed URLs.
+For now we provide a safe data-URL fallback so responses remain self-contained.
+"""
+from __future__ import annotations
+
+import base64
+import os
+import re
+from pathlib import Path
+from typing import Optional, Tuple
+from urllib.parse import urlparse
+
+import requests
+
+DEFAULT_TIMEOUT = float(os.getenv("BLOB_DOWNLOAD_TIMEOUT", "30"))
+USER_AGENT = os.getenv("TINYUTILS_BLOB_UA", "tinyutils-backend/0.1")
+
+
+[2025-11-06T22:04:07] tokens used: 41,155
+
+[2025-11-06T22:04:09] thinking
+
+**Summarizing manifest handling**
+[2025-11-06T22:04:09] exec bash -lc "sed -n '1,200p' api/_lib/manifests.py" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:04:09] bash -lc "sed -n '1,200p' api/_lib/manifests.py" succeeded in 151ms:
+"""Manifest helpers for converter outputs and previews."""
+from __future__ import annotations
+
+import difflib
+from pathlib import Path
+from typing import Dict, List, Optional
+
+from .utils import PREVIEW_HEADINGS_N, PREVIEW_SNIPPETS_M
+
+
+def collect_headings(markdown: str) -> List[str]:
+    headings: List[str] = []
+    for line in markdown.splitlines():
+        if line.startswith("#"):
+            headings.append(line.strip())
+            if len(headings) >= PREVIEW_HEADINGS_N:
+                break
+    return headings
+
+
+[2025-11-06T22:04:09] tokens used: 42,120
+
+[2025-11-06T22:04:12] thinking
+
+**Identifying required modules**
+[2025-11-06T22:04:13] exec bash -lc "sed -n '1,200p' api/_lib/pandoc_runner.py" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:04:13] bash -lc "sed -n '1,200p' api/_lib/pandoc_runner.py" succeeded in 146ms:
+"""Pandoc runner utilities for conversions and Lua-filter passes."""
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Iterable, List, Optional
+
+import pypandoc
+
+
+class PandocError(RuntimeError):
+    """Raised when a pandoc conversion fails."""
+
+
+DEFAULT_OUTPUT_FORMAT = "gfm+pipe_tables+footnotes+tex_math_dollars"
+BASE_ARGS = ["--atx-headers", "--wrap=none", "--reference-links"]
+FILTERS = [
+    "filters/softbreak_to_space.lua",
+    "filters/strip_empty_spans.lua",
+    "filters/normalize_lists.lua",
+]
+[2025-11-06T22:04:13] tokens used: 43,502
+
+[2025-11-06T22:04:15] thinking
+
+**Identifying dependency need**
+[2025-11-06T22:04:15] exec bash -lc "sed -n '1,200p' api/_lib/regex_tools.py" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:04:16] bash -lc "sed -n '1,200p' api/_lib/regex_tools.py" succeeded in 126ms:
+"""Helpers for compiling and applying find/replace expressions safely."""
+from __future__ import annotations
+
+import os
+from bisect import bisect_right
+from dataclasses import dataclass
+from typing import Iterable, List, Sequence, Tuple
+
+import regex
+
+DEFAULT_MAX_MATCHES = int(os.getenv("MAX_MATCHES_PER_FILE", "50000"))
+DEFAULT_SAMPLE_LIMIT = int(os.getenv("PREVIEW_SNIPPETS_M", "4"))
+DEFAULT_CONTEXT_LINES = int(os.getenv("PREVIEW_CONTEXT_LINES", "2"))
+DEFAULT_REGEX_TIMEOUT = float(os.getenv("REGEX_TIMEOUT_SECONDS", "1.5"))
+
+
+class RegexTimeoutError(RuntimeError):
+    """Raised when regex evaluation times out."""
+
+
+[2025-11-06T22:04:16] tokens used: 44,327
+
+[2025-11-06T22:04:17] thinking
+
+**Identifying missing module**
+[2025-11-06T22:04:17] exec bash -lc "sed -n '1,200p' api/_lib/text_clean.py" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:04:18] bash -lc "sed -n '1,200p' api/_lib/text_clean.py" succeeded in 165ms:
+"""Unicode and whitespace cleanup utilities for Markdown output."""
+from __future__ import annotations
+
+import re
+import unicodedata
+from dataclasses import dataclass
+
+ZERO_WIDTH_RE = re.compile("[\u200B\u200C\u200D\uFEFF]")
+MULTI_BLANK_RE = re.compile(r"\n{3,}")
+
+
+@dataclass
+class CleanupStats:
+    softbreaks_replaced: int = 0
+    nbsp_replaced: int = 0
+    zero_width_removed: int = 0
+
+
+def normalise_markdown(
+    text: str,
+[2025-11-06T22:04:18] tokens used: 46,564
+
+[2025-11-06T22:04:19] thinking
+
+**Identifying required utility file**
+[2025-11-06T22:04:19] exec bash -lc "sed -n '1,200p' api/_lib/utils.py" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:04:19] bash -lc "sed -n '1,200p' api/_lib/utils.py" succeeded in 133ms:
+"""Shared utility helpers for TinyUtils Python backends."""
+from __future__ import annotations
+
+import json
+import logging
+import os
+import tempfile
+import uuid
+from contextlib import contextmanager
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, Iterator, List, Optional
+
+DEFAULT_MAX_FILE_MB = 100
+DEFAULT_MAX_BATCH_MB = 1024
+DEFAULT_PREVIEW_HEADINGS = 8
+DEFAULT_PREVIEW_SNIPPETS = 4
+DEFAULT_DIFF_TRUNCATE_KB = 256
+
+MAX_FILE_MB = int(os.getenv("MAX_FILE_MB", str(DEFAULT_MAX_FILE_MB)))
+[2025-11-06T22:04:19] tokens used: 47,098
+
+[2025-11-06T22:04:21] thinking
+
+**Planning library initialization files**
+[2025-11-06T22:04:22] exec bash -lc "sed -n '1,200p' api/_lib/__init__.py" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:04:22] bash -lc "sed -n '1,200p' api/_lib/__init__.py" succeeded in 141ms:
+"""Shared helpers for TinyUtils Python endpoints."""
+[2025-11-06T22:04:22] tokens used: 48,066
+
+[2025-11-06T22:04:24] thinking
+
+**Checking API initialization details**
+[2025-11-06T22:04:25] exec bash -lc "sed -n '1,200p' api/__init__.py" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:04:25] bash -lc "sed -n '1,200p' api/__init__.py" succeeded in 129ms:
+# tinyutils Python API package marker.
+[2025-11-06T22:04:25] tokens used: 48,272
+
+[2025-11-06T22:04:38] thinking
+
+**Summarizing API endpoints and code patterns**
+[2025-11-06T22:04:39] exec bash -lc "nl -ba api/check.js | sed -n '1,60p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:04:40] bash -lc "nl -ba api/check.js | sed -n '1,60p'" succeeded in 167ms:
+     1	export const config = { runtime: 'edge' };
+     2	
+     3	function rid() {
+     4	  return Math.random().toString(16).slice(2, 10);
+     5	}
+     6	
+     7	function json(status, body, requestId) {
+     8	  const headers = new Headers({
+     9	    'content-type': 'application/json; charset=utf-8',
+    10	    'cache-control': 'no-store'
+    11	  });
+    12	  if (requestId) headers.set('x-request-id', requestId);
+    13	  return new Response(JSON.stringify(body), {
+    14	    status,
+    15	    headers
+    16	  });
+    17	}
+    18	
+    19	function jerr(status, code, message, detail, stage, requestId, metaExtras) {
+    20	  const meta = {
+[2025-11-06T22:04:40] tokens used: 49,306
+
+[2025-11-06T22:04:41] thinking
+
+**Extracting handler summary lines**
+[2025-11-06T22:04:42] exec bash -lc "nl -ba api/check.js | sed -n '599,760p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:04:42] bash -lc "nl -ba api/check.js | sed -n '599,760p'" succeeded in 139ms:
+   599	export default async function handler(req) {
+   600	  const requestId = rid();
+   601	  const startedAt = new Date();
+   602	  let stage = 'normalize_input';
+   603	  const setStage = (value) => {
+   604	    stage = value;
+   605	  };
+   606	  let schedulerData = {
+   607	    globalCap: MAX_SERVER_CONCURRENCY,
+   608	    perOriginCap: PER_ORIGIN_CONCURRENCY,
+   609	    globalMaxInFlightObserved: 0,
+   610	    perOriginMaxObserved: {}
+   611	  };
+   612	
+   613	  try {
+   614	    if (req.method !== 'POST') {
+   615	      return jerr(405, 'method_not_allowed', 'Only POST is supported', null, stage, requestId, { scheduler: schedulerData });
+   616	    }
+   617	
+   618	    let rawBody = '';
+[2025-11-06T22:04:42] tokens used: 50,229
+
+[2025-11-06T22:04:44] thinking
+
+**Locating lines near 1010**
+[2025-11-06T22:04:44] exec bash -lc "nl -ba api/check.js | sed -n '960,1040p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:04:45] bash -lc "nl -ba api/check.js | sed -n '960,1040p'" succeeded in 160ms:
+   960	    const responses = new Array(queue.length);
+   961	    const perOriginInFlight = new Map();
+   962	    let globalInFlight = 0;
+   963	    let completed = 0;
+   964	
+   965	    async function worker() {
+   966	      while (true) {
+   967	        let candidate = null;
+   968	        for (const entry of scheduledQueue) {
+   969	          if (entry.done || entry.running) continue;
+   970	          const origin = entry.origin || 'unknown';
+   971	          const inFlightOrigin = perOriginInFlight.get(origin) || 0;
+   972	          if (inFlightOrigin >= PER_ORIGIN_CONCURRENCY) continue;
+   973	          entry.running = true;
+   974	          const previousCount = inFlightOrigin;
+   975	          perOriginInFlight.set(origin, previousCount + 1);
+   976	          globalInFlight += 1;
+   977	          if (schedulerBase.globalMaxInFlightObserved < globalInFlight) {
+   978	            schedulerBase.globalMaxInFlightObserved = globalInFlight;
+   979	          }
+[2025-11-06T22:04:45] tokens used: 52,802
+
+[2025-11-06T22:04:46] thinking
+
+**Checking specific lines in file**
+[2025-11-06T22:04:47] exec bash -lc "nl -ba api/check.js | sed -n '1040,1088p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:04:47] bash -lc "nl -ba api/check.js | sed -n '1040,1088p'" succeeded in 176ms:
+  1040	    }
+  1041	
+  1042	    const totalResults = resolvedResponses.length + prefilled.length;
+  1043	    let truncated = queue.length >= MAX_URLS && (inputCount > (queue.length + prefilled.length));
+  1044	    if (sitemapInfo?.truncated) truncated = true;
+  1045	
+  1046	    const endedAt = new Date();
+  1047	    const durationMs = endedAt.getTime() - startedAt.getTime();
+  1048	
+  1049	    setStage('done');
+  1050	
+  1051	    const meta = {
+  1052	      requestId,
+  1053	      startedAtIso: startedAt.toISOString(),
+  1054	      endedAtIso: endedAt.toISOString(),
+  1055	      durationMs,
+  1056	      robotsStatus,
+  1057	      ...(robotsStatus !== 'applied' ? { robotsReason: robotsReason || null } : {}),
+  1058	      runTimestamp: startedAt.toISOString(),
+  1059	      mode: body.mode || 'list',
+[2025-11-06T22:04:47] tokens used: 54,094
+
+[2025-11-06T22:04:49] thinking
+
+**Searching for environment variable usage**
+[2025-11-06T22:04:50] exec bash -lc "rg -n \"process\\.env\" -n api/check.js" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:04:50] bash -lc "rg -n \"process\\.env\" -n api/check.js" exited 1 in 127ms:
+ERROR
+[2025-11-06T22:04:50] tokens used: 55,020
+
+[2025-11-06T22:04:52] thinking
+
+**Checking imports and key lines in api/convert**
+[2025-11-06T22:04:53] exec bash -lc "nl -ba api/convert/index.py | sed -n '1,200p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:04:53] bash -lc "nl -ba api/convert/index.py | sed -n '1,200p'" succeeded in 129ms:
+     1	"""Universal document converter endpoint."""
+     2	from __future__ import annotations
+     3	
+     4	import json
+     5	import zipfile
+     6	from pathlib import Path
+     7	from typing import List, Optional
+     8	
+     9	import magic
+    10	from fastapi import FastAPI, HTTPException
+    11	from pydantic import BaseModel, Field, validator
+    12	
+    13	from .._lib import blob
+    14	from .._lib.manifests import build_snippets, collect_headings, media_manifest
+    15	from .._lib.pandoc_runner import (
+    16	    DEFAULT_OUTPUT_FORMAT,
+    17	    apply_lua_filters,
+    18	    convert_to_markdown,
+    19	    get_pandoc_version,
+    20	)
+[2025-11-06T22:04:53] tokens used: 55,561
+
+[2025-11-06T22:04:57] thinking
+
+**Identifying response structure details**
+[2025-11-06T22:04:58] exec bash -lc "nl -ba api/findreplace/preview.py | sed -n '1,200p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:04:58] bash -lc "nl -ba api/findreplace/preview.py | sed -n '1,200p'" succeeded in 125ms:
+     1	"""Find & replace preview endpoint."""
+     2	from __future__ import annotations
+     3	
+     4	from pathlib import Path
+     5	from typing import List, Optional
+     6	
+     7	import chardet
+     8	import magic
+     9	from fastapi import FastAPI, HTTPException
+    10	from pydantic import BaseModel, Field
+    11	
+    12	from .._lib import blob
+    13	from .._lib.regex_tools import (
+    14	    RegexTimeoutError,
+    15	    TooManyMatchesError,
+    16	    compile_expression,
+    17	    scan_text,
+    18	)
+    19	from .._lib.utils import (
+    20	    DownloadMetadata,
+[2025-11-06T22:04:58] tokens used: 58,301
+
+[2025-11-06T22:05:01] thinking
+
+**Applying changes near file bottom**
+[2025-11-06T22:05:02] exec bash -lc "nl -ba api/findreplace/apply.py | sed -n '1,200p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:05:02] bash -lc "nl -ba api/findreplace/apply.py | sed -n '1,200p'" succeeded in 129ms:
+     1	"""Find & replace apply endpoint."""
+     2	from __future__ import annotations
+     3	
+     4	import difflib
+     5	from pathlib import Path
+     6	from typing import List, Optional
+     7	
+     8	import chardet
+     9	import magic
+    10	from fastapi import FastAPI, HTTPException
+    11	from pydantic import BaseModel, Field
+    12	
+    13	from .._lib import blob
+    14	from .._lib.regex_tools import (
+    15	    RegexTimeoutError,
+    16	    TooManyMatchesError,
+    17	    apply_replacement,
+    18	    compile_expression,
+    19	)
+    20	from .._lib.utils import (
+[2025-11-06T22:05:02] tokens used: 87,723
+
+[2025-11-06T22:05:18] thinking
+
+**Summarizing API directory structure and patterns**
+
+I'm gathering details about the API folder, including Node serverless endpoints and Python FastAPI apps. I'll note key files like `api/fence.js`, `api/convert`, and `api/findreplace`, and describe their config, response patterns, environment variables, and helper usage. I want to outline the `_lib` utilities and how they tie into these endpoints, including info on headers, cookies, and response formats. To organize this clearly, I might use bullet points or a markdown table referencing files and their roles, including request and response structures. I'll also collect line number info for precise references in Node files like `api/fence.js`. This should provide a thorough summary of the API folder essentials.
+[2025-11-06T22:05:20] exec bash -lc "nl -ba api/fence.js | sed -n '1,240p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:05:20] bash -lc "nl -ba api/fence.js | sed -n '1,240p'" succeeded in 134ms:
+     1	export const config = { runtime: 'edge' };
+     2	
+     3	const COOKIE_NAME = 'tu_preview_secret';
+     4	const COOKIE_MAX_AGE = 60 * 60 * 24; // 24 hours
+     5	
+     6	function rid() {
+     7	  return Math.random().toString(16).slice(2, 10);
+     8	}
+     9	
+    10	function json(status, body, requestId, extraHeaders = {}) {
+    11	  const headers = new Headers({
+    12	    'content-type': 'application/json; charset=utf-8',
+    13	    'cache-control': 'no-store'
+    14	  });
+    15	  if (requestId) headers.set('x-request-id', requestId);
+    16	  for (const [key, value] of Object.entries(extraHeaders)) {
+    17	    headers.set(key, value);
+    18	  }
+    19	  return new Response(JSON.stringify(body), { status, headers });
+    20	}
+[2025-11-06T22:05:20] tokens used: 90,631
+
+[2025-11-06T22:05:22] thinking
+
+**Checking for metafetch.js file**
+[2025-11-06T22:05:24] exec bash -lc "nl -ba api/metafetch.js | sed -n '1,200p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:05:24] bash -lc "nl -ba api/metafetch.js | sed -n '1,200p'" succeeded in 127ms:
+     1	export const config = { runtime: 'edge' };
+     2	
+     3	const UA = 'TinyUtils-DeadLinkChecker/1.0 (+https://tinyutils-eight.vercel.app; hello@tinyutils.net)';
+     4	
+     5	function rid() {
+     6	  return Math.random().toString(16).slice(2, 10);
+     7	}
+     8	
+     9	function json(status, body, requestId) {
+    10	  const headers = new Headers({
+    11	    'content-type': 'application/json; charset=utf-8',
+    12	    'cache-control': 'no-store'
+    13	  });
+    14	  if (requestId) headers.set('x-request-id', requestId);
+    15	  return new Response(JSON.stringify(body), { status, headers });
+    16	}
+    17	
+    18	function isPrivateHost(hostname) {
+    19	  const host = (hostname || '').toLowerCase();
+    20	  if (!host) return true;
+[2025-11-06T22:05:24] tokens used: 92,601
+
+[2025-11-06T22:05:26] thinking
+
+**Extracting line numbers for sitemap-delta.js**
+[2025-11-06T22:05:27] exec bash -lc "nl -ba api/sitemap-delta.js | sed -n '1,80p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:05:27] bash -lc "nl -ba api/sitemap-delta.js | sed -n '1,80p'" succeeded in 132ms:
+     1	export const config = { runtime: 'edge' };
+     2	
+     3	const UA = 'TinyUtils-SitemapDelta/1.0 (+https://tinyutils-eight.vercel.app)';
+     4	const HARD_CAP = 200;
+     5	const CHILD_SITEMAPS_LIMIT = 50;
+     6	const VERIFY_CONCURRENCY = 6;
+     7	const GLOBAL_FETCH_CAP = 10;
+     8	const PER_ORIGIN_FETCH_CAP = 2;
+     9	
+    10	function rid() {
+    11	  return Math.random().toString(16).slice(2, 10);
+    12	}
+    13	
+    14	function jsonResponse(status, payload, requestId) {
+    15	  const headers = new Headers({
+    16	    'content-type': 'application/json; charset=utf-8',
+    17	    'cache-control': 'no-store'
+    18	  });
+    19	  if (requestId) headers.set('x-request-id', requestId);
+    20	  return new Response(JSON.stringify(payload), { status, headers });
+[2025-11-06T22:05:27] tokens used: 95,244
+
+[2025-11-06T22:05:29] thinking
+
+**Extracting final response lines**
+[2025-11-06T22:05:30] exec bash -lc "nl -ba api/sitemap-delta.js | sed -n '358,520p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:05:30] bash -lc "nl -ba api/sitemap-delta.js | sed -n '358,520p'" succeeded in 127ms:
+   358	export default async function handler(req) {
+   359	  const requestId = requestIdFrom(req);
+   360	
+   361	  if (req.method !== 'POST') {
+   362	    return jsonResponse(405, { error: 'method_not_allowed', details: { message: 'Only POST is supported' } }, requestId);
+   363	  }
+   364	
+   365	  let parsed;
+   366	  try {
+   367	    parsed = await req.json();
+   368	  } catch (error) {
+   369	    return jsonResponse(400, { error: 'invalid_json', details: { message: error?.message || 'Invalid JSON' } }, requestId);
+   370	  }
+   371	
+   372	  const body = parsed && typeof parsed === 'object' ? parsed : {};
+   373	  const timeout = Math.min(30000, Math.max(1000, Number(body.timeout) || 10000));
+   374	  const verify = !!body.verifyTargets;
+   375	  const sameReg = body.sameRegDomainOnly !== false;
+   376	  const notes = new Set();
+   377	  const sitemapAUrlInput = readUrlModeInput(body.sitemapAUrl);
+[2025-11-06T22:05:30] tokens used: 96,622
+
+[2025-11-06T22:05:32] thinking
+
+**Checking for api/health.js content**
+[2025-11-06T22:05:32] exec bash -lc 'nl -ba api/health.js' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:05:32] bash -lc 'nl -ba api/health.js' succeeded in 114ms:
+     1	export const config = { runtime: 'edge' };
+     2	
+     3	export default async function handler() {
+     4	  return new Response(JSON.stringify({ ok: true }), {
+     5	    status: 200,
+     6	    headers: {
+     7	      'content-type': 'application/json; charset=utf-8',
+     8	      'cache-control': 'no-store'
+     9	    }
+    10	  });
+    11	}
+[2025-11-06T22:05:32] tokens used: 99,120
+
+[2025-11-06T22:05:34] thinking
+
+**Noting required API files**
+[2025-11-06T22:05:35] exec bash -lc "nl -ba api/wayback-fixer.js | sed -n '1,200p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:05:35] bash -lc "nl -ba api/wayback-fixer.js | sed -n '1,200p'" succeeded in 165ms:
+     1	export const config = { runtime: 'edge' };
+     2	
+     3	function rid() {
+     4	  return Math.random().toString(16).slice(2, 10);
+     5	}
+     6	
+     7	function json(status, body, requestId) {
+     8	  const headers = new Headers({
+     9	    'content-type': 'application/json; charset=utf-8',
+    10	    'cache-control': 'no-store'
+    11	  });
+    12	  if (requestId) headers.set('x-request-id', requestId);
+    13	  return new Response(JSON.stringify(body), { status, headers });
+    14	}
+    15	
+    16	function jerr(status, message, note, requestId) {
+    17	  return json(status, {
+    18	    meta: {
+    19	      error: message || null,
+    20	      note: note || null,
+[2025-11-06T22:05:35] tokens used: 99,413
+
+[2025-11-06T22:05:38] thinking
+
+**Preparing closing references**
+[2025-11-06T22:05:38] exec bash -lc "nl -ba api/wayback-fixer.js | sed -n '320,420p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:05:38] bash -lc "nl -ba api/wayback-fixer.js | sed -n '320,420p'" succeeded in 120ms:
+   320	            noteParts.push('retry_1');
+   321	            retryCount += 1;
+   322	          }
+   323	          if (!noteParts.length) noteParts.push('network_error');
+   324	          results.push({ url: item.url, snapshotUrl: '', snapshotTs: '', verify: null, note: noteParts.join('|') || null });
+   325	        } finally {
+   326	          if (acquired) {
+   327	            globalInFlight = Math.max(0, globalInFlight - 1);
+   328	            const remaining = (perOriginInFlight.get(originKey) || 0) - 1;
+   329	            if (remaining > 0) {
+   330	              perOriginInFlight.set(originKey, remaining);
+   331	            } else {
+   332	              perOriginInFlight.delete(originKey);
+   333	            }
+   334	          }
+   335	        }
+   336	      }
+   337	    })()) : [];
+   338	
+   339	    await Promise.all(workers);
+[2025-11-06T22:05:38] tokens used: 102,744
+
+[2025-11-06T22:05:54] thinking
+
+**Summarizing API directory structure and usage**
+
+I'm gathering detailed notes on the various API files, including concurrency use in `api/check.js`, key `_lib` utilities for blob handling, conversions, text processing, and logging, plus relevant environment variables like tokens and limits. I'll organize this info into sections on Node (Edge) and Python (FastAPI) endpoints, listing key files, runtimes, and patterns; also highlighting secrets and runtime details to guide adding new Python serverless endpoints like `api/convert`. This overview will balance thoroughness with clarity, using bullets and tables where helpful.
+[2025-11-06T22:05:57] exec bash -lc "rg -n \"process\\.env\" api -g\"*.js\"" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T22:05:57] bash -lc "rg -n \"process\\.env\" api -g\"*.js\"" succeeded in 136ms:
+api/fence.js:53:    const expectedSecret = (process.env.PREVIEW_SECRET || '').trim();
+[2025-11-06T22:05:57] tokens used: 104,591
+
+[2025-11-06T22:06:45] thinking
+
+**Summarizing API endpoints and conventions**
+
+I’m gathering detailed notes on both the Node (Edge) and Python (FastAPI) APIs, including specific files, handler signatures, environment variable use, libraries involved, request methods, response schemas, concurrency handling, and error patterns. I plan to organize this into clear sections: Edge JavaScript functions with file and line refs, Python FastAPI endpoints similarly referenced, shared Python utilities under `_lib`, and finish with a concise pattern summary highlighting common conventions for new endpoints. This thorough overview will help ensure any new Python serverless endpoint aligns with existing practices and follows the expected structure and middleware usage.
+[2025-11-06T22:06:47] codex
+
+**Edge JavaScript Functions**
+- `api/check.js:1` declares an Edge runtime Dead Link Checker whose `export default async function handler(req)` ( `api/check.js:599`) only accepts POST, fans out URL checks/sitemap discovery, and responds with `{ ok, requestId, stage, meta, rows }` via the shared `json()` helper that sets `cache-control: no-store` and `x-request-id` ( `api/check.js:7-33`, `api/check.js:1080` ). Errors are standardized through `jerr()` with `meta.detail` plus scheduler metadata ( `api/check.js:19-33`, `api/check.js:1082-1086` ).
+- `api/fence.js:1` is an Edge proxy/bouncer; `handler(req)` ( `api/fence.js:47` ) checks `process.env.PREVIEW_SECRET` plus cookies/headers/query tokens ( `api/fence.js:53-70` ), returns `{ ok:false, code:'preview_required', … }` when locked ( `api/fence.js:73-80` ), and otherwise forwards the request while forcing `cache-control: no-store` and optional `set-cookie` for `tu_preview_secret` ( `api/fence.js:101-128` ).
+- `api/health.js:1` exposes `handler()` ( `api/health.js:3` ) returning `{"ok":true}` with no-store headers, useful as a health probe.
+- `api/metafetch.js:1` runs Edge-side metadata fetching; `handler(req)` ( `api/metafetch.js:83` ) expects POST `{url}`, normalizes/public-host checks ( `api/metafetch.js:18-58` ), fetches HTML with retry ( `api/metafetch.js:64-81` ), and returns `{ title, description, meta: { requestId } }` or `{ error, meta }` ( `api/metafetch.js:86-103` ).
+- `api/sitemap-delta.js:1` compares two sitemaps; its handler ( `api/sitemap-delta.js:358` ) parses JSON, enforces caps/timeouts, expands sitemap indexes, and responds with `{ meta, added, removed, pairs, unmapped, rules }` ( `api/sitemap-delta.js:493-519` ) or `{ error, details, meta, … }` for client/server faults. Request IDs come either from `x-request-id` or a random generator ( `api/sitemap-delta.js:23-29` ).
+- `api/wayback-fixer.js:1` is another Edge POST handler ( `api/wayback-fixer.js:164` ) that normalizes URL lists, queries the Wayback Machine, optionally queues Save Page Now calls, and returns `{ meta, results }` ( `api/wayback-fixer.js:344-377` ) or `jerr()` envelopes on failure ( `api/wayback-fixer.js:16-25`, `api/wayback-fixer.js:378-380` ).
+
+**Python FastAPI Endpoints**
+- `api/convert/index.py:32` instantiates `FastAPI`; `@app.post("/") def convert(request: ConvertRequest)` ( `api/convert/index.py:75` ) downloads a single blob via `_lib.blob`, runs Pandoc + Lua filters + Unicode cleanup, uploads outputs, and responds with `{ jobId, toolVersions, outputs, preview, logs, errors }` ( `api/convert/index.py:155-162` ).
+- `api/findreplace/preview.py:29` defines another FastAPI app; `@app.post("/") def preview(request: PreviewRequest)` ( `api/findreplace/preview.py:69` ) downloads blobs, runs regex scans with sampling, and returns `{ jobId, files:[{path, encoding, matchCount, samples}], errors, logs }` ( `api/findreplace/preview.py:144-149` ).
+- `api/findreplace/apply.py:31` houses the apply worker; `@app.post("/") def apply(request: ApplyRequest)` ( `api/findreplace/apply.py:87` ) performs streaming replacements, uploads modified files, and returns `{ jobId, outputs:[{path,size,blobUrl}], diffs, errors, logs }` ( `api/findreplace/apply.py:166-172` ).
+
+**Shared Python Utilities (`api/_lib/…`)**
+- `blob.py:1-78` centralizes downloads/uploads, supporting `data:` URLs and HTTP(S) with `requests`, honoring `BLOB_DOWNLOAD_TIMEOUT`, `TINYUTILS_BLOB_UA`, and placeholder `BLOB_READ_WRITE_TOKEN`.
+- `manifests.py:1-42` builds heading/snippet/media manifests used in converter previews.
+- `pandoc_runner.py:1-58` wraps `pypandoc` conversions plus Lua filters and exposes `DEFAULT_OUTPUT_FORMAT`.
+- `regex_tools.py:1-120` compiles regex/literal patterns with timeouts, counts limits, sampling utilities, and raises `RegexTimeoutError`/`TooManyMatchesError`.
+- `text_clean.py:1-44` normalizes Markdown (NFC, trimming, zero-width removal) and tracks cleanup stats.
+- `utils.py:1-91` provides config knobs via env (`MAX_FILE_MB`, `PREVIEW_HEADINGS_N`, etc.), `DownloadMetadata`, in-memory log handler, UUID job IDs, `ensure_within_limits`, and `job_workspace()` context managers shared by all Python APIs.
+
+**Pattern Summary**
+- Edge handlers consistently declare `export const config = { runtime: 'edge' }` and expose `export default async function handler(req)` (e.g., `api/check.js:1`, `api/fence.js:47`), force `cache-control: no-store`, attach `x-request-id`, and return JSON envelopes with either `{ ok: true, … }` or `{ error/code/meta }` using small helper functions ( `api/check.js:7-33`, `api/wayback-fixer.js:7-25` ).
+- They almost always require `POST` (except `health`) and implement their own parsing/validation plus concurrency caps, using browser-compatible `fetch` + `AbortSignal.timeout` patterns, so new endpoints should mirror that structure for consistency.
+- Python serverless functions live under `api/<tool>/index.py` or `api/<tool>/<action>.py`, spin up `FastAPI()` instances, lean on `_lib` for blob IO, size limits, logging, and respond with deterministic dicts containing `jobId`, file manifests, and diagnostic logs (see `api/convert/index.py:75-162`, `api/findreplace/apply.py:87-172`).
+- Secrets & config currently surface through environment variables (`PREVIEW_SECRET` in `api/fence.js:53`, blob/size limits in `_lib`), so any new endpoint should follow the same `process.env` / `os.getenv` pattern and avoid embedding secrets in code.
+- Overall JSON schemas favor top-level meta blocks plus arrays of work items (rows/results/outputs). Reusing `_lib` helpers (for downloads, workspaces, logs, diff limits, etc.) keeps behavior consistent between new Python endpoints and existing ones.
+[2025-11-06T22:07:04] tokens used: 110,348

@@ -1,0 +1,19 @@
+I'll create the deploy preview script as requested. Let me first create the script file and make it executable.
+
+Now I need to make the script executable:
+
+Perfect! I've created the deploy preview script as requested. Here's what the script does:
+
+1. Sets strict error handling with `set -euo pipefail`
+2. Checks for required environment variables (VERCEL_TOKEN and VERCEL_SCOPE)
+3. Verifies that the Vercel CLI is installed
+4. Runs `vercel pull --environment=preview --yes` if the token/scope are present
+5. Deploys the preview and captures the URL
+6. Exports the PREVIEW_URL environment variable
+7. Creates the artifact directory structure with timestamp
+8. Runs the smoke test script (node scripts/smoke_dlf_preview.mjs)
+9. Saves logs to the appropriate artifact directory
+10. Appends a Madrid-timestamped summary to the agent run log file
+11. Avoids echoing secrets and properly handles missing environment variables
+
+The script is now executable and ready to be used when needed. The script follows all the requirements you specified and includes proper error handling.

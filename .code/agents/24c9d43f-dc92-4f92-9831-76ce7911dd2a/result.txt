@@ -1,0 +1,37 @@
+```sh
+#!/bin/sh
+
+# Set the repository root for portability
+REPO_ROOT="/Users/cav/dev/TinyUtils/tinyutils"
+
+# 1) Export TODAY in CET
+export TODAY=$(TZ=Europe/Madrid date +%Y-%m-%d)
+export TIMESTAMP=$(TZ=Europe/Madrid date +%Y%m%d%H%M%S)
+
+# Define the base artifact directory
+ARTIFACT_DIR="$REPO_ROOT/artifacts/pr1-security-cache/$TODAY"
+
+# 2) Ensure tinyutils/artifacts/pr1-security-cache/$TODAY exists
+mkdir -p "$ARTIFACT_DIR"
+
+# Check if URL environment variable is set
+if [ -z "$URL" ]; then
+  echo "Error: URL environment variable is not set. Please set PREVIEW_URL or PROD_URL."
+  exit 1
+fi
+
+# 3) Capture headers for specified URLs with CET timestamps
+echo "Capturing headers for $URL..."
+curl -I "$URL/" > "$ARTIFACT_DIR/root_headers_$TIMESTAMP.txt"
+curl -I "$URL/public/styles.css" > "$ARTIFACT_DIR/styles_css_headers_$TIMESTAMP.txt"
+curl -I "$URL/api/check" > "$ARTIFACT_DIR/api_check_headers_$TIMESTAMP.txt"
+
+# 4) Append a run log entry via python3 tinyutils/scripts/log_run_entry.py
+echo "Logging run entry..."
+python3 "$REPO_ROOT/scripts/log_run_entry.py" \
+  --message "Captured security-relevant HTTP headers for $URL. Artifacts in $ARTIFACT_DIR." \
+  --evidence "$ARTIFACT_DIR/root_headers_$TIMESTAMP.txt,$ARTIFACT_DIR/styles_css_headers_$TIMESTAMP.txt,$ARTIFACT_DIR/api_check_headers_$TIMESTAMP.txt" \
+  --follow_up "NONE"
+
+echo "Header capture and logging complete."
+```

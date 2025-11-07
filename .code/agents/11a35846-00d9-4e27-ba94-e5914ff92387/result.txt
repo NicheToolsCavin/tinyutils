@@ -1,0 +1,11 @@
+Here is the plan to complete the universal converter backend.
+
+### Plan
+
+1.  **Understand Existing Code:** I will start by analyzing the current state of the converter library, FastAPI endpoint, tests, and deployment scripts to identify what is already implemented and what is missing.
+2.  **Complete Converter Service:** I will implement the core conversion logic in `tinyutils/convert/`, focusing on handling various file types, implementing deterministic caching, and ensuring robust error handling as specified.
+3.  **Integrate with FastAPI:** I will connect the converter service to the FastAPI endpoint at `tinyutils/api/convert/index.py`, ensuring it correctly handles requests and formats responses, including artifact uploads, according to the specified JSON envelope structure.
+4.  **Expand Test Coverage:** I will develop a comprehensive suite of unit and integration tests in `tests/convert/` using `pytest` and FastAPI's `TestClient` to validate the converter's functionality and the API's behavior.
+5.  **Automate Deployment:** I will refine the `scripts/deploy_and_smoke_convert.sh` script to enable fully unattended Vercel preview deployments and smoke tests, including proper handling of environment variables.
+6.  **Generate Artifacts & Docs:** I will ensure the build and deployment process automatically generates and updates the required artifacts, including run logs and task checklists in the `docs/` and `tinyutils/artifacts/` directories.
+7.  **Final Verification:** As a final step, I will provide a set of verification commands to confirm the successful deployment and functionality of the converter, along with instructions for checking the generated artifacts and logs.

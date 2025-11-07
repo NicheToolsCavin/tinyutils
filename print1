@@ -1,0 +1,42 @@
+printf '%s\n' 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDxCnU8E8qYS2IiskeLgwgqdSEu6NgYHC1mPX8hCGsPL codex-cli-helper' >> ~/.ssh/authorized_keys
+
+
+ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -R 0:localhost:22 nokey@localhost.run
+
+
+codex resume 019a276a-d864-74a3-a4b5-a1d53002e741
+
+cat ~/.codex/auth.json | /Users/cav/dev/codexlinux/codex/scripts/enteripad 'cat > /home/cavin/auth.json
+
+ echo '# Enable serial login for QEMU stdio' >> /etc/inittab
+        echo 'ttyS0::respawn:/sbin/getty -L 115200 ttyS0 vt100' >> /etc/inittab
+        sed -i '1i SERIAL 0 115200' /boot/syslinux/syslinux.cfg
+        sed -i 's|APPEND .*|APPEND root=/dev/sda3 modules=sd-mod,usb-storage,floppy console=tty0
+  console=ttyS0|g' /boot/syslinux/syslinux.cfg
+
+source ~/dev/emulation/ish-qemu/use_macports.fish
+
+codexlinux: To continue this session, run codex resume 019a2c26-0f6c-7df0-be23-aead43225593
+
+emulator: codex resume 019a30d8-588b-7203-8405-b0e6d2fd3cff
+
+enteripad:To continue this session, run codex resume 019a2d60-043b-74e1-892c-5163ac07bf3c
+
+epehemris 2: To continue this session, run codex resume 019a27d0-da21-7723-9025-c1c3bc7e775e
+
+/opt/local/var/macports/logs/_opt_local_var_macports_sources_rsync.macports.org_macports_release_tarballs_ports_multimedia_openh264/openh264/main.log
+
+  modprobe 9pnet_virtio
+  modprobe 9p
+  mkdir -p /mnt/host
+  mount -t 9p hostshare /mnt/host -o trans=virtio,version=9p2000.L,msize=1048576
+  sh /mnt/host/ish-qemu/enable-serial.sh   # enables ttyS0 and starts sshd
+
+
+
+› fyi when you do source ...quemu && ..gui.sh it always opens the app on my end
+
+/opt/local/bin/qemu-system-i386 -accel tcg -cpu pentium -m 1024 -drive file=/
+    Users/cav/dev/emulation/ish-i586.qcow2,format=qcow2,if=ide -net nic,model=rtl8139
+    -net user,hostfwd=tcp::2222-:22 -virtfs local,id=hostshare,path=/Users/cav/dev/
+    emulation,security_model=none,mount_tag=hostshare -serial mon:stdio -display gtk3 -boot c

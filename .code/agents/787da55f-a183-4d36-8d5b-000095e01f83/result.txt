@@ -1,0 +1,36 @@
+I'll create the deploy and smoke test script for you. Let me first create the necessary directory structure and then implement the script with all the requirements.
+
+Now I'll create the deploy and smoke test script with bash strict mode and all the required functionality:
+
+Now let me make the script executable:
+
+Let me verify the script was created correctly and has the proper structure:
+
+I apologize for the error. Let me try again with the correct path:
+
+Let me also create a simple smoke test script to complement the main deployment script, as the main script has a fallback option but it would be better to have an actual smoke test:
+
+Let me make the smoke test script executable as well:
+
+Perfect! I've successfully implemented the deploy and smoke test script according to all your requirements. Let me summarize what was created:
+
+## Summary of Implementation
+
+1. **Main Script**: `tinyutils/scripts/deploy_and_smoke_convert.sh`
+   - Uses bash strict mode (`set -euo pipefail`)
+   - Checks for Vercel CLI installation
+   - Verifies credentials with `vercel whoami`
+   - Exits with code 2 if credentials are missing, writing to `deploy_status.txt`
+   - Performs non-interactive preview deployment
+   - Parses the preview URL from deployment output
+   - Runs smoke tests using the PREVIEW_URL
+   - Stores artifacts in `tinyutils/artifacts/convert/<YYYYMMDD>/smoke-preview-<MadridTs>`
+   - Writes concise status summary to both artifact folder and root directory
+
+2. **Smoke Test Script**: `tinyutils/scripts/smoke_convert_preview.sh`
+   - A dedicated smoke test script to test the deployed preview
+   - Performs basic connectivity tests, HTTP status checks, and content validation
+
+The script handles all error conditions appropriately, uses proper error messaging, and follows the requested flow exactly as specified. The artifacts are organized with proper timestamps and the status files provide clear information about the deployment and test results.
+
+Would you like me to make any adjustments to the implementation?

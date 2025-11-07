@@ -1,0 +1,72 @@
+Key assumptions / questions
+
+*   **Input `from` parameter:** Assumed that all files in a batch will have the same `from` format, or that the `from` format can be inferred per file if not provided. Clarification needed on how to handle mixed `from` formats in a single batch.
+*   **Output `to` parameter:** Will accept an array of strings (e.g., `["md", "html", "txt"]`) or a single string.
+*   **`options` parameter:** Will be extended to support per-target options or global options.
+*   **Deterministic Metadata:** Implies structured parsing of Pandoc's output or a separate metadata extraction step.
+*   **Error Handling:** Errors will be aggregated and reported for batch conversions (per-file errors vs. global batch errors).
+*   **Performance:** Batch conversions could be resource-intensive; performance targets or concurrency requirements need to be considered.
+*   **Blob Storage:** Existing blob upload contract will be maintained, implying separate blob uploads for each output file.
+*   **Lua Filters:** Existing Lua filters are assumed to be compatible with multiple output formats or will need adaptation.
+
+Proposed architecture
+
+A new `tinyutils/convert/` library will orchestrate the conversion process.
+
+*   **`tinyutils/convert/` (New Library):**
+    *   `converter.py`: Main orchestration module with `convert_batch` and `_convert_single_file` functions.
+    *   `pandoc_processor.py`: Encapsulates Pandoc execution, Lua filter application, and output parsing (evolution of `tinyutils/api/_lib/pandoc_runner.py`).
+    *   `output_formatter.py`: Handles post-Pandoc processing for different output formats.
+    *   `metadata_extractor.py`: Extracts deterministic metadata (headings, snippets, images).
+    *   `blob_manager.py`: Handles interactions with blob storage (abstracting `tinyutils/api/_lib/blob.py`).
+*   **`tinyutils/api/convert/index.py` (API Endpoint):** Refactored to use the new `tinyutils/convert/` library, including input validation and JSON envelope construction.
+*   **`tinyutils/api/_lib/`:** Existing modules (`text_clean.py`, `manifests.py`, `utils.py`) will be used by the new library.
+
+Step-by-step plan
+
+1.  **Define New Input/Output Schemas (1 day):** Clearly define the new JSON input schema for `inputs: [{ blobUrl, name?, from? }]` and `to: ["md", "html", "txt"]`. Update the output envelope to accommodate multiple outputs per input file and deterministic metadata.
+    *   **Reference:** `tinyutils/api/convert/index.py`, `docs/AGENT_RUN_LOG.md`.
+2.  **Create `tinyutils/convert/` Library Structure (1 day):** Establish the new library directory and initial modules (`converter.py`, `pandoc_processor.py`, `output_formatter.py`, `metadata_extractor.py`, `blob_manager.py`).
+    *   **Reference:** New directory `tinyutils/convert/`.
+3.  **Refactor `pandoc_runner.py` into `pandoc_processor.py` (2 days):** Move and enhance Pandoc execution logic from `tinyutils/api/_lib/pandoc_runner.py` to `tinyutils/convert/pandoc_processor.py` to handle different output formats and capture detailed output/errors.
+    *   **Reference:** `tinyutils/api/_lib/pandoc_runner.py`, `tinyutils/convert/pandoc_processor.py`.
+4.  **Implement `output_formatter.py` and `metadata_extractor.py` (3 days):** Develop modules to normalize Markdown, clean HTML, extract plain text, and extract structured metadata from Pandoc's output for each target format.
+    *   **Reference:** `tinyutils/convert/output_formatter.py`, `tinyutils/convert/metadata_extractor.py`.
+5.  **Implement `blob_manager.py` and integrate with `blob.py` (1 day):** Create a dedicated module for blob interactions, wrapping or extending `tinyutils/api/_lib/blob.py` to handle multiple output blobs per input file.
+    *   **Reference:** `tinyutils/api/_lib/blob.py`, `tinyutils/convert/blob_manager.py`.
+6.  **Develop `converter.py` orchestration logic (3 days):** Implement `convert_batch` and `_convert_single_file` in `tinyutils/convert/converter.py` to orchestrate calls to other new modules.
+    *   **Reference:** `tinyutils/convert/converter.py`.
+7.  **Refactor `tinyutils/api/convert/index.py` (2 days):** Update the API endpoint to use the new `tinyutils/convert/converter.py` library, implement input validation, and adapt output envelope construction.
+    *   **Reference:** `tinyutils/api/convert/index.py`.
+8.  **Implement New Regression Tests (3 days):** Create new test cases under `tinyutils/tests/` for single-file/multi-target, multi-file/single-target, and multi-file/multi-target conversions. Add new fixtures under `tests/fixtures/convert/`.
+    *   **Reference:** `tinyutils/tests/`, `tests/fixtures/convert/`.
+9.  **Update Documentation and Logging (1 day):** Document the new API schema, library usage, and configuration. Enhance logging. Update `docs/AGENT_RUN_LOG.md` and `docs/AGENT_TASK_CHECKLIST.md`.
+    *   **Reference:** `docs/AGENT_RUN_LOG.md`, `docs/AGENT_TASK_CHECKLIST.md`, `tools/convert/index.html`.
+
+Testing & evidence strategy
+
+*   **Unit Tests:** For each new module (`pandoc_processor.py`, `output_formatter.py`, `metadata_extractor.py`, `blob_manager.py`, `converter.py`).
+*   **Integration Tests:** For `tinyutils/api/convert/index.py` to verify end-to-end flow.
+*   **Regression Tests:** New tests under `tinyutils/tests/` covering single-file/multi-target, multi-file/single-target, multi-file/multi-target, and error handling scenarios.
+*   **Fixtures:** New directory `tests/fixtures/convert/` with sample input documents and expected output files/metadata.
+*   **Artifacts:** Store conversion outputs for successful test runs in `tinyutils/artifacts/convert/<date>/` for evidence and manual inspection.
+*   **Tool Versions:** Ensure `toolVersions` in the output envelope accurately reflect external tool versions.
+
+Risk / mitigation list
+
+*   **Risk: Performance Degradation for Batch Conversions.**
+    *   **Mitigation:** Implement asynchronous processing, monitor resource usage, consider worker queues.
+*   **Risk: Inconsistent Output Across Formats/Files.**
+    *   **Mitigation:** Standardize Pandoc arguments/filters, implement robust post-processing, comprehensive regression tests.
+*   **Risk: Breaking Existing API Contract.**
+    *   **Mitigation:** Maintain backward compatibility for single input/Markdown output, use versioning if necessary.
+*   **Risk: Complex Error Reporting for Batches.**
+    *   **Mitigation:** Design clear error structure in output envelope, detailed logging.
+*   **Risk: Difficulty in Extracting Deterministic Metadata.**
+    *   **Mitigation:** Leverage Pandoc's AST output (JSON), use reliable parsing libraries, iterate on `metadata_extractor.py`.
+*   **Risk: Increased Complexity and Maintainability Burden.**
+    *   **Mitigation:** Adhere to clear module boundaries, well-documented code, comprehensive test suite.
+*   **Risk: Security Vulnerabilities (e.g., Pandoc execution).**
+    *   **Mitigation:** Run Pandoc in isolated environment, sanitize user inputs.
+*   **Risk: Large Blob Storage Consumption.**
+    *   **Mitigation:** Implement efficient storage strategies, consider temporary storage and cleanup, effective media extraction zipping.

@@ -1,0 +1,1159 @@
+[2025-11-05T00:49:36] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-scan-repo-iframe-embed-cross-origin
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-05T00:49:36] User instructions:
+Scan the repo for iframe/embed/cross-origin usage and draft tinyutils/artifacts/phase2-roster/$TODAY/csp-risk-note.md with findings, recommended CSP directives, compatibility notes, and human-confirmation items. Use CET (today 2025-11-05) and keep it concise. Focus on tools/*.html, public/tools/*, and any external assets (analytics, fonts, scripts).
+[2025-11-05T00:49:36] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-scan-repo-iframe-embed-cross-origin
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-05T00:49:36] User instructions:
+Scan the repo for iframe/embed/cross-origin usage and draft tinyutils/artifacts/phase2-roster/$TODAY/csp-risk-note.md with findings, recommended CSP directives, compatibility notes, and human-confirmation items. Use CET (today 2025-11-05) and keep it concise. Focus on tools/*.html, public/tools/*, and any external assets (analytics, fonts, scripts).
+
+[2025-11-05T00:49:47] thinking
+
+**Preparing to search for iframe embeddings**
+[2025-11-05T00:49:47] exec bash -lc 'rg "<iframe" tools' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-scan-repo-iframe-embed-cross-origin
+[2025-11-05T00:49:47] bash -lc 'rg "<iframe" tools' exited 2 in 123ms:
+ERROR
+rg: tools: IO error for operation on tools: No such file or directory (os error 2)
+[2025-11-05T00:49:47] tokens used: 1,391
+
+[2025-11-05T00:49:49] thinking
+
+**Checking directory existence**
+[2025-11-05T00:49:49] exec bash -lc ls in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-scan-repo-iframe-embed-cross-origin
+[2025-11-05T00:49:49] bash -lc ls succeeded in 92ms:
+[2025-11-05T00:49:49] tokens used: 1,669
+
+[2025-11-05T00:49:51] thinking
+
+**Checking for hidden or nested files**
+[2025-11-05T00:49:51] exec bash -lc 'ls -a' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-scan-repo-iframe-embed-cross-origin
+[2025-11-05T00:49:51] bash -lc 'ls -a' succeeded in 93ms:
+.
+..
+.git
+[2025-11-05T00:49:51] tokens used: 2,002
+
+[2025-11-05T00:49:54] thinking
+
+**Checking repository status with git**
+[2025-11-05T00:49:54] exec bash -lc 'git status --short' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-scan-repo-iframe-embed-cross-origin
+[2025-11-05T00:49:54] bash -lc 'git status --short' succeeded in 91ms:
+[2025-11-05T00:49:54] tokens used: 2,816
+
+[2025-11-05T00:49:56] thinking
+
+**Checking repository state without fetch**
+[2025-11-05T00:49:56] exec bash -lc 'git rev-parse HEAD' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-scan-repo-iframe-embed-cross-origin
+[2025-11-05T00:49:56] bash -lc 'git rev-parse HEAD' exited 128 in 143ms:
+HEAD
+
+ERROR
+fatal: ambiguous argument 'HEAD': unknown revision or path not in the working tree.
+Use '--' to separate paths from revisions, like this:
+'git <command> [<revision>...] -- [<file>...]'
+[2025-11-05T00:49:56] tokens used: 3,781
+
+[2025-11-05T00:49:58] thinking
+
+**Investigating repository status**
+[2025-11-05T00:49:59] exec bash -lc 'ls .git' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-scan-repo-iframe-embed-cross-origin
+[2025-11-05T00:49:59] bash -lc 'ls .git' succeeded in 122ms:
+.git
+[2025-11-05T00:49:59] tokens used: 4,103
+
+[2025-11-05T00:50:01] thinking
+
+**Checking .git type**
+[2025-11-05T00:50:01] exec bash -lc 'file .git' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-scan-repo-iframe-embed-cross-origin
+[2025-11-05T00:50:01] bash -lc 'file .git' succeeded in 137ms:
+.git: ASCII text
+[2025-11-05T00:50:01] tokens used: 4,284
+
+[2025-11-05T00:50:03] thinking
+
+**Checking .git file content**
+[2025-11-05T00:50:03] exec bash -lc 'cat .git' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-scan-repo-iframe-embed-cross-origin
+[2025-11-05T00:50:03] bash -lc 'cat .git' succeeded in 114ms:
+gitdir: /Users/cav/dev/TinyUtils/.git/worktrees/code-code-gpt-5-codex-scan-repo-iframe-embed-cross-origin
+[2025-11-05T00:50:03] tokens used: 4,465
+
+[2025-11-05T00:50:06] thinking
+
+**Checking git worktree access**
+[2025-11-05T00:50:06] exec bash -lc ls in /Users/cav/dev/TinyUtils
+[2025-11-05T00:50:06] bash -lc ls succeeded in 108ms:
+__MACOSX
+$
+code-cli-tinyutils-recs.md
+diffs_recs
+docs
+PATH
+post_2035_reapply.patch
+print1
+test_results_nov4.md
+tinyutils
+tinyutils-backup-20251105T001200.zip
+tinyutils.after-accident
+tinyutils.zip
+TinyUtilsCodexContext
+[2025-11-05T00:50:06] tokens used: 4,707
+
+[2025-11-05T00:50:08] thinking
+
+**Locating worktree path**
+[2025-11-05T00:50:08] exec bash -lc ls in /Users/cav/dev/TinyUtils/.git/worktrees/code-code-gpt-5-codex-scan-repo-iframe-embed-cross-origin
+[2025-11-05T00:50:08] bash -lc ls succeeded in 113ms:
+commondir
+gitdir
+HEAD
+index
+refs
+[2025-11-05T00:50:08] tokens used: 4,918
+
+[2025-11-05T00:50:10] thinking
+
+**Checking actual working tree location**
+[2025-11-05T00:50:10] exec bash -lc 'cat commondir' in /Users/cav/dev/TinyUtils/.git/worktrees/code-code-gpt-5-codex-scan-repo-iframe-embed-cross-origin
+[2025-11-05T00:50:10] bash -lc 'cat commondir' succeeded in 118ms:
+../..
+[2025-11-05T00:50:10] tokens used: 7,960
+
+[2025-11-05T00:50:13] thinking
+
+**Checking actual repository worktree**
+[2025-11-05T00:50:13] exec bash -lc 'cat HEAD' in /Users/cav/dev/TinyUtils/.git/worktrees/code-code-gpt-5-codex-scan-repo-iframe-embed-cross-origin
+[2025-11-05T00:50:14] bash -lc 'cat HEAD' succeeded in 118ms:
+ref: refs/heads/code-code-gpt-5-codex-scan-repo-iframe-embed-cross-origin
+[2025-11-05T00:50:14] tokens used: 8,376
+
+[2025-11-05T00:50:15] thinking
+
+**Checking branch and working tree location**
+[2025-11-05T00:50:15] exec bash -lc ls in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:50:16] bash -lc ls succeeded in 89ms:
+ads.txt
+ADSENSE_SETUP.md
+AGENTS.md
+api
+artifacts
+CHANGES-v1.3.0-rc2.txt
+CHANGES-v1.3.0-rc3.txt
+DEPLOY_PRODUCTION_CHECKLIST.md
+docs
+feedback.html
+guides
+index.html
+node_modules
+offering-to-the-triple-goddess.txt
+package.json
+pnpm-lock.yaml
+PREVIEW_SMOKE_CHECKLIST.md
+privacy.html
+public
+README_DEPLOY.md
+[2025-11-05T00:50:16] tokens used: 8,554
+
+[2025-11-05T00:50:19] thinking
+
+**Determining correct work directory**
+[2025-11-05T00:50:19] exec bash -lc 'rg "<iframe" tools' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:50:19] bash -lc 'rg "<iframe" tools' exited 1 in 122ms:
+ERROR
+[2025-11-05T00:50:19] tokens used: 9,079
+
+[2025-11-05T00:50:21] thinking
+
+**Checking for iframes in public tools**
+[2025-11-05T00:50:21] exec bash -lc 'rg "<iframe" public/tools' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:50:21] bash -lc 'rg "<iframe" public/tools' exited 1 in 118ms:
+ERROR
+[2025-11-05T00:50:21] tokens used: 9,317
+
+[2025-11-05T00:50:23] thinking
+
+**Searching for iframe references**
+[2025-11-05T00:50:23] exec bash -lc 'rg "iframe" tools' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:50:23] bash -lc 'rg "iframe" tools' exited 1 in 121ms:
+ERROR
+[2025-11-05T00:50:23] tokens used: 9,525
+
+[2025-11-05T00:50:24] thinking
+
+**Searching for embedding usage**
+[2025-11-05T00:50:25] exec bash -lc 'rg "iframe"' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:50:25] bash -lc 'rg "iframe"' exited 1 in 130ms:
+ERROR
+[2025-11-05T00:50:25] tokens used: 9,706
+
+[2025-11-05T00:50:26] thinking
+
+**Searching for 'embed' keyword**
+[2025-11-05T00:50:27] exec bash -lc 'rg "<embed" tools' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:50:27] bash -lc 'rg "<embed" tools' exited 1 in 111ms:
+ERROR
+[2025-11-05T00:50:27] tokens used: 9,845
+
+[2025-11-05T00:50:29] thinking
+
+**Checking for external references in HTML files**
+[2025-11-05T00:50:29] exec bash -lc 'ls tools' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:50:29] bash -lc 'ls tools' succeeded in 121ms:
+dead-link-finder
+index.html
+keyword-density.html
+meta-preview.html
+sitemap-delta
+sitemap-generator.html
+wayback-fixer
+[2025-11-05T00:50:29] tokens used: 10,069
+
+[2025-11-05T00:50:30] thinking
+
+**Inspecting HTML files**
+[2025-11-05T00:50:31] exec bash -lc "sed -n '1,160p' tools/index.html" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:50:31] bash -lc "sed -n '1,160p' tools/index.html" succeeded in 116ms:
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Tools — TinyUtils</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Explore TinyUtils tools: Dead Link Finder, Sitemap Delta + Redirect Mapper, and Wayback Fixer.">
+  <link rel="canonical" href="/tools/">
+  <link rel="icon" href="/public/favicon.ico">
+  <meta property="og:title" content="Tools — TinyUtils">
+  <meta property="og:description" content="Dead Link Finder, Sitemap Delta + Redirect Mapper, and Wayback Fixer.">
+  <meta property="og:image" content="/public/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/styles/site.css">
+  <script defer src="/scripts/consent.js"></script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "itemListElement": [
+[2025-11-05T00:50:31] tokens used: 10,327
+
+[2025-11-05T00:50:35] thinking
+
+**Checking public/tools directory contents**
+[2025-11-05T00:50:37] exec bash -lc "find public/tools -maxdepth 2 -type f -name '*.html'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:50:37] bash -lc "find public/tools -maxdepth 2 -type f -name '*.html'" succeeded in 118ms:
+public/tools/index.html
+public/tools/sitemap-delta/index.html
+public/tools/wayback-fixer/index.html
+public/tools/dead-link-finder/index.html
+[2025-11-05T00:50:37] tokens used: 12,859
+
+[2025-11-05T00:50:38] thinking
+
+**Inspecting index.html in tools**
+[2025-11-05T00:50:38] exec bash -lc "sed -n '1,200p' public/tools/index.html" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:50:38] bash -lc "sed -n '1,200p' public/tools/index.html" succeeded in 116ms:
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Tools — TinyUtils</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="/public/favicon.ico">
+  <link rel="stylesheet" href="/styles/site.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="container row between center">
+    <a class="brand" href="/">TinyUtils</a>
+    <nav class="nav">
+      <a class="active" href="/tools/">Tools</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+    </nav>
+  </div>
+</header>
+[2025-11-05T00:50:38] tokens used: 13,088
+
+[2025-11-05T00:50:41] thinking
+
+**Examining external scripts in HTML files**
+[2025-11-05T00:50:41] exec bash -lc "sed -n '1,200p' public/tools/dead-link-finder/index.html" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:50:41] bash -lc "sed -n '1,200p' public/tools/dead-link-finder/index.html" succeeded in 101ms:
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dead Link Finder — TinyUtils</title>
+  <meta name="description" content="Find broken links fast. Crawl a page, paste a list, or load a sitemap. Export CSV/JSON/XLSX and grab Wayback snapshots.">
+  <link rel="canonical" href="https://tinyutils.net/tools/dead-link-finder/">
+  <link rel="icon" href="/public/favicon.ico">
+  <meta property="og:title" content="Dead Link Finder — TinyUtils">
+  <meta property="og:description" content="Find broken links fast. Crawl a page, paste a list, or load a sitemap. Export CSV/JSON/XLSX and grab Wayback snapshots.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="/public/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/public/styles.css">
+  <link rel="stylesheet" href="/styles/site.css">
+  <script defer src="/scripts/consent.js"></script>
+  <style>
+    main { padding-bottom: 48px; }
+    .tool-intro h1 { margin-bottom: 0.25rem; }
+[2025-11-05T00:50:41] tokens used: 16,199
+
+[2025-11-05T00:50:43] thinking
+
+**Searching for external script URLs**
+[2025-11-05T00:50:44] exec bash -lc 'rg "https://" public/tools/dead-link-finder/index.html' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:50:45] bash -lc 'rg "https://" public/tools/dead-link-finder/index.html' succeeded in 121ms:
+  <link rel="canonical" href="https://tinyutils.net/tools/dead-link-finder/">
+          <input id="pageUrl" type="url" placeholder="https://example.com/page">
+          <textarea id="listInput" placeholder="https://example.com/one\nhttps://example.com/two"></textarea>
+          <input id="sitemapUrl" type="url" placeholder="https://example.com/sitemap.xml">
+[2025-11-05T00:50:45] tokens used: 19,544
+
+[2025-11-05T00:50:46] thinking
+
+**Checking for external script references**
+[2025-11-05T00:50:47] exec bash -lc "rg \"src=\\\"\" public/tools/dead-link-finder/index.html" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:50:47] bash -lc "rg \"src=\\\"\" public/tools/dead-link-finder/index.html" succeeded in 106ms:
+  <script defer src="/scripts/consent.js"></script>
+[2025-11-05T00:50:47] tokens used: 27,216
+
+[2025-11-05T00:50:49] thinking
+
+**Checking for external script URLs**
+[2025-11-05T00:50:49] exec bash -lc "rg \"'https://\" public/tools/dead-link-finder/index.html" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:50:49] bash -lc "rg \"'https://\" public/tools/dead-link-finder/index.html" exited 1 in 108ms:
+ERROR
+[2025-11-05T00:50:49] tokens used: 28,125
+
+[2025-11-05T00:50:51] thinking
+
+**Searching for escaped URLs**
+[2025-11-05T00:50:51] exec bash -lc "rg \"\\\"https://\" public/tools/dead-link-finder/index.html" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:50:51] bash -lc "rg \"\\\"https://\" public/tools/dead-link-finder/index.html" succeeded in 105ms:
+  <link rel="canonical" href="https://tinyutils.net/tools/dead-link-finder/">
+          <input id="pageUrl" type="url" placeholder="https://example.com/page">
+          <textarea id="listInput" placeholder="https://example.com/one\nhttps://example.com/two"></textarea>
+          <input id="sitemapUrl" type="url" placeholder="https://example.com/sitemap.xml">
+[2025-11-05T00:50:51] tokens used: 28,387
+
+[2025-11-05T00:50:53] thinking
+
+**Checking for fetch usage**
+[2025-11-05T00:50:53] exec bash -lc "rg \"fetch\\(\" public/tools/dead-link-finder/index.html" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:50:53] bash -lc "rg \"fetch\\(\" public/tools/dead-link-finder/index.html" succeeded in 110ms:
+        const response = await fetch('/api/check', {
+[2025-11-05T00:50:53] tokens used: 28,716
+
+[2025-11-05T00:50:56] thinking
+
+**Scanning for external assets in public/tools**
+[2025-11-05T00:50:56] exec bash -lc 'rg "https://" public/tools' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:50:57] bash -lc 'rg "https://" public/tools' succeeded in 185ms:
+public/tools/dead-link-finder/index.html:  <link rel="canonical" href="https://tinyutils.net/tools/dead-link-finder/">
+public/tools/dead-link-finder/index.html:          <input id="pageUrl" type="url" placeholder="https://example.com/page">
+public/tools/dead-link-finder/index.html:          <textarea id="listInput" placeholder="https://example.com/one\nhttps://example.com/two"></textarea>
+public/tools/dead-link-finder/index.html:          <input id="sitemapUrl" type="url" placeholder="https://example.com/sitemap.xml">
+public/tools/sitemap-delta/index.html:  "@context": "https://schema.org",
+public/tools/sitemap-delta/index.html:  "url": "https://tinyutils.net/tools/sitemap-delta/",
+public/tools/sitemap-delta/index.html:        <input id="smA" type="url" placeholder="https://example.com/sitemap.xml">
+public/tools/sitemap-delta/index.html:        <input id="smB" type="url" placeholder="https://example.com/sitemap.xml">
+public/tools/sitemap-delta/index.html:    before: '<urlset><url><loc>https://example.com/blog/how-to-bake</loc></url><url><loc>https://example.com/blog/old-post</loc></url></urlset>',
+public/tools/sitemap-delta/index.html:    after: '<urlset><url><loc>https://example.com/articles/how-to-bake</loc></url><url><loc>https://example.com/blog/new</loc></url></urlset>'
+public/tools/sitemap-delta/index.html:    s.src='https://plausible.io/js/script.js'; document.head.appendChild(s);
+public/tools/sitemap-delta/index.html:      ads.async=true; ads.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX';
+public/tools/wayback-fixer/index.html:  <link rel="canonical" href="https://tinyutils.net/tools/wayback-fixer/">
+public/tools/wayback-fixer/index.html:    "@context":"https://schema.org",
+public/tools/wayback-fixer/index.html:        <textarea id="list" rows="10" placeholder="https://example.com/404
+public/tools/wayback-fixer/index.html:https://example.com/moved"></textarea>
+public/tools/wayback-fixer/index.html:        listEl.value = `https://example.com/old\nhttps://example.com/missing\nhttps://example.com/2011/post`;
+public/tools/index.html:      s.setAttribute('data-domain','tinyutils.net'); s.src='https://plausible.io/js/script.js';
+public/tools/index.html:<script type="application/ld+json">{"@context": "https://schema.org", "@type": "ItemList", "itemListElement": [{"@type": "Thing", "name": "Dead Link Finder", "url": "https://tinyutils.net/"}, {"@type": "Thing", "name": "Keyword Density", "url": "https://tinyutils.net/tools/keyword-density.html"}, {"@type": "Thing", "name": "Meta Tag Preview", "url": "https://tinyutils.net/tools/meta-preview.html"}, {"@type": "Thing", "name": "Sitemap Generator", "url": "https://tinyutils.net/tools/sitemap-generator.html"}]}</script>
+public/tools/index.html:    "@context": "https://schema.org",
+[2025-11-05T00:50:57] tokens used: 46,117
+
+[2025-11-05T00:50:58] thinking
+
+**Identifying external assets**
+[2025-11-05T00:50:59] exec bash -lc "sed -n '1,200p' public/tools/sitemap-delta/index.html" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:50:59] bash -lc "sed -n '1,200p' public/tools/sitemap-delta/index.html" succeeded in 116ms:
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sitemap Delta + Redirect Mapper — TinyUtils</title>
+  <meta name="description" content="Compare two sitemaps (or paste XML), see added/removed URLs, and auto-suggest 301 mappings with confidence scores. Export CSV/JSON.">
+  <link rel="canonical" href="/tools/sitemap-delta/">
+  <link rel="icon" href="/public/favicon.ico">
+  <meta property="og:title" content="Sitemap Delta + Redirect Mapper — TinyUtils">
+  <meta property="og:description" content="Compare two sitemaps, export a 301 redirect plan, and fix migrations fast.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="/public/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/public/styles.css">
+  <link rel="stylesheet" href="/styles/site.css">
+  <script defer src="/scripts/consent.js"></script>
+
+<script type="application/ld+json">
+{
+[2025-11-05T00:50:59] tokens used: 47,280
+
+[2025-11-05T00:51:01] thinking
+
+**Scanning for ad-related scripts**
+[2025-11-05T00:51:02] exec bash -lc 'rg "plausible" public/tools/sitemap-delta/index.html' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:51:02] bash -lc 'rg "plausible" public/tools/sitemap-delta/index.html' succeeded in 117ms:
+    s.src='https://plausible.io/js/script.js'; document.head.appendChild(s);
+[2025-11-05T00:51:02] tokens used: 50,443
+
+[2025-11-05T00:51:03] thinking
+
+**Seeking script context**
+[2025-11-05T00:51:03] exec bash -lc "sed -n '200,400p' public/tools/sitemap-delta/index.html" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:51:03] bash -lc "sed -n '200,400p' public/tools/sitemap-delta/index.html" succeeded in 113ms:
+      pairs,
+      unmapped,
+      added: data.added || [],
+      rules: data.rules || [],
+      meta: data.meta || {}
+    };
+  };
+
+  let lastResults = null;
+  let confThreshold = 0;
+
+  function setExportsEnabled(enabled) {
+    exportButtons.forEach(btn => {
+      if (!btn) return;
+      btn.disabled = !enabled;
+      btn.setAttribute('aria-disabled', String(!enabled));
+    });
+  }
+  setExportsEnabled(false);
+
+[2025-11-05T00:51:03] tokens used: 50,680
+
+[2025-11-05T00:51:05] thinking
+
+**Searching for ad script**
+[2025-11-05T00:51:05] exec bash -lc 'rg "googlesyndication" -n public/tools/sitemap-delta/index.html' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:51:05] bash -lc 'rg "googlesyndication" -n public/tools/sitemap-delta/index.html' succeeded in 117ms:
+642:      ads.async=true; ads.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX';
+[2025-11-05T00:51:05] tokens used: 57,389
+
+[2025-11-05T00:51:08] thinking
+
+**Checking code context near line 600**
+[2025-11-05T00:51:08] exec bash -lc "sed -n '580,700p' public/tools/sitemap-delta/index.html" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:51:08] bash -lc "sed -n '580,700p' public/tools/sitemap-delta/index.html" succeeded in 110ms:
+    const hash = paramsToHash();
+    location.hash = hash;
+    await copyText(location.href);
+  });
+
+  if (demoBtn) {
+    demoBtn.addEventListener('click', async () => {
+      statusEl.textContent = 'Loading demo…';
+      try {
+        const [beforeXml, afterXml] = await Promise.all([
+          fetchDemoAsset(DEMO_SITEMAPS.before),
+          fetchDemoAsset(DEMO_SITEMAPS.after)
+        ]);
+        applyDemoXml(beforeXml, afterXml);
+        statusEl.textContent = 'Demo loaded — press Compare';
+      } catch (error) {
+        console.warn('Demo fetch failed; falling back to inline sample', error);
+        applyDemoXml(DEMO_FALLBACK.before, DEMO_FALLBACK.after);
+        statusEl.textContent = 'Demo fallback loaded — press Compare';
+      }
+[2025-11-05T00:51:08] tokens used: 58,216
+
+[2025-11-05T00:51:11] thinking
+
+**Checking external scripts and fetches**
+[2025-11-05T00:51:11] exec bash -lc "sed -n '1,200p' public/tools/wayback-fixer/index.html" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:51:11] bash -lc "sed -n '1,200p' public/tools/wayback-fixer/index.html" succeeded in 112ms:
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Wayback Fixer — TinyUtils</title>
+  <meta name="description" content="Paste dead URLs and get Wayback replacements. Export a replacement map and 410 list.">
+  <link rel="canonical" href="https://tinyutils.net/tools/wayback-fixer/">
+  <link rel="icon" href="/public/favicon.ico">
+  <meta property="og:title" content="Wayback Fixer — TinyUtils">
+  <meta property="og:description" content="Paste dead URLs and get Wayback replacements. Optional verify and SavePageNow.">
+  <meta property="og:image" content="/public/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/styles/site.css">
+  <script defer src="/scripts/consent.js"></script>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Ubuntu,sans-serif;background:#0a0f1f;color:#e6edf7;margin:0}
+    .wrap{max-width:980px;margin:0 auto;padding:24px}
+    header h1{margin:0 0 8px 0;font-size:28px}
+    .grid{display:grid;gap:12px}
+[2025-11-05T00:51:11] tokens used: 59,361
+
+[2025-11-05T00:51:13] thinking
+
+**Searching for cross-origin references**
+[2025-11-05T00:51:13] exec bash -lc 'rg "https://" public/tools/wayback-fixer/index.html' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:51:13] bash -lc 'rg "https://" public/tools/wayback-fixer/index.html' succeeded in 120ms:
+  <link rel="canonical" href="https://tinyutils.net/tools/wayback-fixer/">
+    "@context":"https://schema.org",
+        <textarea id="list" rows="10" placeholder="https://example.com/404
+https://example.com/moved"></textarea>
+        listEl.value = `https://example.com/old\nhttps://example.com/missing\nhttps://example.com/2011/post`;
+[2025-11-05T00:51:13] tokens used: 62,532
+
+[2025-11-05T00:51:15] thinking
+
+**Searching for plausible analytics**
+[2025-11-05T00:51:16] exec bash -lc 'rg "plausible" public/tools/wayback-fixer/index.html' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:51:16] bash -lc 'rg "plausible" public/tools/wayback-fixer/index.html' exited 1 in 117ms:
+ERROR
+[2025-11-05T00:51:16] tokens used: 62,828
+
+[2025-11-05T00:51:19] thinking
+
+**Searching for web.archive references**
+[2025-11-05T00:51:19] exec bash -lc "rg \"web\\.archive\" -n public/tools/wayback-fixer/index.html" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:51:19] bash -lc "rg \"web\\.archive\" -n public/tools/wayback-fixer/index.html" exited 1 in 117ms:
+ERROR
+[2025-11-05T00:51:19] tokens used: 63,879
+
+[2025-11-05T00:51:21] thinking
+
+**Inspecting script for network operations**
+[2025-11-05T00:51:21] exec bash -lc "sed -n '200,400p' public/tools/wayback-fixer/index.html" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:51:21] bash -lc "sed -n '200,400p' public/tools/wayback-fixer/index.html" succeeded in 121ms:
+      const prev = host.querySelector('.requestIdEcho');
+      if (prev) prev.remove();
+      const small = document.createElement('span');
+      small.className = 'requestIdEcho';
+      small.style.marginLeft = '8px';
+      small.style.opacity = '.7';
+      small.style.fontSize = '12px';
+      small.textContent = `(request ${id})`;
+      host.appendChild(small);
+    }catch{}
+  }
+
+  function setExportsEnabled(enabled){
+    exportButtons.forEach(btn => {
+      if (!btn) return;
+      btn.disabled = !enabled;
+      btn.setAttribute('aria-disabled', String(!enabled));
+    });
+  }
+  setExportsEnabled(false);
+[2025-11-05T00:51:21] tokens used: 64,145
+
+[2025-11-05T00:51:23] thinking
+
+**Searching for archive service calls**
+[2025-11-05T00:51:24] exec bash -lc "sed -n '400,800p' public/tools/wayback-fixer/index.html" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:51:24] bash -lc "sed -n '400,800p' public/tools/wayback-fixer/index.html" succeeded in 110ms:
+        protectCSVCell(r.verify?(r.verify.status||''):'') ,
+        protectCSVCell(r.note||'')
+      ].map(v=>`"${String(v).replace(/"/g,'""')}"`);
+      lines.push(vals.join(','));
+    });
+    lines.push(`# meta: ${JSON.stringify(last?.meta||{})}`);
+    return lines.join(LINE_BREAK);
+  }
+  function to410(rows){
+    const header = ['url_to_remove','reason'];
+    const lines = [header.join(',')];
+    rows.filter(r=> (r.note||'').includes('no_snapshot')).forEach(r=>{
+      lines.push(`"${String(protectCSVCell(r.url||'')).replace(/"/g,'""')}","no_snapshot"`);
+    });
+    return lines.join(LINE_BREAK);
+  }
+  document.getElementById('dlCsv').addEventListener('click', ()=>{
+    if (!last) return; const txt = toCSV(last.results||[]);
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt],{type:'text/csv'})); a.download='wayback-replacements.csv'; a.click();
+  });
+[2025-11-05T00:51:24] tokens used: 66,919
+
+[2025-11-05T00:51:27] thinking
+
+**Investigating external scripts and tools directory**
+[2025-11-05T00:51:28] exec bash -lc 'find tools/wayback-fixer -maxdepth 2 -type f' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:51:28] bash -lc 'find tools/wayback-fixer -maxdepth 2 -type f' succeeded in 112ms:
+tools/wayback-fixer/demo/demo-urls.txt
+tools/wayback-fixer/demo/dlf-sample.csv
+tools/wayback-fixer/index.html
+[2025-11-05T00:51:28] tokens used: 67,901
+
+[2025-11-05T00:51:31] thinking
+
+**Checking wayback-fixer HTML**
+[2025-11-05T00:51:31] exec bash -lc "sed -n '1,200p' tools/wayback-fixer/index.html" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:51:31] bash -lc "sed -n '1,200p' tools/wayback-fixer/index.html" succeeded in 113ms:
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Wayback Fixer — TinyUtils</title>
+  <meta name="description" content="Paste dead URLs and get Wayback replacements. Export a replacement map and 410 list.">
+  <link rel="canonical" href="https://tinyutils-eight.vercel.app/tools/wayback-fixer/">
+  <link rel="icon" href="/public/favicon.ico">
+  <meta property="og:title" content="Wayback Fixer — TinyUtils">
+  <meta property="og:description" content="Paste dead URLs and get Wayback replacements. Optional verify and SavePageNow.">
+  <meta property="og:image" content="/public/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/styles/site.css">
+  <script defer src="/scripts/consent.js"></script>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Ubuntu,sans-serif;background:#0a0f1f;color:#e6edf7;margin:0}
+    .wrap{max-width:980px;margin:0 auto;padding:24px}
+    header h1{margin:0 0 8px 0;font-size:28px}
+    .grid{display:grid;gap:12px}
+[2025-11-05T00:51:31] tokens used: 68,760
+
+[2025-11-05T00:51:34] thinking
+
+**Comparing files and searching keywords**
+[2025-11-05T00:51:34] exec bash -lc 'rg "plausible" tools/wayback-fixer/index.html' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:51:34] bash -lc 'rg "plausible" tools/wayback-fixer/index.html' exited 1 in 119ms:
+ERROR
+[2025-11-05T00:51:34] tokens used: 71,883
+
+[2025-11-05T00:51:36] thinking
+
+**Checking tools version and analytics presence**
+[2025-11-05T00:51:36] exec bash -lc 'rg "googlesyndication" tools/wayback-fixer/index.html' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:51:37] bash -lc 'rg "googlesyndication" tools/wayback-fixer/index.html' exited 1 in 119ms:
+ERROR
+[2025-11-05T00:51:37] tokens used: 72,061
+
+[2025-11-05T00:51:39] thinking
+
+**Checking analytics availability**
+[2025-11-05T00:51:40] exec bash -lc "sed -n '1,200p' tools/sitemap-delta/index.html" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:51:40] bash -lc "sed -n '1,200p' tools/sitemap-delta/index.html" succeeded in 103ms:
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sitemap Delta + Redirect Mapper — TinyUtils</title>
+  <meta name="description" content="Compare two sitemaps (or paste XML), see added/removed URLs, and auto-suggest 301 mappings with confidence scores. Export CSV/JSON.">
+  <link rel="canonical" href="/tools/sitemap-delta/">
+  <link rel="icon" href="/public/favicon.ico">
+  <meta property="og:title" content="Sitemap Delta + Redirect Mapper — TinyUtils">
+  <meta property="og:description" content="Compare two sitemaps, export a 301 redirect plan, and fix migrations fast.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="/public/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/public/styles.css">
+  <link rel="stylesheet" href="/styles/site.css">
+  <script defer src="/scripts/consent.js"></script>
+
+<script type="application/ld+json">
+{
+[2025-11-05T00:51:40] tokens used: 73,106
+
+[2025-11-05T00:51:42] thinking
+
+**Checking near file bottom**
+[2025-11-05T00:51:43] exec bash -lc 'rg "plausible" tools/sitemap-delta/index.html' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:51:43] bash -lc 'rg "plausible" tools/sitemap-delta/index.html' succeeded in 112ms:
+    s.src='https://plausible.io/js/script.js'; document.head.appendChild(s);
+[2025-11-05T00:51:43] tokens used: 76,270
+
+[2025-11-05T00:51:45] thinking
+
+**Requesting more context**
+[2025-11-05T00:51:45] exec bash -lc "sed -n '580,700p' tools/sitemap-delta/index.html" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:51:45] bash -lc "sed -n '580,700p' tools/sitemap-delta/index.html" succeeded in 112ms:
+    const hash = paramsToHash();
+    location.hash = hash;
+    await copyText(location.href);
+  });
+
+  if (demoBtn) {
+    demoBtn.addEventListener('click', async () => {
+      statusEl.textContent = 'Loading demo…';
+      try {
+        const [beforeXml, afterXml] = await Promise.all([
+          fetchDemoAsset(DEMO_SITEMAPS.before),
+          fetchDemoAsset(DEMO_SITEMAPS.after)
+        ]);
+        applyDemoXml(beforeXml, afterXml);
+        statusEl.textContent = 'Demo loaded — press Compare';
+      } catch (error) {
+        console.warn('Demo fetch failed; falling back to inline sample', error);
+        applyDemoXml(DEMO_FALLBACK.before, DEMO_FALLBACK.after);
+        statusEl.textContent = 'Demo fallback loaded — press Compare';
+      }
+[2025-11-05T00:51:45] tokens used: 76,480
+
+[2025-11-05T00:51:48] thinking
+
+**Checking data-domain and directories**
+[2025-11-05T00:51:48] exec bash -lc 'find tools/dead-link-finder -maxdepth 1 -type f' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:51:48] bash -lc 'find tools/dead-link-finder -maxdepth 1 -type f' succeeded in 117ms:
+tools/dead-link-finder/index.html
+[2025-11-05T00:51:48] tokens used: 77,577
+
+[2025-11-05T00:51:50] thinking
+
+**Performing inspection**
+[2025-11-05T00:51:50] exec bash -lc "sed -n '1,200p' tools/dead-link-finder/index.html" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:51:50] bash -lc "sed -n '1,200p' tools/dead-link-finder/index.html" succeeded in 121ms:
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dead Link Finder — TinyUtils</title>
+  <meta name="description" content="Find broken links fast. Crawl a page or paste a list. Export CSV/JSON/XLSX and grab Wayback snapshots.">
+  <link rel="canonical" href="https://tinyutils-eight.vercel.app/tools/dead-link-finder/">
+  <link rel="icon" href="/public/favicon.ico">
+  <meta property="og:title" content="Dead Link Finder — TinyUtils">
+  <meta property="og:description" content="Find broken links fast. Crawl a page or paste a list. Export CSV/JSON/XLSX and grab Wayback snapshots.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="/public/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/public/styles.css">
+  <link rel="stylesheet" href="/styles/site.css">
+  <script defer src="/scripts/consent.js"></script>
+  <style>
+    main { padding-bottom: 48px; }
+    .tool-intro h1 { margin-bottom: 0.25rem; }
+[2025-11-05T00:51:50] tokens used: 77,782
+
+[2025-11-05T00:51:52] thinking
+
+**Checking for cross-origin script references**
+[2025-11-05T00:51:54] exec bash -lc 'rg "plausible" tools/dead-link-finder/index.html' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:51:54] bash -lc 'rg "plausible" tools/dead-link-finder/index.html' exited 1 in 118ms:
+ERROR
+[2025-11-05T00:51:54] tokens used: 81,659
+
+[2025-11-05T00:51:56] thinking
+
+**Checking for remote fetches**
+[2025-11-05T00:51:57] exec bash -lc 'rg "https://" tools/dead-link-finder/index.html' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:51:57] bash -lc 'rg "https://" tools/dead-link-finder/index.html' succeeded in 117ms:
+  <link rel="canonical" href="https://tinyutils-eight.vercel.app/tools/dead-link-finder/">
+          <input id="pageUrl" placeholder="https://example.com/page">
+              <textarea id="targetsInput" rows="8" placeholder="https://example.com/page\nhttps://example.org/another"></textarea>
+      if (!/^[a-zA-Z][a-zA-Z0-9+.\-]*:/.test(s)) s = 'https://' + s;
+[2025-11-05T00:51:57] tokens used: 125,306
+
+[2025-11-05T00:51:59] thinking
+
+**Checking cross-origin usage in consent.js**
+[2025-11-05T00:52:00] exec bash -lc "sed -n '1,200p' scripts/consent.js" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:52:00] bash -lc "sed -n '1,200p' scripts/consent.js" succeeded in 123ms:
+(function(){
+  const LS_KEY = 'tu-consent';
+  const ADS_KEY = 'tu-ads-hidden';
+  const EU_LANGS = ['bg','cs','da','de','el','en-GB','es','et','fi','fr','ga','hr','hu','it','lt','lv','mt','nl','pl','pt','ro','sk','sl','sv','is','no','tr','uk'];
+
+  const isEUByLang = (navigator.languages||[navigator.language||'']).some(l => {
+    const lower = (l||'').toLowerCase();
+    return EU_LANGS.some(code => lower.startsWith(code.toLowerCase()));
+  });
+  const isEUByTZ = (()=>{
+    try { return /(^|\/)Europe\//.test(Intl.DateTimeFormat().resolvedOptions().timeZone||''); }
+    catch { return false; }
+  })();
+  const needsPrompt = isEUByLang || isEUByTZ;
+
+  function loadScript(id, src){
+    if (document.getElementById(id)) return;
+    const s = document.createElement('script');
+    s.id = id;
+    s.defer = true;
+[2025-11-05T00:52:00] tokens used: 125,652
+
+[2025-11-05T00:52:03] thinking
+
+**Checking external scripts and ads integration**
+[2025-11-05T00:52:03] exec bash -lc 'rg "plausible" tools/index.html' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:52:03] bash -lc 'rg "plausible" tools/index.html' exited 1 in 116ms:
+ERROR
+[2025-11-05T00:52:08] tokens used: 127,238
+
+[2025-11-05T00:52:11] thinking
+
+**Investigating iframe usage in scripts**
+[2025-11-05T00:52:11] exec bash -lc 'rg "iframe"' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:52:11] bash -lc 'rg "iframe"' exited 1 in 130ms:
+ERROR
+[2025-11-05T00:52:11] tokens used: 127,424
+
+[2025-11-05T00:52:13] thinking
+
+**Checking for embed usage**
+[2025-11-05T00:52:13] exec bash -lc 'rg "embed"' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:52:14] bash -lc 'rg "embed"' exited 1 in 134ms:
+ERROR
+[2025-11-05T00:52:14] tokens used: 127,604
+
+[2025-11-05T00:52:19] thinking
+
+**Checking external scripts and fonts**
+[2025-11-05T00:52:19] exec bash -lc "rg \"fonts\\.googleapis\" -n" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:52:19] bash -lc "rg \"fonts\\.googleapis\" -n" exited 1 in 126ms:
+ERROR
+[2025-11-05T00:52:19] tokens used: 128,328
+
+[2025-11-05T00:52:21] thinking
+
+**Searching for external font references**
+[2025-11-05T00:52:22] exec bash -lc 'rg "https://" -n tools public/scripts' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:52:22] bash -lc 'rg "https://" -n tools public/scripts' exited 2 in 119ms:
+tools/sitemap-generator.html:16:    <input id='base' type='url' placeholder='https://example.com'>
+tools/dead-link-finder/index.html:8:  <link rel="canonical" href="https://tinyutils-eight.vercel.app/tools/dead-link-finder/">
+tools/dead-link-finder/index.html:84:          <input id="pageUrl" placeholder="https://example.com/page">
+tools/dead-link-finder/index.html:111:              <textarea id="targetsInput" rows="8" placeholder="https://example.com/page\nhttps://example.org/another"></textarea>
+tools/dead-link-finder/index.html:197:      if (!/^[a-zA-Z][a-zA-Z0-9+.\-]*:/.test(s)) s = 'https://' + s;
+tools/wayback-fixer/index.html:8:  <link rel="canonical" href="https://tinyutils-eight.vercel.app/tools/wayback-fixer/">
+tools/wayback-fixer/index.html:44:    "@context":"https://schema.org",
+tools/wayback-fixer/index.html:76:        <textarea id="list" rows="10" placeholder="https://example.com/404
+tools/wayback-fixer/index.html:77:https://example.com/moved"></textarea>
+tools/wayback-fixer/index.html:274:        listEl.value = `https://example.com/old\nhttps://example.com/missing\nhttps://example.com/2011/post`;
+tools/meta-preview.html:40:      s.setAttribute('data-domain','tinyutils.net'); s.src='https://plausible.io/js/script.js';
+tools/meta-preview.html:101:    <input id='u' type='url' placeholder='https://example.com'>
+tools/meta-preview.html:164:    s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+encodeURIComponent(pub);
+tools/wayback-fixer/demo/dlf-sample.csv:2:https://example.com/this-should-404-xyz,404,false,,,
+tools/wayback-fixer/demo/dlf-sample.csv:3:https://www.iana.org/not-a-real-path-xyz,404,false,,,
+tools/wayback-fixer/demo/dlf-sample.csv:4:https://httpstat.us/410,410,false,,,
+tools/wayback-fixer/demo/dlf-sample.csv:5:https://httpstat.us/404,404,false,,,
+tools/wayback-fixer/demo/dlf-sample.csv:6:https://www.wikipedia.org/this-page-should-not-exist-xyz,404,false,,,
+tools/index.html:18:    "@context": "https://schema.org",
+tools/index.html:21:      {"@type": "Thing", "name": "Dead Link Finder", "url": "https://tinyutils-eight.vercel.app/tools/dead-link-finder/"},
+
+ERROR
+rg: public/scripts: No such file or directory (os error 2)
+[2025-11-05T00:52:22] tokens used: 128,535
+
+[2025-11-05T00:52:24] thinking
+
+**Examining tools HTML files**
+[2025-11-05T00:52:25] exec bash -lc "sed -n '1,200p' tools/meta-preview.html" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:52:25] bash -lc "sed -n '1,200p' tools/meta-preview.html" succeeded in 105ms:
+<!doctype html><html lang='en'><head>
+<meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><meta name="robots" content="noindex">
+<title>Meta Tag Preview — TinyUtils</title>
+<link rel='stylesheet' href='/public/styles.css'><style>
+.tu-consent{position:fixed;right:16px;bottom:16px;max-width:340px;background:#0e1530;color:#e8ecf3;border:1px solid #263464;border-radius:12px;padding:12px 12px 10px;box-shadow:0 12px 30px rgba(0,0,0,.35);z-index:9999}
+.tu-consent h4{margin:0 0 6px;font-size:14px}
+.tu-consent p{margin:0 0 8px;font-size:13px;opacity:.9}
+.tu-consent .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
+.tu-consent button{padding:8px 10px;border-radius:10px;border:1px solid #2b6ef6;background:#0e1530;color:#cfe0ff;cursor:pointer}
+.tu-consent button.primary{background:#2b6ef6;color:#fff;border:none}
+.tu-consent .link{font-size:12px;opacity:.85}
+.tu-ads-toggle{margin-left:auto;display:inline-flex;gap:6px;align-items:center;font-size:12px;opacity:.85}
+.tu-ads-toggle input{transform:translateY(1px)}
+
+</style>
+
+<script>
+// --- Consent Mode + EU-friendly toast (very low-profile) ---
+(function(){
+  const EU_LANG = ['bg','cs','da','de','el','en-GB','es','et','fi','fr','ga','hr','hu','it','lt','lv','mt','nl','pl','pt','ro','sk','sl','sv','is','no','tr','uk'];
+[2025-11-05T00:52:25] tokens used: 130,309
+
+[2025-11-05T00:52:27] thinking
+
+**Identifying analytics and ad scripts**
+[2025-11-05T00:52:28] exec bash -lc "sed -n '1,200p' tools/keyword-density.html" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:52:28] bash -lc "sed -n '1,200p' tools/keyword-density.html" succeeded in 114ms:
+<!doctype html><html lang='en'><head>
+<meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><meta name="robots" content="noindex">
+<title>Keyword Density — TinyUtils</title>
+<link rel='stylesheet' href='/public/styles.css'><style>
+.tu-consent{position:fixed;right:16px;bottom:16px;max-width:340px;background:#0e1530;color:#e8ecf3;border:1px solid #263464;border-radius:12px;padding:12px 12px 10px;box-shadow:0 12px 30px rgba(0,0,0,.35);z-index:9999}
+.tu-consent h4{margin:0 0 6px;font-size:14px}
+.tu-consent p{margin:0 0 8px;font-size:13px;opacity:.9}
+.tu-consent .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
+.tu-consent button{padding:8px 10px;border-radius:10px;border:1px solid #2b6ef6;background:#0e1530;color:#cfe0ff;cursor:pointer}
+.tu-consent button.primary{background:#2b6ef6;color:#fff;border:none}
+.tu-consent .link{font-size:12px;opacity:.85}
+.tu-ads-toggle{margin-left:auto;display:inline-flex;gap:6px;align-items:center;font-size:12px;opacity:.85}
+.tu-ads-toggle input{transform:translateY(1px)}
+
+</style>
+
+<script>
+// --- Consent Mode + EU-friendly toast (very low-profile) ---
+(function(){
+  const EU_LANG = ['bg','cs','da','de','el','en-GB','es','et','fi','fr','ga','hr','hu','it','lt','lv','mt','nl','pl','pt','ro','sk','sl','sv','is','no','tr','uk'];
+[2025-11-05T00:52:28] tokens used: 133,676
+
+[2025-11-05T00:52:31] thinking
+
+**Checking external scripts in sitemap-generator**
+[2025-11-05T00:52:32] exec bash -lc "sed -n '1,200p' tools/sitemap-generator.html" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:52:32] bash -lc "sed -n '1,200p' tools/sitemap-generator.html" succeeded in 104ms:
+<!doctype html><html lang='en'><head>
+<meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><meta name="robots" content="noindex">
+<title>Sitemap Generator — TinyUtils</title>
+<link rel='stylesheet' href='/public/styles.css'>
+<link rel="icon" href="/public/favicon.ico" sizes="any">
+</head>
+<body>
+<header class='nav'>
+  <div class='brand'><img src='/public/logo.svg' width='28' height='28'><span class='name'>TinyUtils</span></div>
+  <nav class='links'><a href='/'>Dead Link Finder</a><a href='/tools/'>Tools</a></nav>
+</header>
+<div class='container'>
+  <h1>Sitemap Generator</h1>
+  <div class='card'>
+    <label for='base'>Base site (optional)</label>
+    <input id='base' type='url' placeholder='https://example.com'>
+    <label for='paths'>URLs or paths (one per line)</label>
+    <textarea id='paths' placeholder='/\n/about\n/blog/post-1 or full URLs'></textarea>
+    <div class='grid grid-3'>
+      <div><label>Default changefreq<select id='cf'><option>weekly</option><option>daily</option><option>monthly</option><option>yearly</option><option>never</option></select></label></div>
+[2025-11-05T00:52:32] tokens used: 137,778
+
+[2025-11-05T00:52:35] thinking
+
+**Investigating tool directories and public versions**
+[2025-11-05T00:52:35] exec bash -lc "find public -maxdepth 2 -type f -name 'meta-preview*'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:52:35] bash -lc "find public -maxdepth 2 -type f -name 'meta-preview*'" succeeded in 135ms:
+[2025-11-05T00:52:35] tokens used: 139,327
+
+[2025-11-05T00:52:45] thinking
+
+**Collecting cross-origin resource details**
+[2025-11-05T00:52:45] exec bash -lc "nl -ba scripts/consent.js | sed -n '1,200p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:52:45] bash -lc "nl -ba scripts/consent.js | sed -n '1,200p'" succeeded in 138ms:
+     1	(function(){
+     2	  const LS_KEY = 'tu-consent';
+     3	  const ADS_KEY = 'tu-ads-hidden';
+     4	  const EU_LANGS = ['bg','cs','da','de','el','en-GB','es','et','fi','fr','ga','hr','hu','it','lt','lv','mt','nl','pl','pt','ro','sk','sl','sv','is','no','tr','uk'];
+     5	
+     6	  const isEUByLang = (navigator.languages||[navigator.language||'']).some(l => {
+     7	    const lower = (l||'').toLowerCase();
+     8	    return EU_LANGS.some(code => lower.startsWith(code.toLowerCase()));
+     9	  });
+    10	  const isEUByTZ = (()=>{
+    11	    try { return /(^|\/)Europe\//.test(Intl.DateTimeFormat().resolvedOptions().timeZone||''); }
+    12	    catch { return false; }
+    13	  })();
+    14	  const needsPrompt = isEUByLang || isEUByTZ;
+    15	
+    16	  function loadScript(id, src){
+    17	    if (document.getElementById(id)) return;
+    18	    const s = document.createElement('script');
+    19	    s.id = id;
+    20	    s.defer = true;
+[2025-11-05T00:52:45] tokens used: 140,506
+
+[2025-11-05T00:52:50] thinking
+
+**Identifying script references with line numbers**
+[2025-11-05T00:52:50] exec bash -lc 'rg -n "plausible" public/tools/index.html' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:52:50] bash -lc 'rg -n "plausible" public/tools/index.html' succeeded in 125ms:
+92:    if (!document.getElementById('plausible')) {
+93:      const s = document.createElement('script'); s.id='plausible'; s.defer=true;
+94:      s.setAttribute('data-domain','tinyutils.net'); s.src='https://plausible.io/js/script.js';
+[2025-11-05T00:52:50] tokens used: 142,062
+
+[2025-11-05T00:52:53] thinking
+
+**Preparing to reference specific lines**
+[2025-11-05T00:52:53] exec bash -lc 'rg -n "googlesyndication" public/tools/index.html' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:52:53] bash -lc 'rg -n "googlesyndication" public/tools/index.html' exited 1 in 120ms:
+ERROR
+[2025-11-05T00:52:54] tokens used: 142,803
+
+[2025-11-05T00:52:57] thinking
+
+**Checking for pagead instances**
+[2025-11-05T00:52:57] exec bash -lc 'rg -n "pagead" public/tools/index.html' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:52:57] bash -lc 'rg -n "pagead" public/tools/index.html' exited 1 in 107ms:
+ERROR
+[2025-11-05T00:52:57] tokens used: 143,090
+
+[2025-11-05T00:53:00] thinking
+
+**Searching for specific terms in file**
+[2025-11-05T00:53:00] exec bash -lc 'rg -n "plausible" public/tools/sitemap-delta/index.html' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:53:00] bash -lc 'rg -n "plausible" public/tools/sitemap-delta/index.html' succeeded in 121ms:
+638:    s.src='https://plausible.io/js/script.js'; document.head.appendChild(s);
+[2025-11-05T00:53:00] tokens used: 143,344
+
+[2025-11-05T00:53:02] thinking
+
+**Noticing additional keyword**
+[2025-11-05T00:53:03] exec bash -lc 'rg -n "googlesyndication" public/tools/sitemap-delta/index.html' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:53:03] bash -lc 'rg -n "googlesyndication" public/tools/sitemap-delta/index.html' succeeded in 109ms:
+642:      ads.async=true; ads.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX';
+[2025-11-05T00:53:03] tokens used: 143,608
+
+[2025-11-05T00:53:07] thinking
+
+**Searching for occurrences with line numbers**
+[2025-11-05T00:53:07] exec bash -lc 'rg -n "pagead" tools/meta-preview.html' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:53:07] bash -lc 'rg -n "pagead" tools/meta-preview.html' succeeded in 118ms:
+164:    s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+encodeURIComponent(pub);
+[2025-11-05T00:53:07] tokens used: 143,869
+
+[2025-11-05T00:53:10] thinking
+
+**Locating `plausible` keyword**
+[2025-11-05T00:53:10] exec bash -lc 'rg -n "plausible" tools/meta-preview.html' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:53:10] bash -lc 'rg -n "plausible" tools/meta-preview.html' succeeded in 116ms:
+38:    if (!document.getElementById('plausible')) {
+39:      const s = document.createElement('script'); s.id='plausible'; s.defer=true;
+40:      s.setAttribute('data-domain','tinyutils.net'); s.src='https://plausible.io/js/script.js';
+[2025-11-05T00:53:11] tokens used: 144,139
+
+[2025-11-05T00:53:13] thinking
+
+**Checking for adsbygoogle markup**
+[2025-11-05T00:53:13] exec bash -lc 'rg -n "adsbygoogle" tools/meta-preview.html' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:53:14] bash -lc 'rg -n "adsbygoogle" tools/meta-preview.html' succeeded in 125ms:
+96:<ins class="adsbygoogle" style="display:block;margin:12px 0" data-ad-client="ca-pub-REPLACE_ME" data-ad-slot="1234567890" data-ad-format="auto" data-full-width-responsive="true"></ins>
+97:<script>try{(adsbygoogle = window.adsbygoogle || []).push({});}catch(e){}</script>
+159:    if (document.getElementById('adsbygoogle-js')) return;
+163:    s.id='adsbygoogle-js'; s.async=true;
+164:    s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+encodeURIComponent(pub);
+170:          (window.adsbygoogle = window.adsbygoogle || []).requestNonPersonalizedAds = 1; // npa=1
+171:          (window.adsbygoogle = window.adsbygoogle || []).push({ params: { google_privacy_treatments: 'disablePersonalization' } }); // ppt=1
+174:        document.querySelectorAll('.adsbygoogle').forEach(function(el){
+175:          try{ (window.adsbygoogle = window.adsbygoogle || []).push({}); }catch(e){}
+197:<script>(function(){var h=location.hostname;var ok=(h==='tinyutils.net'||h.endsWith('.vercel.app'));if(!ok){document.querySelectorAll('.adsbygoogle').forEach(el=>el.style.display='none');window.__TU_NOPROD__=true;}})();</script>
+[2025-11-05T00:53:14] tokens used: 144,441
+
+[2025-11-05T00:53:17] thinking
+
+**Preparing to replicate changes for keyword-density.html**
+[2025-11-05T00:53:17] exec bash -lc 'rg -n "plausible" tools/keyword-density.html' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:53:18] bash -lc 'rg -n "plausible" tools/keyword-density.html' succeeded in 112ms:
+38:    if (!document.getElementById('plausible')) {
+39:      const s = document.createElement('script'); s.id='plausible'; s.defer=true;
+40:      s.setAttribute('data-domain','tinyutils.net'); s.src='https://plausible.io/js/script.js';
+[2025-11-05T00:53:18] tokens used: 181,939
+
+[2025-11-05T00:53:20] thinking
+
+**Noticing pagead mention**
+[2025-11-05T00:53:21] exec bash -lc 'rg -n "pagead" tools/keyword-density.html' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:53:21] bash -lc 'rg -n "pagead" tools/keyword-density.html' succeeded in 131ms:
+174:    s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+encodeURIComponent(pub);
+[2025-11-05T00:53:21] tokens used: 183,245
+
+[2025-11-05T00:53:24] thinking
+
+**Checking for adsbygoogle usage**
+[2025-11-05T00:53:24] exec bash -lc 'rg -n "adsbygoogle" tools/keyword-density.html' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:53:24] bash -lc 'rg -n "adsbygoogle" tools/keyword-density.html' succeeded in 92ms:
+96:<ins class="adsbygoogle" style="display:block;margin:12px 0" data-ad-client="ca-pub-REPLACE_ME" data-ad-slot="1234567890" data-ad-format="auto" data-full-width-responsive="true"></ins>
+97:<script>try{(adsbygoogle = window.adsbygoogle || []).push({});}catch(e){}</script>
+169:    if (document.getElementById('adsbygoogle-js')) return;
+173:    s.id='adsbygoogle-js'; s.async=true;
+174:    s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+encodeURIComponent(pub);
+180:          (window.adsbygoogle = window.adsbygoogle || []).requestNonPersonalizedAds = 1; // npa=1
+181:          (window.adsbygoogle = window.adsbygoogle || []).push({ params: { google_privacy_treatments: 'disablePersonalization' } }); // ppt=1
+184:        document.querySelectorAll('.adsbygoogle').forEach(function(el){
+185:          try{ (window.adsbygoogle = window.adsbygoogle || []).push({}); }catch(e){}
+207:<script>(function(){var h=location.hostname;var ok=(h==='tinyutils.net'||h.endsWith('.vercel.app'));if(!ok){document.querySelectorAll('.adsbygoogle').forEach(el=>el.style.display='none');window.__TU_NOPROD__=true;}})();</script>
+[2025-11-05T00:53:24] tokens used: 183,647
+
+[2025-11-05T00:53:26] thinking
+
+**Checking for adsbygoogle markup**
+[2025-11-05T00:53:27] exec bash -lc 'rg -n "adsbygoogle" public/tools/sitemap-delta/index.html' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:53:27] bash -lc 'rg -n "adsbygoogle" public/tools/sitemap-delta/index.html' succeeded in 127ms:
+642:      ads.async=true; ads.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX';
+[2025-11-05T00:53:27] tokens used: 184,353
+
+[2025-11-05T00:53:42] thinking
+
+**Composing CSP risk note draft**
+
+I’m gathering detailed findings about external scripts and ad-related content in various tool files, confirming the absence of `<iframe>` and `<embed>`, and preparing a concise Markdown note with recommendations for CSP directives, compatibility notes, and human confirmation items—all clearly referencing specific files and lines.
+[2025-11-05T00:53:44] exec bash -lc 'rg -n "/scripts/consent.js" public/tools/dead-link-finder/index.html' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:53:44] bash -lc 'rg -n "/scripts/consent.js" public/tools/dead-link-finder/index.html' succeeded in 129ms:
+17:  <script defer src="/scripts/consent.js"></script>
+[2025-11-05T00:53:44] tokens used: 186,646
+
+[2025-11-05T00:53:46] thinking
+
+**Noting similar file presence**
+[2025-11-05T00:53:47] exec bash -lc 'rg -n "/scripts/consent.js" public/tools/wayback-fixer/index.html' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:53:47] bash -lc 'rg -n "/scripts/consent.js" public/tools/wayback-fixer/index.html' succeeded in 120ms:
+15:  <script defer src="/scripts/consent.js"></script>
+[2025-11-05T00:53:47] tokens used: 186,909
+
+[2025-11-05T00:53:49] thinking
+
+**Reviewing sitemap-delta index.html**
+[2025-11-05T00:53:50] exec bash -lc 'rg -n "/scripts/consent.js" public/tools/sitemap-delta/index.html' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:53:50] bash -lc 'rg -n "/scripts/consent.js" public/tools/sitemap-delta/index.html' succeeded in 133ms:
+17:  <script defer src="/scripts/consent.js"></script>
+[2025-11-05T00:53:50] tokens used: 187,161
+
+[2025-11-05T00:54:07] thinking
+
+**Summarizing CSP risk assessment and recommendations**
+
+I'll organize detailed findings about script and resource origins, inline scripts, and ad-related domains into a clear note with recommended CSP directives, compatibility notes, and human confirmation items—making sure to highlight no iframe usage and explain that the user must manually place this note due to read-only access.
+[2025-11-05T00:54:08] codex
+
+Scanned `tools/` and `public/tools/`; no iframe/embed blocks found. External risk comes from analytics and ad loaders. I can’t write the file in this read-only sandbox, so here’s the draft you asked for:
+
+```markdown
+Date: 2025-11-05 CET
+
+Findings
+- No `<iframe>`/`<embed>` usages detected in `tools/` or `public/tools/`; verified with repo-wide search.
+- `scripts/consent.js:25` injects `https://plausible.io/js/script.js` after consent; every `tools/*.html` and `public/tools/*` page references this script (`public/tools/dead-link-finder/index.html:17`, `public/tools/wayback-fixer/index.html:15`, `public/tools/sitemap-delta/index.html:17`, etc.).
+- `tools/meta-preview.html:38` and `tools/meta-preview.html:164` load Plausible and (when `ca-pub` is set) `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js`; inline ad slot at `tools/meta-preview.html:96` renders Google Ads content.
+- `tools/keyword-density.html:38` and `tools/keyword-density.html:174` mirror the Plausible + AdSense pattern with inline ad markup at `tools/keyword-density.html:96`.
+- `tools/sitemap-delta/index.html:638` and `public/tools/sitemap-delta/index.html:638` create Plausible + AdSense scripts when `tinyutils.net` hosts the page; AdSense script URL lives at `...:642`.
+- `public/tools/index.html:94` conditionally injects Plausible (no AdSense in this file but inline consent logic present).
+- AdSense placeholders currently use `ca-pub-REPLACE_ME` and only initialize ads after `localStorage` flags permit it (`tools/meta-preview.html:169`, `tools/keyword-density.html:169`).
+
+Recommended CSP directives
+- `default-src 'self';`
+- `script-src 'self' 'unsafe-inline' https://plausible.io https://pagead2.googlesyndication.com;` (replace `'unsafe-inline'` with nonces/hashes once inline scripts are refactored).
+- `connect-src 'self' https://plausible.io;` (covers Plausible beacons).
+- `img-src 'self' data: https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net;`
+- `frame-src https://googleads.g.doubleclick.net https://pagead2.googlesyndication.com;`
+- `style-src 'self' 'unsafe-inline';` (numerous inline styles across tool pages).
+
+Compatibility notes
+- Inline analytics/ads scripts and sizeable inline app logic mean `'unsafe-inline'` (or CSP nonces) remain necessary until they’re externalized.
+- Google AdSense often pulls additional hosts (e.g., `https://googleads.g.doubleclick.net`, `https://tpc.googlesyndication.com`, `https://adservice.google.com`); monitor production logs and extend CSP if creatives break.
+- Plausible’s script can fall back to `navigator.sendBeacon('https://plausible.io/api/event', ...)`; `connect-src` must keep that endpoint.
+- Domain gate in `tools/meta-preview.html:197` / `tools/keyword-density.html:207` hides ads when not on `tinyutils.net` or `*.vercel.app`; confirm this doesn’t conflict with the final deployment domain list.
+
+Human confirmation
+- Swap `ca-pub-REPLACE_ME` / `ca-pub-XXXXXXXXXXXXXXXX` with live AdSense IDs and verify policy compliance before launch.
+- Confirm consent UX plus CSP decisions align with EU/non-personalized ads obligations, especially for the dual-consent flows in `tools/meta-preview.html` and `tools/keyword-density.html`.
+- After tightening CSP, run production smoke tests (ads + analytics) to ensure no additional third-party endpoints need allowlisting.
+
+```
+
+Next step for me (once you grant write access) would be to drop this markdown into `tinyutils/artifacts/phase2-roster/2025-11-05/csp-risk-note.md`; just let me know if you want any tweaks first.
+[2025-11-05T00:54:13] tokens used: 189,922

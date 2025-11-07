@@ -1,0 +1,112 @@
+I'll help you create a concrete 5-8 step plan for deploying your TinyUtils universal converter backend to Vercel with proper automation, testing, and documentation. Let me first explore the current project structure to understand the existing implementation.
+
+Great! I can see the project structure. Let me examine the key files related to the universal converter backend and Vercel deployment:
+
+Now let me check the API structure and the deployment configuration:
+
+Now let me check the Vercel configuration and deployment files:
+
+Now let me check the requirements and test structure:
+
+Let me check if there are any existing tests and deployment scripts:
+
+Perfect! I can see there are already scripts for deployment. Let me check the deployment scripts:
+
+Let me also check the converter preview smoke script:
+
+Let me also check the documentation and checklist files mentioned in the README:
+
+Now let me check the PREVIEW_SMOKE_CHECKLIST.md and DEPLOY_PRODUCTION_CHECKLIST.md:
+
+Let me update the first todo and check the log_run_entry.py script that was mentioned in the README:
+
+Let me complete the first task manually and move to the next one:
+
+Now let me examine the convert library:
+
+Now let me check the log_run_entry.py script:
+
+Let me also check the add_task_checklist_entry.py script:
+
+Let me update the second task and move to the next:
+
+I've already examined the Vercel configuration in the vercel.json file earlier. Let me check the deployment script more thoroughly to understand the current setup:
+
+Now let me check the existing test coverage:
+
+Let me look at the test folder structure:
+
+Let me check the conversion API tests:
+
+Now let me complete the assessment and create the deployment plan:
+
+Based on my comprehensive analysis of the TinyUtils codebase, I now have a clear understanding of the current implementation and can create a detailed 5-8 step deployment plan. Let me complete the final task:
+
+# TinyUtils Universal Converter Backend - Deployment Plan
+
+Based on my analysis of your project, here is a comprehensive 5-8 step deployment plan addressing all your requirements:
+
+## 1. Enable Credentials & CLI Authentication
+- **Action:** Set up Vercel API token as environment variable `VERCEL_TOKEN` and optional `VERCEL_SCOPE`
+- **Rationale:** The existing `deploy_and_smoke_convert.sh` script already checks for these variables and fails gracefully if missing
+- **Verification:** Run `vercel whoami` after setting credentials to verify authentication
+- **Automation:** Use Vercel dashboard to manage tokens securely; implement credential rotation policy
+
+## 2. Reliable Preview Deploy with Retry Logic & Build Wait
+- **Action:** Enhance existing deployment script with retry logic (3 attempts) and build completion polling
+- **Implementation:** The `deploy_and_smoke_convert.sh` script already handles deployment, but needs enhancement:
+  - Add exponential backoff for deploy retries (10s, 30s, 60s)
+  - Implement polling mechanism to verify build completion before smoke testing
+  - Check endpoint availability with GET requests until 200 status or timeout after 5 minutes
+- **Rationale:** Vercel deployments can occasionally have transient issues; build wait ensures endpoints are ready before testing
+
+## 3. Converter Preview Smoke & Artifact Capture
+- **Action:** Execute converter-specific smoke tests and capture artifacts with Madrid timestamps
+- **Implementation:** Use existing `scripts/smoke_convert_preview.mjs` which already:
+  - Tests various conversion formats (md, txt, html)
+  - Creates Madrid-timestamped artifact directories
+  - Saves response payloads for verification
+- **Enhancement:** Add more comprehensive test cases covering edge cases (large files, special formats, error conditions)
+
+## 4. Documentation & Checklist Updates
+- **Action:** Update operational checklists with converter-specific verification steps
+- **Implementation:**
+  - Use `scripts/log_run_entry.py` to add converter deployment entries to `docs/AGENT_RUN_LOG.md`
+  - Use `scripts/add_task_checklist_entry.py` to update `docs/AGENT_TASK_CHECKLIST.md`
+  - Append Madrid-timestamped entries to `PREVIEW_SMOKE_CHECKLIST.md` for converter verification
+- **Rationale:** Maintains traceability and compliance with existing TinyUtils operational procedures
+
+## 5. Rollback/Bench Policy for Deploy Lane
+- **Action:** Implement rollback mechanism and performance benchmarking
+- **Implementation:**
+  - Use Vercel's deployment aliasing to maintain stable references during deployments
+  - Store previous deployment IDs to enable quick rollback if smoke tests fail
+  - Create performance bench tests that measure conversion speed and memory usage
+  - Add health check endpoints to verify converter service status
+- **Rationale:** Ensures deployment safety and performance consistency
+
+## 6. Verification Evidence Capture
+- **Action:** Systematically capture and store verification evidence by Madrid timestamp conventions
+- **Implementation:**
+  - Current script already creates artifacts in `artifacts/convert/YYYYMMDD/smoke-preview-YYYYMMDDHHMMSS/`
+  - Include response time measurements, error logs, and successful conversion artifacts
+  - Capture environment variables and tool versions (pandoc version, Python version)
+  - Store both success and failure cases for debugging
+
+## 7. Environment Variables & Configuration Validation
+- **Action:** Validate all required converter configurations before deployment
+- **Implementation:**
+  - Verify `MAX_FILE_MB`, `MAX_BATCH_MB`, `PREVIEW_HEADINGS_N`, `PREVIEW_SNIPPETS_M`, `DIFF_TRUNCATE_KB` are properly set
+  - Test blob storage configuration with `BLOB_READ_WRITE_TOKEN`
+  - Validate API rate limiting and security headers
+- **Rationale:** Prevents runtime failures due to missing or incorrect configurations
+
+## 8. Integration with Existing Operational Workflows
+- **Action:** Ensure seamless integration with existing TinyUtils preview workflows
+- **Implementation:**
+  - Maintain compatibility with existing preview fence mechanism
+  - Preserve existing API contracts and security headers from `vercel.json`
+  - Ensure converter endpoints follow existing `/api/` pattern and security policies
+- **Rationale:** Maintains consistency with established deployment and security practices
+
+This plan leverages your existing infrastructure while addressing all requested requirements for automated deployment, testing, documentation, and verification of the universal converter backend.

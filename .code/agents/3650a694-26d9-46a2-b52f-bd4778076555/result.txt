@@ -1,0 +1,85 @@
+[2025-11-04T15:42:47] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-draft-pr3-description
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-04T15:42:47] User instructions:
+Draft the PR3 description: summary, changed files, rewrites overview, acceptance checks, and curl examples for with/without secret. End with next steps: set PREVIEW_SECRET in Vercel env and re-verify after merge. Changes: add api/fence.js (Edge, cookie-based), add vercel.json rewrites for gated tools (/tools/keyword-density, /tools/meta-preview, /tools/sitemap-generator), document PREVIEW_SECRET usage. Acceptance checklist: public tools remain public; gated tools 401 w/o secret and 200 with ?preview_secret=… or x-preview-secret. Include short header snippets and note SSO may cause 401 while still showing expected headers. Mark Depends-On: #22.
+[2025-11-04T15:42:47] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-draft-pr3-description
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-04T15:42:47] User instructions:
+Draft the PR3 description: summary, changed files, rewrites overview, acceptance checks, and curl examples for with/without secret. End with next steps: set PREVIEW_SECRET in Vercel env and re-verify after merge. Changes: add api/fence.js (Edge, cookie-based), add vercel.json rewrites for gated tools (/tools/keyword-density, /tools/meta-preview, /tools/sitemap-generator), document PREVIEW_SECRET usage. Acceptance checklist: public tools remain public; gated tools 401 w/o secret and 200 with ?preview_secret=… or x-preview-secret. Include short header snippets and note SSO may cause 401 while still showing expected headers. Mark Depends-On: #22.
+
+[2025-11-04T15:43:08] thinking
+
+**Drafting detailed PR3 description**
+
+I'll write a structured PR3 summary covering changed files, rewrites, acceptance checks (including SSO note), cURL examples with header snippets, and next steps with numbered tasks. The content will follow the user's formatting and guideline preferences closely.
+[2025-11-04T15:43:09] codex
+
+**Summary**
+- Adds an Edge Runtime fence at `api/fence.js` to scope preview access via cookie + preview secret, wires new rewrites for gated tools, and documents the new `PREVIEW_SECRET` flow for Vercel deploys.
+
+**Changed Files**
+- `api/fence.js` – preview fence (Edge, cookie-aware, validates query/header secrets, sets bypass cookie).
+- `vercel.json` – rewrites `/tools/keyword-density`, `/tools/meta-preview`, `/tools/sitemap-generator` through the fence while keeping public tools untouched.
+- Documentation (preview section) – explains how to provision and use `PREVIEW_SECRET`, including cookie clearing for rotation.
+
+**Rewrites Overview**
+- Public routes continue to hit their existing handlers directly; only the three premium tool routes rewrite to `/api/fence`.
+- Fence inspects `preview_secret` query, `x-preview-secret` header, or existing cookie, returning 401 with `x-preview-protected: required` when missing/invalid and 200 with `x-preview-protected: bypassed` once accepted.
+
+**Acceptance Checks**
+- Public tools remain accessible without authentication.
+- Gated tools return 401 with `x-preview-protected: required` when no valid secret is supplied.
+- Gated tools return 200 with `x-preview-protected: bypassed` when called with either `?preview_secret=...` or `x-preview-secret: ...`.
+- Edge fence sets the preview bypass cookie after a validated request.
+- ⚠️ SSO/IdP redirects can still surface 401s even after bypass; confirm by inspecting the headers above rather than status alone.
+
+**cURL Examples**
+- Without secret:
+  ```bash
+  curl -i https://tinyutils.com/tools/keyword-density
+  ```
+  ```
+  HTTP/2 401
+  x-preview-protected: required
+  ```
+- With query param secret:
+  ```bash
+  curl -i "https://tinyutils.com/tools/keyword-density?preview_secret=$PREVIEW_SECRET"
+  ```
+  ```
+  HTTP/2 200
+  x-preview-protected: bypassed
+  set-cookie: preview-bypass=1; Path=/; Secure; HttpOnly; SameSite=Lax
+  ```
+- With header secret (useful for scripts once cookie exists):
+  ```bash
+  curl -i https://tinyutils.com/tools/keyword-density \
+    -H "x-preview-secret: $PREVIEW_SECRET"
+  ```
+  ```
+  HTTP/2 200
+  x-preview-protected: bypassed
+  ```
+
+**Next Steps**
+1. Set `PREVIEW_SECRET` in the Vercel project environment (Production + Preview).
+2. Re-verify the gated routes after merging to confirm the bypass cookie and headers behave as expected.
+
+Depends-On: #22
+[2025-11-04T15:43:15] tokens used: 7,197

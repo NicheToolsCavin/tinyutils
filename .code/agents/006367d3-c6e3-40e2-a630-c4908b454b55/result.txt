@@ -1,0 +1,165 @@
+[2025-11-07T02:54:44] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-tinyutils-scripts-deploy-preview
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-07T02:54:44] User instructions:
+Create tinyutils/scripts/deploy_preview.sh implementing the full preview deploy + smoke + artifacts + log flow as described; make it executable; do not run it.
+
+Context: Prepare, but do not execute, a shell script at tinyutils/scripts/deploy_preview.sh. The script should: set -euo pipefail; verify Vercel CLI; run `vercel pull --environment=preview --yes` if token/scope are present; deploy preview (`vercel deploy --yes --confirm`), capture the preview URL; export PREVIEW_URL; run `node scripts/smoke_dlf_preview.mjs` (no tiny-reactive) to hit converter API; save responses/logs under tinyutils/artifacts/convert/<YYYYMMDD>/preview-<timestamp>/; append a Madrid-timestamped summary to tinyutils/docs/AGENT_RUN_LOG.md with the URL and artifact path. Avoid echoing secrets; guard missing envs with clear exits.
+[2025-11-07T02:54:44] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-tinyutils-scripts-deploy-preview
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-07T02:54:44] User instructions:
+Create tinyutils/scripts/deploy_preview.sh implementing the full preview deploy + smoke + artifacts + log flow as described; make it executable; do not run it.
+
+Context: Prepare, but do not execute, a shell script at tinyutils/scripts/deploy_preview.sh. The script should: set -euo pipefail; verify Vercel CLI; run `vercel pull --environment=preview --yes` if token/scope are present; deploy preview (`vercel deploy --yes --confirm`), capture the preview URL; export PREVIEW_URL; run `node scripts/smoke_dlf_preview.mjs` (no tiny-reactive) to hit converter API; save responses/logs under tinyutils/artifacts/convert/<YYYYMMDD>/preview-<timestamp>/; append a Madrid-timestamped summary to tinyutils/docs/AGENT_RUN_LOG.md with the URL and artifact path. Avoid echoing secrets; guard missing envs with clear exits.
+
+[2025-11-07T02:54:48] thinking
+
+**Assessing sandbox limitations**
+[2025-11-07T02:54:49] exec bash -lc ls in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-tinyutils-scripts-deploy-preview
+[2025-11-07T02:54:49] bash -lc ls succeeded in 126ms:
+[2025-11-07T02:54:49] tokens used: 5,778
+
+[2025-11-07T02:54:50] thinking
+
+**Investigating empty directory listing**
+[2025-11-07T02:54:50] exec bash -lc 'ls -a' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-tinyutils-scripts-deploy-preview
+[2025-11-07T02:54:51] bash -lc 'ls -a' succeeded in 104ms:
+.
+..
+.git
+[2025-11-07T02:54:51] tokens used: 6,963
+
+[2025-11-07T02:54:52] thinking
+
+**Checking for repository contents**
+[2025-11-07T02:54:52] exec bash -lc 'git status -sb' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-tinyutils-scripts-deploy-preview
+[2025-11-07T02:54:52] bash -lc 'git status -sb' succeeded in 114ms:
+## No commits yet on code-code-gpt-5-codex-create-tinyutils-scripts-deploy-preview
+[2025-11-07T02:54:52] tokens used: 13,025
+
+[2025-11-07T02:55:40] thinking
+
+**Assessing repo state and script requirements**
+**Designing deploy script with logging and environment checks**
+
+I’m working out the detailed structure for the deploy_preview.sh script, including handling optional environment variables for `vercel pull`, verifying required vars before deploy, capturing logs while streaming output, extracting the preview URL from logs, running the smoke test with node, and appending a Madrid-timezone timestamped summary to the run log. The plan balances optional and required env vars carefully and prepares robust logging and error exit handling.
+[2025-11-07T02:56:11] codex
+**Designing deploy script with logging and environment checks**
+
+I’m working out the detailed structure for the deploy_preview.sh script, including handling optional environment variables for `vercel pull`, verifying required vars before deploy, capturing logs while streaming output, extracting the preview URL from logs, running the smoke test with node, and appending a Madrid-timezone timestamped summary to the run log. The plan balances optional and required env vars carefully and prepares robust logging and error exit handling.
+[2025-11-07T02:56:19] tokens used: 21,096
+
+[2025-11-07T02:57:07] thinking
+
+**Preparing deploy script content**
+
+I can't create or make the script executable due to the read-only filesystem, but I'll provide the full deploy script content with detailed features and usage notes. I'll explain the script’s purpose, its logging and environment checks, and include clear next steps for the user to create and run it manually. This way, the user gets everything needed despite the write restrictions.
+**Providing deploy script code block**
+[2025-11-07T02:57:08] codex
+**Providing deploy script code block**
+[2025-11-07T02:57:08] codex
+
+**Deploy Script**
+- The workspace is mounted read-only (approval policy `never`), so creation/`chmod` of `tinyutils/scripts/deploy_preview.sh` was blocked; below is the exact script I prepared so you can drop it in verbatim.
+- It enforces `set -euo pipefail`, verifies `vercel`/`node`, checks the required Vercel env vars, and only proceeds when everything needed is present—no secret values are echoed, only variable names.
+- Preview deploy output, pull logs, and smoke-test logs are streamed live but also captured under `tinyutils/artifacts/convert/<YYYYMMDD>/preview-<timestamp>/`, the preview URL is exported via `PREVIEW_URL`, the smoke test (`node scripts/smoke_dlf_preview.mjs`) runs against that URL, and a Madrid-timestamped summary is appended to `tinyutils/docs/AGENT_RUN_LOG.md`.
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
+SMOKE_SCRIPT="${ROOT_DIR}/scripts/smoke_dlf_preview.mjs"
+
+ARTIFACT_BASE="${ROOT_DIR}/artifacts/convert"
+DATE_STAMP="$(TZ=UTC date +%Y%m%d)"
+RUN_STAMP="$(TZ=UTC date +%H%M%S)"
+ARTIFACT_DIR="${ARTIFACT_BASE}/${DATE_STAMP}/preview-${RUN_STAMP}"
+PULL_LOG="${ARTIFACT_DIR}/vercel_pull.log"
+DEPLOY_LOG="${ARTIFACT_DIR}/vercel_deploy.log"
+SMOKE_LOG="${ARTIFACT_DIR}/smoke.log"
+SUMMARY_LOG="${ROOT_DIR}/docs/AGENT_RUN_LOG.md"
+
+mkdir -p "${ARTIFACT_DIR}"
+mkdir -p "$(dirname "${SUMMARY_LOG}")"
+
+require_cmd() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    echo "Missing required command: $1" >&2
+    exit 1
+  fi
+}
+
+require_cmd vercel
+require_cmd node
+
+if [[ ! -f "${SMOKE_SCRIPT}" ]]; then
+  echo "Missing smoke script at ${SMOKE_SCRIPT}" >&2
+  exit 1
+fi
+
+missing_envs=()
+[[ -z "${VERCEL_TOKEN:-}" ]] && missing_envs+=("VERCEL_TOKEN")
+[[ -z "${VERCEL_PROJECT_ID:-}" ]] && missing_envs+=("VERCEL_PROJECT_ID")
+[[ -z "${VERCEL_SCOPE:-}" && -z "${VERCEL_ORG_ID:-}" ]] && missing_envs+=("VERCEL_SCOPE|VERCEL_ORG_ID")
+
+if ((${#missing_envs[@]} > 0)); then
+  echo "Missing required environment variables: ${missing_envs[*]}" >&2
+  exit 1
+fi
+
+SCOPE_VALUE="${VERCEL_SCOPE:-${VERCEL_ORG_ID}}"
+
+echo "Pulling preview environment via Vercel..."
+(
+  cd "${ROOT_DIR}"
+  vercel pull --environment=preview --yes --scope "${SCOPE_VALUE}"
+) | tee "${PULL_LOG}"
+
+echo "Deploying preview via Vercel..."
+(
+  cd "${ROOT_DIR}"
+  vercel deploy --yes --confirm
+) | tee "${DEPLOY_LOG}"
+
+PREVIEW_URL="$(grep -Eo 'https?://[-[:alnum:]]+\.vercel\.app' "${DEPLOY_LOG}" | tail -n1 || true)"
+if [[ -z "${PREVIEW_URL}" ]]; then
+  echo "Unable to determine preview URL from deploy output." >&2
+  exit 1
+fi
+export PREVIEW_URL
+echo "Preview URL: ${PREVIEW_URL}"
+
+echo "Running converter smoke checks..."
+(
+  cd "${ROOT_DIR}"
+  PREVIEW_URL="${PREVIEW_URL}" node "${SMOKE_SCRIPT}"
+) | tee "${SMOKE_LOG}"
+
+MADRID_TS="$(TZ=Europe/Madrid date '+%Y-%m-%d %H:%M:%S %Z')"
+REL_ARTIFACT_PATH="${ARTIFACT_DIR#"${ROOT_DIR}/"}"
+printf '* %s | Preview: %s | Artifacts: %s\n' "${MADRID_TS}" "${PREVIEW_URL}" "${REL_ARTIFACT_PATH}" >> "${SUMMARY_LOG}"
+
+echo "Artifacts stored under ${REL_ARTIFACT_PATH}"
+```
+
+**Next Steps**
+1. Create `tinyutils/scripts/deploy_preview.sh` with the content above (ensure the `tinyutils/scripts` and `tinyutils/docs` folders exist) and run `chmod +x tinyutils/scripts/deploy_preview.sh`.
+2. (Optional) Review/update any env vars consumed by `scripts/smoke_dlf_preview.mjs`, then run the script when you’re ready for a preview deployment.
+[2025-11-07T02:57:14] tokens used: 28,014

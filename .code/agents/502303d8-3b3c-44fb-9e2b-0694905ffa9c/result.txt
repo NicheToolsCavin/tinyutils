@@ -1,0 +1,40 @@
+Here's a 7-step plan to address the deployment and automation goals for the TinyUtils universal converter backend:
+
+1.  **Enable Vercel CLI Authentication & Project Linking:**
+    *   **Action:** Authenticate the Vercel CLI in the CI/CD environment using a Vercel API token. Link the project to ensure `vercel deploy` commands target the correct project.
+    *   **Rationale:** Unattended deployment requires programmatic access to Vercel. Using an API token (stored securely as an environment variable) and linking the project ensures the CLI operates correctly without manual intervention.
+    *   **Verification:** Run `vercel login --token <YOUR_VERCEL_API_TOKEN>` and `vercel link --project <YOUR_PROJECT_NAME> --org <YOUR_ORG_ID>` (or equivalent environment variables for CI). Confirm successful authentication and linking via CLI output.
+
+2.  **Implement Robust Vercel Preview Deployment:**
+    *   **Action:** Use `vercel deploy --prebuilt --prod=false` for preview deployments. Incorporate retry logic (e.g., a simple loop with delays) around the `vercel deploy` command to handle transient network issues or Vercel service fluctuations. Avoid waiting for the build to complete within the deployment script itself; instead, rely on Vercel's webhooks or subsequent checks for build status.
+    *   **Rationale:** `--prebuilt` leverages local build artifacts, speeding up deployment. Retry logic enhances reliability. Decoupling deployment from build completion allows for more flexible and efficient CI/CD pipelines.
+    *   **Verification:** Execute the deployment script. Monitor Vercel dashboard for successful preview deployment. Check CI/CD logs for retry attempts if any.
+
+3.  **Develop Converter Preview Smoke Tests & Artifact Capture:**
+    *   **Action:** Create a dedicated script (e.g., `run_preview_smoke_tests.sh`) that targets the deployed preview URL. This script should make requests to the converter endpoints, validate responses, and capture relevant data (e.g., response bodies, HTTP status codes, performance metrics) as artifacts. Store these artifacts in a designated directory (e.g., `artifacts/preview_smoke/`).
+    *   **Rationale:** Verifies the deployed converter functionality in the Vercel environment. Capturing artifacts provides concrete evidence of the smoke test results for debugging and auditing.
+    *   **Verification:** Run the smoke test script against a deployed preview. Inspect the generated artifacts for expected content and successful test outcomes.
+
+4.  **Automate Documentation Updates (Madrid Timestamp):**
+    *   **Action:** Create a script (e.g., `update_docs.py`) that appends a new entry to a relevant documentation file (e.g., `tinyutils/docs/deployment_log.md`). The entry should include the deployment details (e.g., preview URL, commit hash) and a Madrid-timestamped date.
+    *   **Rationale:** Ensures documentation is always up-to-date with deployment history, providing a clear audit trail. Madrid timestamp provides a consistent time reference.
+    *   **Verification:** After a deployment, check the specified documentation file for the new, correctly formatted and timestamped entry.
+
+5.  **Define Rollback and Benchmarking Policy:**
+    *   **Action:** Document a clear rollback policy within `tinyutils/docs/deployment_policy.md` (or similar). This policy should outline steps for reverting to a previous Vercel deployment in case of critical issues. Additionally, define a benchmarking policy for new converter features, specifying metrics to track and acceptable performance thresholds.
+    *   **Rationale:** Provides a safety net for deployments and establishes performance standards for new features.
+    *   **Verification:** Review the created documentation for clarity and completeness of the rollback and benchmarking policies.
+
+6.  **Integrate into CI/CD Pipeline:**
+    *   **Action:** Integrate all the above scripts (authentication, deploy, smoke tests, doc updates) into the existing CI/CD pipeline (e.g., `.github/workflows/deploy.yml` if using GitHub Actions). Ensure environment variables for Vercel API tokens are securely configured in the CI/CD system.
+    *   **Rationale:** Automates the entire deployment and verification process, reducing manual effort and potential for human error.
+    *   **Verification:** Trigger a CI/CD run. Monitor the pipeline execution for successful completion of all steps.
+
+7.  **Consolidate Verification Evidence:**
+    *   **Action:** Ensure the CI/CD pipeline collects and makes accessible all relevant verification evidence, including:
+        *   Vercel deployment logs.
+        *   Output from the converter preview smoke tests.
+        *   Captured smoke test artifacts.
+        *   Diffs of updated documentation files.
+    *   **Rationale:** Provides a comprehensive record of each deployment's success and adherence to quality standards.
+    *   **Verification:** After a CI/CD run, confirm that all specified evidence is available and easily retrievable from the CI/CD platform.

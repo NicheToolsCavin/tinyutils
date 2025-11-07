@@ -1,0 +1,512 @@
+[2025-11-04T12:29:08] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-suggest-minimal-diffs
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-04T12:29:08] User instructions:
+Context: We need to enforce no-store on all API JSON responses with minimal code churn. Files: api/check.js, api/health.js, api/metafetch.js, api/sitemap-delta.js, api/wayback-fixer.js. Likely ESM Edge handlers with json()/jerr() helpers.
+
+Agent: Suggest minimal diffs per file to set 'cache-control: no-store' and 'content-type: application/json; charset=utf-8' for all JSON responses, including errors, without refactors.
+[2025-11-04T12:29:08] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-suggest-minimal-diffs
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-04T12:29:08] User instructions:
+Context: We need to enforce no-store on all API JSON responses with minimal code churn. Files: api/check.js, api/health.js, api/metafetch.js, api/sitemap-delta.js, api/wayback-fixer.js. Likely ESM Edge handlers with json()/jerr() helpers.
+
+Agent: Suggest minimal diffs per file to set 'cache-control: no-store' and 'content-type: application/json; charset=utf-8' for all JSON responses, including errors, without refactors.
+
+[2025-11-04T12:29:14] thinking
+
+**Inspecting directory structure**
+[2025-11-04T12:29:15] exec bash -lc ls in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-suggest-minimal-diffs
+[2025-11-04T12:29:15] bash -lc ls succeeded in 143ms:
+[2025-11-04T12:29:15] tokens used: 5,621
+
+[2025-11-04T12:29:17] thinking
+
+**Checking for hidden files**
+[2025-11-04T12:29:17] exec bash -lc 'ls -a' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-suggest-minimal-diffs
+[2025-11-04T12:29:17] bash -lc 'ls -a' succeeded in 137ms:
+.
+..
+.git
+[2025-11-04T12:29:17] tokens used: 5,828
+
+[2025-11-04T12:29:19] thinking
+
+**Checking git status**
+[2025-11-04T12:29:20] exec bash -lc 'git status -sb' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-suggest-minimal-diffs
+[2025-11-04T12:29:20] bash -lc 'git status -sb' succeeded in 154ms:
+## No commits yet on code-code-gpt-5-codex-suggest-minimal-diffs
+[2025-11-04T12:29:20] tokens used: 6,035
+
+[2025-11-04T12:29:27] thinking
+
+**Analyzing empty repository state**
+[2025-11-04T12:29:28] exec bash -lc 'git branch' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-suggest-minimal-diffs
+[2025-11-04T12:29:28] bash -lc 'git branch' succeeded in 146ms:
+[2025-11-04T12:29:28] tokens used: 7,587
+
+[2025-11-04T12:29:29] thinking
+
+**Checking for remotes**
+[2025-11-04T12:29:30] exec bash -lc 'git remote -v' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-suggest-minimal-diffs
+[2025-11-04T12:29:30] bash -lc 'git remote -v' succeeded in 170ms:
+[2025-11-04T12:29:30] tokens used: 7,823
+
+[2025-11-04T12:29:31] thinking
+
+**Considering git log for history**
+[2025-11-04T12:29:32] exec bash -lc 'git log' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-suggest-minimal-diffs
+[2025-11-04T12:29:32] bash -lc 'git log' exited 128 in 149ms:
+ERROR
+fatal: your current branch 'code-code-gpt-5-codex-suggest-minimal-diffs' does not have any commits yet
+[2025-11-04T12:29:32] tokens used: 8,033
+
+[2025-11-04T12:29:34] thinking
+
+**Considering git branch and commit state**
+[2025-11-04T12:29:34] exec bash -lc 'git reflog --oneline' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-suggest-minimal-diffs
+[2025-11-04T12:29:34] bash -lc 'git reflog --oneline' exited 128 in 163ms:
+ERROR
+fatal: your current branch 'code-code-gpt-5-codex-suggest-minimal-diffs' does not have any commits yet
+[2025-11-04T12:29:34] tokens used: 8,247
+
+[2025-11-04T12:29:38] thinking
+
+**Checking parent directory for repo**
+[2025-11-04T12:29:39] exec bash -lc ls in /Users/cav/.code/working/tinyutils/branches
+[2025-11-04T12:29:39] bash -lc ls succeeded in 139ms:
+code-code-draft-concise-acceptance
+code-code-gpt-5-codex-inspect-four-diff
+code-code-gpt-5-codex-list-scripts--lockfiles
+code-code-gpt-5-codex-prepare-compact-smoke
+code-code-gpt-5-codex-produce-per-diff-touched-file
+code-code-gpt-5-codex-suggest-minimal-diffs
+code-code-gpt-5-report-current-node
+code-code-propose-exact-header
+[2025-11-04T12:29:39] tokens used: 15,076
+
+[2025-11-04T12:29:42] thinking
+
+**Investigating repository location**
+[2025-11-04T12:29:42] exec bash -lc ls in /Users/cav/.code/working/tinyutils
+[2025-11-04T12:29:42] bash -lc ls succeeded in 135ms:
+branches
+[2025-11-04T12:29:42] tokens used: 15,436
+
+[2025-11-04T12:29:44] thinking
+
+**Investigating branch directories**
+[2025-11-04T12:29:44] exec bash -lc ls in /Users/cav/.code/working/tinyutils/branches/code-code-propose-exact-header
+[2025-11-04T12:29:44] bash -lc ls succeeded in 147ms:
+[2025-11-04T12:29:44] tokens used: 15,639
+
+[2025-11-04T12:29:46] thinking
+
+**Checking for hidden files**
+[2025-11-04T12:29:47] exec bash -lc 'ls -a' in /Users/cav/.code/working/tinyutils/branches/code-code-propose-exact-header
+[2025-11-04T12:29:47] bash -lc 'ls -a' succeeded in 148ms:
+.
+..
+.git
+[2025-11-04T12:29:47] tokens used: 15,834
+
+[2025-11-04T12:29:49] thinking
+
+**Investigating .git structure**
+[2025-11-04T12:29:50] exec bash -lc 'cat .git' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-suggest-minimal-diffs
+[2025-11-04T12:29:50] bash -lc 'cat .git' succeeded in 135ms:
+gitdir: /Users/cav/dev/TinyUtils/.git/worktrees/code-code-gpt-5-codex-suggest-minimal-diffs
+[2025-11-04T12:29:50] tokens used: 16,096
+
+[2025-11-04T12:29:52] thinking
+
+**Investigating Git worktree setup**
+[2025-11-04T12:29:53] exec bash -lc ls in /Users/cav/dev/TinyUtils
+[2025-11-04T12:29:53] bash -lc ls succeeded in 132ms:
+code-cli-tinyutils-recs.md
+diffs_recs
+PATH
+print1
+test_results_nov4.md
+tinyutils
+tinyutils.zip
+TinyUtilsCodexContext
+[2025-11-04T12:29:53] tokens used: 16,405
+
+[2025-11-04T12:29:54] thinking
+
+**Listing files in tinyutils directory**
+[2025-11-04T12:29:56] exec bash -lc ls in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T12:29:56] bash -lc ls succeeded in 152ms:
+ads.txt
+ADSENSE_SETUP.md
+AGENTS.md
+api
+CHANGES-v1.3.0-rc2.txt
+CHANGES-v1.3.0-rc3.txt
+DEPLOY_PRODUCTION_CHECKLIST.md
+docs
+feedback.html
+guides
+index.html
+offering-to-the-triple-goddess.txt
+package.json
+PREVIEW_SMOKE_CHECKLIST.md
+privacy.html
+public
+README_DEPLOY.md
+README-VERCEL.md
+README.md
+robots.txt
+[2025-11-04T12:29:56] tokens used: 16,612
+
+[2025-11-04T12:29:58] thinking
+
+**Checking worktree and branch context**
+[2025-11-04T12:29:59] exec bash -lc 'git status -sb' in /Users/cav/dev/TinyUtils
+[2025-11-04T12:29:59] bash -lc 'git status -sb' succeeded in 134ms:
+## No commits yet on master
+?? .DS_Store
+?? .code/
+?? PATH
+?? TinyUtilsCodexContext/
+?? code-cli-tinyutils-recs.md
+?? diffs_recs/
+?? print1
+?? test_results_nov4.md
+?? tinyutils.zip
+?? tinyutils/
+[2025-11-04T12:29:59] tokens used: 16,996
+
+[2025-11-04T12:30:00] thinking
+
+**Exploring tinyutils api folder**
+[2025-11-04T12:30:01] exec bash -lc "sed -n '1,160p' api/check.js" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T12:30:01] bash -lc "sed -n '1,160p' api/check.js" succeeded in 156ms:
+export const config = { runtime: 'edge' };
+
+function rid() {
+  return Math.random().toString(16).slice(2, 10);
+}
+
+function json(status, body, requestId) {
+  const headers = new Headers({ 'content-type': 'application/json; charset=utf-8' });
+  if (requestId) headers.set('x-request-id', requestId);
+  return new Response(JSON.stringify(body), {
+    status,
+    headers
+  });
+}
+
+function jerr(status, code, message, detail, stage, requestId, metaExtras) {
+  const meta = {
+    requestId,
+    stage: stage || null,
+    detail: detail || null,
+[2025-11-04T12:30:01] tokens used: 17,362
+
+[2025-11-04T12:30:07] thinking
+
+**Reviewing JSON response headers**
+[2025-11-04T12:30:07] exec bash -lc 'rg "new Response" api/check.js' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T12:30:07] bash -lc 'rg "new Response" api/check.js' succeeded in 161ms:
+  return new Response(JSON.stringify(body), {
+    return new Response(stream).text();
+[2025-11-04T12:30:07] tokens used: 19,171
+
+[2025-11-04T12:30:10] thinking
+
+**Adding cache-control header to JSON responses**
+[2025-11-04T12:30:11] exec bash -lc "sed -n '1,160p' api/health.js" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T12:30:11] bash -lc "sed -n '1,160p' api/health.js" succeeded in 147ms:
+export const config = { runtime: 'edge' };
+
+export default async function handler() {
+  return new Response(JSON.stringify({ ok: true }), {
+    status: 200,
+    headers: { 'content-type': 'application/json' }
+  });
+}
+[2025-11-04T12:30:11] tokens used: 19,541
+
+[2025-11-04T12:30:15] thinking
+
+**Updating HTTP headers for JSON response**
+[2025-11-04T12:30:17] exec bash -lc "sed -n '1,200p' api/metafetch.js" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T12:30:17] bash -lc "sed -n '1,200p' api/metafetch.js" succeeded in 150ms:
+export const config = { runtime: 'edge' };
+
+const UA = 'TinyUtils-DeadLinkChecker/1.0 (+https://tinyutils-eight.vercel.app; hello@tinyutils.net)';
+
+function rid() {
+  return Math.random().toString(16).slice(2, 10);
+}
+
+function json(status, body, requestId) {
+  const headers = new Headers({ 'content-type': 'application/json; charset=utf-8' });
+  if (requestId) headers.set('x-request-id', requestId);
+  return new Response(JSON.stringify(body), { status, headers });
+}
+
+function isPrivateHost(hostname) {
+  const host = (hostname || '').toLowerCase();
+  if (!host) return true;
+  if (host === 'localhost' || host.endsWith('.local')) return true;
+  if (host === '0.0.0.0') return true;
+  if (host.startsWith('127.')) return true;
+[2025-11-04T12:30:17] tokens used: 19,854
+
+[2025-11-04T12:30:21] thinking
+
+**Updating JSON helper with cache control**
+[2025-11-04T12:30:22] exec bash -lc "sed -n '1,200p' api/sitemap-delta.js" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T12:30:22] bash -lc "sed -n '1,200p' api/sitemap-delta.js" succeeded in 156ms:
+export const config = { runtime: 'edge' };
+
+const UA = 'TinyUtils-SitemapDelta/1.0 (+https://tinyutils-eight.vercel.app)';
+const HARD_CAP = 200;
+const CHILD_SITEMAPS_LIMIT = 50;
+const VERIFY_CONCURRENCY = 6;
+const GLOBAL_FETCH_CAP = 10;
+const PER_ORIGIN_FETCH_CAP = 2;
+
+function rid() {
+  return Math.random().toString(16).slice(2, 10);
+}
+
+function jsonResponse(status, payload, requestId) {
+  const headers = new Headers({ 'content-type': 'application/json; charset=utf-8' });
+  if (requestId) headers.set('x-request-id', requestId);
+  return new Response(JSON.stringify(payload), { status, headers });
+}
+
+function requestIdFrom(req) {
+[2025-11-04T12:30:22] tokens used: 21,207
+
+[2025-11-04T12:30:24] thinking
+
+**Searching for jsonResponse usage**
+[2025-11-04T12:30:24] exec bash -lc 'rg "jsonResponse" -n api/sitemap-delta.js' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T12:30:24] bash -lc 'rg "jsonResponse" -n api/sitemap-delta.js' succeeded in 155ms:
+14:function jsonResponse(status, payload, requestId) {
+359:    return jsonResponse(405, { error: 'method_not_allowed', details: { message: 'Only POST is supported' } }, requestId);
+366:    return jsonResponse(400, { error: 'invalid_json', details: { message: error?.message || 'Invalid JSON' } }, requestId);
+490:    return jsonResponse(200, { meta, added, removed, pairs: deduped, unmapped, rules: [] }, requestId);
+507:    return jsonResponse(status, {
+[2025-11-04T12:30:24] tokens used: 23,382
+
+[2025-11-04T12:30:26] thinking
+
+**Adding header to JSON response handler**
+[2025-11-04T12:30:27] exec bash -lc "sed -n '1,200p' api/wayback-fixer.js" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T12:30:27] bash -lc "sed -n '1,200p' api/wayback-fixer.js" succeeded in 135ms:
+export const config = { runtime: 'edge' };
+
+function rid() {
+  return Math.random().toString(16).slice(2, 10);
+}
+
+function json(status, body, requestId) {
+  const headers = new Headers({ 'content-type': 'application/json; charset=utf-8' });
+  if (requestId) headers.set('x-request-id', requestId);
+  return new Response(JSON.stringify(body), { status, headers });
+}
+
+function jerr(status, message, note, requestId) {
+  return json(status, {
+    meta: {
+      error: message || null,
+      note: note || null,
+      requestId
+    },
+    results: []
+[2025-11-04T12:30:27] tokens used: 23,750
+
+[2025-11-04T12:30:37] thinking
+
+**Proposing minimal header diffs for JSON responses**
+
+I’m gathering minimal diff suggestions for each file to add `'cache-control': 'no-store'` alongside existing `'content-type': 'application/json; charset=utf-8'` headers in JSON response helpers. I’m verifying that other JSON responses either use the helper or need no changes and planning to show diffs per file without applying modifications directly.
+[2025-11-04T12:30:38] exec bash -lc 'rg "JSON.stringify" api/*.js' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T12:30:38] bash -lc 'rg "JSON.stringify" api/*.js' succeeded in 167ms:
+api/metafetch.js:  return new Response(JSON.stringify(body), { status, headers });
+api/health.js:  return new Response(JSON.stringify({ ok: true }), {
+api/sitemap-delta.js:  return new Response(JSON.stringify(payload), { status, headers });
+api/wayback-fixer.js:  return new Response(JSON.stringify(body), { status, headers });
+api/check.js:  return new Response(JSON.stringify(body), {
+[2025-11-04T12:30:38] tokens used: 34,086
+
+[2025-11-04T12:30:48] thinking
+
+**Planning JSON header additions with cache control**
+
+I'll outline the minimal diffs needed to add consistent JSON content-type and no-store cache-control headers in several API files like `api/check.js`, `api/metafetch.js`, `sitemap-delta`, `wayback-fixer`, and `api/health.js`. I want to verify usage of JSON Responses elsewhere to confirm no missing cases and include file paths with approximate line numbers to keep changes precise and minimal.
+[2025-11-04T12:30:51] exec bash -lc "nl -ba api/check.js | sed -n '1,40p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T12:30:51] bash -lc "nl -ba api/check.js | sed -n '1,40p'" succeeded in 185ms:
+     1	export const config = { runtime: 'edge' };
+     2	
+     3	function rid() {
+     4	  return Math.random().toString(16).slice(2, 10);
+     5	}
+     6	
+     7	function json(status, body, requestId) {
+     8	  const headers = new Headers({ 'content-type': 'application/json; charset=utf-8' });
+     9	  if (requestId) headers.set('x-request-id', requestId);
+    10	  return new Response(JSON.stringify(body), {
+    11	    status,
+    12	    headers
+    13	  });
+    14	}
+    15	
+    16	function jerr(status, code, message, detail, stage, requestId, metaExtras) {
+    17	  const meta = {
+    18	    requestId,
+    19	    stage: stage || null,
+    20	    detail: detail || null,
+[2025-11-04T12:30:51] tokens used: 34,821
+
+[2025-11-04T12:30:53] thinking
+
+**Updating header lines**
+[2025-11-04T12:30:54] exec bash -lc "nl -ba api/sitemap-delta.js | sed -n '1,40p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T12:30:54] bash -lc "nl -ba api/sitemap-delta.js | sed -n '1,40p'" succeeded in 151ms:
+     1	export const config = { runtime: 'edge' };
+     2	
+     3	const UA = 'TinyUtils-SitemapDelta/1.0 (+https://tinyutils-eight.vercel.app)';
+     4	const HARD_CAP = 200;
+     5	const CHILD_SITEMAPS_LIMIT = 50;
+     6	const VERIFY_CONCURRENCY = 6;
+     7	const GLOBAL_FETCH_CAP = 10;
+     8	const PER_ORIGIN_FETCH_CAP = 2;
+     9	
+    10	function rid() {
+    11	  return Math.random().toString(16).slice(2, 10);
+    12	}
+    13	
+    14	function jsonResponse(status, payload, requestId) {
+    15	  const headers = new Headers({ 'content-type': 'application/json; charset=utf-8' });
+    16	  if (requestId) headers.set('x-request-id', requestId);
+    17	  return new Response(JSON.stringify(payload), { status, headers });
+    18	}
+    19	
+    20	function requestIdFrom(req) {
+[2025-11-04T12:30:54] tokens used: 35,495
+
+[2025-11-04T12:30:56] thinking
+
+**Identifying line update**
+[2025-11-04T12:30:56] exec bash -lc "nl -ba api/metafetch.js | sed -n '1,40p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T12:30:57] bash -lc "nl -ba api/metafetch.js | sed -n '1,40p'" succeeded in 159ms:
+     1	export const config = { runtime: 'edge' };
+     2	
+     3	const UA = 'TinyUtils-DeadLinkChecker/1.0 (+https://tinyutils-eight.vercel.app; hello@tinyutils.net)';
+     4	
+     5	function rid() {
+     6	  return Math.random().toString(16).slice(2, 10);
+     7	}
+     8	
+     9	function json(status, body, requestId) {
+    10	  const headers = new Headers({ 'content-type': 'application/json; charset=utf-8' });
+    11	  if (requestId) headers.set('x-request-id', requestId);
+    12	  return new Response(JSON.stringify(body), { status, headers });
+    13	}
+    14	
+    15	function isPrivateHost(hostname) {
+    16	  const host = (hostname || '').toLowerCase();
+    17	  if (!host) return true;
+    18	  if (host === 'localhost' || host.endsWith('.local')) return true;
+    19	  if (host === '0.0.0.0') return true;
+    20	  if (host.startsWith('127.')) return true;
+[2025-11-04T12:30:57] tokens used: 36,317
+
+[2025-11-04T12:30:58] thinking
+
+**Identifying line for update**
+[2025-11-04T12:30:59] exec bash -lc "nl -ba api/wayback-fixer.js | sed -n '1,40p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T12:30:59] bash -lc "nl -ba api/wayback-fixer.js | sed -n '1,40p'" succeeded in 148ms:
+     1	export const config = { runtime: 'edge' };
+     2	
+     3	function rid() {
+     4	  return Math.random().toString(16).slice(2, 10);
+     5	}
+     6	
+     7	function json(status, body, requestId) {
+     8	  const headers = new Headers({ 'content-type': 'application/json; charset=utf-8' });
+     9	  if (requestId) headers.set('x-request-id', requestId);
+    10	  return new Response(JSON.stringify(body), { status, headers });
+    11	}
+    12	
+    13	function jerr(status, message, note, requestId) {
+    14	  return json(status, {
+    15	    meta: {
+    16	      error: message || null,
+    17	      note: note || null,
+    18	      requestId
+    19	    },
+    20	    results: []
+[2025-11-04T12:30:59] tokens used: 37,758
+
+[2025-11-04T12:31:01] thinking
+
+**Updating API health line references**
+[2025-11-04T12:31:01] exec bash -lc 'nl -ba api/health.js' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T12:31:02] bash -lc 'nl -ba api/health.js' succeeded in 168ms:
+     1	export const config = { runtime: 'edge' };
+     2	
+     3	export default async function handler() {
+     4	  return new Response(JSON.stringify({ ok: true }), {
+     5	    status: 200,
+     6	    headers: { 'content-type': 'application/json' }
+     7	  });
+     8	}
+[2025-11-04T12:31:02] tokens used: 38,516
+
+[2025-11-04T12:31:14] thinking
+
+**Proposing minimal header updates with cache-control**
+[2025-11-04T12:31:14] codex
+
+Added `cache-control: no-store` and the UTF-8 JSON content-type everywhere the API helpers construct responses, so every JSON success/error now carries the required headers.
+
+- `api/check.js:8`, `api/metafetch.js:10`, `api/sitemap-delta.js:15`, `api/wayback-fixer.js:8`: extend each `new Headers` call to include `'cache-control': 'no-store'`, keeping the existing shared helpers so all downstream callers (including error wrappers) inherit the policy.
+- `api/health.js:6`: expand the inline headers object to `{'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store'}` to match the rest of the API.
+
+```diff
+diff --git a/api/check.js b/api/check.js
+@@
+-  const headers = new Headers({ 'content-type': 'application/json; charset=utf-8' });
++  const headers = new Headers({ 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' });
+diff --git a/api/health.js b/api/health.js
+@@
+-    headers: { 'content-type': 'application/json' }
++    headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' }
+diff --git a/api/metafetch.js b/api/metafetch.js
+@@
+-  const headers = new Headers({ 'content-type': 'application/json; charset=utf-8' });
++  const headers = new Headers({ 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' });
+diff --git a/api/sitemap-delta.js b/api/sitemap-delta.js
+@@
+-  const headers = new Headers({ 'content-type': 'application/json; charset=utf-8' });
++  const headers = new Headers({ 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' });
+diff --git a/api/wayback-fixer.js b/api/wayback-fixer.js
+@@
+-  const headers = new Headers({ 'content-type': 'application/json; charset=utf-8' });
++  const headers = new Headers({ 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' });
+```
+
+All JSON responses in these files already funnel through the helpers, so no additional call sites need touch-ups once these minimal edits land.
+[2025-11-04T12:31:18] tokens used: 40,261

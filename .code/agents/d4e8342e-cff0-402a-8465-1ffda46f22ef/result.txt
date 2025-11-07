@@ -1,0 +1,36 @@
+I am unable to read the `AGENTS.md` file from `/Users/cav/dev/TinyUtils/tinyutils/AGENTS.md` because it is outside my current working directory `/Users/cav/.code/working/tinyutils/branches/code-gemini-2-5-flash-extract-expected-orchestrator`. My tools are restricted to operating within the current workspace.
+
+However, I can proceed with drafting the `roster-status.md` based on the active agents you provided and the other requirements.
+
+First, I will check if `config.toml` exists within the current working directory.```markdown
+# Orchestrator Agent Roster Status
+
+This document snapshots the expected orchestrator agent roster for TinyUtils automation as of November 4, 2025.
+
+## Active Agents
+
+The following agents are expected to be active in the orchestrator roster:
+
+*   `code-gpt-5`
+*   `code-gpt-5-codex`
+*   `code-teams-personal`
+*   `code-teams-tarot`
+*   `code-teams-teacher`
+
+## Gemini Fallback Usage and Billing Guardrails
+
+Gemini is used as a fallback mechanism. To prevent unexpected costs or quota issues, **Gemini usage must be disabled immediately if any billing or quota warnings appear.** Regularly monitor usage and billing dashboards.
+
+## Drift Risks and Configuration Check
+
+The `config.toml` file was not found in the current working directory (`/Users/cav/.code/working/tinyutils/branches/code-gemini-2-5-flash-extract-expected-orchestrator`). Therefore, local orchestrator configuration cannot be automatically checked for drift risks against the expected roster.
+
+**TODO:** Manually verify the contents of `config.toml` (if it exists in another location) to ensure it aligns with the active agent roster and any specific environment configurations. Pay close attention to agent enablement flags, API keys, and rate limits.
+
+## Operational Reminders
+
+*   All timestamps in logs and configurations should adhere to **CET (Central European Time)** for consistency.
+*   Maintain strict **logging discipline**, ensuring that all agent activities, decisions, and any errors are comprehensively logged for auditing and debugging purposes.
+```
+
+I have drafted the `roster-status.md` content. I will now write this content to a file named `roster-status.md` in the current working directory.I have created the `roster-status.md` file in the current working directory.

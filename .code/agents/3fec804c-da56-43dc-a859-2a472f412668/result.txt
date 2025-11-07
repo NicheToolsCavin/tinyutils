@@ -1,0 +1,842 @@
+[2025-11-04T15:26:36] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/dev/TinyUtils
+model: gpt-5
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-04T15:26:36] User instructions:
+We need to determine remaining work after implementing PR3 Preview Fence in the TinyUtils repo. Current status: PR1 (security+caching) completed and deployed, PR3 (preview fence) implemented on branch feat/pr3-preview-fence. Need to identify next steps (e.g., PR1 evidence, PR2 UX quick wins, PR4 tests, deployment validation, documentation updates). Review repo at ~/dev/TinyUtils/tinyutils and diffs in ~/dev/TinyUtils/diffs_recs/. Produce a step-by-step plan covering outstanding tasks, dependencies, testing/deployment requirements, and documentation updates.
+
+[Running in read-only mode - no modifications allowed]
+[2025-11-04T15:26:36] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/dev/TinyUtils
+model: gpt-5
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-04T15:26:36] User instructions:
+We need to determine remaining work after implementing PR3 Preview Fence in the TinyUtils repo. Current status: PR1 (security+caching) completed and deployed, PR3 (preview fence) implemented on branch feat/pr3-preview-fence. Need to identify next steps (e.g., PR1 evidence, PR2 UX quick wins, PR4 tests, deployment validation, documentation updates). Review repo at ~/dev/TinyUtils/tinyutils and diffs in ~/dev/TinyUtils/diffs_recs/. Produce a step-by-step plan covering outstanding tasks, dependencies, testing/deployment requirements, and documentation updates.
+
+[Running in read-only mode - no modifications allowed]
+
+[2025-11-04T15:26:44] thinking
+
+**Planning Implementation Steps**
+
+I need to create a step-by-step plan for outstanding tasks related to implementing PR3 Preview Fence. I have access to a read-only mode, and I’ll review the repository at /dev/TinyUtils/tinyutils, along with diffs in /dev/TinyUtils/diffs_recs/. I’ll use functions.shell to list files and search using rg. I need to explore documentation updates, identify tests for PR4, gather evidence for PR1, and note any UX quick wins for PR2. So, there’s a lot to organize!
+**Creating a Step-by-Step Plan**
+
+I need to create a clear step-by-step plan to cover outstanding tasks, dependencies, testing and deployment requirements, as well as any necessary documentation updates. I might also need to review the diffs to identify what remains to be done. I’m currently in the directory at /Users/cav/dev/TinyUtils, and the repository is located at /dev/TinyUtils/tinyutils. First things first, let's list the files to get a better view of what we’re working with!
+[2025-11-04T15:26:50] codex
+**Creating a Step-by-Step Plan**
+
+I need to create a clear step-by-step plan to cover outstanding tasks, dependencies, testing and deployment requirements, as well as any necessary documentation updates. I might also need to review the diffs to identify what remains to be done. I’m currently in the directory at /Users/cav/dev/TinyUtils, and the repository is located at /dev/TinyUtils/tinyutils. First things first, let's list the files to get a better view of what we’re working with!
+[2025-11-04T15:26:50] codex
+
+I’m going to inspect the repo and the `diffs_recs` directory to understand what’s been done in PR3 and what remains. Then I’ll summarize a concrete step-by-step plan.
+[2025-11-04T15:26:50] exec bash -lc 'ls -la' in /Users/cav/dev/TinyUtils
+[2025-11-04T15:26:50] bash -lc 'ls -la' succeeded in 139ms:
+total 32912
+drwxr-xr-x@  13 cav  staff       416 Nov  4 13:02 .
+drwxr-xr-x@ 120 cav  staff      3840 Nov  3 01:19 ..
+drwxr-xr-x@   3 cav  staff        96 Nov  4 13:02 .code
+-rw-r--r--@   1 cav  staff     10244 Nov  4 12:50 .DS_Store
+drwxr-xr-x@  10 cav  staff       320 Nov  4 15:19 .git
+-rw-r--r--@   1 cav  staff      2605 Nov  2 20:40 code-cli-tinyutils-recs.md
+drwxr-xr-x    7 cav  staff       224 Nov  4 12:46 diffs_recs
+-rw-r--r--@   1 cav  staff        20 Oct 31 01:02 PATH
+-rw-r--r--@   1 cav  staff      1930 Oct 31 22:07 print1
+-rw-r--r--@   1 cav  staff      2378 Nov  4 12:12 test_results_nov4.md
+drwxr-xr-x@  39 cav  staff      1248 Nov  4 13:41 tinyutils
+-rw-r--r--    1 cav  staff  16821860 Nov  4 12:03 tinyutils.zip
+drwxr-xr-x@   4 cav  staff       128 Oct 30 19:53 TinyUtilsCodexContext
+[2025-11-04T15:26:50] tokens used: 9,203
+[2025-11-04T15:26:52] exec bash -lc 'ls -la diffs_recs && rg -n "PR[1234]" diffs_recs -S || true' in /Users/cav/dev/TinyUtils
+[2025-11-04T15:26:52] bash -lc 'ls -la diffs_recs && rg -n "PR[1234]" diffs_recs -S || true' succeeded in 149ms:
+total 80
+drwxr-xr-x   7 cav  staff    224 Nov  4 12:46 .
+drwxr-xr-x@ 13 cav  staff    416 Nov  4 13:02 ..
+-rw-r--r--@  1 cav  staff   4418 Nov  4 12:42 pr1-security-caching.diff
+-rw-r--r--@  1 cav  staff   2365 Nov  4 12:42 pr2-ux-noindex-debug.diff
+-rw-r--r--@  1 cav  staff   2929 Nov  4 12:42 pr3-preview-fence.diff
+-rw-r--r--@  1 cav  staff   6068 Nov  4 12:42 pr4-tests-contracts.diff
+-rw-r--r--@  1 cav  staff  16075 Nov  4 12:46 Pro reasoning message nov 4.md
+diffs_recs/Pro reasoning message nov 4.md:181:> **Note:** PR1 modifies `vercel.json` to include rewrites. Apply **PR1 and PR3** together so the fence route exists before the rewrites land.
+diffs_recs/Pro reasoning message nov 4.md:230:**Gated routes (after PR1+PR3)**
+diffs_recs/Pro reasoning message nov 4.md:249:- Add rewrites for beta tools (used by the fence in PR3).
+diffs_recs/Pro reasoning message nov 4.md:341:- After merging PR4, tests cover more surface; I suggest:
+diffs_recs/Pro reasoning message nov 4.md:349:1. **Ship PR1 + PR3 together**: security headers, `no-store`, and preview fence.
+diffs_recs/Pro reasoning message nov 4.md:350:2. **Merge PR2**: stable test hook + `noindex` on beta pages.
+diffs_recs/Pro reasoning message nov 4.md:351:3. **Adopt PR4**: extend contract tests; keep them green before any feature sprint.
+diffs_recs/Pro reasoning message nov 4.md:408:If you want this wrapped as a GitHub Issue with checkboxes + ready commands, say the word and I’ll format it cleanly. Meanwhile, ship PR1+PR3 together, then PR2 and PR4 — that keeps prod crisp while expanding coverage.
+[2025-11-04T15:26:52] tokens used: 9,800
+[2025-11-04T15:26:55] exec bash -lc "sed -n '1,200p' diffs_recs/pr3-preview-fence.diff" in /Users/cav/dev/TinyUtils
+[2025-11-04T15:26:55] bash -lc "sed -n '1,200p' diffs_recs/pr3-preview-fence.diff" succeeded in 131ms:
+--- /dev/null
++++ b/api/fence.js
+--- /dev/null+++ b/api/fence.js@@ -0,0 +1,75 @@+export const config = { runtime: 'edge' };
++
++function rid() { return Math.random().toString(16).slice(2, 10); }
++
++function json(status, body, requestId, extraHeaders) {
++  const headers = new Headers({ 'content-type': 'application/json; charset=utf-8' });
++  headers.set('cache-control', 'no-store');
++  if (requestId) headers.set('x-request-id', requestId);
++  for (const [k, v] of Object.entries(extraHeaders || {})) {
++    headers.set(k, v);
++  }
++  return new Response(JSON.stringify(body), { status, headers });
++}
++
++function parseCookies(cookieHeader) {
++  const out = {};
++  const src = String(cookieHeader || '');
++  for (const part of src.split(/;\s*/)) {
+[2025-11-04T15:26:55] tokens used: 10,497
+[2025-11-04T15:26:57] exec bash -lc "sed -n '1,220p' diffs_recs/pr1-security-caching.diff" in /Users/cav/dev/TinyUtils
+[2025-11-04T15:26:57] bash -lc "sed -n '1,220p' diffs_recs/pr1-security-caching.diff" succeeded in 124ms:
+--- a/vercel.json+++ b/vercel.json@@ -3,15 +3,87 @@     {
+       "source": "/(.*)",
+       "headers": [
+-        { "key": "X-Content-Type-Options", "value": "nosniff" },
+-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
++        {
++          "key": "X-Content-Type-Options",
++          "value": "nosniff"
++        },
++        {
++          "key": "Referrer-Policy",
++          "value": "strict-origin-when-cross-origin"
++        },
++        {
++          "key": "Strict-Transport-Security",
++          "value": "max-age=63072000; includeSubDomains; preload"
++        },
++        {
++          "key": "X-Frame-Options",
++          "value": "DENY"
+[2025-11-04T15:26:57] tokens used: 11,560
+[2025-11-04T15:27:00] exec bash -lc "sed -n '1,240p' diffs_recs/pr2-ux-noindex-debug.diff" in /Users/cav/dev/TinyUtils
+[2025-11-04T15:27:00] bash -lc "sed -n '1,240p' diffs_recs/pr2-ux-noindex-debug.diff" succeeded in 144ms:
+--- a/tools/dead-link-finder/index.html+++ b/tools/dead-link-finder/index.html@@ -378,6 +378,7 @@         metaSection.appendChild(metaTitle);
+         debugSchedulerSummary = document.createElement('p');
+         debugSchedulerSummary.className = 'debug-scheduler';
++        debugSchedulerSummary.setAttribute('data-testid', 'debug-scheduler');
+         debugSchedulerSummary.textContent = 'scheduler: —';
+         metaSection.appendChild(debugSchedulerSummary);
+         debugMetaPre = document.createElement('pre');
+
+--- a/tools/keyword-density.html+++ b/tools/keyword-density.html@@ -1,5 +1,6 @@ <!doctype html><html lang='en'><head>
+-<meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
++
++<meta name=\"robots\" content=\"noindex\"><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
+ <title>Keyword Density — TinyUtils</title>
+ <link rel='stylesheet' href='/public/styles.css'><style>
+ .tu-consent{position:fixed;right:16px;bottom:16px;max-width:340px;background:#0e1530;color:#e8ecf3;border:1px solid #263464;border-radius:12px;padding:12px 12px 10px;box-shadow:0 12px 30px rgba(0,0,0,.35);z-index:9999}
+
+--- a/tools/meta-preview.html+++ b/tools/meta-preview.html@@ -1,5 +1,6 @@ <!doctype html><html lang='en'><head>
+-<meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
++
++<meta name=\"robots\" content=\"noindex\"><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
+[2025-11-04T15:27:00] tokens used: 13,603
+[2025-11-04T15:27:02] exec bash -lc "sed -n '1,260p' diffs_recs/pr4-tests-contracts.diff" in /Users/cav/dev/TinyUtils
+[2025-11-04T15:27:02] bash -lc "sed -n '1,260p' diffs_recs/pr4-tests-contracts.diff" succeeded in 129ms:
+--- /dev/null
++++ b/tests/dlf_envelope_invariants.test.mjs
+--- /dev/null+++ b/tests/dlf_envelope_invariants.test.mjs@@ -0,0 +1,19 @@+import test from 'node:test';
++import assert from 'node:assert/strict';
++import handler from '../api/check.js';
++
++test('DLF GET returns JSON error envelope with scheduler meta', async () => {
++  const req = new Request('https://example.test/api/check', { method: 'GET' });
++  const res = await handler(req);
++
++  assert.equal(res.status, 405, 'should be 405 for GET');
++  const ct = res.headers.get('content-type') || '';
++  assert.ok(ct.includes('application/json'), 'content-type should be JSON');
++  const payload = await res.json();
++  assert.equal(payload.ok, false);
++  assert.equal(typeof payload.code, 'string');
++  assert.equal(typeof payload.message, 'string');
++  assert.equal(typeof payload.requestId, 'string');
++  assert.ok(payload.meta && typeof payload.meta === 'object', 'meta should be object');
++  assert.ok(payload.meta.scheduler && typeof payload.meta.scheduler === 'object', 'meta.scheduler should be present');
+[2025-11-04T15:27:02] tokens used: 27,196
+[2025-11-04T15:27:04] exec bash -lc "sed -n '1,220p' diffs_recs/Pro\\ reasoning\\ message\\ nov\\ 4.md" in /Users/cav/dev/TinyUtils
+[2025-11-04T15:27:05] bash -lc "sed -n '1,220p' diffs_recs/Pro\\ reasoning\\ message\\ nov\\ 4.md" succeeded in 235ms:
+Cavin — dropping in with the full audit, concrete fixes, and PR‑ready patches you can apply today. I kept it opinionated, safe, and fast. Deliverables are all here: prioritized punch‑list, diffs, tests, and ops notes — with download links for each patch.
+
+------
+
+## 1) **Audit Report (MARKDOWN)**
+
+### TL;DR
+
+- **Core tools work** in prod (DLF, Sitemap Delta, Wayback Fixer). APIs respond with JSON, and robots/HSTS logic exists and is generally solid.
+- **Biggest gaps:** missing strict security headers/CSP, API responses are cacheable by intermediaries (yikes), a couple of beta tools should be behind a preview fence, and test coverage is thin (only one unit test).
+- **Quick wins shipped as patches:** Security headers (+ CSP), API `Cache-Control: no-store`, preview fence for half‑working pages, `data-testid` for scheduler debug, `noindex` on beta pages, and a small test bundle covering API contracts & DLF invariants.
+
+------
+
+### P0 (Must fix before more feature work)
+
+1. **APIs return cacheable JSON (no `Cache-Control`)**
+
+- **Finding**: `api/check.js`, `api/sitemap-delta.js`, `api/wayback-fixer.js`, `api/metafetch.js`, and `api/health.js` omit `cache-control` → intermediaries/CDNs can store responses.
+
+[2025-11-04T15:27:05] tokens used: 29,327
+[2025-11-04T15:27:07] exec bash -lc "sed -n '220,520p' diffs_recs/Pro\\ reasoning\\ message\\ nov\\ 4.md" in /Users/cav/dev/TinyUtils
+[2025-11-04T15:27:07] bash -lc "sed -n '220,520p' diffs_recs/Pro\\ reasoning\\ message\\ nov\\ 4.md" succeeded in 125ms:
+**Secrets**
+
+- `PREVIEW_SECRET` — shared secret to gate beta tools in production.
+- `VERCEL_*` — standard Vercel env (unchanged here).
+
+**Preview vs Prod smokes**
+
+- **Preview**: Set `PREVIEW_URL` → `npm run smoke:preview`.
+- **Prod**: `pnpm smoke:extras` uses `TINYUTILS_BASE` (defaults to tinyutils‑eight.vercel.app).
+
+**Gated routes (after PR1+PR3)**
+
+- `/tools/keyword-density(/index.html)`
+- `/tools/meta-preview(/index.html)`
+- `/tools/sitemap-generator(/index.html)`
+  Use `?preview_secret=$PREVIEW_SECRET` once to set a cookie (24h), or send `x-preview-secret` header.
+
+------
+
+## 5) **PR‑ready Descriptions**
+[2025-11-04T15:27:07] tokens used: 32,140
+[2025-11-04T15:27:10] exec bash -lc 'ls -la tinyutils && rg -n "PR3|preview|fence|PREVIEW_SECRET|vercel.json|api/fence|beta|noindex|data-testid|tests|README|smoke|package.json|pnpm" tinyutils -S || true' in /Users/cav/dev/TinyUtils
+[2025-11-04T15:27:10] bash -lc 'ls -la tinyutils && rg -n "PR3|preview|fence|PREVIEW_SECRET|vercel.json|api/fence|beta|noindex|data-testid|tests|README|smoke|package.json|pnpm" tinyutils -S || true' succeeded in 159ms:
+total 256
+drwxr-xr-x@ 39 cav  staff   1248 Nov  4 13:41 .
+drwxr-xr-x@ 13 cav  staff    416 Nov  4 13:02 ..
+drwxr-xr-x@  2 cav  staff     64 Oct 22 13:59 .debug
+drwxr-xr-x@ 15 cav  staff    480 Nov  4 13:48 .git
+-rw-r--r--@  1 cav  staff     19 Oct 20 19:39 .gitattributes
+drwxr-xr-x@  3 cav  staff     96 Oct 20 19:39 .github
+-rw-r--r--@  1 cav  staff    308 Oct 27 21:32 .mailmap
+-rw-r--r--@  1 cav  staff     52 Oct 20 19:39 ads.txt
+-rw-r--r--@  1 cav  staff    495 Oct 20 19:39 ADSENSE_SETUP.md
+-rw-r--r--@  1 cav  staff  10629 Nov  4 10:53 AGENTS.md
+drwxr-xr-x@  8 cav  staff    256 Nov  4 13:46 api
+-rw-r--r--@  1 cav  staff    508 Oct 20 19:39 CHANGES-v1.3.0-rc2.txt
+-rw-r--r--@  1 cav  staff    702 Oct 20 19:39 CHANGES-v1.3.0-rc3.txt
+-rw-r--r--@  1 cav  staff    778 Oct 20 19:39 DEPLOY_PRODUCTION_CHECKLIST.md
+drwxr-xr-x@  4 cav  staff    128 Nov  4 13:05 docs
+-rw-r--r--@  1 cav  staff    534 Oct 20 19:39 feedback.html
+drwxr-xr-x@  6 cav  staff    192 Oct 20 19:39 guides
+-rw-r--r--@  1 cav  staff   2842 Oct 20 19:39 index.html
+-rw-r--r--@  1 cav  staff    243 Oct 20 19:39 offering-to-the-triple-goddess.txt
+[2025-11-04T15:27:10] tokens used: 34,551
+
+[2025-11-04T15:27:13] thinking
+
+**Inspecting repository elements**
+
+I’m looking at the tinyutils repository. There's an `api/fence.js` file present, along with rewrites in `vercel.json`. The README-VERCEL mentions a preview fence, which makes me think that PR3 might already be implemented in a branch. However, we're currently on the master branch. So, my next step is to inspect the content of `tinyutils/api/fence.js` to see what’s happening there.
+[2025-11-04T15:27:15] exec bash -lc "sed -n '1,220p' tinyutils/api/fence.js" in /Users/cav/dev/TinyUtils
+[2025-11-04T15:27:15] bash -lc "sed -n '1,220p' tinyutils/api/fence.js" succeeded in 132ms:
+export const config = { runtime: 'edge' };
+
+const COOKIE_NAME = 'tu_preview_secret';
+const COOKIE_MAX_AGE = 60 * 60 * 24; // 24 hours
+
+function rid() {
+  return Math.random().toString(16).slice(2, 10);
+}
+
+function json(status, body, requestId, extraHeaders = {}) {
+  const headers = new Headers({
+    'content-type': 'application/json; charset=utf-8',
+    'cache-control': 'no-store'
+  });
+  if (requestId) headers.set('x-request-id', requestId);
+  for (const [key, value] of Object.entries(extraHeaders)) {
+    headers.set(key, value);
+  }
+  return new Response(JSON.stringify(body), { status, headers });
+}
+[2025-11-04T15:27:15] tokens used: 38,993
+
+[2025-11-04T15:27:17] thinking
+
+I'm checking the fence on the master branch. Next, I need to look into the vercel.json file to confirm details like rewrites and headers. It’s always good to ensure everything is set up correctly, especially since these configurations can affect how the application behaves. I’ll go through it carefully to understand what’s in there and see if any adjustments are necessary. Let's make sure everything is aligned!
+[2025-11-04T15:27:21] exec bash -lc "sed -n '1,240p' tinyutils/vercel.json" in /Users/cav/dev/TinyUtils
+[2025-11-04T15:27:21] bash -lc "sed -n '1,240p' tinyutils/vercel.json" succeeded in 144ms:
+{
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "geolocation=(), camera=(), microphone=(), usb=(), payment=(), browsing-topics=()" },
+        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+        { "key": "Cross-Origin-Resource-Policy", "value": "same-origin" },
+        { "key": "X-DNS-Prefetch-Control", "value": "off" }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" },
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+[2025-11-04T15:27:21] tokens used: 40,371
+[2025-11-04T15:27:27] exec bash -lc 'rg -n "cache-control|cache control|no-store|no store" tinyutils/api -S || true' in /Users/cav/dev/TinyUtils
+[2025-11-04T15:27:27] bash -lc 'rg -n "cache-control|cache control|no-store|no store" tinyutils/api -S || true' succeeded in 137ms:
+tinyutils/api/wayback-fixer.js:10:    'cache-control': 'no-store'
+tinyutils/api/sitemap-delta.js:17:    'cache-control': 'no-store'
+tinyutils/api/metafetch.js:12:    'cache-control': 'no-store'
+tinyutils/api/check.js:10:    'cache-control': 'no-store'
+tinyutils/api/health.js:8:      'cache-control': 'no-store'
+tinyutils/api/fence.js:13:    'cache-control': 'no-store'
+tinyutils/api/fence.js:119:    responseHeaders.set('cache-control', 'no-store');
+[2025-11-04T15:27:27] tokens used: 41,643
+[2025-11-04T15:27:31] exec bash -lc "sed -n '1,180p' tinyutils/api/check.js" in /Users/cav/dev/TinyUtils
+[2025-11-04T15:27:31] bash -lc "sed -n '1,180p' tinyutils/api/check.js" succeeded in 128ms:
+export const config = { runtime: 'edge' };
+
+function rid() {
+  return Math.random().toString(16).slice(2, 10);
+}
+
+function json(status, body, requestId) {
+  const headers = new Headers({
+    'content-type': 'application/json; charset=utf-8',
+    'cache-control': 'no-store'
+  });
+  if (requestId) headers.set('x-request-id', requestId);
+  return new Response(JSON.stringify(body), {
+    status,
+    headers
+  });
+}
+
+function jerr(status, code, message, detail, stage, requestId, metaExtras) {
+  const meta = {
+[2025-11-04T15:27:31] tokens used: 41,998
+
+[2025-11-04T15:27:37] thinking
+
+**Reviewing PR statuses**
+
+It looks like we have enough information about PR1, with security and caching mostly in place, though it's missing CSP. The previous documentation hints at adding CSP, but it may have been omitted for reasons related to COOP/CORP. 
+
+Next, I should confirm the evidence for PR1 and clarify what remains, figure out the quick wins for PR2, and check the status of PR3 since the user said it's implemented on the 'feat/pr3-preview-fence' branch. However, the current repo suggests that PR3 might already be merged into master.
+**Clarifying implementation status**
+
+To be cautious, it seems that the implementation exists either on the branch or master. Next, I should consider merging PR1 and PR3 as the earlier documentation suggested. The user mentioned PR1 is completed and deployed, while PR3 is implemented on a branch. This implies PR1 might already be merged and ready. I need to check for any outstanding tasks, like verifying the rewrites, ensuring the `PREVIEW_SECRET` environment variable is set, and performing tests. I’ll consult AGENTS.md to follow the necessary instructions.
+[2025-11-04T15:27:43] codex
+**Clarifying implementation status**
+
+To be cautious, it seems that the implementation exists either on the branch or master. Next, I should consider merging PR1 and PR3 as the earlier documentation suggested. The user mentioned PR1 is completed and deployed, while PR3 is implemented on a branch. This implies PR1 might already be merged and ready. I need to check for any outstanding tasks, like verifying the rewrites, ensuring the `PREVIEW_SECRET` environment variable is set, and performing tests. I’ll consult AGENTS.md to follow the necessary instructions.
+[2025-11-04T15:27:43] exec bash -lc "sed -n '1,240p' tinyutils/AGENTS.md" in /Users/cav/dev/TinyUtils
+[2025-11-04T15:27:43] bash -lc "sed -n '1,240p' tinyutils/AGENTS.md" succeeded in 129ms:
+# AGENTS.md
+
+**Goal**
+Get a **passing Vercel Preview** build (not public). Pages must render:
+- `/`, `/tools/`, `/tools/dead-link-finder/`, `/tools/sitemap-delta/`, `/tools/wayback-fixer/`
+Edge APIs must respond:
+- `/api/check`, `/api/sitemap-delta`, `/api/wayback-fixer`, `/api/metafetch`
+
+---
+
+## Constraints
+- **Branch + PR only.** No DNS or Production deploys. No repository secrets. **The exception being when you are asked to push to production, in which case you will do so. Thanks.
+- **Minimal diffs.** No new dependencies unless strictly required & justified in the PR.
+- **Static site, Framework = Other.** No build step; **Output directory = root**.
+- **`vercel.json` = headers only.** Remove any `functions`/`runtime` blocks. (Those trigger “Function Runtimes must have a valid version…” errors.)
+- **ESM everywhere** for Edge functions.
+  - `package.json` must include: `{ "type": "module" }`.
+  - Each API file:
+    ```js
+    export const config = { runtime: 'edge' };
+[2025-11-04T15:27:43] tokens used: 44,031
+
+[2025-11-04T15:27:47] thinking
+
+**Inspecting documentation**
+
+I'm looking at AGENTS.md for useful information, which includes something about "headers only; no functions/runtime". I noticed our vercel.json file has only headers and rewrites, which is great. I'm also checking the README-VERCEL document, as it references a preview fence and `PREVIEW_SECRET`. So, it looks like I need to dive into the README and see what else I can gather from that. Let's clarify these details further!
+[2025-11-04T15:27:49] exec bash -lc "sed -n '1,200p' tinyutils/README-VERCEL.md" in /Users/cav/dev/TinyUtils
+[2025-11-04T15:27:50] bash -lc "sed -n '1,200p' tinyutils/README-VERCEL.md" succeeded in 140ms:
+# TinyUtils — Private Preview on Vercel (RC3)
+
+This guide gets a private preview online so you can run the 7‑step smoke before any public launch.
+
+## Option A — Import from GitHub (recommended)
+1. Create a **new GitHub repo** (e.g., `tinyutils`).
+2. Unzip this archive locally and push all files (include the **`/api`** folder at the project root).
+3. In **Vercel** → **Add New… → Project** → Import your GitHub repo.
+4. **Framework Preset:** `Other`
+5. **Build Command:** *leave blank*
+6. **Output Directory:** `/` (project root)
+7. Click **Deploy**. Vercel gives you a **Preview URL** like `https://tinyutils-xxxx.vercel.app`.
+
+## Option B — Upload the ZIP directly
+1. In Vercel → **Add New… → Project** → **Import Third‑Party Git Repository** → **Upload** → choose this ZIP.
+2. Keep **Framework:** `Other`, **Build:** none, **Output:** `/`.
+3. Deploy → get the **Preview URL**.
+
+## What to verify right away
+- `/api/check` responds to POST (Dead Link Finder)
+[2025-11-04T15:27:50] tokens used: 47,511
+[2025-11-04T15:27:55] exec bash -lc "sed -n '1,220p' tinyutils/README.md" in /Users/cav/dev/TinyUtils
+[2025-11-04T15:27:55] bash -lc "sed -n '1,220p' tinyutils/README.md" succeeded in 131ms:
+# tinyutils
+TinyUtils
+
+## DLF Quick Extras (smokes)
+
+Run against production (override with `TINYUTILS_BASE`):
+
+```bash
+pnpm smoke:extras
+```
+
+Assertions:
+- HSTS / hard-TLD guard — even with `retryHttpOnHttpsFail=true`, HTTP fallback is never used on guarded domains.
+- Robots “unknown” (best-effort) — probes a small set of flaky hosts and always validates the JSON envelope; surfaces `robotsStatus=unknown` when reproducible.
+
+Optional UI sanity (local, uses Tiny-Reactive):
+
+```bash
+tiny-reactive serve --host 127.0.0.1 --port 5566 --headful --debug
+pnpm ui:smoke:dlf
+[2025-11-04T15:27:55] tokens used: 48,550
+
+[2025-11-04T15:27:58] thinking
+
+**Assessing project rollout**
+
+I need to evaluate what tasks are left for PR3 and the overall rollout. It seems like it's also crucial to check the tests directory in tinyutils to see if the PR4 tests have been included. I want to make sure everything is accounted for before we proceed. Let’s ensure we're not missing any important testing elements! This could help in keeping things organized.
+[2025-11-04T15:28:00] exec bash -lc 'ls -la tinyutils/tests && rg -n "." tinyutils/tests -n || true' in /Users/cav/dev/TinyUtils
+[2025-11-04T15:28:00] bash -lc 'ls -la tinyutils/tests && rg -n "." tinyutils/tests -n || true' succeeded in 159ms:
+total 8
+drwxr-xr-x@  3 cav  staff    96 Nov  4 10:53 .
+drwxr-xr-x@ 39 cav  staff  1248 Nov  4 13:41 ..
+-rw-r--r--@  1 cav  staff   810 Nov  4 10:53 dlf_api_error_json.test.mjs
+tinyutils/tests/dlf_api_error_json.test.mjs:1:import test from 'node:test';
+tinyutils/tests/dlf_api_error_json.test.mjs:2:import assert from 'node:assert/strict';
+tinyutils/tests/dlf_api_error_json.test.mjs:4:import handler from '../api/check.js';
+tinyutils/tests/dlf_api_error_json.test.mjs:6:test('DLF API responds with JSON error envelopes', async () => {
+tinyutils/tests/dlf_api_error_json.test.mjs:7:  const request = new Request('https://tinyutils-eight.vercel.app/api/check', {
+tinyutils/tests/dlf_api_error_json.test.mjs:8:    method: 'GET'
+tinyutils/tests/dlf_api_error_json.test.mjs:9:  });
+tinyutils/tests/dlf_api_error_json.test.mjs:11:  const response = await handler(request);
+tinyutils/tests/dlf_api_error_json.test.mjs:13:  const contentType = response.headers.get('content-type') || '';
+tinyutils/tests/dlf_api_error_json.test.mjs:14:  assert.ok(
+tinyutils/tests/dlf_api_error_json.test.mjs:15:    contentType.includes('application/json'),
+tinyutils/tests/dlf_api_error_json.test.mjs:16:    `Expected JSON content-type, got "${contentType}"`
+tinyutils/tests/dlf_api_error_json.test.mjs:17:  );
+tinyutils/tests/dlf_api_error_json.test.mjs:19:  const payload = await response.json();
+tinyutils/tests/dlf_api_error_json.test.mjs:20:  assert.strictEqual(typeof payload, 'object');
+tinyutils/tests/dlf_api_error_json.test.mjs:21:  assert.strictEqual(payload.ok, false);
+[2025-11-04T15:28:00] tokens used: 48,978
+
+[2025-11-04T15:28:03] thinking
+
+**Reviewing test implementation**
+
+Currently, there’s only one test. The proposal for PR4 suggests adding three more tests: dlf_envelope_invariants, api_contracts, and csv_hardening. Since PR4 hasn't been applied to master yet, the next steps probably involve incorporating the tests from PR4. I should check the package.json file to see the relevant scripts for running these tests. This will help ensure everything is set for effective testing!
+[2025-11-04T15:28:07] exec bash -lc 'cat tinyutils/package.json' in /Users/cav/dev/TinyUtils
+[2025-11-04T15:28:07] bash -lc 'cat tinyutils/package.json' succeeded in 129ms:
+{
+  "name": "tinyutils",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "vercel-build": "echo 'static + edge'",
+    "test": "node --test",
+    "smoke:local": "node scripts/smoke_dlf_local.mjs",
+    "smoke:preview": "node scripts/smoke_dlf_preview.mjs",
+    "smoke:extras": "bash scripts/smoke_dlf_extras.sh",
+    "ui:smoke:dlf": "node scripts/ui_smoke_dlf.mjs",
+    "ui:smoke:sd": "node scripts/ui_smoke_sitemap.mjs",
+    "ui:smoke:wbf": "node scripts/ui_smoke_wayback.mjs"
+  },
+  "engines": {
+    "node": "20.x"
+  }
+}
+[2025-11-04T15:28:07] tokens used: 49,749
+
+[2025-11-04T15:28:15] thinking
+
+**Evaluating HTML adjustments**
+
+I need to consider adding "optional: add CSP" or confirm divergence versus diff.  
+
+For PR2 UX quick wins, the diff indicates that we might need to add a data-testid to the debug-scheduler and a meta robots noindex tag to three HTML files. I should check if those HTML files exist in our repo and ensure they include 'noindex.' Where are those tool HTMLs located? I noticed a "tools" directory in our repo tree, so I’ll list what's inside.
+[2025-11-04T15:28:18] exec bash -lc 'ls -la tinyutils/tools && rg -n "dead-link-finder|meta-preview|sitemap-generator|keyword-density" tinyutils/tools -n || true' in /Users/cav/dev/TinyUtils
+[2025-11-04T15:28:18] bash -lc 'ls -la tinyutils/tools && rg -n "dead-link-finder|meta-preview|sitemap-generator|keyword-density" tinyutils/tools -n || true' succeeded in 150ms:
+total 64
+drwxr-xr-x@  9 cav  staff    288 Nov  4 10:53 .
+drwxr-xr-x@ 39 cav  staff   1248 Nov  4 13:41 ..
+drwxr-xr-x@  3 cav  staff     96 Nov  4 10:53 dead-link-finder
+-rw-r--r--@  1 cav  staff   2708 Nov  4 10:53 index.html
+-rw-r--r--@  1 cav  staff  10952 Oct 20 19:39 keyword-density.html
+-rw-r--r--@  1 cav  staff  10072 Oct 20 19:39 meta-preview.html
+drwxr-xr-x@  4 cav  staff    128 Nov  4 10:53 sitemap-delta
+-rw-r--r--@  1 cav  staff   4029 Oct 20 19:39 sitemap-generator.html
+drwxr-xr-x@  4 cav  staff    128 Nov  4 10:53 wayback-fixer
+tinyutils/tools/index.html:21:      {"@type": "Thing", "name": "Dead Link Finder", "url": "https://tinyutils-eight.vercel.app/tools/dead-link-finder/"},
+tinyutils/tools/index.html:46:      <a class="btn primary" href="/tools/dead-link-finder/">Open</a>
+tinyutils/tools/dead-link-finder/index.html:8:  <link rel="canonical" href="https://tinyutils-eight.vercel.app/tools/dead-link-finder/">
+tinyutils/tools/dead-link-finder/index.html:509:          tool: 'dead-link-finder',
+tinyutils/tools/dead-link-finder/index.html:606:      download(makeDatedFilename('dead-link-finder', 'csv'), csv, 'text/csv');
+tinyutils/tools/dead-link-finder/index.html:625:      download(makeDatedFilename('dead-link-finder', 'json'), payload, 'application/json');
+[2025-11-04T15:28:20] tokens used: 50,617
+[2025-11-04T15:28:29] exec bash -lc "sed -n '1,40p' tinyutils/tools/keyword-density.html && sed -n '1,40p' tinyutils/tools/meta-preview.html && sed -n '1,50p' tinyutils/tools/sitemap-generator.html" in /Users/cav/dev/TinyUtils
+[2025-11-04T15:28:29] bash -lc "sed -n '1,40p' tinyutils/tools/keyword-density.html && sed -n '1,40p' tinyutils/tools/meta-preview.html && sed -n '1,50p' tinyutils/tools/sitemap-generator.html" succeeded in 156ms:
+<!doctype html><html lang='en'><head>
+<meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
+<title>Keyword Density — TinyUtils</title>
+<link rel='stylesheet' href='/public/styles.css'><style>
+.tu-consent{position:fixed;right:16px;bottom:16px;max-width:340px;background:#0e1530;color:#e8ecf3;border:1px solid #263464;border-radius:12px;padding:12px 12px 10px;box-shadow:0 12px 30px rgba(0,0,0,.35);z-index:9999}
+.tu-consent h4{margin:0 0 6px;font-size:14px}
+.tu-consent p{margin:0 0 8px;font-size:13px;opacity:.9}
+.tu-consent .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
+.tu-consent button{padding:8px 10px;border-radius:10px;border:1px solid #2b6ef6;background:#0e1530;color:#cfe0ff;cursor:pointer}
+.tu-consent button.primary{background:#2b6ef6;color:#fff;border:none}
+.tu-consent .link{font-size:12px;opacity:.85}
+.tu-ads-toggle{margin-left:auto;display:inline-flex;gap:6px;align-items:center;font-size:12px;opacity:.85}
+.tu-ads-toggle input{transform:translateY(1px)}
+
+</style>
+
+<script>
+// --- Consent Mode + EU-friendly toast (very low-profile) ---
+(function(){
+  const EU_LANG = ['bg','cs','da','de','el','en-GB','es','et','fi','fr','ga','hr','hu','it','lt','lv','mt','nl','pl','pt','ro','sk','sl','sv','is','no','tr','uk'];
+[2025-11-04T15:28:29] tokens used: 51,980
+
+[2025-11-04T15:28:33] thinking
+
+**Updating HTML files**
+
+I’m looking at the PR2 diff, which suggests adding `<meta name="robots" content="noindex">` into the head of three specific HTML files. Currently, these files lack the noindex meta tag, although they do have `<meta charset>` and `<meta name='viewport'>`. Additionally, the PR2 will introduce a data-testid attribute to the debug-scheduler in the DLF HTML. I’ll need to open the DLF file and search for 'debug-scheduler' to see those changes.
+[2025-11-04T15:28:36] exec bash -lc 'rg -n "debug-scheduler" tinyutils/tools/dead-link-finder/index.html -n || true' in /Users/cav/dev/TinyUtils
+[2025-11-04T15:28:36] bash -lc 'rg -n "debug-scheduler" tinyutils/tools/dead-link-finder/index.html -n || true' succeeded in 137ms:
+51:    .debug-scheduler { margin: 0 0 0.5rem 0; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; font-size: 0.85rem; }
+380:        debugSchedulerSummary.className = 'debug-scheduler';
+[2025-11-04T15:28:36] tokens used: 54,724
+[2025-11-04T15:28:39] exec bash -lc "sed -n '350,430p' tinyutils/tools/dead-link-finder/index.html" in /Users/cav/dev/TinyUtils
+[2025-11-04T15:28:39] bash -lc "sed -n '350,430p' tinyutils/tools/dead-link-finder/index.html" succeeded in 131ms:
+    const debugMode = new URLSearchParams(location.search).get('debug') === '1';
+    let debugDetails = null;
+    let debugHeadersList = null;
+    let debugMetaPre = null;
+    let debugSchedulerSummary = null;
+    if (debugMode) {
+      const resultsCard = document.getElementById('resultsHeading')?.closest('.card');
+      if (resultsCard) {
+        debugDetails = document.createElement('details');
+        debugDetails.className = 'debug-panel';
+        const summary = document.createElement('summary');
+        summary.textContent = 'Debug';
+        debugDetails.appendChild(summary);
+        const wrapper = document.createElement('div');
+        wrapper.className = 'debug-content';
+
+        const headersSection = document.createElement('div');
+        const headersTitle = document.createElement('h3');
+        headersTitle.textContent = 'Response headers';
+        headersSection.appendChild(headersTitle);
+[2025-11-04T15:28:39] tokens used: 54,951
+
+[2025-11-04T15:28:53] thinking
+
+**Updating sitemap guidance**
+
+I need to decide whether to update the sitemap by excluding gated pages or keeping them under a "private preview list." I’ll provide a step to update 'public/sitemap.xml' accordingly. I want to remember there are two sitemap files: one in the root directory and another in 'public/sitemap.xml'. So I should open both and check their contents before making updates. Let's see what I find!
+[2025-11-04T15:28:56] exec bash -lc "sed -n '1,160p' tinyutils/sitemap.xml; echo '---'; sed -n '1,160p' tinyutils/public/sitemap.xml || true" in /Users/cav/dev/TinyUtils
+[2025-11-04T15:28:56] bash -lc "sed -n '1,160p' tinyutils/sitemap.xml; echo '---'; sed -n '1,160p' tinyutils/public/sitemap.xml || true" succeeded in 130ms:
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://tinyutils-eight.vercel.app/</loc></url>
+  <url><loc>https://tinyutils-eight.vercel.app/tools/</loc></url>
+  <url><loc>https://tinyutils-eight.vercel.app/tools/dead-link-finder/</loc></url>
+  <url><loc>https://tinyutils-eight.vercel.app/tools/sitemap-delta/</loc></url>
+  <url><loc>https://tinyutils-eight.vercel.app/tools/wayback-fixer/</loc></url>
+</urlset>
+---
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://tinyutils-eight.vercel.app/</loc></url>
+  <url><loc>https://tinyutils-eight.vercel.app/tools/</loc></url>
+  <url><loc>https://tinyutils-eight.vercel.app/tools/keyword-density.html</loc></url>
+  <url><loc>https://tinyutils-eight.vercel.app/tools/meta-preview.html</loc></url>
+  <url><loc>https://tinyutils-eight.vercel.app/tools/sitemap-generator.html</loc></url>
+  <url><loc>https://tinyutils-eight.vercel.app/guides/</loc></url>
+  <url><loc>https://tinyutils-eight.vercel.app/guides/fix-404s.html</loc></url>
+  <url><loc>https://tinyutils-eight.vercel.app/guides/use-sitemap-check.html</loc></url>
+  <url><loc>https://tinyutils-eight.vercel.app/guides/wayback-for-seo.html</loc></url>
+[2025-11-04T15:28:56] tokens used: 56,739
+
+[2025-11-04T15:28:59] thinking
+
+**Checking sitemaps and robots.txt**
+
+I’ve got two sitemaps to consider: one at 'tinyutils/public/sitemap.xml' for the beta tools and another at 'tinyutils/sitemap.xml' for the non-beta content. Now, I'm curious about which sitemap is referenced in the robots.txt file. To find that out, I'll need to open the robots.txt and take a look. Let’s check that out to ensure I understand the usage correctly!
+[2025-11-04T15:29:01] exec bash -lc "sed -n '1,80p' tinyutils/robots.txt" in /Users/cav/dev/TinyUtils
+[2025-11-04T15:29:02] bash -lc "sed -n '1,80p' tinyutils/robots.txt" succeeded in 152ms:
+User-agent: *
+Allow: /
+Sitemap: /sitemap.xml
+[2025-11-04T15:29:02] tokens used: 57,519
+
+[2025-11-04T15:29:15] thinking
+
+**Validating deployment tests**
+
+I've documented the process for deployment validation. I need to propose some acceptance test commands, focusing on verifying gating and headers, and provide 'curl' sequences. We should also check the presence of the "data-testid" attribute for PR2, which isn't there, so we’ll suggest adding it. Additionally, I think it might be helpful to look for "PR1 evidence" in the commit history, although we can only propose log gathering. Finally, I’ll check if the 'branch' 'feat/pr3-preview-fence' exists in our local repo 'tinyutils' by using 'git branch' and 'git log'.
+[2025-11-04T15:29:21] exec bash -lc 'cd tinyutils && git status -sb && git branch --all --no-color && git --no-pager log --decorate --oneline -n 10' in /Users/cav/dev/TinyUtils
+[2025-11-04T15:29:22] bash -lc 'cd tinyutils && git status -sb && git branch --all --no-color && git --no-pager log --decorate --oneline -n 10' succeeded in 246ms:
+## feat/pr3-preview-fence
+  backup/2025-11-03-pre-fixes
+  backup/pre-rewrite-20251027-213255
+  code-code-gpt-5-codex-api-sitemap-delta-js--replace-fixed
+  code-code-gpt-5-codex-apply-fixes-tools-wayback-fixer-index-ht
+  code-code-gpt-5-codex-audit-harden-all
+  code-code-gpt-5-codex-clean-tools-index-html-removing
+  code-code-gpt-5-codex-edit-tools-sitemap-delta-index-html-demo
+  code-code-gpt-5-codex-fix-wayback-fixer
+  code-code-gpt-5-codex-mirror-helper-cleanup
+  code-code-gpt-5-codex-modify-api-sitemap-delta-js-echo
+  code-code-gpt-5-codex-open-api-js-summarize
+  code-code-gpt-5-codex-open-api-metafetch-js-add
+  code-code-gpt-5-codex-open-api-wayback-fixer-js-add
+  code-code-gpt-5-codex-open-tools-dead-link-finder-index-html
+  code-code-gpt-5-codex-open-tools-wayback-fixer-index-html-tool
+  code-code-gpt-5-codex-patch-tools-sitemap-delta-index-html-awa
+  code-code-gpt-5-codex-read-agents-md--vercel-json
+  code-code-gpt-5-codex-repair-sitemap-delta
+  code-code-gpt-5-codex-review-api-wayback-fixer-js--produce
+[2025-11-04T15:29:22] tokens used: 58,000
+[2025-11-04T15:29:27] exec bash -lc "cd tinyutils && git --no-pager show origin/main:vercel.json | sed -n '1,200p'" in /Users/cav/dev/TinyUtils
+[2025-11-04T15:29:27] bash -lc "cd tinyutils && git --no-pager show origin/main:vercel.json | sed -n '1,200p'" succeeded in 152ms:
+{
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+      ]
+    },
+    {
+      "source": "/tools/wayback-fixer/demo/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=600" }
+      ]
+    }
+  ]
+}
+[2025-11-04T15:29:27] tokens used: 60,137
+[2025-11-04T15:29:37] exec bash -lc "cd tinyutils && git --no-pager ls-tree -r --name-only origin/main | rg '"'^api/fence.js$'"' -n || true" in /Users/cav/dev/TinyUtils
+[2025-11-04T15:29:38] bash -lc "cd tinyutils && git --no-pager ls-tree -r --name-only origin/main | rg '"'^api/fence.js$'"' -n || true" succeeded in 175ms:
+[2025-11-04T15:29:38] tokens used: 60,633
+
+[2025-11-04T15:29:42] thinking
+
+**Checking api files**
+
+I'm noticing there's no fence in the main branch, which means PR3 is only present in the branch. That's actually a good thing. Now, I think it's important to check the 'api' files in the main branch for any instances of 'no-store'. This will help ensure that everything is correctly set up and potentially avoid any pitfalls later on. Let's make sure I cover this thoroughly!
+[2025-11-04T15:29:45] exec bash -lc 'cd tinyutils && for f in api/check.js api/sitemap-delta.js api/metafetch.js api/wayback-fixer.js; do echo "--- origin/main:$f"; git --no-pager show origin/main:$f | rg -n "cache-control" -n || echo "(file not found or no cache-control)"; done' in /Users/cav/dev/TinyUtils
+[2025-11-04T15:29:45] bash -lc 'cd tinyutils && for f in api/check.js api/sitemap-delta.js api/metafetch.js api/wayback-fixer.js; do echo "--- origin/main:$f"; git --no-pager show origin/main:$f | rg -n "cache-control" -n || echo "(file not found or no cache-control)"; done' succeeded in 208ms:
+--- origin/main:api/check.js
+(file not found or no cache-control)
+--- origin/main:api/sitemap-delta.js
+(file not found or no cache-control)
+--- origin/main:api/metafetch.js
+(file not found or no cache-control)
+--- origin/main:api/wayback-fixer.js
+(file not found or no cache-control)
+[2025-11-04T15:29:45] tokens used: 60,911
+[2025-11-04T15:29:48] exec bash -lc 'cd tinyutils && for f in api/check.js api/sitemap-delta.js api/metafetch.js api/wayback-fixer.js; do echo "--- origin/main:$f"; git --no-pager show origin/main:$f | sed -n '"'1,40p'; done" in /Users/cav/dev/TinyUtils
+[2025-11-04T15:29:49] bash -lc 'cd tinyutils && for f in api/check.js api/sitemap-delta.js api/metafetch.js api/wayback-fixer.js; do echo "--- origin/main:$f"; git --no-pager show origin/main:$f | sed -n '"'1,40p'; done" succeeded in 197ms:
+--- origin/main:api/check.js
+export const config = { runtime: 'edge' };
+
+function rid() {
+  return Math.random().toString(16).slice(2, 10);
+}
+
+function json(status, body, requestId) {
+  const headers = new Headers({ 'content-type': 'application/json; charset=utf-8' });
+  if (requestId) headers.set('x-request-id', requestId);
+  return new Response(JSON.stringify(body), {
+    status,
+    headers
+  });
+}
+
+function jerr(status, code, message, detail, stage, requestId, metaExtras) {
+  const meta = {
+    requestId,
+    stage: stage || null,
+[2025-11-04T15:29:49] tokens used: 61,535
+
+[2025-11-04T15:29:53] thinking
+
+**Evaluating deployment and merges**
+
+I'm looking into how the `origin/main` lacks the 'cache-control: no-store' in API responses, which confirms my suspicion. While the user says PR1 has been completed and deployed, it seems it's not merged. I need to account for merging the PR1 branch into main to make sure the codebase matches the deployed state. We’ll also want to include acceptance test commands and manage the sequence of merging PRs based on dependencies, particularly with PR3 and its rewrites.
+**Planning deployment and validation**
+
+The Pro reasoning doc indicates that we should apply PR1 and PR3 together, so the rewrites are in place before the route is set. My plan includes configuring the environment by setting `PREVIEW_SECRET` in Vercel for both preview and production, along with testing requirements like unit tests and UI smoke tests. We’ll validate both production and preview post-merge and update related documentation. Additionally, I'm thinking about proposing a small "evidence pack" to suggest gathering header responses since we can't write files ourselves. Lastly, we should ensure our changes in `api/fence.js` offer more robustness than previous diffs.
+**Structuring the plan**
+
+I’m putting together the plan, but there's a hiccup — the guidance mentions using an "update_plan" tool for multi-step tasks, yet it’s not available in the functions I have access to. It seems to be just a mention without a defined tool. Since I can't call it, I'll have to create our final plan as a bullet list in the message instead. I’ll make sure to follow the guidelines for clarity and structure. The plan will include steps, dependencies, testing, and documentation updates, presented concisely for easy reference.
+**Outlining the next steps**
+
+I’m looking to summarize our current state: PR1 is on a branch, PR3 has been implemented, while master lacks PR2 and PR4, and there’s only one test in the repo. Rewrites are present, but the 'noindex meta' is missing, although the preview fence docs are updated.
+
+For the next steps, I’ll align the main branch with deployed PR1 by merging it if needed and ensuring headers and 'no-store' are included. I’ll also need to gate Beta Tools with PR3, implement UX quick wins for PR2, add tests for PR4, and validate the deployment for both preview and production environments.
+**Summarizing current state and outlining the plan**
+
+I’m organizing the documentation updates and rollout plan. The current state shows that we’re on the 'feat/pr3-preview-fence' branch with implemented rewrites, but PR1 is pending for security headers and caching. PR2’s 'noindex meta' is missing, and PR4 lacks tests.
+
+Next, I must clearly lay out the step-by-step plan with concise tasks: aligning branches, adding new headers, ensuring required testing is in place, and updating relevant documentation. I’ll also confirm the deployment validation and summarize the evidence required to ensure clarity and actionability.
+**Defining steps for implementation**
+
+I’m creating a structured plan, where each step includes "Dependencies" and "How to test." In Step 1, I’ll reconcile PR1 on main, ensuring it's deployed and committed, and optionally adopt a 'CSP' header and '/public' caching. Testing will involve checking security headers using 'curl -Is root.' Next, I’ll merge PR3, ensuring the PREVIEW_SECRET is set; for testing, I'll verify gating with 'curl.'
+
+Steps continue with applying PR2, adding tests for PR4, validating deployment with smoke tests, updating documentation, promoting to production, and setting up monitoring follow-ups. I want to keep it concise!
+[2025-11-04T15:30:37] codex
+**Planning deployment and validation**
+
+The Pro reasoning doc indicates that we should apply PR1 and PR3 together, so the rewrites are in place before the route is set. My plan includes configuring the environment by setting `PREVIEW_SECRET` in Vercel for both preview and production, along with testing requirements like unit tests and UI smoke tests. We’ll validate both production and preview post-merge and update related documentation. Additionally, I'm thinking about proposing a small "evidence pack" to suggest gathering header responses since we can't write files ourselves. Lastly, we should ensure our changes in `api/fence.js` offer more robustness than previous diffs.
+[2025-11-04T15:30:37] codex
+**Structuring the plan**
+
+I’m putting together the plan, but there's a hiccup — the guidance mentions using an "update_plan" tool for multi-step tasks, yet it’s not available in the functions I have access to. It seems to be just a mention without a defined tool. Since I can't call it, I'll have to create our final plan as a bullet list in the message instead. I’ll make sure to follow the guidelines for clarity and structure. The plan will include steps, dependencies, testing, and documentation updates, presented concisely for easy reference.
+[2025-11-04T15:30:37] codex
+**Outlining the next steps**
+
+I’m looking to summarize our current state: PR1 is on a branch, PR3 has been implemented, while master lacks PR2 and PR4, and there’s only one test in the repo. Rewrites are present, but the 'noindex meta' is missing, although the preview fence docs are updated.
+
+For the next steps, I’ll align the main branch with deployed PR1 by merging it if needed and ensuring headers and 'no-store' are included. I’ll also need to gate Beta Tools with PR3, implement UX quick wins for PR2, add tests for PR4, and validate the deployment for both preview and production environments.
+[2025-11-04T15:30:37] codex
+**Summarizing current state and outlining the plan**
+
+I’m organizing the documentation updates and rollout plan. The current state shows that we’re on the 'feat/pr3-preview-fence' branch with implemented rewrites, but PR1 is pending for security headers and caching. PR2’s 'noindex meta' is missing, and PR4 lacks tests.
+
+Next, I must clearly lay out the step-by-step plan with concise tasks: aligning branches, adding new headers, ensuring required testing is in place, and updating relevant documentation. I’ll also confirm the deployment validation and summarize the evidence required to ensure clarity and actionability.
+[2025-11-04T15:30:37] codex
+**Defining steps for implementation**
+
+I’m creating a structured plan, where each step includes "Dependencies" and "How to test." In Step 1, I’ll reconcile PR1 on main, ensuring it's deployed and committed, and optionally adopt a 'CSP' header and '/public' caching. Testing will involve checking security headers using 'curl -Is root.' Next, I’ll merge PR3, ensuring the PREVIEW_SECRET is set; for testing, I'll verify gating with 'curl.'
+
+Steps continue with applying PR2, adding tests for PR4, validating deployment with smoke tests, updating documentation, promoting to production, and setting up monitoring follow-ups. I want to keep it concise!
+[2025-11-04T15:30:37] codex
+
+I’ve reviewed `tinyutils` and the `diffs_recs` patches to map what’s shipped and what’s still pending. Below is a concise, dependency-aware plan to finish the PR3 rollout and adjacent items.
+
+**Current State**
+- PR1 (security + caching) exists on branch `feat/pr1-security-cache`; not on `main`. API handlers set `cache-control: no-store` and security headers are tightened in branch files.
+  - Handlers: `tinyutils/api/check.js`, `tinyutils/api/sitemap-delta.js`, `tinyutils/api/metafetch.js`, `tinyutils/api/wayback-fixer.js`
+  - Config (branch): `tinyutils/vercel.json` adds strict security headers and rewrites for fenced routes. Note: no CSP entry yet; `/public/(.*)` caching header also not present.
+  - Config (main): `origin/main:vercel.json` still minimal (no rewrites, limited headers).
+- PR3 (preview fence) implemented on `feat/pr3-preview-fence`: fence handler and rewrites present.
+  - Fence: `tinyutils/api/fence.js`
+  - Rewrites: `tinyutils/vercel.json` (routes beta tools via the fence and bypass loop via `preview_fence_proxy=1`)
+  - Docs mention PREVIEW_SECRET: `tinyutils/README-VERCEL.md`
+- PR2 (UX quick wins) not applied: missing `noindex` metas and test hook.
+  - Beta pages lacking `<meta name="robots" content="noindex">`: `tinyutils/tools/keyword-density.html`, `tinyutils/tools/meta-preview.html`, `tinyutils/tools/sitemap-generator.html`
+  - Missing `data-testid="debug-scheduler"` on DLF: `tinyutils/tools/dead-link-finder/index.html`
+- PR4 (tests) not applied: only one test exists.
+  - Current: `tinyutils/tests/dlf_api_error_json.test.mjs`
+  - Proposed new tests (from diffs): `tests/api_contracts.test.mjs`, `tests/dlf_envelope_invariants.test.mjs`, `tests/csv_hardening.unit.test.mjs`
+
+**Plan**
+- Step 1 — Reconcile PR1 onto main (dependency for PR3)
+  - Merge branch `feat/pr1-security-cache` to `main` so repo matches deployed behavior.
+  - Optional alignment vs diffs: add CSP header and `/public/(.*)` cache header if still desired (diff showed both).
+  - Test (prod): `curl -Is https://<host>/ | egrep -i 'strict-transport|x-frame-options|permissions-policy'`
+  - Test (APIs): `curl -isX POST https://<host>/api/check -H 'content-type: application/json' -d '{}' | grep -i '^cache-control:'` → expect `no-store`.
+
+- Step 2 — Merge PR3 (preview fence) after PR1
+  - Ensure `tinyutils/api/fence.js` and rewrites in `tinyutils/vercel.json` are on `main`.
+  - Set `PREVIEW_SECRET` in Vercel for both Preview and Production scopes.
+  - Acceptance:
+    - 401 without secret: `curl -is https://<host>/tools/keyword-density/ | head -n 20`
+    - 200 with query: `curl -is "https://<host>/tools/keyword-density/?preview_secret=$PREVIEW_SECRET" | head -n 20`
+    - 200 with header: `curl -is https://<host>/tools/keyword-density/ -H "x-preview-secret: $PREVIEW_SECRET" | head -n 20`
+
+- Step 3 — Apply PR2 UX quick wins
+  - Add `<meta name="robots" content="noindex">` to:
+    - `tinyutils/tools/keyword-density.html`
+    - `tinyutils/tools/meta-preview.html`
+    - `tinyutils/tools/sitemap-generator.html`
+  - Add stable test hook to DLF:
+    - In `tinyutils/tools/dead-link-finder/index.html` add `debugSchedulerSummary.setAttribute('data-testid','debug-scheduler')` next to the debug scheduler element.
+  - Acceptance:
+    - View-source to confirm `noindex` metas are present.
+    - On `/tools/dead-link-finder/?debug=1`, check `document.querySelector('[data-testid="debug-scheduler"]')` exists.
+
+- Step 4 — Adopt PR4 tests
+  - Add the three test files from `diffs_recs/pr4-tests-contracts.diff`.
+    - `tests/api_contracts.test.mjs`
+    - `tests/dlf_envelope_invariants.test.mjs`
+    - `tests/csv_hardening.unit.test.mjs`
+  - Run `npm test` (Node 20) and keep them green.
+  - Optional CI: require tests + preview smoke to pass for auto-merge.
+
+- Step 5 — Deployment validation (preview → prod)
+  - Preview smokes:
+    - `PREVIEW_URL=<vercel-preview-url> npm run smoke:preview` (uses `tinyutils/scripts/smoke_dlf_preview.mjs`)
+  - Prod smokes (uses defaults to tinyutils-eight):
+    - `pnpm smoke:extras` (see `tinyutils/README.md`)
+    - Optional UI smokes (visual): `pnpm ui:smoke:sd` and `pnpm ui:smoke:wbf` and `pnpm ui:smoke:dlf` (screenshots under `tinyutils/.debug/`)
+  - Header checks:
+    - Root security headers (Step 1)
+    - API returns JSON + `cache-control: no-store`
+    - Fenced routes 401/200 flows (Step 2)
+
+- Step 6 — Documentation updates
+  - README (API contracts): add brief examples per endpoint with envelope shape and headers.
+    - Files to update: `tinyutils/README.md`
+  - Vercel guide: confirm PREVIEW_SECRET guidance and gated routes list.
+    - File: `tinyutils/README-VERCEL.md`
+  - Preview status: update note to reflect fence live and preview smoke prerequisites.
+    - File: `tinyutils/AGENTS.md`
+  - Tool change logs: record the addition of preview fence and any beta-page meta changes.
+    - Files: `tinyutils/tool_desc_deadlinkfinder.md`, `tinyutils/tool_desc_sitemapdelta.md`, `tinyutils/tool_desc_waybackfixer.md` (append new entries per AGENTS.md rules)
+
+- Step 7 — Promotion and monitoring
+  - Promote latest green preview to production in Vercel.
+  - Re-run Step 5 smokes against production domain.
+  - Watch for CSP (if added) and analytics: confirm Plausible still loads only after consent on production.
+    - If CSP is introduced, minimally include `plausible.io` in `script-src` and `connect-src`, and `archive.org/web.archive.org` in `connect-src`.
+
+**Key Dependencies**
+- PR3 depends on PR1’s rewrites and header foundation; merge PR1 first.
+- PR2 and PR4 are independent, but best layered after PR3 to keep behavior predictable.
+- Environment: `PREVIEW_SECRET` must be set in Vercel for both Preview and Production once PR3 lands.
+
+**Quick Evidence Checklist (to capture and attach)**
+- Security headers on `/` (screenshot or header dump).
+- APIs return JSON with `cache-control: no-store`.
+- Fenced routes 401 without secret; 200 with secret; `set-cookie` sets `tu_preview_secret`.
+- Beta pages show `<meta name="robots" content="noindex">`.
+- DLF debug element present with `data-testid="debug-scheduler"`.
+- `npm test` passes with new tests.
+
+If you want, I can turn this into GitHub Issues (one per step) with checkboxes and exact `curl`/`npm` commands for a smooth handoff.
+[2025-11-04T15:30:51] tokens used: 67,474

@@ -1,0 +1,10 @@
+I'll help you create a concrete implementation plan to complete the universal converter backend work. Let me first examine the current state of the codebase to understand what's already implemented and what remains.
+
+Let me check the current implementation files to understand the current state:
+
+Now, let me check the test files to understand the current test coverage:
+
+Now let me check for any existing documentation or checklist files:
+
+Perfect! Now I have a comprehensive understanding of the current state. Let me create a concrete implementation plan to complete the universal converter backend work.
+

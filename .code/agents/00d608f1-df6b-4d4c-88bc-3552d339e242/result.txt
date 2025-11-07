@@ -1,0 +1,528 @@
+[2025-11-04T21:47:39] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-teams-tarot-scan-repo-iframe-embed
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: auto
+--------
+[2025-11-04T21:47:39] User instructions:
+Context: 
+
+Agent: Scan the repo for iframe/embed usage and cross-origin needs, then draft a brief CSP risk note with any required exceptions or allowlists for a strict-but-compatible policy.
+
+Context:
+- Repo root: /Users/cav/dev/TinyUtils/tinyutils.
+- Goal: flag CSP compatibility risks for PR1 CSP addition.
+- Inputs: tools/* HTML, API usage, existing headers.
+- Output: short risk note covering COOP/COEP implications, iframe/embed usage, assets from external domains, and suggested CSP directives/allowlists to keep functionality.
+
+Constraints:
+- Read-only; do not modify files.
+- Note unknowns if any third-party domains are inferred but not confirmed.
+
+[2025-11-04T21:47:39] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-teams-tarot-scan-repo-iframe-embed
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: auto
+--------
+[2025-11-04T21:47:39] User instructions:
+Context: 
+
+Agent: Scan the repo for iframe/embed usage and cross-origin needs, then draft a brief CSP risk note with any required exceptions or allowlists for a strict-but-compatible policy.
+
+Context:
+- Repo root: /Users/cav/dev/TinyUtils/tinyutils.
+- Goal: flag CSP compatibility risks for PR1 CSP addition.
+- Inputs: tools/* HTML, API usage, existing headers.
+- Output: short risk note covering COOP/COEP implications, iframe/embed usage, assets from external domains, and suggested CSP directives/allowlists to keep functionality.
+
+Constraints:
+- Read-only; do not modify files.
+- Note unknowns if any third-party domains are inferred but not confirmed.
+
+
+[2025-11-04T21:47:47] thinking
+
+**Deciding to create a scanning plan**
+[2025-11-04T21:47:48] tool agent
+{
+  "action": "create",
+  "create": {
+    "task": "Plan command to scan repo for iframe/embed usage and gather info for CSP risk note.",
+    "models": [
+      "code-gpt-5"
+    ],
+    "output": "Outline of steps.",
+    "write": false,
+    "name": "Plan"
+  },
+  "batch_id": "82c42ba7-1996-441d-8db5-fbe20ba80f55"
+}
+[2025-11-04T21:47:48] tool agent success
+{"batch_id":"82c42ba7-1996-441d-8db5-fbe20ba80f55","agent_ids":["ea29c217-ef16-4084-901e-b2e2bb9b38b1"],"status":"started","message":"Agent started successfully","next_steps":"🤖 Agent batch 82c42ba7 started with Plan. Use `agent {\"action\":\"wait\",\"wait\":{\"batch_id\":\"82c42ba7-1996-441d-8db5-fbe20ba80f55\",\"return_all\":true}}` to follow progress, or `agent {\"action\":\"result\",\"result\":{\"agent_id\":\"ea29c217-ef16-4084-901e-b2e2bb9b38b1\"}}` when it finishes.","agent_id":"ea29c217-ef16-4084-901e-b2e2bb9b38b1","skipped":null}
+[2025-11-04T21:47:48] tokens used: 855
+
+[2025-11-04T21:47:49] thinking
+
+**Waiting for input**
+[2025-11-04T21:47:50] tool agent
+{
+  "action": "wait",
+  "wait": {
+    "batch_id": "82c42ba7-1996-441d-8db5-fbe20ba80f55",
+    "timeout_seconds": 600,
+    "return_all": true
+  }
+}
+[2025-11-04T21:48:50] tool agent success
+{"batch_id":"82c42ba7-1996-441d-8db5-fbe20ba80f55","completed_agents":["ea29c217-ef16-4084-901e-b2e2bb9b38b1"],"completed_summaries":[{"agent_id":"ea29c217-ef16-4084-901e-b2e2bb9b38b1","status":"completed","total_lines":166,"agent_result_hint":"agent {\"action\":\"result\",\"result\":{\"agent_id\":\"ea29c217-ef16-4084-901e-b2e2bb9b38b1\",\"batch_id\":\"82c42ba7-1996-441d-8db5-fbe20ba80f55\"}}","agent_result_params":{"action":"result","result":{"agent_id":"ea29c217-ef16-4084-901e-b2e2bb9b38b1","batch_id":"82c42ba7-1996-441d-8db5-fbe20ba80f55"}},"output_preview":"[2025-11-04T21:47:48] OpenAI Codex v0.0.0 (research preview)\n--------\nworkdir: /Users/cav/.code/working/tinyutils/branches/code-code-teams-tarot-scan-repo-iframe-embed\nmodel: gpt-5\nprovider: openai\napproval: never\nsandbox: read-only\nreasoning effort: medium\nreasoning summaries: auto\n--------\n[2025-11-04T21:47:48] User instructions:\nPlan command to scan repo for iframe/embed usage and gather info for CSP risk note.\n\nDesired output: Outline of steps.\n\n[Running in read-only mode - no modifications allowed]\n[2025-11-04T21:47:48] OpenAI Codex v0.0.0 (research preview)\n--------\nworkdir: /Users/cav/.code/working/tinyutils/branches/code-code-teams-tarot-scan-repo-iframe-embed\nmodel: gpt-5\nprovider: openai\napproval: never\nsandbox: read-only\nreasoning effort: medium\nreasoning summaries: auto\n--------\n[2025-11-04T21:47:48] User instructions:\nPlan command to scan repo for iframe/embed usage and gather info for CSP risk note.\n\nDesired output: Outline of steps.\n\n[Running in read-only mode - no modifications allowed]\n\n[2025-11-04T21:47:54] thinking\n\n**Proposing a scanning plan**\n\nI need to outline a plan for scanning the repository for iframe and embed usages to evaluate CSP risk. Since we're in read-only mode, I'll gather without making modifications. The user is looking for a structured set of steps, which likely includes commands using tools like rg or grep to detect iframes or embeds, dynamic creations, and specific attributes. I'll also check for CSP headers, permissions policies, and external URLs in the relevant contexts.\n**Scanning for embeds and risks**\n\nI'm focused on how to scan for the usage of the `<embed>`, `<object>`, `<iframe>`, and `<frameset>` tags in templating frameworks. I'll check for third-party libraries that might inject iframes, like Stripe or Google Maps, and search for known hostnames related to this. I'll also gather information to craft a CSP that addresses risks like clickjacking. The command plan will involve using ripgrep to parse HTML, JSX, and other formats while looking for specific patterns related to iframes and their attributes.\n**Compiling tool command plan**\n\nI need to gather tool commands for scanning various iframe-related tags and attributes. While the user doesn't want to execute anything just yet, they want a structured plan that outlines the steps. I’ll include checking frameworks like Next.js, React, and Angular. For React, I'll note common components like the 'Iframe' or 'react-iframe'. I’ll provide commands for scanning source values, extracting URLs, and ensuring we track any external domains. The structured plan I’m proposing will include detailed commands to run for each step.\n**Establishing a scanning baseline**\n\nI’m outlining a plan to scan the repository for iframes, embeds, and objects. First, I’ll use 'rg' to find these elements. Next, I’ll check for dynamic injections by searching JS/TS files for patterns like `createElement('iframe')` and `innerHTML` usage. I also need to audit messaging with `postMessage` and confirm proper origin checks. I'll compile an allowlist for external hosts by extracting and sorting unique src domains. The final part will involve framework-specific checks, like CSP headers in Next.js configurations.\n**Structuring the scanning plan**\n\nI want to ensure I include the right options for ripgrep, like '-U' for multiline and confirm that '-S' is for smart case. It seems ripgrep uses smart case by default, so it's okay to include or omit it. I’ll structure my plan to include a series of steps. First, I’ll set the scope and any ignores, then I’ll find direct iframes, dynamic injections, and capture attributes. After that, I’ll look for messaging functions and existing CSP headers, extract external domains, flag risky patterns, and finally draft CSP allowlist recommendations.\n[2025-11-04T21:48:34] codex\n**Scanning for embeds and risks**\n\nI'm focused on how to scan for the usage of the `<embed>`, `<object>`, `<iframe>`, and `<frameset>` tags in templating frameworks. I'll check for third-party libraries that might inject iframes, like Stripe or Google Maps, and search for known hostnames related to this. I'll also gather information to craft a CSP that addresses risks like clickjacking. The command plan will involve using ripgrep to parse HTML, JSX, and other formats while looking for specific patterns related to iframes and their attributes.\n[2025-11-04T21:48:34] codex\n**Compiling tool command plan**\n\nI need to gather tool commands for scanning various iframe-related tags and attributes. While the user doesn't want to execute anything just yet, they want a structured plan that outlines the steps. I’ll include checking frameworks like Next.js, React, and Angular. For React, I'll note common components like the 'Iframe' or 'react-iframe'. I’ll provide commands for scanning source values, extracting URLs, and ensuring we track any external domains. The structured plan I’m proposing will include detailed commands to run for each step.\n[2025-11-04T21:48:34] codex\n**Establishing a scanning baseline**\n\nI’m outlining a plan to scan the repository for iframes, embeds, and objects. First, I’ll use 'rg' to find these elements. Next, I’ll check for dynamic injections by searching JS/TS files for patterns like `createElement('iframe')` and `innerHTML` usage. I also need to audit messaging with `postMessage` and confirm proper origin checks. I'll compile an allowlist for external hosts by extracting and sorting unique src domains. The final part will involve framework-specific checks, like CSP headers in Next.js configurations.\n[2025-11-04T21:48:34] codex\n**Structuring the scanning plan**\n\nI want to ensure I include the right options for ripgrep, like '-U' for multiline and confirm that '-S' is for smart case. It seems ripgrep uses smart case by default, so it's okay to include or omit it. I’ll structure my plan to include a series of steps. First, I’ll set the scope and any ignores, then I’ll find direct iframes, dynamic injections, and capture attributes. After that, I’ll look for messaging functions and existing CSP headers, extract external domains, flag risky patterns, and finally draft CSP allowlist recommendations.\n[2025-11-04T21:48:34] codex\n\n**Goal**\n\n- Locate all iframe/embed usage, dynamic insertions, messaging, and existing CSP to draft a risk note and recommended CSP updates.\n\n**Scope Setup**\n\n- Run from repo root. Exclude common vendor/build folders.\n- Suggested ignore globs: `-g '!node_modules' -g '!.git' -g '!dist' -g '!build' -g '!out'`\n\n**1) Direct Iframe/Object Tags**\n\n- Find HTML/templated usage (multiline-safe):\n  - `rg -n -U -S -H -g '!{node_modules,.git,dist,build,out}/' -e '<iframe\\b' -e '<embed\\b' -e '<object\\b' -e '<frame\\b' -e '<frameset\\b' --glob '**/*.{html,htm,md,mdx,astro,vue,svelte,jsx,tsx,js,ts}'`\n\n**2) Dynamic Insertions**\n\n- Detect programmatic frame creation or HTML injection:\n  - `rg -n -U -S -H -e 'createElement\\(\\s*[\\\"\\']iframe' -e 'createElement\\(\\s*[\\\"\\']object' -e 'innerHTML[^;]*<iframe' -e 'dangerouslySetInnerHTML' -e 'v-html' -e '\\[innerHTML\\]'`\n- Inline documents:\n  - `rg -n -U -S -H -e '\\bsrcdoc\\s*='`\n\n**3) Attributes of Interest**\n\n- Pull iframe attribute lines for review:\n  - `rg -n -U -H -e '<iframe[^>]*\\b(sandbox|allow|allowfullscreen|referrerpolicy|loading|srcdoc|name|id)\\b[^>]*>'`\n- Extract sandbox tokens:\n  - `rg -No -U '<iframe[^>]*\\bsandbox\\s*=\\s*([\\\"\\\\\\'][^\\\"\\\\\\']+[\\\"\\\\\\'])' | sed -E 's/.*sandbox=.?([^\\\"\\\\\\']+).*/\\1/' | tr ' ' '\\n' | sort -u`\n- Extract allow tokens (permissions):\n  - `rg -No -U '<iframe[^>]*\\ballow\\s*=\\s*[\\\"\\\\\\']([^\\\"\\\\\\']+)[\\\"\\\\\\']' | sed -E 's/.*allow=.?([^\\\"\\\\\\']+).*/\\1/' | tr ';' '\\n' | tr ' ' '\\n' | sort -u`\n\n**4) PostMessage & Frame Interaction**\n\n- Sender/receiver sites:\n  - `rg -n -U -S -H -e 'postMessage\\s*\\(' -e 'addEventListener\\(\\s*[\\\"\\']message[\\\"\\']' -e '\\bonmessage\\s*=' -e '\\bmessage\\b.*Event'`\n- Risky targetOrigin wildcard:\n  - `rg -n -U -S -H -e 'postMessage\\s*\\(.*?,\\s*[\\\"\\']\\*[\\\"\\']'`\n- Parent/top access:\n  - `rg -n -U -S -H -e 'window\\.parent' -e 'window\\.top'`\n\n**5) Existing CSP/Headers Locations**\n\n- App/server config and meta tags:\n  - `rg -n -U -S -H -e 'Content-Security-Policy' -e 'frame-ancestors' -e 'frame-src' -e 'child-src' -e 'X-Frame-Options' --glob '**/*.{js,ts,tsx,jsx,mjs,cjs,tsconfig,config,conf,json,yml,yaml,html,htm,md,env}'`\n- Framework/infra:\n  - `rg -n -U -S -H -e 'helmet\\(' -e 'next\\\\s*[:=].*headers' -e 'vercel.json' -e '^_headers$' -e 'netlify\\.toml' -e 'nginx' -e 'caddy' -e 'haproxy' -e 'traefik'`\n\n**6) External Domains (for frame-src allowlist)**\n\n- Extract src URLs and list unique hostnames:\n  - `rg -No -U '<iframe[^>]*\\bsrc\\s*=\\s*[\\\"\\\\\\']([^\\\"\\\\\\']+)[\\\"\\\\\\']' | sed -E 's/.*src=.?([^\\\"\\\\\\']+).*/\\1/' | sed -E 's/^\\/\\///; s/#.*$//' | rg -N '^(https?:|data:|blob:|\\/\\/)' | python3 - <<'PY'\\nimport sys,urllib.parse as u\\nseen=set()\\nfor url in sys.stdin:\\n    url=url.strip()\\n    if not url: continue\\n    if url.startswith('//'): url='https:'+url\\n    p=u.urlparse(url)\\n    host=p.netloc.lower()\\n    if host and host not in seen:\\n        seen.add(host); print(host)\\nPY | sort -u`\n- Quick third-party SDK/embeds sweep:\n  - `rg -n -U -S -H -e 'youtube|youtu\\.be|vimeo|wistia|loom|twitch|spotify|soundcloud|figma|notion|airtable|google\\.com/maps|google\\.com/recaptcha|stripe|intercom|zendesk|calendly|hubspot|salesforce|typeform|codepen|jsfiddle|codesandbox'`\n\n**7) Risk Heuristics (flags to review)**\n\n- Un-sandboxed third-party iframes:\n  - Compare results of step 1 vs lines containing `sandbox`. Prioritize external `src` without `sandbox`.\n- Powerful sandbox combos:\n  - `rg -n -U -S -H '<iframe[^>]*sandbox[^>]*' | rg -n -S 'allow-same-origin'`\n  - `rg -n -U -S -H '<iframe[^>]*sandbox[^>]*' | rg -n -S 'allow-scripts'`\n  - If both present, note “near full trust” of embedded origin.\n- Wildcard messaging:\n  - Output from step 4 targeting `'*'` → add remediation to pin `targetOrigin`.\n- Data/blob frames:\n  - `rg -n -U -S -H -e 'src\\s*=\\s*[\\\"\\\\\\'](?:data:|blob:)' -e '\\bsrcdoc\\s*='` → recommend strict `sandbox` + no `allow-same-origin` if scripting is enabled.\n- User-controlled `src`:\n  - JSX/Vue/Angular bindings:\n    - `rg -n -U -S -H -e '<iframe[^>]*\\bsrc=\\{[^}]+\\}' -e 'v-bind:src|:src=' -e '\\[src\\]='`\n\n**8) Compile Findings**\n\n- Produce three lists:\n  - All occurrences: file:line + snippet (from steps 1–4).\n  - Unique external hosts (from step 6).\n  - Risk flags (from step 7) with file:line.\n\n**9) Draft CSP Proposal (template)**\n\n- Start conservative; expand only with required hosts.\n- Template (replace HOSTS with step 6 output):\n  - frame-ancestors 'self'\n  - frame-src 'self' https://HOST1 https://HOST2 data: blob:\n  - child-src 'self' https://HOST1 https://HOST2\n  - object-src 'none'\n  - base-uri 'self'\n  - upgrade-insecure-requests; block-all-mixed-content\n  - report-to default; report-uri /csp-report (if using)\n- If embedding by other sites is needed, adjust `frame-ancestors` accordingly.\n\n**10) Remediation Notes**\n\n- Add `sandbox` to third-party iframes; avoid `allow-same-origin` when `allow-scripts` is present unless strictly necessary.\n- Pin `postMessage` `targetOrigin` and verify `event.origin`.\n- Prefer explicit `allow` permissions; only include needed features (e.g., `autoplay; clipboard-read`).\n- Ensure any user-influenced `src` is validated/allowlisted server-side and client-side.\n\nIf you want, I can run the scans and return the three lists and a CSP draft based on actual findings.\n[2025-11-04T21:48:49] tokens used: 13,775","output_file":"/Users/cav/.code/working/tinyutils/branches/code-code-teams-tarot-scan-repo-iframe-embed/.code/agents/ea29c217-ef16-4084-901e-b2e2bb9b38b1/result.txt"}],"wait_time_seconds":60}
+[2025-11-04T21:48:50] tokens used: 1,970
+
+[2025-11-04T21:48:59] thinking
+
+**Organizing multi-step repo analysis plan**
+
+I’m working out a step-by-step approach to explore the repo root and identify iframe and related embed usage by running ripgrep with specific exclude globs for common build and dependency folders. I'll set the workdir to the repo root and update the plan as I complete each subtask, preparing for careful risk assessment and reporting.
+[2025-11-04T21:49:00] exec bash -lc "rg -n -U -S \"<iframe\\\\b\" --glob '"'!node_modules'"' --glob '"'!.git'"' --glob '"'!dist'"' --glob '"'!build'"' --glob '"'!out'"' --glob '"'!tmp'"'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:49:01] bash -lc "rg -n -U -S \"<iframe\\\\b\" --glob '"'!node_modules'"' --glob '"'!.git'"' --glob '"'!dist'"' --glob '"'!build'"' --glob '"'!out'"' --glob '"'!tmp'"'" exited 1 in 125ms:
+ERROR
+[2025-11-04T21:49:01] tokens used: 12,263
+
+[2025-11-04T21:49:05] thinking
+
+**Searching for iframe usage**
+[2025-11-04T21:49:06] exec bash -lc "rg -n \"iframe\" --glob '"'!node_modules'"' --glob '"'!.git'"' --glob '"'!dist'"' --glob '"'!build'"' --glob '"'!out'"' --glob '"'!tmp'"'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:49:06] bash -lc "rg -n \"iframe\" --glob '"'!node_modules'"' --glob '"'!.git'"' --glob '"'!dist'"' --glob '"'!build'"' --glob '"'!out'"' --glob '"'!tmp'"'" exited 1 in 107ms:
+ERROR
+[2025-11-04T21:49:07] tokens used: 12,920
+
+[2025-11-04T21:49:10] thinking
+
+**Checking Content-Security-Policy headers**
+[2025-11-04T21:49:10] exec bash -lc "rg -n \"Content-Security-Policy\" --glob '"'!node_modules'"' --glob '"'!.git'"' --glob '"'!dist'"' --glob '"'!build'"' --glob '"'!out'"'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:49:11] bash -lc "rg -n \"Content-Security-Policy\" --glob '"'!node_modules'"' --glob '"'!.git'"' --glob '"'!dist'"' --glob '"'!build'"' --glob '"'!out'"'" exited 1 in 111ms:
+ERROR
+[2025-11-04T21:49:11] tokens used: 13,184
+
+[2025-11-04T21:49:13] thinking
+
+**Checking security headers**
+[2025-11-04T21:49:14] exec bash -lc "rg -n \"X-Frame-Options\" --glob '"'!node_modules'"' --glob '"'!.git'"' --glob '"'!dist'"' --glob '"'!build'"' --glob '"'!out'"'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:49:14] bash -lc "rg -n \"X-Frame-Options\" --glob '"'!node_modules'"' --glob '"'!.git'"' --glob '"'!dist'"' --glob '"'!build'"' --glob '"'!out'"'" succeeded in 120ms:
+vercel.json:7:        { "key": "X-Frame-Options", "value": "DENY" },
+[2025-11-04T21:49:14] tokens used: 13,478
+
+[2025-11-04T21:49:17] thinking
+
+**Checking Vercel configuration**
+[2025-11-04T21:49:17] exec bash -lc 'cat vercel.json' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:49:18] bash -lc 'cat vercel.json' succeeded in 156ms:
+{
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "geolocation=(), camera=(), microphone=(), usb=(), payment=(), browsing-topics=()" },
+        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+        { "key": "Cross-Origin-Resource-Policy", "value": "same-origin" },
+        { "key": "X-DNS-Prefetch-Control", "value": "off" }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" },
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+[2025-11-04T21:49:18] tokens used: 13,761
+
+[2025-11-04T21:49:22] thinking
+
+**Checking for embed usage**
+[2025-11-04T21:49:23] exec bash -lc "rg -n \"<embed\" --glob '"'!node_modules'"' --glob '"'!.git'"' --glob '"'!dist'"' --glob '"'!build'"' --glob '"'!out'"'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:49:23] bash -lc "rg -n \"<embed\" --glob '"'!node_modules'"' --glob '"'!.git'"' --glob '"'!dist'"' --glob '"'!build'"' --glob '"'!out'"'" exited 1 in 117ms:
+ERROR
+[2025-11-04T21:49:23] tokens used: 15,919
+
+[2025-11-04T21:49:26] thinking
+
+**Checking for iframe creation**
+[2025-11-04T21:49:26] exec bash -lc "rg -n \"createElement\\(['\\\"]iframe\" --glob '"'!node_modules'"' --glob '"'!.git'"' --glob '"'!dist'"' --glob '"'!build'"' --glob '"'!out'"'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:49:26] bash -lc "rg -n \"createElement\\(['\\\"]iframe\" --glob '"'!node_modules'"' --glob '"'!.git'"' --glob '"'!dist'"' --glob '"'!build'"' --glob '"'!out'"'" exited 1 in 118ms:
+ERROR
+[2025-11-04T21:49:27] tokens used: 16,147
+
+[2025-11-04T21:49:31] thinking
+
+**Investigating external resource loading**
+[2025-11-04T21:49:31] exec bash -lc "rg -n \"https://\" --glob '"'!node_modules'"' --glob '"'!.git'"' --glob '"'!dist'"' --glob '"'!build'"' --glob '"'!out'"'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:49:32] bash -lc "rg -n \"https://\" --glob '"'!node_modules'"' --glob '"'!.git'"' --glob '"'!dist'"' --glob '"'!build'"' --glob '"'!out'"'" succeeded in 129ms:
+README-VERCEL.md:12:7. Click **Deploy**. Vercel gives you a **Preview URL** like `https://tinyutils-xxxx.vercel.app`.
+AGENTS.md:191:- **URL normalization**: accept bare domains (`facebook.com`) or `https://domain` with/without `www` and normalize automatically (prefer `https`, maintain/insert `www` only if target resolves that way).
+sitemap.xml:3:  <url><loc>https://tinyutils-eight.vercel.app/</loc></url>
+sitemap.xml:4:  <url><loc>https://tinyutils-eight.vercel.app/tools/</loc></url>
+sitemap.xml:5:  <url><loc>https://tinyutils-eight.vercel.app/tools/dead-link-finder/</loc></url>
+sitemap.xml:6:  <url><loc>https://tinyutils-eight.vercel.app/tools/sitemap-delta/</loc></url>
+sitemap.xml:7:  <url><loc>https://tinyutils-eight.vercel.app/tools/wayback-fixer/</loc></url>
+tool_desc_deadlinkfinder.md:11:- `facebook.com`, `//example.com/path`, `https://example.com` (no forced `www`).
+tool_desc_deadlinkfinder.md:18:- **Retry HTTP if HTTPS fails** (default **off**): try `http://` only if `https://` failed **and** site isn’t guarded by HSTS/“hard TLD”.
+tool_desc_deadlinkfinder.md:24: - Coerce to `https://` if missing scheme; resolve `//host` → `https://host`.  
+tool_desc_deadlinkfinder.md:46:- Paste `facebook.com` → tool coerces to `https://facebook.com` and crawls the page; it lists links found **on that page** and their statuses.  
+public/robots.txt:4:Sitemap: https://tinyutils-eight.vercel.app/sitemap.xml
+support.html:8:<p><a class='cta' href='https://ko-fi.com/your-handle' target='_blank'>Buy me a coffee</a></p>
+public/sitemap.xml:3:  <url><loc>https://tinyutils-eight.vercel.app/</loc></url>
+public/sitemap.xml:4:  <url><loc>https://tinyutils-eight.vercel.app/tools/</loc></url>
+public/sitemap.xml:5:  <url><loc>https://tinyutils-eight.vercel.app/tools/keyword-density.html</loc></url>
+public/sitemap.xml:6:  <url><loc>https://tinyutils-eight.vercel.app/tools/meta-preview.html</loc></url>
+public/sitemap.xml:7:  <url><loc>https://tinyutils-eight.vercel.app/tools/sitemap-generator.html</loc></url>
+public/sitemap.xml:8:  <url><loc>https://tinyutils-eight.vercel.app/guides/</loc></url>
+public/sitemap.xml:9:  <url><loc>https://tinyutils-eight.vercel.app/guides/fix-404s.html</loc></url>
+[2025-11-04T21:49:32] tokens used: 16,430
+
+[2025-11-04T21:49:45] thinking
+
+**Analyzing external assets and iframe usage**
+[2025-11-04T21:49:46] exec bash -lc 'rg -n "plausible" public/index.html' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:49:46] bash -lc 'rg -n "plausible" public/index.html' succeeded in 118ms:
+154:    if (!document.getElementById('plausible')) {
+155:      const s = document.createElement('script'); s.id='plausible'; s.defer=true;
+156:      s.setAttribute('data-domain','tinyutils.net'); s.src='https://plausible.io/js/script.js';
+327:    if (document.getElementById('plausible')) return;
+329:    s.id = 'plausible'; s.defer = true;
+331:    s.src = 'https://plausible.io/js/script.js';
+334:  const remove = () => { const s=document.getElementById('plausible'); if(s) s.remove(); };
+345:function track(name, props) { try { if (window.plausible) window.plausible(name, {props: props||{}}); } catch(_){} }
+[2025-11-04T21:49:46] tokens used: 23,085
+
+[2025-11-04T21:49:49] thinking
+
+**Checking dynamic script and iframe creation**
+[2025-11-04T21:49:50] exec bash -lc "sed -n '520,560p' public/index.html" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:49:50] bash -lc "sed -n '520,560p' public/index.html" succeeded in 110ms:
+
+
+
+
+
+<script>
+(function(){
+  const EU_LANG = ['protectCSVCell(bg)','cs','da','de','el','en-GB','es','et','fi','fr','ga','hr','hu','it','lt','lv','mt','nl','pl','pt','ro','sk','sl','sv','is','no','tr','uk'];
+  const isEUByLang = (navigator.languages||[protectCSVCell(navigator).language||'']).some(l => EU_LANG.some(e => (l||'').toLowerCase().startsWith(e.toLowerCase())));
+  const isEUByTZ = (Intl && Intl.DateTimeFormat && /(^|\/)Europe\//.test(Intl.DateTimeFormat().resolvedOptions().timeZone||''));
+  const inEU = isEUByLang || isEUByTZ;
+  const LS_CONSENT='tu-consent'; // 'granted' | 'denied' | null
+
+  function gtag(){ (window.dataLayer=window.dataLayer||[]).push(arguments); }
+  // Default conservative
+  gtag('consent','default', {ad_storage:'denied', ad_user_data:'denied', ad_personalization:'denied', analytics_storage:'denied'});
+
+  // Decide mode
+  const c = (function(){ try{return localStorage.getItem(LS_CONSENT);}catch(_){return null;} })();
+
+[2025-11-04T21:49:50] tokens used: 23,532
+
+[2025-11-04T21:50:02] thinking
+
+**Analyzing CSP, COOP, and third-party integrations**
+
+I'm reviewing the usage of Google ads scripts, plausible, and other third-party code injections across HTML files, focusing on how CSP rules and policies like COOP, CORP, and Permissions-Policy interact with them. I’m considering potential runtime iframe injections, cross-origin restrictions, and conflicts with embedding plans, while preparing to gather more info on fetch calls and iframes within the tools directory.
+[2025-11-04T21:50:05] exec bash -lc "rg -n \"fetch\\(\" tools --glob '"'!node_modules'"' --glob '"'!.git'"' --glob '"'!dist'"' --glob '"'!build'"' --glob '"'!out'"'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:50:05] bash -lc "rg -n \"fetch\\(\" tools --glob '"'!node_modules'"' --glob '"'!.git'"' --glob '"'!dist'"' --glob '"'!build'"' --glob '"'!out'"'" succeeded in 122ms:
+tools/meta-preview.html:115:    const res = await fetch('/api/metafetch', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({url})});
+tools/wayback-fixer/index.html:268:        const res = await fetch('/tools/wayback-fixer/demo/demo-urls.txt', { cache: 'no-store' });
+tools/wayback-fixer/index.html:370:      const res = await fetch('/api/wayback-fixer', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify(body) });
+tools/dead-link-finder/index.html:842:          const res = await fetch('/api/check', {
+tools/sitemap-delta/index.html:451:      const res = await fetch('/api/sitemap-delta', {
+tools/sitemap-delta/index.html:604:    const res = await fetch(path, { cache: 'no-store' });
+[2025-11-04T21:50:05] tokens used: 24,963
+
+[2025-11-04T21:50:09] thinking
+
+**Analyzing script loading and CSP needs**
+[2025-11-04T21:50:09] exec bash -lc "sed -n '1,200p' scripts/consent.js" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:50:09] bash -lc "sed -n '1,200p' scripts/consent.js" succeeded in 111ms:
+(function(){
+  const LS_KEY = 'tu-consent';
+  const ADS_KEY = 'tu-ads-hidden';
+  const EU_LANGS = ['bg','cs','da','de','el','en-GB','es','et','fi','fr','ga','hr','hu','it','lt','lv','mt','nl','pl','pt','ro','sk','sl','sv','is','no','tr','uk'];
+
+  const isEUByLang = (navigator.languages||[navigator.language||'']).some(l => {
+    const lower = (l||'').toLowerCase();
+    return EU_LANGS.some(code => lower.startsWith(code.toLowerCase()));
+  });
+  const isEUByTZ = (()=>{
+    try { return /(^|\/)Europe\//.test(Intl.DateTimeFormat().resolvedOptions().timeZone||''); }
+    catch { return false; }
+  })();
+  const needsPrompt = isEUByLang || isEUByTZ;
+
+  function loadScript(id, src){
+    if (document.getElementById(id)) return;
+    const s = document.createElement('script');
+    s.id = id;
+    s.defer = true;
+[2025-11-04T21:50:10] tokens used: 25,545
+
+[2025-11-04T21:50:12] thinking
+
+**Checking for Google AdSense elements**
+[2025-11-04T21:50:13] exec bash -lc "rg -n \"adsbygoogle\" --glob '"'!node_modules'"' --glob '"'!.git'"' --glob '"'!dist'"' --glob '"'!build'"' --glob '"'!out'"'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:50:13] bash -lc "rg -n \"adsbygoogle\" --glob '"'!node_modules'"' --glob '"'!.git'"' --glob '"'!dist'"' --glob '"'!build'"' --glob '"'!out'"'" succeeded in 113ms:
+public/index.html:270:<ins class="adsbygoogle" style="display:block;margin:12px 0" data-ad-client="ca-pub-REPLACE_ME" data-ad-slot="1234567890" data-ad-format="auto" data-full-width-responsive="true"></ins>
+public/index.html:271:<script>try{(adsbygoogle = window.adsbygoogle || []).push({});}catch(e){}
+public/index.html:544:    if (document.getElementById('adsbygoogle-js')) return;
+public/index.html:548:    s.id='adsbygoogle-js'; s.async=true;
+public/index.html:549:    s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+encodeURIComponent(pub);
+public/index.html:555:          (window.adsbygoogle = window.adsbygoogle || []).requestNonPersonalizedAds = 1; // npa=1
+public/index.html:556:          (window.adsbygoogle = window.adsbygoogle || []).push({ params: { google_privacy_treatments: 'disablePersonalization' } }); // ppt=1
+public/index.html:559:        document.querySelectorAll('.adsbygoogle').forEach(function(el){
+public/index.html:560:          try{ (window.adsbygoogle = window.adsbygoogle || []).push({}); }catch(e){}
+public/index.html:587:<script>(function(){var h=location.hostname;var ok=(h==='tinyutils.net'||h.endsWith('.vercel.app'));if(!ok){document.querySelectorAll('.adsbygoogle').forEach(el=>el.style.display='none');window.__TU_NOPROD__=true;}})();
+tools/meta-preview.html:96:<ins class="adsbygoogle" style="display:block;margin:12px 0" data-ad-client="ca-pub-REPLACE_ME" data-ad-slot="1234567890" data-ad-format="auto" data-full-width-responsive="true"></ins>
+tools/meta-preview.html:97:<script>try{(adsbygoogle = window.adsbygoogle || []).push({});}catch(e){}</script>
+tools/meta-preview.html:159:    if (document.getElementById('adsbygoogle-js')) return;
+tools/meta-preview.html:163:    s.id='adsbygoogle-js'; s.async=true;
+tools/meta-preview.html:164:    s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+encodeURIComponent(pub);
+tools/meta-preview.html:170:          (window.adsbygoogle = window.adsbygoogle || []).requestNonPersonalizedAds = 1; // npa=1
+tools/meta-preview.html:171:          (window.adsbygoogle = window.adsbygoogle || []).push({ params: { google_privacy_treatments: 'disablePersonalization' } }); // ppt=1
+tools/meta-preview.html:174:        document.querySelectorAll('.adsbygoogle').forEach(function(el){
+tools/meta-preview.html:175:          try{ (window.adsbygoogle = window.adsbygoogle || []).push({}); }catch(e){}
+tools/meta-preview.html:197:<script>(function(){var h=location.hostname;var ok=(h==='tinyutils.net'||h.endsWith('.vercel.app'));if(!ok){document.querySelectorAll('.adsbygoogle').forEach(el=>el.style.display='none');window.__TU_NOPROD__=true;}})();</script>
+[2025-11-04T21:50:13] tokens used: 26,717
+
+[2025-11-04T21:50:33] thinking
+
+**Summarizing cross-origin resources and CSP risks**
+
+I'm gathering details on all third-party scripts and domains involved, especially Google ad-related frames and plausible analytics, to outline their impact on Content Security Policy. Inline scripts and styles in the public HTML require 'unsafe-inline' or nonce/hash strategies, and dynamic script injections complicate strict CSP adoption. I’ll also note potential COOP/COEP header conflicts with cross-origin iframes and explain implications if frame-ancestors or X-Frame-Options are set. There’s a focus on understanding which URLs must be allowlisted for `script-src`, `connect-src`, and `frame-src` to maintain functionality while assessing CSP risks thoroughly.
+[2025-11-04T21:50:35] exec bash -lc "rg -n \"https?://\" api --glob '"'!node_modules'"' --glob '"'!.git'"' --glob '"'!dist'"' --glob '"'!build'"' --glob '"'!out'"'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:50:35] bash -lc "rg -n \"https?://\" api --glob '"'!node_modules'"' --glob '"'!.git'"' --glob '"'!dist'"' --glob '"'!build'"' --glob '"'!out'"'" succeeded in 122ms:
+api/wayback-fixer.js:27:const UA = 'TinyUtils-WaybackFixer/1.0 (+https://tinyutils-eight.vercel.app; hello@tinyutils.net)';
+api/wayback-fixer.js:104:  if (!/^[a-zA-Z][a-zA-Z0-9+\.\-]*:/.test(value)) value = 'https://' + value;
+api/wayback-fixer.js:123:      `https://archive.org/wayback/available?url=${encodeURIComponent(target)}`,
+api/wayback-fixer.js:306:              fetchWithRetry(`https://web.archive.org/save/${encodeURIComponent(item.url)}`, {}, timeout).catch(() => {});
+api/sitemap-delta.js:3:const UA = 'TinyUtils-SitemapDelta/1.0 (+https://tinyutils-eight.vercel.app)';
+api/metafetch.js:3:const UA = 'TinyUtils-DeadLinkChecker/1.0 (+https://tinyutils-eight.vercel.app; hello@tinyutils.net)';
+api/metafetch.js:44:  if (!/^[a-zA-Z][a-zA-Z0-9+\.\-]*:/.test(value)) value = 'https://' + value;
+api/check.js:65:const UA = 'TinyUtils-DeadLinkChecker/1.0 (+https://tinyutils-eight.vercel.app; hello@tinyutils.net)';
+api/check.js:222:  if (!/^[a-zA-Z][a-zA-Z0-9+\.\-]*:/.test(value)) value = 'https://' + value;
+api/fence.js:39:  if (target.startsWith('http://') || target.startsWith('https://')) return target;
+[2025-11-04T21:50:35] tokens used: 30,199
+
+[2025-11-04T21:50:39] thinking
+
+**Reviewing cross-origin and CSP considerations**
+[2025-11-04T21:50:40] exec bash -lc "rg -n \"fundingchoices\" --glob '"'!node_modules'"' --glob '"'!.git'"' --glob '"'!dist'"' --glob '"'!build'"' --glob '"'!out'"'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:50:40] bash -lc "rg -n \"fundingchoices\" --glob '"'!node_modules'"' --glob '"'!.git'"' --glob '"'!dist'"' --glob '"'!build'"' --glob '"'!out'"'" succeeded in 116ms:
+public/index.html:74:<script async src="https://fundingchoicesmessages.google.com/i/pub-REPLACE_ME?ers=1">
+[2025-11-04T21:50:40] tokens used: 31,342
+
+[2025-11-04T21:50:52] thinking
+
+**Reviewing plan update strategy**
+[2025-11-04T21:50:53] exec bash -lc "nl -ba vercel.json | sed -n '1,80p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:50:53] bash -lc "nl -ba vercel.json | sed -n '1,80p'" succeeded in 134ms:
+     1	{
+     2	  "headers": [
+     3	    {
+     4	      "source": "/(.*)",
+     5	      "headers": [
+     6	        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+     7	        { "key": "X-Frame-Options", "value": "DENY" },
+     8	        { "key": "X-Content-Type-Options", "value": "nosniff" },
+     9	        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+    10	        { "key": "Permissions-Policy", "value": "geolocation=(), camera=(), microphone=(), usb=(), payment=(), browsing-topics=()" },
+    11	        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+    12	        { "key": "Cross-Origin-Resource-Policy", "value": "same-origin" },
+    13	        { "key": "X-DNS-Prefetch-Control", "value": "off" }
+    14	      ]
+    15	    },
+    16	    {
+    17	      "source": "/api/(.*)",
+    18	      "headers": [
+    19	        { "key": "Cache-Control", "value": "no-store" },
+    20	        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+[2025-11-04T21:50:53] tokens used: 32,076
+
+[2025-11-04T21:50:56] thinking
+
+**Adding line numbers to HTML sections**
+[2025-11-04T21:50:57] exec bash -lc "nl -ba public/index.html | sed -n '60,140p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:50:57] bash -lc "nl -ba public/index.html | sed -n '60,140p'" succeeded in 132ms:
+    60	  </section>
+    61	</main>
+    62	
+    63	<footer class="site-footer">
+    64	  <div class="container row between wrap">
+    65	    <span>© <span id="y"></span> TinyUtils</span>
+    66	    <span><a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a></span>
+    67	  </div>
+    68	</footer>
+    69	<script>document.getElementById('y').textContent = new Date().getFullYear();</script>
+    70	</body>
+    71	</html>
+    72	<!doctype html><html lang="en"><head>
+    73	<!-- Optional: Google Funding Choices CMP (replace PUB_ID and uncomment)
+    74	<script async src="https://fundingchoicesmessages.google.com/i/pub-REPLACE_ME?ers=1">
+    75	function protectCSVCell(v){
+    76	  const s = String(v ?? "");
+    77	  return /^[=+\-@]/.test(s) ? "'" + s : s;
+    78	}
+    79	</script>
+[2025-11-04T21:50:57] tokens used: 59,298
+
+[2025-11-04T21:51:04] thinking
+
+**Examining HTML file structure and scripts**
+
+I notice the `public/index.html` contains multiple HTML documents appended, which is unusual and might affect script behavior. There's a mix of JSON-LD and JavaScript inside one `<script>` tag that seems invalid. I’m focusing on inline script risks with `'strict-dynamic'` or `'unsafe-inline'` policies and will check similar patterns in `tools/` pages plus search for iframes there to understand cross-origin concerns.
+[2025-11-04T21:51:06] exec bash -lc "rg -n \"<iframe\" tools --glob '"'!node_modules'"' --glob '"'!.git'"' --glob '"'!dist'"' --glob '"'!build'"' --glob '"'!out'"'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:51:06] bash -lc "rg -n \"<iframe\" tools --glob '"'!node_modules'"' --glob '"'!.git'"' --glob '"'!dist'"' --glob '"'!build'"' --glob '"'!out'"'" exited 1 in 129ms:
+ERROR
+[2025-11-04T21:51:06] tokens used: 62,597
+
+[2025-11-04T21:51:10] thinking
+
+**Collecting script line references**
+[2025-11-04T21:51:10] exec bash -lc "nl -ba public/index.html | sed -n '140,200p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:51:10] bash -lc "nl -ba public/index.html | sed -n '140,200p'" succeeded in 131ms:
+   140	  const LS_KEY = 'tu-consent';
+   141	  const ADS_KEY = 'tu-ads-hidden';
+   142	  // Consent defaults (denied) so pages behave conservatively in EU until the user decides
+   143	  window.dataLayer = window.dataLayer || [];
+   144	  function gtag(){dataLayer.push(arguments);}
+   145	  window.gtag = window.gtag || gtag;
+   146	  gtag('consent','default', {ad_storage:'denied', ad_user_data:'denied', ad_personalization:'denied', analytics_storage:'denied'});
+   147	
+   148	  function saveConsent(val){ try{ localStorage.setItem(LS_KEY, val); }catch{} }
+   149	  function loadConsent(){ try{ return localStorage.getItem(LS_KEY); }catch{ return null; } }
+   150	
+   151	  function enableAll(){
+   152	    gtag('consent','update', {ad_storage:'granted', ad_user_data:'granted', ad_personalization:'granted', analytics_storage:'granted'});
+   153	    // load Plausible if not already loaded
+   154	    if (!document.getElementById('plausible')) {
+   155	      const s = document.createElement('script'); s.id='plausible'; s.defer=true;
+   156	      s.setAttribute('data-domain','tinyutils.net'); s.src='https://plausible.io/js/script.js';
+   157	      document.head.appendChild(s);
+   158	    }
+   159	  }
+[2025-11-04T21:51:11] tokens used: 62,943
+
+[2025-11-04T21:51:13] thinking
+
+**Inspecting HTML near ad script**
+[2025-11-04T21:51:14] exec bash -lc "nl -ba public/index.html | sed -n '520,620p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:51:14] bash -lc "nl -ba public/index.html | sed -n '520,620p'" succeeded in 128ms:
+   520	
+   521	
+   522	
+   523	
+   524	
+   525	<script>
+   526	(function(){
+   527	  const EU_LANG = ['protectCSVCell(bg)','cs','da','de','el','en-GB','es','et','fi','fr','ga','hr','hu','it','lt','lv','mt','nl','pl','pt','ro','sk','sl','sv','is','no','tr','uk'];
+   528	  const isEUByLang = (navigator.languages||[protectCSVCell(navigator).language||'']).some(l => EU_LANG.some(e => (l||'').toLowerCase().startsWith(e.toLowerCase())));
+   529	  const isEUByTZ = (Intl && Intl.DateTimeFormat && /(^|\/)Europe\//.test(Intl.DateTimeFormat().resolvedOptions().timeZone||''));
+   530	  const inEU = isEUByLang || isEUByTZ;
+   531	  const LS_CONSENT='tu-consent'; // 'granted' | 'denied' | null
+   532	
+   533	  function gtag(){ (window.dataLayer=window.dataLayer||[]).push(arguments); }
+   534	  // Default conservative
+   535	  gtag('consent','default', {ad_storage:'denied', ad_user_data:'denied', ad_personalization:'denied', analytics_storage:'denied'});
+   536	
+   537	  // Decide mode
+   538	  const c = (function(){ try{return localStorage.getItem(LS_CONSENT);}catch(_){return null;} })();
+   539	
+[2025-11-04T21:51:14] tokens used: 65,311
+
+[2025-11-04T21:51:18] thinking
+
+**Inspecting third-party scripts in tools pages**
+[2025-11-04T21:51:19] exec bash -lc "nl -ba tools/meta-preview.html | sed -n '80,200p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:51:19] bash -lc "nl -ba tools/meta-preview.html | sed -n '80,200p'" succeeded in 135ms:
+    80	
+    81	  // If user previously granted consent, enable now; else keep denied defaults.
+    82	  const prior = loadConsent();
+    83	  if (prior === 'granted') enableAll();
+    84	
+    85	  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', function(){ mountToast(); initAdsToggle(); }); }
+    86	  else { mountToast(); initAdsToggle(); }
+    87	})();
+    88	</script>
+    89	
+    90	<link rel="icon" href="/public/favicon.ico" sizes="any">
+    91	</head>
+    92	<body>
+    93	<header class='nav'><div class='brand'><img src='/public/logo.svg' width='28' height='28'><span class='name'>TinyUtils</span></div>
+    94	<nav class='links'><a href='/'>Dead Link Finder</a><a href='/tools/'>Tools</a></nav></header>
+    95	<div class='container'>
+    96	<ins class="adsbygoogle" style="display:block;margin:12px 0" data-ad-client="ca-pub-REPLACE_ME" data-ad-slot="1234567890" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    97	<script>try{(adsbygoogle = window.adsbygoogle || []).push({});}catch(e){}</script>
+    98	  <h1>Meta Tag Preview</h1>
+    99	  <div class='card'>
+[2025-11-04T21:51:19] tokens used: 67,306
+
+[2025-11-04T21:51:27] thinking
+
+**Summarizing external resources and CSP considerations**
+[2025-11-04T21:51:28] exec bash -lc "rg -n \"data:\" --glob '"'!node_modules'"' --glob '"'!.git'"' --glob '"'!dist'"' --glob '"'!build'"' --glob '"'!out'"'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:51:28] bash -lc "rg -n \"data:\" --glob '"'!node_modules'"' --glob '"'!.git'"' --glob '"'!dist'"' --glob '"'!build'"' --glob '"'!out'"'" succeeded in 117ms:
+AGENTS.md:150:- Unsupported schemes (javascript:, data:, mailto:) are skipped.
+tool_desc_deadlinkfinder.md:25: - Block **private/loopback hosts** and **unsupported schemes** (`javascript:`, `data:`, `mailto:`).  
+docs/AGENT_RUN_LOG.md:9:- **Metadata:** Capture run mode (auto/manual), branch, session id (if shown), and CWD when known.
+api/check.js:193:  return /^(?:javascript:|data:|mailto:|tel:|fb:|fb:\/\/|whatsapp:|tg:|intent:|itms:)/i.test(input || '');
+public/index.html:146:  gtag('consent','default', {ad_storage:'denied', ad_user_data:'denied', ad_personalization:'denied', analytics_storage:'denied'});
+public/index.html:152:    gtag('consent','update', {ad_storage:'granted', ad_user_data:'granted', ad_personalization:'granted', analytics_storage:'granted'});
+public/index.html:161:    gtag('consent','update', {ad_storage:'denied', ad_user_data:'denied', ad_personalization:'denied', analytics_storage:'denied'});
+public/index.html:535:  gtag('consent','default', {ad_storage:'denied', ad_user_data:'denied', ad_personalization:'denied', analytics_storage:'denied'});
+public/index.html:569:      gtag('consent','update',{ad_storage:'granted', ad_user_data:'granted', ad_personalization:'granted', analytics_storage:'granted'});
+api/wayback-fixer.js:132:    return { data: await res.json(), retried };
+tools/meta-preview.html:30:  gtag('consent','default', {ad_storage:'denied', ad_user_data:'denied', ad_personalization:'denied', analytics_storage:'denied'});
+tools/meta-preview.html:36:    gtag('consent','update', {ad_storage:'granted', ad_user_data:'granted', ad_personalization:'granted', analytics_storage:'granted'});
+tools/meta-preview.html:45:    gtag('consent','update', {ad_storage:'denied', ad_user_data:'denied', ad_personalization:'denied', analytics_storage:'denied'});
+tools/meta-preview.html:150:  gtag('consent','default', {ad_storage:'denied', ad_user_data:'denied', ad_personalization:'denied', analytics_storage:'denied'});
+tools/meta-preview.html:184:      gtag('consent','update',{ad_storage:'granted', ad_user_data:'granted', ad_personalization:'granted', analytics_storage:'granted'});
+tools/keyword-density.html:30:  gtag('consent','default', {ad_storage:'denied', ad_user_data:'denied', ad_personalization:'denied', analytics_storage:'denied'});
+tools/keyword-density.html:36:    gtag('consent','update', {ad_storage:'granted', ad_user_data:'granted', ad_personalization:'granted', analytics_storage:'granted'});
+tools/keyword-density.html:45:    gtag('consent','update', {ad_storage:'denied', ad_user_data:'denied', ad_personalization:'denied', analytics_storage:'denied'});
+tools/keyword-density.html:160:  gtag('consent','default', {ad_storage:'denied', ad_user_data:'denied', ad_personalization:'denied', analytics_storage:'denied'});
+tools/keyword-density.html:194:      gtag('consent','update',{ad_storage:'granted', ad_user_data:'granted', ad_personalization:'granted', analytics_storage:'granted'});
+[2025-11-04T21:51:28] tokens used: 70,088
+
+[2025-11-04T21:51:44] thinking
+
+**Summarizing CSP and COOP risks**
+
+I'm putting together a clear, concise risk note covering iframe usage, external scripts, inline scripting risks, and header settings like COOP and COEP. I'll include file references and highlight unknowns about dynamic google ad hosts and inline scripts needing unsafe-inline or hashes. I'll also cover coordination between X-Frame-Options, frame-ancestors, and COOP same-origin, plus implications of missing COEP with google resources. Finally, I'll add a brief plan status with completed steps to keep everything organized and transparent.
+[2025-11-04T21:51:45] codex
+
+**CSP Risk Note**
+- No first-party `<iframe>`/`<embed>` elements were found across the repo, but Google Ads slots (`.adsbygoogle`) are present on multiple pages and load frames dynamically from Google ad domains once `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js` executes (`public/index.html:270`, `tools/meta-preview.html:96`, `tools/keyword-density.html:96`). A `frame-src`/`child-src` allowlist will be needed for `https://pagead2.googlesyndication.com`, `https://googleads.g.doubleclick.net`, and `https://tpc.googlesyndication.com`; expect additional Google ad subdomains at runtime (unknowns to verify in the browser).
+- Analytics and consent management inject external scripts: Plausible (`https://plausible.io/js/script.js`) in `public/index.html:154` and all tool pages, and an optional Google Funding Choices CMP script (`https://fundingchoicesmessages.google.com/...`) that is currently commented out but should be budgeted for if enabled (`public/index.html:74`). `script-src` and `connect-src` must cover `https://plausible.io` (events hit `/api/event`) and the Google domains above; `img-src` should anticipate ad beacons from Google ad hosts plus `data:` if creatives demand it.
+- Pages rely heavily on inline scripts and inline styles for core functionality (consent gating, tool logic, layout) (`public/index.html:69`, `public/index.html:119`, `tools/meta-preview.html:97`, `tools/sitemap-delta/index.html:451`). A strict CSP will need either nonces/hashes applied to every inline block and attribute, or fall back to `'unsafe-inline'` for both `script-src` and `style-src`. Without covering this, every tool UI breaks.
+- Front-end network calls stay on same-origin APIs (`/api/check`, `/api/wayback-fixer`, etc.), but those APIs in turn call Archive.org and arbitrary user targets server-side (`api/wayback-fixer.js:123`, `api/check.js:222`). CSP only needs `connect-src 'self' https://plausible.io https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net` (plus any additional ad telemetry domains observed in testing), unless Google Funding Choices is activated (would add `https://fundingchoicesmessages.google.com`).
+- Existing headers already set `X-Frame-Options: DENY`, `Cross-Origin-Opener-Policy: same-origin`, and `Cross-Origin-Resource-Policy: same-origin` globally (`vercel.json:7`, `vercel.json:11`). If CSP adds `frame-ancestors`, keep it aligned with DENY (use `frame-ancestors 'none'`) unless the site must be embeddable; changing COOP/COEP to achieve cross-origin isolation is risky because Google Ads, Plausible, and third-party embeds do not send the necessary `Cross-Origin-Resource-Policy`/`Cross-Origin-Embedder-Policy` headers and would be blocked.
+- For a strict-but-compatible baseline CSP, plan on:  
+  `default-src 'self';`  
+  `script-src 'self' 'unsafe-inline' https://plausible.io https://pagead2.googlesyndication.com;`  
+  `style-src 'self' 'unsafe-inline';`  
+  `img-src 'self' data: https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com;`  
+  `connect-src 'self' https://plausible.io https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net;`  
+  `frame-src 'self' https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com;`  
+  `child-src` mirroring `frame-src`;  
+  `object-src 'none'; base-uri 'self'; frame-ancestors 'none'; upgrade-insecure-requests; block-all-mixed-content.`  
+  Add Funding Choices domains and any additional Google ad endpoints confirmed during browser testing.
+
+Plan status: repo scan completed, third-party dependencies catalogued, and CSP guidance drafted for review.
+[2025-11-04T21:51:53] tokens used: 73,339

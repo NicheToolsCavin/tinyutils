@@ -1,0 +1,114 @@
+[2025-11-06T22:28:10] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/dev/TinyUtils
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-06T22:28:10] User instructions:
+You are helping plan upgrades to TinyUtils' universal converter backend.
+
+Context:
+- Repo: /Users/cav/dev/TinyUtils (branch feature/universal-converter-backend). All converter logic currently lives in tinyutils/api/convert/index.py which handles a single input document -> Markdown output using Pandoc + Lua filters, normalisation, and blob uploads. The contract: accept JSON { inputs: [{ blobUrl, name? }], from?, to: "md", options }, produce JSON envelope with jobId/toolVersions/outputs[] (blobUrl+size)/preview/logs/errors. Media extraction optionally zips files.
+- Supporting libs under tinyutils/api/_lib (pandoc_runner.py, text_clean.py, manifests.py, utils.py, blob.py). No dedicated converter library yet.
+- Requirements: extend to multi-file batches and multiple targets (md/html/txt). Maintain existing envelope + blob upload contract so /tools/convert stays compatible. Need reusable library module(s) (e.g. tinyutils/convert/) that orchestrate per-file conversions, collects logs, handles errors, supports multiple output formats, and returns deterministic metadata (headings/snippets/images). Must keep Pandoc/Lua filter pipeline + blob interactions.
+- Tests under tinyutils/tests currently cover API contracts + CSV hardening; need new regression coverage for converter flows (single/batch/multi-target). Add fixtures under tests/fixtures/convert/ and artifacts under tinyutils/artifacts/convert/<date>/.
+- Active agents: code-gpt-5-codex, code-teams-personal, qwen-3-coder. Gemini models currently benched in production but include thoughts anyway.
+
+Task:
+Produce a concrete implementation plan for delivering the multi-file/multi-target converter backend: identify required library structure, API schema updates, validation, blob strategy, testing, and documentation/log updates. Highlight dependencies, sequencing, and risk mitigations. Reference relevant repo paths (tinyutils/api/convert/index.py, tinyutils/api/_lib/*, docs/AGENT_RUN_LOG.md, docs/AGENT_TASK_CHECKLIST.md, tools/convert/index.html) so implementers know where to start.
+
+Output format:
+- Key assumptions / questions
+- Proposed architecture
+- Step-by-step plan (5-10 steps) with brief rationale
+- Testing & evidence strategy
+- Risk / mitigation list
+
+Be specific but concise. Assume reader is already familiar with repo basics.
+
+[Running in read-only mode - no modifications allowed]
+[2025-11-06T22:28:10] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/dev/TinyUtils
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-06T22:28:10] User instructions:
+You are helping plan upgrades to TinyUtils' universal converter backend.
+
+Context:
+- Repo: /Users/cav/dev/TinyUtils (branch feature/universal-converter-backend). All converter logic currently lives in tinyutils/api/convert/index.py which handles a single input document -> Markdown output using Pandoc + Lua filters, normalisation, and blob uploads. The contract: accept JSON { inputs: [{ blobUrl, name? }], from?, to: "md", options }, produce JSON envelope with jobId/toolVersions/outputs[] (blobUrl+size)/preview/logs/errors. Media extraction optionally zips files.
+- Supporting libs under tinyutils/api/_lib (pandoc_runner.py, text_clean.py, manifests.py, utils.py, blob.py). No dedicated converter library yet.
+- Requirements: extend to multi-file batches and multiple targets (md/html/txt). Maintain existing envelope + blob upload contract so /tools/convert stays compatible. Need reusable library module(s) (e.g. tinyutils/convert/) that orchestrate per-file conversions, collects logs, handles errors, supports multiple output formats, and returns deterministic metadata (headings/snippets/images). Must keep Pandoc/Lua filter pipeline + blob interactions.
+- Tests under tinyutils/tests currently cover API contracts + CSV hardening; need new regression coverage for converter flows (single/batch/multi-target). Add fixtures under tests/fixtures/convert/ and artifacts under tinyutils/artifacts/convert/<date>/.
+- Active agents: code-gpt-5-codex, code-teams-personal, qwen-3-coder. Gemini models currently benched in production but include thoughts anyway.
+
+Task:
+Produce a concrete implementation plan for delivering the multi-file/multi-target converter backend: identify required library structure, API schema updates, validation, blob strategy, testing, and documentation/log updates. Highlight dependencies, sequencing, and risk mitigations. Reference relevant repo paths (tinyutils/api/convert/index.py, tinyutils/api/_lib/*, docs/AGENT_RUN_LOG.md, docs/AGENT_TASK_CHECKLIST.md, tools/convert/index.html) so implementers know where to start.
+
+Output format:
+- Key assumptions / questions
+- Proposed architecture
+- Step-by-step plan (5-10 steps) with brief rationale
+- Testing & evidence strategy
+- Risk / mitigation list
+
+Be specific but concise. Assume reader is already familiar with repo basics.
+
+[Running in read-only mode - no modifications allowed]
+
+[2025-11-06T22:28:15] thinking
+
+**Outlining project plan and architecture**
+
+I'll craft a detailed plan covering assumptions, proposed architecture focusing on a new `tinyutils/convert/` module, step-by-step implementation, testing strategies, and identified risks, referencing relevant file paths where possible to keep it clear and structured.
+[2025-11-06T22:28:16] codex
+
+**Key Assumptions / Questions**
+- Inputs remain blob-backed via existing `tinyutils/api/_lib/blob.py`; no direct file uploads.
+- Downstream `/tools/convert` UI (see `tools/convert/index.html`) expects the current envelope shape; we can extend metadata but must not break existing keys.
+- Multi-target requests share identical source inputs; assume we can reuse extracted media between targets rather than re-running Pandoc per target? (TBD).
+
+**Proposed Architecture**
+- Introduce `tinyutils/convert/` package: 
+  - `batch.py` orchestrates batches (multiple inputs × targets) and normalizes options/metadata.
+  - `runner.py` wraps Pandoc + Lua filters using `tinyutils/api/_lib/pandoc_runner.py`, emitting structured logs/events.
+  - `manifest.py` (or reuse `_lib/manifests.py`) for deterministic metadata (headings/snippets/images) per converted asset.
+  - `outputs.py` handles blob upload coordination via `_lib/blob.py`, plus optional ZIP bundling for media.
+- Expose a façade `tinyutils/convert/service.py` consumed by `tinyutils/api/convert/index.py` so the API layer mainly validates request/envelope plumbing.
+- Central log collector to capture per-file/per-target steps, feeding previews and `logs` in response.
+- Shared `convert/models.py` for typed request/response schemas so validators/testing align.
+
+**Step-by-Step Plan (with rationale)**
+1. **Baseline Audit** – Map current flow inside `tinyutils/api/convert/index.py` and supporting `_lib` helpers to catalog responsibilities that should migrate to the new `tinyutils/convert/` package (prevents regressions).
+2. **Define Schemas & Validation** – Create request/response dataclasses or pydantic-like validators (`tinyutils/convert/models.py`), extending inputs array handling, multi-target `to` spec, options validation, and deterministic metadata fields. Update API endpoint to use them.
+3. **Implement Batch Orchestrator** – Build `tinyutils/convert/batch.py` that iterates inputs × targets, invokes runner, aggregates logs/errors, and handles early abort vs per-file failure policy. Ensure media extraction is keyed per input and reused for all targets.
+4. **Abstract Conversion Runner** – Move Pandoc/Lua pipeline into `tinyutils/convert/runner.py`, wrapping `_lib/pandoc_runner.py` and ensuring consistent tool version reporting. Include hooks for metadata extraction (`_lib/text_clean.py`, `_lib/manifests.py`).
+5. **Blob & Artifact Strategy** – Centralize blob upload + artifact writing in `tinyutils/convert/outputs.py`, covering: per-output blob upload, optional ZIP for extracted media, and dated artifact mirrors under `tinyutils/artifacts/convert/<date>/`. Ensure uploads return size + URL for envelope.
+6. **API Layer Update** – Refactor `tinyutils/api/convert/index.py` to delegate to the new service, preserving envelope structure (jobId/toolVersions/outputs/preview/logs/errors) while now supporting multi-file/multi-target.
+7. **Metadata Determinism** – Extend `_lib/manifests.py` or new helper so each converted document yields headings/snippets/images in a predictable order; include this metadata in outputs to support future UI enhancements.
+8. **Logging & Docs** – Update `docs/AGENT_RUN_LOG.md` and `docs/AGENT_TASK_CHECKLIST.md` to reflect new module boundaries, configuration knobs, and operational steps. Ensure log messages in service expose file/target context for easier debugging.
+9. **Test Coverage & Fixtures** – Add fixtures under `tinyutils/tests/fixtures/convert/` (single doc, multi-file, binary + media). Write regression tests under `tinyutils/tests/convert/` covering single input, batch, multi-target, and error handling; verify blob upload stubs and metadata outputs.
+10. **Front-End Contract Note** – Update `tools/convert/index.html` (if needed) to surface multi-target selections; ensure backend contract remains compatible and document new options.
+
+**Testing & Evidence Strategy**
+- Unit tests for models/validation (`tinyutils/tests/convert/test_models.py`) covering schema permutations.
+- Integration-style tests (`test_service.py`) stubbing Pandoc runner + blob uploads to assert envelopes/logs for single-file, multi-file, and multi-target scenarios.
+- Snapshot artifacts in `tinyutils/artifacts/convert/<date>/` to confirm deterministic metadata (headings/snippets) and zipped media contents.
+- Existing API contract tests extended to call multi-target requests ensuring backward compatibility.
+
+**Risks / Mitigations**
+- *Pandoc throughput for multi-target*: cache intermediate AST or extracted media per input to avoid redundant conversions.
+- *Blob upload churn*: ensure batching uploads and reusing ZIPs; add retries via `_lib/blob.py`.
+- *Metadata non-determinism*: enforce stable sorting (e.g., headings by appearance) and normalized text cleaning.
+- *Test flakiness due to timestamps/jobIds*: inject deterministic IDs via dependency injection in service layer.
+- *Docs/UI drift*: keep `docs/AGENT_TASK_CHECKLIST.md` and `tools/convert/index.html` updated concurrently, so operators understand new capabilities.
+[2025-11-06T22:28:35] tokens used: 6,926

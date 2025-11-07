@@ -1,0 +1,722 @@
+[2025-11-07T00:08:58] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/dev/TinyUtils
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-07T00:08:58] User instructions:
+You are helping plan upgrades to TinyUtils' universal converter backend.
+
+Context:
+- Repo: /Users/cav/dev/TinyUtils (branch feature/universal-converter-backend).
+- Current implementation: tinyutils/api/convert/index.py already calls tinyutils.convert library but still needs production-ready plan for multi-file + multi-target flow. Supporting modules tinyutils/api/_lib/{pandoc_runner.py,text_clean.py,manifests.py,blob.py,utils.py} remain in use.
+- Library scaffold exists under tinyutils/convert/service.py and tinyutils/convert/types.py with convert_one/convert_batch, target handling (md/html/txt), preview + media zip support. Need roadmap to harden it.
+- Tests seeded under tests/convert/{test_service.py,test_api_convert_unit.py,test_api_convert.py}; repo also has existing Node tests (tinyutils/tests/*.mjs). Need strategy for regression coverage including fixtures in tests/fixtures/convert/ and evidence artifacts tinyutils/artifacts/convert/<date>/.
+- Docs/logs: update tinyutils/docs/AGENT_RUN_LOG.md and tinyutils/docs/AGENT_TASK_CHECKLIST.md, plus ensure tools/convert/index.html (UI) reflects new capabilities.
+
+Goal:
+Produce a concrete, execution-ready implementation plan for delivering the multi-file/multi-target converter backend. Plan must cover:
+  * Library structure & responsibilities (tinyutils/convert/*) and how they interact with existing _lib helpers and blob uploads.
+  * API schema & validation updates in tinyutils/api/convert/index.py to accept batch inputs and multiple targets while preserving envelope contract (jobId/toolVersions/outputs/preview/logs/errors).
+  * Blob/download strategy, size enforcement, and deterministic metadata (preview headings/snippets/images) selection.
+  * Testing approach: Python pytest for library/API, Node contract tests, fixtures/artifacts layout.
+  * Documentation/log updates (AGENT_RUN_LOG.md, AGENT_TASK_CHECKLIST.md, PREVIEW/PRODUCTION checklists) and any logging or instrumentation adjustments.
+  * Dependencies, sequencing, risks, and mitigations required before enabling autodrive/automation.
+
+Deliverable expectations:
+- Highlight key assumptions/questions needing clarification.
+- Describe proposed architecture or module boundaries.
+- Provide 5-10 actionable steps with rationale.
+- Outline testing & evidence strategy and specific suites to run.
+- Enumerate top risks with mitigations.
+Cite relevant repo paths so implementers know where to work.
+
+
+[Running in read-only mode - no modifications allowed]
+[2025-11-07T00:08:58] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/dev/TinyUtils
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-07T00:08:58] User instructions:
+You are helping plan upgrades to TinyUtils' universal converter backend.
+
+Context:
+- Repo: /Users/cav/dev/TinyUtils (branch feature/universal-converter-backend).
+- Current implementation: tinyutils/api/convert/index.py already calls tinyutils.convert library but still needs production-ready plan for multi-file + multi-target flow. Supporting modules tinyutils/api/_lib/{pandoc_runner.py,text_clean.py,manifests.py,blob.py,utils.py} remain in use.
+- Library scaffold exists under tinyutils/convert/service.py and tinyutils/convert/types.py with convert_one/convert_batch, target handling (md/html/txt), preview + media zip support. Need roadmap to harden it.
+- Tests seeded under tests/convert/{test_service.py,test_api_convert_unit.py,test_api_convert.py}; repo also has existing Node tests (tinyutils/tests/*.mjs). Need strategy for regression coverage including fixtures in tests/fixtures/convert/ and evidence artifacts tinyutils/artifacts/convert/<date>/.
+- Docs/logs: update tinyutils/docs/AGENT_RUN_LOG.md and tinyutils/docs/AGENT_TASK_CHECKLIST.md, plus ensure tools/convert/index.html (UI) reflects new capabilities.
+
+Goal:
+Produce a concrete, execution-ready implementation plan for delivering the multi-file/multi-target converter backend. Plan must cover:
+  * Library structure & responsibilities (tinyutils/convert/*) and how they interact with existing _lib helpers and blob uploads.
+  * API schema & validation updates in tinyutils/api/convert/index.py to accept batch inputs and multiple targets while preserving envelope contract (jobId/toolVersions/outputs/preview/logs/errors).
+  * Blob/download strategy, size enforcement, and deterministic metadata (preview headings/snippets/images) selection.
+  * Testing approach: Python pytest for library/API, Node contract tests, fixtures/artifacts layout.
+  * Documentation/log updates (AGENT_RUN_LOG.md, AGENT_TASK_CHECKLIST.md, PREVIEW/PRODUCTION checklists) and any logging or instrumentation adjustments.
+  * Dependencies, sequencing, risks, and mitigations required before enabling autodrive/automation.
+
+Deliverable expectations:
+- Highlight key assumptions/questions needing clarification.
+- Describe proposed architecture or module boundaries.
+- Provide 5-10 actionable steps with rationale.
+- Outline testing & evidence strategy and specific suites to run.
+- Enumerate top risks with mitigations.
+Cite relevant repo paths so implementers know where to work.
+
+
+[Running in read-only mode - no modifications allowed]
+
+[2025-11-07T00:09:01] thinking
+
+**Planning read-only context gathering**
+[2025-11-07T00:09:01] exec bash -lc ls in /Users/cav/dev/TinyUtils
+[2025-11-07T00:09:01] bash -lc ls succeeded in 82ms:
+__MACOSX
+$
+backups
+PATH
+print1
+tests
+tinyutils
+TinyUtilsCodexContext
+[2025-11-07T00:09:01] tokens used: 5,888
+
+[2025-11-07T00:09:02] thinking
+
+**Exploring tinyutils directory**
+[2025-11-07T00:09:03] exec bash -lc 'ls tinyutils' in /Users/cav/dev/TinyUtils
+[2025-11-07T00:09:03] bash -lc 'ls tinyutils' succeeded in 81ms:
+__init__.py
+__pycache__
+ads.txt
+ADSENSE_SETUP.md
+AGENTS.md
+api
+artifacts
+CHANGES-v1.3.0-rc2.txt
+CHANGES-v1.3.0-rc3.txt
+config
+convert
+data
+DEPLOY_PRODUCTION_CHECKLIST.md
+docs
+feedback.html
+filters
+fixtures
+guides
+index
+index.html
+[2025-11-07T00:09:03] tokens used: 6,109
+
+[2025-11-07T00:09:04] thinking
+
+**Inspecting convert subdirectory**
+[2025-11-07T00:09:05] exec bash -lc 'ls tinyutils/convert' in /Users/cav/dev/TinyUtils
+[2025-11-07T00:09:05] bash -lc 'ls tinyutils/convert' succeeded in 84ms:
+__init__.py
+__pycache__
+service.py
+types.py
+[2025-11-07T00:09:05] tokens used: 6,516
+
+[2025-11-07T00:09:06] thinking
+
+**Checking service/types file start**
+[2025-11-07T00:09:06] exec bash -lc "sed -n '1,200p' tinyutils/convert/service.py" in /Users/cav/dev/TinyUtils
+[2025-11-07T00:09:06] bash -lc "sed -n '1,200p' tinyutils/convert/service.py" succeeded in 81ms:
+"""Reusable converter service for TinyUtils APIs."""
+from __future__ import annotations
+
+import json
+import zipfile
+from pathlib import Path
+from typing import Any, Iterable, List, Optional, Sequence
+
+from tinyutils.api._lib import pandoc_runner
+from tinyutils.api._lib.manifests import build_snippets, collect_headings, media_manifest
+from tinyutils.api._lib.text_clean import normalise_markdown
+from tinyutils.api._lib.utils import ensure_within_limits, generate_job_id, job_workspace
+
+from .types import (
+    BatchResult,
+    ConversionError,
+    ConversionOptions,
+    ConversionResult,
+    InputPayload,
+    MediaArtifact,
+[2025-11-07T00:09:06] tokens used: 12,915
+[2025-11-07T00:09:08] exec bash -lc "sed -n '200,400p' tinyutils/convert/service.py" in /Users/cav/dev/TinyUtils
+[2025-11-07T00:09:08] bash -lc "sed -n '200,400p' tinyutils/convert/service.py" succeeded in 78ms:
+        to=pandoc_target,
+        format="gfm",
+        extra_args=["--wrap=none"],
+    )
+    return rendered.encode("utf-8")
+
+
+def _get_pypandoc():
+    global _PYPANDOC
+    if _PYPANDOC is None:
+        import pypandoc  # type: ignore
+
+        _PYPANDOC = pypandoc
+    return _PYPANDOC
+
+
+def _build_media_artifact(media_dir: Optional[Path], base_name: str) -> Optional[MediaArtifact]:
+    if not media_dir or not media_dir.exists():
+        return None
+    files = [path for path in media_dir.rglob("*") if path.is_file()]
+[2025-11-07T00:09:08] tokens used: 14,766
+
+[2025-11-07T00:09:09] thinking
+
+**Identifying missing types file**
+[2025-11-07T00:09:09] exec bash -lc "sed -n '1,200p' tinyutils/convert/types.py" in /Users/cav/dev/TinyUtils
+[2025-11-07T00:09:09] bash -lc "sed -n '1,200p' tinyutils/convert/types.py" succeeded in 84ms:
+"""Type definitions for the TinyUtils converter library."""
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import List, Optional, Sequence
+
+
+SUPPORTED_TARGETS: Sequence[str] = ("md", "html", "txt")
+
+
+@dataclass(slots=True)
+class ConversionOptions:
+    """Options that align with the public converter API."""
+
+    accept_tracked_changes: bool = True
+    extract_media: bool = False
+    remove_zero_width: bool = True
+
+
+@dataclass(slots=True)
+[2025-11-07T00:09:09] tokens used: 17,171
+
+[2025-11-07T00:09:11] thinking
+
+**Inspecting related modules for context**
+[2025-11-07T00:09:11] exec bash -lc "sed -n '1,200p' tinyutils/api/_lib/pandoc_runner.py" in /Users/cav/dev/TinyUtils
+[2025-11-07T00:09:11] bash -lc "sed -n '1,200p' tinyutils/api/_lib/pandoc_runner.py" succeeded in 85ms:
+"""Pandoc runner utilities for conversions and Lua-filter passes."""
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Iterable, List, Optional
+
+import pypandoc
+
+
+class PandocError(RuntimeError):
+    """Raised when a pandoc conversion fails."""
+
+
+DEFAULT_OUTPUT_FORMAT = "gfm+pipe_tables+footnotes+tex_math_dollars"
+BASE_ARGS = ["--atx-headers", "--wrap=none", "--reference-links"]
+FILTERS = [
+    "filters/softbreak_to_space.lua",
+    "filters/strip_empty_spans.lua",
+    "filters/normalize_lists.lua",
+]
+[2025-11-07T00:09:11] tokens used: 18,515
+
+[2025-11-07T00:09:12] thinking
+
+**Opening text_clean module**
+[2025-11-07T00:09:13] exec bash -lc "sed -n '1,200p' tinyutils/api/_lib/text_clean.py" in /Users/cav/dev/TinyUtils
+[2025-11-07T00:09:13] bash -lc "sed -n '1,200p' tinyutils/api/_lib/text_clean.py" succeeded in 89ms:
+"""Unicode and whitespace cleanup utilities for Markdown output."""
+from __future__ import annotations
+
+import re
+import unicodedata
+from dataclasses import dataclass
+
+ZERO_WIDTH_RE = re.compile("[\u200B\u200C\u200D\uFEFF]")
+MULTI_BLANK_RE = re.compile(r"\n{3,}")
+
+
+@dataclass
+class CleanupStats:
+    softbreaks_replaced: int = 0
+    nbsp_replaced: int = 0
+    zero_width_removed: int = 0
+
+
+def normalise_markdown(
+    text: str,
+[2025-11-07T00:09:13] tokens used: 19,316
+
+[2025-11-07T00:09:14] thinking
+
+**Noting term reference**
+[2025-11-07T00:09:14] exec bash -lc "sed -n '1,200p' tinyutils/api/_lib/manifests.py" in /Users/cav/dev/TinyUtils
+[2025-11-07T00:09:14] bash -lc "sed -n '1,200p' tinyutils/api/_lib/manifests.py" succeeded in 84ms:
+"""Manifest helpers for converter outputs and previews."""
+from __future__ import annotations
+
+import difflib
+from pathlib import Path
+from typing import Dict, List, Optional
+
+from .utils import PREVIEW_HEADINGS_N, PREVIEW_SNIPPETS_M
+
+
+def collect_headings(markdown: str) -> List[str]:
+    headings: List[str] = []
+    for line in markdown.splitlines():
+        if line.startswith("#"):
+            headings.append(line.strip())
+            if len(headings) >= PREVIEW_HEADINGS_N:
+                break
+    return headings
+
+
+[2025-11-07T00:09:14] tokens used: 21,752
+
+[2025-11-07T00:09:15] thinking
+
+**Checking for library and utility files**
+[2025-11-07T00:09:16] exec bash -lc "sed -n '1,200p' tinyutils/api/_lib/blob.py" in /Users/cav/dev/TinyUtils
+[2025-11-07T00:09:16] bash -lc "sed -n '1,200p' tinyutils/api/_lib/blob.py" succeeded in 83ms:
+"""Helpers for downloading inputs and uploading outputs.
+
+The real blob integration will eventually use Vercel Blob signed URLs.
+For now we provide a safe data-URL fallback so responses remain self-contained.
+"""
+from __future__ import annotations
+
+import base64
+import os
+import re
+from pathlib import Path
+from typing import Optional, Tuple
+from urllib.parse import urlparse
+
+import requests
+
+DEFAULT_TIMEOUT = float(os.getenv("BLOB_DOWNLOAD_TIMEOUT", "30"))
+USER_AGENT = os.getenv("TINYUTILS_BLOB_UA", "tinyutils-backend/0.1")
+
+
+[2025-11-07T00:09:16] tokens used: 32,901
+
+[2025-11-07T00:09:17] thinking
+
+**Identifying utility needs**
+[2025-11-07T00:09:17] exec bash -lc "sed -n '1,200p' tinyutils/api/_lib/utils.py" in /Users/cav/dev/TinyUtils
+[2025-11-07T00:09:17] bash -lc "sed -n '1,200p' tinyutils/api/_lib/utils.py" succeeded in 82ms:
+"""Shared utility helpers for TinyUtils Python backends."""
+from __future__ import annotations
+
+import json
+import logging
+import os
+import tempfile
+import uuid
+from contextlib import contextmanager
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, Iterator, List, Optional
+
+DEFAULT_MAX_FILE_MB = 100
+DEFAULT_MAX_BATCH_MB = 1024
+DEFAULT_PREVIEW_HEADINGS = 8
+DEFAULT_PREVIEW_SNIPPETS = 4
+DEFAULT_DIFF_TRUNCATE_KB = 256
+
+MAX_FILE_MB = int(os.getenv("MAX_FILE_MB", str(DEFAULT_MAX_FILE_MB)))
+[2025-11-07T00:09:17] tokens used: 33,854
+
+[2025-11-07T00:09:19] thinking
+
+**Inspecting index file for API conversion**
+[2025-11-07T00:09:19] exec bash -lc "sed -n '1,200p' tinyutils/api/convert/index.py" in /Users/cav/dev/TinyUtils
+[2025-11-07T00:09:19] bash -lc "sed -n '1,200p' tinyutils/api/convert/index.py" succeeded in 99ms:
+"""Universal document converter endpoint backed by tinyutils.convert."""
+from __future__ import annotations
+
+from pathlib import Path
+from typing import List, Optional
+
+import magic
+from fastapi import FastAPI, HTTPException
+try:  # pragma: no cover - Pydantic v2
+    from pydantic import BaseModel, Field, ConfigDict, field_validator
+    _USE_PYDANTIC_V2 = True
+except ImportError:  # pragma: no cover - fallback to Pydantic v1
+    from pydantic import BaseModel, Field, validator  # type: ignore
+    ConfigDict = None  # type: ignore
+    field_validator = None  # type: ignore
+    _USE_PYDANTIC_V2 = False
+
+from tinyutils.convert import (
+    ConversionOptions as ConverterOptions,
+    InputPayload,
+[2025-11-07T00:09:19] tokens used: 36,259
+
+[2025-11-07T00:09:21] thinking
+
+**Checking test files for convert service**
+[2025-11-07T00:09:21] exec bash -lc 'ls tests/convert' in /Users/cav/dev/TinyUtils
+[2025-11-07T00:09:21] bash -lc 'ls tests/convert' succeeded in 90ms:
+__pycache__
+test_api_convert_unit.py
+test_api_convert.py
+test_service.py
+[2025-11-07T00:09:21] tokens used: 39,715
+
+[2025-11-07T00:09:22] thinking
+
+**Inspecting test_service module**
+[2025-11-07T00:09:23] exec bash -lc "sed -n '1,200p' tests/convert/test_service.py" in /Users/cav/dev/TinyUtils
+[2025-11-07T00:09:23] bash -lc "sed -n '1,200p' tests/convert/test_service.py" succeeded in 90ms:
+"""Unit tests for tinyutils.convert.service."""
+from __future__ import annotations
+
+from pathlib import Path
+
+import pytest
+
+from tinyutils.convert import ConversionOptions, convert_batch, convert_one
+from tinyutils.convert.types import InputPayload
+
+
+@pytest.fixture(autouse=True)
+def stub_pandoc(monkeypatch, tmp_path):
+    """Monkeypatch pandoc helpers so tests never spawn real processes."""
+
+    def fake_convert_to_markdown(
+        source: Path,
+        destination: Path,
+        from_format=None,
+        accept_tracked_changes=False,
+[2025-11-07T00:09:23] tokens used: 54,176
+
+[2025-11-07T00:09:24] thinking
+
+**Opening API test files**
+[2025-11-07T00:09:24] exec bash -lc "sed -n '1,200p' tests/convert/test_api_convert_unit.py" in /Users/cav/dev/TinyUtils
+[2025-11-07T00:09:24] bash -lc "sed -n '1,200p' tests/convert/test_api_convert_unit.py" succeeded in 83ms:
+"""Unit tests for the convert() handler without HTTPX dependencies."""
+from __future__ import annotations
+
+import pytest
+from fastapi import HTTPException
+
+from tinyutils.api.convert.index import ConvertRequest, InputItem, convert
+from tinyutils.convert.types import (
+    BatchResult,
+    ConversionError,
+    ConversionResult,
+    InputPayload,
+    PreviewData,
+    TargetArtifact,
+)
+
+
+def _patch_download(monkeypatch, payloads):
+    monkeypatch.setattr(
+        "tinyutils.api.convert.index._download_payloads",
+[2025-11-07T00:09:24] tokens used: 57,060
+
+[2025-11-07T00:09:25] thinking
+
+**Preparing to test API conversion**
+[2025-11-07T00:09:26] exec bash -lc "sed -n '1,200p' tests/convert/test_api_convert.py" in /Users/cav/dev/TinyUtils
+[2025-11-07T00:09:26] bash -lc "sed -n '1,200p' tests/convert/test_api_convert.py" succeeded in 87ms:
+"""Integration tests for the FastAPI converter endpoint."""
+from __future__ import annotations
+
+import pytest
+
+pytest.importorskip("httpx")
+
+from fastapi.testclient import TestClient
+
+from tinyutils.api.convert.index import app
+from tinyutils.convert.types import (
+    BatchResult,
+    ConversionError,
+    ConversionResult,
+    MediaArtifact,
+    PreviewData,
+    TargetArtifact,
+)
+
+
+[2025-11-07T00:09:26] tokens used: 59,508
+
+[2025-11-07T00:09:34] thinking
+
+**Planning multi-file conversion and referencing**
+
+I’m outlining a plan covering multi-target and multi-file API schema, blob chunking and size limits, aggregated batch size enforcement, deterministic preview selection, and coordination with _lib modules. I’ll include updates for tests under tinyutils/tests and document the AGENT_RUN_LOG. To meet requirements, I’ll gather and reference exact start line numbers for key files and functions like convert_one and convert_batch using `nl -ba`, ensuring each code reference includes a single starting line, not ranges. This plan will detail architecture, testing strategy, risks with mitigations, and actionable steps.
+[2025-11-07T00:09:36] exec bash -lc "nl -ba tinyutils/convert/service.py | sed -n '1,200p'" in /Users/cav/dev/TinyUtils
+[2025-11-07T00:09:36] bash -lc "nl -ba tinyutils/convert/service.py | sed -n '1,200p'" succeeded in 109ms:
+     1	"""Reusable converter service for TinyUtils APIs."""
+     2	from __future__ import annotations
+     3	
+     4	import json
+     5	import zipfile
+     6	from pathlib import Path
+     7	from typing import Any, Iterable, List, Optional, Sequence
+     8	
+     9	from tinyutils.api._lib import pandoc_runner
+    10	from tinyutils.api._lib.manifests import build_snippets, collect_headings, media_manifest
+    11	from tinyutils.api._lib.text_clean import normalise_markdown
+    12	from tinyutils.api._lib.utils import ensure_within_limits, generate_job_id, job_workspace
+    13	
+    14	from .types import (
+    15	    BatchResult,
+    16	    ConversionError,
+    17	    ConversionOptions,
+    18	    ConversionResult,
+    19	    InputPayload,
+    20	    MediaArtifact,
+[2025-11-07T00:09:36] tokens used: 61,637
+
+[2025-11-07T00:09:38] thinking
+
+**Preparing to extract API file lines**
+[2025-11-07T00:09:39] exec bash -lc "nl -ba tinyutils/api/convert/index.py | sed -n '1,200p'" in /Users/cav/dev/TinyUtils
+[2025-11-07T00:09:39] bash -lc "nl -ba tinyutils/api/convert/index.py | sed -n '1,200p'" succeeded in 99ms:
+     1	"""Universal document converter endpoint backed by tinyutils.convert."""
+     2	from __future__ import annotations
+     3	
+     4	from pathlib import Path
+     5	from typing import List, Optional
+     6	
+     7	import magic
+     8	from fastapi import FastAPI, HTTPException
+     9	try:  # pragma: no cover - Pydantic v2
+    10	    from pydantic import BaseModel, Field, ConfigDict, field_validator
+    11	    _USE_PYDANTIC_V2 = True
+    12	except ImportError:  # pragma: no cover - fallback to Pydantic v1
+    13	    from pydantic import BaseModel, Field, validator  # type: ignore
+    14	    ConfigDict = None  # type: ignore
+    15	    field_validator = None  # type: ignore
+    16	    _USE_PYDANTIC_V2 = False
+    17	
+    18	from tinyutils.convert import (
+    19	    ConversionOptions as ConverterOptions,
+    20	    InputPayload,
+[2025-11-07T00:09:39] tokens used: 64,622
+
+[2025-11-07T00:09:42] thinking
+
+**Outlining comprehensive plan details**
+[2025-11-07T00:09:43] exec bash -lc 'ls tests/fixtures/convert' in /Users/cav/dev/TinyUtils
+[2025-11-07T00:09:43] bash -lc 'ls tests/fixtures/convert' exited 1 in 87ms:
+ERROR
+ls: tests/fixtures/convert: No such file or directory
+[2025-11-07T00:09:43] tokens used: 73,282
+
+[2025-11-07T00:09:45] thinking
+
+**Checking fixtures directory**
+[2025-11-07T00:09:45] exec bash -lc 'ls tests' in /Users/cav/dev/TinyUtils
+[2025-11-07T00:09:45] bash -lc 'ls tests' succeeded in 88ms:
+__pycache__
+conftest.py
+convert
+test_results_nov4.md
+[2025-11-07T00:09:45] tokens used: 76,925
+
+[2025-11-07T00:09:47] thinking
+
+**Checking fixture directories**
+[2025-11-07T00:09:47] exec bash -lc 'ls tinyutils/fixtures' in /Users/cav/dev/TinyUtils
+[2025-11-07T00:09:47] bash -lc 'ls tinyutils/fixtures' succeeded in 81ms:
+README.md
+sample.md
+[2025-11-07T00:09:47] tokens used: 77,109
+
+[2025-11-07T00:10:07] thinking
+
+**Outlining comprehensive conversion plan**
+
+I'll organize a detailed plan covering assumptions, architecture referencing key files with line numbers, multi-target conversion steps, API and blob handling strategies, testing and evidence collection, documentation and UI updates, plus risks with mitigations—providing 5-10 actionable steps with clear rationale to ensure clarity and completeness.
+[2025-11-07T00:10:08] exec bash -lc "sed -n '1,200p' tools/convert/index.html" in /Users/cav/dev/TinyUtils
+[2025-11-07T00:10:08] bash -lc "sed -n '1,200p' tools/convert/index.html" exited 1 in 101ms:
+ERROR
+sed: tools/convert/index.html: No such file or directory
+[2025-11-07T00:10:08] tokens used: 78,969
+
+[2025-11-07T00:10:09] thinking
+
+**Checking for tools directory**
+[2025-11-07T00:10:10] exec bash -lc 'ls tools' in /Users/cav/dev/TinyUtils
+[2025-11-07T00:10:10] bash -lc 'ls tools' exited 1 in 110ms:
+ERROR
+ls: tools: No such file or directory
+[2025-11-07T00:10:10] tokens used: 79,510
+
+[2025-11-07T00:10:11] thinking
+
+**Double-checking directory names**
+[2025-11-07T00:10:12] exec bash -lc 'ls -a' in /Users/cav/dev/TinyUtils
+[2025-11-07T00:10:12] bash -lc 'ls -a' succeeded in 98ms:
+__MACOSX
+.
+..
+.code
+.debug
+.DS_Store
+.git
+.pytest_cache
+$
+backups
+PATH
+print1
+tests
+tinyutils
+TinyUtilsCodexContext
+[2025-11-07T00:10:12] tokens used: 80,162
+
+[2025-11-07T00:10:13] thinking
+
+**Checking contents of tinyutils/tools**
+[2025-11-07T00:10:14] exec bash -lc 'ls tinyutils/tools' in /Users/cav/dev/TinyUtils
+[2025-11-07T00:10:14] bash -lc 'ls tinyutils/tools' succeeded in 108ms:
+convert
+dead-link-finder
+find-replace
+index.html
+keyword-density.html
+meta-preview.html
+sitemap-delta
+sitemap-generator.html
+wayback-fixer
+[2025-11-07T00:10:14] tokens used: 80,334
+
+[2025-11-07T00:10:15] thinking
+
+**Requesting top of HTML file**
+[2025-11-07T00:10:16] exec bash -lc "sed -n '1,200p' tinyutils/tools/convert/index.html" in /Users/cav/dev/TinyUtils
+[2025-11-07T00:10:16] bash -lc "sed -n '1,200p' tinyutils/tools/convert/index.html" succeeded in 83ms:
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>TinyUtils — Universal Converter (Preview)</title>
+    <style>
+      body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", sans-serif; background: #050b18; color: #f8fbff; margin: 0; }
+      .wrap { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+      .card { background: rgba(15,25,50,0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 24px; margin-bottom: 24px; }
+      label { display: block; font-size: 0.9rem; margin-bottom: 8px; }
+      input[type="file"], select, button, textarea { width: 100%; margin-bottom: 12px; }
+      button { background: #2563eb; border: none; color: white; padding: 12px 16px; border-radius: 10px; cursor: pointer; }
+      button:disabled { opacity: 0.5; cursor: not-allowed; }
+      pre { background: rgba(0,0,0,0.4); padding: 12px; border-radius: 10px; overflow: auto; }
+      .badgelist { display: flex; gap: 8px; flex-wrap: wrap; }
+      .badge { background: rgba(37,99,235,0.2); border: 1px solid rgba(37,99,235,0.4); border-radius: 999px; padding: 4px 12px; font-size: 0.85rem; }
+      .hidden { display: none; }
+    </style>
+  </head>
+[2025-11-07T00:10:16] tokens used: 80,530
+
+[2025-11-07T00:10:18] thinking
+
+**Organizing multi-file UI update plan**
+[2025-11-07T00:10:19] exec bash -lc 'ls tinyutils/tests' in /Users/cav/dev/TinyUtils
+[2025-11-07T00:10:19] bash -lc 'ls tinyutils/tests' succeeded in 101ms:
+api_contracts.test.mjs
+csv_hardening.unit.test.mjs
+dlf_api_error_json.test.mjs
+dlf_envelope_invariants.test.mjs
+helpers
+[2025-11-07T00:10:19] tokens used: 83,692
+
+[2025-11-07T00:10:20] thinking
+
+**Reviewing test and artifact files**
+[2025-11-07T00:10:21] exec bash -lc 'ls tinyutils/artifacts' in /Users/cav/dev/TinyUtils
+[2025-11-07T00:10:21] bash -lc 'ls tinyutils/artifacts' succeeded in 86ms:
+a11y
+audit
+docs-refresh
+phase2-roster
+pr1-security-cache
+pr2-ux-noindex-debug
+pr3-fence
+pr4-tests
+[2025-11-07T00:10:21] tokens used: 83,909
+
+[2025-11-07T00:10:42] thinking
+
+**Outlining multi-target conversion plan**
+
+I'm putting together a detailed plan to handle multi-target, multi-file conversion with size enforcement, deterministic preview selection, blob upload/download strategies, and integration with existing modules. The plan will cover assumptions, architecture, execution steps including testing and documentation, plus risks and dependencies, all while referencing key files and line numbers to guide implementation and future verification.
+[2025-11-07T00:10:44] exec bash -lc 'ls tinyutils/docs' in /Users/cav/dev/TinyUtils
+[2025-11-07T00:10:44] bash -lc 'ls tinyutils/docs' succeeded in 88ms:
+AGENT_RUN_LOG.md
+AGENT_TASK_CHECKLIST.md
+BACKUP.md
+chatgpt-convo-2025-10-28.md
+features
+[2025-11-07T00:10:44] tokens used: 85,809
+
+[2025-11-07T00:10:46] thinking
+
+**Verifying key utility files**
+[2025-11-07T00:10:47] exec bash -lc 'ls tinyutils | grep PREVIEW' in /Users/cav/dev/TinyUtils
+[2025-11-07T00:10:47] bash -lc 'ls tinyutils | grep PREVIEW' succeeded in 89ms:
+PREVIEW_SMOKE_CHECKLIST.md
+[2025-11-07T00:10:47] tokens used: 86,082
+
+[2025-11-07T00:10:58] thinking
+
+**Outlining deployment checklist and plan**
+
+I’m organizing a detailed plan for the production deployment checklist in `tinyutils/DEPLOY_PRODUCTION_CHECKLIST.md`, making sure to reference relevant core modules, convert services, and tests. I’m structuring it into clear sections covering assumptions, architecture, execution steps, testing strategies, and risk management, while integrating rationale and module specifics to provide a comprehensive yet succinct guide.
+[2025-11-07T00:10:59] codex
+
+**Assumptions & Questions**  
+- Multi-file payloads share a single option set as in `ConvertRequest` (`tinyutils/api/convert/index.py:44`); confirm whether per-input overrides (targets/from/options) are required.  
+- `blobUrl` inputs currently cover data URLs + HTTP(S) (`tinyutils/api/_lib/blob.py:27`); clarify if we must accept signed storage handles (Vercel Blob) before launch.  
+- Targets are limited to `md/html/txt` (`tinyutils/convert/types.py:9`); confirm roadmap for PDF/zip bundles so we can shape extension points now.  
+- Evidence directories and UI copy reference “preview” mode—confirm when PROD flag should flip in `tinyutils/tools/convert/index.html:1` and corresponding checklists.
+
+**Architecture & Responsibilities**  
+- Core conversion remains in `tinyutils/convert/service.py:37`, where `convert_one` orchestrates pandoc, cleaning, preview manifests, and media zipping; plan is to keep it pure + synchronous while pushing batching (quota, ordering, aggregation) into `convert_batch` (`tinyutils/convert/service.py:113`).  
+- Existing `_lib` helpers supply Pandoc execution (`tinyutils/api/_lib/pandoc_runner.py:1`), markdown cleanup (`tinyutils/api/_lib/text_clean.py:1`), preview manifolds (`tinyutils/api/_lib/manifests.py:1`), and workspace/limits (`tinyutils/api/_lib/utils.py:34`); the plan wraps them with additional guards (e.g., batch-level byte accounting) rather than duplicating logic.  
+- HTTP shape is enforced in `tinyutils/api/convert/index.py:67`; we’ll expand schema validation, enforce deterministic preview selection, and keep the envelope contract of `jobId/toolVersions/outputs/preview/logs/errors`.  
+- Download/upload flow (`tinyutils/api/_lib/blob.py:1`) remains the integration point for storage; we’ll add consistent naming + metadata for each target artifact and media zip so UI + downstream blob stores behave predictably.
+
+**Execution Steps (actionable)**  
+- Step 1 — Harden `convert_batch`: add batch-level byte quotas (using `MAX_BATCH_MB` from `tinyutils/api/_lib/utils.py:14`), parallel-safe sequencing, and richer per-input metadata (source mime, derived extension) before dispatching to `convert_one`; ensure shared `ConversionOptions` is frozen per job to keep deterministic outputs.  
+- Step 2 — Extend `tinyutils/convert/service.py:83` pipelines to cache rendered markdown once, stream additional targets, and expose deterministic preview metadata (headings/snippets/images) with stable sorting + truncation; wire `_build_media_artifact` to tag MIME counts for logging.  
+- Step 3 — Update API schema/validation in `tinyutils/api/convert/index.py:44`: accept arrays of `inputs` with optional `targets` per item (falling back to job defaults), surface per-input download metadata, and enforce both per-file and cumulative limits before conversion; embed a `ListLogHandler` (`tinyutils/api/_lib/utils.py:57`) to emit structured log lines into the envelope.  
+- Step 4 — Finalize blob/download + output naming: persist original filenames, ensure sanitized suffixes, and include SHA256 + byte counts in response entries from `_serialize_outputs` (`tinyutils/api/convert/index.py:131`) to support caching + dedupe; document the fallback data-URL behavior in `tinyutils/api/_lib/blob.py:63` until Vercel Blob signing arrives.  
+- Step 5 — Deterministic preview + media selection: enhance `_select_preview` (`tinyutils/api/convert/index.py:156`) to choose the first successful input with both headings and snippets, fall back to longest markdown otherwise, and attach media manifests + snippet diffs already produced by `tinyutils/api/_lib/manifests.py:9`; propagate this metadata into UI + artifacts.  
+- Step 6 — Testing + fixtures: seed `tests/fixtures/convert/` with representative DOCX/HTML/TXT inputs (small + edge cases), update `tests/convert/test_service.py:1` and `tests/convert/test_api_convert.py:1` to cover multi-file multi-target flows, and add Node contract checks in `tinyutils/tests/api_contracts.test.mjs:1`; capture golden outputs in `tests/fixtures/convert/expected/`.  
+- Step 7 — Docs, UI, instrumentation: refresh `tinyutils/tools/convert/index.html:1` to allow multi-file uploads + multi-select targets, log plan + verification in `tinyutils/docs/AGENT_RUN_LOG.md:1` and checklist items in `tinyutils/docs/AGENT_TASK_CHECKLIST.md:1` / `tinyutils/PREVIEW_SMOKE_CHECKLIST.md:1` / `tinyutils/DEPLOY_PRODUCTION_CHECKLIST.md:1`; emit run evidence under `tinyutils/artifacts/convert/<date>/` and note telemetry hooks for future automation.
+
+**Testing & Evidence Strategy**  
+- Python: `pytest tests/convert/test_service.py tests/convert/test_api_convert_unit.py tests/convert/test_api_convert.py` to cover library + FastAPI layers, plus new regression files exercising size caps and media extraction.  
+- Node: `node --test tinyutils/tests/api_contracts.test.mjs` (and other existing `.mjs` suites) to ensure envelope compatibility with frontend consumers.  
+- Fixture-backed golden tests: load documents from `tests/fixtures/convert/` and compare outputs byte-for-byte; stash observed previews + media manifests under `tests/fixtures/convert/expected/`.  
+- Evidence: archive successful run JSON + sample outputs in `tinyutils/artifacts/convert/<date>/job-<id>.json` alongside logs/screenshots; document commands + sha sums in AGENT log.  
+- UI validation: after backend changes, load `tinyutils/tools/convert/index.html:1` via the browser harness, run multi-file conversions, and attach screenshots verifying preview/output lists.
+
+**Top Risks & Mitigations**  
+- Pandoc latency or missing filters (risk to SLAs): pre-flight `get_pandoc_version()` (`tinyutils/api/_lib/pandoc_runner.py:17`) at startup, cache failures, and add retry/backoff plus synthetic tests to detect missing binaries.  
+- Memory/size overruns when batching many files: enforce cumulative byte counting before download, stream downloads to disk (`tinyutils/api/convert/index.py:118`), and short-circuit when `MAX_BATCH_MB` exceeded with explicit HTTP 413.  
+- Envelope drift breaking Node clients: guard with contract tests (`tinyutils/tests/api_contracts.test.mjs:1`) + snapshot artifacts; add versioned schema docs and keep preview/log keys stable.
+[2025-11-07T00:11:16] tokens used: 88,294

@@ -1,0 +1,287 @@
+[2025-11-06T20:32:03] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/dev/TinyUtils
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-06T20:32:03] User instructions:
+Context: Repo path: /Users/cav/dev/TinyUtils/tinyutils. Current site is static HTML/JS utilities with Node-based API endpoints (e.g., /api/check.js). Need to add new /app/* React pages for converter/find-replace, Python API functions under /api/convert/index.py and /api/findreplace/{preview,apply}. Must implement Pandoc Lua filters in /filters, manage blob uploads/downloads, produce manifest JSON responses with previews/logs/errors, enforce size limits and guardrails, add SEO landing routes (docx-to-markdown, etc.), update sitemap, set environment variables in vercel.json, add fixtures/tests, and align with AI-ready plan layer (no actual AI calls).
+
+Agent: Develop a detailed implementation plan for integrating a Universal Document Converter and Find & Replace utility into TinyUtils per the provided product brief, ensuring Vercel deployment, Python serverless functions with Pandoc and regex, Vercel Blob storage flow, comprehensive previews, SEO landers, fixtures, and CI updates.
+
+[Running in read-only mode - no modifications allowed]
+[2025-11-06T20:32:03] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/dev/TinyUtils
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-06T20:32:03] User instructions:
+Context: Repo path: /Users/cav/dev/TinyUtils/tinyutils. Current site is static HTML/JS utilities with Node-based API endpoints (e.g., /api/check.js). Need to add new /app/* React pages for converter/find-replace, Python API functions under /api/convert/index.py and /api/findreplace/{preview,apply}. Must implement Pandoc Lua filters in /filters, manage blob uploads/downloads, produce manifest JSON responses with previews/logs/errors, enforce size limits and guardrails, add SEO landing routes (docx-to-markdown, etc.), update sitemap, set environment variables in vercel.json, add fixtures/tests, and align with AI-ready plan layer (no actual AI calls).
+
+Agent: Develop a detailed implementation plan for integrating a Universal Document Converter and Find & Replace utility into TinyUtils per the provided product brief, ensuring Vercel deployment, Python serverless functions with Pandoc and regex, Vercel Blob storage flow, comprehensive previews, SEO landers, fixtures, and CI updates.
+
+[Running in read-only mode - no modifications allowed]
+
+[2025-11-06T20:32:06] thinking
+
+**Inspecting repository structure**
+[2025-11-06T20:32:06] exec bash -lc ls in /Users/cav/dev/TinyUtils
+[2025-11-06T20:32:07] bash -lc ls succeeded in 98ms:
+__MACOSX
+$
+backups
+PATH
+print1
+tests
+tinyutils
+TinyUtilsCodexContext
+[2025-11-06T20:32:07] tokens used: 5,597
+
+[2025-11-06T20:32:08] thinking
+
+**Locating tinyutils repository**
+[2025-11-06T20:32:09] exec bash -lc ls in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T20:32:09] bash -lc ls succeeded in 98ms:
+ads.txt
+ADSENSE_SETUP.md
+AGENTS.md
+api
+artifacts
+CHANGES-v1.3.0-rc2.txt
+CHANGES-v1.3.0-rc3.txt
+config
+data
+DEPLOY_PRODUCTION_CHECKLIST.md
+docs
+feedback.html
+guides
+index
+index.html
+keys
+launchd
+locks
+node_modules
+offering-to-the-triple-goddess.txt
+[2025-11-06T20:32:09] tokens used: 5,785
+
+[2025-11-06T20:32:11] thinking
+
+**Planning investigation of project structure**
+[2025-11-06T20:32:11] exec bash -lc 'cat package.json' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T20:32:12] bash -lc 'cat package.json' succeeded in 93ms:
+{
+  "name": "tinyutils",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "vercel-build": "echo 'static + edge'",
+    "test": "node --test",
+    "smoke:local": "node scripts/smoke_dlf_local.mjs",
+    "smoke:preview": "node scripts/smoke_dlf_preview.mjs",
+    "smoke:extras": "bash scripts/smoke_dlf_extras.sh",
+    "ui:smoke:dlf": "node scripts/ui_smoke_dlf.mjs",
+    "ui:smoke:sd": "node scripts/ui_smoke_sitemap.mjs",
+    "ui:smoke:wbf": "node scripts/ui_smoke_wayback.mjs"
+  },
+  "engines": {
+    "node": "20.x"
+  }
+}
+[2025-11-06T20:32:12] tokens used: 11,765
+
+[2025-11-06T20:32:13] thinking
+
+**Examining API structure**
+[2025-11-06T20:32:13] exec bash -lc ls in /Users/cav/dev/TinyUtils/tinyutils/api
+[2025-11-06T20:32:13] bash -lc ls succeeded in 90ms:
+check.js
+fence.js
+health.js
+metafetch.js
+sitemap-delta.js
+wayback-fixer.js
+[2025-11-06T20:32:13] tokens used: 12,158
+
+[2025-11-06T20:32:15] thinking
+
+**Analyzing project structure for new React app**
+[2025-11-06T20:32:16] exec bash -lc ls in /Users/cav/dev/TinyUtils/tinyutils/index
+[2025-11-06T20:32:16] bash -lc ls succeeded in 97ms:
+6a8547b01a7954f478609aee91636ea8b787981e658b820bc252a7eca0cae1b6
+[2025-11-06T20:32:16] tokens used: 12,481
+
+[2025-11-06T20:32:18] thinking
+
+**Planning universal document converter implementation**
+
+I'm thinking of inspecting the existing static HTML files and exploring the new React app under `/app/*` to see how everything fits together. Since the repo might be migrating to Next.js, I'll check files like `vercel.json` and the README to understand the functions structure and plan out a detailed approach for the universal document converter and find & replace features.
+[2025-11-06T20:32:19] exec bash -lc "sed -n '1,160p' README.md" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T20:32:19] bash -lc "sed -n '1,160p' README.md" succeeded in 91ms:
+# tinyutils
+TinyUtils
+
+## DLF Quick Extras (smokes)
+
+Run against production (override with `TINYUTILS_BASE`):
+
+```bash
+pnpm smoke:extras
+```
+
+Assertions:
+- HSTS / hard-TLD guard — even with `retryHttpOnHttpsFail=true`, HTTP fallback is never used on guarded domains.
+- Robots “unknown” (best-effort) — probes a small set of flaky hosts and always validates the JSON envelope; surfaces `robotsStatus=unknown` when reproducible.
+
+Optional UI sanity (local, uses Tiny-Reactive):
+
+```bash
+tiny-reactive serve --host 127.0.0.1 --port 5566 --headful --debug
+pnpm ui:smoke:dlf
+[2025-11-06T20:32:19] tokens used: 13,501
+
+[2025-11-06T20:32:20] thinking
+
+**Planning new features and inspecting configuration**
+[2025-11-06T20:32:21] exec bash -lc 'cat vercel.json' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-06T20:32:21] bash -lc 'cat vercel.json' succeeded in 88ms:
+{
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "geolocation=(), camera=(), microphone=(), usb=(), payment=(), browsing-topics=()" },
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'; object-src 'none'; upgrade-insecure-requests" },
+        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+        { "key": "Cross-Origin-Resource-Policy", "value": "same-origin" },
+        { "key": "X-DNS-Prefetch-Control", "value": "off" }
+      ]
+    },
+    {
+      "source": "/public/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=600" }
+[2025-11-06T20:32:21] tokens used: 14,466
+
+[2025-11-06T20:32:23] thinking
+
+**Planning environment variable additions**
+[2025-11-06T20:32:24] exec bash -lc ls in /Users/cav/dev/TinyUtils/tinyutils/tests
+[2025-11-06T20:32:24] bash -lc ls succeeded in 91ms:
+api_contracts.test.mjs
+csv_hardening.unit.test.mjs
+dlf_api_error_json.test.mjs
+dlf_envelope_invariants.test.mjs
+helpers
+[2025-11-06T20:32:24] tokens used: 15,648
+
+[2025-11-06T20:32:29] thinking
+
+**Formulating integration plan for React app**
+
+I'm putting together a detailed plan to add React pages under `/app`, considering the repo is currently a static site without Next.js. I’m figuring how to incorporate Next 13’s app directory or use Vercel’s edge functions, along with required serverless Python functions and deployment updates, while checking docs for more context.
+[2025-11-06T20:32:30] exec bash -lc ls in /Users/cav/dev/TinyUtils/tinyutils/docs
+[2025-11-06T20:32:30] bash -lc ls succeeded in 80ms:
+AGENT_RUN_LOG.md
+AGENT_TASK_CHECKLIST.md
+BACKUP.md
+chatgpt-convo-2025-10-28.md
+features
+[2025-11-06T20:32:30] tokens used: 16,205
+
+[2025-11-06T20:32:31] thinking
+
+**Checking docs/features directory**
+[2025-11-06T20:32:32] exec bash -lc ls in /Users/cav/dev/TinyUtils/tinyutils/docs/features
+[2025-11-06T20:32:32] bash -lc ls succeeded in 92ms:
+dead-link-finder.md
+[2025-11-06T20:32:32] tokens used: 16,351
+
+[2025-11-06T20:33:04] thinking
+
+**Outlining comprehensive implementation plan**
+
+I’m mapping out a detailed multi-phase plan to integrate new React and Python features with the existing static site, focusing on Next.js adoption, Vercel Blob storage, Pandoc-based processing with Lua filters, test coverage, SEO updates, and deployment config. The plan covers dependency audits, app architecture, backend serverless functions, storage workflows, UI components, manifest formats, CI adjustments, and documentation—all tailored to fit with current constraints and prepare the project for future AI enhancements.
+[2025-11-06T20:33:05] codex
+
+**Implementation Plan**
+
+- Groundwork & Dependencies  
+  - Inventory current static bundle, note which assets must stay in `public/` versus moving into Next’s `/app` layer; capture build + deploy expectations from `README-VERCEL.md`.  
+  - Extend `package.json` with `next`, `react`, `react-dom`, `typescript`, `@vercel/analytics`, `@vercel/blob`, `zod`, `swr`, and `clsx`; add `devDependencies` for linting/formatting already used elsewhere.  
+  - Create `tsconfig.json`, `next.config.js` (enable `experimental.appDir`, configure `output: 'standalone'`, `images: { unoptimized: true }`, and custom headers rewrites to preserve existing CSP) plus `postcss.config.js`/`tailwind.config.js` only if we lean on utility classes.  
+  - Add `python` requirements file (`api/requirements.txt`) including `pydantic`, `fastapi` (for request parsing helpers), `python-multipart`, `loguru`, `pytz`, and `vercel_blob`. Vendor a static Pandoc binary (latest LTS) under `bin/` with a bootstrap script that adds it to `PATH` for the Python functions.  
+
+- App Router & Global Shell  
+  - Introduce `app/layout.tsx` with shared `<head>` meta (canonical URL, social previews, GA stub if needed) and wrap content in a theme-aware scaffold referencing existing CSS from `styles/`.  
+  - Build a `app/(marketing)/page.tsx` (or keep `index.html` as static and mount Next only below `/app`); ensure top-level nav exposes new tools and deep links to SEO landing routes.  
+  - Add a `lib/constants.ts` for size limits, supported conversions, regex guardrails, help copy, and AI-plan placeholders.
+
+- Universal Document Converter UI (`/app/converter`)  
+  - Create `app/converter/page.tsx` with client components for upload dropzone, settings (input format detection, desired output, Markdown style, include images), and preview tabs (rendered HTML, raw Markdown, log).  
+  - Extract shared hooks (`hooks/useUpload.ts`, `hooks/useManifestPoll.ts`) using SWR to call the Python endpoint, stream status, and handle errors.  
+  - Add `components/blob/UploadDropzone.tsx`, `components/previews/RenderedMarkdown.tsx` (hydrate using `react-markdown` + sanitizer), `components/previews/LogViewer.tsx`, and toast notifications for guardrail breaches.  
+  - Enforce local-only validation (file type allowlist, ≤ configured size, concurrency limit) and build the “AI-ready” plan layer as a JSON panel that explains each processing step without invoking any AI services yet.
+
+- Find & Replace UI (`/app/find-replace`)  
+  - Mirror converter shell; include regex editor with toggles (case sensitivity, multiline, whole word) and guardrails (limit to safe patterns, highlight catastrophic backtracking warnings).  
+  - Provide diff previews: original vs proposed replacements (use `diff2html` or lightweight diff util rendered client-side) and a “safe apply” confirmation step.  
+  - Hook into `/api/findreplace/preview` for dry runs and `/api/findreplace/apply` to persist results to blob + return manifest.
+
+- Python Serverless Functions  
+  - `api/convert/index.py`: accept `multipart/form-data`, validate `Content-Length` vs `CONVERTER_MAX_INPUT_MB`, stream file to `/tmp`, log metadata, and push original to `Vercel Blob` via signed URLs.  
+    - Execute Pandoc (`subprocess.run`) with Lua filters chain from `/filters`, capture stdout/md output plus JSON log of filters applied, upload artifact blobs (converted file, plain-text preview, log file) keyed by `request_id/timestamp`.  
+    - Return JSON envelope `{ requestId, status, preview: { html, text, truncated }, blobs: […], logs: […], guardrails: […] }`, aligning with current API error schema (HTTP 400 for validation, 413 for big file, 500 for unexpected).  
+  - `api/findreplace/preview.py`: parse uploaded blob reference or text payload, apply regex safely (timeout using `signal.alarm`), produce patched sample, summary counts, and an “AI plan” narrative derived from template strings.  
+  - `api/findreplace/apply.py`: reuse sanitized inputs, write patched file to blob, emit manifest; ensure idempotency with `requestId`.  
+  - Shared helpers in `api/_lib/` (request parsing, blob client, pandoc runner, guardrail validator, manifest builder, logging).  
+
+- Pandoc Lua Filters (`/filters`)  
+  - Implement modular filters: `strip_tracking.lua` (remove Google Doc comments), `normalize_headings.lua`, `bullet_consistency.lua`, `table_cleanup.lua`, `image_caption.lua`.  
+  - Provide README in `/filters` explaining each filter and include fixtures to regression-test them.  
+  - Ensure Python runner builds command string `pandoc --lua-filter filters/normalize_headings.lua --lua-filter …`.
+
+- Blob Storage Flow  
+  - Define helper for generating blob keys (`f"converter/{request_id}/{filename}"` etc.) and embed signed download URLs in manifests.  
+  - On the client, build download buttons using `@vercel/blob` `put()` for uploads and direct GET for downloads; ensure we never expose write tokens client-side (all uploads go through API).  
+  - Implement cleanup cron (if required) or document retention expectations.
+
+- SEO Landing Pages & Sitemap  
+  - Create marketing routes under `app/(marketing)/docx-to-markdown/page.tsx`, `…/markdown-to-docx`, `…/bulk-find-replace`, each with rich copy, FAQ accordions, schema.org JSON-LD (SoftwareApplication), testimonial placeholders.  
+  - Update `sitemap.xml` generator script (if manual, edit file; otherwise add script) to include new slugs; adjust `robots.txt` if necessary.  
+  - Ensure canonical tags + OpenGraph/Twitter metadata for each landing route; include static analytics events.
+
+- Environment & Vercel Config  
+  - Extend `vercel.json` with `env` block for `CONVERTER_MAX_INPUT_MB`, `FINDREPLACE_MAX_INPUT_MB`, `ALLOWED_MIME_TYPES`, `PANDOC_FILTER_LIST`, `VERCEL_BLOB_READ_WRITE_TOKEN`, `PLAN_LAYER_ENABLED`.  
+  - Add new API cache headers if different (still `no-store`) and route rewrites so `/app/(.*)` is handled by Next while legacy static pages remain untouched.  
+  - Document required env vars in `README.md` + `.env.example` and note secrets management process.
+
+- Fixtures & Automated Tests  
+  - Add sample documents under `fixtures/convert/` (docx, html, markdown) and regex cases under `fixtures/findreplace/`.  
+  - Expand Node test suite (`tests/api_converter.test.mjs`, `tests/api_findreplace.test.mjs`) using `fetch` against local dev server (mock responses with `msw` if needed) to verify manifest schema, guardrails, and preview payloads.  
+  - Introduce Python unit tests (`api/tests/`) run with `pytest` to exercise Lua filters (via Pandoc) and regex safety functions; stub Pandoc call in CI to keep runtime fast (allow override with env `SKIP_PANDOC` for slower e2e).  
+  - Update CI entrypoint (likely GitHub Actions under `.github/workflows/`) to install `pnpm`, `next`, run `pnpm test`, install Python deps, and execute `pytest`. Include artifact upload for failing manifests.
+
+- Manual QA & Browser Validation  
+  - Add `scripts/dev_converters.mjs` to spin up Next dev + stub APIs, log sample conversions.  
+  - Record instructions for post-change smoke tests (`PREVIEW_SMOKE_CHECKLIST.md` update) and ensure to capture before/after snapshots using the browser tool as part of release QA.
+
+- Documentation & Launch Readiness  
+  - Refresh `README.md` with architecture overview, quick start (Node+Python dev), Vercel deployment notes, and blob retention policy.  
+  - Add feature docs under `docs/features/converter.md` and `…/find-replace.md` including API schemas and troubleshooting.  
+  - Update operational checklists to cover new endpoints (e.g., add 400/500 envelope verification), mention AI-plan layer toggles, and align with analytics requirements.
+
+Natural next step: confirm desired stack decisions (Next vs standalone React) before scaffolding so dependency updates stay minimal.
+[2025-11-06T20:33:26] tokens used: 20,866

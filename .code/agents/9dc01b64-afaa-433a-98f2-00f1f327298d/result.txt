@@ -1,0 +1,64 @@
+Plan for PR3 Preview Fence Evidence Collection:
+
+**1. `preview_smoke.mjs` Invocation**
+
+*   **Description:** Run the preview smoke test script to verify the fence functionality.
+*   **Exact Command:**
+    ```bash
+    PREVIEW_URL="https://your-vercel-preview-url.vercel.app" \
+    BYPASS_TOKEN="your-bypass-token" \
+    PREVIEW_SECRET="your-preview-secret" \
+    node scripts/preview_smoke.mjs
+    ```
+*   **Expected Output (example):**
+    ```
+    Running preview smoke test for https://your-vercel-preview-url.vercel.app
+    Fetching /api/protected-route with bypass token...
+    Status: 200 OK
+    Response: {"message": "Access granted"}
+    Fetching /api/protected-route without bypass token...
+    Status: 401 Unauthorized
+    Response: {"message": "Unauthorized"}
+    Preview smoke test completed successfully.
+    ```
+
+**2. Manual `curl` Commands (401 → 200 Transition)**
+
+*   **Description:** Manually verify the preview fence by attempting to access a protected endpoint without and then with the bypass token.
+*   **Exact Command (401 Unauthorized):**
+    ```bash
+    curl -v "https://your-vercel-preview-url.vercel.app/api/protected-route"
+    ```
+*   **Expected Output (example - relevant parts):**
+    ```
+    < HTTP/1.1 401 Unauthorized
+    < content-type: application/json; charset=utf-8
+    < x-vercel-cache: MISS
+    <
+    {"message":"Unauthorized"}
+    ```
+*   **Exact Command (200 OK with Bypass Token):**
+    ```bash
+    curl -v -H "x-preview-bypass-token: your-bypass-token" "https://your-vercel-preview-url.vercel.app/api/protected-route"
+    ```
+    *(Note: Assuming `x-preview-bypass-token` is the header for the bypass token. This might need adjustment based on actual implementation.)*
+*   **Expected Output (example - relevant parts):**
+    ```
+    < HTTP/1.1 200 OK
+    < content-type: application/json; charset=utf-8
+    < x-vercel-cache: MISS
+    <
+    {"message":"Access granted"}
+    ```
+
+**3. Artifact Filenames and Paths**
+
+*   **Base Path:** `/Users/cav/.code/working/tinyutils/branches/code-gemini-2-5-flash-draft-exact-commands/artifacts/pr3-fence/2025-11-04/`
+*   **Artifacts:**
+    *   `preview_smoke_output.txt`: Output from the `preview_smoke.mjs` script.
+    *   `curl_401_output.txt`: Output from the `curl` command showing 401 Unauthorized.
+    *   `curl_200_output.txt`: Output from the `curl` command showing 200 OK.
+
+**4. Documentation Updates**
+
+*   **Note:** Update `README-VERCEL.md` to include details about the preview fence, how it works, and how to test it.

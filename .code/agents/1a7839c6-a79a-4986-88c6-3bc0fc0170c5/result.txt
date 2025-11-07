@@ -1,0 +1,126 @@
+I'll provide you with an implementation plan for the TinyUtils universal converter backend. Let me first explore the current codebase to understand the existing structure and then create a comprehensive plan.
+
+Now that I have a good understanding of the current codebase, I'll create an implementation plan for the TinyUtils universal converter backend. Based on the context provided, here's my comprehensive plan:
+
+## Implementation Plan for TinyUtils Universal Converter Backend
+
+Based on my analysis of the existing codebase, here's an actionable implementation plan with 7 key steps:
+
+### Step 1: Implement Guardrails System
+**Rationale**: Security and resource management are critical for any file conversion service. The system needs to limit input sizes to ≤100MB and validate file types to prevent security issues.
+
+**Actions**:
+- Update `ensure_within_limits` function to enforce 100MB limit
+- Add file type validation using `python-magic`
+- Implement security checks for malicious file types
+- Add input sanitization
+
+**Key files**: `tinyutils/api/_lib/utils.py`, `tinyutils/convert/service.py`
+
+### Step 2: Add Caching Layer
+**Rationale**: Caching conversion results and blob uploads will significantly improve performance for repeated requests and reduce system load.
+
+**Actions**:
+- Integrate Redis for caching conversion results
+- Cache blob upload URLs to avoid redundant uploads
+- Implement cache TTL and invalidation logic
+- Add cache hit/miss metrics
+
+**Key files**: `tinyutils/api/_lib/cache.py`, `tinyutils/api/convert/index.py`
+
+### Step 3: Enhance Error Handling
+**Rationale**: Robust error handling is essential for a production-ready API. The system needs structured exceptions with detailed information for debugging.
+
+**Actions**:
+- Create custom exception hierarchy for different error types
+- Implement comprehensive error logging
+- Add retry mechanisms for transient failures
+- Provide meaningful error messages to clients
+
+**Key files**: `tinyutils/convert/types.py`, `tinyutils/api/convert/index.py`
+
+### Step 4: Implement JSON Envelope
+**Rationale**: Standardized response format improves API usability and allows for additional metadata without breaking changes.
+
+**Actions**:
+- Design consistent JSON response envelope
+- Include metadata like processing time, version info
+- Add request validation feedback
+- Standardize error response format
+
+**Key files**: `tinyutils/api/convert/index.py`
+
+### Step 5: Build Artifact Management System
+**Rationale**: Logging and artifact management are crucial for monitoring, debugging, and auditing conversion operations.
+
+**Actions**:
+- Create daily artifact directories `tinyutils/artifacts/convert/<YYYYMMDD>/`
+- Log conversion details, errors, and performance metrics
+- Store processed file metadata and statistics
+- Implement log rotation and cleanup
+
+**Key files**: `tinyutils/convert/service.py`, `tinyutils/api/_lib/artifacts.py`
+
+### Step 6: Finalize Documentation and Tests
+**Rationale**: Comprehensive documentation and tests ensure maintainability and reliability of the system.
+
+**Actions**:
+- Update API documentation with new features
+- Add integration tests for all new functionality
+- Document guardrails, caching, and error handling
+- Create usage examples and tutorials
+
+**Key files**: `tests/convert/`, `docs/`, `README.md`
+
+### Step 7: Enhance Media Zip and Markdown Cleanup
+**Rationale**: Improve the core conversion functionality to handle media extraction better and refine markdown output quality.
+
+**Actions**:
+- Enhance media extraction and packaging options
+- Improve markdown cleanup algorithms
+- Add preview/snippets functionality as requested
+- Optimize media file handling
+
+**Key files**: `tinyutils/convert/service.py`, `tinyutils/api/_lib/text_clean.py`
+
+### Verification Commands:
+- `pytest tests/convert/` - Run all conversion tests
+- `uvicorn tinyutils.api.convert.index:app --reload` - Test API locally
+- `pnpm run test` - Run frontend tests if applicable
+- Check Redis connection and caching behavior
+- Verify artifact logging in `tinyutils/artifacts/convert/`
+
+### Artifact Logging Reminders:
+- Daily logs in `tinyutils/artifacts/convert/<YYYYMMDD>/`
+- Include job_id, input/output files, processing time, errors
+- Store metadata about source formats and target formats
+- Log performance metrics and system resource usage
+
+Let me start working on the first task - implementing the guardrails system:
+
+I need to first examine the current implementation of the `ensure_within_limits` function to understand how to update it for the 100MB limit:
+
+Let me search for the `ensure_within_limits` function using the glob and read_file tools:
+
+Great! I can see that the `ensure_within_limits` function is already in place and it uses the `MAX_FILE_MB` constant which defaults to 100MB. Now I need to check if there are any file type validation requirements and also examine the pandoc runner to understand any additional security measures that might be needed. Let me also check the current pandoc runner implementation:
+
+Let me check if there are any file type validation functions already implemented:
+
+Let me try using the read_many_files tool to search for magic in the api convert index:
+
+I can see that the `magic` library is already being used in the convert API. Now I'll check the blob module to see if there's any file validation there:
+
+Now I need to look more closely at the service.py file to see if there's a place to add file type validation. Looking at what's already implemented, I can see that the system already has a 100MB limit (through `DEFAULT_MAX_FILE_MB = 100`) and that `ensure_within_limits` is being called. The magic library is also already used for content type detection. Let me examine the full flow to see where I need to add validation:
+
+1. The API receives requests
+2. Files are downloaded via blob.download_to_path
+3. ensure_within_limits is called in _download_input
+4. Then files are converted
+
+For the guardrails system, I need to:
+
+1. Update the current limit to explicitly enforce ≤100MB (it's already set to 100MB by default)
+2. Add file type validation to restrict supported file types
+
+Let me check what file types are currently supported by pandoc:
+

@@ -1,0 +1,54 @@
+[2025-11-04T12:29:05] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-propose-exact-header
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-04T12:29:05] User instructions:
+Context: We’re updating vercel.json security headers. Ensure values are compatible with static+edge on Vercel and don’t break public tools. Provide a compact header list to apply.
+
+Agent: Propose exact header key/value pairs for vercel.json global /(.*) rule and a separate /api/(.*) rule, focusing on safe defaults for static sites and Edge APIs.
+[2025-11-04T12:29:05] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-propose-exact-header
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-04T12:29:05] User instructions:
+Context: We’re updating vercel.json security headers. Ensure values are compatible with static+edge on Vercel and don’t break public tools. Provide a compact header list to apply.
+
+Agent: Propose exact header key/value pairs for vercel.json global /(.*) rule and a separate /api/(.*) rule, focusing on safe defaults for static sites and Edge APIs.
+
+[2025-11-04T12:29:28] thinking
+
+**Proposing compact Vercel header sets**
+
+I'm putting together concise, safe default headers for both global static content and API routes on Vercel. I'll keep security strong but compatible—choosing headers that avoid breaking common tools and consider Vercel’s Edge environment. I want to balance strictness with practicality, so for example, I’ll suggest HSTS, basic frame and content-type protections, minimal permissions policy, and tailored cache controls for each route type. I'll also note where users might want to customize based on their needs.
+[2025-11-04T12:29:30] codex
+
+Global rule: apply the following headers to `/(.*)` so every static asset/page inherits a safe baseline without blocking common embeds or tooling:
+- `Strict-Transport-Security`: `max-age=63072000; includeSubDomains; preload`
+- `X-Frame-Options`: `SAMEORIGIN`
+- `X-Content-Type-Options`: `nosniff`
+- `Referrer-Policy`: `strict-origin-when-cross-origin`
+- `Permissions-Policy`: `camera=(), microphone=(), geolocation=()`
+
+API rule: keep Edge/API responses lean, non-cacheable, and search-invisible while reusing the transport hardening:
+- `Strict-Transport-Security`: `max-age=63072000; includeSubDomains; preload`
+- `X-Content-Type-Options`: `nosniff`
+- `Referrer-Policy`: `no-referrer`
+- `Permissions-Policy`: `camera=(), microphone=(), geolocation=()`
+- `Cache-Control`: `no-store`
+- `X-Robots-Tag`: `noindex`
+
+Suggested next steps:
+1. Drop these blocks into `vercel.json` and deploy to a preview to confirm downstream analytics or embed tools still behave as expected.
+[2025-11-04T12:29:31] tokens used: 7,573

@@ -1,0 +1,62 @@
+Here is a concrete implementation plan to complete the universal converter backend.
+
+### Implementation Plan: Universal Converter Backend
+
+This plan outlines the necessary steps to implement, test, and document the converter service, moving from the core logic to the API layer and final artifacts.
+
+**1. Implement Core Conversion Service Logic & Guardrails**
+
+*   **Action:** Flesh out the primary conversion functions (`convert_one`, `convert_batch`) in the service layer. Implement foundational features, including input validation, markdown cleanup utilities, and the crucial ≤100MB file size guardrail to prevent abuse. Define the core data structures in `types.py`.
+*   **Rationale:** Establishes a robust, secure foundation for all conversion operations before exposing them through an API. This isolates business logic from the web layer.
+*   **Key Files:**
+    *   `tinyutils/convert/service.py`
+    *   `tinyutils/convert/types.py`
+*   **Verification:** Create unit tests in `tests/convert/test_service.py` to validate the guardrail logic, markdown cleaning, and the basic flow of `convert_one`.
+
+**2. Add Caching, Media Handling, and Previews**
+
+*   **Action:** Enhance the `service.py` module by adding a caching layer (e.g., using `functools.lru_cache` or a simple dictionary) to avoid re-processing identical inputs. Implement logic to handle zipped media bundles as input and generate text snippets/previews from conversion results.
+*   **Rationale:** Caching improves performance and reduces redundant work. Media handling and previews are core feature requirements for handling complex documents and providing a better user experience.
+*   **Key Files:**
+    *   `tinyutils/convert/service.py`
+*   **Verification:** Expand `tests/convert/test_service.py` with tests that assert cache hits/misses and verify correct snippet generation.
+
+**3. Wire the FastAPI Endpoint**
+
+*   **Action:** In `index.py`, implement the FastAPI route `/api/convert`. This endpoint will accept file uploads and a JSON payload. It will call the `convert_batch` function from the service layer, correctly handling both a single string and a list of strings for the `to` parameter.
+*   **Rationale:** This step connects the core service logic to the web, making it an accessible and functional API.
+*   **Key Files:**
+    *   `tinyutils/api/convert/index.py`
+*   **Verification:** Create `tests/convert/test_api.py` using FastAPI's `TestClient`. Add tests to simulate file uploads and validate that the endpoint correctly processes requests with both `to: "pdf"` and `to: ["pdf", "docx"]`.
+
+**4. Implement Artifact Generation and Storage**
+
+*   **Action:** Upon successful conversion, the service will generate output artifacts (converted files, a JSON manifest, and logs). The API layer will then handle uploading these artifacts to a designated blob storage location, following the convention `tinyutils/artifacts/convert/<YYYYMMDD>/<requestId>/`.
+*   **Rationale:** Persistently storing artifacts is essential for delivering results to users, especially for asynchronous jobs, and for maintaining a clear audit trail.
+*   **Key Files:**
+    *   `tinyutils/convert/service.py` (to generate artifacts)
+    *   `tinyutils/api/convert/index.py` (to trigger uploads)
+*   **Verification:** Mock the blob storage client in `tests/convert/test_api.py` to confirm that the upload function is called with the correct file paths and metadata.
+
+**5. Finalize API Response Envelope**
+
+*   **Action:** Ensure the FastAPI endpoint strictly adheres to the specified response envelope (`requestId`, `logs`, `errors`, `preview`). Populate these fields with data generated during the conversion process.
+*   **Rationale:** A consistent, predictable API contract is crucial for frontend clients and other services that will interact with this backend.
+*   **Key Files:**
+    *   `tinyutils/api/convert/index.py`
+*   **Verification:** In `tests/convert/test_api.py`, assert the structure of the JSON response, ensuring all required keys are present and correctly populated.
+
+**6. Run Comprehensive Testing & Check Coverage**
+
+*   **Action:** Execute the full test suite to ensure all components work together seamlessly. Run a coverage report to identify any untested code paths in the service and API layers.
+*   **Rationale:** Guarantees the feature is robust, reliable, and meets the project's quality standards before deployment.
+*   **Commands:**
+    *   `pytest tests/convert/ --cov=tinyutils/convert --cov=tinyutils/api/convert`
+
+**7. Update Project Documentation**
+
+*   **Action:** Mark the relevant tasks as complete in the checklist. Add an entry to the agent run log detailing the work performed, referencing the key changes and test results.
+*   **Rationale:** Maintains accurate project tracking and provides a clear record of development activities for future reference.
+*   **Key Files:**
+    *   `docs/AGENT_TASK_CHECKLIST.md`
+    *   `docs/AGENT_RUN_LOG.md`

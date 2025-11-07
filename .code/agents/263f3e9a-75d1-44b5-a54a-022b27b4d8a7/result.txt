@@ -1,0 +1,53 @@
+Here is the action plan for completing the universal converter backend.
+
+### Action Plan: Universal Converter Backend
+
+This plan outlines the development, testing, and deployment of the universal converter backend, designed for unattended execution by an automated agent.
+
+**Step 1: Implement Core Converter Library Logic**
+
+*   **Action:** In `tinyutils/convert/`, implement the core conversion logic within `convert_one` and `convert_batch` functions. This includes input validation (≤100 MB per file, ≤1 GB per batch), markdown cleanup, preview/snippet generation, deterministic caching to avoid re-processing identical inputs, and an option to bundle media assets into a zip archive. Implement structured error handling that includes retry hints and captures detailed logs.
+*   **Rationale:** Establishes a robust, standalone library that handles all conversion tasks. This separation of concerns simplifies the API layer and makes the core logic independently testable and reusable.
+*   **Verification:** Create unit tests in `tests/convert/test_converter_lib.py`. These tests will use `pytest` to validate all features, including file size limits, cache hits/misses, correctness of markdown cleaning, and the structure of error responses for various failure scenarios.
+
+**Step 2: Develop the FastAPI Endpoint**
+
+*   **Action:** Create the FastAPI endpoint in `tinyutils/api/convert/index.py`. This endpoint will consume the converter library developed in Step 1. It must handle requests where the `to` parameter is either a single format (string) or multiple formats (list of strings). The endpoint will manage the full request lifecycle, including uploading all generated artifacts (outputs, logs, manifests) to a blob storage service and returning a JSON response containing the `requestId`, links to the artifacts, `logs`, `errors`, and `preview`.
+*   **Rationale:** Provides a clear, modern API for clients to access the conversion functionality. Offloading artifacts to blob storage prevents large inline data transfers and keeps the API responses lightweight.
+*   **Verification:** Add integration tests in `tests/convert/test_api.py` using `FastAPI.TestClient`. Tests will cover successful single and multi-format conversions, error handling for invalid requests, and confirming that the API response adheres to the specified JSON structure with valid links to artifacts.
+
+**Step 3: Configure Testing and Automation**
+
+*   **Action:** In `package.json`, add a script `test:convert` that executes the `pytest` suite for the converter. Configure `pytest` to generate code coverage reports to monitor test quality.
+*   **Rationale:** Automates the testing process, enabling rapid, repeatable verification of the converter's functionality. This is a critical step for enabling unattended CI/CD workflows.
+*   **Verification:** Execute `pnpm test:convert`. The command must successfully run all unit and integration tests and generate a coverage report in the console or as a file.
+
+**Step 4: Implement Artifact and Documentation Persistence**
+
+*   **Action:** Implement the mechanism to write all operational artifacts, including conversion manifests and detailed logs, to the `tinyutils/artifacts/convert/<YYYYMMDD>/` directory. Additionally, create a script or function to programmatically update `docs/AGENT_RUN_LOG.md` and `docs/AGENT_TASK_CHECKLIST.md` with the status and evidence of the executed tasks.
+*   **Rationale:** Ensures complete auditability and traceability for every agent run, which is essential for debugging and operational oversight in an unattended environment.
+*   **Verification:** After running a test conversion, verify that the corresponding artifacts are created in the correct dated subdirectory. Inspect the content of the updated `AGENT_RUN_LOG.md` and `AGENT_TASK_CHECKLIST.md` files to confirm they accurately reflect the completed actions.
+
+**Step 5: Execute Full Pre-Deployment Verification**
+
+*   **Action:** Run the entire test suite using `pnpm test:convert` and any other project-wide tests (e.g., `pnpm test`). Run project-wide linting and formatting checks to ensure code quality and consistency.
+*   **Rationale:** A comprehensive quality gate to ensure that the new functionality is sound and has not introduced regressions elsewhere in the application before it is deployed.
+*   **Verification:** All test suites, linters, and formatters must pass without any errors.
+
+**Step 6: Deploy to Preview Environment**
+
+*   **Action:** Execute the project's deployment script to push the current branch to the Vercel preview environment.
+*   **Rationale:** Moves the feature from local development to a cloud environment that mirrors production, allowing for final end-to-end validation.
+*   **Verification:** The deployment command completes successfully, and Vercel provides a unique preview URL for the deployment.
+
+**Step 7: Conduct Post-Deployment Smoke Test**
+
+*   **Action:** Using the preview URL from Step 6, execute an automated smoke test that sends a sample conversion request to the live `/api/convert` endpoint. The test should verify the API response, follow the artifact links, and confirm the artifacts are accessible and correct. Append the logs and results of this smoke test to the artifacts folder.
+*   **Rationale:** Confirms that the application is fully functional and correctly configured in the deployed environment, providing the final sign-off before considering the task complete.
+*   **Verification:** The smoke test script passes, successfully completing an end-to-end conversion on the preview environment. The final run log in `docs/AGENT_RUN_LOG.md` is updated with the successful deployment and smoke test results.
+
+**Step 8: Initiate Roster Monitoring**
+
+*   **Action:** As the final operational step, initiate the background agent roster monitoring process as specified.
+*   **Rationale:** Fulfills the project's ongoing operational requirement for agent monitoring.
+*   **Verification:** The monitoring process is successfully started and runs in the background.

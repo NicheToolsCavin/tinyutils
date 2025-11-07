@@ -1,0 +1,262 @@
+[2025-11-04T18:54:45] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/dev/TinyUtils
+model: gpt-5
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-04T18:54:45] User instructions:
+Context: TinyUtils repo (static Vercel site under /Users/cav/dev/TinyUtils). Recent commits landed PR1 (security headers) and PR3 (preview fence), but several follow-ups remain. Outstanding items from docs/AGENT_TASK_CHECKLIST.md: (1) add <meta name="robots" content="noindex"> to beta tools (tools/keyword-density.html, tools/meta-preview.html, tools/sitemap-generator.html) and data-testid="debug-scheduler" to tools/dead-link-finder/index.html; (2) reintroduce CSP + /public/(.*) cache rule in vercel.json and capture production evidence; (3) add PR4 Node test suites (tests/api_contracts.test.mjs, tests/dlf_envelope_invariants.test.mjs, tests/csv_hardening.unit.test.mjs) and ensure package.json scripts wire them; (4) run preview fence evidence script + document results (scripts/preview_smoke.mjs, README-VERCEL.md, DEPLOY docs); (5) refresh documentation (README.md, README_DEPLOY.md, TESTING.md, DEPLOY_PRODUCTION_CHECKLIST.md) to reflect new tooling; (6) confirm keyboard shortcut/a11y fixes for tools/sitemap-delta/index.html and tools/wayback-fixer/index.html or plan changes.
+
+Goal: propose a comprehensive implementation plan that sequences these tasks safely. Assume repo currently on master with pending modifications to AGENTS.md and docs, but code changes for tasks not yet made. Consider testing requirements (pnpm test, scripts/preview_smoke.mjs), evidence storage under artifacts/, and documentation updates. Provide detailed steps, dependencies, and risks. Reference key files (vercel.json, tools/*.html, tests/, docs/).
+
+[Running in read-only mode - no modifications allowed]
+[2025-11-04T18:54:45] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/dev/TinyUtils
+model: gpt-5
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-04T18:54:45] User instructions:
+Context: TinyUtils repo (static Vercel site under /Users/cav/dev/TinyUtils). Recent commits landed PR1 (security headers) and PR3 (preview fence), but several follow-ups remain. Outstanding items from docs/AGENT_TASK_CHECKLIST.md: (1) add <meta name="robots" content="noindex"> to beta tools (tools/keyword-density.html, tools/meta-preview.html, tools/sitemap-generator.html) and data-testid="debug-scheduler" to tools/dead-link-finder/index.html; (2) reintroduce CSP + /public/(.*) cache rule in vercel.json and capture production evidence; (3) add PR4 Node test suites (tests/api_contracts.test.mjs, tests/dlf_envelope_invariants.test.mjs, tests/csv_hardening.unit.test.mjs) and ensure package.json scripts wire them; (4) run preview fence evidence script + document results (scripts/preview_smoke.mjs, README-VERCEL.md, DEPLOY docs); (5) refresh documentation (README.md, README_DEPLOY.md, TESTING.md, DEPLOY_PRODUCTION_CHECKLIST.md) to reflect new tooling; (6) confirm keyboard shortcut/a11y fixes for tools/sitemap-delta/index.html and tools/wayback-fixer/index.html or plan changes.
+
+Goal: propose a comprehensive implementation plan that sequences these tasks safely. Assume repo currently on master with pending modifications to AGENTS.md and docs, but code changes for tasks not yet made. Consider testing requirements (pnpm test, scripts/preview_smoke.mjs), evidence storage under artifacts/, and documentation updates. Provide detailed steps, dependencies, and risks. Reference key files (vercel.json, tools/*.html, tests/, docs/).
+
+[Running in read-only mode - no modifications allowed]
+
+[2025-11-04T18:54:53] thinking
+
+**Planning implementation for TinyUtils**
+
+I need to propose a thorough implementation plan for the TinyUtils repo while ensuring tasks are sequenced safely. Since we’re in a read-only mode, I can’t run shell commands. It looks like I can only execute safe read commands. The approvals being "never" means I can't escalate for additional permissions. While I don’t need to run commands to propose the plan, reading files to confirm paths based on the user's provided file names and structure will be helpful.
+**Structuring the implementation plan**
+
+The user expects a detailed plan that references key files and outlines steps for test wiring, documentation updates, and evidence capture in the artifacts. I should also incorporate developer message guidelines and consider using the update_plan tool. Since this is a deliverable, I can present it with structured headers and bullet points.
+
+The plan must sequence dependencies and note risks and testing steps while following the final structure and style guidelines. It might be useful to propose commit sequences and outline a branching strategy. I should include path references, perhaps like `tools/keyword-density.html`.
+**Proposing feature branch and updates**
+
+The user points out that the repo is currently on the master branch, and there are pending modifications to AGENTS.md and documentation, but no code changes have been implemented yet. I'll propose creating a feature branch for implementing items, running tests with pnpm, and using the preview smoke script. It’s important to capture evidence under `artifacts/` and update READMEs accordingly.
+
+I need to provide a risk and rollback strategy, mention Vercel configuration changes, specifically reintroducing a content security policy in the `vercel.json` file. I should include a sample JSON snippet for `headers`, cache rules for `/public/(.*)`, and how `Cache-Control` can be set in Vercel.
+**Enhancing Vercel configuration**
+
+I need to incorporate additional settings like `cleanUrls` and `trailingSlash`, while planning to add `headers` entries for both `Content-Security-Policy` and `Cache-Control` specifically for static assets in the `/public/` directory. Since Vercel serves these assets at the root, I’ll set a cache rule for this path.
+
+I’ll propose using `source: "/public/(.*)"` to implement long-term caching with a `Cache-Control` header, provided the site uses hashed filenames. Additionally, I’ll recommend adding a `<meta name="robots" content="noindex">` tag to specific HTML files and ensure the right metadata is included for SEO purposes.
+**Planning headers and testing strategies**
+
+I’m considering implementing `noindex, nofollow`, but I need to stick to just `noindex` as specified, avoiding production pages. For testing, I’ll add three test files in `tests/` and ensure our plan updates `package.json` scripts accordingly.
+
+I propose using Node’s built-in test runner with scripts configured for `pnpm`. We’ll run a preview fence evidence script for testing `X-Robots-Tag: noindex`. We’ll thoroughly document results, update various markdown files, and propose a branching strategy while being cautious of CSP changes and network restrictions. Finally, I’ll suggest effective caching rules for assets in the `public/` directory.
+**Creating a comprehensive implementation plan**
+
+I'm developing a plan to address several key elements, starting with confirming risks around path mismatches and specifically applying a "noindex" header for our preview deployments. We need to implement Node test suites, with basic skeleton tests proposed for validation, focusing on automated checklist mapping and GitHub integration.
+
+Also, we'll guide the evidence storage under `artifacts/`, define naming conventions, and include each task’s dependencies and risks. For accessibility, I'll confirm fixes and provide criteria for acceptance, all structured with clear headers and bullet points. Our plan will incorporate specific commands and snippets from `vercel.json` and `package.json` to ensure smooth execution, along with outlining PR timelines and rollback strategies.
+**Crafting a comprehensive implementation strategy**
+
+I'm outlining a plan to add a smoke test using `jsdom` to validate HTML presence, alongside implementing Node tests for checking our files. The plan includes updating `vercel.json` to incorporate CSP and cache rules, starting with a Report-Only policy. I will verify evidence using `curl` for our cache settings and prepare Node tests focused on static invariants.
+
+Moreover, I’ll set up a documentation refresh, ensuring it reflects new artifacts, caching, and CSP requirements. Accessibility checks will include manual steps for keyboard shortcuts. Finally, I'll propose a two-PR strategy to minimize risk, detailing necessary commands and expected outputs.
+[2025-11-04T18:55:58] codex
+**Structuring the implementation plan**
+
+The user expects a detailed plan that references key files and outlines steps for test wiring, documentation updates, and evidence capture in the artifacts. I should also incorporate developer message guidelines and consider using the update_plan tool. Since this is a deliverable, I can present it with structured headers and bullet points.
+
+The plan must sequence dependencies and note risks and testing steps while following the final structure and style guidelines. It might be useful to propose commit sequences and outline a branching strategy. I should include path references, perhaps like `tools/keyword-density.html`.
+[2025-11-04T18:55:58] codex
+**Proposing feature branch and updates**
+
+The user points out that the repo is currently on the master branch, and there are pending modifications to AGENTS.md and documentation, but no code changes have been implemented yet. I'll propose creating a feature branch for implementing items, running tests with pnpm, and using the preview smoke script. It’s important to capture evidence under `artifacts/` and update READMEs accordingly.
+
+I need to provide a risk and rollback strategy, mention Vercel configuration changes, specifically reintroducing a content security policy in the `vercel.json` file. I should include a sample JSON snippet for `headers`, cache rules for `/public/(.*)`, and how `Cache-Control` can be set in Vercel.
+[2025-11-04T18:55:58] codex
+**Enhancing Vercel configuration**
+
+I need to incorporate additional settings like `cleanUrls` and `trailingSlash`, while planning to add `headers` entries for both `Content-Security-Policy` and `Cache-Control` specifically for static assets in the `/public/` directory. Since Vercel serves these assets at the root, I’ll set a cache rule for this path.
+
+I’ll propose using `source: "/public/(.*)"` to implement long-term caching with a `Cache-Control` header, provided the site uses hashed filenames. Additionally, I’ll recommend adding a `<meta name="robots" content="noindex">` tag to specific HTML files and ensure the right metadata is included for SEO purposes.
+[2025-11-04T18:55:58] codex
+**Planning headers and testing strategies**
+
+I’m considering implementing `noindex, nofollow`, but I need to stick to just `noindex` as specified, avoiding production pages. For testing, I’ll add three test files in `tests/` and ensure our plan updates `package.json` scripts accordingly.
+
+I propose using Node’s built-in test runner with scripts configured for `pnpm`. We’ll run a preview fence evidence script for testing `X-Robots-Tag: noindex`. We’ll thoroughly document results, update various markdown files, and propose a branching strategy while being cautious of CSP changes and network restrictions. Finally, I’ll suggest effective caching rules for assets in the `public/` directory.
+[2025-11-04T18:55:58] codex
+**Creating a comprehensive implementation plan**
+
+I'm developing a plan to address several key elements, starting with confirming risks around path mismatches and specifically applying a "noindex" header for our preview deployments. We need to implement Node test suites, with basic skeleton tests proposed for validation, focusing on automated checklist mapping and GitHub integration.
+
+Also, we'll guide the evidence storage under `artifacts/`, define naming conventions, and include each task’s dependencies and risks. For accessibility, I'll confirm fixes and provide criteria for acceptance, all structured with clear headers and bullet points. Our plan will incorporate specific commands and snippets from `vercel.json` and `package.json` to ensure smooth execution, along with outlining PR timelines and rollback strategies.
+[2025-11-04T18:55:58] codex
+**Crafting a comprehensive implementation strategy**
+
+I'm outlining a plan to add a smoke test using `jsdom` to validate HTML presence, alongside implementing Node tests for checking our files. The plan includes updating `vercel.json` to incorporate CSP and cache rules, starting with a Report-Only policy. I will verify evidence using `curl` for our cache settings and prepare Node tests focused on static invariants.
+
+Moreover, I’ll set up a documentation refresh, ensuring it reflects new artifacts, caching, and CSP requirements. Accessibility checks will include manual steps for keyboard shortcuts. Finally, I'll propose a two-PR strategy to minimize risk, detailing necessary commands and expected outputs.
+[2025-11-04T18:55:58] codex
+
+Here’s a safe, sequenced plan to complete the follow-ups, with dependencies, testing, evidence capture, and risks. It assumes master is current, with PR1 (security headers) and PR3 (preview fence) already merged, and no code changes yet for these tasks.
+
+**Overview**
+- Split work into two PRs to de-risk: PR4 (tests + minor HTML updates) then PR5 (CSP + cache + docs + evidence + a11y).
+- Use `artifacts/` for evidence: `artifacts/{date-tag}/{category}/...`.
+- Validate with `pnpm test` and `scripts/preview_smoke.mjs`. Keep production verification lightweight via curl and saved headers.
+
+**Phase 0 — Prep**
+- Create branch `pr4-followups`.
+- Confirm Node >= 20 and pnpm is available; install deps if needed.
+- Skim `AGENTS.md` and docs/AGENT_TASK_CHECKLIST.md to align style and scope.
+
+**Phase 1 — Robots Meta + DLF Test ID (Low Risk)**
+- Add `<meta name="robots" content="noindex">` to:
+  - `tools/keyword-density.html`
+  - `tools/meta-preview.html`
+  - `tools/sitemap-generator.html`
+- Add `data-testid="debug-scheduler"` to `tools/dead-link-finder/index.html` (attach to the container of the debug scheduler UI so tests have a stable hook).
+- Dependency: None. Can be done immediately.
+- Risks: Duplicate robots tags; apply only to listed beta tools. Verify noindex doesn’t leak to production pages via includes.
+
+**Phase 2 — PR4 Node Test Suites (Core Task)**
+- Add tests (scaffold and fill with current behavior):
+  - `tests/api_contracts.test.mjs` — Encode API/contract expectations or static invariants; use fixtures in `tests/fixtures/` as needed.
+  - `tests/dlf_envelope_invariants.test.mjs` — Assert Dead Link Finder “envelope” shape invariants (fields required, types, bounds).
+  - `tests/csv_hardening.unit.test.mjs` — Assert CSV hardening (e.g., prefix/sanitize cells starting with = + - @, enforce safe delimiters/quoting).
+- Wire scripts in `package.json`:
+  - `"test": "node --test tests/**/*.test.mjs"`
+  - `"test:ci": "node --test --test-reporter=tap tests/**/*.test.mjs > artifacts/test-results.tap"`
+  - `"test:watch": "node --test --watch tests/**/*.test.mjs"` (only if Node supports `--watch` in your env)
+- Add a convenience script to ensure artifacts directory exists:
+  - `"pretest": "mkdir -p artifacts"`
+- Run tests locally; fix or mark TODOs where behavior is undecided.
+- Dependency: None on CSP. Can proceed in parallel with Phase 1.
+- Risks: Node version mismatch for built-in test runner; adjust to use `vitest` if needed.
+
+**Phase 3 — CSP + Public Cache Rule (High Impact; PR5)**
+- Update `vercel.json` to reintroduce CSP and cache rule for `/public/(.*)`:
+  - Add or extend `headers` with:
+    - Global security headers (preserving PR1) and new `Content-Security-Policy`.
+    - Cache rule for static files under `/public/(.*)`.
+
+Example `vercel.json` additions (adjust to your existing structure):
+```
+{
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "no-referrer" },
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; img-src 'self' data: blob:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+        }
+      ]
+    },
+    {
+      "source": "/public/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    }
+  ]
+}
+```
+- Rollout strategy:
+  - Step 1: Use Report-Only in preview first:
+    - Replace `Content-Security-Policy` with `Content-Security-Policy-Report-Only` during preview validation.
+  - Step 2: Fix violations (move inline scripts to files or add nonces/sha256 if feasible).
+  - Step 3: Switch to enforced CSP and merge to production.
+- Dependencies:
+  - If tools rely on inline/eval, adjust prior to enforcing CSP.
+  - Confirm site actually serves under `/public/(.*)` paths; otherwise change rule to match actual asset paths or hashed assets.
+- Risks:
+  - CSP breakage (inline scripts/styles). Mitigation: report-only phase, audit console, adjust policy.
+  - Cache rule mismatch if assets aren’t under `/public`. Mitigation: verify paths, adjust `source`.
+
+**Phase 4 — Preview Fence Evidence (PR5)**
+- Ensure `scripts/preview_smoke.mjs` validates:
+  - Preview URL returns `X-Robots-Tag: noindex` or equivalent.
+  - Canonical/robots meta behavior matches PR3 expectations.
+  - Key pages return 200 and link sets are sane.
+- Add script entry:
+  - `"preview:smoke": "node scripts/preview_smoke.mjs"`
+- Run on a preview deployment URL and store outputs:
+  - Save logs and any JSON to `artifacts/preview_fence/<date>/`.
+  - If the script emits screenshots, also store in the same folder.
+- Document in `README-VERCEL.md` and DEPLOY docs:
+  - What was checked, date/time, preview URL used, summary of pass/fail.
+- Dependencies: A preview deployment (from PR5). Run before flipping CSP from report-only to enforce to catch conflicts.
+- Risks: Script may need URL parameter; support `--url` or read `VERCEL_URL`.
+
+**Phase 5 — Documentation Refresh (PR5)**
+- Update:
+  - `README.md` — High-level: security headers summary, test commands (`pnpm test`), artifacts overview.
+  - `README_DEPLOY.md` — Preview fence steps, CSP rollout checklist, how to collect evidence, and how to verify cache headers.
+  - `TESTING.md` — Node test runner usage, adding fixtures, running `test:ci`, artifacts locations.
+  - `DEPLOY_PRODUCTION_CHECKLIST.md` — Add CSP (report-only → enforce) gates, production header verification, cached asset checks, preview fence validation.
+  - `README-VERCEL.md` — Vercel-specific: `vercel.json` changes, header patterns, preview smoke procedure, caching behavior.
+- Embed commands and sample outputs; link to `artifacts/` subfolders by path for traceability.
+- Dependencies: After Phases 3–4 so docs can include real evidence paths and final decisions.
+
+**Phase 6 — A11y & Keyboard Fix Validation (PR5 or PR6)**
+- Scope:
+  - `tools/sitemap-delta/index.html`
+  - `tools/wayback-fixer/index.html`
+- Acceptance checks:
+  - Fully operable by keyboard (tab order, visible focus, no key trapping).
+  - Provide `aria-keyshortcuts` for documented shortcuts; ensure modifiers not conflicting with browser defaults.
+  - Labels for controls (`aria-label`/`aria-labelledby`), `role` where appropriate, avoid `div` buttons.
+  - Live regions where asynchronous results appear (`aria-live="polite"`), and focus management on view changes.
+  - Color contrast and hit targets meet WCAG AA.
+- If gaps exist, create a follow-up PR with focused diffs and a short manual test script in `docs/` or `TESTING.md`.
+- Dependencies: None; may run parallel with Phase 3–5 if resourcing allows.
+- Risks: UX regressions; mitigate with small, isolated changes and targeted checks.
+
+**Artifacts & Evidence**
+- Headers/CSP:
+  - `artifacts/headers/<YYYY-MM-DD>/index_headers.txt` — `curl -sI <prod-root>`
+  - `artifacts/headers/<YYYY-MM-DD>/public_asset_headers.txt` — `curl -sI <prod>/public/<asset>`
+  - Optional: page-level HTML saved to confirm `<meta name="robots" content="noindex">` on beta tools.
+- Preview fence:
+  - `artifacts/preview_fence/<YYYY-MM-DD>/smoke.log`
+  - `artifacts/preview_fence/<YYYY-MM-DD>/summary.json` or TAP, per script output.
+- Tests:
+  - `artifacts/test-results.tap` (from `test:ci`)
+
+**Sequencing & Dependencies**
+- PR4 (safer, fast):
+  - Phase 1 → Phase 2 → merge
+- PR5 (broader changes):
+  - Phase 3 (CSP report-only) → Phase 4 (preview fence evidence) → enforce CSP → Phase 5 docs → Phase 6 a11y → merge
+- Gate merges on:
+  - All tests green (PR4/PR5).
+  - Preview fence passing and CSP not breaking tool UIs (PR5).
+  - Production header evidence captured and saved to `artifacts/`.
+
+**Risks & Mitigations**
+- CSP breaks inline code:
+  - Start with Report-Only; if needed, temporarily allow `'unsafe-inline'` while migrating to nonces or external files.
+- Cache rule not applying:
+  - Validate with real paths; adjust to match served asset URLs rather than directory names if necessary.
+- Node test runner incompatibilities:
+  - If Node < 20 or `--watch` unsupported, switch to `vitest` or drop watch script.
+
+**What I’ll Do Next (once approved)**
+1. Open PR4 branch, add noindex metas and the DLF data-testid, scaffold tests and scripts, push and validate in CI.
+2. Open PR5 branch, update `vercel.json` with CSP (Report-Only) and cache rule, run preview smoke, collect evidence to `artifacts/`, then enforce CSP, refresh docs, and validate a11y items.
+3. Provide a short summary in each PR description linking to `artifacts/` paths and highlighting any CSP allowances left (if any).
+
+If you want, I can start by drafting the exact `package.json` script changes and a `vercel.json` diff based on your current files.
+[2025-11-04T18:56:19] tokens used: 16,132

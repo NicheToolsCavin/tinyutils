@@ -1,0 +1,131 @@
+Here is an updated, execution-ready plan for the TinyUtils reconciliation backlog:
+
+## TinyUtils Reconciliation Plan — 2025-11-04 (Execution Ready)
+
+This plan sequences dependencies, outlines environment prerequisites, enumerates validation/evidence expectations, and surfaces risk mitigations. All logging and documentation will use CET timestamps and leverage `scripts/log_run_entry.py` and `scripts/add_task_checklist_entry.py`. Evidence will be stored under `artifacts/<task>/<YYYYMMDD>/` and supporting diffs in `diffs_recs/`.
+
+---
+
+### Phase 0: Setup & Baseline
+
+**Objective:** Establish a stable working environment and ensure foundational elements are in place.
+
+*   **Task 0.1: Git/Log Backfill**
+    *   **Description:** Ensure local git history is up-to-date and review recent logs for context.
+    *   **Prerequisites:** Git installed.
+    *   **Validation/Evidence:** `git status`, `git log -n 10`.
+    *   **Logging/Documentation:** Record current git state and any relevant log entries in `docs/AGENT_RUN_LOG.md`.
+
+*   **Task 0.2: Orchestrator Agent Roster Check**
+    *   **Description:** Verify `AGENTS.md` and `config.toml` reflect the current orchestrator roster (code-gpt-5, code-gpt-5-codex, 3 hacked ChatGPT handles, Gemini fallback).
+    *   **Prerequisites:** Access to `AGENTS.md` and `config.toml`.
+    *   **Validation/Evidence:** Manual review of file contents.
+    *   **Logging/Documentation:** Confirm roster accuracy in `docs/AGENT_TASK_CHECKLIST.md`.
+
+*   **Task 0.3: Environment Prerequisites Check**
+    *   **Description:** Confirm Vercel deployment access, `pnpm` installation, `curl` availability, and functionality of custom scripts (`scripts/`).
+    *   **Prerequisites:** Vercel CLI configured, `pnpm` installed, `curl` available.
+    *   **Validation/Evidence:** Run `vercel --version`, `pnpm --version`, `curl --version`, and execute a simple test script (e.g., `node scripts/preview_smoke.mjs --help`).
+    *   **Logging/Documentation:** Record versions and successful script execution in `docs/AGENT_RUN_LOG.md`.
+
+---
+
+### Phase 1: PR1 - Security Headers & `/public` Caching
+
+**Objective:** Implement and verify security headers, specifically Content Security Policy (CSP), and ensure correct caching for `/public` assets.
+
+*   **Task 1.1: Implement CSP**
+    *   **Description:** Add or update Content Security Policy (CSP) headers in `vercel.json` to enhance security.
+    *   **Prerequisites:** Understanding of existing `vercel.json` structure.
+    *   **Validation/Evidence:** Deploy to a preview environment. Use `curl -I <preview-url>` to capture response headers. Analyze headers for correct CSP implementation. Store header captures in `artifacts/pr1-security-caching/<YYYYMMDD>/`.
+    *   **Risk Mitigation:** **CSP Drift:** Carefully review CSP directives to avoid breaking existing functionality. Start with a report-only mode if possible, or a very permissive policy, and gradually tighten.
+    *   **Logging/Documentation:** Record `vercel.json` changes in `diffs_recs/pr1-security-caching.diff`. Add entry to `docs/AGENT_TASK_CHECKLIST.md` for CSP implementation and verification.
+
+*   **Task 1.2: Verify `/public` Caching**
+    *   **Description:** Confirm that assets served from the `/public` directory have appropriate caching headers.
+    *   **Prerequisites:** Deployed preview environment.
+    *   **Validation/Evidence:** Use `curl -I <preview-url>/public/styles.css` (or another static asset) to capture response headers. Verify `Cache-Control` and `Expires` headers. Store header captures in `artifacts/pr1-security-caching/<YYYYMMDD>/`.
+    *   **Logging/Documentation:** Add entry to `docs/AGENT_TASK_CHECKLIST.md` for caching verification.
+
+---
+
+### Phase 2: PR2 - Noindex Meta & Debug Hook
+
+**Objective:** Implement `noindex` meta tags for specific pages and add a debug hook for controlled debugging.
+
+*   **Task 2.1: Implement Noindex Meta Tags**
+    *   **Description:** Add `<meta name="robots" content="noindex">` to pages that should not be indexed by search engines (e.g., internal tools, temporary pages).
+    *   **Prerequisites:** Identify target pages (e.g., `feedback.html`, `support.html` if not public-facing).
+    *   **Validation/Evidence:** Deploy to a preview environment. Use `curl <preview-url>/feedback.html` and inspect the HTML content for the `noindex` meta tag. Store HTML snippets in `artifacts/pr2-ux-noindex-debug/<YYYYMMDD>/`.
+    *   **Logging/Documentation:** Record file changes in `diffs_recs/pr2-ux-noindex-debug.diff`. Add entry to `docs/AGENT_TASK_CHECKLIST.md`.
+
+*   **Task 2.2: Implement Debug Hook**
+    *   **Description:** Introduce a controlled debug hook (e.g., a query parameter or environment variable) to enable/disable debug logging or features.
+    *   **Prerequisites:** Identify appropriate location for the hook (e.g., `api/check.js` or a shared utility).
+    *   **Validation/Evidence:** Test the hook in a preview environment by activating and deactivating it, observing expected debug output or behavior.
+    *   **Logging/Documentation:** Record code changes in `diffs_recs/pr2-ux-noindex-debug.diff`. Add entry to `docs/AGENT_TASK_CHECKLIST.md`.
+
+---
+
+### Phase 3: PR3 - Preview Fence Verification
+
+**Objective:** Verify the functionality and robustness of the preview fence mechanism.
+
+*   **Task 3.1: Verify Preview Fence**
+    *   **Description:** Ensure that the preview fence (`api/fence.js`) correctly restricts access to preview deployments based on defined rules.
+    *   **Prerequisites:** Deployed preview environment with the fence enabled.
+    *   **Validation/Evidence:** Attempt to access preview URLs with and without the expected authentication/authorization. Capture HTTP status codes and response bodies. Store evidence in `artifacts/pr3-preview-fence/<YYYYMMDD>/`.
+    *   **Risk Mitigation:** **Preview Gating:** Ensure the fence does not inadvertently block legitimate access or expose sensitive information. Test edge cases (e.g., invalid tokens, expired sessions).
+    *   **Logging/Documentation:** Record any necessary adjustments to `api/fence.js` in `diffs_recs/pr3-preview-fence.diff`. Add entry to `docs/AGENT_TASK_CHECKLIST.md`.
+
+---
+
+### Phase 4: PR4 - Test Suite Restoration
+
+**Objective:** Restore and execute the project's test suite to ensure code quality and prevent regressions.
+
+*   **Task 4.1: Restore Test Suite**
+    *   **Description:** Re-enable or fix any broken tests, particularly those related to contracts and API functionality.
+    *   **Prerequisites:** Identify relevant test files (e.g., `tests/dlf_api_error_json.test.mjs`).
+    *   **Validation/Evidence:** Run `pnpm test`.
+    *   **Logging/Documentation:** Record changes to test files in `diffs_recs/pr4-tests-contracts.diff`. Add entry to `docs/AGENT_TASK_CHECKLIST.md`.
+
+*   **Task 4.2: Run `pnpm test`**
+    *   **Description:** Execute the full test suite to confirm all tests pass.
+    *   **Prerequisites:** Test suite restored and configured.
+    *   **Validation/Evidence:** Capture the output of `pnpm test`. Store output in `artifacts/pr4-tests-contracts/<YYYYMMDD>/test_results.txt`.
+    *   **Logging/Documentation:** Record test run status in `docs/AGENT_RUN_LOG.md`.
+
+---
+
+### Phase 5: Documentation & Accessibility
+
+**Objective:** Refresh project documentation and conduct an accessibility re-audit.
+
+*   **Task 5.1: Doc Refresh**
+    *   **Description:** Update `README.md`, `docs/AGENT_RUN_LOG.md`, `docs/AGENT_TASK_CHECKLIST.md`, and other relevant documentation to reflect current state and new features.
+    *   **Prerequisites:** Review existing documentation for outdated information.
+    *   **Validation/Evidence:** Manual review of updated documentation.
+    *   **Risk Mitigation:** **Doc Lag:** Prioritize critical documentation updates.
+    *   **Logging/Documentation:** Record changes to documentation files. Add entry to `docs/AGENT_TASK_CHECKLIST.md`.
+
+*   **Task 5.2: Accessibility Re-audit**
+    *   **Description:** Perform a re-audit of the application's accessibility, focusing on key user flows and new features.
+    *   **Prerequisites:** Identify accessibility testing tools (e.g., Lighthouse, browser developer tools).
+    *   **Validation/Evidence:** Capture accessibility audit reports. Store reports in `artifacts/accessibility-re-audit/<YYYYMMDD>/`.
+    *   **Risk Mitigation:** **Accessibility Uncertainty:** If issues are found, prioritize critical fixes and document remaining known issues.
+    *   **Logging/Documentation:** Record audit findings and any implemented fixes in `docs/AGENT_RUN_LOG.md` and `docs/AGENT_TASK_CHECKLIST.md`.
+
+---
+
+### Phase 6: Strict Logging Hygiene
+
+**Objective:** Ensure all logging adheres to strict hygiene standards, including CET timestamps and appropriate use of logging scripts.
+
+*   **Task 6.1: Review Logging Practices**
+    *   **Description:** Conduct a final review of all logging calls within the codebase to ensure consistency, proper use of CET timestamps, and utilization of `scripts/log_run_entry.py` and `scripts/add_task_checklist_entry.py` where appropriate.
+    *   **Prerequisites:** Codebase access.
+    *   **Validation/Evidence:** Manual code review.
+    *   **Logging/Documentation:** Document any identified logging improvements or fixes in `docs/AGENT_RUN_LOG.md`.
+
+---

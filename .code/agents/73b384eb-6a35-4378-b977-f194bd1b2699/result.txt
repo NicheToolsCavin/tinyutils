@@ -1,0 +1,102 @@
+Based on the provided context, here is the proposed execution-ready reconciliation plan.
+
+***
+
+### **TinyUtils Reconciliation & Backlog Clearance Plan (2025-11-04 CET)**
+
+This plan outlines the sequence of tasks required to clear the outstanding technical, documentation, and quality assurance backlog for the TinyUtils project. All tasks must adhere to strict logging and evidence-gathering protocols.
+
+**Guiding Principles:**
+*   **Logging:** All actions will be logged via `scripts/log_run_entry.py`.
+*   **Task Tracking:** All tasks will be recorded and checked off in `docs/AGENT_TASK_CHECKLIST.md` using `scripts/add_task_checklist_entry.py`.
+*   **Evidence:** All validation artifacts (command outputs, screenshots, reports) will be stored in `artifacts/<task-name>/<YYYYMMDD>/`.
+*   **Timestamps:** All logs and artifacts must use CET.
+
+---
+
+### **Phase 0: Prerequisites & Environment Baseline**
+
+**Objective:** Ensure all tooling is operational and establish a clean baseline before initiating changes.
+
+1.  **Environment Validation:**
+    *   **Action:** Confirm local installation and authentication for Vercel CLI (`vercel whoami`), `pnpm` (`pnpm --version`), and `curl`.
+    *   **Evidence:** Command outputs confirming versions and login status.
+
+2.  **Repository State Capture:**
+    *   **Action:** Run `git status` and `git log -n 5` to capture the current repository state.
+    *   **Evidence:** Save command output to `artifacts/baseline/20251104/git-status.log`.
+
+3.  **Tooling Verification:**
+    *   **Action:** Perform a dry-run of logging scripts (e.g., `python3 scripts/log_run_entry.py --message "Testing logger" --dry_run`).
+    *   **Evidence:** Log a successful dry-run message.
+
+---
+
+### **Phase 1: Foundational Restoration**
+
+**Objective:** Restore core project testing capabilities and align configuration with operational roster.
+
+1.  **Task: Restore Test Suite (PR4 Follow-up)**
+    *   **Dependency:** None. This is a prerequisite for validating subsequent changes.
+    *   **Action:** Apply the changes from `diffs_recs/pr4-tests-contracts.diff`. Run `pnpm install` to ensure all dependencies are met.
+    *   **Validation:** Execute `pnpm test`. The suite must pass without errors.
+    *   **Evidence:** Full output of the `pnpm test` command saved to `artifacts/pr4-tests/20251104/test-results.txt`.
+
+2.  **Task: Agent Roster Verification**
+    *   **Action:** Review `AGENTS.md` and any project configuration files (e.g., `config.toml`, if it exists) against the documented roster: `code-gpt-5`, `code-gpt-5-codex`, three ChatGPT handles, and a Gemini fallback.
+    *   **Validation:** A manual check confirming alignment.
+    *   **Evidence:** A text file `artifacts/agents/20251104/roster-audit.md` stating the result of the review.
+
+---
+
+### **Phase 2: Technical Debt & Feature Verification**
+
+**Objective:** Implement and validate outstanding changes from PRs 1, 2, and 3.
+
+1.  **Task: Implement Security Headers & Caching (PR1 Follow-up)**
+    *   **Dependency:** Phase 1 (Working Test Suite).
+    *   **Action:** Apply `diffs_recs/pr1-security-caching.diff`. Deploy the changes to a Vercel preview environment.
+    *   **Validation:**
+        *   Use `curl -I <preview-url>` to inspect the HTTP headers for the homepage.
+        *   Use `curl -I <preview-url>/styles.css` (or another asset from `/public`) to inspect its headers.
+        *   Confirm the presence and correctness of `Content-Security-Policy` and `Cache-Control` headers.
+    *   **Evidence:** Save `curl` outputs to `artifacts/pr1-security-caching/20251104/headers.log`.
+
+2.  **Task: Verify No-index Meta & Debug Hook (PR2 Follow-up)**
+    *   **Dependency:** Phase 1.
+    *   **Action:** Apply `diffs_recs/pr2-ux-noindex-debug.diff`. Deploy to a Vercel preview environment.
+    *   **Validation:**
+        *   Run `curl <preview-url>` and verify the presence of `<meta name="robots" content="noindex">` in the HTML.
+        *   Review the diff to understand and document the debug hook mechanism.
+    *   **Evidence:** Save `curl` output to `artifacts/pr2-noindex-debug/20251104/meta-tag-check.html`.
+
+3.  **Task: Verify Preview Deployment Fence (PR3 Follow-up)**
+    *   **Dependency:** Successful deployment from Phase 2, Task 1 (for CSP).
+    *   **Action:** Target the latest Vercel preview deployment URL.
+    *   **Validation:** Execute the smoke test script: `node scripts/preview_smoke.mjs`. The script should verify that unauthenticated access is blocked and provide instructions for any required manual checks.
+    *   **Evidence:** Full output of the smoke test script saved to `artifacts/pr3-preview-fence/20251104/smoke-test.log`.
+
+---
+
+### **Phase 3: Documentation & Accessibility Audit**
+
+**Objective:** Refresh user-facing documentation and perform a baseline accessibility re-audit.
+
+1.  **Task: Documentation Refresh**
+    *   **Action:** Review `README.md`, `AGENTS.md`, and all guides in `/guides/` for accuracy and clarity following the recent changes.
+    *   **Validation:** Manual review.
+    *   **Evidence:** Create `artifacts/docs/20251104/review-summary.md` noting any identified gaps or necessary updates.
+
+2.  **Task: Accessibility Re-audit**
+    *   **Action:** Perform a baseline accessibility audit on the main page and one tool page (e.g., Dead Link Finder) of a preview deployment. Use a combination of automated (browser dev tools Lighthouse) and manual (keyboard navigation, screen reader spot-check) testing.
+    *   **Validation:** Generate a Lighthouse report and document manual findings.
+    *   **Evidence:** Save the Lighthouse report and a summary of manual findings in `artifacts/accessibility/20251104/`.
+
+---
+
+### **Risk Mitigation & Cross-Cutting Concerns**
+
+*   **CSP Drift:** The current CSP will be documented as the "golden standard." Any future changes must be validated against this documented policy. Consider adding an automated header check to a CI workflow.
+*   **Preview Gating Failure:** The `preview_smoke.mjs` script is the primary mitigation. It must be a required manual step in any pre-production deployment checklist.
+*   **Documentation Lag:** Link documentation updates directly to the technical tasks in `AGENT_TASK_CHECKLIST.md`. A task is not "done" until its corresponding documentation is updated.
+*   **Accessibility Uncertainty:** The audit in Phase 3 provides a baseline. Acknowledge that this is not exhaustive. High-priority issues should be filed as new tasks; the full report will inform future accessibility work.

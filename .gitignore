@@ -1,0 +1,6 @@
+.vercel
+tinyutils/.env.preview
+tinyutils/.env.local
+*.env
+*.env.local
+!tinyutils/.env.preview.example

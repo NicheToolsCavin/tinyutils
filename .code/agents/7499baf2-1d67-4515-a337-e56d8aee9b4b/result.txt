@@ -1,0 +1,2303 @@
+[2025-11-07T02:21:45] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-complete-converter-core
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-07T02:21:45] User instructions:
+Complete the converter core and unit tests so pytest tests/convert/test_service.py passes under the stated guardrails with caching, preview, and media bundle support.
+
+Context: Implement convert_one/convert_batch in tinyutils/convert/service.py and adjust tinyutils/convert/types.py to enforce ≤100 MB per input and ≤1 GB per batch, sanitize markdown, generate preview/snippets, create deterministic cache keys, and support optional media zip. Return structured errors with retry hints and capture logs. Make tests/convert/test_service.py pass using existing pandoc stubs; keep diffs minimal and style consistent.
+[2025-11-07T02:21:45] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-complete-converter-core
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-07T02:21:45] User instructions:
+Complete the converter core and unit tests so pytest tests/convert/test_service.py passes under the stated guardrails with caching, preview, and media bundle support.
+
+Context: Implement convert_one/convert_batch in tinyutils/convert/service.py and adjust tinyutils/convert/types.py to enforce ≤100 MB per input and ≤1 GB per batch, sanitize markdown, generate preview/snippets, create deterministic cache keys, and support optional media zip. Return structured errors with retry hints and capture logs. Make tests/convert/test_service.py pass using existing pandoc stubs; keep diffs minimal and style consistent.
+
+[2025-11-07T02:21:51] thinking
+
+**Clarifying read-only sandbox constraints**
+
+I’m figuring out the sandbox is read-only, so I can’t write or modify files directly, but the task requires code changes. Since I can’t ask for approval, I’m stuck unless there’s a workaround. To understand better, I’ll start by listing files and gathering repo info to plan the next move carefully.
+[2025-11-07T02:21:52] exec bash -lc ls in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-complete-converter-core
+[2025-11-07T02:21:52] bash -lc ls succeeded in 92ms:
+[2025-11-07T02:21:52] tokens used: 5,756
+
+[2025-11-07T02:21:54] thinking
+
+**Checking for hidden files**
+[2025-11-07T02:21:54] exec bash -lc 'ls -a' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-complete-converter-core
+[2025-11-07T02:21:54] bash -lc 'ls -a' succeeded in 105ms:
+.
+..
+.git
+[2025-11-07T02:21:54] tokens used: 11,602
+
+[2025-11-07T02:21:56] thinking
+
+**Checking repository status**
+[2025-11-07T02:21:56] exec bash -lc 'git status -sb' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-complete-converter-core
+[2025-11-07T02:21:56] bash -lc 'git status -sb' succeeded in 105ms:
+## No commits yet on code-code-gpt-5-codex-complete-converter-core
+[2025-11-07T02:21:56] tokens used: 12,830
+
+[2025-11-07T02:21:58] thinking
+
+**Checking repository file structure**
+[2025-11-07T02:21:58] exec bash -lc 'git ls-tree --name-only HEAD' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-complete-converter-core
+[2025-11-07T02:21:58] bash -lc 'git ls-tree --name-only HEAD' exited 128 in 133ms:
+ERROR
+fatal: Not a valid object name HEAD
+[2025-11-07T02:21:58] tokens used: 13,063
+
+[2025-11-07T02:22:03] thinking
+
+**Investigating empty repository state**
+[2025-11-07T02:22:03] exec bash -lc 'cat .git/HEAD' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-complete-converter-core
+[2025-11-07T02:22:03] bash -lc 'cat .git/HEAD' exited 1 in 123ms:
+ERROR
+cat: .git/HEAD: Not a directory
+[2025-11-07T02:22:03] tokens used: 13,888
+
+[2025-11-07T02:22:05] thinking
+
+**Checking if Git repo is bare**
+[2025-11-07T02:22:05] exec bash -lc 'ls -l .git' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-complete-converter-core
+[2025-11-07T02:22:05] bash -lc 'ls -l .git' succeeded in 109ms:
+-rw-r--r--@ 1 cav  staff  94 Nov  7 03:21 .git
+[2025-11-07T02:22:05] tokens used: 14,080
+
+[2025-11-07T02:22:06] thinking
+
+**Inspecting .git file**
+[2025-11-07T02:22:07] exec bash -lc 'cat .git' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-complete-converter-core
+[2025-11-07T02:22:07] bash -lc 'cat .git' succeeded in 107ms:
+gitdir: /Users/cav/dev/TinyUtils/.git/worktrees/code-code-gpt-5-codex-complete-converter-core
+[2025-11-07T02:22:07] tokens used: 14,277
+
+[2025-11-07T02:22:13] thinking
+
+**Investigating actual working tree location**
+[2025-11-07T02:22:14] exec bash -lc 'git --git-dir=/Users/cav/dev/TinyUtils/.git --work-tree=/Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-complete-converter-core status -sb' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-complete-converter-core
+[2025-11-07T02:22:14] bash -lc 'git --git-dir=/Users/cav/dev/TinyUtils/.git --work-tree=/Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-complete-converter-core status -sb' succeeded in 123ms:
+## No commits yet on feature/universal-converter-backend
+[2025-11-07T02:22:14] tokens used: 14,811
+
+[2025-11-07T02:22:16] thinking
+
+**Investigating missing commits**
+[2025-11-07T02:22:16] exec bash -lc 'find . -maxdepth 2 -mindepth 1' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-complete-converter-core
+[2025-11-07T02:22:16] bash -lc 'find . -maxdepth 2 -mindepth 1' succeeded in 99ms:
+./.git
+[2025-11-07T02:22:16] tokens used: 22,174
+
+[2025-11-07T02:22:19] thinking
+
+**Investigating repository structure**
+[2025-11-07T02:22:19] exec bash -lc 'ls /Users/cav/.code/working/tinyutils' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-complete-converter-core
+[2025-11-07T02:22:20] bash -lc 'ls /Users/cav/.code/working/tinyutils' succeeded in 104ms:
+branches
+[2025-11-07T02:22:20] tokens used: 22,651
+
+[2025-11-07T02:22:23] thinking
+
+**Investigating repository state**
+[2025-11-07T02:22:23] exec bash -lc 'git --git-dir=/Users/cav/dev/TinyUtils/.git rev-parse HEAD' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-complete-converter-core
+[2025-11-07T02:22:23] bash -lc 'git --git-dir=/Users/cav/dev/TinyUtils/.git rev-parse HEAD' exited 128 in 124ms:
+HEAD
+
+ERROR
+fatal: ambiguous argument 'HEAD': unknown revision or path not in the working tree.
+Use '--' to separate paths from revisions, like this:
+'git <command> [<revision>...] -- [<file>...]'
+[2025-11-07T02:22:23] tokens used: 23,111
+
+[2025-11-07T02:22:29] thinking
+
+**Evaluating repository state and next steps**
+[2025-11-07T02:22:29] exec bash -lc 'ls /Users/cav/dev/TinyUtils' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-complete-converter-core
+[2025-11-07T02:22:29] bash -lc 'ls /Users/cav/dev/TinyUtils' succeeded in 106ms:
+PATH
+print1
+tests
+tinyutils
+TinyUtilsCodexContext
+[2025-11-07T02:22:29] tokens used: 24,387
+
+[2025-11-07T02:22:37] thinking
+
+**Clarifying repository and working tree locations**
+[2025-11-07T02:22:38] exec bash -lc 'ls /Users/cav/dev/TinyUtils/tinyutils' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-complete-converter-core
+[2025-11-07T02:22:38] bash -lc 'ls /Users/cav/dev/TinyUtils/tinyutils' succeeded in 104ms:
+__init__.py
+__pycache__
+ads.txt
+ADSENSE_SETUP.md
+AGENTS.md
+api
+artifacts
+CHANGES-v1.3.0-rc2.txt
+CHANGES-v1.3.0-rc3.txt
+config
+convert
+data
+DEPLOY_PRODUCTION_CHECKLIST.md
+docs
+feedback.html
+filters
+fixtures
+guides
+index
+index.html
+[2025-11-07T02:22:38] tokens used: 25,255
+
+[2025-11-07T02:22:46] thinking
+
+**Assessing repo environment and permissions**
+[2025-11-07T02:22:46] exec bash -lc 'ls -a /Users/cav/dev/TinyUtils' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-complete-converter-core
+[2025-11-07T02:22:46] bash -lc 'ls -a /Users/cav/dev/TinyUtils' succeeded in 104ms:
+.
+..
+.code
+.debug
+.DS_Store
+.git
+.pytest_cache
+PATH
+print1
+tests
+tinyutils
+TinyUtilsCodexContext
+[2025-11-07T02:22:46] tokens used: 27,346
+
+[2025-11-07T02:22:51] thinking
+
+**Assessing Git worktree and branch setup**
+[2025-11-07T02:22:51] exec bash -lc 'cd /Users/cav/dev/TinyUtils && git status -sb' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-complete-converter-core
+[2025-11-07T02:22:51] bash -lc 'cd /Users/cav/dev/TinyUtils && git status -sb' succeeded in 115ms:
+## No commits yet on feature/universal-converter-backend
+?? .DS_Store
+?? .code/
+?? PATH
+?? TinyUtilsCodexContext/
+?? print1
+?? tests/
+?? tinyutils/
+[2025-11-07T02:22:51] tokens used: 27,741
+
+[2025-11-07T02:22:55] thinking
+
+**Assessing repository state and file location**
+[2025-11-07T02:22:56] exec bash -lc "sed -n '1,200p' tinyutils/convert/service.py" in /Users/cav/dev/TinyUtils
+[2025-11-07T02:22:56] bash -lc "sed -n '1,200p' tinyutils/convert/service.py" succeeded in 104ms:
+"""Reusable converter service for TinyUtils APIs."""
+from __future__ import annotations
+
+import json
+import zipfile
+from pathlib import Path
+from typing import Any, Iterable, List, Optional, Sequence
+
+from tinyutils.api._lib import pandoc_runner
+from tinyutils.api._lib.manifests import build_snippets, collect_headings, media_manifest
+from tinyutils.api._lib.text_clean import normalise_markdown
+from tinyutils.api._lib.utils import ensure_within_limits, generate_job_id, job_workspace
+
+from .types import (
+    BatchResult,
+    ConversionError,
+    ConversionOptions,
+    ConversionResult,
+    InputPayload,
+    MediaArtifact,
+[2025-11-07T02:22:56] tokens used: 28,954
+[2025-11-07T02:22:58] exec bash -lc "sed -n '200,400p' tinyutils/convert/service.py" in /Users/cav/dev/TinyUtils
+[2025-11-07T02:22:58] bash -lc "sed -n '200,400p' tinyutils/convert/service.py" succeeded in 118ms:
+        to=pandoc_target,
+        format="gfm",
+        extra_args=["--wrap=none"],
+    )
+    return rendered.encode("utf-8")
+
+
+def _get_pypandoc():
+    global _PYPANDOC
+    if _PYPANDOC is None:
+        import pypandoc  # type: ignore
+
+        _PYPANDOC = pypandoc
+    return _PYPANDOC
+
+
+def _build_media_artifact(media_dir: Optional[Path], base_name: str) -> Optional[MediaArtifact]:
+    if not media_dir or not media_dir.exists():
+        return None
+    files = [path for path in media_dir.rglob("*") if path.is_file()]
+[2025-11-07T02:22:58] tokens used: 32,155
+
+[2025-11-07T02:22:59] thinking
+
+**Reviewing conversion utilities and types**
+[2025-11-07T02:23:00] exec bash -lc "sed -n '1,200p' tinyutils/convert/types.py" in /Users/cav/dev/TinyUtils
+[2025-11-07T02:23:00] bash -lc "sed -n '1,200p' tinyutils/convert/types.py" succeeded in 106ms:
+"""Type definitions for the TinyUtils converter library."""
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import List, Optional, Sequence
+
+
+SUPPORTED_TARGETS: Sequence[str] = ("md", "html", "txt")
+
+
+@dataclass(slots=True)
+class ConversionOptions:
+    """Options that align with the public converter API."""
+
+    accept_tracked_changes: bool = True
+    extract_media: bool = False
+    remove_zero_width: bool = True
+
+
+@dataclass(slots=True)
+[2025-11-07T02:23:00] tokens used: 32,710
+
+[2025-11-07T02:23:01] thinking
+
+**Reviewing test file for expected behavior**
+[2025-11-07T02:23:02] exec bash -lc "sed -n '1,200p' tests/convert/test_service.py" in /Users/cav/dev/TinyUtils
+[2025-11-07T02:23:02] bash -lc "sed -n '1,200p' tests/convert/test_service.py" succeeded in 110ms:
+"""Unit tests for tinyutils.convert.service."""
+from __future__ import annotations
+
+from pathlib import Path
+
+import pytest
+
+from tinyutils.convert import ConversionOptions, convert_batch, convert_one
+from tinyutils.convert.types import InputPayload
+
+
+@pytest.fixture(autouse=True)
+def stub_pandoc(monkeypatch, tmp_path):
+    """Monkeypatch pandoc helpers so tests never spawn real processes."""
+
+    def fake_convert_to_markdown(
+        source: Path,
+        destination: Path,
+        from_format=None,
+        accept_tracked_changes=False,
+[2025-11-07T02:23:02] tokens used: 33,895
+[2025-11-07T02:23:04] exec bash -lc "sed -n '200,400p' tests/convert/test_service.py" in /Users/cav/dev/TinyUtils
+[2025-11-07T02:23:04] bash -lc "sed -n '200,400p' tests/convert/test_service.py" succeeded in 105ms:
+[2025-11-07T02:23:04] tokens used: 35,037
+
+[2025-11-07T02:23:08] thinking
+
+**Evaluating test coverage and feature gaps**
+[2025-11-07T02:23:08] exec bash -lc 'ls /Users/cav/dev/TinyUtils/TinyUtilsCodexContext' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-complete-converter-core
+[2025-11-07T02:23:09] bash -lc 'ls /Users/cav/dev/TinyUtils/TinyUtilsCodexContext' succeeded in 105ms:
+finished
+[2025-11-07T02:23:09] tokens used: 35,410
+
+[2025-11-07T02:23:10] thinking
+
+**Checking for compressed context**
+[2025-11-07T02:23:11] exec bash -lc 'ls /Users/cav/dev/TinyUtils/TinyUtilsCodexContext/finished' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-complete-converter-core
+[2025-11-07T02:23:11] bash -lc 'ls /Users/cav/dev/TinyUtils/TinyUtilsCodexContext/finished' succeeded in 111ms:
+diffs_recs_finished
+email-sanitization-and-setup-2025-10-30.md
+THESE_FILES_ARE_NOT_RELEVANT
+[2025-11-07T02:23:11] tokens used: 35,625
+
+[2025-11-07T02:23:13] thinking
+
+**Checking for relevant tests**
+[2025-11-07T02:23:13] exec bash -lc 'rg -n "caching" -n tests/convert/test_service.py' in /Users/cav/dev/TinyUtils
+[2025-11-07T02:23:14] bash -lc 'rg -n "caching" -n tests/convert/test_service.py' exited 1 in 116ms:
+ERROR
+[2025-11-07T02:23:14] tokens used: 35,965
+
+[2025-11-07T02:23:16] thinking
+
+**Checking for test_service.py in tests/convert**
+[2025-11-07T02:23:16] exec bash -lc "rg --files -g 'test_service.py'" in /Users/cav/dev/TinyUtils
+[2025-11-07T02:23:16] bash -lc "rg --files -g 'test_service.py'" succeeded in 121ms:
+tests/convert/test_service.py
+[2025-11-07T02:23:16] tokens used: 36,389
+
+[2025-11-07T02:23:22] thinking
+
+**Analyzing service and test requirements**
+[2025-11-07T02:23:22] exec bash -lc "sed -n '1,200p' tinyutils/api/_lib/utils.py" in /Users/cav/dev/TinyUtils
+[2025-11-07T02:23:22] bash -lc "sed -n '1,200p' tinyutils/api/_lib/utils.py" succeeded in 102ms:
+"""Shared utility helpers for TinyUtils Python backends."""
+from __future__ import annotations
+
+import json
+import logging
+import os
+import tempfile
+import uuid
+from contextlib import contextmanager
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, Iterator, List, Optional
+
+DEFAULT_MAX_FILE_MB = 100
+DEFAULT_MAX_BATCH_MB = 1024
+DEFAULT_PREVIEW_HEADINGS = 8
+DEFAULT_PREVIEW_SNIPPETS = 4
+DEFAULT_DIFF_TRUNCATE_KB = 256
+
+MAX_FILE_MB = int(os.getenv("MAX_FILE_MB", str(DEFAULT_MAX_FILE_MB)))
+[2025-11-07T02:23:22] tokens used: 37,248
+
+[2025-11-07T02:23:26] thinking
+
+**Analyzing convert service features and caching**
+
+I'm checking how the convert service handles file size limits and batch size enforcement, noticing that batch summing isn’t currently enforced. I see mentions of caching, preview, and sanitized markdown that may need further implementation or refinement, so I plan to look for other usages of the convert service and search for caching-related code to understand what's missing or planned.
+[2025-11-07T02:23:30] exec bash -lc 'rg -n "cache" tinyutils/convert -n' in /Users/cav/dev/TinyUtils
+[2025-11-07T02:23:30] bash -lc 'rg -n "cache" tinyutils/convert -n' exited 1 in 116ms:
+ERROR
+[2025-11-07T02:23:30] tokens used: 38,380
+
+[2025-11-07T02:23:32] thinking
+
+**Searching for error usage**
+[2025-11-07T02:23:33] exec bash -lc 'rg -n "JobTooLargeError" -n' in /Users/cav/dev/TinyUtils
+[2025-11-07T02:23:33] bash -lc 'rg -n "JobTooLargeError" -n' succeeded in 119ms:
+tinyutils/api/_lib/utils.py:35:class JobTooLargeError(Exception):
+tinyutils/api/_lib/utils.py:78:        raise JobTooLargeError(
+[2025-11-07T02:23:33] tokens used: 38,564
+
+[2025-11-07T02:23:35] thinking
+
+**Confirming location**
+[2025-11-07T02:23:35] exec bash -lc "sed -n '1,200p' tinyutils/api/_lib/manifests.py" in /Users/cav/dev/TinyUtils
+[2025-11-07T02:23:35] bash -lc "sed -n '1,200p' tinyutils/api/_lib/manifests.py" succeeded in 107ms:
+"""Manifest helpers for converter outputs and previews."""
+from __future__ import annotations
+
+import difflib
+from pathlib import Path
+from typing import Dict, List, Optional
+
+from .utils import PREVIEW_HEADINGS_N, PREVIEW_SNIPPETS_M
+
+
+def collect_headings(markdown: str) -> List[str]:
+    headings: List[str] = []
+    for line in markdown.splitlines():
+        if line.startswith("#"):
+            headings.append(line.strip())
+            if len(headings) >= PREVIEW_HEADINGS_N:
+                break
+    return headings
+
+
+[2025-11-07T02:23:35] tokens used: 39,162
+
+[2025-11-07T02:23:37] thinking
+
+**Inspecting module exposures**
+[2025-11-07T02:23:37] exec bash -lc "sed -n '1,200p' tinyutils/convert/__init__.py" in /Users/cav/dev/TinyUtils
+[2025-11-07T02:23:37] bash -lc "sed -n '1,200p' tinyutils/convert/__init__.py" succeeded in 109ms:
+"""Public exports for the TinyUtils converter library."""
+from .service import ConversionOptions, convert_batch, convert_one
+from .types import (
+    BatchResult,
+    ConversionError,
+    ConversionResult,
+    InputPayload,
+    MediaArtifact,
+    PreviewData,
+    TargetArtifact,
+)
+
+__all__ = [
+    "BatchResult",
+    "ConversionError",
+    "ConversionOptions",
+    "ConversionResult",
+    "InputPayload",
+    "MediaArtifact",
+    "PreviewData",
+[2025-11-07T02:23:37] tokens used: 39,915
+
+[2025-11-07T02:23:41] thinking
+
+**Reviewing conversion feature requirements**
+[2025-11-07T02:23:42] exec bash -lc "rg -n \"Cache\" -n tinyutils -g'*'" in /Users/cav/dev/TinyUtils
+[2025-11-07T02:23:42] bash -lc "rg -n \"Cache\" -n tinyutils -g'*'" succeeded in 162ms:
+tinyutils/DEPLOY_PRODUCTION_CHECKLIST.md:30:  - `/public/styles.css`: `Cache-Control: public, max-age=600`.
+tinyutils/DEPLOY_PRODUCTION_CHECKLIST.md:31:  - `/api/check`: `Cache-Control: no-store` and `X-Robots-Tag: noindex`.
+tinyutils/vercel.json:20:        { "key": "Cache-Control", "value": "public, max-age=600" }
+tinyutils/vercel.json:26:        { "key": "Cache-Control", "value": "no-store" },
+tinyutils/vercel.json:40:        { "key": "Cache-Control", "value": "public, max-age=600" }
+tinyutils/api/check.js:811:    const robotsCache = new Map();
+tinyutils/api/check.js:836:      if (robotsCache.has(origin)) {
+tinyutils/api/check.js:837:        const cached = robotsCache.get(origin);
+tinyutils/api/check.js:853:          robotsCache.set(origin, value);
+tinyutils/api/check.js:862:          robotsCache.set(origin, value);
+tinyutils/api/check.js:869:          robotsCache.set(origin, value);
+tinyutils/api/check.js:874:          robotsCache.set(origin, value);
+tinyutils/api/check.js:881:          robotsCache.set(origin, value);
+tinyutils/api/check.js:886:        robotsCache.set(origin, value);
+[2025-11-07T02:23:42] tokens used: 40,459
+
+[2025-11-07T02:23:43] thinking
+
+**Checking for caching utilities**
+[2025-11-07T02:23:44] exec bash -lc "rg --files -g '*cache*' tinyutils" in /Users/cav/dev/TinyUtils
+[2025-11-07T02:23:44] bash -lc "rg --files -g '*cache*' tinyutils" exited 1 in 121ms:
+ERROR
+[2025-11-07T02:23:44] tokens used: 41,011
+
+[2025-11-07T02:23:47] thinking
+
+**Investigating caching implementations**
+[2025-11-07T02:23:47] exec bash -lc 'rg -n "cache_key" -n' in /Users/cav/dev/TinyUtils
+[2025-11-07T02:23:47] bash -lc 'rg -n "cache_key" -n' exited 1 in 118ms:
+ERROR
+[2025-11-07T02:23:47] tokens used: 42,103
+
+[2025-11-07T02:23:50] thinking
+
+**Reviewing test requirements and specifications**
+[2025-11-07T02:23:51] exec bash -lc 'ls TinyUtilsCodexContext/finished/diffs_recs_finished' in /Users/cav/dev/TinyUtils
+[2025-11-07T02:23:51] bash -lc 'ls TinyUtilsCodexContext/finished/diffs_recs_finished' succeeded in 84ms:
+code-cli-tinyutils-recs-finished.md
+pr1-security-caching.diff
+pr2-ux-noindex-debug.diff
+pr3-preview-fence.diff
+pr4-tests-contracts.diff
+Pro reasoning message nov 4.md
+[2025-11-07T02:23:51] tokens used: 42,393
+
+[2025-11-07T02:23:53] thinking
+
+**Checking test references for convert service**
+[2025-11-07T02:23:54] exec bash -lc "sed -n '1,200p' TinyUtilsCodexContext/finished/diffs_recs_finished/pr4-tests-contracts.diff" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-complete-converter-core
+[2025-11-07T02:23:54] bash -lc "sed -n '1,200p' TinyUtilsCodexContext/finished/diffs_recs_finished/pr4-tests-contracts.diff" exited 1 in 108ms:
+ERROR
+sed: TinyUtilsCodexContext/finished/diffs_recs_finished/pr4-tests-contracts.diff: No such file or directory
+[2025-11-07T02:23:54] tokens used: 42,690
+
+[2025-11-07T02:23:56] thinking
+
+**Setting working directory for commands**
+[2025-11-07T02:23:56] exec bash -lc "sed -n '1,200p' /Users/cav/dev/TinyUtils/TinyUtilsCodexContext/finished/diffs_recs_finished/pr4-tests-contracts.diff" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-complete-converter-core
+[2025-11-07T02:23:56] bash -lc "sed -n '1,200p' /Users/cav/dev/TinyUtils/TinyUtilsCodexContext/finished/diffs_recs_finished/pr4-tests-contracts.diff" succeeded in 101ms:
+--- /dev/null
++++ b/tests/dlf_envelope_invariants.test.mjs
+--- /dev/null+++ b/tests/dlf_envelope_invariants.test.mjs@@ -0,0 +1,19 @@+import test from 'node:test';
++import assert from 'node:assert/strict';
++import handler from '../api/check.js';
++
++test('DLF GET returns JSON error envelope with scheduler meta', async () => {
++  const req = new Request('https://example.test/api/check', { method: 'GET' });
++  const res = await handler(req);
++
++  assert.equal(res.status, 405, 'should be 405 for GET');
++  const ct = res.headers.get('content-type') || '';
++  assert.ok(ct.includes('application/json'), 'content-type should be JSON');
++  const payload = await res.json();
++  assert.equal(payload.ok, false);
++  assert.equal(typeof payload.code, 'string');
++  assert.equal(typeof payload.message, 'string');
++  assert.equal(typeof payload.requestId, 'string');
++  assert.ok(payload.meta && typeof payload.meta === 'object', 'meta should be object');
++  assert.ok(payload.meta.scheduler && typeof payload.meta.scheduler === 'object', 'meta.scheduler should be present');
+[2025-11-07T02:23:56] tokens used: 42,890
+
+[2025-11-07T02:23:58] thinking
+
+**Searching for convert service spec**
+[2025-11-07T02:23:59] exec bash -lc "sed -n '1,200p' /Users/cav/dev/TinyUtils/TinyUtilsCodexContext/finished/diffs_recs_finished/pr1-security-caching.diff" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-complete-converter-core
+[2025-11-07T02:23:59] bash -lc "sed -n '1,200p' /Users/cav/dev/TinyUtils/TinyUtilsCodexContext/finished/diffs_recs_finished/pr1-security-caching.diff" succeeded in 105ms:
+--- a/vercel.json+++ b/vercel.json@@ -3,15 +3,87 @@     {
+       "source": "/(.*)",
+       "headers": [
+-        { "key": "X-Content-Type-Options", "value": "nosniff" },
+-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
++        {
++          "key": "X-Content-Type-Options",
++          "value": "nosniff"
++        },
++        {
++          "key": "Referrer-Policy",
++          "value": "strict-origin-when-cross-origin"
++        },
++        {
++          "key": "Strict-Transport-Security",
++          "value": "max-age=63072000; includeSubDomains; preload"
++        },
++        {
++          "key": "X-Frame-Options",
++          "value": "DENY"
+[2025-11-07T02:23:59] tokens used: 45,483
+
+[2025-11-07T02:24:07] thinking
+
+**Planning converter core and tests enhancements**
+[2025-11-07T02:24:07] exec bash -lc 'rg -n "retry" tinyutils -n' in /Users/cav/dev/TinyUtils
+[2025-11-07T02:24:08] bash -lc 'rg -n "retry" tinyutils -n' succeeded in 137ms:
+tinyutils/tools/wayback-fixer/index.html:241:      'retry_1':'Retried'
+tinyutils/tools/dead-link-finder/index.html:115:              <label for="retryHttp"><input type="checkbox" id="retryHttp"> Retry with HTTP if HTTPS fails <abbr title="If HTTPS fetch fails and site is not HSTS-only, retry once over HTTP to diagnose mixed/proto issues. HSTS: Strict-Transport-Security tells browsers to use HTTPS only. We won’t downgrade such hosts.">(?)</abbr></label>
+tinyutils/tools/dead-link-finder/index.html:332:    const retryHttpEl = document.getElementById('retryHttp');
+tinyutils/tools/dead-link-finder/index.html:558:        settings.retryHttp = !!requestPayload.retryHttp;
+tinyutils/tools/dead-link-finder/index.html:647:        retryHttp: retryHttpEl ? retryHttpEl.checked : false,
+tinyutils/tools/dead-link-finder/index.html:691:      if (retryHttpEl) retryHttpEl.checked = !!state.retryHttp;
+tinyutils/tools/dead-link-finder/index.html:710:      retryHttp: false,
+tinyutils/tools/dead-link-finder/index.html:787:        retryHttp: retryHttpEl ? retryHttpEl.checked : false,
+tinyutils/tool_desc_waybackfixer.md:57:• Concurrency and retry metadata (`network.retries`, `concurrency.*`, `spnLimit`) emitted in the API response so exports reflect guardrails.
+tinyutils/tool_desc_waybackfixer.md:64:• Hardened `/api/wayback-fixer` with `fetchWithRetry`, per-origin jitter, SPN ≤10 cap enforcement, and richer note handling (`retry_1`, `timeout`).
+tinyutils/tool_desc_waybackfixer.md:71:• API consumers gain visibility into retry behavior and enforced caps, matching the documented guardrails without extra parsing changes.
+tinyutils/tool_desc_waybackfixer.md:120:• Shortcut handling now requires Cmd/Ctrl for CSV/JSON actions and ignores keystrokes when focus is inside a form control, while exports/copy buttons only enable after fresh results load (and re-disable on retry).
+tinyutils/public/index.html:249:      <label><input type="checkbox" id="retryHttp"> Retry with HTTP if HTTPS fails</label>
+tinyutils/public/index.html:362:const retryHttp = document.getElementById('retryHttp');
+tinyutils/public/index.html:405:  if (['protectCSVCell(includeArchive)','headFirst','retryHttp'].includes(e.target.id)) track('option_changed', {id:e.target.id, checked:e.target.checked});
+tinyutils/public/index.html:484:    concurrency: Math.max(1, Math.min(10, Number((document.getElementById('concurrency')||{}).value)||10)), Math.min(10, Number(concurrencyEl.value)||10)), Math.min(20, Number(concurrencyEl.value) || 10)), retryHttp: !!retryHttp.checked, mode
+tinyutils/public/index.html:504:      const meta = { runTimestamp: new Date().toISOString(), mode, source: payload.pageUrl || payload.sitemapUrl || 'list', concurrency: Math.max(1, Math.min(10, Number((document.getElementById('concurrency')||{}).value)||10)), timeoutMs: payload.timeout, robots: payload.respectRobots, scope: payload.scope || 'internal', assets: payload.includeAssets || false, httpFallback: payload.retryHttp || false, wayback: payload.includeArchive || false, totalQueued: data.totalQueued ?? lastResults.length, totalChecked: lastResults.length, truncated: !!data.truncated };
+tinyutils/public/index.html:602:      retryHttp: !!(document.getElementById('retryHttp')||{}).checked,
+tinyutils/public/index.html:626:      ['protectCSVCell(includeAssets)','respectRobots','includeArchive','headFirst','retryHttp'].forEach(chk);
+tinyutils/README.md:13:- HSTS / hard-TLD guard — even with `retryHttpOnHttpsFail=true`, HTTP fallback is never used on guarded domains.
+[2025-11-07T02:24:08] tokens used: 48,128
+
+[2025-11-07T02:24:09] thinking
+
+**Searching for convert service documentation**
+[2025-11-07T02:24:10] exec bash -lc 'rg -n "converter" -n' in /Users/cav/dev/TinyUtils
+[2025-11-07T02:24:10] bash -lc 'rg -n "converter" -n' succeeded in 112ms:
+tinyutils/convert/service.py:1:"""Reusable converter service for TinyUtils APIs."""
+tinyutils/AGENTS.md:44:  - [ ]  `/docx-to-markdown` (SEO lander; routes into the converter UI)
+tinyutils/AGENTS.md:123:- Keep using `PREVIEW_SECRET` for beta fences; converter/find-replace endpoints must accept the fence header/cookie.
+tinyutils/AGENTS.md:197:- Store converter runs under `artifacts/convert/<YYYYMMDD>/` (manifest JSON, preview diff snippets, head/tail logs).
+tinyutils/docs/AGENT_RUN_LOG.md:20:- **Branch:** `feature/universal-converter-backend`
+tinyutils/docs/AGENT_RUN_LOG.md:63:### 2025-11-06 23:55 CET - Manual - feature/universal-converter-backend
+tinyutils/docs/AGENT_RUN_LOG.md:66:- **Branch:** `feature/universal-converter-backend`
+tinyutils/docs/AGENT_RUN_LOG.md:75:### 2025-11-06 23:02 CET - Manual - feat/universal-converter-backend
+tinyutils/docs/AGENT_RUN_LOG.md:78:- **Branch:** `feature/universal-converter-backend`
+tinyutils/docs/AGENT_RUN_LOG.md:81:  - Kickoff universal converter backend implementation (libs+API+tests).
+tinyutils/docs/AGENT_RUN_LOG.md:83:  - Implement converter libs, endpoint, tests; gather artifacts.
+tinyutils/convert/types.py:1:"""Type definitions for the TinyUtils converter library."""
+tinyutils/convert/types.py:13:    """Options that align with the public converter API."""
+tests/convert/test_api_convert.py:1:"""Integration tests for the FastAPI converter endpoint."""
+tinyutils/convert/__init__.py:1:"""Public exports for the TinyUtils converter library."""
+tinyutils/docs/AGENT_TASK_CHECKLIST.md:17:| Universal converter library (convert_one/convert_batch, caching, media zip) | manual-2025-11-06T23-55 | In Progress | Library scaffolded under `tinyutils/convert/`; finish API wiring/tests before marking complete. |
+tinyutils/fixtures/README.md:4:checks once the converter and find/replace features mature. Keep files tiny and
+tinyutils/api/convert/__init__.py:1:"""Universal converter FastAPI endpoint."""
+tinyutils/api/convert/index.py:1:"""Universal document converter endpoint backed by tinyutils.convert."""
+tinyutils/api/convert/index.py:78:    converter_options = ConverterOptions(
+[2025-11-07T02:24:10] tokens used: 50,808
+
+[2025-11-07T02:24:11] thinking
+
+**Inspecting convert module**
+[2025-11-07T02:24:12] exec bash -lc "sed -n '1,200p' tinyutils/api/convert/index.py" in /Users/cav/dev/TinyUtils
+[2025-11-07T02:24:12] bash -lc "sed -n '1,200p' tinyutils/api/convert/index.py" succeeded in 107ms:
+"""Universal document converter endpoint backed by tinyutils.convert."""
+from __future__ import annotations
+
+from pathlib import Path
+from typing import List, Optional
+
+import magic
+from fastapi import FastAPI, HTTPException
+try:  # pragma: no cover - Pydantic v2
+    from pydantic import BaseModel, Field, ConfigDict, field_validator
+    _USE_PYDANTIC_V2 = True
+except ImportError:  # pragma: no cover - fallback to Pydantic v1
+    from pydantic import BaseModel, Field, validator  # type: ignore
+    ConfigDict = None  # type: ignore
+    field_validator = None  # type: ignore
+    _USE_PYDANTIC_V2 = False
+
+from tinyutils.convert import (
+    ConversionOptions as ConverterOptions,
+    InputPayload,
+[2025-11-07T02:24:12] tokens used: 51,657
+
+[2025-11-07T02:24:14] thinking
+
+**Reviewing test file for conversion requirements**
+[2025-11-07T02:24:14] exec bash -lc "sed -n '1,200p' tests/convert/test_api_convert.py" in /Users/cav/dev/TinyUtils
+[2025-11-07T02:24:14] bash -lc "sed -n '1,200p' tests/convert/test_api_convert.py" succeeded in 103ms:
+"""Integration tests for the FastAPI converter endpoint."""
+from __future__ import annotations
+
+import pytest
+
+pytest.importorskip("httpx")
+
+from fastapi.testclient import TestClient
+
+from tinyutils.api.convert.index import app
+from tinyutils.convert.types import (
+    BatchResult,
+    ConversionError,
+    ConversionResult,
+    MediaArtifact,
+    PreviewData,
+    TargetArtifact,
+)
+
+
+[2025-11-07T02:24:14] tokens used: 53,316
+
+[2025-11-07T02:24:17] thinking
+
+**Reviewing service tests and documentation**
+[2025-11-07T02:24:18] exec bash -lc "sed -n '60,160p' tinyutils/docs/AGENT_RUN_LOG.md" in /Users/cav/dev/TinyUtils
+[2025-11-07T02:24:18] bash -lc "sed -n '60,160p' tinyutils/docs/AGENT_RUN_LOG.md" succeeded in 100ms:
+- **Follow-ups:**
+  - Reload launchd agents so new log paths take effect.
+
+### 2025-11-06 23:55 CET - Manual - feature/universal-converter-backend
+- **Session:** local-shell
+- **Mode:** manual
+- **Branch:** `feature/universal-converter-backend`
+- **CWD:** /Users/cav/dev/TinyUtils
+- **Summary:**
+  - Scaffolded `tinyutils/convert/` (types + service) for multi-input/multi-target conversions, including cached Markdown reuse, previews, and optional media zips.
+  - Refactored `tinyutils/api/convert/index.py` to delegate to the new library, added `tests/convert/test_service.py` + `tests/convert/test_api_convert.py`, and stubbed dependencies for deterministic runs (`pytest -q tests/convert`).
+  - Active agents: `code-gpt-5-codex`, `qwen-3-coder`.
+- **Follow-ups:**
+  - Extend API tests once httpx is available in CI, capture artifacts, and wire documentation updates into release notes.
+
+### 2025-11-06 23:02 CET - Manual - feat/universal-converter-backend
+- **Session:** `rollout-2025-11-06T22-52-53-8a938272-2ef7-42fc-885f-502fd805313a`
+- **Mode:** manual
+- **Branch:** `feature/universal-converter-backend`
+- **CWD:** /Users/cav/dev/TinyUtils
+[2025-11-07T02:24:18] tokens used: 54,860
+
+[2025-11-07T02:24:28] thinking
+
+**Planning converter updates and tests**
+
+I'm going through the user's specs and existing code to identify needed improvements for the converter core and its tests, focusing on size limits, caching, preview generation, and markdown sanitization. I see the current service looks mostly complete but lacks caching and some features; I'll plan to add new tests for the expected functionality that currently doesn't exist so that the implementation can evolve guided by failing tests.
+[2025-11-07T02:24:29] exec bash -lc 'rg -n "cache key" -n' in /Users/cav/dev/TinyUtils
+[2025-11-07T02:24:29] bash -lc 'rg -n "cache key" -n' exited 1 in 115ms:
+ERROR
+[2025-11-07T02:24:29] tokens used: 57,399
+
+[2025-11-07T02:24:31] thinking
+
+**Searching for 'convert cache' references**
+[2025-11-07T02:24:32] exec bash -lc 'rg -n "convert" TinyUtilsCodexContext -n' in /Users/cav/dev/TinyUtils
+[2025-11-07T02:24:32] bash -lc 'rg -n "convert" TinyUtilsCodexContext -n' exited 1 in 113ms:
+ERROR
+[2025-11-07T02:24:32] tokens used: 57,586
+
+[2025-11-07T02:24:35] thinking
+
+**Considering caching strategy for conversion**
+[2025-11-07T02:24:36] exec bash -lc 'ls tinyutils/convert' in /Users/cav/dev/TinyUtils
+[2025-11-07T02:24:37] bash -lc 'ls tinyutils/convert' succeeded in 108ms:
+__init__.py
+__pycache__
+service.py
+types.py
+[2025-11-07T02:24:37] tokens used: 58,621
+
+[2025-11-07T02:24:44] thinking
+
+**Evaluating caching implementation options**
+[2025-11-07T02:24:44] exec bash -lc "sed -n '1,120p' tinyutils/docs/AGENT_TASK_CHECKLIST.md" in /Users/cav/dev/TinyUtils
+[2025-11-07T02:24:44] bash -lc "sed -n '1,120p' tinyutils/docs/AGENT_TASK_CHECKLIST.md" succeeded in 101ms:
+# Agent Task Checklist
+
+Shared tracker so agents can see which work items are planned, in progress, or finished - and how plans have evolved.
+
+## How to Use
+- **Append-only:** Add new tasks to the top of the relevant table (newest first).
+- **Always timestamp:** Record Europe/Madrid (CET) timestamps for new entries and status changes.
+- **Reference the source:** Link each task to the session ID / plan entry that created it (e.g., `rollout-2025-11-04T16-26-36-...`).
+- **Update status promptly:** When a task is completed, move it to the Completed section with evidence pointers. If a task becomes obsolete, mark it as "Superseded" with the reason.
+- **Plan changes:** Log scope or approach changes under Plan Updates and cross-reference the affected task.
+- **Helper script:** Use `python scripts/add_task_checklist_entry.py --help` to insert rows and plan updates quickly.
+
+## Active Tasks (Newest First)
+
+| Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
+| --- | --- | --- | --- |
+| Universal converter library (convert_one/convert_batch, caching, media zip) | manual-2025-11-06T23-55 | In Progress | Library scaffolded under `tinyutils/convert/`; finish API wiring/tests before marking complete. |
+| API wiring (schemas, envelope compatibility, blob uploads) | manual-2025-11-06T23-55 | In Progress | Refactor `tinyutils/api/convert/index.py` to call the library, accept string/list `to`, and keep outputs logs/errors. |
+| Tests & fixtures (unit + FastAPI) | manual-2025-11-06T23-55 | In Progress | `tests/convert/test_service.py` + `tests/convert/test_api_convert.py` seeded; extend coverage + integrate into CI. |
+| Converter artifacts & evidence path setup | manual-2025-11-06T23-55 | In Progress | Create `tinyutils/artifacts/convert/<date>/` convention for future runs; document in AGENT_RUN_LOG + checklist. |
+[2025-11-07T02:24:44] tokens used: 59,251
+
+[2025-11-07T02:24:46] thinking
+
+**Reviewing convert library tasks**
+[2025-11-07T02:24:47] exec bash -lc "sed -n '1,200p' tinyutils/api/convert/__init__.py" in /Users/cav/dev/TinyUtils
+[2025-11-07T02:24:47] bash -lc "sed -n '1,200p' tinyutils/api/convert/__init__.py" succeeded in 103ms:
+"""Universal converter FastAPI endpoint."""
+[2025-11-07T02:24:47] tokens used: 61,194
+
+[2025-11-07T02:24:54] thinking
+
+**Testing write permissions in environment**
+[2025-11-07T02:24:54] exec bash -lc "rg -n \"cache key\" -n tinyutils/docs -g'*'" in /Users/cav/dev/TinyUtils
+[2025-11-07T02:24:55] bash -lc "rg -n \"cache key\" -n tinyutils/docs -g'*'" exited 1 in 134ms:
+ERROR
+[2025-11-07T02:24:55] tokens used: 61,734
+
+[2025-11-07T02:24:56] thinking
+
+**Checking TinyUtilsCodexContext for convert references**
+[2025-11-07T02:24:57] exec bash -lc "rg -n \"converter\" -n TinyUtilsCodexContext -g'*'" in /Users/cav/dev/TinyUtils
+[2025-11-07T02:24:57] bash -lc "rg -n \"converter\" -n TinyUtilsCodexContext -g'*'" exited 1 in 127ms:
+ERROR
+[2025-11-07T02:24:57] tokens used: 62,658
+
+[2025-11-07T02:25:00] thinking
+
+**Planning test updates and utility inspection**
+[2025-11-07T02:25:00] exec bash -lc "sed -n '1,200p' tinyutils/api/_lib/pandoc_runner.py" in /Users/cav/dev/TinyUtils
+[2025-11-07T02:25:00] bash -lc "sed -n '1,200p' tinyutils/api/_lib/pandoc_runner.py" succeeded in 105ms:
+"""Pandoc runner utilities for conversions and Lua-filter passes."""
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Iterable, List, Optional
+
+import pypandoc
+
+
+class PandocError(RuntimeError):
+    """Raised when a pandoc conversion fails."""
+
+
+DEFAULT_OUTPUT_FORMAT = "gfm+pipe_tables+footnotes+tex_math_dollars"
+BASE_ARGS = ["--atx-headers", "--wrap=none", "--reference-links"]
+FILTERS = [
+    "filters/softbreak_to_space.lua",
+    "filters/strip_empty_spans.lua",
+    "filters/normalize_lists.lua",
+]
+[2025-11-07T02:25:00] tokens used: 63,043
+
+[2025-11-07T02:25:03] thinking
+
+**Inspecting text_clean.py for normalise**
+[2025-11-07T02:25:03] exec bash -lc "sed -n '1,200p' tinyutils/api/_lib/text_clean.py" in /Users/cav/dev/TinyUtils
+[2025-11-07T02:25:03] bash -lc "sed -n '1,200p' tinyutils/api/_lib/text_clean.py" succeeded in 107ms:
+"""Unicode and whitespace cleanup utilities for Markdown output."""
+from __future__ import annotations
+
+import re
+import unicodedata
+from dataclasses import dataclass
+
+ZERO_WIDTH_RE = re.compile("[\u200B\u200C\u200D\uFEFF]")
+MULTI_BLANK_RE = re.compile(r"\n{3,}")
+
+
+@dataclass
+class CleanupStats:
+    softbreaks_replaced: int = 0
+    nbsp_replaced: int = 0
+    zero_width_removed: int = 0
+
+
+def normalise_markdown(
+    text: str,
+[2025-11-07T02:25:03] tokens used: 63,870
+
+[2025-11-07T02:25:14] thinking
+
+**Analyzing converter core and caching requirements**
+
+I’m reviewing the converter core in `tinyutils/convert/service.py` and related files to understand incomplete features like caching, preview, and batch size enforcement. There’s existing scaffold code with some features, but I suspect some caching and sanitization are still missing. I’ll check the related tests to see if they currently pass or need enhancement and consider running them to establish a baseline.
+[2025-11-07T02:25:15] Command guard: Leading cd /Users/cav/dev/TinyUtils is redundant because the command already runs in /Users/cav/dev/TinyUtils. Drop the prefix before retrying.
+
+original_script: cd /Users/cav/dev/TinyUtils && pytest tests/convert/test_service.py
+resend_exact_argv: ["bash","-lc","pytest tests/convert/test_service.py"]
+[2025-11-07T02:25:15] tokens used: 65,828
+
+[2025-11-07T02:25:18] thinking
+
+**Rerunning command without cd**
+[2025-11-07T02:25:19] exec bash -lc 'pytest tests/convert/test_service.py' in /Users/cav/dev/TinyUtils
+[2025-11-07T02:25:20] bash -lc 'pytest tests/convert/test_service.py' exited 1 in 498ms:
+ERROR
+Traceback (most recent call last):
+  File "/usr/local/bin/pytest", line 7, in <module>
+    sys.exit(console_main())
+             ~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.14/site-packages/_pytest/config/__init__.py", line 201, in console_main
+    code = main()
+  File "/usr/local/lib/python3.14/site-packages/_pytest/config/__init__.py", line 156, in main
+    config = _prepareconfig(args, plugins)
+  File "/usr/local/lib/python3.14/site-packages/_pytest/config/__init__.py", line 342, in _prepareconfig
+    config = pluginmanager.hook.pytest_cmdline_parse(
+        pluginmanager=pluginmanager, args=args
+    )
+  File "/usr/local/lib/python3.14/site-packages/pluggy/_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.14/site-packages/pluggy/_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.14/site-packages/pluggy/_callers.py", line 167, in _multicall
+    raise exception
+[2025-11-07T02:25:20] tokens used: 66,143
+
+[2025-11-07T02:25:25] thinking
+
+**Investigating test environment restrictions**
+[2025-11-07T02:25:26] exec bash -lc 'mkdir -p .tmp' in /Users/cav/dev/TinyUtils
+[2025-11-07T02:25:26] bash -lc 'mkdir -p .tmp' exited 1 in 123ms:
+ERROR
+mkdir: .tmp: Operation not permitted
+[2025-11-07T02:25:26] tokens used: 69,104
+
+[2025-11-07T02:25:32] thinking
+
+**Assessing write permissions in read-only environment**
+[2025-11-07T02:25:33] tokens used: 70,406
+
+[2025-11-07T02:25:49] thinking
+
+**Planning code modifications under read-only constraint**
+
+I'm figuring out how to handle the task despite strict read-only access preventing file edits. Since I can’t apply changes or run tests, I plan to craft detailed patch instructions describing code and test updates for the user to apply manually. This includes enhancing convert_one and convert_batch functions with caching, input limits, error handling, markdown sanitization, preview generation, and structured logs, all while ensuring minimal diff and consistent style. I'll analyze existing tests to align new test cases with requirements and produce clear diffs to meet the spec even though I cannot verify them by running tests.
+[2025-11-07T02:25:51] exec bash -lc 'rg -n "cacheKey" -n' in /Users/cav/dev/TinyUtils
+[2025-11-07T02:25:52] bash -lc 'rg -n "cacheKey" -n' exited 1 in 122ms:
+ERROR
+[2025-11-07T02:25:52] tokens used: 71,929
+
+[2025-11-07T02:25:54] thinking
+
+**Checking for TODO comments**
+[2025-11-07T02:25:55] exec bash -lc 'rg -n "TODO" tinyutils/convert/service.py' in /Users/cav/dev/TinyUtils
+[2025-11-07T02:25:55] bash -lc 'rg -n "TODO" tinyutils/convert/service.py' exited 1 in 111ms:
+ERROR
+[2025-11-07T02:25:55] tokens used: 72,123
+
+[2025-11-07T02:26:41] thinking
+
+**Detailing convert service improvements**
+**Planning caching and error enhancements**
+
+I'm laying out a plan to add deterministic cache keys to conversion results, enforce input and batch size limits, propagate retry hints on errors, and update types and tests accordingly. This includes computing cache keys via hashing inputs and options, adding per-input size checks in InputPayload, batch size checks in convert_batch, and augmenting ConversionResult and ConversionError dataclasses while balancing caching complexity and test coverage.
+**Implementing cache key, batch limits, and error handling**
+
+I’m defining constants for cache version and batch size limits, creating helper functions to compute deterministic cache keys from input and options, and validating total batch size to enforce limits. I’m updating convert_one to use these helpers, embed cache keys in logs, and propagate retry hints on errors, while convert_batch checks batch size before processing and logs cache keys per item. Corresponding tests will verify cache key presence, error retry hints, batch size enforcement, and input size validation through monkeypatching and stubbing.
+**Preparing type and service module enhancements with patches**
+
+I’m designing detailed modifications adding size limits and cache key support to types and service modules, plus related error hints and batch size enforcement. Because the environment is read-only, I’ll produce unified diffs for `tinyutils/convert/types.py` and `tinyutils/convert/service.py` that the user can apply manually. These include new fields, constants, helpers, improved logging, and expanded error handling aligned with the specified plan and tests.
+**Finalizing batch processing, cache key, and tests enhancements**
+
+I’m wrapping up the batch conversion updates by adding batch size enforcement, detailed cache key computation with hashing, and improved error hints. I also prepared thorough pytest tests covering the new constraints, retries, and cache key determinism, using monkeypatching to stub out dependencies and simulate failures. With all this, the user will get clear manual patch diffs they can apply to bring these improvements into the codebase.
+**Preparing patch generation strategy**
+
+I’m planning how to create precise diffs for the files by reading their current contents, generating the full updated versions as strings, and then using Python’s difflib to produce unified diffs without touching the files. This way I can ensure accuracy and avoid manual line errors when integrating the batch size limits, cache key logic, and tests changes into types.py, service.py, and the test files.
+[2025-11-07T02:30:14] codex
+**Planning caching and error enhancements**
+
+I'm laying out a plan to add deterministic cache keys to conversion results, enforce input and batch size limits, propagate retry hints on errors, and update types and tests accordingly. This includes computing cache keys via hashing inputs and options, adding per-input size checks in InputPayload, batch size checks in convert_batch, and augmenting ConversionResult and ConversionError dataclasses while balancing caching complexity and test coverage.
+[2025-11-07T02:30:14] codex
+**Implementing cache key, batch limits, and error handling**
+
+I’m defining constants for cache version and batch size limits, creating helper functions to compute deterministic cache keys from input and options, and validating total batch size to enforce limits. I’m updating convert_one to use these helpers, embed cache keys in logs, and propagate retry hints on errors, while convert_batch checks batch size before processing and logs cache keys per item. Corresponding tests will verify cache key presence, error retry hints, batch size enforcement, and input size validation through monkeypatching and stubbing.
+[2025-11-07T02:30:14] codex
+**Preparing type and service module enhancements with patches**
+
+I’m designing detailed modifications adding size limits and cache key support to types and service modules, plus related error hints and batch size enforcement. Because the environment is read-only, I’ll produce unified diffs for `tinyutils/convert/types.py` and `tinyutils/convert/service.py` that the user can apply manually. These include new fields, constants, helpers, improved logging, and expanded error handling aligned with the specified plan and tests.
+[2025-11-07T02:30:14] codex
+**Finalizing batch processing, cache key, and tests enhancements**
+
+I’m wrapping up the batch conversion updates by adding batch size enforcement, detailed cache key computation with hashing, and improved error hints. I also prepared thorough pytest tests covering the new constraints, retries, and cache key determinism, using monkeypatching to stub out dependencies and simulate failures. With all this, the user will get clear manual patch diffs they can apply to bring these improvements into the codebase.
+[2025-11-07T02:30:14] codex
+**Preparing patch generation strategy**
+
+I’m planning how to create precise diffs for the files by reading their current contents, generating the full updated versions as strings, and then using Python’s difflib to produce unified diffs without touching the files. This way I can ensure accuracy and avoid manual line errors when integrating the batch size limits, cache key logic, and tests changes into types.py, service.py, and the test files.
+[2025-11-07T02:30:17] exec bash -lc "python - <<'PY'
+from pathlib import Path
+path = Path('tinyutils/convert/types.py')
+old = path.read_text()
+new = '''\"\"\"Type definitions for the TinyUtils converter library.\"\"\"
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import List, Optional, Sequence
+
+from tinyutils.api._lib.utils import MAX_BATCH_MB, MAX_FILE_MB, ensure_within_limits
+
+
+SUPPORTED_TARGETS: Sequence[str] = (\"md\", \"html\", \"txt\")
+MAX_INPUT_BYTES = MAX_FILE_MB * 1024 * 1024
+MAX_BATCH_BYTES = MAX_BATCH_MB * 1024 * 1024
+
+
+@dataclass(slots=True)
+class ConversionOptions:
+    \"\"\"Options that align with the public converter API.\"\"\"
+
+    accept_tracked_changes: bool = True
+    extract_media: bool = False
+    remove_zero_width: bool = True
+
+
+@dataclass(slots=True)
+class InputPayload:
+    \"\"\"In-memory payload for a document awaiting conversion.\"\"\"
+
+    name: str
+    data: bytes
+    source_format: Optional[str] = None
+
+    def __post_init__(self) -> None:
+        ensure_within_limits(len(self.data))
+
+    @property
+    def size(self) -> int:
+        return len(self.data)
+
+
+@dataclass(slots=True)
+class ConversionError:
+    \"\"\"Non-fatal error captured during a conversion attempt.\"\"\"
+
+    message: str
+    kind: str
+    retry_hint: Optional[str] = None
+
+
+@dataclass(slots=True)
+class TargetArtifact:
+    \"\"\"Artifact emitted for a requested target format.\"\"\"
+
+    target: str
+    name: str
+    content_type: str
+    data: bytes
+
+    @property
+    def size(self) -> int:
+        return len(self.data)
+
+
+@dataclass(slots=True)
+class MediaArtifact:
+    \"\"\"Optional archive that packages extracted media files.\"\"\"
+
+    name: str
+    content_type: str
+    data: bytes
+
+    @property
+    def size(self) -> int:
+        return len(self.data)
+
+
+@dataclass(slots=True)
+class PreviewData:
+    \"\"\"Preview snippets used by the TinyUtils UI.\"\"\"
+
+    headings: List[str] = field(default_factory=list)
+    snippets: List[dict] = field(default_factory=list)
+    images: List[dict] = field(default_factory=list)
+
+
+@dataclass(slots=True)
+class ConversionResult:
+    \"\"\"Full record for a single converted payload.\"\"\"
+
+    name: str
+    cache_key: Optional[str] = None
+    outputs: List[TargetArtifact] = field(default_factory=list)
+    preview: Optional[PreviewData] = None
+    media: Optional[MediaArtifact] = None
+    logs: List[str] = field(default_factory=list)
+    error: Optional[ConversionError] = None
+
+    @property
+    def succeeded(self) -> bool:
+        return self.error is None and bool(self.outputs)
+
+    @property
+    def cacheable(self) -> bool:
+        return self.succeeded and bool(self.cache_key)
+
+
+@dataclass(slots=True)
+class BatchResult:
+    \"\"\"Aggregated response for convert_batch.\"\"\"
+
+    job_id: str
+    results: List[ConversionResult] = field(default_factory=list)
+    logs: List[str] = field(default_factory=list)
+
+    @property
+    def errors(self) -> List[ConversionError]:
+        return [result.error for result in self.results if result.error]
+'''
+import difflib
+print('\\n'.join(difflib.unified_diff(old.splitlines(), new.splitlines(), fromfile=str(path), tofile=str(path))))
+PY" in /Users/cav/dev/TinyUtils
+[2025-11-07T02:30:17] bash -lc "python - <<'PY'
+from pathlib import Path
+path = Path('tinyutils/convert/types.py')
+old = path.read_text()
+new = '''\"\"\"Type definitions for the TinyUtils converter library.\"\"\"
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import List, Optional, Sequence
+
+from tinyutils.api._lib.utils import MAX_BATCH_MB, MAX_FILE_MB, ensure_within_limits
+
+
+SUPPORTED_TARGETS: Sequence[str] = (\"md\", \"html\", \"txt\")
+MAX_INPUT_BYTES = MAX_FILE_MB * 1024 * 1024
+MAX_BATCH_BYTES = MAX_BATCH_MB * 1024 * 1024
+
+
+@dataclass(slots=True)
+class ConversionOptions:
+    \"\"\"Options that align with the public converter API.\"\"\"
+
+    accept_tracked_changes: bool = True
+    extract_media: bool = False
+    remove_zero_width: bool = True
+
+
+@dataclass(slots=True)
+class InputPayload:
+    \"\"\"In-memory payload for a document awaiting conversion.\"\"\"
+
+    name: str
+    data: bytes
+    source_format: Optional[str] = None
+
+    def __post_init__(self) -> None:
+        ensure_within_limits(len(self.data))
+
+    @property
+    def size(self) -> int:
+        return len(self.data)
+
+
+@dataclass(slots=True)
+class ConversionError:
+    \"\"\"Non-fatal error captured during a conversion attempt.\"\"\"
+
+    message: str
+    kind: str
+    retry_hint: Optional[str] = None
+
+
+@dataclass(slots=True)
+class TargetArtifact:
+    \"\"\"Artifact emitted for a requested target format.\"\"\"
+
+    target: str
+    name: str
+    content_type: str
+    data: bytes
+
+    @property
+    def size(self) -> int:
+        return len(self.data)
+
+
+@dataclass(slots=True)
+class MediaArtifact:
+    \"\"\"Optional archive that packages extracted media files.\"\"\"
+
+    name: str
+    content_type: str
+    data: bytes
+
+    @property
+    def size(self) -> int:
+        return len(self.data)
+
+
+@dataclass(slots=True)
+class PreviewData:
+    \"\"\"Preview snippets used by the TinyUtils UI.\"\"\"
+
+    headings: List[str] = field(default_factory=list)
+    snippets: List[dict] = field(default_factory=list)
+    images: List[dict] = field(default_factory=list)
+
+
+@dataclass(slots=True)
+class ConversionResult:
+    \"\"\"Full record for a single converted payload.\"\"\"
+
+    name: str
+    cache_key: Optional[str] = None
+    outputs: List[TargetArtifact] = field(default_factory=list)
+    preview: Optional[PreviewData] = None
+    media: Optional[MediaArtifact] = None
+    logs: List[str] = field(default_factory=list)
+    error: Optional[ConversionError] = None
+
+    @property
+    def succeeded(self) -> bool:
+        return self.error is None and bool(self.outputs)
+
+    @property
+    def cacheable(self) -> bool:
+        return self.succeeded and bool(self.cache_key)
+
+
+@dataclass(slots=True)
+class BatchResult:
+    \"\"\"Aggregated response for convert_batch.\"\"\"
+
+    job_id: str
+    results: List[ConversionResult] = field(default_factory=list)
+    logs: List[str] = field(default_factory=list)
+
+    @property
+    def errors(self) -> List[ConversionError]:
+        return [result.error for result in self.results if result.error]
+'''
+import difflib
+print('\\n'.join(difflib.unified_diff(old.splitlines(), new.splitlines(), fromfile=str(path), tofile=str(path))))
+PY" exited 1 in 111ms:
+ERROR
+bash: cannot create temp file for here document: Operation not permitted
+[2025-11-07T02:30:17] tokens used: 97,872
+
+[2025-11-07T02:30:35] thinking
+
+**Evaluating alternatives to heredoc in read-only environment**
+[2025-11-07T02:30:39] exec bash -lc "python -c \"from pathlib import Path; old=Path('tinyutils/convert/types.py').read_text(); new='''\"\"\"Type definitions for the TinyUtils converter library.\"\"\"
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import List, Optional, Sequence
+
+from tinyutils.api._lib.utils import MAX_BATCH_MB, MAX_FILE_MB, ensure_within_limits
+
+
+SUPPORTED_TARGETS: Sequence[str] = (\"md\", \"html\", \"txt\")
+MAX_INPUT_BYTES = MAX_FILE_MB * 1024 * 1024
+MAX_BATCH_BYTES = MAX_BATCH_MB * 1024 * 1024
+
+
+@dataclass(slots=True)
+class ConversionOptions:
+    \"\"\"Options that align with the public converter API.\"\"\"
+
+    accept_tracked_changes: bool = True
+    extract_media: bool = False
+    remove_zero_width: bool = True
+
+
+@dataclass(slots=True)
+class InputPayload:
+    \"\"\"In-memory payload for a document awaiting conversion.\"\"\"
+
+    name: str
+    data: bytes
+    source_format: Optional[str] = None
+
+    def __post_init__(self) -> None:
+        ensure_within_limits(len(self.data))
+
+    @property
+    def size(self) -> int:
+        return len(self.data)
+
+
+@dataclass(slots=True)
+class ConversionError:
+    \"\"\"Non-fatal error captured during a conversion attempt.\"\"\"
+
+    message: str
+    kind: str
+    retry_hint: Optional[str] = None
+
+
+@dataclass(slots=True)
+class TargetArtifact:
+    \"\"\"Artifact emitted for a requested target format.\"\"\"
+
+    target: str
+    name: str
+    content_type: str
+    data: bytes
+
+    @property
+    def size(self) -> int:
+        return len(self.data)
+
+
+@dataclass(slots=True)
+class MediaArtifact:
+    \"\"\"Optional archive that packages extracted media files.\"\"\"
+
+    name: str
+    content_type: str
+    data: bytes
+
+    @property
+    def size(self) -> int:
+        return len(self.data)
+
+
+@dataclass(slots=True)
+class PreviewData:
+    \"\"\"Preview snippets used by the TinyUtils UI.\"\"\"
+
+    headings: List[str] = field(default_factory=list)
+    snippets: List[dict] = field(default_factory=list)
+    images: List[dict] = field(default_factory=list)
+
+
+@dataclass(slots=True)
+class ConversionResult:
+    \"\"\"Full record for a single converted payload.\"\"\"
+
+    name: str
+    cache_key: Optional[str] = None
+    outputs: List[TargetArtifact] = field(default_factory=list)
+    preview: Optional[PreviewData] = None
+    media: Optional[MediaArtifact] = None
+    logs: List[str] = field(default_factory=list)
+    error: Optional[ConversionError] = None
+
+    @property
+    def succeeded(self) -> bool:
+        return self.error is None and bool(self.outputs)
+
+    @property
+    def cacheable(self) -> bool:
+        return self.succeeded and bool(self.cache_key)
+
+
+@dataclass(slots=True)
+class BatchResult:
+    \"\"\"Aggregated response for convert_batch.\"\"\"
+
+    job_id: str
+    results: List[ConversionResult] = field(default_factory=list)
+    logs: List[str] = field(default_factory=list)
+
+    @property
+    def errors(self) -> List[ConversionError]:
+        return [result.error for result in self.results if result.error]
+'''; import difflib; print('\\n'.join(difflib.unified_diff(old.splitlines(), new.splitlines(), fromfile='tinyutils/convert/types.py', tofile='tinyutils/convert/types.py')))\"]]," in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-complete-converter-core
+[2025-11-07T02:30:39] bash -lc "python -c \"from pathlib import Path; old=Path('tinyutils/convert/types.py').read_text(); new='''\"\"\"Type definitions for the TinyUtils converter library.\"\"\"
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import List, Optional, Sequence
+
+from tinyutils.api._lib.utils import MAX_BATCH_MB, MAX_FILE_MB, ensure_within_limits
+
+
+SUPPORTED_TARGETS: Sequence[str] = (\"md\", \"html\", \"txt\")
+MAX_INPUT_BYTES = MAX_FILE_MB * 1024 * 1024
+MAX_BATCH_BYTES = MAX_BATCH_MB * 1024 * 1024
+
+
+@dataclass(slots=True)
+class ConversionOptions:
+    \"\"\"Options that align with the public converter API.\"\"\"
+
+    accept_tracked_changes: bool = True
+    extract_media: bool = False
+    remove_zero_width: bool = True
+
+
+@dataclass(slots=True)
+class InputPayload:
+    \"\"\"In-memory payload for a document awaiting conversion.\"\"\"
+
+    name: str
+    data: bytes
+    source_format: Optional[str] = None
+
+    def __post_init__(self) -> None:
+        ensure_within_limits(len(self.data))
+
+    @property
+    def size(self) -> int:
+        return len(self.data)
+
+
+@dataclass(slots=True)
+class ConversionError:
+    \"\"\"Non-fatal error captured during a conversion attempt.\"\"\"
+
+    message: str
+    kind: str
+    retry_hint: Optional[str] = None
+
+
+@dataclass(slots=True)
+class TargetArtifact:
+    \"\"\"Artifact emitted for a requested target format.\"\"\"
+
+    target: str
+    name: str
+    content_type: str
+    data: bytes
+
+    @property
+    def size(self) -> int:
+        return len(self.data)
+
+
+@dataclass(slots=True)
+class MediaArtifact:
+    \"\"\"Optional archive that packages extracted media files.\"\"\"
+
+    name: str
+    content_type: str
+    data: bytes
+
+    @property
+    def size(self) -> int:
+        return len(self.data)
+
+
+@dataclass(slots=True)
+class PreviewData:
+    \"\"\"Preview snippets used by the TinyUtils UI.\"\"\"
+
+    headings: List[str] = field(default_factory=list)
+    snippets: List[dict] = field(default_factory=list)
+    images: List[dict] = field(default_factory=list)
+
+
+@dataclass(slots=True)
+class ConversionResult:
+    \"\"\"Full record for a single converted payload.\"\"\"
+
+    name: str
+    cache_key: Optional[str] = None
+    outputs: List[TargetArtifact] = field(default_factory=list)
+    preview: Optional[PreviewData] = None
+    media: Optional[MediaArtifact] = None
+    logs: List[str] = field(default_factory=list)
+    error: Optional[ConversionError] = None
+
+    @property
+    def succeeded(self) -> bool:
+        return self.error is None and bool(self.outputs)
+
+    @property
+    def cacheable(self) -> bool:
+        return self.succeeded and bool(self.cache_key)
+
+
+@dataclass(slots=True)
+class BatchResult:
+    \"\"\"Aggregated response for convert_batch.\"\"\"
+
+    job_id: str
+    results: List[ConversionResult] = field(default_factory=list)
+    logs: List[str] = field(default_factory=list)
+
+    @property
+    def errors(self) -> List[ConversionError]:
+        return [result.error for result in self.results if result.error]
+'''; import difflib; print('\\n'.join(difflib.unified_diff(old.splitlines(), new.splitlines(), fromfile='tinyutils/convert/types.py', tofile='tinyutils/convert/types.py')))\"]]," exited 127 in 117ms:
+ERROR
+bash: python: command not found
+[2025-11-07T02:30:39] tokens used: 102,101
+
+[2025-11-07T02:30:41] thinking
+
+**Recognizing Python command usage**
+[2025-11-07T02:30:47] exec bash -lc "python3 -c \"from pathlib import Path; old=Path('tinyutils/convert/types.py').read_text(); new='''\"\"\"Type definitions for the TinyUtils converter library.\"\"\"
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import List, Optional, Sequence
+
+from tinyutils.api._lib.utils import MAX_BATCH_MB, MAX_FILE_MB, ensure_within_limits
+
+
+SUPPORTED_TARGETS: Sequence[str] = (\"md\", \"html\", \"txt\")
+MAX_INPUT_BYTES = MAX_FILE_MB * 1024 * 1024
+MAX_BATCH_BYTES = MAX_BATCH_MB * 1024 * 1024
+
+
+@dataclass(slots=True)
+class ConversionOptions:
+    \"\"\"Options that align with the public converter API.\"\"\"
+
+    accept_tracked_changes: bool = True
+    extract_media: bool = False
+    remove_zero_width: bool = True
+
+
+@dataclass(slots=True)
+class InputPayload:
+    \"\"\"In-memory payload for a document awaiting conversion.\"\"\"
+
+    name: str
+    data: bytes
+    source_format: Optional[str] = None
+
+    def __post_init__(self) -> None:
+        ensure_within_limits(len(self.data))
+
+    @property
+    def size(self) -> int:
+        return len(self.data)
+
+
+@dataclass(slots=True)
+class ConversionError:
+    \"\"\"Non-fatal error captured during a conversion attempt.\"\"\"
+
+    message: str
+    kind: str
+    retry_hint: Optional[str] = None
+
+
+@dataclass(slots=True)
+class TargetArtifact:
+    \"\"\"Artifact emitted for a requested target format.\"\"\"
+
+    target: str
+    name: str
+    content_type: str
+    data: bytes
+
+    @property
+    def size(self) -> int:
+        return len(self.data)
+
+
+@dataclass(slots=True)
+class MediaArtifact:
+    \"\"\"Optional archive that packages extracted media files.\"\"\"
+
+    name: str
+    content_type: str
+    data: bytes
+
+    @property
+    def size(self) -> int:
+        return len(self.data)
+
+
+@dataclass(slots=True)
+class PreviewData:
+    \"\"\"Preview snippets used by the TinyUtils UI.\"\"\"
+
+    headings: List[str] = field(default_factory=list)
+    snippets: List[dict] = field(default_factory=list)
+    images: List[dict] = field(default_factory=list)
+
+
+@dataclass(slots=True)
+class ConversionResult:
+    \"\"\"Full record for a single converted payload.\"\"\"
+
+    name: str
+    cache_key: Optional[str] = None
+    outputs: List[TargetArtifact] = field(default_factory=list)
+    preview: Optional[PreviewData] = None
+    media: Optional[MediaArtifact] = None
+    logs: List[str] = field(default_factory=list)
+    error: Optional[ConversionError] = None
+
+    @property
+    def succeeded(self) -> bool:
+        return self.error is None and bool(self.outputs)
+
+    @property
+    def cacheable(self) -> bool:
+        return self.succeeded and bool(self.cache_key)
+
+
+@dataclass(slots=True)
+class BatchResult:
+    \"\"\"Aggregated response for convert_batch.\"\"\"
+
+    job_id: str
+    results: List[ConversionResult] = field(default_factory=list)
+    logs: List[str] = field(default_factory=list)
+
+    @property
+    def errors(self) -> List[ConversionError]:
+        return [result.error for result in self.results if result.error]
+'''; import difflib; print('\\n'.join(difflib.unified_diff(old.splitlines(), new.splitlines(), fromfile='tinyutils/convert/types.py', tofile='tinyutils/convert/types.py')))\"]}," in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-complete-converter-core
+[2025-11-07T02:30:48] bash -lc "python3 -c \"from pathlib import Path; old=Path('tinyutils/convert/types.py').read_text(); new='''\"\"\"Type definitions for the TinyUtils converter library.\"\"\"
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import List, Optional, Sequence
+
+from tinyutils.api._lib.utils import MAX_BATCH_MB, MAX_FILE_MB, ensure_within_limits
+
+
+SUPPORTED_TARGETS: Sequence[str] = (\"md\", \"html\", \"txt\")
+MAX_INPUT_BYTES = MAX_FILE_MB * 1024 * 1024
+MAX_BATCH_BYTES = MAX_BATCH_MB * 1024 * 1024
+
+
+@dataclass(slots=True)
+class ConversionOptions:
+    \"\"\"Options that align with the public converter API.\"\"\"
+
+    accept_tracked_changes: bool = True
+    extract_media: bool = False
+    remove_zero_width: bool = True
+
+
+@dataclass(slots=True)
+class InputPayload:
+    \"\"\"In-memory payload for a document awaiting conversion.\"\"\"
+
+    name: str
+    data: bytes
+    source_format: Optional[str] = None
+
+    def __post_init__(self) -> None:
+        ensure_within_limits(len(self.data))
+
+    @property
+    def size(self) -> int:
+        return len(self.data)
+
+
+@dataclass(slots=True)
+class ConversionError:
+    \"\"\"Non-fatal error captured during a conversion attempt.\"\"\"
+
+    message: str
+    kind: str
+    retry_hint: Optional[str] = None
+
+
+@dataclass(slots=True)
+class TargetArtifact:
+    \"\"\"Artifact emitted for a requested target format.\"\"\"
+
+    target: str
+    name: str
+    content_type: str
+    data: bytes
+
+    @property
+    def size(self) -> int:
+        return len(self.data)
+
+
+@dataclass(slots=True)
+class MediaArtifact:
+    \"\"\"Optional archive that packages extracted media files.\"\"\"
+
+    name: str
+    content_type: str
+    data: bytes
+
+    @property
+    def size(self) -> int:
+        return len(self.data)
+
+
+@dataclass(slots=True)
+class PreviewData:
+    \"\"\"Preview snippets used by the TinyUtils UI.\"\"\"
+
+    headings: List[str] = field(default_factory=list)
+    snippets: List[dict] = field(default_factory=list)
+    images: List[dict] = field(default_factory=list)
+
+
+@dataclass(slots=True)
+class ConversionResult:
+    \"\"\"Full record for a single converted payload.\"\"\"
+
+    name: str
+    cache_key: Optional[str] = None
+    outputs: List[TargetArtifact] = field(default_factory=list)
+    preview: Optional[PreviewData] = None
+    media: Optional[MediaArtifact] = None
+    logs: List[str] = field(default_factory=list)
+    error: Optional[ConversionError] = None
+
+    @property
+    def succeeded(self) -> bool:
+        return self.error is None and bool(self.outputs)
+
+    @property
+    def cacheable(self) -> bool:
+        return self.succeeded and bool(self.cache_key)
+
+
+@dataclass(slots=True)
+class BatchResult:
+    \"\"\"Aggregated response for convert_batch.\"\"\"
+
+    job_id: str
+    results: List[ConversionResult] = field(default_factory=list)
+    logs: List[str] = field(default_factory=list)
+
+    @property
+    def errors(self) -> List[ConversionError]:
+        return [result.error for result in self.results if result.error]
+'''; import difflib; print('\\n'.join(difflib.unified_diff(old.splitlines(), new.splitlines(), fromfile='tinyutils/convert/types.py', tofile='tinyutils/convert/types.py')))\"]}," exited 1 in 214ms:
+ERROR
+  File "<string>", line 1
+    from pathlib import Path; old=Path('tinyutils/convert/types.py').read_text(); new='''Type
+                                                                                      ^
+SyntaxError: unterminated triple-quoted string literal (detected at line 1)
+[2025-11-07T02:30:48] tokens used: 104,233
+
+[2025-11-07T02:31:08] thinking
+
+**Analyzing quoting and newline issues in command string**
+[2025-11-07T02:31:08] exec bash -lc 'ls /Users/cav' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-complete-converter-core
+[2025-11-07T02:31:08] bash -lc 'ls /Users/cav' succeeded in 123ms:
+-
+6841a584-b1cb-4310-8e18-c5f2d47de887.jpg
+Airdropped Files
+Applications
+Applications (Parallels)
+Backups
+cali_core
+Calibre Library
+Celtic_Cross_Tarot_Spread.jpeg
+ChatGPT Chat SAVE
+chatgpt_collaboration
+check_playsound.log
+context.json
+Creative Cloud Files
+Desktop
+dev
+Documents
+Downloads
+dwhelper
+evalonly.txt
+[2025-11-07T02:31:08] tokens used: 106,840
+
+[2025-11-07T02:31:11] thinking
+
+**Considering alternative temporary directory**
+[2025-11-07T02:31:11] exec bash -lc 'mkdir -p /Users/cav/tmp' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-complete-converter-core
+[2025-11-07T02:31:11] bash -lc 'mkdir -p /Users/cav/tmp' exited 1 in 135ms:
+ERROR
+mkdir: /Users/cav/tmp: Operation not permitted
+[2025-11-07T02:31:11] tokens used: 107,270
+
+[2025-11-07T02:31:55] thinking
+
+**Preparing bulk code modifications**
+
+I'm focusing on crafting complete patches for types, service, and tests files with detailed modifications for caching, error handling, batch checking, and logging features. Since the filesystem is read-only and quoting issues prevent running verification scripts here, I’m planning manual diffs with embedded string replacements and careful edits to ensure correctness. This approach lets me describe complex changes precisely and provide the user final patches to apply and test on their environment.
+**Detailing patch creation strategy**
+
+I'm working on producing accurate patches by comparing old and new code and encoding changes as diffs. Because direct file editing isn't possible here, I'm planning to craft manual patch files including edits to imports, new constants, updated functions with caching and error improvements, and extended tests validating all changes. I’m carefully ensuring syntax correctness and references to help the user apply these comprehensively later.
+**Completing conversion enhancements**
+
+I'm preparing a detailed patch that adds input size enforcement, caching keys, improved logging, and retry hints to the conversion service and type definitions. The patch also updates tests to cover these new behaviors and edge cases. I'll include helpers for batch size checks and options summarization, refactor conversion functions for better error handling, and tighten input payload validation based on size limits. Next, I’ll summarize this in a final message with relevant file references and testing notes.
+[2025-11-07T02:33:22] codex
+**Detailing patch creation strategy**
+
+I'm working on producing accurate patches by comparing old and new code and encoding changes as diffs. Because direct file editing isn't possible here, I'm planning to craft manual patch files including edits to imports, new constants, updated functions with caching and error improvements, and extended tests validating all changes. I’m carefully ensuring syntax correctness and references to help the user apply these comprehensively later.
+[2025-11-07T02:33:22] codex
+**Completing conversion enhancements**
+
+I'm preparing a detailed patch that adds input size enforcement, caching keys, improved logging, and retry hints to the conversion service and type definitions. The patch also updates tests to cover these new behaviors and edge cases. I'll include helpers for batch size checks and options summarization, refactor conversion functions for better error handling, and tighten input payload validation based on size limits. Next, I’ll summarize this in a final message with relevant file references and testing notes.
+[2025-11-07T02:33:22] codex
+
+I couldn’t modify the working tree because the sandbox is read-only (write commands are blocked), but here’s the complete patch for the converter core, types, and unit tests that implements the requested limits, caching metadata, richer previews/logs, structured retry hints, and additional coverage.
+
+```diff
+diff --git a/tinyutils/convert/types.py b/tinyutils/convert/types.py
+--- a/tinyutils/convert/types.py
++++ b/tinyutils/convert/types.py
+@@
+-from dataclasses import dataclass, field
+-from typing import List, Optional, Sequence
+-
+-
+-SUPPORTED_TARGETS: Sequence[str] = ("md", "html", "txt")
++from dataclasses import dataclass, field
++from typing import List, Optional, Sequence
++
++from tinyutils.api._lib.utils import MAX_BATCH_MB, MAX_FILE_MB, ensure_within_limits
++
++
++SUPPORTED_TARGETS: Sequence[str] = ("md", "html", "txt")
++MAX_INPUT_BYTES = MAX_FILE_MB * 1024 * 1024
++MAX_BATCH_BYTES = MAX_BATCH_MB * 1024 * 1024
+@@
+ @dataclass(slots=True)
+ class InputPayload:
+@@
+-    source_format: Optional[str] = None
++    source_format: Optional[str] = None
++
++    def __post_init__(self) -> None:
++        ensure_within_limits(len(self.data))
++
++    @property
++    def size(self) -> int:
++        return len(self.data)
+@@
+ @dataclass(slots=True)
+ class ConversionError:
+@@
+-    message: str
+-    kind: str
++    message: str
++    kind: str
++    retry_hint: Optional[str] = None
+@@
+ @dataclass(slots=True)
+ class ConversionResult:
+@@
+-    name: str
++    name: str
++    cache_key: Optional[str] = None
+     outputs: List[TargetArtifact] = field(default_factory=list)
+@@
+     def succeeded(self) -> bool:
+         return self.error is None and bool(self.outputs)
++
++    @property
++    def cacheable(self) -> bool:
++        return self.succeeded and bool(self.cache_key)
+diff --git a/tinyutils/convert/service.py b/tinyutils/convert/service.py
+--- a/tinyutils/convert/service.py
++++ b/tinyutils/convert/service.py
+@@
+-import json
+-import zipfile
+-from pathlib import Path
+-from typing import Any, Iterable, List, Optional, Sequence
+-
+-from tinyutils.api._lib import pandoc_runner
+-from tinyutils.api._lib.manifests import build_snippets, collect_headings, media_manifest
+-from tinyutils.api._lib.text_clean import normalise_markdown
+-from tinyutils.api._lib.utils import ensure_within_limits, generate_job_id, job_workspace
++import hashlib
++import json
++import zipfile
++from pathlib import Path
++from typing import Any, Iterable, List, Optional, Sequence
++
++from tinyutils.api._lib import pandoc_runner
++from tinyutils.api._lib.manifests import build_snippets, collect_headings, media_manifest
++from tinyutils.api._lib.text_clean import normalise_markdown
++from tinyutils.api._lib.utils import (
++    JobTooLargeError,
++    MAX_BATCH_MB,
++    ensure_within_limits,
++    generate_job_id,
++    job_workspace,
++)
+@@
+-from .types import (
+-    BatchResult,
+-    ConversionError,
+-    ConversionOptions,
+-    ConversionResult,
+-    InputPayload,
+-    MediaArtifact,
+-    PreviewData,
+-    TargetArtifact,
+-)
++from .types import (
++    BatchResult,
++    ConversionError,
++    ConversionOptions,
++    ConversionResult,
++    InputPayload,
++    MediaArtifact,
++    PreviewData,
++    TargetArtifact,
++    MAX_BATCH_BYTES,
++)
+@@
+ TARGET_CONTENT_TYPES = {
+     "md": "text/markdown; charset=utf-8",
+     "html": "text/html; charset=utf-8",
+     "txt": "text/plain; charset=utf-8",
+ }
+ 
++CACHE_VERSION = "tinyutils.convert/v1"
++_RETRY_HINT_SHRINK = "shrink-input"
++_RETRY_HINT_RETRY = "retry-later"
++
+@@
+ def convert_one(
+@@
+-) -> ConversionResult:
+-    """Convert a single payload into the requested textual outputs."""
+-
+-    opts = options or ConversionOptions()
+-    normalized_targets = _normalize_targets(targets)
+-    logs: List[str] = [f"targets={','.join(normalized_targets)}"]
+-
+-    try:
+-        ensure_within_limits(len(input_bytes))
+-        with job_workspace() as workspace:
+-            safe_name = _safe_name(name)
+-            input_path = workspace / safe_name
+-            input_path.write_bytes(input_bytes)
+-            logs.append(f"input_bytes={len(input_bytes)}")
+-
+-            raw_md = workspace / "raw.md"
+-            filtered_md = workspace / "filtered.md"
+-            cleaned_md = workspace / "cleaned.md"
+-            media_dir = workspace / "media"
+-            extract_dir: Optional[Path] = media_dir if opts.extract_media else None
+-
+-            pandoc_runner.convert_to_markdown(
+-                source=input_path,
+-                destination=raw_md,
+-                from_format=from_format,
+-                accept_tracked_changes=opts.accept_tracked_changes,
+-                extract_media_dir=extract_dir,
+-            )
+-            pandoc_runner.apply_lua_filters(raw_md, filtered_md)
+-
+-            before_text = raw_md.read_text("utf-8")
+-            filtered_text = filtered_md.read_text("utf-8")
+-            cleaned_text, stats = normalise_markdown(
+-                filtered_text,
+-                remove_zero_width=opts.remove_zero_width,
+-            )
+-            cleaned_md.write_text(cleaned_text, "utf-8")
+-            logs.append(f"cleanup_stats={json.dumps(stats.__dict__, sort_keys=True)}")
+-
+-            outputs = _build_target_artifacts(
+-                targets=normalized_targets,
+-                cleaned_path=cleaned_md,
+-                cleaned_text=cleaned_text,
+-                base_name=_safe_stem(safe_name),
+-            )
+-
+-            preview = PreviewData(
+-                headings=collect_headings(cleaned_text),
+-                snippets=build_snippets(before_text, cleaned_text),
+-                images=media_manifest(extract_dir),
+-            )
+-
+-            media_artifact = _build_media_artifact(extract_dir, _safe_stem(safe_name))
+-
+-            return ConversionResult(
+-                name=name,
+-                outputs=outputs,
+-                preview=preview,
+-                media=media_artifact,
+-                logs=logs,
+-            )
+-    except Exception as exc:  # pragma: no cover - converted to error payload
+-        return ConversionResult(
+-            name=name,
+-            logs=logs,
+-            error=ConversionError(message=str(exc), kind=exc.__class__.__name__),
+-        )
++) -> ConversionResult:
++    """Convert a single payload into the requested textual outputs."""
++
++    opts = options or ConversionOptions()
++    normalized_targets = _normalize_targets(targets)
++    cache_key = _compute_cache_key(
++        input_bytes=input_bytes,
++        targets=normalized_targets,
++        options=opts,
++        from_format=from_format,
++    )
++    logs: List[str] = [
++        f"cache_key={cache_key}",
++        f"targets={','.join(normalized_targets)}",
++        _summarize_options(opts),
++    ]
++
++    try:
++        ensure_within_limits(len(input_bytes))
++        with job_workspace() as workspace:
++            safe_name = _safe_name(name)
++            base_name = _safe_stem(safe_name)
++            input_path = workspace / safe_name
++            input_path.write_bytes(input_bytes)
++            logs.append(f"input_bytes={len(input_bytes)}")
++
++            raw_md = workspace / "raw.md"
++            filtered_md = workspace / "filtered.md"
++            cleaned_md = workspace / "cleaned.md"
++            media_dir = workspace / "media"
++            extract_dir: Optional[Path] = media_dir if opts.extract_media else None
++
++            pandoc_runner.convert_to_markdown(
++                source=input_path,
++                destination=raw_md,
++                from_format=from_format,
++                accept_tracked_changes=opts.accept_tracked_changes,
++                extract_media_dir=extract_dir,
++            )
++            pandoc_runner.apply_lua_filters(raw_md, filtered_md)
++
++            before_text = raw_md.read_text("utf-8")
++            filtered_text = filtered_md.read_text("utf-8")
++            cleaned_text, stats = normalise_markdown(
++                filtered_text,
++                remove_zero_width=opts.remove_zero_width,
++            )
++            cleaned_md.write_text(cleaned_text, "utf-8")
++            logs.append(f"cleanup_stats={json.dumps(stats.__dict__, sort_keys=True)}")
++
++            outputs = _build_target_artifacts(
++                targets=normalized_targets,
++                cleaned_path=cleaned_md,
++                cleaned_text=cleaned_text,
++                base_name=base_name,
++            )
++
++            preview = PreviewData(
++                headings=collect_headings(cleaned_text),
++                snippets=build_snippets(before_text, cleaned_text),
++                images=media_manifest(extract_dir),
++            )
++            logs.append(f"preview_headings={len(preview.headings)}")
++            logs.append(f"preview_snippets={len(preview.snippets)}")
++            logs.append(f"preview_images={len(preview.images)}")
++
++            media_artifact = _build_media_artifact(extract_dir, base_name)
++            if media_artifact:
++                logs.append(f"media_bytes={media_artifact.size}")
++
++            return ConversionResult(
++                name=name,
++                cache_key=cache_key,
++                outputs=outputs,
++                preview=preview,
++                media=media_artifact,
++                logs=logs,
++            )
++    except JobTooLargeError as exc:
++        logs.append("error=too_large")
++        return ConversionResult(
++            name=name,
++            cache_key=cache_key,
++            logs=logs,
++            error=ConversionError(
++                message=str(exc),
++                kind=exc.__class__.__name__,
++                retry_hint=_RETRY_HINT_SHRINK,
++            ),
++        )
++    except Exception as exc:  # pragma: no cover - converted to error payload
++        logs.append(f"error={exc.__class__.__name__}")
++        return ConversionResult(
++            name=name,
++            cache_key=cache_key,
++            logs=logs,
++            error=ConversionError(
++                message=str(exc),
++                kind=exc.__class__.__name__,
++                retry_hint=_RETRY_HINT_RETRY,
++            ),
++        )
+@@
+ def convert_batch(
+@@
+-) -> BatchResult:
+-    """Convert multiple payloads, capturing per-input errors."""
+-
+-    if not inputs:
+-        raise ValueError("inputs must contain at least one payload")
+-
+-    opts = options or ConversionOptions()
+-    normalized_targets = _normalize_targets(targets)
+-    job_id = generate_job_id()
+-    batch_logs = [
+-        f"job_id={job_id}",
+-        f"inputs={len(inputs)}",
+-        f"targets={','.join(normalized_targets)}",
+-    ]
+-
+-    results: List[ConversionResult] = []
+-    for payload in inputs:
+-        result = convert_one(
+-            input_bytes=payload.data,
+-            name=payload.name,
+-            targets=normalized_targets,
+-            from_format=payload.source_format or from_format,
+-            options=opts,
+-        )
+-        for entry in result.logs:
+-            batch_logs.append(f"{payload.name}:{entry}")
+-        results.append(result)
+-
+-    return BatchResult(job_id=job_id, results=results, logs=batch_logs)
++) -> BatchResult:
++    """Convert multiple payloads, capturing per-input errors."""
++
++    if not inputs:
++        raise ValueError("inputs must contain at least one payload")
++
++    opts = options or ConversionOptions()
++    normalized_targets = _normalize_targets(targets)
++    total_bytes = _ensure_batch_within_limits(inputs)
++    job_id = generate_job_id()
++    batch_logs = [
++        f"job_id={job_id}",
++        f"inputs={len(inputs)}",
++        f"bytes={total_bytes}",
++        f"targets={','.join(normalized_targets)}",
++    ]
++
++    results: List[ConversionResult] = []
++    for payload in inputs:
++        result = convert_one(
++            input_bytes=payload.data,
++            name=payload.name,
++            targets=normalized_targets,
++            from_format=payload.source_format or from_format,
++            options=opts,
++        )
++        if result.cache_key:
++            batch_logs.append(f"{payload.name}:cache_key={result.cache_key}")
++        for entry in result.logs:
++            batch_logs.append(f"{payload.name}:{entry}")
++        results.append(result)
++
++    return BatchResult(job_id=job_id, results=results, logs=batch_logs)
++
++
++def _ensure_batch_within_limits(inputs: Sequence[InputPayload]) -> int:
++    total = sum(len(payload.data) for payload in inputs)
++    if total > MAX_BATCH_BYTES:
++        raise ValueError(
++            f"Batch exceeds MAX_BATCH_MB ({MAX_BATCH_MB} MB). Received {total} bytes."
++        )
++    return total
+@@
+ def _build_target_artifacts(
+@@
+     return artifacts
++
++
++def _summarize_options(opts: ConversionOptions) -> str:
++    return (
++        "options="
++        f"tracked={int(opts.accept_tracked_changes)}"
++        f";media={int(opts.extract_media)}"
++        f";zero_width={int(opts.remove_zero_width)}"
++    )
++
++
++def _compute_cache_key(
++    *,
++    input_bytes: bytes,
++    targets: Sequence[str],
++    options: ConversionOptions,
++    from_format: Optional[str],
++) -> str:
++    digest = hashlib.sha256()
++    digest.update(CACHE_VERSION.encode("utf-8"))
++    digest.update(b"\x00")
++    digest.update(",".join(targets).encode("utf-8"))
++    digest.update(b"\x00")
++    digest.update(b"1" if options.accept_tracked_changes else b"0")
++    digest.update(b"1" if options.extract_media else b"0")
++    digest.update(b"1" if options.remove_zero_width else b"0")
++    digest.update(b"\x00")
++    digest.update((from_format or "").strip().lower().encode("utf-8"))
++    digest.update(b"\x00")
++    digest.update(len(input_bytes).to_bytes(8, "big"))
++    digest.update(input_bytes)
++    return digest.hexdigest()
+diff --git a/tests/convert/test_service.py b/tests/convert/test_service.py
+--- a/tests/convert/test_service.py
++++ b/tests/convert/test_service.py
+@@
+-from pathlib import Path
+-
+-import pytest
+-
+-from tinyutils.convert import ConversionOptions, convert_batch, convert_one
+-from tinyutils.convert.types import InputPayload
++from pathlib import Path
++
++import pytest
++
++from tinyutils.api._lib import pandoc_runner
++from tinyutils.api._lib.utils import JobTooLargeError
++from tinyutils.convert import ConversionOptions, convert_batch, convert_one
++from tinyutils.convert.types import InputPayload
++import tinyutils.convert.service as service_module
++import tinyutils.convert.types as types_module
+@@
+-@pytest.fixture(autouse=True)
+-def stub_pandoc(monkeypatch, tmp_path):
++@pytest.fixture(autouse=True)
++def stub_pandoc(monkeypatch):
+@@
+-    from tinyutils.api._lib import pandoc_runner
+-    import tinyutils.convert.service as service_module
+-
+     monkeypatch.setattr(pandoc_runner, "convert_to_markdown", fake_convert_to_markdown)
+     monkeypatch.setattr(pandoc_runner, "apply_lua_filters", fake_apply_lua_filters)
+@@
+-def test_convert_one_defaults_to_markdown_only():
+-    payload = "# Title\n\nBody"
++def test_convert_one_defaults_to_markdown_only():
++    payload = "# Title\u200b\n\nBody"
+@@
+-    assert result.error is None
+-    assert [artifact.target for artifact in result.outputs] == ["md"]
+-    md_artifact = result.outputs[0]
+-    assert md_artifact.name == "doc.md"
+-    assert md_artifact.data.decode("utf-8").startswith("# Title")
+-    assert result.preview and result.preview.headings == ["# Title"]
++    assert result.error is None
++    assert result.cache_key
++    assert [artifact.target for artifact in result.outputs] == ["md"]
++    md_artifact = result.outputs[0]
++    assert md_artifact.name == "doc.md"
++    assert "\u200b" not in md_artifact.data.decode("utf-8")
++    assert result.preview and result.preview.headings == ["# Title"]
++    assert any(log.startswith("cleanup_stats=") for log in result.logs)
+@@
+-def test_convert_one_multi_target_reuses_markdown(tmp_path):
++def test_convert_one_multi_target_reuses_markdown():
+@@
+-    assert [artifact.target for artifact in result.outputs] == ["md", "html", "txt"]
++    assert result.cache_key
++    assert [artifact.target for artifact in result.outputs] == ["md", "html", "txt"]
+@@
+ def test_convert_one_with_media_zip(monkeypatch):
+@@
+-    assert result.media.size > 0
++    assert result.media.size > 0
++    assert "media_bytes=" in " ".join(result.logs)
++
++
++def test_convert_one_cache_key_is_deterministic():
++    data = b"# Cache Key"
++    first = convert_one(input_bytes=data, name="doc.docx")
++    second = convert_one(input_bytes=data, name="doc.docx")
++
++    assert first.cache_key == second.cache_key
++
++
++def test_convert_one_reports_retry_hint_for_size(monkeypatch):
++    def fake_ensure(_size):
++        raise JobTooLargeError("way too big")
++
++    monkeypatch.setattr(service_module, "ensure_within_limits", fake_ensure)
++    result = convert_one(input_bytes=b"x", name="huge.docx")
++
++    assert result.error
++    assert result.error.retry_hint == "shrink-input"
++
++
++def test_convert_one_reports_retry_hint_for_runtime(monkeypatch):
++    def boom(*_args, **_kwargs):
++        raise RuntimeError("pandoc exploded")
++
++    monkeypatch.setattr(pandoc_runner, "convert_to_markdown", boom)
++    result = convert_one(input_bytes=b"boom", name="boom.docx")
++
++    assert result.error
++    assert result.error.retry_hint == "retry-later"
++    assert "error=RuntimeError" in result.logs[-1]
+@@
+-def test_convert_batch_aggregates_results(monkeypatch):
++def test_convert_batch_aggregates_results():
+@@
+-    assert len(batch.results) == 2
+-    assert all(result.error is None for result in batch.results)
+-    assert any("first.docx" in log for log in batch.logs)
+-    first = batch.results[0]
+-    assert [artifact.target for artifact in first.outputs] == ["md", "txt"]
++    assert len(batch.results) == 2
++    assert all(result.error is None for result in batch.results)
++    assert any("first.docx" in log for log in batch.logs)
++    first = batch.results[0]
++    assert first.cache_key
++    assert [artifact.target for artifact in first.outputs] == ["md", "txt"]
++    assert any("cache_key=" in entry for entry in batch.logs)
++
++
++def test_convert_batch_enforces_batch_limit(monkeypatch):
++    monkeypatch.setattr(service_module, "MAX_BATCH_BYTES", 8)
++
++    inputs = [
++        InputPayload(name="first.docx", data=b"1234"),
++        InputPayload(name="second.docx", data=b"1234"),
++    ]
++
++    with pytest.raises(ValueError):
++        convert_batch(inputs=inputs, targets=["md"])
++
++
++def test_convert_batch_preserves_individual_logs():
++    inputs = [
++        InputPayload(name="first.docx", data=b"one"),
++        InputPayload(name="second.docx", data=b"two"),
++    ]
++
++    batch = convert_batch(inputs=inputs)
++
++    assert any("cleanup_stats" in log for log in batch.logs)
+@@
+-def test_convert_batch_aggregates_results(monkeypatch):
+-    inputs = [
+-        InputPayload(name="first.docx", data=b"one"),
+-        InputPayload(name="second.docx", data=b"two"),
+-    ]
+-
+-    batch = convert_batch(inputs=inputs, targets=["md", "txt"])
+-
+-    assert batch.job_id
+-    assert len(batch.results) == 2
+-    assert all(result.error is None for result in batch.results)
+-    assert any("first.docx" in log for log in batch.logs)
+-    first = batch.results[0]
+-    assert [artifact.target for artifact in first.outputs] == ["md", "txt"]
++def test_input_payload_enforces_limit(monkeypatch):
++    def fake_ensure(size):
++        if size > 4:
++            raise JobTooLargeError("too big")
++
++    monkeypatch.setattr(types_module, "ensure_within_limits", fake_ensure)
++
++    InputPayload(name="ok.docx", data=b"1234")
++    with pytest.raises(JobTooLargeError):
++        InputPayload(name="bad.docx", data=b"12345")
+```
+
+Key changes to apply:
+
+- `tinyutils/convert/types.py:7-61` adds limit-sharing constants, validates `InputPayload` sizes on construction, adds `retry_hint` plus `cache_key` metadata with `cacheable` convenience.
+- `tinyutils/convert/service.py:8-193` now computes deterministic cache keys, enriches logs/preview metadata, enforces per-batch byte limits, and emits structured `ConversionError` retry hints (`shrink-input` for limit breaches, `retry-later` otherwise).
+- `tests/convert/test_service.py:1-160` extends the suite to cover cache keys, logging, retry hints, batch limit enforcement, and the new `InputPayload` guard while keeping the existing pandoc stubs.
+
+Testing: `pytest tests/convert/test_service.py` still can’t run here because the sandbox blocks creation of temporary directories (`tempfile` fails before pytest starts). Please apply the patch and run the suite locally once you’re on a writable filesystem.
+
+Next steps for me (once a writable sandbox is available):
+1. Apply the diff above and rerun `pytest tests/convert/test_service.py`.
+2. If you need API-level verification, exercise `tests/convert/test_api_convert.py` as well so FastAPI wiring sees the new fields.
+
+Let me know if you’d like me to revisit once write access is restored.
+[2025-11-07T02:33:48] tokens used: 128,214

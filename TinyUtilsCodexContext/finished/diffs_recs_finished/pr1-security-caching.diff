@@ -1,0 +1,122 @@
+--- a/vercel.json+++ b/vercel.json@@ -3,15 +3,87 @@     {
+       "source": "/(.*)",
+       "headers": [
+-        { "key": "X-Content-Type-Options", "value": "nosniff" },
+-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
++        {
++          "key": "X-Content-Type-Options",
++          "value": "nosniff"
++        },
++        {
++          "key": "Referrer-Policy",
++          "value": "strict-origin-when-cross-origin"
++        },
++        {
++          "key": "Strict-Transport-Security",
++          "value": "max-age=63072000; includeSubDomains; preload"
++        },
++        {
++          "key": "X-Frame-Options",
++          "value": "DENY"
++        },
++        {
++          "key": "Permissions-Policy",
++          "value": "geolocation=(), camera=(), microphone=(), usb=(), payment=(), browsing-topics=()"
++        },
++        {
++          "key": "Content-Security-Policy",
++          "value": "default-src 'self'; img-src 'self' data: https:; script-src 'self' 'unsafe-inline' https://plausible.io; connect-src 'self' https://plausible.io https://archive.org https://web.archive.org; style-src 'self' 'unsafe-inline'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
++        }
+       ]
+     },
+     {
+       "source": "/tools/wayback-fixer/demo/(.*)",
+       "headers": [
+-        { "key": "Cache-Control", "value": "public, max-age=600" }
++        {
++          "key": "Cache-Control",
++          "value": "public, max-age=600"
++        }
++      ]
++    },
++    {
++      "source": "/public/(.*)",
++      "headers": [
++        {
++          "key": "Cache-Control",
++          "value": "public, max-age=600"
++        }
+       ]
+     }
++  ],
++  "rewrites": [
++    {
++      "source": "/tools/keyword-density",
++      "destination": "/api/fence?target=/tools/keyword-density/index.html"
++    },
++    {
++      "source": "/tools/keyword-density/",
++      "destination": "/api/fence?target=/tools/keyword-density/index.html"
++    },
++    {
++      "source": "/tools/keyword-density/index.html",
++      "destination": "/api/fence?target=/tools/keyword-density/index.html"
++    },
++    {
++      "source": "/tools/meta-preview",
++      "destination": "/api/fence?target=/tools/meta-preview/index.html"
++    },
++    {
++      "source": "/tools/meta-preview/",
++      "destination": "/api/fence?target=/tools/meta-preview/index.html"
++    },
++    {
++      "source": "/tools/meta-preview/index.html",
++      "destination": "/api/fence?target=/tools/meta-preview/index.html"
++    },
++    {
++      "source": "/tools/sitemap-generator",
++      "destination": "/api/fence?target=/tools/sitemap-generator/index.html"
++    },
++    {
++      "source": "/tools/sitemap-generator/",
++      "destination": "/api/fence?target=/tools/sitemap-generator/index.html"
++    },
++    {
++      "source": "/tools/sitemap-generator/index.html",
++      "destination": "/api/fence?target=/tools/sitemap-generator/index.html"
++    }
+   ]
+-}
++}
+--- a/api/check.js+++ b/api/check.js@@ -6,6 +6,7 @@ 
+ function json(status, body, requestId) {
+   const headers = new Headers({ 'content-type': 'application/json; charset=utf-8' });
++  headers.set('cache-control', 'no-store');
+   if (requestId) headers.set('x-request-id', requestId);
+   return new Response(JSON.stringify(body), {
+     status,
+
+--- a/api/sitemap-delta.js+++ b/api/sitemap-delta.js@@ -13,6 +13,7 @@ 
+ function jsonResponse(status, payload, requestId) {
+   const headers = new Headers({ 'content-type': 'application/json; charset=utf-8' });
++  headers.set('cache-control', 'no-store');
+   if (requestId) headers.set('x-request-id', requestId);
+   return new Response(JSON.stringify(payload), { status, headers });
+ }
+
+--- a/api/wayback-fixer.js+++ b/api/wayback-fixer.js@@ -6,6 +6,7 @@ 
+ function json(status, body, requestId) {
+   const headers = new Headers({ 'content-type': 'application/json; charset=utf-8' });
++  headers.set('cache-control', 'no-store');
+   if (requestId) headers.set('x-request-id', requestId);
+   return new Response(JSON.stringify(body), { status, headers });
+ }
+
+--- a/api/metafetch.js+++ b/api/metafetch.js@@ -8,6 +8,7 @@ 
+ function json(status, body, requestId) {
+   const headers = new Headers({ 'content-type': 'application/json; charset=utf-8' });
++  headers.set('cache-control', 'no-store');
+   if (requestId) headers.set('x-request-id', requestId);
+   return new Response(JSON.stringify(body), { status, headers });
+ }

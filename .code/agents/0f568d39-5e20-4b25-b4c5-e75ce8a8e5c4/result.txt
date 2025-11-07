@@ -1,0 +1,98 @@
+[2025-11-04T15:42:53] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-produce-exact-bash
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-04T15:42:53] User instructions:
+Produce the exact bash to deploy + probe + save artifacts for PR3 fence validation with preview→prod fallback and print a short summary footer of observed statuses. Steps: set FENCE_SECRET (use existing $PREVIEW_SECRET or generate with openssl rand -hex 16), run `vercel pull --yes --environment=preview`, deploy preview with `vercel deploy --yes --env PREVIEW_SECRET=$FENCE_SECRET` capturing URL (fallback to `vercel deploy --prod --yes --env PREVIEW_SECRET=$FENCE_SECRET`). Curl -sD - the following and save headers to artifacts: 1) $URL/tools/dead-link-finder/ (public), 2) $URL/tools/keyword-density (expect 401), 3) $URL/tools/keyword-density?preview_secret=$FENCE_SECRET (expect 200 & Set-Cookie). Grep for HTTP/, content-type, cache-control, set-cookie, www-authenticate. Note SSO may yield 401; capture & annotate. Output should be compact copy-pasteable bash.
+[2025-11-04T15:42:53] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-produce-exact-bash
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-04T15:42:53] User instructions:
+Produce the exact bash to deploy + probe + save artifacts for PR3 fence validation with preview→prod fallback and print a short summary footer of observed statuses. Steps: set FENCE_SECRET (use existing $PREVIEW_SECRET or generate with openssl rand -hex 16), run `vercel pull --yes --environment=preview`, deploy preview with `vercel deploy --yes --env PREVIEW_SECRET=$FENCE_SECRET` capturing URL (fallback to `vercel deploy --prod --yes --env PREVIEW_SECRET=$FENCE_SECRET`). Curl -sD - the following and save headers to artifacts: 1) $URL/tools/dead-link-finder/ (public), 2) $URL/tools/keyword-density (expect 401), 3) $URL/tools/keyword-density?preview_secret=$FENCE_SECRET (expect 200 & Set-Cookie). Grep for HTTP/, content-type, cache-control, set-cookie, www-authenticate. Note SSO may yield 401; capture & annotate. Output should be compact copy-pasteable bash.
+
+[2025-11-04T15:43:41] thinking
+
+**Producing comprehensive bash deployment script**
+
+I'll create a copy-pasteable bash script that generates or uses a secret, runs `vercel pull` and deploy commands with fallback from preview to production, captures deployment URLs from logs, probes endpoints with curl saving headers and filtered info, annotates possible SSO-induced 401 responses, and prints a summary—all designed to be portable and robust for the user’s needs.
+[2025-11-04T15:43:42] codex
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+ARTIFACT_ROOT="artifacts/pr3-fence-$(date +%Y%m%d-%H%M%S)"
+mkdir -p "$ARTIFACT_ROOT"
+
+if [[ -n "${PREVIEW_SECRET:-}" ]]; then
+  FENCE_SECRET="$PREVIEW_SECRET"
+else
+  FENCE_SECRET="$(openssl rand -hex 16)"
+fi
+export FENCE_SECRET
+export PREVIEW_SECRET="$FENCE_SECRET"
+
+vercel pull --yes --environment=preview | tee "$ARTIFACT_ROOT/vercel-pull.log"
+
+extract_url() {
+  awk 'match($0, /(https:\/\/[[:alnum:]\.-]+\.vercel\.app)/, m){url=m[1]} END{if(length(url)) print url}' "$1"
+}
+
+DEPLOYED_URL=""
+preview_log="$ARTIFACT_ROOT/vercel-deploy-preview.log"
+prod_log="$ARTIFACT_ROOT/vercel-deploy-prod.log"
+
+if vercel deploy --yes --env PREVIEW_SECRET="$FENCE_SECRET" 2>&1 | tee "$preview_log"; then
+  DEPLOYED_URL="$(extract_url "$preview_log")"
+fi
+if [[ -z "$DEPLOYED_URL" ]]; then
+  if vercel deploy --prod --yes --env PREVIEW_SECRET="$FENCE_SECRET" 2>&1 | tee "$prod_log"; then
+    DEPLOYED_URL="$(extract_url "$prod_log")"
+  fi
+fi
+if [[ -z "$DEPLOYED_URL" ]]; then
+  echo "Failed to determine deployment URL." >&2
+  exit 1
+fi
+
+declare -a SUMMARY_LINES=()
+
+probe() {
+  local label="$1"
+  local endpoint="$2"
+  local expectation="$3"
+  local out_all="$ARTIFACT_ROOT/${label}.headers"
+  local out_filtered="$ARTIFACT_ROOT/${label}.headers.filtered"
+
+  curl -sS -D - "$endpoint" -o /dev/null | tee "$out_all" >/dev/null
+  grep -iE '^(HTTP/|content-type|cache-control|set-cookie|www-authenticate)' "$out_all" | tee "$out_filtered" || true
+
+  local status
+  status="$(grep -m1 -i '^HTTP/' "$out_all" | awk '{print $2}')"
+  SUMMARY_LINES+=("$label :: ${status:-n/a} (expected $expectation)")
+  if [[ "${status:-}" == "401" ]]; then
+    SUMMARY_LINES+=("$label :: note 401 (possible SSO guard)")
+  fi
+}
+
+probe "dead-link-finder"        "$DEPLOYED_URL/tools/dead-link-finder/"                "200 public"
+probe "keyword-density-locked"  "$DEPLOYED_URL/tools/keyword-density"                  "401 protected"
+probe "keyword-density-secret"  "$DEPLOYED_URL/tools/keyword-density?preview_secret=$FENCE_SECRET" "200 preview (Set-Cookie)"
+
+printf '\nArtifacts captured under %s\n' "$ARTIFACT_ROOT"
+printf '%s\n' "${SUMMARY_LINES[@]}"
+```
+[2025-11-04T15:43:47] tokens used: 9,275

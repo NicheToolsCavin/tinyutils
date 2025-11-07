@@ -1,0 +1,1614 @@
+[2025-11-05T00:12:19] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-05T00:12:19] User instructions:
+Context: 
+
+Agent: Create a unified diff patch for tinyutils that: (a) adds tests/api_contracts.test.mjs, tests/dlf_envelope_invariants.test.mjs, tests/csv_hardening.unit.test.mjs with focused, deterministic tests matching our API envelope (status, JSON ok/detail, request-id propagation) and CSV hardening edges; (b) adds tinyutils/scripts/test_edge_handlers.mjs if the suites import it; (c) updates tinyutils/package.
+
+Context: Goal: prepare PR4 tests. Repo: /Users/cav/dev/TinyUtils/tinyutils. Inputs: diffs_recs/pr4-tests-contracts.diff if present; otherwise derive from checklist: add tests/api_contracts.test.mjs, tests/dlf_envelope_invariants.test.mjs, tests/csv_hardening.unit.test.mjs; ensure package.json has "type":"module" and a "test" script using Node’s built-in test runner. Keep changes minimal; do not break existing code. Maintain ESM.
+
+[2025-11-05T00:12:19] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-05T00:12:19] User instructions:
+Context: 
+
+Agent: Create a unified diff patch for tinyutils that: (a) adds tests/api_contracts.test.mjs, tests/dlf_envelope_invariants.test.mjs, tests/csv_hardening.unit.test.mjs with focused, deterministic tests matching our API envelope (status, JSON ok/detail, request-id propagation) and CSV hardening edges; (b) adds tinyutils/scripts/test_edge_handlers.mjs if the suites import it; (c) updates tinyutils/package.
+
+Context: Goal: prepare PR4 tests. Repo: /Users/cav/dev/TinyUtils/tinyutils. Inputs: diffs_recs/pr4-tests-contracts.diff if present; otherwise derive from checklist: add tests/api_contracts.test.mjs, tests/dlf_envelope_invariants.test.mjs, tests/csv_hardening.unit.test.mjs; ensure package.json has "type":"module" and a "test" script using Node’s built-in test runner. Keep changes minimal; do not break existing code. Maintain ESM.
+
+
+[2025-11-05T00:12:23] thinking
+
+**Inspecting repository state and diffs**
+[2025-11-05T00:12:23] exec bash -lc pwd in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:12:23] bash -lc pwd succeeded in 85ms:
+/Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:12:23] tokens used: 5,723
+
+[2025-11-05T00:12:25] thinking
+
+**Listing repository contents**
+[2025-11-05T00:12:26] exec bash -lc ls in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:12:26] bash -lc ls succeeded in 95ms:
+[2025-11-05T00:12:26] tokens used: 11,590
+
+[2025-11-05T00:12:29] thinking
+
+**Checking repository directory contents**
+[2025-11-05T00:12:29] exec bash -lc 'ls /Users/cav/dev/TinyUtils/tinyutils' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:12:29] bash -lc 'ls /Users/cav/dev/TinyUtils/tinyutils' succeeded in 87ms:
+ads.txt
+ADSENSE_SETUP.md
+AGENTS.md
+api
+artifacts
+CHANGES-v1.3.0-rc2.txt
+CHANGES-v1.3.0-rc3.txt
+DEPLOY_PRODUCTION_CHECKLIST.md
+docs
+feedback.html
+guides
+index.html
+offering-to-the-triple-goddess.txt
+package.json
+PREVIEW_SMOKE_CHECKLIST.md
+privacy.html
+public
+README_DEPLOY.md
+README-VERCEL.md
+README.md
+[2025-11-05T00:12:29] tokens used: 11,943
+
+[2025-11-05T00:12:31] thinking
+
+**Preparing to read package.json**
+[2025-11-05T00:12:32] exec bash -lc 'cat /Users/cav/dev/TinyUtils/tinyutils/package.json' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:12:32] bash -lc 'cat /Users/cav/dev/TinyUtils/tinyutils/package.json' succeeded in 100ms:
+{
+  "name": "tinyutils",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "vercel-build": "echo 'static + edge'",
+    "test": "node --test",
+    "smoke:local": "node scripts/smoke_dlf_local.mjs",
+    "smoke:preview": "node scripts/smoke_dlf_preview.mjs",
+    "smoke:extras": "bash scripts/smoke_dlf_extras.sh",
+    "ui:smoke:dlf": "node scripts/ui_smoke_dlf.mjs",
+    "ui:smoke:sd": "node scripts/ui_smoke_sitemap.mjs",
+    "ui:smoke:wbf": "node scripts/ui_smoke_wayback.mjs"
+  },
+  "engines": {
+    "node": "20.x"
+  }
+}
+[2025-11-05T00:12:32] tokens used: 12,709
+
+[2025-11-05T00:12:33] thinking
+
+**Checking tinyutils package contents**
+[2025-11-05T00:12:34] exec bash -lc 'ls /Users/cav/dev/TinyUtils/tinyutils/tinyutils' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:12:34] bash -lc 'ls /Users/cav/dev/TinyUtils/tinyutils/tinyutils' succeeded in 96ms:
+artifacts
+[2025-11-05T00:12:34] tokens used: 13,441
+
+[2025-11-05T00:12:36] thinking
+
+**Searching for tinyutils package file**
+[2025-11-05T00:12:36] exec bash -lc 'ls /Users/cav/dev/TinyUtils/tinyutils' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:12:36] bash -lc 'ls /Users/cav/dev/TinyUtils/tinyutils' succeeded in 101ms:
+ads.txt
+ADSENSE_SETUP.md
+AGENTS.md
+api
+artifacts
+CHANGES-v1.3.0-rc2.txt
+CHANGES-v1.3.0-rc3.txt
+DEPLOY_PRODUCTION_CHECKLIST.md
+docs
+feedback.html
+guides
+index.html
+offering-to-the-triple-goddess.txt
+package.json
+PREVIEW_SMOKE_CHECKLIST.md
+privacy.html
+public
+README_DEPLOY.md
+README-VERCEL.md
+README.md
+[2025-11-05T00:12:36] tokens used: 14,070
+
+[2025-11-05T00:12:38] thinking
+
+**Searching for package files**
+[2025-11-05T00:12:39] exec bash -lc "cd /Users/cav/dev/TinyUtils/tinyutils && rg --files -g 'package*'" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:12:39] bash -lc "cd /Users/cav/dev/TinyUtils/tinyutils && rg --files -g 'package*'" succeeded in 135ms:
+package.json
+[2025-11-05T00:12:39] tokens used: 14,560
+
+[2025-11-05T00:12:40] thinking
+
+**Planning test creation strategy**
+[2025-11-05T00:12:41] exec bash -lc 'ls /Users/cav/dev/TinyUtils/tinyutils/tests' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:12:41] bash -lc 'ls /Users/cav/dev/TinyUtils/tinyutils/tests' succeeded in 101ms:
+dlf_api_error_json.test.mjs
+[2025-11-05T00:12:41] tokens used: 14,803
+
+[2025-11-05T00:12:44] thinking
+
+**Planning additional tests**
+[2025-11-05T00:12:44] exec bash -lc 'ls /Users/cav/dev/TinyUtils/tinyutils/api' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:12:44] bash -lc 'ls /Users/cav/dev/TinyUtils/tinyutils/api' succeeded in 95ms:
+check.js
+fence.js
+health.js
+metafetch.js
+sitemap-delta.js
+wayback-fixer.js
+[2025-11-05T00:12:44] tokens used: 15,142
+
+[2025-11-05T00:12:46] thinking
+
+**Inspecting edge function example**
+[2025-11-05T00:12:46] exec bash -lc "sed -n '1,160p' /Users/cav/dev/TinyUtils/tinyutils/api/check.js" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:12:46] bash -lc "sed -n '1,160p' /Users/cav/dev/TinyUtils/tinyutils/api/check.js" succeeded in 97ms:
+export const config = { runtime: 'edge' };
+
+function rid() {
+  return Math.random().toString(16).slice(2, 10);
+}
+
+function json(status, body, requestId) {
+  const headers = new Headers({
+    'content-type': 'application/json; charset=utf-8',
+    'cache-control': 'no-store'
+  });
+  if (requestId) headers.set('x-request-id', requestId);
+  return new Response(JSON.stringify(body), {
+    status,
+    headers
+  });
+}
+
+function jerr(status, code, message, detail, stage, requestId, metaExtras) {
+  const meta = {
+[2025-11-05T00:12:46] tokens used: 15,366
+
+[2025-11-05T00:12:48] thinking
+
+**Checking test coverage in separate modules**
+[2025-11-05T00:12:48] exec bash -lc "sed -n '1,160p' /Users/cav/dev/TinyUtils/tinyutils/tests/dlf_api_error_json.test.mjs" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:12:49] bash -lc "sed -n '1,160p' /Users/cav/dev/TinyUtils/tinyutils/tests/dlf_api_error_json.test.mjs" succeeded in 105ms:
+import test from 'node:test';
+import assert from 'node:assert/strict';
+
+import handler from '../api/check.js';
+
+test('DLF API responds with JSON error envelopes', async () => {
+  const request = new Request('https://tinyutils-eight.vercel.app/api/check', {
+    method: 'GET'
+  });
+
+  const response = await handler(request);
+
+  const contentType = response.headers.get('content-type') || '';
+  assert.ok(
+    contentType.includes('application/json'),
+    `Expected JSON content-type, got "${contentType}"`
+  );
+
+  const payload = await response.json();
+  assert.strictEqual(typeof payload, 'object');
+[2025-11-05T00:12:49] tokens used: 17,916
+
+[2025-11-05T00:12:51] thinking
+
+**Investigating test setup for envelope behavior**
+[2025-11-05T00:12:52] exec bash -lc 'ls /Users/cav/dev/TinyUtils/tinyutils/scripts' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:12:52] bash -lc 'ls /Users/cav/dev/TinyUtils/tinyutils/scripts' succeeded in 104ms:
+add_task_checklist_entry.py
+consent.js
+log_run_entry.py
+preview_smoke.mjs
+smoke_dlf_extras.sh
+smoke_dlf_local.mjs
+smoke_dlf_preview.mjs
+test_edge_handlers.mjs
+ui_smoke_dlf.mjs
+ui_smoke_sitemap.mjs
+ui_smoke_wayback.mjs
+[2025-11-05T00:12:52] tokens used: 21,004
+
+[2025-11-05T00:12:54] thinking
+
+**Verifying existing test script presence**
+[2025-11-05T00:12:55] exec bash -lc "sed -n '1,200p' /Users/cav/dev/TinyUtils/tinyutils/scripts/test_edge_handlers.mjs" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:12:55] bash -lc "sed -n '1,200p' /Users/cav/dev/TinyUtils/tinyutils/scripts/test_edge_handlers.mjs" succeeded in 97ms:
+#!/usr/bin/env node
+import sitemapDelta from '../api/sitemap-delta.js';
+import waybackFixer from '../api/wayback-fixer.js';
+import metafetch from '../api/metafetch.js';
+import checkHandler from '../api/check.js';
+
+const originalFetch = globalThis.fetch;
+
+const SNAPSHOT_URL = 'https://web.archive.org/web/20240101120000/https://example.com/old';
+
+globalThis.fetch = async (url, init = {}) => {
+  if (typeof url === 'string' && url.startsWith('https://archive.org/wayback/available')) {
+    const payload = {
+      archived_snapshots: {
+        closest: {
+          available: true,
+          url: SNAPSHOT_URL,
+          timestamp: '20240101120000',
+          status: '200'
+        }
+[2025-11-05T00:12:55] tokens used: 21,720
+
+[2025-11-05T00:12:58] thinking
+
+**Reviewing test coverage for API handlers**
+[2025-11-05T00:12:58] exec bash -lc "sed -n '1,200p' /Users/cav/dev/TinyUtils/tinyutils/api/health.js" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:12:58] bash -lc "sed -n '1,200p' /Users/cav/dev/TinyUtils/tinyutils/api/health.js" succeeded in 104ms:
+export const config = { runtime: 'edge' };
+
+export default async function handler() {
+  return new Response(JSON.stringify({ ok: true }), {
+    status: 200,
+    headers: {
+      'content-type': 'application/json; charset=utf-8',
+      'cache-control': 'no-store'
+    }
+  });
+}
+[2025-11-05T00:12:58] tokens used: 24,095
+
+[2025-11-05T00:13:00] thinking
+
+**Checking metafetch.js file**
+[2025-11-05T00:13:01] exec bash -lc "sed -n '1,200p' /Users/cav/dev/TinyUtils/tinyutils/api/metafetch.js" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:13:01] bash -lc "sed -n '1,200p' /Users/cav/dev/TinyUtils/tinyutils/api/metafetch.js" succeeded in 101ms:
+export const config = { runtime: 'edge' };
+
+const UA = 'TinyUtils-DeadLinkChecker/1.0 (+https://tinyutils-eight.vercel.app; hello@tinyutils.net)';
+
+function rid() {
+  return Math.random().toString(16).slice(2, 10);
+}
+
+function json(status, body, requestId) {
+  const headers = new Headers({
+    'content-type': 'application/json; charset=utf-8',
+    'cache-control': 'no-store'
+  });
+  if (requestId) headers.set('x-request-id', requestId);
+  return new Response(JSON.stringify(body), { status, headers });
+}
+
+function isPrivateHost(hostname) {
+  const host = (hostname || '').toLowerCase();
+  if (!host) return true;
+[2025-11-05T00:13:01] tokens used: 24,492
+
+[2025-11-05T00:13:03] thinking
+
+**Searching for CSV-related code**
+[2025-11-05T00:13:03] exec bash -lc 'cd /Users/cav/dev/TinyUtils/tinyutils && rg "csv" -n' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:13:04] bash -lc 'cd /Users/cav/dev/TinyUtils/tinyutils && rg "csv" -n' succeeded in 127ms:
+CHANGES-v1.3.0-rc2.txt:5:- Bundled demo datasets: /tools/wayback-fixer/demo/demo-urls.txt and dlf-sample.csv.
+docs/AGENT_TASK_CHECKLIST.md:22:| Import PR4 Node test suites and wire `pnpm test` | `rollout-2025-11-04T16-26-36-da356561-8be5-4818-8e6c-7eab8f79a99a` (2025-11-04 15:29 CET) | Open | Add `tests/api_contracts.test.mjs`, `tests/dlf_envelope_invariants.test.mjs`, `tests/csv_hardening.unit.test.mjs`; ensure `package.json` scripts run them; execute `pnpm test` and capture logs. |
+docs/AGENT_RUN_LOG.md:122:- Import `tests/api_contracts.test.mjs`, `tests/dlf_envelope_invariants.test.mjs`, `tests/csv_hardening.unit.test.mjs`; update `package.json` scripts and run `pnpm test` (PR4).
+public/tools/dead-link-finder/index.html:386:      download('dead-links.csv', toCSV(lastResults, meta), 'text/csv');
+public/index.html:456:exportCsv.addEventListener('click', () => { download('dead-links.csv', toCSV(lastResults, meta, meta), 'text/csv'); track('export_csv'); });
+public/index.html:458:  try { await navigator.clipboard.writeText(toCSV(lastResults)); copyCsv.textContent='Copied'; setTimeout(()=>copyCsv.textContent='Copy CSV',1200); track('copy_csv'); } 
+tools/dead-link-finder/index.html:501:      const csv = lines.join('\n');
+tools/dead-link-finder/index.html:502:      return `\ufeff${csv}`;
+tools/dead-link-finder/index.html:606:      const csv = toCSV(lastResults, meta);
+tools/dead-link-finder/index.html:607:      download(makeDatedFilename('dead-link-finder', 'csv'), csv, 'text/csv');
+tools/dead-link-finder/index.html:613:        const csv = toCSV(lastResults, meta);
+tools/dead-link-finder/index.html:614:        await navigator.clipboard.writeText(csv);
+public/tools/sitemap-delta/index.html:482:    const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join(LINE_BREAK);
+public/tools/sitemap-delta/index.html:483:    downloadFile('sitemap-delta-redirects.csv', 'text/csv', `${csv}${LINE_BREAK}${metaLine}`);
+public/tools/sitemap-delta/index.html:509:    const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join(LINE_BREAK);
+public/tools/sitemap-delta/index.html:510:    downloadFile('unmapped-410.csv', 'text/csv', csv);
+public/tools/wayback-fixer/index.html:79:          <input id="file" type="file" accept=".csv,.txt">
+public/tools/wayback-fixer/index.html:283:    if (f.name.endsWith('.csv')){
+public/tools/wayback-fixer/index.html:302:      const [f] = await window.showOpenFilePicker({ types:[{ description:'CSV', accept:{ 'text/csv':['.csv'] } }] });
+public/tools/wayback-fixer/index.html:413:    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt],{type:'text/csv'})); a.download='wayback-replacements.csv'; a.click();
+[2025-11-05T00:13:04] tokens used: 25,934
+
+[2025-11-05T00:13:06] thinking
+
+**Searching for CSV utilities**
+[2025-11-05T00:13:07] exec bash -lc 'cd /Users/cav/dev/TinyUtils/tinyutils && rg "function toCSV" -n' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:13:07] bash -lc 'cd /Users/cav/dev/TinyUtils/tinyutils && rg "function toCSV" -n' succeeded in 96ms:
+tools/dead-link-finder/index.html:476:    function toCSV(rows, metaInfo) {
+public/index.html:435:function toCSV(rows, meta){
+tools/wayback-fixer/index.html:391:  function toCSV(rows){
+public/tools/wayback-fixer/index.html:387:  function toCSV(rows){
+public/tools/dead-link-finder/index.html:329:    function toCSV(rows, metaInfo) {
+[2025-11-05T00:13:07] tokens used: 27,477
+
+[2025-11-05T00:13:10] thinking
+
+**Analyzing testing strategy and dependencies**
+[2025-11-05T00:13:10] exec bash -lc 'cd /Users/cav/dev/TinyUtils/tinyutils && rg "request-id" -n' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:13:11] bash -lc 'cd /Users/cav/dev/TinyUtils/tinyutils && rg "request-id" -n' succeeded in 107ms:
+AGENTS.md:213:- **Completed:** Sitemap Delta/Wayback UI hardening, Edge API request-id + JSON headers, sitemap.xml trim, tools index cleanup, new demo fixtures, `scripts/preview_smoke.mjs` for instant smoke.
+tinyutils/artifacts/pr1-security-cache/20251105/prod-vercel-api-20251105T001232+0100.headers:15:x-request-id: 1036baae
+tool_desc_sitemapdelta.md:82:• UI echoes the `x-request-id` returned by `/api/sitemap-delta` next to the status chip so preview logs can be correlated instantly.
+tool_desc_waybackfixer.md:76:• UI now echoes the `x-request-id` next to the status chip and dispatches a `tinyutils:results-updated` event after every render so copy buttons rehydrate reliably.
+tool_desc_waybackfixer.md:96:• Edge handler now issues a `requestId` per run (mirroring `/api/check`) and echoes it via `x-request-id` headers plus `meta.requestId` in the JSON payload.
+api/metafetch.js:14:  if (requestId) headers.set('x-request-id', requestId);
+api/check.js:12:  if (requestId) headers.set('x-request-id', requestId);
+api/sitemap-delta.js:19:  if (requestId) headers.set('x-request-id', requestId);
+api/sitemap-delta.js:25:    const incoming = req.headers.get('x-request-id');
+tools/dead-link-finder/index.html:314:      ['content-type', 'x-request-id', 'x-vercel-id', 'x-vercel-cache', 'age'].forEach((key) => {
+api/wayback-fixer.js:12:  if (requestId) headers.set('x-request-id', requestId);
+tinyutils/artifacts/pr3-fence/20251105/keyword-density-401-20251105T004603+0100.headers:17:x-request-id: 563c72b6
+tools/sitemap-delta/index.html:222:      const id = res.headers.get('x-request-id');
+tools/wayback-fixer/index.html:196:      const id = res.headers.get('x-request-id');
+api/fence.js:15:  if (requestId) headers.set('x-request-id', requestId);
+tinyutils/artifacts/pr3-fence/20251105/fence-20251105T004618+0100.headers:17:x-request-id: 9ded7748
+tinyutils/artifacts/pr3-fence/20251105/fence-20251105T004633+0100.headers:17:x-request-id: ee47d542
+public/tools/wayback-fixer/index.html:196:      const id = res.headers.get('x-request-id');
+docs/AGENT_RUN_LOG.md:106:- **Summary:** Blocked applying `api/metafetch.js` patch due to read-only sandbox; documented diff to add request-id + JSON headers.
+docs/AGENT_RUN_LOG.md:107:- **Follow-ups:** Ensure PR1 branch incorporates request-id helper (already present in local implementation; double-check after CSP update).
+[2025-11-05T00:13:11] tokens used: 28,035
+
+[2025-11-05T00:13:12] thinking
+
+**Planning request ID propagation tests**
+[2025-11-05T00:13:13] exec bash -lc "sed -n '1,200p' /Users/cav/dev/TinyUtils/tinyutils/api/sitemap-delta.js" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:13:13] bash -lc "sed -n '1,200p' /Users/cav/dev/TinyUtils/tinyutils/api/sitemap-delta.js" succeeded in 93ms:
+export const config = { runtime: 'edge' };
+
+const UA = 'TinyUtils-SitemapDelta/1.0 (+https://tinyutils-eight.vercel.app)';
+const HARD_CAP = 200;
+const CHILD_SITEMAPS_LIMIT = 50;
+const VERIFY_CONCURRENCY = 6;
+const GLOBAL_FETCH_CAP = 10;
+const PER_ORIGIN_FETCH_CAP = 2;
+
+function rid() {
+  return Math.random().toString(16).slice(2, 10);
+}
+
+function jsonResponse(status, payload, requestId) {
+  const headers = new Headers({
+    'content-type': 'application/json; charset=utf-8',
+    'cache-control': 'no-store'
+  });
+  if (requestId) headers.set('x-request-id', requestId);
+  return new Response(JSON.stringify(payload), { status, headers });
+[2025-11-05T00:13:13] tokens used: 29,969
+
+[2025-11-05T00:13:20] thinking
+
+**Searching for toCSV usage**
+[2025-11-05T00:13:21] exec bash -lc 'cd /Users/cav/dev/TinyUtils/tinyutils && rg "toCSV" -g "*.mjs" -n' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:13:21] bash -lc 'cd /Users/cav/dev/TinyUtils/tinyutils && rg "toCSV" -g "*.mjs" -n' exited 1 in 126ms:
+ERROR
+[2025-11-05T00:13:21] tokens used: 32,354
+
+[2025-11-05T00:13:24] thinking
+
+**Investigating test strategy and utilities**
+[2025-11-05T00:13:24] exec bash -lc "find /Users/cav/dev/TinyUtils/tinyutils -maxdepth 2 -type f -name '*.mjs'" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:13:24] bash -lc "find /Users/cav/dev/TinyUtils/tinyutils -maxdepth 2 -type f -name '*.mjs'" succeeded in 122ms:
+/Users/cav/dev/TinyUtils/tinyutils/tests/dlf_api_error_json.test.mjs
+/Users/cav/dev/TinyUtils/tinyutils/scripts/ui_smoke_sitemap.mjs
+/Users/cav/dev/TinyUtils/tinyutils/scripts/ui_smoke_dlf.mjs
+/Users/cav/dev/TinyUtils/tinyutils/scripts/smoke_dlf_local.mjs
+/Users/cav/dev/TinyUtils/tinyutils/scripts/ui_smoke_wayback.mjs
+/Users/cav/dev/TinyUtils/tinyutils/scripts/test_edge_handlers.mjs
+/Users/cav/dev/TinyUtils/tinyutils/scripts/smoke_dlf_preview.mjs
+/Users/cav/dev/TinyUtils/tinyutils/scripts/preview_smoke.mjs
+[2025-11-05T00:13:24] tokens used: 33,668
+
+[2025-11-05T00:13:33] thinking
+
+**Evaluating test setup and dependencies**
+[2025-11-05T00:13:33] exec bash -lc "sed -n '1,200p' /Users/cav/dev/TinyUtils/tinyutils/api/wayback-fixer.js" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:13:33] bash -lc "sed -n '1,200p' /Users/cav/dev/TinyUtils/tinyutils/api/wayback-fixer.js" succeeded in 164ms:
+export const config = { runtime: 'edge' };
+
+function rid() {
+  return Math.random().toString(16).slice(2, 10);
+}
+
+function json(status, body, requestId) {
+  const headers = new Headers({
+    'content-type': 'application/json; charset=utf-8',
+    'cache-control': 'no-store'
+  });
+  if (requestId) headers.set('x-request-id', requestId);
+  return new Response(JSON.stringify(body), { status, headers });
+}
+
+function jerr(status, message, note, requestId) {
+  return json(status, {
+    meta: {
+      error: message || null,
+      note: note || null,
+[2025-11-05T00:13:33] tokens used: 34,826
+
+[2025-11-05T00:13:36] thinking
+
+**Identifying test targets and API response structures**
+[2025-11-05T00:13:37] exec bash -lc 'cd /Users/cav/dev/TinyUtils/tinyutils && rg "return json" api/check.js' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:13:37] bash -lc 'cd /Users/cav/dev/TinyUtils/tinyutils && rg "return json" api/check.js' succeeded in 578ms:
+  return json(status, {
+    return json(200, payload, requestId);
+[2025-11-05T00:13:37] tokens used: 37,203
+
+[2025-11-05T00:13:39] thinking
+
+**Inspecting file tail**
+[2025-11-05T00:13:40] exec bash -lc 'tail -n 200 /Users/cav/dev/TinyUtils/tinyutils/api/check.js' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:13:40] bash -lc 'tail -n 200 /Users/cav/dev/TinyUtils/tinyutils/api/check.js' succeeded in 183ms:
+    };
+
+    let fallbackUsed = false;
+
+    const processItem = async (item) => {
+      if (respectRobots) {
+        setStage('robots_evaluate');
+        let origin = null;
+        try {
+          origin = new URL(item.url).origin;
+        } catch {
+          origin = null;
+        }
+        if (origin) {
+          const robotsInfo = await getRobotsRules(origin);
+          if (robotsInfo.status === 'unavailable') {
+            markRobotsIssue(robotsInfo.reason || 'fetch_failed');
+          }
+          if (robotsInfo.status === 'applied') {
+            const allowed = isAllowedByRobots(robotsInfo.rules, item.url);
+[2025-11-05T00:13:40] tokens used: 37,417
+
+[2025-11-05T00:13:43] thinking
+
+**Inspecting jerr function definition**
+[2025-11-05T00:13:43] exec bash -lc "sed -n '1,120p' /Users/cav/dev/TinyUtils/tinyutils/api/check.js" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:13:43] bash -lc "sed -n '1,120p' /Users/cav/dev/TinyUtils/tinyutils/api/check.js" succeeded in 211ms:
+export const config = { runtime: 'edge' };
+
+function rid() {
+  return Math.random().toString(16).slice(2, 10);
+}
+
+function json(status, body, requestId) {
+  const headers = new Headers({
+    'content-type': 'application/json; charset=utf-8',
+    'cache-control': 'no-store'
+  });
+  if (requestId) headers.set('x-request-id', requestId);
+  return new Response(JSON.stringify(body), {
+    status,
+    headers
+  });
+}
+
+function jerr(status, code, message, detail, stage, requestId, metaExtras) {
+  const meta = {
+[2025-11-05T00:13:43] tokens used: 62,035
+
+[2025-11-05T00:13:46] thinking
+
+**Analyzing JSON response structure and test coverage**
+[2025-11-05T00:13:47] exec bash -lc 'rg "toCSV" -n public/index.html' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:13:47] bash -lc 'rg "toCSV" -n public/index.html' exited 2 in 201ms:
+ERROR
+rg: public/index.html: IO error for operation on public/index.html: No such file or directory (os error 2)
+[2025-11-05T00:13:47] tokens used: 63,780
+
+[2025-11-05T00:13:50] thinking
+
+**Adjusting working directory for commands**
+[2025-11-05T00:13:50] exec bash -lc 'cd /Users/cav/dev/TinyUtils/tinyutils && rg "toCSV" -n public/index.html' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:13:50] bash -lc 'cd /Users/cav/dev/TinyUtils/tinyutils && rg "toCSV" -n public/index.html' succeeded in 154ms:
+435:function toCSV(rows, meta){
+456:exportCsv.addEventListener('click', () => { download('dead-links.csv', toCSV(lastResults, meta, meta), 'text/csv'); track('export_csv'); });
+458:  try { await navigator.clipboard.writeText(toCSV(lastResults)); copyCsv.textContent='Copied'; setTimeout(()=>copyCsv.textContent='Copy CSV',1200); track('copy_csv'); } 
+[2025-11-05T00:13:50] tokens used: 64,125
+
+[2025-11-05T00:13:52] thinking
+
+**Preparing to inspect function**
+[2025-11-05T00:13:52] exec bash -lc "cd /Users/cav/dev/TinyUtils/tinyutils && sed -n '420,470p' public/index.html" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:13:53] bash -lc "cd /Users/cav/dev/TinyUtils/tinyutils && sed -n '420,470p' public/index.html" succeeded in 125ms:
+      <td>${r.ok ? '✅' : '❌'}</td>
+      <td>${r.finalUrl ? '<a href="' + r.finalUrl + '" target="_blank">open</a>' : ''}</td>
+      <td>${wb}</td>
+      <td>${replBtn}</td>
+    `;
+    resultsBody.appendChild(tr);
+  });
+  resultsBody.querySelectorAll('button[protectCSVCell(data)-copy]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      try{ await navigator.clipboard.writeText(btn.getAttribute('data-copy')); btn.textContent='Copied'; setTimeout(()=>btn.textContent='Copy Wayback',1000); track('copy_wayback'); }catch(e){ alert('Copy failed: '+e.message); }
+    });
+  });
+  applyFilters();
+}
+
+function toCSV(rows, meta){
+  const header = ['protectCSVCell(url)','status','ok','finalUrl','archiveUrl','note','chain'];
+  const esc = v => '"' + String(v).replace(/"/g,'""') + '"';
+  const lines = [protectCSVCell(header).join(',')];
+  rows.forEach(r => {
+[2025-11-05T00:13:53] tokens used: 65,289
+
+[2025-11-05T00:13:54] thinking
+
+**Searching for protectCSVCell function**
+[2025-11-05T00:13:55] exec bash -lc 'cd /Users/cav/dev/TinyUtils/tinyutils && rg "function protectCSVCell" -n public/index.html' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:13:55] bash -lc 'cd /Users/cav/dev/TinyUtils/tinyutils && rg "function protectCSVCell" -n public/index.html' succeeded in 162ms:
+75:function protectCSVCell(v){
+114:function protectCSVCell(v){
+205:function protectCSVCell(v){
+212:function protectCSVCell(v){
+272:function protectCSVCell(v){
+514:function protectCSVCell(v){
+580:function protectCSVCell(v){
+634:function protectCSVCell(v){
+[2025-11-05T00:13:55] tokens used: 66,321
+
+[2025-11-05T00:13:57] thinking
+
+**Checking function definitions**
+[2025-11-05T00:13:57] exec bash -lc "cd /Users/cav/dev/TinyUtils/tinyutils && sed -n '60,130p' public/index.html" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:13:57] bash -lc "cd /Users/cav/dev/TinyUtils/tinyutils && sed -n '60,130p' public/index.html" succeeded in 131ms:
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container row between wrap">
+    <span>© <span id="y"></span> TinyUtils</span>
+    <span><a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a></span>
+  </div>
+</footer>
+<script>document.getElementById('y').textContent = new Date().getFullYear();</script>
+</body>
+</html>
+<!doctype html><html lang="en"><head>
+<!-- Optional: Google Funding Choices CMP (replace PUB_ID and uncomment)
+<script async src="https://fundingchoicesmessages.google.com/i/pub-REPLACE_ME?ers=1">
+function protectCSVCell(v){
+  const s = String(v ?? "");
+  return /^[=+\-@]/.test(s) ? "'" + s : s;
+}
+</script>
+[2025-11-05T00:13:57] tokens used: 66,621
+
+[2025-11-05T00:14:03] thinking
+
+**Investigating protectCSVCell usage mismatch**
+[2025-11-05T00:14:03] exec bash -lc "cd /Users/cav/dev/TinyUtils/tinyutils && sed -n '500,560p' public/index.html" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:14:03] bash -lc "cd /Users/cav/dev/TinyUtils/tinyutils && sed -n '500,560p' public/index.html" succeeded in 123ms:
+    const MAX=1000; if (mode==='list'){ const lines=(payload.urls||[]).length; if (lines>MAX){ alert('You entered '+lines+' URLs. We will check only the first '+MAX+' to be polite.'); }}
+    const res = await fetch('/api/check', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const data = await res.json(); if (!res.ok && data && data.code==='gzip_unsupported'){ throw new Error('Sitemap is gzip-compressed, but this runtime cannot decompress it (gzip_unsupported).'); }
+    lastResults = data.results || [];
+      const meta = { runTimestamp: new Date().toISOString(), mode, source: payload.pageUrl || payload.sitemapUrl || 'list', concurrency: Math.max(1, Math.min(10, Number((document.getElementById('concurrency')||{}).value)||10)), timeoutMs: payload.timeout, robots: payload.respectRobots, scope: payload.scope || 'internal', assets: payload.includeAssets || false, httpFallback: payload.retryHttp || false, wayback: payload.includeArchive || false, totalQueued: data.totalQueued ?? lastResults.length, totalChecked: lastResults.length, truncated: !!data.truncated };
+    renderRows(lastResults);
+    const broken = lastResults.filter(r => !r.ok).length;
+    summary.textContent = `${lastResults.length} checked · ${broken} broken` + (data.truncated ? ' (soft cap reached)' : '');
+    const has = lastResults.length>0;
+    exportCsv.disabled = !has; exportJson.disabled = !has; copyCsv.disabled = !has; document.getElementById('exportXls').disabled = !has;
+    progress.textContent = 'Done';
+  } catch (e) { progress.textContent = 'Error: ' + e.message; }
+});
+
+function protectCSVCell(v){
+  const s = String(v ?? "");
+  return /^[=+\-@]/.test(s) ? "'" + s : s;
+}
+</script>
+
+[2025-11-05T00:14:03] tokens used: 68,169
+
+[2025-11-05T00:14:10] thinking
+
+**Investigating protectCSVCell usage oddity**
+[2025-11-05T00:14:10] exec bash -lc 'cd /Users/cav/dev/TinyUtils/tinyutils && rg "protectCSVCell" -g "*.js" -n' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:14:10] bash -lc 'cd /Users/cav/dev/TinyUtils/tinyutils && rg "protectCSVCell" -g "*.js" -n' exited 1 in 155ms:
+ERROR
+[2025-11-05T00:14:10] tokens used: 70,390
+
+[2025-11-05T00:14:27] thinking
+
+**Devising testing strategy for CSV functions**
+
+I'm exploring how to test `protectCSVCell` and `toCSV` given they only exist inside an HTML file and aren't directly importable. I’m considering extracting their definitions using regex from `public/index.html`, then evaluating them in a Node context to run deterministic tests verifying CSV injection protection and correct output formatting. It’s a bit tricky because of code minification and potential naming conflicts, but this approach might let me check that the sanitization and CSV generation behave as expected without modifying the original code.
+[2025-11-05T00:14:29] exec bash -lc "python3 - <<'PY'
+from pathlib import Path
+text = Path('/Users/cav/dev/TinyUtils/tinyutils/public/index.html').read_text()
+start = text.index('function toCSV')
+print(text[start:start+300])
+PY" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:14:29] bash -lc "python3 - <<'PY'
+from pathlib import Path
+text = Path('/Users/cav/dev/TinyUtils/tinyutils/public/index.html').read_text()
+start = text.index('function toCSV')
+print(text[start:start+300])
+PY" exited 1 in 180ms:
+ERROR
+bash: cannot create temp file for here document: Operation not permitted
+[2025-11-05T00:14:29] tokens used: 72,103
+
+[2025-11-05T00:14:33] thinking
+
+**Handling read-only environment limitations**
+[2025-11-05T00:14:34] exec bash -lc "python3 -c \"from pathlib import Path
+text = Path('/Users/cav/dev/TinyUtils/tinyutils/public/index.html').read_text()
+start = text.index('function toCSV')
+print(text[start:start+300])\"" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:14:34] bash -lc "python3 -c \"from pathlib import Path
+text = Path('/Users/cav/dev/TinyUtils/tinyutils/public/index.html').read_text()
+start = text.index('function toCSV')
+print(text[start:start+300])\"" succeeded in 276ms:
+function toCSV(rows, meta){
+  const header = ['protectCSVCell(url)','status','ok','finalUrl','archiveUrl','note','chain'];
+  const esc = v => '"' + String(v).replace(/"/g,'""') + '"';
+  const lines = [protectCSVCell(header).join(',')];
+  rows.forEach(r => {
+    lines.push([
+      protectCSVCell(prot
+[2025-11-05T00:14:34] tokens used: 72,588
+
+[2025-11-05T00:14:36] thinking
+
+**Inspecting raw string usage**
+[2025-11-05T00:14:37] exec bash -lc "python3 -c \"from pathlib import Path
+text = Path('/Users/cav/dev/TinyUtils/tinyutils/public/index.html').read_text()
+start = text.index('lines.push([')
+print(text[start:start+200])\"" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:14:37] bash -lc "python3 -c \"from pathlib import Path
+text = Path('/Users/cav/dev/TinyUtils/tinyutils/public/index.html').read_text()
+start = text.index('lines.push([')
+print(text[start:start+200])\"" succeeded in 260ms:
+lines.push([
+      protectCSVCell(protectCSVCell)(r.url)||'', (r.status??''), r.ok?'true':'false', r.finalUrl||'',
+      (r.archive&&r.archive.url)||'', r.note||'', (typeof r.chain==='number'?r.chain:
+[2025-11-05T00:14:37] tokens used: 72,947
+
+[2025-11-05T00:14:40] thinking
+
+**Continuing file inspection**
+[2025-11-05T00:14:41] exec bash -lc "python3 -c \"from pathlib import Path
+text = Path('/Users/cav/dev/TinyUtils/tinyutils/public/index.html').read_text()
+start = text.index('(typeof r.chain')
+print(text[start:start+120])\"" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:14:41] bash -lc "python3 -c \"from pathlib import Path
+text = Path('/Users/cav/dev/TinyUtils/tinyutils/public/index.html').read_text()
+start = text.index('(typeof r.chain')
+print(text[start:start+120])\"" succeeded in 196ms:
+(typeof r.chain==='number'?r.chain:0)
+    ].map(esc).join(','));
+  });
+  if (meta) lines.push('# meta: ' + JSON.stringif
+[2025-11-05T00:14:41] tokens used: 73,240
+
+[2025-11-05T00:14:50] thinking
+
+**Analyzing protectCSVCell usage**
+[2025-11-05T00:14:50] exec bash -lc "node -e \"function protectCSVCell(v){const s=String(v??'');return /"'^[=+'"\\-@]/.test(s)?'\\''+s:s;}const header=['protectCSVCell(url)','status'];const lines=[protectCSVCell(header).join(',')];console.log(lines);\"" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:14:51] bash -lc "node -e \"function protectCSVCell(v){const s=String(v??'');return /"'^[=+'"\\-@]/.test(s)?'\\''+s:s;}const header=['protectCSVCell(url)','status'];const lines=[protectCSVCell(header).join(',')];console.log(lines);\"" exited 1 in 544ms:
+ERROR
+[eval]:1
+function protectCSVCell(v){const s=String(v??'');return /^[=+\-@]/.test(s)?'\''+s:s;}const header=['protectCSVCell(url)','status'];const lines=[protectCSVCell(header).join(',')];console.log(lines);
+                                                                                                                                                                       ^
+
+TypeError: protectCSVCell(...).join is not a function
+    at [eval]:1:168
+    at runScriptInThisContext (node:internal/vm:219:10)
+    at node:internal/process/execution:451:12
+    at [eval]-wrapper:6:24
+    at runScriptInContext (node:internal/process/execution:449:60)
+    at evalFunction (node:internal/process/execution:283:30)
+    at evalTypeScript (node:internal/process/execution:295:3)
+    at node:internal/main/eval_string:71:3
+
+Node.js v25.1.0
+[2025-11-05T00:14:51] tokens used: 74,186
+
+[2025-11-05T00:14:57] thinking
+
+**Investigating protectCSVCell function confusion**
+[2025-11-05T00:14:57] exec bash -lc "python3 -c \"from pathlib import Path
+text = Path('/Users/cav/dev/TinyUtils/tinyutils/public/tools/dead-link-finder/index.html').read_text()
+start = text.index('function toCSV')
+print(text[start:start+200])\"" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:14:58] bash -lc "python3 -c \"from pathlib import Path
+text = Path('/Users/cav/dev/TinyUtils/tinyutils/public/tools/dead-link-finder/index.html').read_text()
+start = text.index('function toCSV')
+print(text[start:start+200])\"" succeeded in 222ms:
+function toCSV(rows, metaInfo) {
+      const header = ['url', 'status', 'ok', 'finalUrl', 'archiveUrl', 'note', 'chain'];
+      const escapeCell = (value) => `"${protectCSVCell(String(value ?? '')).re
+[2025-11-05T00:14:58] tokens used: 75,078
+
+[2025-11-05T00:15:00] thinking
+
+**Requesting additional information**
+[2025-11-05T00:15:01] exec bash -lc "python3 -c \"from pathlib import Path
+text = Path('/Users/cav/dev/TinyUtils/tinyutils/public/tools/dead-link-finder/index.html').read_text()
+start = text.index('const escapeCell')
+print(text[start:start+200])\"" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:15:01] bash -lc "python3 -c \"from pathlib import Path
+text = Path('/Users/cav/dev/TinyUtils/tinyutils/public/tools/dead-link-finder/index.html').read_text()
+start = text.index('const escapeCell')
+print(text[start:start+200])\"" succeeded in 429ms:
+const escapeCell = (value) => `"${protectCSVCell(String(value ?? '')).replace(/"/g, '""')}"`;
+      const lines = [header.join(',')];
+      rows.forEach((row) => {
+        lines.push([
+          row.u
+[2025-11-05T00:15:01] tokens used: 100,223
+
+[2025-11-05T00:15:05] thinking
+
+**Investigating CSV protection functions**
+[2025-11-05T00:15:05] exec bash -lc "python3 -c \"from pathlib import Path
+text = Path('/Users/cav/dev/TinyUtils/tinyutils/public/tools/dead-link-finder/index.html').read_text()
+start = text.index('function protectCSVCell')
+print(text[start:start+150])\"" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:15:06] bash -lc "python3 -c \"from pathlib import Path
+text = Path('/Users/cav/dev/TinyUtils/tinyutils/public/tools/dead-link-finder/index.html').read_text()
+start = text.index('function protectCSVCell')
+print(text[start:start+150])\"" succeeded in 238ms:
+function protectCSVCell(value) {
+      const str = String(value ?? '');
+      return /^[=+\-@]/.test(str) ? "'" + str : str;
+    }
+
+    function escap
+[2025-11-05T00:15:06] tokens used: 135,210
+
+[2025-11-05T00:15:21] thinking
+
+**Planning deterministic API and CSV tests**
+
+I'm outlining how to design stable, network-independent tests for API contracts, CSV hardening, and envelope invariants. I want to stub `Math.random` and `fetch` for predictable request IDs and responses, crafting new test files that reuse or adapt existing stub logic while ensuring tests run cleanly in Node’s test runner. This way, I can build thorough coverage without changing existing code, only outputting patches.
+[2025-11-05T00:15:23] exec bash -lc "node -e \"const hex='abcd1234';const num=parseInt(hex,16)/16**hex.length;console.log(num);console.log(num.toString(16));\"" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:15:23] bash -lc "node -e \"const hex='abcd1234';const num=parseInt(hex,16)/16**hex.length;console.log(num);console.log(num.toString(16));\"" succeeded in 424ms:
+0.6710978867486119
+0.abcd1234
+[2025-11-05T00:15:23] tokens used: 137,522
+
+[2025-11-05T00:15:29] thinking
+
+**Designing test stubs for request IDs and fetch**
+[2025-11-05T00:15:29] exec bash -lc 'cd /Users/cav/dev/TinyUtils/tinyutils && rg "req.method" -n api/check.js' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:15:29] bash -lc 'cd /Users/cav/dev/TinyUtils/tinyutils && rg "req.method" -n api/check.js' succeeded in 172ms:
+614:    if (req.method !== 'POST') {
+[2025-11-05T00:15:29] tokens used: 138,222
+
+[2025-11-05T00:15:32] thinking
+
+**Seeking more context near line 614**
+[2025-11-05T00:15:32] exec bash -lc "sed -n '560,660p' /Users/cav/dev/TinyUtils/tinyutils/api/check.js" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:15:32] bash -lc "sed -n '560,660p' /Users/cav/dev/TinyUtils/tinyutils/api/check.js" succeeded in 136ms:
+        queue.push(normalized.url);
+      }
+      continue;
+    }
+
+    const locs = extractSitemapUrls(xml);
+    for (const loc of locs) {
+      const normalized = assertPublicHttp(loc);
+      if (!normalized.ok) continue;
+      if (!seenUrls.has(normalized.url)) {
+        seenUrls.add(normalized.url);
+        urls.push(normalized.url);
+      }
+    }
+  }
+
+  if (queue.length && visited.size >= MAX_SITEMAP_FETCHES) {
+    truncated = true;
+  }
+
+[2025-11-05T00:15:32] tokens used: 139,046
+
+[2025-11-05T00:15:40] thinking
+
+**Evaluating API error and success response tests**
+
+I’m examining how GET requests yield 405 errors with JSON envelopes for easy testing and considering focusing tests on error paths to verify `meta` details and request ID propagation. I’m also comparing API endpoints like `api/wayback-fixer` to see if all responses consistently include `meta` and to understand if success paths need complex stubs or if error paths suffice for coverage. I want to clarify the expected envelope structure for both error and success responses before designing tests.
+[2025-11-05T00:15:41] exec bash -lc 'cd /Users/cav/dev/TinyUtils/tinyutils && rg "return json" -n api/wayback-fixer.js' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:15:41] bash -lc 'cd /Users/cav/dev/TinyUtils/tinyutils && rg "return json" -n api/wayback-fixer.js' succeeded in 140ms:
+17:  return json(status, {
+168:    return json(405, { ok: false, message: 'Only POST is supported' }, requestId);
+377:    return json(200, { meta, results }, requestId);
+[2025-11-05T00:15:41] tokens used: 141,298
+
+[2025-11-05T00:15:45] thinking
+
+**Analyzing json response usage and testing strategies**
+[2025-11-05T00:15:47] exec bash -lc 'cd /Users/cav/dev/TinyUtils/tinyutils && rg "jsonResponse" -n api/sitemap-delta.js' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:15:47] bash -lc 'cd /Users/cav/dev/TinyUtils/tinyutils && rg "jsonResponse" -n api/sitemap-delta.js' succeeded in 143ms:
+14:function jsonResponse(status, payload, requestId) {
+362:    return jsonResponse(405, { error: 'method_not_allowed', details: { message: 'Only POST is supported' } }, requestId);
+369:    return jsonResponse(400, { error: 'invalid_json', details: { message: error?.message || 'Invalid JSON' } }, requestId);
+493:    return jsonResponse(200, { meta, added, removed, pairs: deduped, unmapped, rules: [] }, requestId);
+510:    return jsonResponse(status, {
+[2025-11-05T00:15:47] tokens used: 141,803
+
+[2025-11-05T00:15:49] thinking
+
+**Inspecting file bottom**
+[2025-11-05T00:15:50] exec bash -lc "sed -n '360,430p' /Users/cav/dev/TinyUtils/tinyutils/api/sitemap-delta.js" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:15:50] bash -lc "sed -n '360,430p' /Users/cav/dev/TinyUtils/tinyutils/api/sitemap-delta.js" succeeded in 136ms:
+
+  if (req.method !== 'POST') {
+    return jsonResponse(405, { error: 'method_not_allowed', details: { message: 'Only POST is supported' } }, requestId);
+  }
+
+  let parsed;
+  try {
+    parsed = await req.json();
+  } catch (error) {
+    return jsonResponse(400, { error: 'invalid_json', details: { message: error?.message || 'Invalid JSON' } }, requestId);
+  }
+
+  const body = parsed && typeof parsed === 'object' ? parsed : {};
+  const timeout = Math.min(30000, Math.max(1000, Number(body.timeout) || 10000));
+  const verify = !!body.verifyTargets;
+  const sameReg = body.sameRegDomainOnly !== false;
+  const notes = new Set();
+  const sitemapAUrlInput = readUrlModeInput(body.sitemapAUrl);
+  const sitemapBUrlInput = readUrlModeInput(body.sitemapBUrl);
+  const requestedMax = Number(body.maxCompare);
+[2025-11-05T00:15:50] tokens used: 142,133
+
+[2025-11-05T00:16:04] thinking
+
+**Designing test strategies for API handlers**
+
+I'm planning tests for API handlers by focusing on minimal scenarios that avoid network fetches, like using provided XML strings for sitemap tests and stubbing fetch for others. I'll verify error and success paths separately, ensure request ID propagation, and implement deterministic random ID stubs for consistent test results. Let's explore these details and craft helper utilities to keep tests reliable and focused.
+[2025-11-05T00:16:05] exec bash -lc "sed -n '430,520p' /Users/cav/dev/TinyUtils/tinyutils/api/sitemap-delta.js" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:16:05] bash -lc "sed -n '430,520p' /Users/cav/dev/TinyUtils/tinyutils/api/sitemap-delta.js" succeeded in 143ms:
+    }
+
+    const allAdded = added.slice();
+    const pairs = [];
+    for (const r of removed) {
+      if (pairs.length >= maxCompare) break;
+      let candidates = [];
+      try {
+        const h = new URL(r).host;
+        candidates = byHost.get(h) || [];
+        if (!candidates.length) {
+          candidates = allAdded.filter(u => sameRegDomain(u, r));
+        }
+      } catch {
+        candidates = allAdded;
+      }
+      let best = null;
+      let bestScore = -1;
+      const rp = pathOf(r);
+      for (const t of (candidates.length ? candidates : allAdded)) {
+[2025-11-05T00:16:05] tokens used: 145,289
+
+[2025-11-05T00:16:13] thinking
+
+**Verifying meta and stubbing fetch calls**
+
+I'm checking that the success response's `meta.requestId` matches the `x-request-id` header by inspecting how the handler uses `fetchWithRetry`. To test the `api/metafetch` route, I'll stub `global.fetch` to return an HTML response with appropriate status and headers, ensuring it respects the signal option. For the `api/wayback-fixer` route, I plan to stub fetch calls to `archive.org` endpoints and tailor the request body to minimize the workflow, avoiding unnecessary HEAD requests by setting flags accordingly. I'm verifying whether the handler fetches snapshots from `web.archive.org` and adjusting stubs based on that.
+[2025-11-05T00:16:16] exec bash -lc 'cd /Users/cav/dev/TinyUtils/tinyutils && rg "web.archive" -n api/wayback-fixer.js' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:16:16] bash -lc 'cd /Users/cav/dev/TinyUtils/tinyutils && rg "web.archive" -n api/wayback-fixer.js' succeeded in 139ms:
+306:              fetchWithRetry(`https://web.archive.org/save/${encodeURIComponent(item.url)}`, {}, timeout).catch(() => {});
+[2025-11-05T00:16:16] tokens used: 146,815
+
+[2025-11-05T00:16:18] thinking
+
+**Inspecting fetch usage logic**
+[2025-11-05T00:16:19] exec bash -lc "sed -n '240,360p' /Users/cav/dev/TinyUtils/tinyutils/api/wayback-fixer.js" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:16:19] bash -lc "sed -n '240,360p' /Users/cav/dev/TinyUtils/tinyutils/api/wayback-fixer.js" succeeded in 124ms:
+      while (true) {
+        const current = index;
+        index += 1;
+        if (current >= validUrls.length) return;
+        const item = validUrls[current];
+        let noteParts = [];
+        let retriedThisItem = false;
+        let originKey;
+        let acquired = false;
+        try {
+          originKey = new URL(item.url).origin;
+          while (
+            globalInFlight >= globalCap ||
+            (perOriginInFlight.get(originKey) || 0) >= PER_ORIGIN_FETCH_CAP
+          ) {
+            await delay(25);
+          }
+          globalInFlight += 1;
+          acquired = true;
+          const originCount = (perOriginInFlight.get(originKey) || 0) + 1;
+[2025-11-05T00:16:19] tokens used: 147,078
+
+[2025-11-05T00:16:22] thinking
+
+**Verifying requestId location**
+[2025-11-05T00:16:23] exec bash -lc "sed -n '360,440p' /Users/cav/dev/TinyUtils/tinyutils/api/wayback-fixer.js" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-05T00:16:23] bash -lc "sed -n '360,440p' /Users/cav/dev/TinyUtils/tinyutils/api/wayback-fixer.js" succeeded in 127ms:
+        invalid: invalidCount,
+        duplicates: duplicateCount
+      },
+      concurrency: {
+        requested: maxConc,
+        effective: workerCount,
+        perOriginCap: PER_ORIGIN_FETCH_CAP,
+        globalCap
+      },
+      network: {
+        timeoutMs: timeout,
+        retries: retryCount
+      },
+      spnLimit: SPN_CAP
+    };
+
+    meta.requestId = requestId;
+    return json(200, { meta, results }, requestId);
+  } catch (error) {
+    return jerr(500, String(error).slice(0, 200), error?.note || null, requestId);
+[2025-11-05T00:16:23] tokens used: 148,467
+
+[2025-11-05T00:16:49] thinking
+
+**Stubbing fetch and testing CSV helpers**
+
+I'll set up fetch stubs to simulate archive.org API responses, carefully controlling concurrency and ensuring cleanup after each test. For CSV, I plan to read and extract the `protectCSVCell` and `toCSV` functions from an HTML file using a custom helper with Node’s `vm` module, then write tests verifying protection against formula injection and correct CSV output formatting.
+[2025-11-05T00:16:51] exec bash -lc "python3 -c \"from pathlib import Path
+text = Path('/Users/cav/dev/TinyUtils/tinyutils/public/tools/dead-link-finder/index.html').read_text()
+start = text.index('function toCSV(rows')
+end = text.index('function download', start)
+print(text[start:end])\"" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:16:51] bash -lc "python3 -c \"from pathlib import Path
+text = Path('/Users/cav/dev/TinyUtils/tinyutils/public/tools/dead-link-finder/index.html').read_text()
+start = text.index('function toCSV(rows')
+end = text.index('function download', start)
+print(text[start:end])\"" succeeded in 279ms:
+function toCSV(rows, metaInfo) {
+      const header = ['url', 'status', 'ok', 'finalUrl', 'archiveUrl', 'note', 'chain'];
+      const escapeCell = (value) => `"${protectCSVCell(String(value ?? '')).replace(/"/g, '""')}"`;
+      const lines = [header.join(',')];
+      rows.forEach((row) => {
+        lines.push([
+          row.url,
+          row.status ?? '',
+          row.ok ? 'true' : 'false',
+          row.finalUrl ?? '',
+          row.archive && row.archive.url ? row.archive.url : '',
+          row.note ?? '',
+          row.chain ?? 0
+        ].map(escapeCell).join(','));
+      });
+      if (metaInfo) {
+        lines.push('# meta: ' + JSON.stringify(metaInfo));
+      }
+      return lines.join('\n');
+    }
+[2025-11-05T00:16:51] tokens used: 151,165
+
+[2025-11-05T00:16:58] thinking
+
+**Designing CSV sanitization tests**
+[2025-11-05T00:17:00] exec bash -lc "node -e \"const protectCSVCell = (value) => { const str = String(value ?? ''); return /"'^[=+'"\\-@]/.test(str) ? '\\'' + str : str; }; const toCSV = (rows, metaInfo) => { const header = ['url', 'status', 'ok', 'finalUrl', 'archiveUrl', 'note', 'chain']; const escapeCell = (value) => "'`'"\\\""'${protectCSVCell(String(value ?? '"'')).replace(/\\\"/g, '\\\"\\\"')}\\\""'`; const lines = [header.join('"',')]; rows.forEach((row) => { lines.push([ row.url, row.status ?? '', row.ok ? 'true' : 'false', row.finalUrl ?? '', row.archive && row.archive.url ? row.archive.url : '', row.note ?? '', row.chain ?? 0 ].map(escapeCell).join(',')); }); if (metaInfo) { lines.push('# meta: ' + JSON.stringify(metaInfo)); } return lines.join('\\n'); }; const csv = toCSV([{ url: '=SUM(A1:A2)', status: 502, ok: false, finalUrl: '', archive: { url: 'https://web.archive.org/save' }, note: '+calc', chain: 1 }], { totalChecked: 1 }); console.log(csv);\"" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:17:01] bash -lc "node -e \"const protectCSVCell = (value) => { const str = String(value ?? ''); return /"'^[=+'"\\-@]/.test(str) ? '\\'' + str : str; }; const toCSV = (rows, metaInfo) => { const header = ['url', 'status', 'ok', 'finalUrl', 'archiveUrl', 'note', 'chain']; const escapeCell = (value) => "'`'"\\\""'${protectCSVCell(String(value ?? '"'')).replace(/\\\"/g, '\\\"\\\"')}\\\""'`; const lines = [header.join('"',')]; rows.forEach((row) => { lines.push([ row.url, row.status ?? '', row.ok ? 'true' : 'false', row.finalUrl ?? '', row.archive && row.archive.url ? row.archive.url : '', row.note ?? '', row.chain ?? 0 ].map(escapeCell).join(',')); }); if (metaInfo) { lines.push('# meta: ' + JSON.stringify(metaInfo)); } return lines.join('\\n'); }; const csv = toCSV([{ url: '=SUM(A1:A2)', status: 502, ok: false, finalUrl: '', archive: { url: 'https://web.archive.org/save' }, note: '+calc', chain: 1 }], { totalChecked: 1 }); console.log(csv);\"" exited 1 in 516ms:
+ERROR
+bash: command substitution: line 0: unexpected EOF while looking for matching `}'
+bash: command substitution: line 1: syntax error: unexpected end of file
+[eval]:1
+const protectCSVCell = (value) => { const str = String(value ?? ''); return /^[=+\-@]/.test(str) ? '\'' + str : str; }; const toCSV = (rows, metaInfo) => { const header = ['url', 'status', 'ok', 'finalUrl', 'archiveUrl', 'note', 'chain']; const escapeCell = (value) => ; const lines = [header.join(',')]; rows.forEach((row) => { lines.push([ row.url, row.status ?? '', row.ok ? 'true' : 'false', row.finalUrl ?? '', row.archive && row.archive.url ? row.archive.url : '', row.note ?? '', row.chain ?? 0 ].map(escapeCell).join(',')); }); if (metaInfo) { lines.push('# meta: ' + JSON.stringify(metaInfo)); } return lines.join('\n'); }; const csv = toCSV([{ url: '=SUM(A1:A2)', status: 502, ok: false, finalUrl: '', archive: { url: 'https://web.archive.org/save' }, note: '+calc', chain: 1 }], { totalChecked: 1 }); console.log(csv);
+                                                                                                                                                                                                                                                                             ^
+Expression expected
+
+SyntaxError: Unexpected token ';'
+    at makeContextifyScript (node:internal/vm:194:14)
+    at compileScript (node:internal/process/execution:388:10)
+    at evalTypeScript (node:internal/process/execution:260:22)
+    at node:internal/main/eval_string:71:3
+
+Node.js v25.1.0
+[2025-11-05T00:17:01] tokens used: 152,671
+
+[2025-11-05T00:17:45] thinking
+
+**Designing comprehensive API and CSV tests**
+
+I’m outlining detailed test plans for API endpoints and CSV cell protection, including stubbing `Math.random` deterministically and mocking fetch calls for stable, isolated tests. I’ll craft new test files that assert proper metadata, request IDs, sanitized CSV output, and response structure, carefully managing stubs and restoring state to keep tests reliable and reproducible. Let’s explore structuring these tests clearly and thoughtfully!
+**Handling accurate JavaScript function extraction from HTML**
+
+I’m figuring out how to reliably extract functions like `protectCSVCell` and `toCSV` from the HTML source despite nested template strings with braces that mess up naive brace counting. To handle this, I’m considering a parser that tracks string and template literal states while scanning characters, so I don’t get tripped up by braces inside template literals. This way, I can safely isolate and run these functions in a Node VM for testing. It’s a bit tricky but feels doable!
+[2025-11-05T00:17:57] codex
+**Handling accurate JavaScript function extraction from HTML**
+
+I’m figuring out how to reliably extract functions like `protectCSVCell` and `toCSV` from the HTML source despite nested template strings with braces that mess up naive brace counting. To handle this, I’m considering a parser that tracks string and template literal states while scanning characters, so I don’t get tripped up by braces inside template literals. This way, I can safely isolate and run these functions in a Node VM for testing. It’s a bit tricky but feels doable!
+[2025-11-05T00:17:58] exec bash -lc "python3 -c \"from pathlib import Path
+text = Path('/Users/cav/dev/TinyUtils/tinyutils/tools/dead-link-finder/index.html').read_text()
+start = text.index('function toCSV')
+end = text.index('function download', start)
+print(text[start:end])\"" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:17:58] bash -lc "python3 -c \"from pathlib import Path
+text = Path('/Users/cav/dev/TinyUtils/tinyutils/tools/dead-link-finder/index.html').read_text()
+start = text.index('function toCSV')
+end = text.index('function download', start)
+print(text[start:end])\"" succeeded in 209ms:
+function toCSV(rows, metaInfo) {
+      const header = ['url', 'status', 'ok', 'finalUrl', 'archiveUrl', 'note', 'chain'];
+      const escapeCell = (value) => `"${protectCSVCell(String(value ?? '')).replace(/"/g, '""')}"`;
+      const lines = [header.join(',')];
+      rows.forEach((row) => {
+        lines.push([
+          row.url,
+          row.status ?? '',
+          row.ok ? 'true' : 'false',
+          row.finalUrl ?? '',
+          row.archive && row.archive.url ? row.archive.url : '',
+          row.note ?? '',
+          row.chain ?? 0
+        ].map(escapeCell).join(','));
+      });
+      if (metaInfo && typeof metaInfo === 'object') {
+        lines.push('');
+        lines.push(['meta_key', 'meta_value'].map(escapeCell).join(','));
+        Object.entries(metaInfo)
+          .filter(([, value]) => value !== undefined)
+[2025-11-05T00:17:58] tokens used: 159,710
+
+[2025-11-05T00:18:04] thinking
+
+**Analyzing code extraction approach**
+[2025-11-05T00:18:05] exec bash -lc "python3 -c \"import re, pathlib
+text = pathlib.Path('/Users/cav/dev/TinyUtils/tinyutils/tools/dead-link-finder/index.html').read_text()
+match = re.search(r'function protectCSVCell\\(value\\) \\{[\\s\\S]*?\\n    \\}', text)
+print(bool(match))
+print(match.group(0))\"" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:18:06] bash -lc "python3 -c \"import re, pathlib
+text = pathlib.Path('/Users/cav/dev/TinyUtils/tinyutils/tools/dead-link-finder/index.html').read_text()
+match = re.search(r'function protectCSVCell\\(value\\) \\{[\\s\\S]*?\\n    \\}', text)
+print(bool(match))
+print(match.group(0))\"" succeeded in 210ms:
+True
+function protectCSVCell(value) {
+      const str = String(value ?? '');
+      const trimmed = str.trimStart();
+      return /^[=+\-@]/.test(trimmed) ? "'" + str : str;
+    }
+[2025-11-05T00:18:06] tokens used: 162,255
+
+[2025-11-05T00:18:09] thinking
+
+**Preparing to extract toCSV function**
+[2025-11-05T00:18:09] exec bash -lc "python3 -c \"import re, pathlib
+text = pathlib.Path('/Users/cav/dev/TinyUtils/tinyutils/tools/dead-link-finder/index.html').read_text()
+match = re.search(r'function toCSV\\(rows, metaInfo\\) \\{[\\s\\S]*?\\n    \\}', text)
+print(bool(match))
+print(match.group(0)[:200])\"" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:18:10] bash -lc "python3 -c \"import re, pathlib
+text = pathlib.Path('/Users/cav/dev/TinyUtils/tinyutils/tools/dead-link-finder/index.html').read_text()
+match = re.search(r'function toCSV\\(rows, metaInfo\\) \\{[\\s\\S]*?\\n    \\}', text)
+print(bool(match))
+print(match.group(0)[:200])\"" succeeded in 204ms:
+True
+function toCSV(rows, metaInfo) {
+      const header = ['url', 'status', 'ok', 'finalUrl', 'archiveUrl', 'note', 'chain'];
+      const escapeCell = (value) => `"${protectCSVCell(String(value ?? '')).re
+[2025-11-05T00:18:10] tokens used: 162,951
+
+[2025-11-05T00:18:54] thinking
+
+**Ensuring complete function extraction and test preparations**
+
+I’m verifying that the regex fully captures each function including its closing brace without overreaching. Then I’m planning detailed tests for CSV cell protection and CSV generation, checking formula character sanitization with whitespace and meta data. I’m also mapping out new ESM test files and minimal package.json updates to support these additions.
+**Drafting detailed test files and helper functions**
+
+I’m putting together comprehensive ESM test files for API contract checks, envelope invariants, and CSV hardening. I’m carefully implementing helpers to extract and eval CSV functions from source files, stubbing `Math.random` and `fetch` to control randomness and HTTP responses, and writing assertions for metadata, sanitization, and error handling.
+**Implementing precise function extractor and refining tests setup**
+
+I'm refining the approach to extract full function source by parsing braces carefully—tracking nested blocks and respecting strings and template literals—to reliably grab CSV helper functions. Meanwhile, I’m solidifying API contract and CSV hardening tests with rigorous assertions and improved fetch stubbing to ensure deterministic, isolated runs.
+**Detailing brace and string parsing logic for function extraction**
+
+I'm refining a robust parser to extract functions by carefully tracking nested braces and string/template literal boundaries, ensuring braces inside template placeholders and strings don’t prematurely end extraction. This nuanced state machine approach will handle nested expressions and comments accurately for reliable code snippets.
+**Designing nuanced template string parsing with placeholder tracking**
+
+I'm building a detailed parser that tracks both template literal boundaries and nested `${}` placeholders, managing string states inside expressions to accurately extract functions from source despite complex nested syntax. This should make function extraction precise even with tricky template expressions.
+[2025-11-05T00:21:20] codex
+**Drafting detailed test files and helper functions**
+
+I’m putting together comprehensive ESM test files for API contract checks, envelope invariants, and CSV hardening. I’m carefully implementing helpers to extract and eval CSV functions from source files, stubbing `Math.random` and `fetch` to control randomness and HTTP responses, and writing assertions for metadata, sanitization, and error handling.
+[2025-11-05T00:21:20] codex
+**Implementing precise function extractor and refining tests setup**
+
+I'm refining the approach to extract full function source by parsing braces carefully—tracking nested blocks and respecting strings and template literals—to reliably grab CSV helper functions. Meanwhile, I’m solidifying API contract and CSV hardening tests with rigorous assertions and improved fetch stubbing to ensure deterministic, isolated runs.
+[2025-11-05T00:21:20] codex
+**Detailing brace and string parsing logic for function extraction**
+
+I'm refining a robust parser to extract functions by carefully tracking nested braces and string/template literal boundaries, ensuring braces inside template placeholders and strings don’t prematurely end extraction. This nuanced state machine approach will handle nested expressions and comments accurately for reliable code snippets.
+[2025-11-05T00:21:20] codex
+**Designing nuanced template string parsing with placeholder tracking**
+
+I'm building a detailed parser that tracks both template literal boundaries and nested `${}` placeholders, managing string states inside expressions to accurately extract functions from source despite complex nested syntax. This should make function extraction precise even with tricky template expressions.
+[2025-11-05T00:21:20] exec bash -lc 'cd /Users/cav/dev/TinyUtils/tinyutils && rg "protectCSVCell" -g "*.mjs" -n scripts' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:21:20] bash -lc 'cd /Users/cav/dev/TinyUtils/tinyutils && rg "protectCSVCell" -g "*.mjs" -n scripts' exited 1 in 139ms:
+ERROR
+[2025-11-05T00:21:20] tokens used: 184,654
+
+[2025-11-05T00:21:34] thinking
+
+**Planning function extraction and evaluation strategy**
+
+I'm weighing options for reliably extracting and testing critical CSV-protection functions: dynamic parsing with brace tracking versus slicing source by heuristics, or even dynamic importing with data URIs. The goal is to verify the logic behind `protectCSVCell` and `toCSV` without fully executing untrusted code, balancing accuracy and complexity. I'll explore a simplified parser approach and consider runtime evaluation approaches next.
+[2025-11-05T00:21:37] exec bash -lc "python3 -c \"from pathlib import Path
+text = Path('/Users/cav/dev/TinyUtils/tinyutils/tools/dead-link-finder/index.html').read_text()
+start = text.index('function protectCSVCell(value) {')
+print(text[start:start+200])
+\"" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:21:37] bash -lc "python3 -c \"from pathlib import Path
+text = Path('/Users/cav/dev/TinyUtils/tinyutils/tools/dead-link-finder/index.html').read_text()
+start = text.index('function protectCSVCell(value) {')
+print(text[start:start+200])
+\"" succeeded in 191ms:
+function protectCSVCell(value) {
+      const str = String(value ?? '');
+      const trimmed = str.trimStart();
+      return /^[=+\-@]/.test(trimmed) ? "'" + str : str;
+    }
+
+    function escapeHtml(v
+[2025-11-05T00:21:37] tokens used: 205,834
+
+[2025-11-05T00:21:46] thinking
+
+**Extracting function snippets by index markers**
+[2025-11-05T00:21:50] exec bash -lc "python3 -c \"from pathlib import Path
+text = Path('/Users/cav/dev/TinyUtils/tinyutils/tools/dead-link-finder/index.html').read_text()
+start = text.index('function toCSV(rows, metaInfo) {')
+next_idx = text.index('\\n\\n    function', start)
+print(next_idx - start)
+print(text[start:next_idx])
+\"" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:21:50] bash -lc "python3 -c \"from pathlib import Path
+text = Path('/Users/cav/dev/TinyUtils/tinyutils/tools/dead-link-finder/index.html').read_text()
+start = text.index('function toCSV(rows, metaInfo) {')
+next_idx = text.index('\\n\\n    function', start)
+print(next_idx - start)
+print(text[start:next_idx])
+\"" succeeded in 211ms:
+1120
+function toCSV(rows, metaInfo) {
+      const header = ['url', 'status', 'ok', 'finalUrl', 'archiveUrl', 'note', 'chain'];
+      const escapeCell = (value) => `"${protectCSVCell(String(value ?? '')).replace(/"/g, '""')}"`;
+      const lines = [header.join(',')];
+      rows.forEach((row) => {
+        lines.push([
+          row.url,
+          row.status ?? '',
+          row.ok ? 'true' : 'false',
+          row.finalUrl ?? '',
+          row.archive && row.archive.url ? row.archive.url : '',
+          row.note ?? '',
+          row.chain ?? 0
+        ].map(escapeCell).join(','));
+      });
+      if (metaInfo && typeof metaInfo === 'object') {
+        lines.push('');
+        lines.push(['meta_key', 'meta_value'].map(escapeCell).join(','));
+        Object.entries(metaInfo)
+[2025-11-05T00:21:50] tokens used: 285,667
+
+[2025-11-05T00:21:53] thinking
+
+**Verifying 'next' function behavior**
+[2025-11-05T00:21:54] exec bash -lc "python3 -c \"from pathlib import Path
+text = Path('/Users/cav/dev/TinyUtils/tinyutils/tools/dead-link-finder/index.html').read_text()
+start = text.index('function protectCSVCell(value) {')
+next_idx = text.index('\\n\\n    function', start)
+print(text[start:next_idx])
+\"" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-create-unified-diff
+[2025-11-05T00:21:54] bash -lc "python3 -c \"from pathlib import Path
+text = Path('/Users/cav/dev/TinyUtils/tinyutils/tools/dead-link-finder/index.html').read_text()
+start = text.index('function protectCSVCell(value) {')
+next_idx = text.index('\\n\\n    function', start)
+print(text[start:next_idx])
+\"" succeeded in 183ms:
+function protectCSVCell(value) {
+      const str = String(value ?? '');
+      const trimmed = str.trimStart();
+      return /^[=+\-@]/.test(trimmed) ? "'" + str : str;
+    }
+[2025-11-05T00:21:54] tokens used: 287,487
+
+[2025-11-05T00:22:31] thinking
+
+**Summarizing comprehensive test and helper updates**
+
+I’m preparing detailed tests for multiple API handlers to verify functionality and request ID propagation, including fetch stubbing and JSON error handling. I’m also improving the CSV helpers extraction to reliably slice functions from source by identifying the next function boundary more robustly. Finally, I’m updating package.json’s test script to run these new tests under `tests/*.test.mjs`. This approach helps ensure solid coverage and cleaner helper imports without complex parsing.
+**Preparing unified diff patch for tests and configs**
+
+I’m assembling the final unified diff that updates `package.json` to run tests under `tests/*.test.mjs` and adds three new test files with comprehensive content: API contracts, envelope invariants, and CSV hardening. The diffs include all code additions and proper contexts to integrate smoothly. This patch sets up the thorough test coverage and helper loading discussed earlier.
+[2025-11-05T00:22:40] codex
+**Preparing unified diff patch for tests and configs**
+
+I’m assembling the final unified diff that updates `package.json` to run tests under `tests/*.test.mjs` and adds three new test files with comprehensive content: API contracts, envelope invariants, and CSV hardening. The diffs include all code additions and proper contexts to integrate smoothly. This patch sets up the thorough test coverage and helper loading discussed earlier.
+[2025-11-05T00:22:40] codex
+
+Change set wires deterministic coverage for the edge handlers and CSV hardening helpers.
+
+```diff
+diff --git a/package.json b/package.json
+index 0000000..1111111
+--- a/package.json
++++ b/package.json
+@@
+   "scripts": {
+     "vercel-build": "echo 'static + edge'",
+-    "test": "node --test",
++    "test": "node --test tests/*.test.mjs",
+     "smoke:local": "node scripts/smoke_dlf_local.mjs",
+diff --git a/tests/api_contracts.test.mjs b/tests/api_contracts.test.mjs
+new file mode 100644
+index 0000000..2222222
+--- /dev/null
++++ b/tests/api_contracts.test.mjs
+@@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++
++import sitemapDelta from '../api/sitemap-delta.js';
++import waybackFixer from '../api/wayback-fixer.js';
++import metafetch from '../api/metafetch.js';
++
++function stubRandom(hexValues) {
++  if (!Array.isArray(hexValues) || hexValues.length === 0) {
++    throw new Error('hexValues must contain at least one entry');
++  }
++  const original = Math.random;
++  let index = 0;
++  Math.random = () => {
++    const hex = hexValues[index] ?? hexValues[hexValues.length - 1];
++    index += 1;
++    return parseInt(hex, 16) / 16 ** hex.length;
++  };
++  return {
++    expectedId: hexValues[0].slice(0, 8),
++    restore() {
++      Math.random = original;
++    }
++  };
++}
++
++function installFetchStub(resolver) {
++  const original = globalThis.fetch;
++  globalThis.fetch = async (input, init = {}) => {
++    const url = typeof input === 'string' ? input : input?.url;
++    const result = await resolver(url, init);
++    if (result instanceof Response) {
++      return result;
++    }
++    throw new Error(`Unexpected fetch: ${String(url ?? input)}`);
++  };
++  return () => {
++    globalThis.fetch = original;
++  };
++}
++
++test('sitemap-delta returns JSON diff metadata with request id propagated', async () => {
++  const random = stubRandom(['feedcafe']);
++  const expectedId = random.expectedId;
++  try {
++    const request = new Request('https://tinyutils.test/api/sitemap-delta', {
++      method: 'POST',
++      headers: { 'content-type': 'application/json' },
++      body: JSON.stringify({
++        sitemapAText: '<urlset><url><loc>https://demo.example.com/old</loc></url></urlset>',
++        sitemapBText: '<urlset><url><loc>https://demo.example.com/new</loc></url></urlset>',
++        verifyTargets: false,
++        maxCompare: 5
++      })
++    });
++
++    const response = await sitemapDelta(request);
++    assert.strictEqual(response.status, 200);
++    assert.match(response.headers.get('content-type') ?? '', /application\/json/i);
++
++    const payload = await response.json();
++    assert.strictEqual(response.headers.get('x-request-id'), expectedId);
++    assert.strictEqual(payload?.meta?.requestId, expectedId);
++    assert.deepEqual(payload?.removed, ['https://demo.example.com/old']);
++    assert.deepEqual(payload?.added, ['https://demo.example.com/new']);
++    assert.strictEqual(payload?.meta?.removedCount, 1);
++    assert.strictEqual(payload?.meta?.addedCount, 1);
++  } finally {
++    random.restore();
++  }
++});
++
++test('wayback-fixer reports archive metadata and echoes request id', async () => {
++  const random = stubRandom(['c001d00d']);
++  const expectedId = random.expectedId;
++  const snapshotUrl = 'https://web.archive.org/web/20240101010101/https://www.gov.example/path';
++  const restoreFetch = installFetchStub((url) => {
++    if (typeof url === 'string' && url.startsWith('https://archive.org/wayback/available')) {
++      return new Response(JSON.stringify({
++        archived_snapshots: {
++          closest: {
++            available: true,
++            url: snapshotUrl,
++            timestamp: '20240101010101',
++            status: '200'
++          }
++        }
++      }), {
++        status: 200,
++        headers: { 'content-type': 'application/json' }
++      });
++    }
++    return undefined;
++  });
++
++  try {
++    const request = new Request('https://tinyutils.test/api/wayback-fixer', {
++      method: 'POST',
++      headers: { 'content-type': 'application/json' },
++      body: JSON.stringify({
++        list: 'https://www.gov.example/path',
++        verifyHead: false,
++        trySavePageNow: false,
++        prefWindow: 'any',
++        timeout: 2500,
++        concurrency: 1
++      })
++    });
++
++    const response = await waybackFixer(request);
++    assert.strictEqual(response.status, 200);
++    assert.match(response.headers.get('content-type') ?? '', /application\/json/i);
++
++    const payload = await response.json();
++    assert.strictEqual(response.headers.get('x-request-id'), expectedId);
++    assert.strictEqual(payload?.meta?.requestId, expectedId);
++    assert.strictEqual(payload?.results?.length, 1);
++
++    const [result] = payload.results;
++    assert.strictEqual(result?.url, 'https://www.gov.example/path');
++    assert.strictEqual(result?.snapshotUrl, snapshotUrl);
++    assert.match(result?.note ?? '', /archived/);
++    assert.strictEqual(payload?.meta?.totalQueued, 1);
++    assert.strictEqual(payload?.meta?.input?.accepted, 1);
++  } finally {
++    restoreFetch();
++    random.restore();
++  }
++});
++
++test('metafetch extracts title/description and propagates request id', async () => {
++  const random = stubRandom(['fadedcab']);
++  const expectedId = random.expectedId;
++  const restoreFetch = installFetchStub((url) => {
++    if (url === 'https://example.com/') {
++      return new Response('<!doctype html><html><head><title>Example Title</title><meta name="description" content="Example Description"></head><body></body></html>', {
++        status: 200,
++        headers: { 'content-type': 'text/html; charset=utf-8' }
++      });
++    }
++    return undefined;
++  });
++
++  try {
++    const request = new Request('https://tinyutils.test/api/metafetch', {
++      method: 'POST',
++      headers: { 'content-type': 'application/json' },
++      body: JSON.stringify({ url: 'https://example.com/' })
++    });
++
++    const response = await metafetch(request);
++    assert.strictEqual(response.status, 200);
++    assert.match(response.headers.get('content-type') ?? '', /application\/json/i);
++
++    const payload = await response.json();
++    assert.strictEqual(response.headers.get('x-request-id'), expectedId);
++    assert.strictEqual(payload?.meta?.requestId, expectedId);
++    assert.strictEqual(payload?.title, 'Example Title');
++    assert.strictEqual(payload?.description, 'Example Description');
++  } finally {
++    restoreFetch();
++    random.restore();
++  }
++});
+diff --git a/tests/dlf_envelope_invariants.test.mjs b/tests/dlf_envelope_invariants.test.mjs
+new file mode 100644
+index 0000000..3333333
+--- /dev/null
++++ b/tests/dlf_envelope_invariants.test.mjs
+@@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++
++import checkHandler from '../api/check.js';
++
++function stubRandom(hexValues) {
++  if (!Array.isArray(hexValues) || hexValues.length === 0) {
++    throw new Error('hexValues must contain at least one entry');
++  }
++  const original = Math.random;
++  let index = 0;
++  Math.random = () => {
++    const hex = hexValues[index] ?? hexValues[hexValues.length - 1];
++    index += 1;
++    return parseInt(hex, 16) / 16 ** hex.length;
++  };
++  return {
++    expectedId: hexValues[0].slice(0, 8),
++    restore() {
++      Math.random = original;
++    }
++  };
++}
++
++test('check handler rejects non-POST with structured envelope', async () => {
++  const random = stubRandom(['deadbeef']);
++  const expectedId = random.expectedId;
++  try {
++    const request = new Request('https://tinyutils.test/api/check', { method: 'GET' });
++    const response = await checkHandler(request);
++
++    assert.strictEqual(response.status, 405);
++    assert.match(response.headers.get('content-type') ?? '', /application\/json/i);
++    assert.strictEqual(response.headers.get('x-request-id'), expectedId);
++
++    const payload = await response.json();
++    assert.strictEqual(payload.ok, false);
++    assert.strictEqual(payload.code, 'method_not_allowed');
++    assert.strictEqual(payload.message, 'Only POST is supported');
++    assert.strictEqual(payload.requestId, expectedId);
++    assert.strictEqual(payload?.meta?.requestId, expectedId);
++    assert.strictEqual(payload?.meta?.stage, 'normalize_input');
++    assert.strictEqual(payload?.meta?.detail, null);
++    assert.strictEqual(payload?.meta?.scheduler?.globalCap, 6);
++    assert.strictEqual(payload?.meta?.scheduler?.perOriginCap, 2);
++  } finally {
++    random.restore();
++  }
++});
++
++test('check handler surfaces invalid JSON detail while preserving envelope', async () => {
++  const random = stubRandom(['0badf00d']);
++  const expectedId = random.expectedId;
++  try {
++    const request = new Request('https://tinyutils.test/api/check', {
++      method: 'POST',
++      headers: { 'content-type': 'application/json' },
++      body: '{'
++    });
++
++    const response = await checkHandler(request);
++    assert.strictEqual(response.status, 400);
++    assert.match(response.headers.get('content-type') ?? '', /application\/json/i);
++    assert.strictEqual(response.headers.get('x-request-id'), expectedId);
++
++    const payload = await response.json();
++    assert.strictEqual(payload.ok, false);
++    assert.strictEqual(payload.code, 'invalid_json');
++    assert.strictEqual(payload.message, 'Request body must be valid JSON');
++    assert.strictEqual(payload.requestId, expectedId);
++    assert.strictEqual(payload?.meta?.requestId, expectedId);
++    assert.strictEqual(payload?.meta?.stage, 'normalize_input');
++    assert.ok(typeof payload?.meta?.detail === 'string' && payload.meta.detail.length > 0);
++    assert.strictEqual(payload?.meta?.scheduler?.globalCap, 6);
++    assert.strictEqual(payload?.meta?.scheduler?.perOriginCap, 2);
++  } finally {
++    random.restore();
++  }
++});
+diff --git a/tests/csv_hardening.unit.test.mjs b/tests/csv_hardening.unit.test.mjs
+new file mode 100644
+index 0000000..4444444
+--- /dev/null
++++ b/tests/csv_hardening.unit.test.mjs
+@@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import path from 'node:path';
++import { fileURLToPath } from 'node:url';
++import { readFile } from 'node:fs/promises';
++import vm from 'node:vm';
++
++const __filename = fileURLToPath(import.meta.url);
++const __dirname = path.dirname(__filename);
++const helpersPath = path.resolve(__dirname, '..', 'tools', 'dead-link-finder', 'index.html');
++
++let cachedHelpers;
++
++async function loadCsvHelpers() {
++  if (cachedHelpers) return cachedHelpers;
++  const source = await readFile(helpersPath, 'utf8');
++  const protectSnippet = sliceFunction(source, 'function protectCSVCell(value) {');
++  const toCsvSnippet = sliceFunction(source, 'function toCSV(rows, metaInfo) {');
++  const helpers = vm.runInNewContext(`${protectSnippet}\n${toCsvSnippet}\n({ protectCSVCell, toCSV });`);
++  cachedHelpers = helpers;
++  return helpers;
++}
++
++function sliceFunction(source, signature) {
++  const start = source.indexOf(signature);
++  if (start === -1) {
++    throw new Error(`Unable to locate ${signature.trim()} in ${helpersPath}`);
++  }
++  const searchStart = start + signature.length;
++  const candidates = [source.indexOf('\nfunction ', searchStart), source.indexOf('\n    function', searchStart)]
++    .filter((value) => value !== -1);
++  const end = candidates.length ? Math.min(...candidates) : source.length;
++  return source.slice(start, end).trim();
++}
++
++test('protectCSVCell guards formula-prefixed cells including whitespace', async () => {
++  const { protectCSVCell } = await loadCsvHelpers();
++  assert.strictEqual(protectCSVCell('=SUM(A1:A2)'), '\'=SUM(A1:A2)');
++  assert.strictEqual(protectCSVCell('+SUM'), '\'+SUM');
++  assert.strictEqual(protectCSVCell('-DELETE'), '\'-DELETE');
++  assert.strictEqual(protectCSVCell('@cmd'), '\'@cmd');
++  assert.strictEqual(protectCSVCell('  =cmd'), '\'  =cmd');
++  assert.strictEqual(protectCSVCell('safe value'), 'safe value');
++});
++
++test('toCSV prefixes risky cells and meta rows while preserving CSV shape', async () => {
++  const { toCSV } = await loadCsvHelpers();
++  const csv = toCSV([
++    {
++      url: '=HYPERLINK("https://mal.example/")',
++      status: 404,
++      ok: false,
++      finalUrl: '',
++      archive: { url: 'https://web.archive.org/web/20240101000000/https://mal.example/' },
++      note: '@alert',
++      chain: 2
++    }
++  ], {
++    requestId: '=RID42',
++    warning: '-=oops'
++  });
++
++  assert.ok(csv.startsWith('\ufeff'));
++  const lines = csv.slice(1).split('\n');
++  assert.ok(lines[0].startsWith('url,status,ok'));
++
++  const rowCells = lines[1].split(',');
++  assert.strictEqual(rowCells[0], '"\'=HYPERLINK(""https://mal.example/"")"');
++  assert.strictEqual(rowCells[5], '"\'@alert"');
++
++  const metaHeaderIndex = lines.indexOf('"meta_key","meta_value"');
++  assert.notStrictEqual(metaHeaderIndex, -1);
++  assert.strictEqual(lines[metaHeaderIndex + 1], '"requestId","\'=RID42"');
++  assert.strictEqual(lines[metaHeaderIndex + 2], '"warning","\'-=oops"');
++});
+```
+
+**Next steps (if desired)**  
+1. `node --test` to exercise the new suites once write access is available.  
+2. Re-run targeted handler smoke (`node scripts/test_edge_handlers.mjs`) to cross-check runtime behaviour.
+[2025-11-05T00:22:53] tokens used: 297,487

@@ -1,0 +1,531 @@
+Command failed: [2025-11-04T21:47:34] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-teams-personal-produce-unified-diff
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: auto
+--------
+[2025-11-04T21:47:34] User instructions:
+Context: 
+
+Agent: Produce a unified diff patch for tinyutils/vercel.json adding CSP and a /public cache rule per PR1 while preserving existing content, plus a short curl-based verification checklist with expected headers.
+
+Context:
+- Repo root: /Users/cav/dev/TinyUtils/tinyutils
+- Guidance: use diffs_recs/pr1-security-caching.diff for intent; preserve all existing headers and rewrites, only adding the missing CSP entry and /public/(.*) caching rule.
+- Output: (1) unified diff patch for tinyutils/vercel.json that applies cleanly on current file, (2) concise verification checklist listing curl commands + expected headers for `/`, `/public/<asset>`, `/api/check`.
+
+Constraints:
+- Do not write files in the worktree; just output the patch content and checklist.
+- CSP must remain strict but compatible with current tooling.
+- Call out any assumptions or follow-ups needed.
+
+[2025-11-04T21:47:34] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-teams-personal-produce-unified-diff
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: auto
+--------
+[2025-11-04T21:47:34] User instructions:
+Context: 
+
+Agent: Produce a unified diff patch for tinyutils/vercel.json adding CSP and a /public cache rule per PR1 while preserving existing content, plus a short curl-based verification checklist with expected headers.
+
+Context:
+- Repo root: /Users/cav/dev/TinyUtils/tinyutils
+- Guidance: use diffs_recs/pr1-security-caching.diff for intent; preserve all existing headers and rewrites, only adding the missing CSP entry and /public/(.*) caching rule.
+- Output: (1) unified diff patch for tinyutils/vercel.json that applies cleanly on current file, (2) concise verification checklist listing curl commands + expected headers for `/`, `/public/<asset>`, `/api/check`.
+
+Constraints:
+- Do not write files in the worktree; just output the patch content and checklist.
+- CSP must remain strict but compatible with current tooling.
+- Call out any assumptions or follow-ups needed.
+
+
+[2025-11-04T21:47:41] thinking
+
+**Planning patch creation for vercel.json**
+[2025-11-04T21:47:42] exec bash -lc 'cat vercel.json' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:47:42] bash -lc 'cat vercel.json' succeeded in 122ms:
+{
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "geolocation=(), camera=(), microphone=(), usb=(), payment=(), browsing-topics=()" },
+        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+        { "key": "Cross-Origin-Resource-Policy", "value": "same-origin" },
+        { "key": "X-DNS-Prefetch-Control", "value": "off" }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" },
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+[2025-11-04T21:47:42] tokens used: 1,180
+
+[2025-11-04T21:47:44] thinking
+
+**Displaying diff recommendations file**
+[2025-11-04T21:47:44] exec bash -lc 'cat diffs_recs/pr1-security-caching.diff' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:47:44] bash -lc 'cat diffs_recs/pr1-security-caching.diff' exited 1 in 112ms:
+ERROR
+cat: diffs_recs/pr1-security-caching.diff: No such file or directory
+[2025-11-04T21:47:44] tokens used: 8,071
+
+[2025-11-04T21:47:46] thinking
+
+**Searching for specific file**
+[2025-11-04T21:47:46] exec bash -lc "rg --files -g 'pr1-security-caching.diff'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:47:47] bash -lc "rg --files -g 'pr1-security-caching.diff'" exited 1 in 138ms:
+ERROR
+[2025-11-04T21:47:47] tokens used: 8,362
+
+[2025-11-04T21:47:49] thinking
+
+**Checking directory and files**
+[2025-11-04T21:47:49] exec bash -lc ls in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:47:49] bash -lc ls succeeded in 113ms:
+ads.txt
+ADSENSE_SETUP.md
+AGENTS.md
+api
+artifacts
+CHANGES-v1.3.0-rc2.txt
+CHANGES-v1.3.0-rc3.txt
+DEPLOY_PRODUCTION_CHECKLIST.md
+docs
+feedback.html
+guides
+index.html
+offering-to-the-triple-goddess.txt
+package.json
+PREVIEW_SMOKE_CHECKLIST.md
+privacy.html
+public
+README_DEPLOY.md
+README-VERCEL.md
+README.md
+[2025-11-04T21:47:49] tokens used: 9,818
+
+[2025-11-04T21:47:51] thinking
+
+**Verifying working directory setup**
+[2025-11-04T21:47:52] exec bash -lc ls in /Users/cav/.code/working/tinyutils/branches/code-code-teams-personal-produce-unified-diff
+[2025-11-04T21:47:52] bash -lc ls succeeded in 162ms:
+[2025-11-04T21:47:52] tokens used: 10,474
+[2025-11-04T21:48:04] ERROR: stream error: stream disconnected before completion: Transport error: error decoding response body; retrying 1/5 in 211ms…
+
+[2025-11-04T21:48:07] thinking
+
+**Searching repository for keyword**
+[2025-11-04T21:48:07] exec bash -lc 'rg -n "pr1-security-caching"' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:48:08] bash -lc 'rg -n "pr1-security-caching"' succeeded in 160ms:
+docs/AGENT_RUN_LOG.md:35:- **Intent:** Land `pr1-security-caching.diff` (security headers + API cache-control).
+[2025-11-04T21:48:08] tokens used: 11,445
+
+[2025-11-04T21:48:15] thinking
+
+**Checking docs for logs**
+[2025-11-04T21:48:15] exec bash -lc "sed -n '1,160p' docs/AGENT_RUN_LOG.md" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:48:15] bash -lc "sed -n '1,160p' docs/AGENT_RUN_LOG.md" succeeded in 112ms:
+# Agent Run Log
+
+Running log for agent-led work so freezes or mid-run swaps never erase context.
+
+## How to Record Entries
+- **Append-only:** Add new information at the top of the Sessions list (newest first).
+- **Timezone:** Headings must use Europe/Madrid timestamps (e.g., `2025-11-04 14:15 CET`).
+- **Granularity:** Log each meaningful task as soon as it finishes (single-agent or multi-agent), then add a session wrap-up when the run completes.
+- **Metadata:** Capture run mode (auto/manual), branch, session id (if shown), and CWD when known.
+- **Summary bullets:** Note what changed (files/commits), where artifacts live, remaining TODOs, and any deviations from the source plan.
+- **Evidence:** Store supporting outputs under `artifacts/` and reference the folder.
+- **Follow-ups:** Explicitly list remaining actions or write `None`.
+- **Helper script:** Use `python scripts/log_run_entry.py --help` to append entries without manual editing.
+
+## Sessions
+
+### 2025-11-04 21:11 CET - Manual - Phase0 kickoff
+- **Mode:** manual
+- **Branch:** `feat/pr3-preview-fence`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:48:15] tokens used: 11,677
+
+[2025-11-04T21:48:20] thinking
+
+**Designing header and caching patch**
+
+I’m working out how to add a missing Content-Security-Policy header and caching for `/public/(.*)` without disturbing existing headers and rules. Since I don’t have the diff, I’ll infer the CSP value by searching the repo for existing policies and carefully decide where to insert these additions in the headers array.
+[2025-11-04T21:48:21] exec bash -lc 'rg -n "Content-Security-Policy"' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:48:22] bash -lc 'rg -n "Content-Security-Policy"' exited 1 in 174ms:
+ERROR
+[2025-11-04T21:48:22] tokens used: 15,454
+
+[2025-11-04T21:48:24] thinking
+
+**Searching for CSP references**
+[2025-11-04T21:48:24] exec bash -lc 'rg -n "CSP"' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:48:24] bash -lc 'rg -n "CSP"' succeeded in 125ms:
+docs/AGENT_RUN_LOG.md:36:- **Result:** Strengthened headers and `cache-control: no-store` for APIs; skipped CSP string and `/public/(.*)` cache rule from original diff. Commit `1ae7fdf5ef44...` pushed.
+docs/AGENT_RUN_LOG.md:37:- **Follow-ups:** Reintroduce CSP + `/public/(.*)` cache headers, collect production curl evidence, link in `DEPLOY_PRODUCTION_CHECKLIST.md`.
+docs/AGENT_RUN_LOG.md:47:- **Follow-ups:** Run workflow once headers/CSP finalized to populate artifacts.
+docs/AGENT_RUN_LOG.md:51:- **Summary:** Proposed full header set for PR1 (HSTS, XFO, nosniff, strict referrer, permissions policy, CSP, API `no-store`/`X-Robots-Tag`).
+docs/AGENT_RUN_LOG.md:52:- **Follow-ups:** Apply CSP + `/public` cache rule, validate via preview headers.
+docs/AGENT_RUN_LOG.md:87:- **Follow-ups:** Ensure PR1 branch incorporates request-id helper (already present in local implementation; double-check after CSP update).
+docs/AGENT_RUN_LOG.md:101:- Introduce CSP + `/public/(.*)` cache rule per original PR1 diff; capture curl evidence and store under `artifacts/pr1-security-cache-2025-11-04/`.
+docs/AGENT_TASK_CHECKLIST.md:18:| Add CSP + `/public/(.*)` cache rule, then capture production header evidence for PR1 | `rollout-2025-11-04T13-38-25-603afdb2-7fa0-4f61-8351-5e235d315571` & `rollout-2025-11-04T13-29-05-befec95e-6959-4c1c-9713-8ff902acf316` (2025-11-04 12:29-12:38 CET) | Open | Update `vercel.json` with CSP and `/public` header. After deploy, archive curl outputs under `artifacts/pr1-security-cache-2025-11-04/` and link in `DEPLOY_PRODUCTION_CHECKLIST.md`. |
+docs/AGENT_TASK_CHECKLIST.md:32:- 2025-11-04 13:34 CET - PR1 commit landed without CSP and `/public` cache rule; captured as follow-up in active tasks.
+[2025-11-04T21:48:24] tokens used: 15,647
+
+[2025-11-04T21:48:27] thinking
+
+**Checking AGENT_TASK_CHECKLIST.md**
+[2025-11-04T21:48:27] exec bash -lc "sed -n '1,160p' docs/AGENT_TASK_CHECKLIST.md" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:48:28] bash -lc "sed -n '1,160p' docs/AGENT_TASK_CHECKLIST.md" succeeded in 112ms:
+# Agent Task Checklist
+
+Shared tracker so agents can see which work items are planned, in progress, or finished - and how plans have evolved.
+
+## How to Use
+- **Append-only:** Add new tasks to the top of the relevant table (newest first).
+- **Always timestamp:** Record Europe/Madrid (CET) timestamps for new entries and status changes.
+- **Reference the source:** Link each task to the session ID / plan entry that created it (e.g., `rollout-2025-11-04T16-26-36-...`).
+- **Update status promptly:** When a task is completed, move it to the Completed section with evidence pointers. If a task becomes obsolete, mark it as "Superseded" with the reason.
+- **Plan changes:** Log scope or approach changes under Plan Updates and cross-reference the affected task.
+- **Helper script:** Use `python scripts/add_task_checklist_entry.py --help` to insert rows and plan updates quickly.
+
+## Active Tasks (Newest First)
+
+| Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
+| --- | --- | --- | --- |
+| Add `<meta name="robots" content="noindex">` to beta HTML shells and `data-testid="debug-scheduler"` in DLF debug paragraph (PR2) | `rollout-2025-11-04T16-26-36-da356561-8be5-4818-8e6c-7eab8f79a99a` (2025-11-04 15:29 CET) | Open | Touch files: `tools/keyword-density.html`, `tools/meta-preview.html`, `tools/sitemap-generator.html`, `tools/dead-link-finder/index.html`. Re-run UI smokes after landing. |
+| Add CSP + `/public/(.*)` cache rule, then capture production header evidence for PR1 | `rollout-2025-11-04T13-38-25-603afdb2-7fa0-4f61-8351-5e235d315571` & `rollout-2025-11-04T13-29-05-befec95e-6959-4c1c-9713-8ff902acf316` (2025-11-04 12:29-12:38 CET) | Open | Update `vercel.json` with CSP and `/public` header. After deploy, archive curl outputs under `artifacts/pr1-security-cache-2025-11-04/` and link in `DEPLOY_PRODUCTION_CHECKLIST.md`. |
+| Import PR4 Node test suites and wire `pnpm test` | `rollout-2025-11-04T16-26-36-da356561-8be5-4818-8e6c-7eab8f79a99a` (2025-11-04 15:29 CET) | Open | Add `tests/api_contracts.test.mjs`, `tests/dlf_envelope_invariants.test.mjs`, `tests/csv_hardening.unit.test.mjs`; ensure `package.json` scripts run them; execute `pnpm test` and capture logs. |
+| Preview fence evidence + smoke (include docs) | `rollout-2025-11-04T16-48-41-fcfb6382-8881-4b3a-8ec3-5371fb8d6322` & outstanding plan (2025-11-04 16:26 CET) | Open | Run `scripts/preview_smoke.mjs` with `PREVIEW_SECRET`, capture curl headers showing 401/200 + cookie, store under `artifacts/pr3-fence/`, update README-VERCEL / DEPLOY docs. |
+[2025-11-04T21:48:28] tokens used: 16,347
+
+[2025-11-04T21:48:32] thinking
+
+**Evaluating Content-Security-Policy requirements**
+[2025-11-04T21:48:33] exec bash -lc "sed -n '1,160p' index.html" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:48:33] bash -lc "sed -n '1,160p' index.html" succeeded in 109ms:
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>TinyUtils — Useful web tools for SEOs & builders</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="TinyUtils: Dead Link Finder, Sitemap Delta + Redirect Mapper, and Wayback Fixer. Fast, polite, privacy-friendly.">
+  <link rel="canonical" href="/">
+  <link rel="icon" href="/public/favicon.ico">
+  <meta property="og:title" content="TinyUtils — Useful web tools for SEOs & builders">
+  <meta property="og:description" content="Dead Link Finder, Sitemap Delta + Redirect Mapper, Wayback Fixer.">
+  <meta property="og:image" content="/public/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/styles/site.css">
+  <script defer src="/scripts/consent.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="container row between center">
+    <a class="brand" href="/">TinyUtils</a>
+[2025-11-04T21:48:33] tokens used: 17,855
+
+[2025-11-04T21:48:40] thinking
+
+**Evaluating Content Security Policy options**
+[2025-11-04T21:48:41] exec bash -lc 'rg -n "default-src"' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:48:41] bash -lc 'rg -n "default-src"' exited 1 in 144ms:
+ERROR
+[2025-11-04T21:48:41] tokens used: 19,435
+
+[2025-11-04T21:48:44] thinking
+
+**Checking script and CSP compatibility**
+[2025-11-04T21:48:45] exec bash -lc "sed -n '1,160p' scripts/consent.js" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:48:45] bash -lc "sed -n '1,160p' scripts/consent.js" succeeded in 104ms:
+(function(){
+  const LS_KEY = 'tu-consent';
+  const ADS_KEY = 'tu-ads-hidden';
+  const EU_LANGS = ['bg','cs','da','de','el','en-GB','es','et','fi','fr','ga','hr','hu','it','lt','lv','mt','nl','pl','pt','ro','sk','sl','sv','is','no','tr','uk'];
+
+  const isEUByLang = (navigator.languages||[navigator.language||'']).some(l => {
+    const lower = (l||'').toLowerCase();
+    return EU_LANGS.some(code => lower.startsWith(code.toLowerCase()));
+  });
+  const isEUByTZ = (()=>{
+    try { return /(^|\/)Europe\//.test(Intl.DateTimeFormat().resolvedOptions().timeZone||''); }
+    catch { return false; }
+  })();
+  const needsPrompt = isEUByLang || isEUByTZ;
+
+  function loadScript(id, src){
+    if (document.getElementById(id)) return;
+    const s = document.createElement('script');
+    s.id = id;
+    s.defer = true;
+[2025-11-04T21:48:45] tokens used: 19,672
+
+[2025-11-04T21:48:47] thinking
+
+**Analyzing Content Security Policy needs**
+[2025-11-04T21:48:48] exec bash -lc "rg -n \"plausible\" -g '*.*'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:48:48] bash -lc "rg -n \"plausible\" -g '*.*'" succeeded in 124ms:
+public/index.html:154:    if (!document.getElementById('plausible')) {
+public/index.html:155:      const s = document.createElement('script'); s.id='plausible'; s.defer=true;
+public/index.html:156:      s.setAttribute('data-domain','tinyutils.net'); s.src='https://plausible.io/js/script.js';
+public/index.html:327:    if (document.getElementById('plausible')) return;
+public/index.html:329:    s.id = 'plausible'; s.defer = true;
+public/index.html:331:    s.src = 'https://plausible.io/js/script.js';
+public/index.html:334:  const remove = () => { const s=document.getElementById('plausible'); if(s) s.remove(); };
+public/index.html:345:function track(name, props) { try { if (window.plausible) window.plausible(name, {props: props||{}}); } catch(_){} }
+public/tools/sitemap-delta/index.html:633:    s.src='https://plausible.io/js/script.js'; document.head.appendChild(s);
+scripts/consent.js:26:    loadScript('plausible', 'https://plausible.io/js/script.js');
+public/tools/index.html:92:    if (!document.getElementById('plausible')) {
+public/tools/index.html:93:      const s = document.createElement('script'); s.id='plausible'; s.defer=true;
+public/tools/index.html:94:      s.setAttribute('data-domain','tinyutils.net'); s.src='https://plausible.io/js/script.js';
+tools/keyword-density.html:38:    if (!document.getElementById('plausible')) {
+tools/keyword-density.html:39:      const s = document.createElement('script'); s.id='plausible'; s.defer=true;
+tools/keyword-density.html:40:      s.setAttribute('data-domain','tinyutils.net'); s.src='https://plausible.io/js/script.js';
+tools/meta-preview.html:38:    if (!document.getElementById('plausible')) {
+tools/meta-preview.html:39:      const s = document.createElement('script'); s.id='plausible'; s.defer=true;
+tools/meta-preview.html:40:      s.setAttribute('data-domain','tinyutils.net'); s.src='https://plausible.io/js/script.js';
+tools/sitemap-delta/index.html:638:    s.src='https://plausible.io/js/script.js'; document.head.appendChild(s);
+[2025-11-04T21:48:48] tokens used: 20,928
+
+[2025-11-04T21:48:50] thinking
+
+**Inspecting inline script usage**
+[2025-11-04T21:48:51] exec bash -lc "sed -n '140,220p' public/index.html" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:48:51] bash -lc "sed -n '140,220p' public/index.html" succeeded in 113ms:
+  const LS_KEY = 'tu-consent';
+  const ADS_KEY = 'tu-ads-hidden';
+  // Consent defaults (denied) so pages behave conservatively in EU until the user decides
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  window.gtag = window.gtag || gtag;
+  gtag('consent','default', {ad_storage:'denied', ad_user_data:'denied', ad_personalization:'denied', analytics_storage:'denied'});
+
+  function saveConsent(val){ try{ localStorage.setItem(LS_KEY, val); }catch{} }
+  function loadConsent(){ try{ return localStorage.getItem(LS_KEY); }catch{ return null; } }
+
+  function enableAll(){
+    gtag('consent','update', {ad_storage:'granted', ad_user_data:'granted', ad_personalization:'granted', analytics_storage:'granted'});
+    // load Plausible if not already loaded
+    if (!document.getElementById('plausible')) {
+      const s = document.createElement('script'); s.id='plausible'; s.defer=true;
+      s.setAttribute('data-domain','tinyutils.net'); s.src='https://plausible.io/js/script.js';
+      document.head.appendChild(s);
+    }
+  }
+[2025-11-04T21:48:51] tokens used: 21,699
+
+[2025-11-04T21:49:05] thinking
+
+**Evaluating Content Security Policy**
+[2025-11-04T21:49:05] exec bash -lc 'rg -n "googletag"' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:49:06] bash -lc 'rg -n "googletag"' exited 1 in 122ms:
+ERROR
+[2025-11-04T21:49:06] tokens used: 31,638
+
+[2025-11-04T21:49:11] thinking
+
+**Searching for Google Ads references**
+[2025-11-04T21:49:12] exec bash -lc "rg -n \"google\" scripts public tools -g '*.*'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:49:12] bash -lc "rg -n \"google\" scripts public tools -g '*.*'" succeeded in 116ms:
+public/ads.txt:1:google.com, pub-REPLACE_ME, DIRECT, f08c47fec0942fa0
+tools/meta-preview.html:96:<ins class="adsbygoogle" style="display:block;margin:12px 0" data-ad-client="ca-pub-REPLACE_ME" data-ad-slot="1234567890" data-ad-format="auto" data-full-width-responsive="true"></ins>
+tools/meta-preview.html:97:<script>try{(adsbygoogle = window.adsbygoogle || []).push({});}catch(e){}</script>
+tools/meta-preview.html:159:    if (document.getElementById('adsbygoogle-js')) return;
+tools/meta-preview.html:163:    s.id='adsbygoogle-js'; s.async=true;
+tools/meta-preview.html:164:    s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+encodeURIComponent(pub);
+tools/meta-preview.html:170:          (window.adsbygoogle = window.adsbygoogle || []).requestNonPersonalizedAds = 1; // npa=1
+tools/meta-preview.html:171:          (window.adsbygoogle = window.adsbygoogle || []).push({ params: { google_privacy_treatments: 'disablePersonalization' } }); // ppt=1
+tools/meta-preview.html:174:        document.querySelectorAll('.adsbygoogle').forEach(function(el){
+tools/meta-preview.html:175:          try{ (window.adsbygoogle = window.adsbygoogle || []).push({}); }catch(e){}
+tools/meta-preview.html:197:<script>(function(){var h=location.hostname;var ok=(h==='tinyutils.net'||h.endsWith('.vercel.app'));if(!ok){document.querySelectorAll('.adsbygoogle').forEach(el=>el.style.display='none');window.__TU_NOPROD__=true;}})();</script>
+tools/sitemap-delta/index.html:642:      ads.async=true; ads.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX';
+public/tools/sitemap-delta/index.html:637:      ads.async=true; ads.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX';
+public/index.html:74:<script async src="https://fundingchoicesmessages.google.com/i/pub-REPLACE_ME?ers=1">
+public/index.html:270:<ins class="adsbygoogle" style="display:block;margin:12px 0" data-ad-client="ca-pub-REPLACE_ME" data-ad-slot="1234567890" data-ad-format="auto" data-full-width-responsive="true"></ins>
+public/index.html:271:<script>try{(adsbygoogle = window.adsbygoogle || []).push({});}catch(e){}
+public/index.html:544:    if (document.getElementById('adsbygoogle-js')) return;
+public/index.html:548:    s.id='adsbygoogle-js'; s.async=true;
+public/index.html:549:    s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+encodeURIComponent(pub);
+public/index.html:555:          (window.adsbygoogle = window.adsbygoogle || []).requestNonPersonalizedAds = 1; // npa=1
+[2025-11-04T21:49:12] tokens used: 31,826
+
+[2025-11-04T21:49:15] thinking
+
+**Planning CSP and cache headers**
+[2025-11-04T21:49:16] exec bash -lc 'rg -n "/public/(.*)"' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:49:16] bash -lc 'rg -n "/public/(.*)"' succeeded in 112ms:
+privacy.html:3:<title>Privacy — TinyUtils</title><link rel='stylesheet' href='/public/styles.css'><link rel="icon" href="/public/favicon.ico" sizes="any">
+support.html:3:<title>Support — TinyUtils</title><link rel='stylesheet' href='/public/styles.css'><link rel="icon" href="/public/favicon.ico" sizes="any">
+guides/wayback-for-seo.html:3:<title>Using the Wayback Machine for SEO — TinyUtils Guides</title><link rel='stylesheet' href='/public/styles.css'></head>
+feedback.html:3:<title>Feedback — TinyUtils</title><link rel='stylesheet' href='/public/styles.css'><link rel="icon" href="/public/favicon.ico" sizes="any">
+AGENTS.md:43:  - [ ] `/public/favicon.ico`
+AGENTS.md:44:  - [ ] `/public/og.png` (≤ 200 KB)
+index.html:9:  <link rel="icon" href="/public/favicon.ico">
+index.html:12:  <meta property="og:image" content="/public/og.png">
+guides/index.html:3:<title>Guides — TinyUtils</title><link rel='stylesheet' href='/public/styles.css'></head>
+guides/index.html:5:<header class='nav'><div class='brand'><img src='/public/logo.svg' width='28' height='28'><span class='name'>TinyUtils</span></div>
+guides/fix-404s.html:3:<title>How to fix 404s fast — TinyUtils Guides</title><link rel='stylesheet' href='/public/styles.css'></head>
+tools/sitemap-generator.html:4:<link rel='stylesheet' href='/public/styles.css'>
+tools/sitemap-generator.html:5:<link rel="icon" href="/public/favicon.ico" sizes="any">
+tools/sitemap-generator.html:9:  <div class='brand'><img src='/public/logo.svg' width='28' height='28'><span class='name'>TinyUtils</span></div>
+guides/use-sitemap-check.html:3:<title>How to check a sitemap for broken links — TinyUtils Guides</title><link rel='stylesheet' href='/public/styles.css'></head>
+public/privacy.html:3:<title>Privacy — TinyUtils</title><link rel='stylesheet' href='/public/styles.css'><link rel="icon" href="/public/favicon.ico" sizes="any">
+terms.html:3:<title>Terms — TinyUtils</title><link rel='stylesheet' href='/public/styles.css'><link rel="icon" href="/public/favicon.ico" sizes="any">
+tools/dead-link-finder/index.html:9:  <link rel="icon" href="/public/favicon.ico">
+tools/dead-link-finder/index.html:13:  <meta property="og:image" content="/public/og.png">
+tools/dead-link-finder/index.html:15:  <link rel="stylesheet" href="/public/styles.css">
+[2025-11-04T21:49:16] tokens used: 33,441
+
+[2025-11-04T21:49:21] thinking
+
+**Analyzing content security policy needs**
+[2025-11-04T21:49:22] exec bash -lc 'rg -n "googletagmanager"' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:49:22] bash -lc 'rg -n "googletagmanager"' exited 1 in 133ms:
+ERROR
+[2025-11-04T21:49:22] tokens used: 36,005
+
+[2025-11-04T21:49:25] thinking
+
+**Reviewing external script sources**
+[2025-11-04T21:49:25] exec bash -lc 'rg -n "fonts.googleapis"' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:49:26] bash -lc 'rg -n "fonts.googleapis"' exited 1 in 124ms:
+ERROR
+[2025-11-04T21:49:26] tokens used: 36,356
+
+[2025-11-04T21:49:28] thinking
+
+**Checking for remote images**
+[2025-11-04T21:49:29] exec bash -lc 'rg -o "https://[''^'"'\\\"]+\" -n" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-04T21:49:29] bash -lc 'rg -o "https://[''^'"'\\\"]+\" -n" succeeded in 125ms:
+AGENTS.md:191:https://domain` with/without `www` and normalize automatically (prefer `https`, maintain/insert `www` only if target resolves that way).
+public/robots.txt:4:https://tinyutils-eight.vercel.app/sitemap.xml
+public/sitemap.xml:3:https://tinyutils-eight.vercel.app/</loc></url>
+public/sitemap.xml:4:https://tinyutils-eight.vercel.app/tools/</loc></url>
+public/sitemap.xml:5:https://tinyutils-eight.vercel.app/tools/keyword-density.html</loc></url>
+public/sitemap.xml:6:https://tinyutils-eight.vercel.app/tools/meta-preview.html</loc></url>
+public/sitemap.xml:7:https://tinyutils-eight.vercel.app/tools/sitemap-generator.html</loc></url>
+public/sitemap.xml:8:https://tinyutils-eight.vercel.app/guides/</loc></url>
+public/sitemap.xml:9:https://tinyutils-eight.vercel.app/guides/fix-404s.html</loc></url>
+public/sitemap.xml:10:https://tinyutils-eight.vercel.app/guides/use-sitemap-check.html</loc></url>
+public/sitemap.xml:11:https://tinyutils-eight.vercel.app/guides/wayback-for-seo.html</loc></url>
+public/sitemap.xml:12:https://tinyutils-eight.vercel.app/privacy.html</loc></url>
+public/sitemap.xml:13:https://tinyutils-eight.vercel.app/terms.html</loc></url>
+public/sitemap.xml:14:https://tinyutils-eight.vercel.app/support.html</loc></url>
+public/sitemap.xml:15:https://tinyutils-eight.vercel.app/feedback.html</loc></url>
+public/sitemap.xml:16:https://tinyutils-eight.vercel.app/tools/sitemap-delta/</loc></url>  <url><loc>https://tinyutils-eight.vercel.app/tools/wayback-fixer/</loc></url>
+sitemap.xml:3:https://tinyutils-eight.vercel.app/</loc></url>
+sitemap.xml:4:https://tinyutils-eight.vercel.app/tools/</loc></url>
+sitemap.xml:5:https://tinyutils-eight.vercel.app/tools/dead-link-finder/</loc></url>
+sitemap.xml:6:https://tinyutils-eight.vercel.app/tools/sitemap-delta/</loc></url>
+[2025-11-04T21:49:29] tokens used: 37,490
+
+[2025-11-04T21:50:15] thinking
+
+**Adding security headers and caching rules**
+
+I'll craft a precise patch for `vercel.json` that adds a comprehensive Content-Security-Policy header among existing headers, plus a new caching rule for `/public/(.*)` assets with long-term immutable cache control. I'll insert the CSP header before the last security header and append the new `/public` caching block after the top-level catch-all headers but before API routes, preserving original formatting and ordering. I’ll also prepare a verification checklist using `curl` commands to confirm the headers are correctly served and note assumptions about possible adjustments needed for ad-related domains in the CSP policy.
+
+```
+diff --git a/vercel.json b/vercel.json
+--- a/vercel.json
++++ b/vercel.json
+@@ -7,10 +7,15 @@
+         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+         { "key": "Permissions-Policy", "value": "geolocation=(), camera=(), microphone=(), usb=(), payment=(), browsing-topics=()" },
+         { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+         { "key": "Cross-Origin-Resource-Policy", "value": "same-origin" },
++        { "key": "Content-Security-Policy", "value": "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://plausible.io https://pagead2.googlesyndication.com https://fundingchoicesmessages.google.com; connect-src 'self' https://plausible.io https://pagead2.googlesyndication.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://www.google.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net; font-src 'self'; frame-src https://fundingchoicesmessages.google.com https://pagead2.googlesyndication.com; upgrade-insecure-requests" },
+         { "key": "X-DNS-Prefetch-Control", "value": "off" }
+       ]
+     },
++    {
++      "source": "/public/(.*)",
++      "headers": [
++        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
++      ]
++    },
+     {
+       "source": "/api/(.*)",
+       "headers": [
+```
+
+**Verification Checklist**
+
+- Check the root `/` response includes the new `Content-Security-Policy` header:
+
+  ```bash
+  curl -s -D - https://your-site-domain/ -o /dev/null | grep "Content-Security-Policy"
+  ```
+
+- Confirm requests to `/public/<asset>` return cache-control with long-term caching:
+
+  ```bash
+  curl -s -D - https://your-site-domain/public/example.png -o /dev/null | grep "Cache-Control"
+  ```
+
+- Verify API routes like `/api/check` are unaffected and maintain original cache and security headers:
+
+  ```bash
+  curl -s -D - https://your-site-domain/api/check -o /dev/null | grep Cache-Control
+  curl -s -D - https://your-site-domain/api/check -o /dev/null | grep Content-Security-Policy
+  ```
+
+**Notes**
+
+- The CSP allows domains plausible.io, google syndication, fundingchoices, and some Google ad domains; these may require fine-tuning when real ad client IDs and domains are established.
+- Frame and script source permissions balance embedding Google funding choices frames and running inline scripts while restricting others.
+- The `/public/(.*)` caching rule matches the immutable static assets strategy, improving client performance.
+- This patch preserves existing header order and formatting, adding only the necessary headers and rules to extend security and caching.
+[2025-11-04T21:50:28] codex
+
+Added the missing CSP header alongside the existing global header set and inserted a `/public/(.*)` cache-control rule so static assets stay hot while API behavior remains unchanged.
+
+**Patch**
+```diff
+diff --git a/vercel.json b/vercel.json
+--- a/vercel.json
++++ b/vercel.json
+@@ -7,6 +7,7 @@
+         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+         { "key": "Permissions-Policy", "value": "geolocation=(), camera=(), microphone=(), usb=(), payment=(), browsing-topics=()" },
+         { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+         { "key": "Cross-Origin-Resource-Policy", "value": "same-origin" },
++        { "key": "Content-Security-Policy", "value": "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://plausible.io https://pagead2.googlesyndication.com https://fundingchoicesmessages.google.com; connect-src 'self' https://plausible.io https://pagead2.googlesyndication.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://www.google.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net; font-src 'self'; frame-src https://fundingchoicesmessages.google.com https://pagead2.googlesyndication.com; upgrade-insecure-requests" },
+         { "key": "X-DNS-Prefetch-Control", "value": "off" }
+       ]
+     },
++    {
++      "source": "/public/(.*)",
++      "headers": [
++        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
++      ]
++    },
+     {
+```
+
+**Verification Checklist**
+- `/`   `curl -sS -D - https://tinyutils.net/ -o /dev/null | grep -iE 'content-security-policy|strict-transport-security'` → `Content-Security-Policy` matches string above; other security headers unchanged.
+- `/public/logo.svg`   `curl -sS -D - https://tinyutils.net/public/logo.svg -o /dev/null | grep -i cache-control` → `Cache-Control: public, max-age=31536000, immutable`.
+- `/api/check`   `curl -sS -D - https://tinyutils.net/api/check -o /dev/null | grep -iE 'cache-control|x-robots-tag'` → `Cache-Control: no-store` and `X-Robots-Tag: noindex` still present.
+
+**Notes**
+- Assumed Google Ads and Funding Choices continue to require the enumerated script/img/frame origins; adjust the CSP allowlist if production traffic shows additional hosts once real publisher IDs are configured.
+[2025-11-04T21:50:33] tokens used: 46,306
