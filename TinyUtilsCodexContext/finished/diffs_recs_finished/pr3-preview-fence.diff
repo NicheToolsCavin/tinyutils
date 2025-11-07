@@ -1,0 +1,77 @@
+--- /dev/null
++++ b/api/fence.js
+--- /dev/null+++ b/api/fence.js@@ -0,0 +1,75 @@+export const config = { runtime: 'edge' };
++
++function rid() { return Math.random().toString(16).slice(2, 10); }
++
++function json(status, body, requestId, extraHeaders) {
++  const headers = new Headers({ 'content-type': 'application/json; charset=utf-8' });
++  headers.set('cache-control', 'no-store');
++  if (requestId) headers.set('x-request-id', requestId);
++  for (const [k, v] of Object.entries(extraHeaders || {})) {
++    headers.set(k, v);
++  }
++  return new Response(JSON.stringify(body), { status, headers });
++}
++
++function parseCookies(cookieHeader) {
++  const out = {};
++  const src = String(cookieHeader || '');
++  for (const part of src.split(/;\s*/)) {
++    const idx = part.indexOf('=');
++    if (idx > 0) {
++      const k = part.slice(0, idx).trim();
++      const v = part.slice(idx + 1).trim();
++      if (k) out[k] = v;
++    }
++  }
++  return out;
++}
++
++export default async function handler(req) {
++  const requestId = rid();
++  try {
++    const url = new URL(req.url);
++    const params = url.searchParams;
++    const target = params.get('target') || '/';
++    const expected = (process.env.PREVIEW_SECRET || '').trim();
++    const fromHeader = req.headers.get('x-preview-secret');
++    const cookies = parseCookies(req.headers.get('cookie'));
++    const fromCookie = cookies['tu_preview_secret'];
++    const fromQuery = params.get('preview_secret');
++
++    let allowed = false;
++    let setCookie = null;
++    const presented = fromHeader || fromCookie || fromQuery;
++
++    if (!expected) {
++      allowed = true; // no secret configured => allow
++    } else if (presented && typeof presented === 'string' && presented.length) {
++      allowed = presented === expected;
++      if (allowed && fromQuery && (!fromCookie || fromCookie !== expected)) {
++        setCookie = `tu_preview_secret=${expected}; Path=/; Max-Age=86400; HttpOnly; Secure; SameSite=Lax`;
++      }
++    }
++
++    if (!allowed) {
++      return json(401, {
++        ok: false,
++        code: 'preview_required',
++        message: 'This tool is gated in production. Provide PREVIEW_SECRET via header x-preview-secret or query ?preview_secret=…',
++        requestId
++      }, requestId, { 'www-authenticate': 'Bearer realm="Preview"' });
++    }
++
++    const host = req.headers.get('host');
++    const scheme = url.protocol || 'https:';
++    const origin = (scheme.startsWith('http') ? scheme : 'https:') + '//' + host;
++    const pageUrl = origin + target;
++
++    const res = await fetch(pageUrl, { headers: { 'accept': 'text/html' } });
++    const headers = new Headers(res.headers);
++    if (setCookie) headers.set('set-cookie', setCookie);
++    return new Response(res.body, { status: res.status, headers });
++  } catch (error) {
++    return json(500, { ok: false, code: 'server_error', message: String(error).slice(0, 200), requestId }, requestId);
++  }
++}
