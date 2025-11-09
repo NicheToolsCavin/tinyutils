@@ -16,3 +16,8 @@
     "node": "20.x"
   }
 }
+{
+  "license": "UNLICENSED",
+  "private": true,
+  "author": "TinyUtils.net"
+}
