@@ -1,0 +1,19 @@
+{
+  "name": "tinyutils",
+  "private": true,
+  "type": "module",
+  "license": "UNLICENSED",
+  "author": "TinyUtils.net",
+  "scripts": {
+    "test": "node --test",
+    "smoke:local": "node scripts/smoke_dlf_local.mjs",
+    "smoke:preview": "node scripts/smoke_dlf_preview.mjs",
+    "smoke:extras": "bash scripts/smoke_dlf_extras.sh",
+    "ui:smoke:dlf": "node scripts/ui_smoke_dlf.mjs",
+    "ui:smoke:sd": "node scripts/ui_smoke_sitemap.mjs",
+    "ui:smoke:wbf": "node scripts/ui_smoke_wayback.mjs"
+  },
+  "engines": {
+    "node": "20.x"
+  }
+}
