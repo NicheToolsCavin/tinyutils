@@ -5,7 +5,7 @@
   "license": "UNLICENSED",
   "author": "TinyUtils.net",
   "scripts": {
-    "vercel-build": "echo 'static + edge'",
+    "vercel-build": "node scripts/vercel_static_build.mjs",
     "test": "node --test",
     "smoke:local": "node scripts/smoke_dlf_local.mjs",
     "smoke:preview": "node scripts/smoke_dlf_preview.mjs",
