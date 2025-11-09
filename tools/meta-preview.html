@@ -1,0 +1,199 @@
+<!doctype html><html lang='en'><head>
+<meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><meta name="robots" content="noindex">
+<title>Meta Tag Preview — TinyUtils</title>
+<link rel='stylesheet' href='/public/styles.css'><style>
+.tu-consent{position:fixed;right:16px;bottom:16px;max-width:340px;background:#0e1530;color:#e8ecf3;border:1px solid #263464;border-radius:12px;padding:12px 12px 10px;box-shadow:0 12px 30px rgba(0,0,0,.35);z-index:9999}
+.tu-consent h4{margin:0 0 6px;font-size:14px}
+.tu-consent p{margin:0 0 8px;font-size:13px;opacity:.9}
+.tu-consent .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
+.tu-consent button{padding:8px 10px;border-radius:10px;border:1px solid #2b6ef6;background:#0e1530;color:#cfe0ff;cursor:pointer}
+.tu-consent button.primary{background:#2b6ef6;color:#fff;border:none}
+.tu-consent .link{font-size:12px;opacity:.85}
+.tu-ads-toggle{margin-left:auto;display:inline-flex;gap:6px;align-items:center;font-size:12px;opacity:.85}
+.tu-ads-toggle input{transform:translateY(1px)}
+
+</style>
+
+<script>
+// --- Consent Mode + EU-friendly toast (very low-profile) ---
+(function(){
+  const EU_LANG = ['bg','cs','da','de','el','en-GB','es','et','fi','fr','ga','hr','hu','it','lt','lv','mt','nl','pl','pt','ro','sk','sl','sv','is','no','tr','uk'];
+  const isEUByLang = (navigator.languages||[navigator.language||'']).some(l => EU_LANG.some(e => l.startsWith(e.toLowerCase())));
+  const isEUByTZ = (Intl && Intl.DateTimeFormat && /(^|\/)Europe\//.test(Intl.DateTimeFormat().resolvedOptions().timeZone||''));
+  const shouldPrompt = isEUByLang || isEUByTZ; // heuristic without IP lookup
+  const LS_KEY = 'tu-consent';
+  const ADS_KEY = 'tu-ads-hidden';
+  // Consent defaults (denied) so pages behave conservatively in EU until the user decides
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  window.gtag = window.gtag || gtag;
+  gtag('consent','default', {ad_storage:'denied', ad_user_data:'denied', ad_personalization:'denied', analytics_storage:'denied'});
+
+  function saveConsent(val){ try{ localStorage.setItem(LS_KEY, val); }catch{} }
+  function loadConsent(){ try{ return localStorage.getItem(LS_KEY); }catch{ return null; } }
+
+  function enableAll(){
+    gtag('consent','update', {ad_storage:'granted', ad_user_data:'granted', ad_personalization:'granted', analytics_storage:'granted'});
+    // load Plausible if not already loaded
+    if (!document.getElementById('plausible')) {
+      const s = document.createElement('script'); s.id='plausible'; s.defer=true;
+      s.setAttribute('data-domain','tinyutils.net'); s.src='https://plausible.io/js/script.js';
+      document.head.appendChild(s);
+    }
+  }
+  function denyAll(){
+    gtag('consent','update', {ad_storage:'denied', ad_user_data:'denied', ad_personalization:'denied', analytics_storage:'denied'});
+  }
+
+  function mountToast(){
+    if (!shouldPrompt) { // outside EU: honor persisted choice if any but don't block UX
+      const c = loadConsent();
+      if (c === 'granted') enableAll(); else denyAll();
+      return;
+    }
+    // If already decided, apply and exit
+    const decided = loadConsent();
+    if (decided) { if (decided==='granted') enableAll(); else denyAll(); return; }
+
+    const div = document.createElement('div');
+    div.className='tu-consent';
+    div.innerHTML = '<h4>Privacy choices</h4><p>We use cookie‑free analytics and show Google Ads to keep TinyUtils free. Choose your preference for analytics & ads.</p><div class="row"><a class="link" href="/privacy.html">Privacy</a><button class="secondary" id="tu-decline">Decline</button><button class="primary" id="tu-accept">Accept</button></div>';
+    document.body.appendChild(div);
+    document.getElementById('tu-accept').onclick = function(){ saveConsent('granted'); enableAll(); div.remove(); };
+    document.getElementById('tu-decline').onclick = function(){ saveConsent('denied'); denyAll(); div.remove(); };
+  }
+
+  // Ad hide/show toggle (UI only; separate from consent)
+  function initAdsToggle(){
+    const val = localStorage.getItem(ADS_KEY);
+    if (val === '1') document.documentElement.classList.add('ads-hidden');
+    const el = document.getElementById('tu-ads-toggle');
+    if (!el) return;
+    const cb = el.querySelector('input[type="checkbox"]');
+    if (cb){ cb.checked = document.documentElement.classList.contains('ads-hidden'); }
+    el.addEventListener('change', e => {
+      const on = e.target.checked;
+      document.documentElement.classList.toggle('ads-hidden', on);
+      try{ localStorage.setItem(ADS_KEY, on ? '1' : '0'); }catch{}
+    });
+  }
+
+  // If user previously granted consent, enable now; else keep denied defaults.
+  const prior = loadConsent();
+  if (prior === 'granted') enableAll();
+
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', function(){ mountToast(); initAdsToggle(); }); }
+  else { mountToast(); initAdsToggle(); }
+})();
+</script>
+
+<link rel="icon" href="/public/favicon.ico" sizes="any">
+</head>
+<body>
+<header class='nav'><div class='brand'><img src='/public/logo.svg' width='28' height='28'><span class='name'>TinyUtils</span></div>
+<nav class='links'><a href='/'>Dead Link Finder</a><a href='/tools/'>Tools</a></nav></header>
+<div class='container'>
+<ins class="adsbygoogle" style="display:block;margin:12px 0" data-ad-client="ca-pub-REPLACE_ME" data-ad-slot="1234567890" data-ad-format="auto" data-full-width-responsive="true"></ins>
+<script>try{(adsbygoogle = window.adsbygoogle || []).push({});}catch(e){}</script>
+  <h1>Meta Tag Preview</h1>
+  <div class='card'>
+    <label for='u'>URL</label>
+    <input id='u' type='url' placeholder='https://example.com'>
+    <div style='margin-top:10px;display:flex;gap:8px'>
+      <button id='load'>Preview</button>
+    </div>
+    <div id='out' style='margin-top:12px'></div>
+  </div>
+</div>
+<script>
+document.getElementById('load').addEventListener('click', async ()=>{
+  const url = document.getElementById('u').value.trim();
+  if(!url) return;
+  const out = document.getElementById('out');
+  out.textContent='Loading...';
+  try{
+    const res = await fetch('/api/metafetch', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({url})});
+    const {data, error} = await res.json();
+    if (error) throw new Error(error);
+    out.innerHTML = `
+      <div class="tableWrap"><table>
+        <tr><th>Final URL</th><td>${data.url||''}</td></tr>
+        <tr><th>Title</th><td>${data.title||''}</td></tr>
+        <tr><th>Description</th><td>${data.description||''}</td></tr>
+        <tr><th>OG Title</th><td>${data.og_title||''}</td></tr>
+        <tr><th>OG Description</th><td>${data.og_description||''}</td></tr>
+        <tr><th>OG Image</th><td>${data.og_image?'<a href="'+data.og_image+'" target="_blank">open</a>':''}</td></tr>
+        <tr><th>Twitter Card</th><td>${data.twitter_card||''}</td></tr>
+        <tr><th>Twitter Title</th><td>${data.twitter_title||''}</td></tr>
+        <tr><th>Twitter Description</th><td>${data.twitter_description||''}</td></tr>
+        <tr><th>Twitter Image</th><td>${data.twitter_image?'<a href="'+data.twitter_image+'" target="_blank">open</a>':''}</td></tr>
+      </table></div>`;
+  }catch(e){ out.textContent='Error: '+e.message; }
+});
+</script>
+
+
+
+
+
+
+<script>
+(function(){
+  const EU_LANG = ['bg','cs','da','de','el','en-GB','es','et','fi','fr','ga','hr','hu','it','lt','lv','mt','nl','pl','pt','ro','sk','sl','sv','is','no','tr','uk'];
+  const isEUByLang = (navigator.languages||[navigator.language||'']).some(l => EU_LANG.some(e => (l||'').toLowerCase().startsWith(e.toLowerCase())));
+  const isEUByTZ = (Intl && Intl.DateTimeFormat && /(^|\/)Europe\//.test(Intl.DateTimeFormat().resolvedOptions().timeZone||''));
+  const inEU = isEUByLang || isEUByTZ;
+  const LS_CONSENT='tu-consent'; // 'granted' | 'denied' | null
+
+  function gtag(){ (window.dataLayer=window.dataLayer||[]).push(arguments); }
+  // Default conservative
+  gtag('consent','default', {ad_storage:'denied', ad_user_data:'denied', ad_personalization:'denied', analytics_storage:'denied'});
+
+  // Decide mode
+  const c = (function(){ try{return localStorage.getItem(LS_CONSENT);}catch(_){return null;} })();
+
+  // For EU: if consent denied or not decided, we still serve non‑personalized ads
+  const useNPA = inEU && (c !== 'granted');
+
+  function loadAds(){
+    if (document.getElementById('adsbygoogle-js')) return;
+    var pub = 'ca-pub-REPLACE_ME';
+    if (!pub || pub.indexOf('REPLACE_ME')>=0) return;
+    var s = document.createElement('script');
+    s.id='adsbygoogle-js'; s.async=true;
+    s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+encodeURIComponent(pub);
+    s.crossOrigin='anonymous';
+    s.onload = function(){
+      try{
+        // If non‑personalized path, set NPA (npa=1) and disable personalization (ppt=1) before rendering
+        if (useNPA){
+          (window.adsbygoogle = window.adsbygoogle || []).requestNonPersonalizedAds = 1; // npa=1
+          (window.adsbygoogle = window.adsbygoogle || []).push({ params: { google_privacy_treatments: 'disablePersonalization' } }); // ppt=1
+        }
+        // Render all ad slots
+        document.querySelectorAll('.adsbygoogle').forEach(function(el){
+          try{ (window.adsbygoogle = window.adsbygoogle || []).push({}); }catch(e){}
+        });
+      }catch(e){}
+    };
+    document.head.appendChild(s);
+  }
+
+  if (inEU){
+    if (c === 'granted'){
+      gtag('consent','update',{ad_storage:'granted', ad_user_data:'granted', ad_personalization:'granted', analytics_storage:'granted'});
+    } else {
+      // Denied or undecided: keep denied signals; ads will render in non‑personalized mode
+    }
+    loadAds();
+  } else {
+    // Non‑EU: always load ads normally
+    loadAds();
+  }
+})();
+</script>
+
+
+<script>(function(){var h=location.hostname;var ok=(h==='tinyutils.net'||h.endsWith('.vercel.app'));if(!ok){document.querySelectorAll('.adsbygoogle').forEach(el=>el.style.display='none');window.__TU_NOPROD__=true;}})();</script>
+
+</body></html>
