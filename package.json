@@ -11,12 +11,12 @@
     "ui:smoke:dlf": "node scripts/ui_smoke_dlf.mjs",
     "ui:smoke:sd": "node scripts/ui_smoke_sitemap.mjs",
     "ui:smoke:wbf": "node scripts/ui_smoke_wayback.mjs"
-  };
-    {
+  }
+  {
   "license": "UNLICENSED",
   "private": true,
   "author": "TinyUtils.net"
-}
+  }
   },
   "engines": {
     "node": "20.x"
