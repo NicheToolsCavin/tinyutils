@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 .vercel
 tinyutils/.env.preview
 tinyutils/.env.local
@@ -5,3 +6,10 @@ tinyutils/.env.local
 *.env.local
 !tinyutils/.env.preview.example
 .code/agents/*/exec-call_*.txt
+=======
+node_modules/
+.env.local
+.vercel/
+*.zip
+.code/
+>>>>>>> Stashed changes
