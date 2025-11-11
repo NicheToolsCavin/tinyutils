@@ -35,3 +35,4 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 - 2025-11-04 13:47 CET - Preview fence commit omitted deployment evidence; tracked under "Preview fence evidence + smoke".
 - 2025-11-04 13:34 CET - PR1 commit landed without CSP and `/public` cache rule; captured as follow-up in active tasks.
 - 2025-11-04 08:42 CET - Compliance audit flagged keyboard shortcut conflicts; marked "Needs Review" pending verification.
+| DLF Quick Extras smoke gates + artifacts | 2025-11-11 21:43 CET (UTC+0100) | Completed | Green; gating + artifacts in place |

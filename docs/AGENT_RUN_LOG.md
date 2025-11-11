@@ -1,3 +1,9 @@
+### 2025-11-11 21:43 CET (UTC+0100) — DLF Quick Extras hardened (ci/preview-prod-green)
+- Added preview_url input, resolve+gate step, unconditional artifact upload.
+- scripts/smoke_dlf_extras.sh: bypass cookie + 200/JSON gating; artifacts saved.
+- Workflow run: https://github.com/NicheToolsCavin/tinyutils/actions/runs/19278026559
+- Result: PASS (green).
+
 # Agent Run Log
 
 Running log for agent-led work so freezes or mid-run swaps never erase context.
