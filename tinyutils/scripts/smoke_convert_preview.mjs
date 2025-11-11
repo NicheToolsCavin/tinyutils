@@ -7,10 +7,10 @@ import { promisify } from 'node:util';
 const execFile = promisify(_execFile);
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const previewUrl = process.env.PREVIEW_URL;
+const previewUrl = process.argv[2] || process.env.PREVIEW_URL;
 
 if (!previewUrl) {
-  console.error('smoke_convert_preview: PREVIEW_URL not set; skipping.');
+  console.error('smoke_convert_preview: PREVIEW_URL not set (either as argument or env var); skipping.');
   process.exit(0);
 }
 
@@ -50,13 +50,19 @@ if (bypassToken) {
 const setBypassCookieIfPossible = async () => {
   const token = baseHeaders['x-vercel-protection-bypass'] || baseHeaders['X-Vercel-Protection-Bypass'] || bypassToken;
   if (!token) return;
+
+  const url = `${endpoint}?x-vercel-set-bypass-cookie=true&x-vercel-protection-bypass=${encodeURIComponent(token)}`;
+  const headersPath = join(artifactDir, 'set_cookie.headers');
+  const cookiesPath = join(artifactDir, 'cookies.txt');
+  const bodyPath = join(artifactDir, 'set_cookie.html');
+
   // Primary: curl Set-Cookie capture
   try {
-    const url = `${endpoint}?x-vercel-set-bypass-cookie=true&x-vercel-protection-bypass=${encodeURIComponent(token)}`;
-    const headersPath = join(artifactDir, 'set_cookie.headers');
-    const cookiesPath = join(artifactDir, 'cookies.txt');
-    const bodyPath = join(artifactDir, 'set_cookie.html');
-    await execFile('curl', ['-sS', '-D', headersPath, url, '-c', cookiesPath, '-o', bodyPath]);
+    console.log(`Attempting to get bypass cookie using curl from: ${url}`);
+    const { stdout, stderr } = await execFile('curl', ['-sS', '-D', headersPath, url, '-c', cookiesPath, '-o', bodyPath]);
+    if (stdout) console.log(`Curl stdout: ${stdout}`);
+    if (stderr) console.error(`Curl stderr: ${stderr}`);
+
     const cookiesTxt = await readFile(cookiesPath, 'utf-8');
     const lines = cookiesTxt.split(/\r?\n/).filter(Boolean);
     const jwtLine = [...lines].reverse().find((l) => /\t_vercel_jwt\t/.test(l));
@@ -65,31 +71,39 @@ const setBypassCookieIfPossible = async () => {
       const value = parts[parts.length - 1];
       const cookie = `_vercel_jwt=${value}`;
       baseHeaders['Cookie'] = baseHeaders['Cookie'] ? `${baseHeaders['Cookie']}; ${cookie}` : cookie;
+      console.log('Successfully set _vercel_jwt cookie from curl.');
       return;
     }
-  } catch {
-    // fall through to fetch
+    console.warn('Curl did not return _vercel_jwt. Falling back to fetch.');
+  } catch (e) {
+    console.warn(`Curl failed to get bypass cookie (${e.message}). Falling back to fetch.`);
   }
+
   // Fallback: fetch Set-Cookie
   try {
-    const url = `${endpoint}?x-vercel-set-bypass-cookie=true&x-vercel-protection-bypass=${encodeURIComponent(token)}`;
-    const resp = await fetch(url, { headers: baseHeaders, redirect: 'manual' });
+    console.log(`Attempting to get bypass cookie using fetch from: ${url}`);
+    const resp = await fetch(url, { headers: { 'x-vercel-protection-bypass': token }, redirect: 'manual' });
     let cookies = [];
     const anyHeaders = resp.headers;
-    if (typeof anyHeaders.getSetCookie === 'function') cookies = anyHeaders.getSetCookie();
-    else {
+    if (typeof anyHeaders.getSetCookie === 'function') {
+      cookies = anyHeaders.getSetCookie();
+    } else {
       const raw = anyHeaders.get('set-cookie') || anyHeaders.get('Set-Cookie');
       if (raw) cookies = [raw];
     }
+
     for (const raw of cookies) {
       const m = String(raw).match(/_vercel_jwt=([^;]+)/);
       if (m) {
         const cookie = `_vercel_jwt=${m[1]}`;
         baseHeaders['Cookie'] = baseHeaders['Cookie'] ? `${baseHeaders['Cookie']}; ${cookie}` : cookie;
+        console.log('Successfully set _vercel_jwt cookie from fetch.');
         break;
       }
     }
-  } catch {}
+  } catch (e) {
+    console.warn(`Fetch failed to get bypass cookie (${e.message}).`);
+  }
 };
 
 const ensureArtifacts = async () => { await mkdir(artifactDir, { recursive: true }); return artifactDir; };
@@ -106,9 +120,23 @@ const runCase = async ({ name, body }) => {
   const payload = await response.text();
   const outputPath = join(artifactDir, `resp_${name}.json`);
   await writeFile(outputPath, payload);
+
+  // Additionally check /api/convert/health
+  const healthEndpoint = `${base}/api/convert/health`;
+  const healthResponse = await fetch(healthEndpoint, { headers: buildHeaders() });
+  const healthPayload = await healthResponse.json();
+  const healthOutputPath = join(artifactDir, `health_${name}.json`);
+  await writeFile(healthOutputPath, JSON.stringify(healthPayload, null, 2));
+
   if (!response.ok) {
     const snippet = payload.slice(0, 240).replace(/\s+/g, ' ').trim();
-    console.error(`smoke_convert_preview: ${name} failed with ${response.status} ${snippet ? `- ${snippet}` : ''}`);
+    console.error(`smoke_convert_preview: API ${name} failed with ${response.status} ${snippet ? `- ${snippet}` : ''}`);
+    process.exitCode = 1;
+    return; // Exit early if main API test fails
+  }
+
+  if (!healthResponse.ok || healthPayload.status !== 'ok') {
+    console.error(`smoke_convert_preview: Health check for ${name} failed with ${healthResponse.status} or status not 'ok'.`);
     process.exitCode = 1;
   }
 };
@@ -118,6 +146,13 @@ const main = async () => {
   await setBypassCookieIfPossible();
   for (const t of cases) await runCase(t);
   console.log(`smoke_convert_preview: artifacts stored in ${artifactDir}`);
+
+  if (process.exitCode === 1) {
+    console.error('smoke_convert_preview: One or more smoke tests failed.');
+    process.exit(1);
+  } else {
+    console.log('smoke_convert_preview: All smoke tests passed successfully.');
+  }
 };
 
 main().catch((error) => { console.error('smoke_convert_preview: unexpected error', error); process.exit(1); });

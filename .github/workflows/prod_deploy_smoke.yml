@@ -1,0 +1,80 @@
+name: Convert Production Deploy & Smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      prod_deploy:
+        description: 'Set to true to deploy to production'
+        required: false # Default false if not set
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  production-deploy-smoke:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tinyutils
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Check Vercel Secrets
+        id: check_secrets
+        run: |
+          if [[ -z "${{ secrets.VERCEL_TOKEN }}" || -z "${{ secrets.VERCEL_ORG_ID }}" || -z "${{ secrets.VERCEL_PROJECT_ID }}" ]]; then
+            echo "Vercel secrets (VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID) are required for deployment and are not set."
+            echo "skip_deploy=true" >> $GITHUB_OUTPUT
+          else
+            echo "Vercel secrets are set. Proceeding with deploy."
+            echo "skip_deploy=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Remove .vercel/output before deploy
+        if: ${{ github.event.inputs.prod_deploy == true && steps.check_secrets.outputs.skip_deploy == 'false' }}
+        run: |
+          rm -rf .vercel/output
+          echo ".vercel/output removed to ensure fresh build."
+
+      - name: Deploy to Vercel Production
+        id: deploy_prod
+        if: ${{ github.event.inputs.prod_deploy == true && steps.check_secrets.outputs.skip_deploy == 'false' }}
+        run: |
+          mkdir -p artifacts/prod/github-${{ github.run_id }}
+          npx vercel deploy --prod --yes 2>&1 | tee artifacts/prod/github-${{ github.run_id }}/vercel_deploy_prod.log
+          PROD_URL=$(grep -Eo 'https://[^ ]+\.vercel\.app' artifacts/prod/github-${{ github.run_id }}/vercel_deploy_prod.log | tail -1)
+          echo "prod_url=$PROD_URL" >> "$GITHUB_OUTPUT"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Run convert production smoke
+        id: prod_smoke
+        if: ${{ steps.deploy_prod.outputs.prod_url != '' }}
+        env:
+          CONVERT_SMOKE_ARTIFACTS: artifacts/prod/github-${{ github.run_id }}
+          PREVIEW_URL: ${{ steps.deploy_prod.outputs.prod_url }}
+          PREVIEW_SECRET: ${{ secrets.PREVIEW_SECRET }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+        run: |
+          echo "Running production smoke test on ${{ steps.deploy_prod.outputs.prod_url }}"
+          node scripts/smoke_convert_preview.mjs
+        working-directory: tinyutils
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: convert-prod-smoke-${{ github.run_id }}
+          path: tinyutils/artifacts/prod
+          if-no-files-found: warn

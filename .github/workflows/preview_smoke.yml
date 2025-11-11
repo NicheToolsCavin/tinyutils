@@ -3,7 +3,12 @@ name: Convert Preview Smoke
 on:
   pull_request:
     branches: [ main ]
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      preview_url:
+        description: 'Optional: URL of the Vercel preview deployment to test'
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -24,6 +29,7 @@ jobs:
           node-version: '20.x'
 
       - name: Pull Vercel preview env
+        if: ${{ secrets.VERCEL_TOKEN != '' && secrets.VERCEL_ORG_ID != '' && secrets.VERCEL_PROJECT_ID != '' }}
         run: |
           mkdir -p .vercel
           npx vercel env pull .vercel/.env.preview.local --environment preview --yes
@@ -34,6 +40,7 @@ jobs:
 
       - name: Deploy Vercel preview
         id: deploy
+        if: ${{ github.event.inputs.preview_url == '' && secrets.VERCEL_TOKEN != '' && secrets.VERCEL_ORG_ID != '' && secrets.VERCEL_PROJECT_ID != '' }}
         run: |
           mkdir -p artifacts/convert/github-${{ github.run_id }}
           npx vercel deploy --yes --target preview 2>&1 | tee artifacts/convert/github-${{ github.run_id }}/vercel_deploy.log
@@ -44,13 +51,28 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
+      - name: Set PREVIEW_URL for smoke test
+        id: set_preview_url
+        run: |
+          if [ -n "${{ github.event.inputs.preview_url }}" ]; then
+            echo "Using provided PREVIEW_URL: ${{ github.event.inputs.preview_url }}"
+            echo "preview_url=${{ github.event.inputs.preview_url }}" >> "$GITHUB_OUTPUT"
+          elif [ -n "${{ steps.deploy.outputs.preview_url }}" ]; then
+            echo "Using deployed PREVIEW_URL: ${{ steps.deploy.outputs.preview_url }}"
+            echo "preview_url=${{ steps.deploy.outputs.preview_url }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "No PREVIEW_URL available. Skipping smoke test."
+            echo "preview_url=" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Vendor integrity (informational)
         run: python3 scripts/verify_vendors.py || true
 
       - name: Run convert preview smoke
+        if: ${{ steps.set_preview_url.outputs.preview_url != '' }}
         env:
           CONVERT_SMOKE_ARTIFACTS: artifacts/convert/github-${{ github.run_id }}
-          PREVIEW_URL: ${{ steps.deploy.outputs.preview_url }}
+          PREVIEW_URL: ${{ steps.set_preview_url.outputs.preview_url }}
           PREVIEW_SECRET: ${{ secrets.PREVIEW_SECRET }}
           VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
         run: |
