@@ -1,0 +1,29 @@
+Vercel CLI 48.8.2
+Fetching deployment "tinyutils-dz2xyerm4-cavins-projects-7b0e00bb.vercel.app" in cavins-projects-7b0e00bb
+> Fetched deployment "tinyutils-dz2xyerm4-cavins-projects-7b0e00bb.vercel.app" in cavins-projects-7b0e00bb [515ms]
+
+  General
+
+    id		dpl_DGLGck1rPpRUAdQzdfJSMLaJjuNt
+    name	tinyutils
+    target	preview
+    status	● Ready
+    url		https://tinyutils-dz2xyerm4-cavins-projects-7b0e00bb.vercel.app
+    created	Mon Nov 10 2025 04:27:54 GMT+0100 (Central European Standard Time) [32s ago]
+
+
+  Aliases
+
+    ╶ https://tinyutils-nichetoolscavin-9963-cavins-projects-7b0e00bb.vercel.app
+    
+
+  Builds
+
+    ┌ .        [0ms]
+    ├── λ api/convert/app (20.71MB) [iad1]
+    ├── λ api/findreplace/apply (20.71MB) [iad1]
+    ├── λ api/convert/index (20.71MB) [iad1]
+    ├── λ api/convert/index (20.71MB) [iad1]
+    └── λ api/findreplace/preview (20.71MB) [iad1]
+    
+

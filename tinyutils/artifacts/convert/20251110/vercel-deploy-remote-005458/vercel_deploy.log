@@ -1,0 +1,12 @@
+Vercel CLI 48.8.2
+Retrieving project…
+Deploying cavins-projects-7b0e00bb/tinyutils
+Uploading [--------------------] (0.0B/18.4KB)
+Uploading [=================---] (16.0KB/18.4KB)
+Uploading [====================] (18.4KB/18.4KB)
+Inspect: https://vercel.com/cavins-projects-7b0e00bb/tinyutils/2dbRmqLf2yCRV8jNbsufXLJGmvoK [2s]
+Preview: https://tinyutils-3d8bodrft-cavins-projects-7b0e00bb.vercel.app [2s]
+https://tinyutils-3d8bodrft-cavins-projects-7b0e00bb.vercel.appQueued
+Building
+Completing
+To deploy to production (www.tinyutils.net), run `vercel --prod`

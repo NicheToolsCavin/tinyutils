@@ -1,0 +1,2 @@
+x-vercel-protection-bypass: 
+Cookie: vercel-protection-bypass=

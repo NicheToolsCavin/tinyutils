@@ -1,0 +1,3 @@
+Vercel CLI 48.8.2
+WARN! Build not running on Vercel. System environment variables will not be available.
+Error: Function Runtimes must have a valid version, for example `now-php@1.0.0`.

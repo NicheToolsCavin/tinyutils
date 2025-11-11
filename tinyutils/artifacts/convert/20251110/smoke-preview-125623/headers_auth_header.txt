@@ -1,0 +1,206 @@
+HTTP/2 200 
+accept-ranges: bytes
+access-control-allow-origin: *
+age: 0
+cache-control: public, max-age=0, must-revalidate
+content-disposition: inline; filename="convert"
+content-security-policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'; object-src 'none'; upgrade-insecure-requests
+content-type: text/html; charset=utf-8
+cross-origin-opener-policy: same-origin
+cross-origin-resource-policy: same-origin
+date: Mon, 10 Nov 2025 11:56:25 GMT
+etag: "4226e426eb753ae85000a2cfe2d52024"
+last-modified: Mon, 10 Nov 2025 11:56:25 GMT
+permissions-policy: geolocation=(), camera=(), microphone=(), usb=(), payment=(), browsing-topics=()
+referrer-policy: strict-origin-when-cross-origin
+server: Vercel
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+x-content-type-options: nosniff
+x-dns-prefetch-control: off
+x-frame-options: DENY
+x-robots-tag: noindex
+x-vercel-cache: HIT
+x-vercel-id: iad1::qntjr-1762775785493-515f146435ad
+content-length: 7068
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>TinyUtils — Universal Converter (Preview)</title>
+    <style>
+      body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", sans-serif; background: #050b18; color: #f8fbff; margin: 0; }
+      .wrap { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+      .card { background: rgba(15,25,50,0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 24px; margin-bottom: 24px; }
+      label { display: block; font-size: 0.9rem; margin-bottom: 8px; }
+      input[type="file"], select, button, textarea { width: 100%; margin-bottom: 12px; }
+      button { background: #2563eb; border: none; color: white; padding: 12px 16px; border-radius: 10px; cursor: pointer; }
+      button:disabled { opacity: 0.5; cursor: not-allowed; }
+      pre { background: rgba(0,0,0,0.4); padding: 12px; border-radius: 10px; overflow: auto; }
+      .badgelist { display: flex; gap: 8px; flex-wrap: wrap; }
+      .badge { background: rgba(37,99,235,0.2); border: 1px solid rgba(37,99,235,0.4); border-radius: 999px; padding: 4px 12px; font-size: 0.85rem; }
+      .hidden { display: none; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <a href="/" style="color:#60a5fa;text-decoration:none;">← Back to TinyUtils</a>
+        <h1>Universal Converter (Preview)</h1>
+        <p>Upload DOCX, ODT, HTML, Markdown, or plain text. We convert everything to clean GitHub-flavoured Markdown with deterministic cleanup.</p>
+      </header>
+
+      <section class="card">
+        <h2>Configure</h2>
+        <label>Source file (single)</label>
+        <input id="file" type="file" accept=".docx,.odt,.rtf,.md,.markdown,.html,.txt,.zip" />
+
+        <label>Convert from</label>
+        <select id="from">
+          <option value="docx">DOCX</option>
+          <option value="md">Markdown</option>
+          <option value="html">HTML</option>
+          <option value="txt">Plain text</option>
+        </select>
+
+        <label>Convert to</label>
+        <select id="to">
+          <option value="md">Markdown (GFM)</option>
+        </select>
+
+        <div>
+          <label><input type="checkbox" id="acceptTracked" checked /> Accept tracked changes</label>
+          <label><input type="checkbox" id="extractMedia" checked /> Extract media to ZIP</label>
+          <label><input type="checkbox" id="removeZeroWidth" checked /> Remove zero-width characters</label>
+        </div>
+
+        <button id="convertBtn" disabled>Convert</button>
+        <p id="status" aria-live="polite"></p>
+      </section>
+
+      <section class="card">
+        <h2>Preview</h2>
+        <div id="previewHeadings" class="badgelist"></div>
+        <pre id="previewSnippets" class="hidden"></pre>
+      </section>
+
+      <section class="card">
+        <h2>Outputs</h2>
+        <ul id="outputs"></ul>
+      </section>
+
+      <section class="card">
+        <h2>Logs</h2>
+        <pre id="logs"></pre>
+      </section>
+
+      <section class="card">
+        <h2>Errors</h2>
+        <ul id="errors"></ul>
+      </section>
+    </div>
+
+    <script>
+      const fileInput = document.getElementById('file');
+      const convertBtn = document.getElementById('convertBtn');
+      const statusEl = document.getElementById('status');
+      const previewHeadings = document.getElementById('previewHeadings');
+      const previewSnippets = document.getElementById('previewSnippets');
+      const outputsList = document.getElementById('outputs');
+      const logsEl = document.getElementById('logs');
+      const errorsList = document.getElementById('errors');
+
+      function canRun() {
+        convertBtn.disabled = !fileInput.files.length;
+      }
+
+      fileInput.addEventListener('change', canRun);
+
+      async function uploadFile(file) {
+        const reader = new FileReader();
+        return new Promise((resolve, reject) => {
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }
+
+      convertBtn.addEventListener('click', async () => {
+        if (!fileInput.files.length) return;
+        statusEl.textContent = 'Uploading…';
+        convertBtn.disabled = true;
+
+        try {
+          const blobUrl = await uploadFile(fileInput.files[0]);
+          const payload = {
+            inputs: [{ blobUrl }],
+            from: document.getElementById('from').value,
+            to: document.getElementById('to').value,
+            options: {
+              acceptTrackedChanges: document.getElementById('acceptTracked').checked,
+              extractMedia: document.getElementById('extractMedia').checked,
+              removeZeroWidth: document.getElementById('removeZeroWidth').checked
+            }
+          };
+
+          statusEl.textContent = 'Converting…';
+          const response = await fetch('/api/convert', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.detail || 'Conversion failed');
+          }
+
+          const data = await response.json();
+          statusEl.textContent = 'Done';
+
+          previewHeadings.innerHTML = '';
+          data.preview.headings.forEach(h => {
+            const badge = document.createElement('span');
+            badge.className = 'badge';
+            badge.textContent = h;
+            previewHeadings.appendChild(badge);
+          });
+
+          if (data.preview.snippets.length) {
+            previewSnippets.classList.remove('hidden');
+            previewSnippets.textContent = data.preview.snippets.map(s => `Before\n${s.before}\n\nAfter\n${s.after}`).join('\n\n---\n\n');
+          } else {
+            previewSnippets.classList.add('hidden');
+          }
+
+          outputsList.innerHTML = '';
+          outputsList.innerHTML = '';
+          data.outputs.forEach(output => {
+            const li = document.createElement('li');
+            const link = document.createElement('a');
+            link.href = output.blobUrl;
+            link.textContent = `${output.name} (${(output.size/1024).toFixed(1)} KB)`;
+            link.download = output.name;
+            li.appendChild(link);
+            outputsList.appendChild(li);
+          });
+
+          logsEl.textContent = (data.logs || []).join('\n');
+
+          errorsList.innerHTML = '';
+          (data.errors || []).forEach(err => {
+            const li = document.createElement('li');
+            li.textContent = typeof err === 'string' ? err : JSON.stringify(err);
+            errorsList.appendChild(li);
+          });
+        } catch (err) {
+          console.error(err);
+          statusEl.textContent = err.message || 'Conversion failed';
+        } finally {
+          convertBtn.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>

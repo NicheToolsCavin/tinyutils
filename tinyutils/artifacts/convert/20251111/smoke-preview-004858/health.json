@@ -1,0 +1,18 @@
+Import failure in convert lambda:
+Traceback (most recent call last):
+  File "/var/task/api/convert/index.py", line 10, in <module>
+    from .app import (  # pragma: no cover - Vercel entrypoint
+  File "/var/task/api/convert/app.py", line 277, in <module>
+    @app.post("/api/convert", include_in_schema=False)
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/var/task/_vendor/fastapi/routing.py", line 944, in decorator
+    self.add_api_route(
+  File "/var/task/_vendor/fastapi/routing.py", line 883, in add_api_route
+    route = route_class(
+            ^^^^^^^^^^^^
+  File "/var/task/_vendor/fastapi/routing.py", line 472, in __init__
+    self.response_field = create_response_field(
+                          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/var/task/_vendor/fastapi/utils.py", line 101, in create_response_field
+    raise fastapi.exceptions.FastAPIError(
+fastapi.exceptions.FastAPIError: Invalid args for response field! Hint: check that dict | starlette.responses.JSONResponse is a valid Pydantic field type. If you are using a return type annotation that is not a valid Pydantic field (e.g. Union[Response, dict, None]) you can disable generating the response model from the type annotation with the path operation decorator parameter response_model=None. Read more: https://fastapi.tiangolo.com/tutorial/response-model/

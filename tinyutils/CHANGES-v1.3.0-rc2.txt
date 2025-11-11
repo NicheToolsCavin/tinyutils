@@ -1,0 +1,7 @@
+CHANGES v1.3.0-rc2
+- Added collapsible "How to replace dead links with archive URLs" panel on Wayback Fixer.
+- Updated tooltip near Run: "Polite by default — honors robots.txt and rate‑limits requests."
+- Mapped chip labels to readable text (Archived, No snapshot, SavePageNow queued, Retried, etc.).
+- Bundled demo datasets: /tools/wayback-fixer/demo/demo-urls.txt and dlf-sample.csv.
+- Demo button now loads demo-urls.txt via fetch.
+- No deploy yet; this cut is for local/preview-only QA per checklist.

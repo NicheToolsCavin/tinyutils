@@ -1,0 +1,2 @@
+URL=https://tinyutils-8nunoc85g-cavins-projects-7b0e00bb.vercel.app
+TOKEN_SRC=VERCEL_AUTOMATION_BYPASS_SECRETPREVIEW_BYPASS_TOKENBYPASS_TOKEN

@@ -1,0 +1,29 @@
+Import failure in convert lambda:
+Traceback (most recent call last):
+  File "/var/task/api/convert/index.py", line 10, in <module>
+    from .app import (  # pragma: no cover - Vercel entrypoint
+  File "/var/task/api/convert/app.py", line 93, in <module>
+    from fastapi import FastAPI, Header, HTTPException, Request, Response
+  File "/var/task/_vendor/fastapi/__init__.py", line 7, in <module>
+    from .applications import FastAPI as FastAPI
+  File "/var/task/_vendor/fastapi/applications.py", line 16, in <module>
+    from fastapi import routing
+  File "/var/task/_vendor/fastapi/routing.py", line 22, in <module>
+    from fastapi import params
+  File "/var/task/_vendor/fastapi/params.py", line 5, in <module>
+    from fastapi.openapi.models import Example
+  File "/var/task/_vendor/fastapi/openapi/models.py", line 170, in <module>
+    class Schema(BaseModel):
+  File "/var/task/_vendor/pydantic/main.py", line 286, in __new__
+    cls.__try_update_forward_refs__()
+  File "/var/task/_vendor/pydantic/main.py", line 807, in __try_update_forward_refs__
+    update_model_forward_refs(cls, cls.__fields__.values(), cls.__config__.json_encoders, localns, (NameError,))
+  File "/var/task/_vendor/pydantic/typing.py", line 554, in update_model_forward_refs
+    update_field_forward_refs(f, globalns=globalns, localns=localns)
+  File "/var/task/_vendor/pydantic/typing.py", line 520, in update_field_forward_refs
+    field.type_ = evaluate_forwardref(field.type_, globalns, localns or None)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/var/task/_vendor/pydantic/typing.py", line 66, in evaluate_forwardref
+    return cast(Any, type_)._evaluate(globalns, localns, set())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: ForwardRef._evaluate() missing 1 required keyword-only argument: 'recursive_guard'

@@ -1,0 +1,110 @@
+{
+  "version": 2,
+  "functions": {
+    "api/convert/index.py": {
+      "includeFiles": "{api/convert/**,api/_lib/**,api/_vendor/pandoc/pandoc.xz,api/_vendor/pydantic_core/**,convert/**,filters/**,__init__.py}",
+      "excludeFiles": "{artifacts/**,.code/**,tests/**,TinyBackups/**,.vercel/**,node_modules/**,**/__pycache__/**,api/_vendor/pandoc/pandoc}",
+      "maxDuration": 180
+    },
+    "api/findreplace/preview.py": {
+      "includeFiles": "{api/findreplace/**,api/_lib/**}",
+      "excludeFiles": "{api/_vendor/**,artifacts/**,.code/**,tests/**,TinyBackups/**,.vercel/**,node_modules/**,**/__pycache__/**}",
+      "maxDuration": 60
+    },
+    "api/findreplace/apply.py": {
+      "includeFiles": "{api/findreplace/**,api/_lib/**}",
+      "excludeFiles": "{api/_vendor/**,artifacts/**,.code/**,tests/**,TinyBackups/**,.vercel/**,node_modules/**,**/__pycache__/**}",
+      "maxDuration": 60
+    }
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "geolocation=(), camera=(), microphone=(), usb=(), payment=(), browsing-topics=()" },
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'; object-src 'none'; upgrade-insecure-requests" },
+        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+        { "key": "Cross-Origin-Resource-Policy", "value": "same-origin" },
+        { "key": "X-DNS-Prefetch-Control", "value": "off" }
+      ]
+    },
+    {
+      "source": "/public/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=600" }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" },
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "no-referrer" },
+        { "key": "Permissions-Policy", "value": "geolocation=(), camera=(), microphone=(), usb=(), payment=(), browsing-topics=()" },
+        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+        { "key": "Cross-Origin-Resource-Policy", "value": "same-origin" },
+        { "key": "X-DNS-Prefetch-Control", "value": "off" },
+        { "key": "X-Robots-Tag", "value": "noindex" }
+      ]
+    },
+    {
+      "source": "/tools/wayback-fixer/demo/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=600" }
+      ]
+    }
+  ],
+  "rewrites": [
+    { "source": "/api/convert/health", "destination": "/api/convert/index.py?__health=1" },
+    { "source": "/api/convert/health/", "destination": "/api/convert/index.py?__health=1" },
+    { "source": "/api/convert", "destination": "/api/convert/index.py" },
+    { "source": "/api/convert/", "destination": "/api/convert/index.py" },
+    
+    {
+      "source": "/tools/:beta(keyword-density|meta-preview|sitemap-generator|convert|find-replace)",
+      "has": [
+        { "type": "query", "key": "preview_fence_proxy", "value": "1" }
+      ],
+      "destination": "/tools/:beta"
+    },
+    {
+      "source": "/tools/:beta(keyword-density|meta-preview|sitemap-generator|convert|find-replace)/:rest*",
+      "has": [
+        { "type": "query", "key": "preview_fence_proxy", "value": "1" }
+      ],
+      "destination": "/tools/:beta/:rest*"
+    },
+    {
+      "source": "/tools/:beta(keyword-density|meta-preview|sitemap-generator|convert|find-replace).html",
+      "has": [
+        { "type": "query", "key": "preview_fence_proxy", "value": "1" }
+      ],
+      "destination": "/tools/:beta.html"
+    },
+    {
+      "source": "/tools/:beta(keyword-density|meta-preview|sitemap-generator|convert|find-replace)",
+      "destination": "/api/fence?target=/tools/:beta"
+    },
+    {
+      "source": "/tools/:beta(keyword-density|meta-preview|sitemap-generator|convert|find-replace)/:rest*",
+      "destination": "/api/fence?target=/tools/:beta/:rest*"
+    },
+    {
+      "source": "/tools/:beta(keyword-density|meta-preview|sitemap-generator|convert|find-replace).html",
+      "destination": "/api/fence?target=/tools/:beta.html"
+    },
+    {
+      "source": "/api/:path*.py",
+      "destination": "/api/:path*"
+    },
+    {
+      "source": "/api/:path*.js",
+      "destination": "/api/:path*"
+    }
+  ]
+}

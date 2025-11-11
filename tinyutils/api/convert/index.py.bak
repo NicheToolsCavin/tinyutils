@@ -1,0 +1,213 @@
+"""Universal document converter endpoint backed by tinyutils.convert."""
+from __future__ import annotations
+
+import logging
+import os
+import sys
+from pathlib import Path
+from typing import List, Optional
+
+try:  # pragma: no cover - python-magic may be unavailable in serverless envs
+    import magic  # type: ignore
+except ImportError:  # pragma: no cover
+    magic = None  # type: ignore
+from fastapi import FastAPI, HTTPException
+try:  # pragma: no cover - Pydantic v2
+    from pydantic import BaseModel, Field, ConfigDict, field_validator
+    _USE_PYDANTIC_V2 = True
+except ImportError:  # pragma: no cover - fallback to Pydantic v1
+    from pydantic import BaseModel, Field, validator  # type: ignore
+    ConfigDict = None  # type: ignore
+    field_validator = None  # type: ignore
+    _USE_PYDANTIC_V2 = False
+
+from tinyutils.convert import (
+    ConversionOptions as ConverterOptions,
+    InputPayload,
+    convert_batch,
+)
+from tinyutils.convert.types import BatchResult
+
+from .._lib import blob
+from .._lib.pandoc_runner import get_pandoc_version
+from .._lib.utils import DownloadMetadata, ensure_within_limits, job_workspace
+
+
+logging.basicConfig(level=os.getenv("TINYUTILS_LOG_LEVEL", "INFO"))
+logger = logging.getLogger(__name__)
+print("[tinyutils] convert API module imported", file=sys.stderr)
+
+
+app = FastAPI()
+
+
+class InputItem(BaseModel):
+    blobUrl: str
+    name: Optional[str] = None
+
+
+class Options(BaseModel):
+    acceptTrackedChanges: bool = True
+    extractMedia: bool = False
+    removeZeroWidth: bool = True
+
+
+class ConvertRequest(BaseModel):
+    inputs: List[InputItem]
+    source_format: Optional[str] = Field(default=None, alias="from")
+    targets: List[str] = Field(default_factory=lambda: ["md"], alias="to")
+    options: Options = Options()
+
+    if _USE_PYDANTIC_V2:
+        model_config = ConfigDict(validate_by_name=True)
+
+        @field_validator("targets", mode="before")
+        @classmethod
+        def _normalise_targets(cls, value):
+            return _coerce_targets(value)
+
+    else:  # pragma: no cover - legacy path
+        @validator("targets", pre=True)
+        def _normalise_targets(cls, value):
+            return _coerce_targets(value)
+
+        class Config:
+            allow_population_by_field_name = True
+
+
+@app.post("/")
+def convert(request: ConvertRequest) -> dict:
+    if not request.inputs:
+        raise HTTPException(status_code=400, detail="No inputs provided")
+
+    logger.info("convert job inputs=%d targets=%s", len(request.inputs), request.targets)
+
+    try:
+        with job_workspace() as workdir:
+            payloads = _download_payloads(request.inputs, workdir)
+    except blob.DownloadError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    converter_options = ConverterOptions(
+        accept_tracked_changes=request.options.acceptTrackedChanges,
+        extract_media=request.options.extractMedia,
+        remove_zero_width=request.options.removeZeroWidth,
+    )
+
+    try:
+        batch = convert_batch(
+            inputs=payloads,
+            targets=request.targets,
+            from_format=request.source_format,
+            options=converter_options,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception:
+        logger.exception("convert batch failed")
+        raise
+
+    outputs = _serialize_outputs(batch)
+    preview = _select_preview(batch)
+    errors = _serialize_errors(batch)
+
+    response = {
+        "jobId": batch.job_id,
+        "toolVersions": {"pandoc": get_pandoc_version()},
+        "outputs": outputs,
+        "preview": preview,
+        "logs": batch.logs,
+        "errors": errors,
+    }
+    logger.info("convert job_id=%s outputs=%d errors=%d", batch.job_id, len(outputs), len(errors))
+    return response
+
+
+def _download_payloads(inputs: List[InputItem], job_dir: Path) -> List[InputPayload]:
+    payloads: List[InputPayload] = []
+    for index, item in enumerate(inputs, start=1):
+        metadata = _download_input(item, job_dir)
+        data = metadata.path.read_bytes()
+        name = (item.name or metadata.original_name or f"document-{index}").strip() or f"document-{index}"
+        payloads.append(InputPayload(name=name, data=data, source_format=None))
+    return payloads
+
+
+def _download_input(item: InputItem, job_dir: Path) -> DownloadMetadata:
+    target = job_dir / (item.name or "input")
+    size, content_type = blob.download_to_path(item.blobUrl, target)
+    ensure_within_limits(size)
+    mime_type = content_type
+    if not mime_type and magic is not None:
+        try:
+            mime_type = magic.from_file(str(target), mime=True)
+        except Exception as exc:  # pragma: no cover - fallback when libmagic missing
+            logger.warning("magic.from_file failed: %s", exc)
+            mime_type = None
+    if not mime_type:
+        mime_type = "application/octet-stream"
+    return DownloadMetadata(
+        path=target,
+        size_bytes=size,
+        content_type=mime_type,
+        original_name=item.name,
+    )
+
+
+def _serialize_outputs(batch) -> List[dict]:
+    entries: List[dict] = []
+    for result in batch.results:
+        for artifact in result.outputs:
+            blob_url = blob.upload_bytes(artifact.name, artifact.data, artifact.content_type)
+            entry = {
+                "name": artifact.name,
+                "size": artifact.size,
+                "blobUrl": blob_url,
+                "target": artifact.target,
+            }
+            entries.append(entry)
+        if result.media:
+            blob_url = blob.upload_bytes(result.media.name, result.media.data, result.media.content_type)
+            entries.append(
+                {
+                    "name": result.media.name,
+                    "size": result.media.size,
+                    "blobUrl": blob_url,
+                    "target": "media",
+                }
+            )
+    return entries
+
+
+def _select_preview(batch) -> dict:
+    for result in batch.results:
+        if result.preview:
+            return {
+                "headings": result.preview.headings,
+                "snippets": result.preview.snippets,
+                "images": result.preview.images,
+            }
+    return {"headings": [], "snippets": [], "images": []}
+
+
+def _serialize_errors(batch) -> List[dict]:
+    errors: List[dict] = []
+    for result in batch.results:
+        if result.error:
+            errors.append(
+                {
+                    "input": result.name,
+                    "message": result.error.message,
+                    "kind": result.error.kind,
+                }
+            )
+    return errors
+
+
+def _coerce_targets(value):
+    if value is None:
+        return ["md"]
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, list) and value:
+        return value
+    raise ValueError("`to` must be a string or non-empty list")

@@ -1,0 +1,14 @@
+Vercel CLI 48.8.2
+Retrieving project…
+> Overwriting existing .vercel/.env.preview.local file
+> Downloading `preview` Environment Variables for cavins-projects-7b0e00bb/tinyutils
+Downloading
+
+Changes:
++ BYPASS_TOKEN (Updated)
++ PREVIEW_SECRET (Updated)
++ VERCEL_OIDC_TOKEN (Updated)
++ PIP_ONLY_BINARY
++ PIP_PREFER_BINARY
+
+Updated .vercel/.env.preview.local file  [237ms]

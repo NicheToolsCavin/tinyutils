@@ -1,0 +1,7 @@
+CHANGES v1.3.0-rc3
+- CSV export hardening: cells beginning with =,+,-,@ are prefixed with ' to prevent formula execution in spreadsheets.
+- Wayback Fixer: DLF CSV import accepts either `url` or `finalUrl` columns.
+- Long URL readability: added `word-break: break-all` for URL cells; lightweight per-row "Copy" buttons appended after results render.
+- APIs (/api/check.js, /api/sitemap-delta.js, /api/wayback-fixer.js): responses include `X-Request-ID` for easier support/debug; UI echoes the id on Wayback Fixer runs.
+- Consent microcopy: added note “We use minimal analytics only after you consent.”
+- This cut addresses the tiny pre-preview nits; still intended for local/preview QA, not staging.

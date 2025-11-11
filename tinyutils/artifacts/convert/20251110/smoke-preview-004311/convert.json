@@ -1,0 +1,51 @@
+HTTP/2 500 
+cache-control: no-store
+content-security-policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'; object-src 'none'; upgrade-insecure-requests
+content-type: text/plain; charset=utf-8
+cross-origin-opener-policy: same-origin
+cross-origin-resource-policy: same-origin
+date: Mon, 10 Nov 2025 23:43:12 GMT
+permissions-policy: geolocation=(), camera=(), microphone=(), usb=(), payment=(), browsing-topics=()
+referrer-policy: no-referrer
+server: Vercel
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+x-content-type-options: nosniff
+x-dns-prefetch-control: off
+x-frame-options: DENY
+x-robots-tag: noindex
+x-vercel-cache: MISS
+x-vercel-id: cdg1::iad1::mm5b4-1762818192077-05ce4eeb1e3d
+
+Import failure in convert lambda:
+Traceback (most recent call last):
+  File "/var/task/api/convert/index.py", line 10, in <module>
+    from .app import (  # pragma: no cover - Vercel entrypoint
+  File "/var/task/api/convert/app.py", line 93, in <module>
+    from fastapi import FastAPI, Header, HTTPException, Request, Response
+  File "/var/task/_vendor/fastapi/__init__.py", line 7, in <module>
+    from .applications import FastAPI as FastAPI
+  File "/var/task/_vendor/fastapi/applications.py", line 16, in <module>
+    from fastapi import routing
+  File "/var/task/_vendor/fastapi/routing.py", line 24, in <module>
+    from fastapi.dependencies.models import Dependant
+  File "/var/task/_vendor/fastapi/dependencies/models.py", line 3, in <module>
+    from fastapi.security.base import SecurityBase
+  File "/var/task/_vendor/fastapi/security/__init__.py", line 1, in <module>
+    from .api_key import APIKeyCookie as APIKeyCookie
+  File "/var/task/_vendor/fastapi/security/api_key.py", line 3, in <module>
+    from fastapi.openapi.models import APIKey, APIKeyIn
+  File "/var/task/_vendor/fastapi/openapi/models.py", line 103, in <module>
+    class Schema(BaseModel):
+  File "/var/task/_vendor/pydantic/main.py", line 286, in __new__
+    cls.__try_update_forward_refs__()
+  File "/var/task/_vendor/pydantic/main.py", line 807, in __try_update_forward_refs__
+    update_model_forward_refs(cls, cls.__fields__.values(), cls.__config__.json_encoders, localns, (NameError,))
+  File "/var/task/_vendor/pydantic/typing.py", line 554, in update_model_forward_refs
+    update_field_forward_refs(f, globalns=globalns, localns=localns)
+  File "/var/task/_vendor/pydantic/typing.py", line 520, in update_field_forward_refs
+    field.type_ = evaluate_forwardref(field.type_, globalns, localns or None)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/var/task/_vendor/pydantic/typing.py", line 66, in evaluate_forwardref
+    return cast(Any, type_)._evaluate(globalns, localns, set())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: ForwardRef._evaluate() missing 1 required keyword-only argument: 'recursive_guard'

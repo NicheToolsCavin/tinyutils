@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>TinyUtils — Find & Replace (Preview)</title>
+    <style>
+      body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", sans-serif; background: #060b1b; color: #f8fbff; margin: 0; }
+      .wrap { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+      .card { background: rgba(18,28,60,0.65); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 24px; margin-bottom: 24px; }
+      label { display: block; font-size: 0.9rem; margin-bottom: 6px; }
+      input[type="file"], input[type="text"], textarea, select { width: 100%; margin-bottom: 12px; }
+      textarea { min-height: 90px; }
+      button { background: #22d3ee; border: none; color: #041022; padding: 12px 16px; border-radius: 10px; cursor: pointer; margin-right: 8px; }
+      button:disabled { opacity: 0.5; cursor: not-allowed; }
+      pre { background: rgba(0,0,0,0.45); padding: 12px; border-radius: 10px; overflow: auto; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { border-bottom: 1px solid rgba(255,255,255,0.08); padding: 8px; text-align: left; }
+      ul { padding-left: 20px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <a href="/" style="color:#38bdf8;text-decoration:none;">← Back to TinyUtils</a>
+        <h1>Find & Replace (Preview)</h1>
+        <p>Preview regex replacements across multiple text files, then apply changes with unified diffs and downloadable results.</p>
+      </header>
+
+      <section class="card">
+        <h2>Inputs</h2>
+        <label>Select files (ZIP not yet supported)</label>
+        <input id="frFiles" type="file" multiple accept=".txt,.md,.markdown,.html,.json,.csv,.yml,.yaml" />
+
+        <label>Pattern</label>
+        <input id="pattern" type="text" placeholder="e.g. (?-m)^\\s+" />
+
+        <label>Replacement</label>
+        <input id="replacement" type="text" placeholder="Leave blank to delete" />
+
+        <label>Mode</label>
+        <select id="mode">
+          <option value="regex">Regex</option>
+          <option value="literal">Literal</option>
+        </select>
+
+        <div>
+          <label><input type="checkbox" id="multiline" /> Multiline / DOTALL</label>
+          <label><input type="checkbox" id="caseSensitive" checked /> Case sensitive</label>
+          <label><input type="checkbox" id="wholeWord" /> Whole word</label>
+        </div>
+
+        <div>
+          <label>Include globs (comma separated)</label>
+          <input id="includeGlobs" type="text" placeholder="e.g. **/*.md" />
+        </div>
+        <div>
+          <label>Exclude globs (comma separated)</label>
+          <input id="excludeGlobs" type="text" placeholder="e.g. vendor/**" />
+        </div>
+
+        <div>
+          <label>Max matches per file</label>
+          <input id="maxMatches" type="number" value="50000" min="1" />
+        </div>
+
+        <button id="previewBtn" disabled>Preview</button>
+        <button id="applyBtn" disabled>Apply</button>
+        <p id="status" aria-live="polite"></p>
+      </section>
+
+      <section class="card">
+        <h2>Preview Results</h2>
+        <table id="previewTable" class="hidden">
+          <thead>
+            <tr>
+              <th>Path</th>
+              <th>Encoding</th>
+              <th>Size</th>
+              <th>Matches</th>
+              <th>Samples</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <section class="card">
+        <h2>Outputs (Apply)</h2>
+        <ul id="outputFiles"></ul>
+      </section>
+
+      <section class="card">
+        <h2>Diffs</h2>
+        <div id="diffs"></div>
+      </section>
+
+      <section class="card">
+        <h2>Logs</h2>
+        <pre id="logs"></pre>
+      </section>
+
+      <section class="card">
+        <h2>Errors</h2>
+        <ul id="errors"></ul>
+      </section>
+    </div>
+
+    <script>
+      const fileInput = document.getElementById('frFiles');
+      const previewBtn = document.getElementById('previewBtn');
+      const applyBtn = document.getElementById('applyBtn');
+      const statusEl = document.getElementById('status');
+      const previewTable = document.getElementById('previewTable');
+      const previewBody = previewTable.querySelector('tbody');
+      const outputFiles = document.getElementById('outputFiles');
+      const diffsEl = document.getElementById('diffs');
+      const logsEl = document.getElementById('logs');
+      const errorsEl = document.getElementById('errors');
+
+      function canRun() {
+        const hasFiles = fileInput.files.length > 0;
+        previewBtn.disabled = !hasFiles;
+        applyBtn.disabled = !hasFiles;
+      }
+
+      fileInput.addEventListener('change', canRun);
+
+      async function filesToInputs() {
+        const list = await Promise.all(
+          Array.from(fileInput.files).map(async (file) => {
+            const reader = new FileReader();
+            const url = await new Promise((resolve, reject) => {
+              reader.onload = () => resolve(reader.result);
+              reader.onerror = reject;
+              reader.readAsDataURL(file);
+            });
+            return { blobUrl: url, name: file.name };
+          })
+        );
+        return list;
+      }
+
+      function buildPayload() {
+        return {
+          inputs: [],
+          pattern: document.getElementById('pattern').value,
+          replacement: document.getElementById('replacement').value,
+          mode: document.getElementById('mode').value,
+          multiline: document.getElementById('multiline').checked,
+          caseSensitive: document.getElementById('caseSensitive').checked,
+          wholeWord: document.getElementById('wholeWord').checked,
+          includeGlobs: splitList(document.getElementById('includeGlobs').value),
+          excludeGlobs: splitList(document.getElementById('excludeGlobs').value),
+          maxMatchesPerFile: Number(document.getElementById('maxMatches').value) || 50000
+        };
+      }
+
+      function splitList(value) {
+        return value
+          .split(',')
+          .map((v) => v.trim())
+          .filter(Boolean);
+      }
+
+      function renderErrors(errors) {
+        errorsEl.innerHTML = '';
+        (errors || []).forEach((err) => {
+          const li = document.createElement('li');
+          li.textContent = typeof err === 'string' ? err : JSON.stringify(err);
+          errorsEl.appendChild(li);
+        });
+      }
+
+      function renderLogs(logs) {
+        logsEl.textContent = (logs || []).join('\n');
+      }
+
+      previewBtn.addEventListener('click', async () => {
+        if (!fileInput.files.length) return;
+        statusEl.textContent = 'Preparing preview…';
+        previewBtn.disabled = true;
+        try {
+          const payload = buildPayload();
+          payload.inputs = await filesToInputs();
+
+          const response = await fetch('/api/findreplace/preview', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.detail || 'Preview failed');
+          }
+
+          const data = await response.json();
+          statusEl.textContent = 'Preview ready';
+          renderLogs(data.logs);
+          renderErrors(data.errors);
+
+          previewBody.innerHTML = '';
+          (data.files || []).forEach((file) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${file.path}</td>
+              <td>${file.encoding}</td>
+              <td>${(file.size / 1024).toFixed(1)} KB</td>
+              <td>${file.matchCount}</td>
+              <td>${(file.samples || []).map((s) => `#${s.line}: ${s.match}`).join('<br>')}</td>
+            `;
+            previewBody.appendChild(tr);
+          });
+          previewTable.classList.remove('hidden');
+        } catch (err) {
+          console.error(err);
+          statusEl.textContent = err.message || 'Preview failed';
+        } finally {
+          previewBtn.disabled = false;
+        }
+      });
+
+      applyBtn.addEventListener('click', async () => {
+        if (!fileInput.files.length) return;
+        statusEl.textContent = 'Applying replacements…';
+        applyBtn.disabled = true;
+        try {
+          const payload = buildPayload();
+          payload.inputs = await filesToInputs();
+
+          const response = await fetch('/api/findreplace/apply', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.detail || 'Apply failed');
+          }
+
+          const data = await response.json();
+          statusEl.textContent = 'Apply complete';
+          renderLogs(data.logs);
+          renderErrors(data.errors);
+
+          outputFiles.innerHTML = '';
+          (data.outputs || []).forEach((output) => {
+            const li = document.createElement('li');
+            const link = document.createElement('a');
+            link.href = output.blobUrl;
+            link.download = output.path || 'output.txt';
+            link.textContent = `${output.path || 'output.txt'} (${(output.size / 1024).toFixed(1)} KB)`;
+            li.appendChild(link);
+            outputFiles.appendChild(li);
+          });
+
+          diffsEl.innerHTML = '';
+          (data.diffs || []).forEach((diff) => {
+            const pre = document.createElement('pre');
+            pre.textContent = `# ${diff.path}\n${diff.unified}`;
+            diffsEl.appendChild(pre);
+          });
+        } catch (err) {
+          console.error(err);
+          statusEl.textContent = err.message || 'Apply failed';
+        } finally {
+          applyBtn.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>

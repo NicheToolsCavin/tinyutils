@@ -1,0 +1,5 @@
+8.0K	.vercel/output/builds.json
+8.0K	.vercel/output/config.json
+8.0K	.vercel/output/diagnostics
+672K	.vercel/output/functions
+900K	.vercel/output/static

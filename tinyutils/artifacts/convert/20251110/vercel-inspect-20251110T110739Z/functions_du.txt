@@ -1,0 +1,9 @@
+672K	.vercel/output/functions
+ 44K	.vercel/output/functions/api/check.func
+300K	.vercel/output/functions/api/convert
+ 16K	.vercel/output/functions/api/fence.func
+240K	.vercel/output/functions/api/findreplace
+ 12K	.vercel/output/functions/api/health.func
+ 12K	.vercel/output/functions/api/metafetch.func
+ 24K	.vercel/output/functions/api/sitemap-delta.func
+ 24K	.vercel/output/functions/api/wayback-fixer.func

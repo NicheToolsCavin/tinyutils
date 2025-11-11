@@ -1,0 +1,16 @@
+# Trim build/deploy uploads; `.vercel/output/**` must remain for prebuilt deploys
+artifacts/**
+.code/**
+TinyBackups/**
+TinyUtilsCodexContext/**
+tests/**
+.venv*/
+node_modules/**
+api/_vendor/pandoc/pandoc
+.vercel/output/**/cache/**
+vercel_build.log
+vercel_problem.log
+vercel_problems_*.md
+*.pyc
+# Ensure prebuilt assets stay included
+!.vercel/output/**

@@ -1,0 +1,9 @@
+https://www.wikipedia.org/
+https://www.iana.org/domains/reserved
+https://example.com/
+https://www.mozilla.org/en-US/
+https://example.com/this-should-404-xyz
+https://www.wikipedia.org/this-page-should-not-exist-xyz
+https://www.iana.org/not-a-real-path-xyz
+https://httpstat.us/410
+https://httpstat.us/404

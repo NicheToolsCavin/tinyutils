@@ -1,0 +1,35 @@
+HTTP/2 500 
+cache-control: no-store
+content-security-policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'; object-src 'none'; upgrade-insecure-requests
+content-type: text/plain; charset=utf-8
+cross-origin-opener-policy: same-origin
+cross-origin-resource-policy: same-origin
+date: Mon, 10 Nov 2025 23:01:05 GMT
+permissions-policy: geolocation=(), camera=(), microphone=(), usb=(), payment=(), browsing-topics=()
+referrer-policy: no-referrer
+server: Vercel
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+x-content-type-options: nosniff
+x-dns-prefetch-control: off
+x-frame-options: DENY
+x-robots-tag: noindex
+x-vercel-cache: MISS
+x-vercel-id: cdg1::iad1::2fljs-1762815665227-161d4b5e9ac5
+
+Import failure in convert lambda:
+Traceback (most recent call last):
+  File "/var/task/api/convert/index.py", line 10, in <module>
+    from .app import (  # pragma: no cover - Vercel entrypoint
+  File "/var/task/api/convert/app.py", line 14, in <module>
+    from pydantic import BaseModel, ConfigDict, Field, field_validator
+  File "/var/task/_vendor/pydantic/__init__.py", line 5, in <module>
+    from ._migration import getattr_migration
+  File "/var/task/_vendor/pydantic/_migration.py", line 4, in <module>
+    from pydantic.warnings import PydanticDeprecatedSince20
+  File "/var/task/_vendor/pydantic/warnings.py", line 5, in <module>
+    from .version import version_short
+  File "/var/task/_vendor/pydantic/version.py", line 7, in <module>
+    from pydantic_core import __version__ as __pydantic_core_version__
+  File "/var/task/_vendor/pydantic_core/__init__.py", line 8, in <module>
+    from ._pydantic_core import (
+ModuleNotFoundError: No module named 'pydantic_core._pydantic_core'

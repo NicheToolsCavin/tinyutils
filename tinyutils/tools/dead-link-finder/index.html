@@ -1,0 +1,981 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dead Link Finder — TinyUtils</title>
+  <meta name="description" content="Find broken links fast. Crawl a page or paste a list. Export CSV/JSON/XLSX and grab Wayback snapshots.">
+  <link rel="canonical" href="https://tinyutils.net/tools/dead-link-finder/">
+  <link rel="icon" href="/public/favicon.ico">
+  <meta property="og:title" content="Dead Link Finder — TinyUtils">
+  <meta property="og:description" content="Find broken links fast. Crawl a page or paste a list. Export CSV/JSON/XLSX and grab Wayback snapshots.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="/public/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/public/styles.css">
+  <link rel="stylesheet" href="/styles/site.css">
+  <script defer src="/scripts/consent.js"></script>
+  <style>
+    main { padding-bottom: 48px; }
+    .tool-intro h1 { margin-bottom: 0.25rem; }
+    .tool-intro p { margin-top: 0; color: var(--muted, #97a3c2); }
+    .card { margin-top: 1rem; }
+    .mode-primary { margin-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+    .mode-primary input { width: 100%; max-width: 100%; }
+    .options-grid { display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-top: 1rem; }
+    .actions-row { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin-top: 1rem; }
+    .actions-row button.primary { background: var(--brand, #3b82f6); color: #fff; border: none; padding: 0.65rem 1.4rem; border-radius: 0.75rem; cursor: pointer; }
+    .actions-row button.primary[disabled] { opacity: 0.6; cursor: not-allowed; }
+    .actions-row button.secondary { background: transparent; color: inherit; border: 1px solid rgba(255,255,255,0.2); border-radius: 0.75rem; padding: 0.55rem 1.25rem; cursor: pointer; }
+    .advanced details { margin-top: 1rem; }
+    .advanced-inputs { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
+    .advanced-grid { display: grid; gap: 0.5rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-top: 0.75rem; }
+    label span.help { color: var(--muted, #97a3c2); font-size: 0.8rem; display: block; margin-top: 0.2rem; }
+    textarea { min-height: 160px; }
+    #progress { min-height: 1.5rem; display: flex; align-items: center; gap: 0.5rem; }
+    .status-bar { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .filter-group { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+    .export-group { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+    .export-group button { border-radius: 0.6rem; padding: 0.5rem 1rem; border: 1px solid rgba(255,255,255,0.18); background: transparent; color: inherit; cursor: pointer; }
+    .export-group button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .meta-info { display: flex; flex-direction: column; gap: 0.25rem; min-width: 200px; }
+    .meta-line { color: var(--muted, #97a3c2); font-size: 0.85rem; word-break: break-word; }
+    .meta-line-row { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    .debug-panel { margin-top: 1rem; border: 1px solid rgba(255,255,255,0.15); border-radius: 0.75rem; padding: 0.5rem 0.75rem; background: rgba(11,18,36,0.35); }
+    .debug-panel summary { cursor: pointer; font-weight: 600; }
+    .debug-content { display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-top: 0.5rem; }
+    .debug-list { margin: 0; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; font-size: 0.85rem; }
+    .debug-list dt { font-weight: 600; }
+    .debug-list dd { margin: 0 0 0.5rem 0; word-break: break-all; }
+    .debug-meta { margin: 0; padding: 0.5rem; background: rgba(12,19,32,0.5); border-radius: 0.5rem; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; font-size: 0.85rem; max-height: 240px; overflow: auto; }
+    .debug-scheduler { margin: 0 0 0.5rem 0; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; font-size: 0.85rem; }
+    .toast { position: fixed; right: 16px; bottom: 16px; background: #0b1224; color: #e6edf7; border: 1px solid rgba(255,255,255,0.12); padding: 10px 14px; border-radius: 10px; z-index: 9999; box-shadow: 0 12px 30px rgba(0,0,0,0.35); }
+    .tableWrap { margin-top: 1rem; max-height: 70vh; overflow: auto; border: 1px solid #eee; border-radius: 8px; }
+    #results thead th { position: sticky; top: 0; z-index: 2; background: #fff; box-shadow: 0 1px 0 rgba(0,0,0,0.05); }
+    td .url-text { word-break: break-all; display: inline-block; max-width: 420px; }
+    .cell-url { word-break: break-all; }
+    .visually-hidden { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container row between center">
+      <a class="brand" href="/">TinyUtils</a>
+      <nav class="nav">
+        <a class="active" href="/tools/">Tools</a>
+        <a href="/privacy.html">Privacy</a>
+        <a href="/terms.html">Terms</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="container tool-intro">
+      <h1>🔍 Dead Link Finder</h1>
+      <p>Crawl a page or paste a list. Check response codes, respect robots, and export results with Wayback helpers.</p>
+      <p><a class="cta" href="/tools/">See all tools →</a></p>
+
+      <section class="card" role="region" aria-labelledby="inputHeading">
+        <h2 id="inputHeading">Input</h2>
+        <div class="mode-primary">
+          <label for="pageUrl">Page URL to crawl
+            <span class="help">We’ll fetch this page, follow its links (respecting scope), and check them for issues.</span>
+          </label>
+          <input id="pageUrl" placeholder="https://example.com/page">
+        </div>
+
+        <div class="options-grid" aria-label="Options">
+          <label for="scope">Scope <abbr title="Internal only: only links on the same registrable domain (example.com). All links on page: includes external links too.">(?)</abbr>
+            <select id="scope">
+              <option value="internal" selected>Internal only</option>
+              <option value="all">All links on page</option>
+            </select>
+          </label>
+          <label for="includeAssets"><input type="checkbox" id="includeAssets"> Include assets (img/script/link)</label>
+          <label for="respectRobots"><input type="checkbox" id="respectRobots" checked> Respect robots.txt</label>
+          <label for="timeout">Timeout (ms)
+            <input type="number" id="timeout" min="1000" max="30000" value="10000">
+          </label>
+          <label for="concurrency">Concurrency
+            <input type="number" id="concurrency" min="1" max="10" value="10">
+          </label>
+        </div>
+
+        <div class="advanced">
+          <details>
+            <summary>Advanced options</summary>
+            <div class="advanced-inputs">
+              <label for="targetsInput">Pages (list)
+                <span class="help">Paste URLs to check directly (max 200). Leave blank to crawl the page above. Newlines, commas, or semicolons work. Lines may end with comments (# or //).</span>
+              </label>
+              <textarea id="targetsInput" rows="8" placeholder="https://example.com/page\nhttps://example.org/another"></textarea>
+            </div>
+            <div class="advanced-grid">
+              <label for="headFirst"><input type="checkbox" id="headFirst" checked> Try HEAD before GET <abbr title="Sends a lightweight HEAD first; if status looks good, follow with GET to confirm. Faster &amp; polite.">(?)</abbr></label>
+              <label for="retryHttp"><input type="checkbox" id="retryHttp"> Retry with HTTP if HTTPS fails <abbr title="If HTTPS fetch fails and site is not HSTS-only, retry once over HTTP to diagnose mixed/proto issues. HSTS: Strict-Transport-Security tells browsers to use HTTPS only. We won’t downgrade such hosts.">(?)</abbr></label>
+              <label for="includeArchive"><input type="checkbox" id="includeArchive"> Include Wayback helper</label>
+            </div>
+          </details>
+        </div>
+
+        <div class="actions-row">
+          <button id="runBtn" class="primary" type="button">Run check</button>
+          <button id="clearBtn" class="secondary" type="button">Clear</button>
+          <span class="badge">Shortcuts: <kbd>Ctrl/Cmd + Enter</kbd> run · <kbd>Ctrl/Cmd + E</kbd> export CSV · <kbd>Ctrl/Cmd + Shift + C</kbd> copy CSV</span>
+        </div>
+        <div id="progress" aria-live="polite"></div>
+      </section>
+
+      <section class="card" role="region" aria-labelledby="resultsHeading">
+        <div class="status-bar">
+          <h2 id="resultsHeading" style="margin:0">Results</h2>
+          <div class="filter-group">
+            <label><input type="checkbox" class="statusFilter" data-group="2" checked> 2xx</label>
+            <label><input type="checkbox" class="statusFilter" data-group="3" checked> 3xx</label>
+            <label><input type="checkbox" class="statusFilter" data-group="4" checked> 4xx</label>
+            <label><input type="checkbox" class="statusFilter" data-group="5" checked> 5xx</label>
+            <label><input type="checkbox" class="statusFilter" data-group="null" checked> Unknown</label>
+            <label for="onlyBroken"><input type="checkbox" id="onlyBroken"> Show only broken</label>
+            <label for="search" class="visually-hidden">Filter results</label>
+            <input id="search" type="search" placeholder="Filter results…" aria-label="Filter results">
+          </div>
+          <div class="export-group">
+            <button id="exportCsv" disabled>Export CSV</button>
+            <button id="copyCsv" class="ghost" disabled title="Copy CSV (Cmd/Ctrl+Shift+C)">Copy CSV</button>
+            <button id="exportJson" class="secondary" disabled>Export JSON</button>
+            <button id="exportXls" class="secondary" disabled>Export Excel</button>
+            <button id="shareBtn" class="ghost" disabled>Share</button>
+            <div class="meta-info">
+              <span id="summary"></span>
+              <div class="meta-line-row">
+                <span id="metaLine" class="meta-line"></span>
+                <button id="copyStatus" class="ghost" type="button" aria-label="Copy status line" title="Copy status line" disabled>Copy status</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tableWrap">
+          <table id="results">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">URL</th>
+                <th scope="col">Status</th>
+                <th scope="col">OK?</th>
+                <th scope="col">Final URL</th>
+                <th scope="col">Wayback</th>
+                <th scope="col">Replace</th>
+                <th scope="col">Note</th>
+                <th scope="col">Chain</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container row between wrap">
+      <span>© <span id="year"></span> TinyUtils</span>
+      <span><a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a></span>
+    </div>
+  </footer>
+
+  <script>
+    const clamp = (v, lo, hi, d) => Math.max(lo, Math.min(hi, Number(v) || d));
+
+    function stripInlineComments(line) {
+      return String(line || '').replace(/\s+#.*$/, '').replace(/\s+\/\/.*$/, '').trim();
+    }
+
+    function coerceUrl(s) {
+      s = String(s || '').trim();
+      if (!s) return '';
+      if (s.startsWith('//')) s = 'https:' + s;
+      if (!/^[a-zA-Z][a-zA-Z0-9+.\-]*:/.test(s)) s = 'https://' + s;
+      return s;
+    }
+
+    function splitMulti(val) {
+      return String(val || '')
+        .split(/[\r\n,;]+/)
+        .map(stripInlineComments)
+        .map(coerceUrl)
+        .filter(Boolean);
+    }
+
+    function protectCSVCell(value) {
+      const str = String(value ?? '');
+      const trimmed = str.trimStart();
+      return /^[=+\-@]/.test(trimmed) ? "'" + str : str;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>"']/g, (ch) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      })[ch]);
+    }
+
+    function statusGroup(status) {
+      if (status == null) return 'null';
+      const n = Number(status);
+      if (n >= 200 && n < 300) return '2';
+      if (n >= 300 && n < 400) return '3';
+      if (n >= 400 && n < 500) return '4';
+      if (n >= 500 && n < 600) return '5';
+      return 'null';
+    }
+
+    function showToast(message) {
+      const existing = document.querySelector('.toast');
+      if (existing) existing.remove();
+      const div = document.createElement('div');
+      div.className = 'toast';
+      div.textContent = message;
+      document.body.appendChild(div);
+      setTimeout(() => { div.remove(); }, 4000);
+    }
+
+    function resetDebug() {
+      if (!debugMode || !debugHeadersList || !debugMetaPre) return;
+      debugHeadersList.innerHTML = '';
+      const dd = document.createElement('dd');
+      dd.textContent = 'Waiting for response…';
+      debugHeadersList.appendChild(dd);
+      debugMetaPre.textContent = '—';
+      if (debugSchedulerSummary) {
+        debugSchedulerSummary.textContent = 'scheduler: —';
+      }
+    }
+
+    function describeSchedulerMeta(scheduler) {
+      if (!scheduler || typeof scheduler !== 'object') {
+        return 'scheduler: —';
+      }
+      const formatNumber = (value, fallback = '—') => (Number.isFinite(value) ? value : fallback);
+      const globalCap = formatNumber(scheduler.globalCap);
+      const perOriginCap = formatNumber(scheduler.perOriginCap);
+      const globalMax = formatNumber(scheduler.globalMaxInFlightObserved, 0);
+      let line = `scheduler: globalCap=${globalCap}, perOriginCap=${perOriginCap}, globalMax=${globalMax}`;
+      const perOriginData = scheduler.perOriginMaxObserved && typeof scheduler.perOriginMaxObserved === 'object'
+        ? Object.entries(scheduler.perOriginMaxObserved)
+            .filter(([, value]) => Number.isFinite(value) && value > 0)
+        : [];
+      if (perOriginData.length) {
+        perOriginData.sort((a, b) => b[1] - a[1]);
+        const topOrigins = perOriginData.slice(0, 3).map(([origin, value]) => `${origin}=${value}`).join(', ');
+        if (topOrigins.length) {
+          line += `; top origins: ${topOrigins}`;
+        }
+      }
+      return line;
+    }
+
+    function renderDebug(headersSnapshot, metaSnapshot) {
+      if (!debugMode || !debugHeadersList || !debugMetaPre) return;
+      debugHeadersList.innerHTML = '';
+      const entries = [];
+      if (headersSnapshot && typeof headersSnapshot === 'object') {
+        Object.entries(headersSnapshot).forEach(([key, value]) => {
+          if (value !== undefined && value !== null && String(value).length) {
+            entries.push([key, String(value)]);
+          }
+        });
+      }
+      if (!entries.length) {
+        const dd = document.createElement('dd');
+        dd.textContent = 'No headers captured.';
+        debugHeadersList.appendChild(dd);
+      } else {
+        entries.forEach(([key, value]) => {
+          const dt = document.createElement('dt');
+          dt.textContent = key;
+          const dd = document.createElement('dd');
+          dd.textContent = value;
+          debugHeadersList.append(dt, dd);
+        });
+      }
+      debugMetaPre.textContent = metaSnapshot ? JSON.stringify(metaSnapshot, null, 2) : '—';
+      if (debugSchedulerSummary) {
+        debugSchedulerSummary.textContent = describeSchedulerMeta(metaSnapshot?.scheduler);
+      }
+    }
+
+    function snapshotHeaders(res) {
+      if (!res || typeof res.headers?.get !== 'function') return null;
+      const headers = {};
+      headers.status = res.statusText ? `${res.status} ${res.statusText}`.trim() : String(res.status);
+      ['content-type', 'x-request-id', 'x-vercel-id', 'x-vercel-cache', 'age'].forEach((key) => {
+        const value = res.headers.get(key);
+        if (value) headers[key] = value;
+      });
+      return headers;
+    }
+
+    const REQUEST_TIMEOUT_MS = 40000;
+
+    const pageUrlEl = document.getElementById('pageUrl');
+    const targetsInputEl = document.getElementById('targetsInput');
+    const advancedDetailsEl = document.querySelector('.advanced details');
+    const scopeEl = document.getElementById('scope');
+    const includeAssetsEl = document.getElementById('includeAssets');
+    const respectRobotsEl = document.getElementById('respectRobots');
+    const timeoutEl = document.getElementById('timeout');
+    const concurrencyEl = document.getElementById('concurrency');
+    const headFirstEl = document.getElementById('headFirst');
+    const retryHttpEl = document.getElementById('retryHttp');
+    const includeArchiveEl = document.getElementById('includeArchive');
+    const runBtn = document.getElementById('runBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const progressEl = document.getElementById('progress');
+    const summaryEl = document.getElementById('summary');
+    const metaLineEl = document.getElementById('metaLine');
+    const resultsBody = document.querySelector('#results tbody');
+    const copyStatusBtn = document.getElementById('copyStatus');
+    const exportCsvBtn = document.getElementById('exportCsv');
+    const copyCsvBtn = document.getElementById('copyCsv');
+    const exportJsonBtn = document.getElementById('exportJson');
+    const exportXlsBtn = document.getElementById('exportXls');
+    const shareBtn = document.getElementById('shareBtn');
+    const searchEl = document.getElementById('search');
+    const onlyBrokenEl = document.getElementById('onlyBroken');
+    const statusFilters = document.querySelectorAll('.statusFilter');
+
+    const debugMode = new URLSearchParams(location.search).get('debug') === '1';
+    let debugDetails = null;
+    let debugHeadersList = null;
+    let debugMetaPre = null;
+    let debugSchedulerSummary = null;
+    if (debugMode) {
+      const resultsCard = document.getElementById('resultsHeading')?.closest('.card');
+      if (resultsCard) {
+        debugDetails = document.createElement('details');
+        debugDetails.className = 'debug-panel';
+        const summary = document.createElement('summary');
+        summary.textContent = 'Debug';
+        debugDetails.appendChild(summary);
+        const wrapper = document.createElement('div');
+        wrapper.className = 'debug-content';
+
+        const headersSection = document.createElement('div');
+        const headersTitle = document.createElement('h3');
+        headersTitle.textContent = 'Response headers';
+        headersSection.appendChild(headersTitle);
+        debugHeadersList = document.createElement('dl');
+        debugHeadersList.className = 'debug-list';
+        headersSection.appendChild(debugHeadersList);
+        wrapper.appendChild(headersSection);
+
+        const metaSection = document.createElement('div');
+        const metaTitle = document.createElement('h3');
+        metaTitle.textContent = 'Response meta';
+        metaSection.appendChild(metaTitle);
+        debugSchedulerSummary = document.createElement('p');
+        debugSchedulerSummary.className = 'debug-scheduler';
+        debugSchedulerSummary.setAttribute('data-testid', 'debug-scheduler');
+        debugSchedulerSummary.textContent = 'scheduler: —';
+        metaSection.appendChild(debugSchedulerSummary);
+        debugMetaPre = document.createElement('pre');
+        debugMetaPre.className = 'debug-meta';
+        debugMetaPre.textContent = '—';
+        metaSection.appendChild(debugMetaPre);
+        wrapper.appendChild(metaSection);
+
+        debugDetails.appendChild(wrapper);
+        resultsCard.appendChild(debugDetails);
+      }
+    }
+
+    if (debugMode) {
+      resetDebug();
+    }
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    function setExportState(enabled) {
+      [exportCsvBtn, copyCsvBtn, exportJsonBtn, exportXlsBtn].forEach((btn) => {
+        if (btn) btn.disabled = !enabled;
+      });
+    }
+
+    function syncStatusCopyAvailability() {
+      if (!copyStatusBtn) return;
+      const text = metaLineEl ? metaLineEl.textContent.trim() : '';
+      copyStatusBtn.disabled = text.length === 0;
+    }
+
+    syncStatusCopyAvailability();
+
+    let lastResults = [];
+    let meta = null;
+    let lastRequestPayload = null;
+
+    function renderRows(rows) {
+      resultsBody.innerHTML = '';
+      rows.forEach((row, index) => {
+        const tr = document.createElement('tr');
+        tr.dataset.group = statusGroup(row.status);
+        tr.dataset.ok = row.ok ? '1' : '0';
+        const archiveUrl = row.archive && row.archive.url ? row.archive.url : '';
+        const archiveCell = archiveUrl ? `<a href="${escapeHtml(archiveUrl)}" target="_blank" rel="noopener">snapshot</a>` : '';
+        const replaceCell = archiveUrl ? `<button type="button" class="ghost" data-copy="${escapeHtml(archiveUrl)}">Copy Wayback</button>` : '';
+        const finalLink = row.finalUrl ? `<a href="${escapeHtml(row.finalUrl)}" target="_blank" rel="noopener">${escapeHtml(row.finalUrl)}</a>` : '';
+        tr.innerHTML = `
+          <td>${index + 1}</td>
+          <td class="cell-url"><a href="${escapeHtml(row.url)}" target="_blank" rel="noopener" class="url-text">${escapeHtml(row.url)}</a></td>
+          <td>${row.status ?? ''}</td>
+          <td>${row.ok ? '✅' : '❌'}</td>
+          <td class="cell-url">${finalLink}</td>
+          <td>${archiveCell}</td>
+          <td>${replaceCell}</td>
+          <td class="cell-url">${escapeHtml(row.note || '')}</td>
+          <td>${row.chain ?? 0}</td>
+        `;
+        resultsBody.appendChild(tr);
+      });
+
+      resultsBody.querySelectorAll('button[data-copy]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(btn.getAttribute('data-copy'));
+            btn.textContent = 'Copied';
+            setTimeout(() => { btn.textContent = 'Copy Wayback'; }, 1200);
+          } catch (err) {
+            showToast('Copy failed: ' + err.message);
+          }
+        });
+      });
+
+      applyFilters();
+    }
+
+    function applyFilters() {
+      const activeGroups = Array.from(statusFilters).filter((cb) => cb.checked).map((cb) => cb.getAttribute('data-group'));
+      const searchTerm = searchEl.value.trim().toLowerCase();
+      const onlyBroken = !!(onlyBrokenEl && onlyBrokenEl.checked);
+
+      Array.from(resultsBody.querySelectorAll('tr')).forEach((tr) => {
+        const matchesStatus = activeGroups.includes(tr.dataset.group);
+        const matchesSearch = searchTerm ? tr.textContent.toLowerCase().includes(searchTerm) : true;
+        const matchesBroken = onlyBroken ? tr.dataset.ok !== '1' : true;
+        const visible = matchesStatus && matchesSearch && matchesBroken;
+        tr.style.display = visible ? '' : 'none';
+      });
+    }
+
+    statusFilters.forEach((cb) => cb.addEventListener('change', applyFilters));
+    if (onlyBrokenEl) onlyBrokenEl.addEventListener('change', applyFilters);
+    searchEl.addEventListener('input', applyFilters);
+
+    function toCSV(rows, metaInfo) {
+      const header = ['url', 'status', 'ok', 'finalUrl', 'archiveUrl', 'note', 'chain'];
+      const escapeCell = (value) => `"${protectCSVCell(String(value ?? '')).replace(/"/g, '""')}"`;
+      const lines = [header.join(',')];
+      rows.forEach((row) => {
+        lines.push([
+          row.url,
+          row.status ?? '',
+          row.ok ? 'true' : 'false',
+          row.finalUrl ?? '',
+          row.archive && row.archive.url ? row.archive.url : '',
+          row.note ?? '',
+          row.chain ?? 0
+        ].map(escapeCell).join(','));
+      });
+      if (metaInfo && typeof metaInfo === 'object') {
+        lines.push('');
+        lines.push(['meta_key', 'meta_value'].map(escapeCell).join(','));
+        Object.entries(metaInfo)
+          .filter(([, value]) => value !== undefined)
+          .forEach(([key, value]) => {
+            const serialized = typeof value === 'string' ? value : JSON.stringify(value);
+            lines.push([key, serialized].map(escapeCell).join(','));
+          });
+      }
+      const csv = lines.join('\n');
+      return `\ufeff${csv}`;
+    }
+
+    function toJSONPayload(rows, metaInfo, settings) {
+      const timestampISO = (metaInfo && metaInfo.runTimestamp) || new Date().toISOString();
+      const payload = {
+        ok: true,
+        meta: {
+          tool: 'dead-link-finder',
+          timestampISO,
+          settings: settings || {},
+          run: metaInfo || null
+        },
+        rows
+      };
+      return JSON.stringify(payload, null, 2);
+    }
+
+    function toExcelXML(rows) {
+      const header = ['URL', 'Status', 'OK', 'Final URL', 'Archive URL', 'Note', 'Chain'];
+      const escapeCell = (value) => escapeHtml(String(value ?? ''));
+      const tableRows = rows.map((row) => `
+        <tr>
+          <td>${escapeCell(row.url)}</td>
+          <td>${escapeCell(row.status ?? '')}</td>
+          <td>${row.ok ? 'true' : 'false'}</td>
+          <td>${escapeCell(row.finalUrl ?? '')}</td>
+          <td>${escapeCell(row.archive && row.archive.url ? row.archive.url : '')}</td>
+          <td>${escapeCell(row.note ?? '')}</td>
+          <td>${escapeCell(row.chain ?? 0)}</td>
+        </tr>`).join('');
+      return `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body><table><thead><tr>${header.map((h) => `<th>${escapeCell(h)}</th>`).join('')}</tr></thead><tbody>${tableRows}</tbody></table></body></html>`;
+    }
+
+    function buildSettings(metaInfo, requestPayload) {
+      const settings = {};
+      if (metaInfo && typeof metaInfo === 'object') {
+        if (metaInfo.mode !== undefined) settings.mode = metaInfo.mode;
+        if (metaInfo.source !== undefined) settings.source = metaInfo.source;
+        settings.respectRobots = metaInfo.robots !== false;
+        if (metaInfo.robotsStatus !== undefined) settings.robotsStatus = metaInfo.robotsStatus;
+        if (metaInfo.robotsStatus !== 'applied' && metaInfo.robotsReason) {
+          settings.robotsReason = metaInfo.robotsReason;
+        }
+        if (metaInfo.concurrency !== undefined) settings.concurrency = metaInfo.concurrency;
+        if (metaInfo.timeoutMs !== undefined) settings.timeoutMs = metaInfo.timeoutMs;
+        if (metaInfo.scope !== undefined) settings.scope = metaInfo.scope;
+        settings.includeAssets = !!metaInfo.assets;
+        settings.includeArchive = !!metaInfo.wayback;
+        settings.httpFallback = !!metaInfo.httpFallback;
+        if (metaInfo.totalQueued !== undefined) settings.totalQueued = metaInfo.totalQueued;
+        if (metaInfo.totalChecked !== undefined) settings.totalChecked = metaInfo.totalChecked;
+        settings.truncated = !!metaInfo.truncated;
+        if (metaInfo.requestId !== undefined) settings.requestId = metaInfo.requestId;
+      }
+      if (requestPayload && typeof requestPayload === 'object') {
+        settings.retryHttp = !!requestPayload.retryHttp;
+        settings.headFirst = requestPayload.headFirst !== false;
+        if (typeof requestPayload.scope === 'string' && !settings.scope) {
+          settings.scope = requestPayload.scope;
+        }
+      }
+      Object.keys(settings).forEach((key) => {
+        if (settings[key] === null) {
+          delete settings[key];
+        }
+      });
+      return settings;
+    }
+
+    function makeDatedFilename(base, ext) {
+      const stamp = new Date().toISOString().slice(0, 10);
+      return `${base}-${stamp}.${ext}`;
+    }
+
+    function download(name, text, type = 'text/plain') {
+      const blob = new Blob([text], { type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 0);
+    }
+
+    window.exportCSV = () => { if (!exportCsvBtn?.disabled) exportCsvBtn?.click(); };
+    window.copyCSV = () => { if (!copyCsvBtn?.disabled) copyCsvBtn?.click(); };
+    copyStatusBtn?.addEventListener('click', async () => {
+      const text = metaLineEl ? metaLineEl.textContent.trim() : '';
+      if (!text) return;
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast('Status line copied');
+      } catch (err) {
+        showToast('Copy failed: ' + (err?.message || 'Unknown error'));
+      }
+    });
+
+    exportCsvBtn.addEventListener('click', () => {
+      if (!lastResults.length) return;
+      const csv = toCSV(lastResults, meta);
+      download(makeDatedFilename('dead-link-finder', 'csv'), csv, 'text/csv');
+    });
+
+    copyCsvBtn.addEventListener('click', async () => {
+      if (!lastResults.length) return;
+      try {
+        const csv = toCSV(lastResults, meta);
+        await navigator.clipboard.writeText(csv);
+        copyCsvBtn.textContent = 'Copied';
+        setTimeout(() => { copyCsvBtn.textContent = 'Copy CSV'; }, 1200);
+      } catch (err) {
+        showToast('Copy failed: ' + err.message);
+      }
+    });
+
+    exportJsonBtn.addEventListener('click', () => {
+      if (!lastResults.length) return;
+      const settings = buildSettings(meta, lastRequestPayload);
+      const payload = toJSONPayload(lastResults, meta, settings);
+      download(makeDatedFilename('dead-link-finder', 'json'), payload, 'application/json');
+    });
+
+    exportXlsBtn.addEventListener('click', () => {
+      if (!lastResults.length) return;
+      download('dead-links.xls', toExcelXML(lastResults), 'application/vnd.ms-excel');
+    });
+
+    function encodeState() {
+      const listValue = targetsInputEl ? targetsInputEl.value : '';
+      const pageValue = pageUrlEl ? pageUrlEl.value : '';
+      const mode = listValue && listValue.trim().length > 0 ? 'list' : 'crawl';
+      const state = {
+        mode,
+        pageUrl: pageValue,
+        targets: listValue,
+        list: listValue,
+        scope: scopeEl ? scopeEl.value : 'internal',
+        includeAssets: includeAssetsEl ? includeAssetsEl.checked : false,
+        respectRobots: respectRobotsEl ? respectRobotsEl.checked : true,
+        headFirst: headFirstEl ? headFirstEl.checked : true,
+        retryHttp: retryHttpEl ? retryHttpEl.checked : false,
+        includeArchive: includeArchiveEl ? includeArchiveEl.checked : false,
+        timeout: clamp(timeoutEl ? timeoutEl.value : 10000, 1000, 30000, 10000),
+        concurrency: clamp(concurrencyEl ? concurrencyEl.value : 10, 1, 10, 10)
+      };
+      const json = JSON.stringify(state);
+      const bytes = new TextEncoder().encode(json);
+      let binary = '';
+      bytes.forEach((b) => { binary += String.fromCharCode(b); });
+      return btoa(binary);
+    }
+
+    function decodeState(hash) {
+      try {
+        const binary = atob(hash);
+        const bytes = Uint8Array.from(binary, (ch) => ch.charCodeAt(0));
+        const json = new TextDecoder().decode(bytes);
+        return JSON.parse(json);
+      } catch {
+        return null;
+      }
+    }
+
+    function applyState(state) {
+      const stateMode = state.mode;
+      let pageValue = state.pageUrl ?? state.page ?? state.pageInput ?? '';
+      let listValue = state.list ?? state.targets ?? state.urls ?? '';
+      if (!pageValue && listValue && stateMode !== 'list') {
+        const parsed = splitMulti(listValue);
+        if (parsed.length === 1) {
+          pageValue = parsed[0];
+          listValue = '';
+        }
+      }
+      if (pageUrlEl) {
+        pageUrlEl.value = pageValue;
+      }
+      if (targetsInputEl) {
+        targetsInputEl.value = listValue;
+      }
+      if (scopeEl) scopeEl.value = state.scope === 'all' ? 'all' : 'internal';
+      if (includeAssetsEl) includeAssetsEl.checked = !!state.includeAssets;
+      if (respectRobotsEl) respectRobotsEl.checked = state.respectRobots !== false;
+      if (headFirstEl) headFirstEl.checked = state.headFirst !== false;
+      if (retryHttpEl) retryHttpEl.checked = !!state.retryHttp;
+      if (includeArchiveEl) includeArchiveEl.checked = !!state.includeArchive;
+      if (timeoutEl) timeoutEl.value = clamp(state.timeout, 1000, 30000, 10000);
+      if (concurrencyEl) concurrencyEl.value = clamp(state.concurrency, 1, 10, 10);
+      if (advancedDetailsEl) {
+        const shouldOpen = !!(targetsInputEl && targetsInputEl.value && targetsInputEl.value.trim());
+        advancedDetailsEl.open = shouldOpen;
+      }
+    }
+
+    const defaultState = {
+      mode: 'crawl',
+      pageUrl: '',
+      targets: '',
+      list: '',
+      scope: 'internal',
+      includeAssets: false,
+      respectRobots: true,
+      headFirst: true,
+      retryHttp: false,
+      includeArchive: false,
+      timeout: 10000,
+      concurrency: 10
+    };
+
+    function resetState() {
+      applyState(defaultState);
+    }
+
+    if (shareBtn) shareBtn.disabled = false;
+
+    shareBtn?.addEventListener('click', async () => {
+      const encoded = encodeState();
+      const url = `${location.origin}${location.pathname}#${encoded}`;
+      try {
+        await navigator.clipboard.writeText(url);
+        showToast('Sharable link copied to clipboard');
+      } catch {
+        prompt('Copy this link', url);
+      }
+    });
+
+    function ensureMeta(payload, data) {
+      const base = data && data.meta ? { ...data.meta } : {};
+      const mode = payload.mode || base.mode || 'crawl';
+      const apiStage = data?.stage || base.stage || 'done';
+      base.mode = mode;
+      base.stage = apiStage;
+      base.requestId = base.requestId || data?.requestId || data?.meta?.requestId || '';
+      const robotsStatusFromApi = data?.meta?.robotsStatus || base.robotsStatus;
+      if (robotsStatusFromApi) {
+        base.robotsStatus = robotsStatusFromApi;
+      } else {
+        base.robotsStatus = payload.respectRobots !== false ? 'applied' : 'ignored';
+      }
+      if (data?.meta?.robotsReason !== undefined) {
+        base.robotsReason = data.meta.robotsReason;
+      } else if (base.robotsStatus !== 'applied' && base.robotsReason === undefined) {
+        base.robotsReason = payload.respectRobots === false ? 'toggle_off' : null;
+      }
+      base.runTimestamp = base.runTimestamp || new Date().toISOString();
+      const source = payload.pageUrl || (mode === 'list' ? 'list' : '');
+      const defaultSource = mode === 'list' ? 'list' : 'page';
+      base.source = base.source || source || defaultSource;
+      if (typeof base.concurrency !== 'number') {
+        base.concurrency = typeof data?.meta?.concurrency === 'number'
+          ? data.meta.concurrency
+          : clamp(concurrencyEl ? concurrencyEl.value : 10, 1, 10, 10);
+      }
+      base.timeoutMs = typeof base.timeoutMs === 'number'
+        ? base.timeoutMs
+        : clamp(timeoutEl ? timeoutEl.value : 10000, 1000, 30000, 10000);
+      if (typeof base.robots !== 'boolean') {
+        base.robots = payload.respectRobots !== false;
+      }
+      base.scope = base.scope || payload.scope || 'internal';
+      base.assets = typeof base.assets === 'boolean' ? base.assets : !!payload.includeAssets;
+      const fallbackUsed = typeof base.httpFallback === 'boolean'
+        ? base.httpFallback
+        : lastResults.some((row) => typeof row.note === 'string' && row.note.includes('http_fallback_used'));
+      base.httpFallback = !!fallbackUsed;
+      if (typeof base.wayback !== 'boolean') {
+        base.wayback = payload.includeArchive || false;
+      }
+      base.totalQueued = typeof base.totalQueued === 'number' ? base.totalQueued : data?.meta?.totalQueued ?? lastResults.length;
+      base.totalChecked = typeof base.totalChecked === 'number' ? base.totalChecked : lastResults.length;
+      base.truncated = typeof base.truncated === 'boolean' ? base.truncated : !!data?.meta?.truncated;
+      return base;
+    }
+
+    async function buildPayload() {
+      const base = {
+        respectRobots: respectRobotsEl ? respectRobotsEl.checked : true,
+        scope: scopeEl ? scopeEl.value : 'internal',
+        includeAssets: includeAssetsEl ? includeAssetsEl.checked : false,
+        headFirst: headFirstEl ? headFirstEl.checked : true,
+        retryHttp: retryHttpEl ? retryHttpEl.checked : false,
+        includeArchive: includeArchiveEl ? includeArchiveEl.checked : false,
+        timeout: clamp(timeoutEl ? timeoutEl.value : 10000, 1000, 30000, 10000),
+        concurrency: clamp(concurrencyEl ? concurrencyEl.value : 10, 1, 10, 10)
+      };
+
+      const rawTargets = targetsInputEl ? targetsInputEl.value : '';
+      let urls = splitMulti(rawTargets);
+      const unique = Array.from(new Set(urls));
+      if (unique.length > 200) {
+        showToast('Only the first 200 URLs will be checked to stay polite.');
+      }
+      urls = unique.slice(0, 200);
+
+      if (urls.length > 0) {
+        return { ...base, mode: 'list', list: urls.join('\n') };
+      }
+
+      const rawPage = pageUrlEl ? pageUrlEl.value : '';
+      const cleanedPage = stripInlineComments(rawPage);
+      const pageUrl = coerceUrl(cleanedPage);
+      if (!pageUrl) {
+        throw new Error('Please enter a valid page URL.');
+      }
+
+      return { ...base, mode: 'crawl', pageUrl };
+    }
+
+    runBtn?.addEventListener('click', async (event) => {
+      event.preventDefault();
+      progressEl.textContent = '';
+      if (metaLineEl) metaLineEl.textContent = '';
+      syncStatusCopyAvailability();
+      runBtn.disabled = true;
+      let timeoutId = null;
+      let controller = null;
+      try {
+        if (debugMode) resetDebug();
+        lastRequestPayload = null;
+        const payload = await buildPayload();
+        lastRequestPayload = payload;
+        progressEl.textContent = 'Running…';
+        setExportState(false);
+        resultsBody.innerHTML = '';
+        summaryEl.textContent = '';
+        if (metaLineEl) metaLineEl.textContent = '';
+        syncStatusCopyAvailability();
+        lastResults = [];
+        meta = null;
+
+        controller = new AbortController();
+        timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+        let data;
+        try {
+          let debugHeadersSnapshot = null;
+          let debugMetaSnapshot = null;
+          const res = await fetch('/api/check', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify(payload),
+            signal: controller.signal
+          });
+          if (debugMode) {
+            debugHeadersSnapshot = snapshotHeaders(res);
+          }
+          const contentType = res.headers.get('content-type') || '';
+          let parsed;
+          if (contentType.includes('application/json')) {
+            parsed = await res.json();
+            if (debugMode) {
+              debugMetaSnapshot = parsed?.meta || null;
+              renderDebug(debugHeadersSnapshot, debugMetaSnapshot);
+            }
+          } else {
+            const fallback = await res.text();
+            if (debugMode && debugHeadersSnapshot) {
+              renderDebug(debugHeadersSnapshot, null);
+            }
+            throw new Error(fallback || `Non-JSON response (${res.status})`);
+          }
+          if (!res.ok || !parsed?.ok) {
+            const msg = parsed?.message ? String(parsed.message) : `Request failed (${res.status})`;
+            const requestId = parsed?.requestId || parsed?.meta?.requestId || '';
+            const stageInfo = parsed?.stage || parsed?.meta?.stage;
+            const error = new Error(msg + (requestId ? ` (ReqID: ${requestId})` : ''));
+            if (requestId) error.requestId = requestId;
+            if (stageInfo) error.stage = stageInfo;
+            if (parsed?.detail) error.detail = parsed.detail;
+            throw error;
+          }
+          data = parsed;
+        } catch (error) {
+          if (error?.name === 'AbortError') {
+            const timeoutError = new Error('Request timed out. Please try again.');
+            timeoutError.code = 'timeout';
+            throw timeoutError;
+          }
+          throw error;
+        } finally {
+          if (timeoutId) {
+            clearTimeout(timeoutId);
+            timeoutId = null;
+          }
+        }
+
+        lastResults = Array.isArray(data.rows) ? data.rows : [];
+        meta = ensureMeta(payload, data);
+        renderRows(lastResults);
+        const broken = lastResults.filter((row) => !row.ok).length;
+        const truncatedLabel = meta.truncated ? ' (soft cap reached)' : '';
+        summaryEl.textContent = `${lastResults.length} checked · ${broken} broken${truncatedLabel}`;
+        setExportState(lastResults.length > 0);
+        const reqLabel = meta.requestId ? meta.requestId : '—';
+        const robotsLabel = meta.robotsStatus || 'unknown';
+        const robotsPart = meta.robotsStatus !== 'applied' && meta.robotsReason
+          ? `robots ${robotsLabel} (${meta.robotsReason})`
+          : `robots ${robotsLabel}`;
+        const statusParts = [
+          `${lastResults.length} checked`,
+          `${broken} broken${meta.truncated ? ' (soft cap reached)' : ''}`,
+          robotsPart,
+          `req ${reqLabel}`
+        ];
+        if (metaLineEl) {
+          metaLineEl.textContent = statusParts.join(' · ');
+        }
+        syncStatusCopyAvailability();
+        const stageLabel = meta.stage && meta.stage !== 'done' ? ` (stage: ${meta.stage})` : '';
+        progressEl.textContent = `Done${stageLabel}`;
+      } catch (err) {
+        const message = err?.message || 'Run failed';
+        const stageHint = err?.stage ? ` [stage: ${err.stage}]` : '';
+        const needsReqId = err?.requestId && !(message.includes('ReqID') || message.includes('reqid'));
+        const rid = needsReqId ? ` (ReqID: ${err.requestId})` : '';
+        progressEl.textContent = `Error: ${message}${rid}${stageHint}`;
+        if (metaLineEl) metaLineEl.textContent = '';
+        syncStatusCopyAvailability();
+        lastResults = [];
+        meta = null;
+      } finally {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+        runBtn.disabled = false;
+      }
+    });
+
+    clearBtn?.addEventListener('click', () => {
+      if (pageUrlEl) pageUrlEl.value = '';
+      if (targetsInputEl) targetsInputEl.value = '';
+      if (advancedDetailsEl) advancedDetailsEl.open = false;
+      resultsBody.innerHTML = '';
+      summaryEl.textContent = '';
+      progressEl.textContent = '';
+      if (metaLineEl) metaLineEl.textContent = '';
+      syncStatusCopyAvailability();
+      lastResults = [];
+      meta = null;
+      lastRequestPayload = null;
+      setExportState(false);
+    });
+
+    document.addEventListener('keydown', (e) => {
+      const inField = /^(INPUT|TEXTAREA)$/.test(e.target?.nodeName) || e.target?.isContentEditable;
+      if (!e.metaKey && !e.ctrlKey) return;
+      if (inField) return;
+
+      const k = e.key.toLowerCase();
+      if (k === 'enter') { e.preventDefault(); runBtn?.click(); }
+      if (k === 'e')     { e.preventDefault(); window.exportCSV?.(); }
+      if (k === 'c' && e.shiftKey) {
+        if (!lastResults.length) return;
+        e.preventDefault();
+        window.copyCSV?.();
+      }
+    });
+
+    if (location.hash.length > 1) {
+      const parsed = decodeState(location.hash.slice(1));
+      if (parsed) {
+        applyState(parsed);
+        if (parsed.mode === 'sitemap' || parsed.sitemapUrl || parsed.sitemapInput) {
+          showToast('Sitemap mode now lives in Sitemap Delta.');
+        }
+      } else {
+        resetState();
+        showToast('Invalid share link. Defaults restored.');
+      }
+    } else {
+      resetState();
+    }
+  </script>
+
+</body>
+</html>

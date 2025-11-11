@@ -1,0 +1,9 @@
+Vercel CLI 48.8.2
+Retrieving project…
+Deploying cavins-projects-7b0e00bb/tinyutils
+Uploading [--------------------] (0.0B/334.9MB)
+Uploading [=====---------------] (83.7MB/334.9MB)
+Uploading [==========----------] (167.4MB/334.9MB)
+Uploading [===============-----] (251.2MB/334.9MB)
+Uploading [====================] (334.9MB/334.9MB)
+Error: File size limit exceeded (100 MB)

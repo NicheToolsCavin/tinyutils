@@ -1,0 +1,3 @@
+[agent_timeouts]
+run = "20m"
+idle = "5m"
