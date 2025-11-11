@@ -1,0 +1,79 @@
+name: Convert Preview Smoke
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  preview-smoke:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tinyutils
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Pull Vercel preview env
+        run: |
+          mkdir -p .vercel
+          pnpm dlx vercel env pull .vercel/.env.preview.local --environment preview --yes
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Deploy Vercel preview
+        id: deploy
+        run: |
+          mkdir -p artifacts/convert/github-${{ github.run_id }}
+          pnpm dlx vercel deploy --yes --target preview 2>&1 | tee artifacts/convert/github-${{ github.run_id }}/vercel_deploy.log
+          PREVIEW_URL=$(grep -Eo 'https://[^ ]+\.vercel\.app' artifacts/convert/github-${{ github.run_id }}/vercel_deploy.log | tail -1)
+          echo "preview_url=$PREVIEW_URL" >> "$GITHUB_OUTPUT"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Vendor integrity (informational)
+        run: python3 scripts/verify_vendors.py || true
+
+      - name: Run convert preview smoke
+        env:
+          CONVERT_SMOKE_ARTIFACTS: artifacts/convert/github-${{ github.run_id }}
+          PREVIEW_URL: ${{ steps.deploy.outputs.preview_url }}
+          PREVIEW_SECRET: ${{ secrets.PREVIEW_SECRET }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+        run: |
+          set -a
+          source .vercel/.env.preview.local || true
+          set +a
+          node scripts/smoke_convert_preview.mjs
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: convert-preview-smoke-${{ github.run_id }}
+          path: tinyutils/artifacts/convert
+          if-no-files-found: warn
