@@ -1,7 +1,7 @@
 # TinyUtils QA Notes (2025-11-02)
 
 ## Overview
-Manual smoke tests against https://tinyutils-eight.vercel.app on 2025-11-02 surfaced several regressions. Dead Link Finder still returns data, Wayback Fixer’s UI fails to render results, Sitemap Delta + Redirect Mapper never surfaces compare output, and several advertised tools 404. Findings below capture what to fix next.
+Manual smoke tests against https://tinyutils.net on 2025-11-02 surfaced several regressions. Dead Link Finder still returns data, Wayback Fixer’s UI fails to render results, Sitemap Delta + Redirect Mapper never surfaces compare output, and several advertised tools 404. Findings below capture what to fix next.
 
 ## Issues
 1. **Wayback Fixer front-end dead.** Clicking “Find Wayback Replacements” leaves the status stuck on `Ready.` and no `fetch` fires; programmatic clicks show the same. Yet `POST /api/wayback-fixer` succeeds (returns `note: "network_error"` for test URLs). Likely JS errors (duplicate `protectCSVCell` helpers, malformed template literals) stop the handler from binding. Need to restore the event listener and ensure CSV/JSON exports only enable once results load.

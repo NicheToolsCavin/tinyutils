@@ -1,0 +1,7 @@
+fastapi==0.121.1
+pydantic==2.12
+pydantic-core==2.41.5
+starlette==0.48.0
+uvicorn==0.38.0
+pypandoc==1.16
+Rationale: These are the latest stable versions compatible with Python 3.12, FastAPI >=0.110, Pydantic v2, and have manylinux wheels, ensuring stability and minimal churn.

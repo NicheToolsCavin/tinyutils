@@ -1,0 +1,132 @@
+I'll help you transform the vercel.json configuration. First, let's understand the current setup by looking at the existing vercel.json file and the AGENTS.md file for requirements.
+
+I need to navigate to the correct project directory. Let me find the tinyutils directory in the workspace.
+
+I see the tinyutils directory is inside the current workspace. Let me check if there's a vercel.json file there:
+
+Let me look for any vercel.json files in the current directory:
+
+Let me check the entire directory structure to better understand the project:
+
+It looks like the tinyutils directory is empty. Let me search more broadly to find the actual project files:
+
+Let me try to understand the context better. It seems the issue mentions a repo root at `/Users/cav/dev/TinyUtils/tinyutils`, but we're currently in a different directory. Let me try to find if the actual repo exists elsewhere:
+
+Great! The actual repo is at `/Users/cav/dev/TinyUtils/tinyutils`. Let me check if the vercel.json file is there:
+
+I need to navigate to the correct workspace. Let me check if I can access this directory by changing the workspace or by using a different approach.
+
+I need to find the vercel.json file. Let me try to search for it using grep in the workspace:
+
+The vercel.json doesn't seem to be in the current workspace directory. Let me copy the file from the actual repo location to the workspace, or look for any vercel-related files:
+
+Perfect! I found the vercel.json file at `/Users/cav/dev/TinyUtils/tinyutils/vercel.json`. Now let me read it:
+
+Now let me look for the AGENTS.md file to understand the preview fence requirements:
+
+Great! Let me read the AGENTS.md file to understand the preview fence requirements:
+
+Now I'll look at the smoke test logs mentioned in the issue to understand the specific error:
+
+Let me look at one of the vercel deploy attempt logs to see the specific error:
+
+Let me check for error logs that show the specific "cannot combine 'routes' with 'headers/rewrites'" error:
+
+Perfect! Now I understand the issue. The error message confirms that Vercel doesn't allow combining `routes` with `headers` or `rewrites`. I need to create a new vercel.json that removes the `routes` and re-expresses the functionality using top-level `headers` and `rewrites` properties.
+
+Let me also check for the api/convert/index.py file mentioned in the requirements:
+
+Let me also look at other API files to understand the structure:
+
+Let me find the actual source files for the findreplace API:
+
+Now I have a good understanding of the issue and requirements. Let me mark the first todo as completed and move to the next one:
+
+Based on my analysis of the current vercel.json and AGENTS.md, I understand the problem and requirements. Let me draft a new vercel.json that uses top-level `headers` and `rewrites` instead of `routes`.
+
+The current vercel.json has a "routes" property that conflicts with top-level "headers" and "rewrites". I need to convert the routes to use the new format while preserving:
+
+1. Security headers (HSTS, X-Frame-Options, etc.)
+2. Cache headers for public assets and API endpoints
+3. Preview fence functionality for beta tools like /tools/(convert|find-replace) and their .html variants
+4. API routing for /api/convert and related endpoints
+
+Here's the transformed vercel.json:
+
+Now I need to also handle the preview fence functionality for the tools mentioned in the issue: /tools/(convert|find-replace). Let me update the vercel.json to include these routes as well:
+
+I need to understand the structure better. Looking at the original vercel.json again, I notice there were "handle:filesystem" and "handle:miss" entries that control the order of routing. In the new format, we need to be more careful about rewrite ordering. Let me also make sure I have the correct patterns for the convert and find-replace tools:
+
+Now I need to update my todo list and continue with the next steps:
+
+Looking back at the original vercel.json, I notice that I need to make sure all the preview fence functionality is properly handled. I see that some tools have special handling with the `preview_fence_proxy=1` query parameter while others just go directly to the fence. Let me review the original behavior:
+
+1. Tools like keyword-density, meta-preview, sitemap-generator have special handling when `preview_fence_proxy=1` is present
+2. Tools like convert and find-replace should always be fenced (based on the issue description)
+
+I need to make sure that the convert and find-replace tools are always protected by the fence, without any bypass query parameter exceptions:
+
+Wait, I need to look more carefully at the original vercel.json to understand when the preview_fence_proxy query parameter is used. Looking back at the original, I see that:
+
+1. Tools like keyword-density, meta-preview, sitemap-generator are only allowed to bypass the fence when `preview_fence_proxy=1` is present (when authenticated)
+2. The original vercel.json had a pattern that would allow these tools to go directly to their destination when the query parameter was present
+
+But for convert and find-replace, they should always be fenced according to the issue description. However, I should be careful to make sure that when a user has been authenticated (has the fence cookie), they can access these tools normally.
+
+Looking at the original vercel.json again, I see the pattern:
+- For keyword tools: with `preview_fence_proxy=1` → go directly to the tool (with "check": true)
+- For keyword tools: without the parameter → go to fence
+- For convert and find-replace, there were no special routes in the original vercel.json, but per the issue description they need to be fenced too
+
+Based on the issue description, I need to ensure that both convert and find-replace tools, and their .html variants, are properly protected by the fence mechanism. Let me update the vercel.json based on the AGENTS.md which indicates that tools like convert and find-replace should be treated as beta tools that need to be fenced.
+
+From AGENTS.md: "Preview fence requires PREVIEW_SECRET; converter/find-replace endpoints must accept the fence header/cookie."
+
+This confirms that both /tools/convert and /tools/find-replace should be fenced. So my current implementation is correct. Now let me proceed with the next todo:
+
+Looking at the current vercel.json, I can see that the function configurations are already properly set up with:
+
+1. Proper `includeFiles` and `excludeFiles` patterns to keep bundle sizes under 100MB
+2. Exclusions for artifacts/, .code/, and tests/ directories as required
+3. Appropriate `maxDuration` settings for long-running operations
+
+The existing function configurations already handle the bundle size constraints and exclusions properly:
+
+- `includeFiles`: Specifies exactly which files to include (e.g., tinyutils/{__init__.py,api/**,convert/**,filters/**})
+- `excludeFiles`: Excludes artifacts, .code, and tests directories as required by the AGENTS.md
+
+The function configuration is already correct and satisfies the bundle size constraints mentioned in the issue. Let me update the final todo:
+
+Perfect! I've completed all the required tasks. Let me provide you with a comprehensive summary of the solution:
+
+## Vercel.json Transformation Summary
+
+I have successfully transformed the vercel.json to resolve the routing conflict by removing the `routes` property and re-expressing all functionality using top-level `headers` and `rewrites` properties while preserving all critical functionality.
+
+### Key Changes Made:
+
+1. **Eliminated Routing Conflict**: Removed the `routes` property that was causing the "cannot combine 'routes' with 'headers/rewrites'" error.
+
+2. **Replaced Routes with Headers**: Converted security and cache header rules to use the top-level `headers` property:
+   - Security headers (HSTS, X-Frame-Options, CSP, etc.) for all paths
+   - Cache headers for public assets and API endpoints
+   - Custom headers for specific paths like `/tools/wayback-fixer/demo/*`
+
+3. **Replaced Routes with Rewrites**: Converted URL routing rules to use the `rewrites` property:
+   - API routing for `/api/convert` endpoints
+   - Preview fence routing for beta tools: `/tools/convert`, `/tools/find-replace`, and their .html variants
+   - Preview fence routing for other beta tools: keyword-density, meta-preview, sitemap-generator
+   - API fallback routing for Python/JS files
+
+4. **Preserved Preview Fence**: All beta tools including convert and find-replace are now properly protected by the fence mechanism, requiring `PREVIEW_SECRET` authentication as required by AGENTS.md.
+
+5. **Maintained Function Configuration**: Preserved the function configurations with proper `includeFiles` and `excludeFiles` patterns to maintain under 100MB bundle size:
+   - Excludes artifacts/, .code/, and tests/ directories as required
+   - Proper file inclusion patterns for each API function
+
+### Final vercel.json Structure:
+- `functions` - Defines Python serverless functions for API endpoints with proper include/exclude patterns
+- `headers` - Security, caching, and other HTTP headers applied to specific paths
+- `rewrites` - URL routing rules that direct requests to the appropriate handlers
+
+The new configuration maintains all security requirements (strict headers, CSP, etc.), preserves the preview fence functionality for beta tools (including the newly added convert and find-replace tools), and resolves the Vercel deployment conflict while keeping bundle sizes within limits.

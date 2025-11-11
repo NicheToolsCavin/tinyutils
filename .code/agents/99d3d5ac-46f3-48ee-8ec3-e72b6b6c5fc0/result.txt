@@ -1,0 +1,44 @@
+Okay, I will analyze the TinyUtils converter backend and `pandoc_runner` to recommend the best approach for running in a Vercel serverless environment. I will focus on providing actionable deployment strategies and outlining the necessary changes.
+
+First, I'll review the relevant files to understand the current implementation.
+
+Based on my analysis of the codebase and the Vercel deployment environment's constraints, here is the recommended approach to get the converter backend working reliably.
+
+### Summary
+
+The root cause of the `HTTP 500` errors on Vercel preview deployments is the failure of the `pandoc` binary to run. The current implementation attempts to download `pandoc` at runtime into the `/tmp` directory, which is unreliable and likely exceeds Vercel's serverless function execution time limit on cold starts, causing a timeout. The existing `pypandoc-binary` package is also not working as expected in this environment.
+
+### 1. Recommended Approach: Bundle the Pandoc Binary
+
+The most robust and performant solution is to include the `pandoc` binary directly within the application bundle. This ensures it is immediately available when the function starts, eliminating runtime download delays and external dependencies.
+
+*   **Trade-offs:**
+    *   **Pro:** Greatly improves reliability and performance, especially for cold starts.
+    *   **Con:** Increases the serverless function's bundle size. The Linux `pandoc` binary is approximately 25-30 MB, which is a significant portion of Vercel's 50 MB limit. This requires careful management of other dependencies.
+*   **Prerequisites:**
+    *   The `pandoc` binary must be for a compatible architecture (e.g., `linux-amd64` for Vercel's default environment).
+*   **Minimal Changes:**
+    1.  **Vendor the binary:** Create a script to download and extract the `pandoc` binary into a directory like `tinyutils/api/_vendor/`. This script would be run once locally or as part of a build step.
+    2.  **Update `pandoc_runner.py`:** Modify the `ensure_pandoc()` function to remove the runtime download logic. Instead, it should point `pypandoc` to the vendored binary's path (e.g., by setting the `PYPANDOC_PANDOC` environment variable).
+    3.  **Vercel Config:** Ensure the vendored binary is included in the deployment by checking the `.vercelignore` file and Vercel build settings.
+
+### 2. Fallback Approach: Guard the Endpoint
+
+If bundling the binary causes the function to exceed Vercel's size limits, the fallback is to gracefully degrade the service.
+
+*   **Trade-offs:**
+    *   **Pro:** Keeps the bundle size small and prevents the API from crashing.
+    *   **Con:** The core conversion functionality will be disabled in the preview/serverless environment. The API will only return a low-fidelity, unformatted text response.
+*   **Prerequisites:** None.
+*   **Minimal Changes:**
+    1.  **Modify `convert/service.py`:** At application startup, check if `pandoc` is available.
+    2.  If it's not, the `convert_one` function should immediately call the `_fallback_conversion` logic without attempting to run the real conversion process. This avoids errors and timeouts while still returning a valid (though basic) response.
+
+### 3. Immediate TODOs
+
+*   **(TODO-1) Vendor the pandoc binary:** Create a build script to download the `pandoc-3.1.11.1-linux-amd64` binary and place it in `tinyutils/api/_vendor/pandoc/`.
+    *   **Owner:** Dev Team
+*   **(TODO-2) Update pandoc_runner.py:** Modify `ensure_pandoc` to remove the download logic and point to the vendored binary.
+    *   **Owner:** Dev Team
+*   **(TODO-3) Deploy and Verify:** Deploy the changes to a Vercel preview environment and run the smoke test scripts to confirm the `/api/convert` endpoint works as expected.
+    *   **Owner:** Agent / Dev Team

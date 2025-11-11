@@ -1,0 +1,688 @@
+[2025-11-10T11:34:47] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-sonictornado-determine-how-run
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: auto
+--------
+[2025-11-10T11:34:47] User instructions:
+Context: Key files: docs/AGENT_RUN_LOG.md records last deploy at 2025-11-10 17:55 CET with preview URL but no smoke evidence. scripts/smoke_convert_preview.mjs expects PREVIEW_URL and optional PREVIEW_FENCE_HEADER/PREVIEW_SECRET. Need to inspect tinyutils/.env.preview or Vercel env via `vercel env pull` to obtain PREVIEW_SECRET. If secret unavailable, note blocker. Ensure artifacts stored under artifacts/convert/<YYYYMMDD>/smoke-preview-<timestamp>.
+
+Agent: Determine how to run the TinyUtils converter preview smoke now that we have a fresh preview deploy but no PREVIEW_SECRET on hand. Identify where secrets might live (e.g., tinyutils/.env.preview, local .env files, Vercel CLI env pull) and outline the steps to validate fence behavior (401 without secret, success with secret) plus run `node scripts/smoke_convert_preview.mjs` capturing evidence. Note current context: repo root /Users/cav/dev/TinyUtils/tinyutils, branch universal-converter-backend, recent preview URL https://tinyutils-nlkdpr1l0-cavins-projects-7b0e00bb.vercel.app, previous run logs show we lack PREVIEW_SECRET for smoke. Plan should cover: discovering/confirming secret, running fence curl checks, executing smoke script with PREVIEW_URL and artifact paths, updating docs/AGENT_RUN_LOG.md + checklist, handling blockers if secret unavailable.
+[2025-11-10T11:34:47] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-sonictornado-determine-how-run
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: auto
+--------
+[2025-11-10T11:34:47] User instructions:
+Context: Key files: docs/AGENT_RUN_LOG.md records last deploy at 2025-11-10 17:55 CET with preview URL but no smoke evidence. scripts/smoke_convert_preview.mjs expects PREVIEW_URL and optional PREVIEW_FENCE_HEADER/PREVIEW_SECRET. Need to inspect tinyutils/.env.preview or Vercel env via `vercel env pull` to obtain PREVIEW_SECRET. If secret unavailable, note blocker. Ensure artifacts stored under artifacts/convert/<YYYYMMDD>/smoke-preview-<timestamp>.
+
+Agent: Determine how to run the TinyUtils converter preview smoke now that we have a fresh preview deploy but no PREVIEW_SECRET on hand. Identify where secrets might live (e.g., tinyutils/.env.preview, local .env files, Vercel CLI env pull) and outline the steps to validate fence behavior (401 without secret, success with secret) plus run `node scripts/smoke_convert_preview.mjs` capturing evidence. Note current context: repo root /Users/cav/dev/TinyUtils/tinyutils, branch universal-converter-backend, recent preview URL https://tinyutils-nlkdpr1l0-cavins-projects-7b0e00bb.vercel.app, previous run logs show we lack PREVIEW_SECRET for smoke. Plan should cover: discovering/confirming secret, running fence curl checks, executing smoke script with PREVIEW_URL and artifact paths, updating docs/AGENT_RUN_LOG.md + checklist, handling blockers if secret unavailable.
+
+[2025-11-10T11:34:53] thinking
+
+**Assessing read-only environment constraints**
+[2025-11-10T11:34:54] exec bash -lc ls in /Users/cav/.code/working/tinyutils/branches/code-sonictornado-determine-how-run
+[2025-11-10T11:34:54] bash -lc ls succeeded in 95ms:
+PATH
+print1
+tests
+tinyutils
+TinyUtilsCodexContext
+[2025-11-10T11:34:54] tokens used: 5,803
+
+[2025-11-10T11:34:56] thinking
+
+**Exploring tinyutils directory**
+[2025-11-10T11:34:56] exec bash -lc ls in /Users/cav/.code/working/tinyutils/branches/code-sonictornado-determine-how-run/tinyutils
+[2025-11-10T11:34:57] bash -lc ls succeeded in 105ms:
+[2025-11-10T11:34:57] tokens used: 7,008
+
+[2025-11-10T11:34:58] thinking
+
+**Checking for hidden files**
+[2025-11-10T11:34:59] exec bash -lc 'ls -a' in /Users/cav/.code/working/tinyutils/branches/code-sonictornado-determine-how-run/tinyutils
+[2025-11-10T11:34:59] bash -lc 'ls -a' succeeded in 94ms:
+.
+..
+[2025-11-10T11:34:59] tokens used: 7,178
+
+[2025-11-10T11:35:01] thinking
+
+**Checking repository context presence**
+[2025-11-10T11:35:02] exec bash -lc ls in /Users/cav/.code/working/tinyutils/branches/code-sonictornado-determine-how-run/TinyUtilsCodexContext
+[2025-11-10T11:35:02] bash -lc ls succeeded in 97ms:
+finished
+[2025-11-10T11:35:02] tokens used: 7,400
+
+[2025-11-10T11:35:03] thinking
+
+**Checking repo location**
+[2025-11-10T11:35:04] exec bash -lc ls in /Users/cav/.code/working/tinyutils/branches/code-sonictornado-determine-how-run/print1
+[2025-11-10T11:35:04] bash -lc ls exited -1 in 3ms:
+ERROR
+Not a directory (os error 20)
+[2025-11-10T11:35:04] tokens used: 7,839
+
+[2025-11-10T11:35:07] thinking
+
+**Checking repository path accessibility**
+[2025-11-10T11:35:07] exec bash -lc ls in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-10T11:35:07] bash -lc ls succeeded in 90ms:
+__init__.py
+__pycache__
+ads.txt
+ADSENSE_SETUP.md
+AGENTS.md
+api
+artifacts
+CHANGES-v1.3.0-rc2.txt
+CHANGES-v1.3.0-rc3.txt
+config
+convert
+data
+DEPLOY_PRODUCTION_CHECKLIST.md
+docs
+feedback.html
+filters
+fixtures
+guides
+index
+index.html
+[2025-11-10T11:35:07] tokens used: 8,437
+
+[2025-11-10T11:35:10] thinking
+
+**Inspecting test-related docs**
+[2025-11-10T11:35:11] exec bash -lc "sed -n '1,160p' docs/AGENT_RUN_LOG.md" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-10T11:35:11] bash -lc "sed -n '1,160p' docs/AGENT_RUN_LOG.md" succeeded in 105ms:
+# Agent Run Log
+
+## Sessions
+
+### 2025-11-10 17:20 CET - Manual - vercel-runtime-validation
+- **Branch:** `feature/universal-converter-backend`
+- **CWD:** tinyutils
+- **Summary:**
+  - Updated all Python functions in `vercel.json` to `python3.11` runtime; `npx vercel build --yes` still failed because CLI 48.8.2 rejects custom runtimes.
+  - Removed per-function runtime fields and reran the build; local build completed (still warns about defaulting to Python 3.12).
+- **Artifacts:**
+  - Fail (python3.11 attempt): tinyutils/artifacts/convert/20251110/vercel-build-python311-20251110T110202Z/vercel_build.log
+  - Pass (no runtime): tinyutils/artifacts/convert/20251110/vercel-build-noruntime-20251110T110225Z/vercel_build.log
+
+### 2025-11-10 17:24 CET - Manual - vercel-deploy-prebuilt
+- **Branch:** `feature/universal-converter-backend`
+- **CWD:** tinyutils
+- **Summary:** Attempted `npx vercel deploy --prebuilt --yes` with existing `.vercel/output`; upload exceeded the 100 MB file cap (~346 MB bundle) and Vercel aborted before issuing a preview URL.
+- **Artifacts:** tinyutils/artifacts/convert/20251110/vercel-deploy-prebuilt-20251110T110446Z/vercel_deploy.log
+
+[2025-11-10T11:35:11] tokens used: 8,902
+
+[2025-11-10T11:35:14] thinking
+
+**Planning to inspect smoke_convert_preview.mjs**
+[2025-11-10T11:35:15] exec bash -lc "sed -n '1,200p' scripts/smoke_convert_preview.mjs" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-10T11:35:15] bash -lc "sed -n '1,200p' scripts/smoke_convert_preview.mjs" succeeded in 96ms:
+#!/usr/bin/env node
+import { mkdir, writeFile } from 'node:fs/promises';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const previewUrl = process.env.PREVIEW_URL;
+
+if (!previewUrl) {
+  console.error('smoke_convert_preview: PREVIEW_URL not set; skipping.');
+  process.exit(0);
+}
+
+const base = previewUrl.replace(/\/$/, '');
+const endpoint = `${base}/api/convert`;
+
+const now = new Date();
+const fmt = (tz, opts) => new Intl.DateTimeFormat('en-CA', {
+  timeZone: tz,
+  ...opts,
+[2025-11-10T11:35:15] tokens used: 11,938
+
+[2025-11-10T11:35:17] thinking
+
+**Reviewing preview environment variables**
+[2025-11-10T11:35:17] exec bash -lc "sed -n '1,200p' PREVIEW_SMOKE_CHECKLIST.md" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-10T11:35:17] bash -lc "sed -n '1,200p' PREVIEW_SMOKE_CHECKLIST.md" succeeded in 107ms:
+# TinyUtils — Private Preview 7‑Step Smoke
+
+Run these on your **Preview URL** (not public).
+
+1) **Dead Link Finder (/):**
+   - HSTS guard behaves; unsupported schemes skipped; robots‑unknown chip appears on fetch failure.
+   - CSV/JSON contain meta (runTimestamp, mode, etc.).
+
+2) **Sitemap Delta (/tools/sitemap-delta/):**
+   - Two sitemaps ≤2k URLs → Added/Removed/Mapping sensible.
+   - Confidence filters reflow counts; Same‑domain guard ON filters cross‑host; OFF shows them.
+   - `.xml.gz` via sitemap index → either processed or labeled ".gz not supported here".
+   - Exports: nginx/Apache rewrite blocks and 410 CSV sane (trailing slash, index.html, percent‑encoding).
+   - Share‑link restore; malformed hash → defaults + toast.
+
+3) **Wayback Fixer (/tools/wayback-fixer/):**
+   - Demo list → chips (Archived / No snapshot / SPN queued / Errors) match filters; ISO timestamps present.
+   - Window prefs (Any/5y/1y) persist into meta in CSV/JSON.
+   - Verify HEAD ON → 200/OK for good snapshots; forced low timeout shows "Timed out".
+   - SPN ON enqueues ≤10/run; notes show `no_snapshot|spn_queued`.
+[2025-11-10T11:35:17] tokens used: 13,176
+
+[2025-11-10T11:35:20] thinking
+
+**Searching for environment files**
+[2025-11-10T11:35:20] exec bash -lc "rg --files -g '.env*'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-10T11:35:20] bash -lc "rg --files -g '.env*'" succeeded in 113ms:
+.env.local
+.env.preview
+.env.production
+.env.preview.example
+.env.preview.local
+.env
+[2025-11-10T11:35:20] tokens used: 25,050
+
+[2025-11-10T11:35:22] thinking
+
+**Checking environment files**
+[2025-11-10T11:35:23] exec bash -lc 'cat .env.preview' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-10T11:35:23] bash -lc 'cat .env.preview' succeeded in 94ms:
+# Created by Vercel CLI
+BYPASS_TOKEN="a5426296112627424e9f33ecfbeb98323b3b6ea1ca9ca61d\n"
+NX_DAEMON="false"
+PREVIEW_BYPASS_TOKEN="Yno35jZnyMkLBDOG5B_v8_0fNY0noIEn"
+PREVIEW_SECRET="e6bcb14e19a2877a30b0bab299ba236c40708d0b1a3234518ba8ccc56807d715\n"
+TURBO_CACHE="remote:rw"
+TURBO_DOWNLOAD_LOCAL_ENABLED="true"
+TURBO_REMOTE_ONLY="true"
+TURBO_RUN_SUMMARY="true"
+VERCEL="1"
+VERCEL_AUTOMATION_BYPASS_SECRET="EdOM9aDhTRFTL10cznBkkaMXR0ECqkPR"
+VERCEL_ENV="preview"
+VERCEL_GIT_COMMIT_AUTHOR_LOGIN=""
+VERCEL_GIT_COMMIT_AUTHOR_NAME=""
+VERCEL_GIT_COMMIT_MESSAGE=""
+VERCEL_GIT_COMMIT_REF=""
+VERCEL_GIT_COMMIT_SHA=""
+VERCEL_GIT_PREVIOUS_SHA=""
+VERCEL_GIT_PROVIDER=""
+VERCEL_GIT_PULL_REQUEST_ID=""
+[2025-11-10T11:35:23] tokens used: 25,271
+
+[2025-11-10T11:35:29] thinking
+
+**Planning secret retrieval and exposure**
+[2025-11-10T11:35:29] exec bash -lc 'rg -n "PREVIEW_FENCE_HEADER" -n' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-10T11:35:30] bash -lc 'rg -n "PREVIEW_FENCE_HEADER" -n' succeeded in 121ms:
+.env.preview.example:2:# PREVIEW_FENCE_HEADER="x-vercel-protection-bypass: <TOKEN>"
+.env.preview.example:3:# PREVIEW_FENCE_HEADER="Cookie: vercel-protection-bypass=<TOKEN>"
+.env.preview.example:4:# PREVIEW_FENCE_HEADER="Authorization: Basic <base64-credentials>"
+README.md:37:   - Run `node scripts/smoke_convert_preview.mjs` with `PREVIEW_URL`, and (if fenced) a valid bypass header via `PREVIEW_FENCE_HEADER`. Capture the manual 401→200 flow.
+docs/AGENT_RUN_LOG.md:50:  - Convert preview smoke not executed: `scripts/smoke_convert_preview.mjs` requires `PREVIEW_SECRET`/`PREVIEW_FENCE_HEADER`, which aren’t available in this session; noted for follow-up.
+docs/AGENT_RUN_LOG.md:580:  - Need PREVIEW_URL + PREVIEW_FENCE_HEADER + BLOB_READ_WRITE_TOKEN to unblock
+docs/AGENT_RUN_LOG.md:593:  - Need PREVIEW_URL + PREVIEW_FENCE_HEADER + BLOB_READ_WRITE_TOKEN
+docs/AGENT_RUN_LOG.md:670:  - Local smoke replay blocked by missing fence header (401), confirming need for PREVIEW_FENCE_HEADER to reach convert lambda.
+scripts/smoke_convert_preview_latest.sh:70:if [ -z "${PREVIEW_FENCE_HEADER:-}" ] && [ -f "$ART_DIR/preview_fence_header.txt" ]; then
+scripts/smoke_convert_preview_latest.sh:71:  PREVIEW_FENCE_HEADER="$(tr -d '\r\n' <"$ART_DIR/preview_fence_header.txt")"
+scripts/smoke_convert_preview_latest.sh:74:if [ -z "${PREVIEW_FENCE_HEADER:-}" ]; then
+scripts/smoke_convert_preview_latest.sh:76:  MESSAGE="PREVIEW_FENCE_HEADER not provided"
+scripts/smoke_convert_preview_latest.sh:90:if ! CONVERT_SMOKE_ARTIFACTS="$ART_DIR" PREVIEW_URL="$PREVIEW_URL" PREVIEW_FENCE_HEADER="$PREVIEW_FENCE_HEADER" \
+scripts/deploy_and_smoke_convert.sh:55:normalize_secret_vars BYPASS_TOKEN PREVIEW_BYPASS_TOKEN PREVIEW_SECRET PREVIEW_FENCE_HEADER VERCEL_AUTOMATION_BYPASS_SECRET
+scripts/deploy_and_smoke_convert.sh:56:if [[ -n "${PREVIEW_FENCE_HEADER:-}" ]]; then
+scripts/deploy_and_smoke_convert.sh:57:  PREVIEW_HEADERS+=("${PREVIEW_FENCE_HEADER}")
+scripts/deploy_and_smoke_convert.sh:59:unset PREVIEW_FENCE_HEADER
+scripts/deploy_and_smoke_convert.sh:83:PREVIEW_FENCE_HEADER_FILE="${ART_DIR}/preview_fence_header.txt"
+scripts/deploy_and_smoke_convert.sh:315:  rm -f "$PREVIEW_FENCE_HEADER_FILE"
+scripts/deploy_and_smoke_convert.sh:338:      printf 'Cookie: %s' "$signed_cookie" >"$PREVIEW_FENCE_HEADER_FILE"
+[2025-11-10T11:35:30] tokens used: 26,794
+
+[2025-11-10T11:35:32] thinking
+
+**Inspecting environment preview example**
+[2025-11-10T11:35:33] exec bash -lc 'cat .env.preview.example' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-10T11:35:33] bash -lc 'cat .env.preview.example' succeeded in 95ms:
+# Preview protection bypass header (uncomment and fill in one option)
+# PREVIEW_FENCE_HEADER="x-vercel-protection-bypass: <TOKEN>"
+# PREVIEW_FENCE_HEADER="Cookie: vercel-protection-bypass=<TOKEN>"
+# PREVIEW_FENCE_HEADER="Authorization: Basic <base64-credentials>"
+[2025-11-10T11:35:33] tokens used: 27,880
+
+[2025-11-10T11:35:35] thinking
+
+**Investigating environment variable usage**
+[2025-11-10T11:35:36] exec bash -lc 'rg -n "PREVIEW_SECRET" -n' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-10T11:35:36] bash -lc 'rg -n "PREVIEW_SECRET" -n' succeeded in 106ms:
+PREVIEW_SMOKE_CHECKLIST.md:42:- `curl -c cookies.txt "https://tinyutils.net/api/fence?preview_secret=$PREVIEW_SECRET&target=/tools/keyword-density"` sets `tu_preview_secret`.
+AGENTS.md:4:Keep the TinyUtils preview (the auto-generated Vercel preview URL shown after each deploy) green and ready to promote while production (`https://tinyutils.net`) stays stable. Public tools must load without secrets, preview-fenced betas must require `PREVIEW_SECRET`, and all Edge APIs should return valid JSON envelopes with request IDs.
+AGENTS.md:29:  - Required envs: `PREVIEW_SECRET` (fence), `BYPASS_TOKEN` (optional internal bypass), `VERCEL_TOKEN` (CLI if needed), `BLOB_READ_WRITE_TOKEN` (Vercel Blob; serverless only).
+AGENTS.md:52:- [ ] **Preview-fenced betas** (serve 401 until `PREVIEW_SECRET` accepted)
+AGENTS.md:117:- `api/fence.js` expects `PREVIEW_SECRET`. Visitors hit 401 until they present it via `?preview_secret=` or header `x-preview-secret`.
+AGENTS.md:122:- Keep using `PREVIEW_SECRET` for beta fences; converter/find-replace endpoints must accept the fence header/cookie.
+AGENTS.md:128:curl -c cookies.txt "$PREVIEW/api/fence?preview_secret=$PREVIEW_SECRET&target=/tools/keyword-density"
+AGENTS.md:174:- If a tool is in beta, HTML shells at `/tools/convert` and `/tools/find-replace` are gated by `PREVIEW_SECRET` (same fence flow as other betas).
+AGENTS.md:288:- **Current posture:** Preview fence requires `PREVIEW_SECRET`; latest smoke (2025-11-05) is green with stored 401→200 captures.
+docs/AGENT_RUN_LOG.md:50:  - Convert preview smoke not executed: `scripts/smoke_convert_preview.mjs` requires `PREVIEW_SECRET`/`PREVIEW_FENCE_HEADER`, which aren’t available in this session; noted for follow-up.
+docs/AGENT_RUN_LOG.md:694:  - Preview smoke script skipped because `PREVIEW_URL`/`PREVIEW_SECRET` are unset (see log)
+docs/convert_api_contract.md:8:- **Auth:** preview fence (401 until `PREVIEW_SECRET` accepted) still applies to preview deployments.
+docs/AGENT_TASK_CHECKLIST.md:44:- 2025-11-10 17:55 CET - Removed extracted `api/_vendor/pandoc/pandoc`, leaving the `.xz` archive for runtime unpack; prebuilt deploy now succeeds (preview https://tinyutils-nlkdpr1l0-cavins-projects-7b0e00bb.vercel.app). Awaiting PREVIEW_SECRET before running convert smoke.
+artifacts/convert/20251109/smoke-preview-20251109T233819/vercel_pull.log:9:+ PREVIEW_SECRET (Updated)
+artifacts/convert/20251110/smoke-preview-20251110T041449/vercel_pull.log:9:+ PREVIEW_SECRET (Updated)
+artifacts/convert/20251110/smoke-preview-20251110T044617/vercel_pull.log:9:+ PREVIEW_SECRET (Updated)
+api/fence.js:53:    const expectedSecret = (process.env.PREVIEW_SECRET || '').trim();
+api/fence.js:77:        message: 'Preview access required. Provide PREVIEW_SECRET via ?preview_secret=… or header x-preview-secret.',
+artifacts/convert/20251110/smoke-preview-20251110T040111/vercel_pull.log:9:+ PREVIEW_SECRET (Updated)
+README-VERCEL.md:26:- In Vercel → **Settings → Environment Variables**, set `PREVIEW_SECRET` (same value across preview/prod as needed).
+[2025-11-10T11:35:36] tokens used: 28,429
+
+[2025-11-10T11:35:39] thinking
+
+**Examining secret verification scripts**
+[2025-11-10T11:35:39] exec bash -lc "sed -n '1,220p' scripts/deploy_and_smoke_convert.sh" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-10T11:35:40] bash -lc "sed -n '1,220p' scripts/deploy_and_smoke_convert.sh" succeeded in 98ms:
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}" )/.." && pwd)"
+SMOKE_SCRIPT="${ROOT_DIR}/scripts/smoke_convert_preview.mjs"
+SAFEPOINT_SCRIPT="${ROOT_DIR}/scripts/create_safe_point.sh"
+set -a
+[ -f "$ROOT_DIR/.env.preview" ] && . "$ROOT_DIR/.env.preview"
+set +a
+cd "$ROOT_DIR"
+declare -a PREVIEW_HEADERS=()
+strip_secret_var() {
+  local var=$1
+  local value="${!var-}"
+  [[ -z "$value" ]] && return 0
+  value="${value//$'\r'/}"
+  value="${value//$'\n'/}"
+  printf -v "$var" '%s' "$value"
+}
+
+[2025-11-10T11:35:40] tokens used: 30,367
+
+[2025-11-10T11:35:44] thinking
+
+**Searching for smoke test instructions**
+[2025-11-10T11:35:44] exec bash -lc "sed -n '1,200p' README-VERCEL.md" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-10T11:35:45] bash -lc "sed -n '1,200p' README-VERCEL.md" succeeded in 97ms:
+# TinyUtils — Private Preview on Vercel (RC3)
+
+This guide gets a private preview online so you can run the 7‑step smoke before any public launch.
+
+## Option A — Import from GitHub (recommended)
+1. Create a **new GitHub repo** (e.g., `tinyutils`).
+2. Unzip this archive locally and push all files (include the **`/api`** folder at the project root).
+3. In **Vercel** → **Add New… → Project** → Import your GitHub repo.
+4. **Framework Preset:** `Other`
+5. **Build Command:** *leave blank*
+6. **Output Directory:** `/` (project root)
+7. Click **Deploy**. Vercel gives you a **Preview URL** like `<preview-url>`.
+
+## Option B — Upload the ZIP directly
+1. In Vercel → **Add New… → Project** → **Import Third‑Party Git Repository** → **Upload** → choose this ZIP.
+2. Keep **Framework:** `Other`, **Build:** none, **Output:** `/`.
+3. Deploy → get the **Preview URL**.
+
+## What to verify right away
+- `/api/check` responds to POST (Dead Link Finder)
+[2025-11-10T11:35:45] tokens used: 32,829
+
+[2025-11-10T11:35:49] thinking
+
+**Planning verification of artifact fencing**
+[2025-11-10T11:35:49] exec bash -lc 'cat .env.preview.local' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-10T11:35:49] bash -lc 'cat .env.preview.local' succeeded in 97ms:
+PREVIEW_URL="https://tinyutils-gqxyq6cmd-cavins-projects-7b0e00bb.vercel.app"
+PREVIEW_SECRET="e6bcb14e19a2877a30b0bab299ba236c40708d0b1a3234518ba8ccc56807d715"
+PREVIEW_FENCE_HEADER="x-vercel-protection-bypass: EdOM9aDhTRFTL10cznBkkaMXR0ECqkPR
+Cookie: vercel-protection-bypass=a5426296112627424e9f33ecfbeb98323b3b6ea1ca9ca61d"
+PREVIEW_BYPASS_TOKEN="Yno35jZnyMkLBDOG5B_v8_0fNY0noIEn"
+BYPASS_TOKEN="a5426296112627424e9f33ecfbeb98323b3b6ea1ca9ca61d"
+BLOB_READ_WRITE_TOKEN="vercel-blob-local-31f7f4f0f8fdce7a888b83e14134f015bf47ea23fcd4960b"
+VERCEL_BLOB_API_URL="https://api.vercel.com/v2/blob/upload"
+[2025-11-10T11:35:49] tokens used: 34,946
+
+[2025-11-10T11:36:01] thinking
+
+**Planning preview conversion script verification**
+
+I’m outlining a detailed plan to run the preview conversion script by setting the necessary environment variables like PREVIEW_URL and PREVIEW_SECRET, confirming the correct convert path, and verifying fence behavior via HTTP status codes with and without secrets. I’ll include steps to fetch secrets from Vercel if needed, caveat network restrictions, capture evidence logs in timestamped artifact directories, and update relevant documentation after the run. Let’s make sure every part—from cookie handling to header enforcement—is covered for a thorough smoke test!
+[2025-11-10T11:36:02] exec bash -lc "sed -n '1,120p' artifacts/convert/20251110/smoke-preview-20251110T053627/vercel_pull.log" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-10T11:36:03] bash -lc "sed -n '1,120p' artifacts/convert/20251110/smoke-preview-20251110T053627/vercel_pull.log" succeeded in 95ms:
+Vercel CLI 48.8.2
+Retrieving project…
+> Overwriting existing .vercel/.env.preview.local file
+> Downloading `preview` Environment Variables for cavins-projects-7b0e00bb/tinyutils
+Downloading
+
+Changes:
++ BYPASS_TOKEN (Updated)
++ PREVIEW_SECRET (Updated)
++ VERCEL_OIDC_TOKEN (Updated)
+
+Updated .vercel/.env.preview.local file  [234ms]
+
+> Downloading project settings
+Downloaded project settings to ~/dev/TinyUtils/tinyutils/.vercel/project.json [0ms]
+[2025-11-10T11:36:03] tokens used: 36,316
+
+[2025-11-10T11:36:05] thinking
+
+**Checking environment file locations**
+[2025-11-10T11:36:05] exec bash -lc 'ls .vercel' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-10T11:36:05] bash -lc 'ls .vercel' succeeded in 91ms:
+output
+project.json
+python
+README.txt
+[2025-11-10T11:36:05] tokens used: 36,694
+
+[2025-11-10T11:36:09] thinking
+
+**Investigating missing .vercel env file**
+[2025-11-10T11:36:27] exec bash -lc 'ls -a .vercel' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-10T11:36:27] bash -lc 'ls -a .vercel' succeeded in 93ms:
+.
+..
+.env.preview.local
+output
+project.json
+python
+README.txt
+[2025-11-10T11:36:27] tokens used: 36,905
+
+[2025-11-10T11:36:30] thinking
+
+**Inspecting environment file**
+[2025-11-10T11:37:05] exec bash -lc 'cat .vercel/.env.preview.local' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-10T11:37:05] bash -lc 'cat .vercel/.env.preview.local' succeeded in 110ms:
+# Created by Vercel CLI
+BYPASS_TOKEN="a5426296112627424e9f33ecfbeb98323b3b6ea1ca9ca61d\n"
+NX_DAEMON="false"
+PREVIEW_BYPASS_TOKEN="Yno35jZnyMkLBDOG5B_v8_0fNY0noIEn"
+PREVIEW_SECRET="e6bcb14e19a2877a30b0bab299ba236c40708d0b1a3234518ba8ccc56807d715\n"
+TURBO_CACHE="remote:rw"
+TURBO_DOWNLOAD_LOCAL_ENABLED="true"
+TURBO_REMOTE_ONLY="true"
+TURBO_RUN_SUMMARY="true"
+VERCEL="1"
+VERCEL_AUTOMATION_BYPASS_SECRET="EdOM9aDhTRFTL10cznBkkaMXR0ECqkPR"
+VERCEL_ENV="preview"
+VERCEL_GIT_COMMIT_AUTHOR_LOGIN=""
+VERCEL_GIT_COMMIT_AUTHOR_NAME=""
+VERCEL_GIT_COMMIT_MESSAGE=""
+VERCEL_GIT_COMMIT_REF=""
+VERCEL_GIT_COMMIT_SHA=""
+VERCEL_GIT_PREVIOUS_SHA=""
+VERCEL_GIT_PROVIDER=""
+VERCEL_GIT_PULL_REQUEST_ID=""
+[2025-11-10T11:37:05] tokens used: 58,879
+
+[2025-11-10T11:37:14] thinking
+
+**Outlining secret verification and docs update plan**
+
+I’m putting together detailed steps for inspecting the preview secret by checking `tinyutils/.env.preview` and potentially running environment pulls despite network limits. I want to include instructions on handling multi-line headers, running the smoke test script with proper env vars, capturing request logs, and updating relevant docs like `docs/AGENT_RUN_LOG.md` with approximate line references. I also need to cover blockers if the secret’s missing and highlight the environment’s read-only nature, so this plan will mainly guide verification rather than execution.
+[2025-11-10T11:37:16] exec bash -lc "nl -ba docs/AGENT_RUN_LOG.md | sed -n '1,80p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-10T11:37:16] bash -lc "nl -ba docs/AGENT_RUN_LOG.md | sed -n '1,80p'" succeeded in 117ms:
+     1	# Agent Run Log
+     2	
+     3	## Sessions
+     4	
+     5	### 2025-11-10 17:20 CET - Manual - vercel-runtime-validation
+     6	- **Branch:** `feature/universal-converter-backend`
+     7	- **CWD:** tinyutils
+     8	- **Summary:**
+     9	  - Updated all Python functions in `vercel.json` to `python3.11` runtime; `npx vercel build --yes` still failed because CLI 48.8.2 rejects custom runtimes.
+    10	  - Removed per-function runtime fields and reran the build; local build completed (still warns about defaulting to Python 3.12).
+    11	- **Artifacts:**
+    12	  - Fail (python3.11 attempt): tinyutils/artifacts/convert/20251110/vercel-build-python311-20251110T110202Z/vercel_build.log
+    13	  - Pass (no runtime): tinyutils/artifacts/convert/20251110/vercel-build-noruntime-20251110T110225Z/vercel_build.log
+    14	
+    15	### 2025-11-10 17:24 CET - Manual - vercel-deploy-prebuilt
+    16	- **Branch:** `feature/universal-converter-backend`
+    17	- **CWD:** tinyutils
+    18	- **Summary:** Attempted `npx vercel deploy --prebuilt --yes` with existing `.vercel/output`; upload exceeded the 100 MB file cap (~346 MB bundle) and Vercel aborted before issuing a preview URL.
+    19	- **Artifacts:** tinyutils/artifacts/convert/20251110/vercel-deploy-prebuilt-20251110T110446Z/vercel_deploy.log
+    20	
+[2025-11-10T11:37:16] tokens used: 61,016
+
+[2025-11-10T11:37:19] thinking
+
+**Preparing line-numbered script excerpt**
+[2025-11-10T11:37:20] exec bash -lc "nl -ba scripts/smoke_convert_preview.mjs | sed -n '1,200p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-10T11:37:20] bash -lc "nl -ba scripts/smoke_convert_preview.mjs | sed -n '1,200p'" succeeded in 112ms:
+     1	#!/usr/bin/env node
+     2	import { mkdir, writeFile } from 'node:fs/promises';
+     3	import { dirname, join, resolve } from 'node:path';
+     4	import { fileURLToPath } from 'node:url';
+     5	
+     6	const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+     7	const previewUrl = process.env.PREVIEW_URL;
+     8	
+     9	if (!previewUrl) {
+    10	  console.error('smoke_convert_preview: PREVIEW_URL not set; skipping.');
+    11	  process.exit(0);
+    12	}
+    13	
+    14	const base = previewUrl.replace(/\/$/, '');
+    15	const endpoint = `${base}/api/convert`;
+    16	
+    17	const now = new Date();
+    18	const fmt = (tz, opts) => new Intl.DateTimeFormat('en-CA', {
+    19	  timeZone: tz,
+    20	  ...opts,
+[2025-11-10T11:37:20] tokens used: 63,289
+
+[2025-11-10T11:37:23] thinking
+
+**Preparing environment file references**
+[2025-11-10T11:37:24] exec bash -lc "nl -ba .env.preview | sed -n '1,40p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-10T11:37:24] bash -lc "nl -ba .env.preview | sed -n '1,40p'" succeeded in 110ms:
+     1	# Created by Vercel CLI
+     2	BYPASS_TOKEN="a5426296112627424e9f33ecfbeb98323b3b6ea1ca9ca61d\n"
+     3	NX_DAEMON="false"
+     4	PREVIEW_BYPASS_TOKEN="Yno35jZnyMkLBDOG5B_v8_0fNY0noIEn"
+     5	PREVIEW_SECRET="e6bcb14e19a2877a30b0bab299ba236c40708d0b1a3234518ba8ccc56807d715\n"
+     6	TURBO_CACHE="remote:rw"
+     7	TURBO_DOWNLOAD_LOCAL_ENABLED="true"
+     8	TURBO_REMOTE_ONLY="true"
+     9	TURBO_RUN_SUMMARY="true"
+    10	VERCEL="1"
+    11	VERCEL_AUTOMATION_BYPASS_SECRET="EdOM9aDhTRFTL10cznBkkaMXR0ECqkPR"
+    12	VERCEL_ENV="preview"
+    13	VERCEL_GIT_COMMIT_AUTHOR_LOGIN=""
+    14	VERCEL_GIT_COMMIT_AUTHOR_NAME=""
+    15	VERCEL_GIT_COMMIT_MESSAGE=""
+    16	VERCEL_GIT_COMMIT_REF=""
+    17	VERCEL_GIT_COMMIT_SHA=""
+    18	VERCEL_GIT_PREVIOUS_SHA=""
+    19	VERCEL_GIT_PROVIDER=""
+    20	VERCEL_GIT_PULL_REQUEST_ID=""
+[2025-11-10T11:37:24] tokens used: 65,791
+
+[2025-11-10T11:37:27] thinking
+
+**Checking .env.preview.local content**
+[2025-11-10T11:37:27] exec bash -lc "nl -ba .env.preview.local | sed -n '1,80p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-10T11:37:28] bash -lc "nl -ba .env.preview.local | sed -n '1,80p'" succeeded in 113ms:
+     1	PREVIEW_URL="https://tinyutils-gqxyq6cmd-cavins-projects-7b0e00bb.vercel.app"
+     2	PREVIEW_SECRET="e6bcb14e19a2877a30b0bab299ba236c40708d0b1a3234518ba8ccc56807d715"
+     3	PREVIEW_FENCE_HEADER="x-vercel-protection-bypass: EdOM9aDhTRFTL10cznBkkaMXR0ECqkPR
+     4	Cookie: vercel-protection-bypass=a5426296112627424e9f33ecfbeb98323b3b6ea1ca9ca61d"
+     5	PREVIEW_BYPASS_TOKEN="Yno35jZnyMkLBDOG5B_v8_0fNY0noIEn"
+     6	BYPASS_TOKEN="a5426296112627424e9f33ecfbeb98323b3b6ea1ca9ca61d"
+     7	BLOB_READ_WRITE_TOKEN="vercel-blob-local-31f7f4f0f8fdce7a888b83e14134f015bf47ea23fcd4960b"
+     8	VERCEL_BLOB_API_URL="https://api.vercel.com/v2/blob/upload"
+[2025-11-10T11:37:28] tokens used: 67,597
+
+[2025-11-10T11:37:35] thinking
+
+**Outlining preview URL and env var update**
+
+I'm laying out a detailed plan to document the new preview URL and environmental variables, including how to set multi-line vars and verify secret fetching through scripts and logs. I'll also confirm the presence and access gating of the convert preview route, so everything needed for smooth deployment and testing is covered well.
+[2025-11-10T11:37:36] exec bash -lc 'ls tools' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-10T11:37:36] bash -lc 'ls tools' succeeded in 96ms:
+convert
+dead-link-finder
+find-replace
+index.html
+keyword-density.html
+meta-preview.html
+sitemap-delta
+sitemap-generator.html
+wayback-fixer
+[2025-11-10T11:37:36] tokens used: 68,522
+
+[2025-11-10T11:37:48] thinking
+
+**Outlining verification and evidence steps**
+[2025-11-10T11:37:49] exec bash -lc "nl -ba scripts/deploy_and_smoke_convert.sh | sed -n '1,200p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-10T11:37:49] bash -lc "nl -ba scripts/deploy_and_smoke_convert.sh | sed -n '1,200p'" succeeded in 121ms:
+     1	#!/usr/bin/env bash
+     2	set -euo pipefail
+     3	
+     4	ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}" )/.." && pwd)"
+     5	SMOKE_SCRIPT="${ROOT_DIR}/scripts/smoke_convert_preview.mjs"
+     6	SAFEPOINT_SCRIPT="${ROOT_DIR}/scripts/create_safe_point.sh"
+     7	set -a
+     8	[ -f "$ROOT_DIR/.env.preview" ] && . "$ROOT_DIR/.env.preview"
+     9	set +a
+    10	cd "$ROOT_DIR"
+    11	declare -a PREVIEW_HEADERS=()
+    12	strip_secret_var() {
+    13	  local var=$1
+    14	  local value="${!var-}"
+    15	  [[ -z "$value" ]] && return 0
+    16	  value="${value//$'\r'/}"
+    17	  value="${value//$'\n'/}"
+    18	  printf -v "$var" '%s' "$value"
+    19	}
+    20	
+[2025-11-10T11:37:49] tokens used: 69,702
+
+[2025-11-10T11:37:54] thinking
+
+**Summarizing plan and verification points**
+[2025-11-10T11:37:55] exec bash -lc "nl -ba api/fence.js | sed -n '1,200p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-10T11:37:55] bash -lc "nl -ba api/fence.js | sed -n '1,200p'" succeeded in 111ms:
+     1	export const config = { runtime: 'edge' };
+     2	
+     3	const COOKIE_NAME = 'tu_preview_secret';
+     4	const COOKIE_MAX_AGE = 60 * 60 * 24; // 24 hours
+     5	
+     6	function rid() {
+     7	  return Math.random().toString(16).slice(2, 10);
+     8	}
+     9	
+    10	function json(status, body, requestId, extraHeaders = {}) {
+    11	  const headers = new Headers({
+    12	    'content-type': 'application/json; charset=utf-8',
+    13	    'cache-control': 'no-store'
+    14	  });
+    15	  if (requestId) headers.set('x-request-id', requestId);
+    16	  for (const [key, value] of Object.entries(extraHeaders)) {
+    17	    headers.set(key, value);
+    18	  }
+    19	  return new Response(JSON.stringify(body), { status, headers });
+    20	}
+[2025-11-10T11:37:55] tokens used: 73,053
+
+[2025-11-10T11:38:13] thinking
+
+**Summarizing final response structure**
+[2025-11-10T11:38:14] exec bash -lc "nl -ba docs/AGENT_TASK_CHECKLIST.md | sed -n '30,90p'" in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-10T11:38:14] bash -lc "nl -ba docs/AGENT_TASK_CHECKLIST.md | sed -n '30,90p'" succeeded in 115ms:
+    30	| Documentation refresh to align with new tooling (README, README_DEPLOY, TESTING, DEPLOY_PRODUCTION_CHECKLIST) | `rollout-2025-11-04T16-26-36-da356561-8be5-4818-8e6c-7eab8f79a99a` (2025-11-04 15:29 CET) | Completed | manual-2025-11-05T01-33 entry; docs refreshed with PR1–PR4 workflows. Evidence: tinyutils/artifacts/docs-refresh/20251105/. |
+    31	| Keyboard shortcut & a11y compliance fixes in Sitemap Delta / Wayback Fixer | `rollout-2025-11-04T09-42-32-d2d99936-2fbb-46bf-963c-5ba9b250971c` (2025-11-04 08:42 CET) | Completed | Guarded shortcuts from firing while typing; audit logged under tinyutils/artifacts/a11y/20251105/audit.md. |
+    32	
+    33	## Completed Tasks
+    34	
+    35	| Task | Completed On (CET) | Notes / Evidence |
+    36	| --- | --- | --- |
+    37	| FastAPI / blob wiring for converter responses (schema, headers, media zip) | 2025-11-08 16:05 CET | Envelope + Blob uploads finalized; see docs/convert_api_contract.md and artifacts/convert/20251108/final/pnpm-test.log. |
+    38	| Converter library caching + media packaging | 2025-11-08 16:05 CET | `tinyutils/convert/service.py` cache now reusable per-input; media zips + logs covered. Evidence: artifacts/convert/20251108/final/pytest.log. |
+    39	| Converter unit/API tests & fixtures | 2025-11-08 16:05 CET | `tests/convert/*` + `tests/api/test_blob.py` cover cache hits, partial errors, Blob fallback. Evidence: artifacts/convert/20251108/final/*.log. |
+    40	| Move repo auto-backups to `~/dev/TinyBackups` (script defaults, docs, launchd logs) | 2025-11-07 01:35 CET | Evidence: `artifacts/backup-relocation/20251107/`; launchctl bootout/bootstrap/kickstart (macOS Tahoe syntax) applied for backup + restic agents. |
+    41	
+    42	## Plan Updates
+    43	- 2025-11-10 17:20 CET - Runtime validation: python3.11 build still blocked by CLI; keeping runtimes unset until tooling supports them.
+    44	- 2025-11-10 17:55 CET - Removed extracted `api/_vendor/pandoc/pandoc`, leaving the `.xz` archive for runtime unpack; prebuilt deploy now succeeds (preview https://tinyutils-nlkdpr1l0-cavins-projects-7b0e00bb.vercel.app). Awaiting PREVIEW_SECRET before running convert smoke.
+    45	- 2025-11-10 17:05 CET - Logged vercel.json rewrite + roster bench (session vercel-config+roster-maintenance); pending rerun once Vercel supports python3.12 runtimes locally.
+    46	- 2025-11-04 13:47 CET - Preview fence commit omitted deployment evidence; tracked under "Preview fence evidence + smoke".
+    47	- 2025-11-04 13:34 CET - PR1 commit landed without CSP and `/public` cache rule; captured as follow-up in active tasks.
+    48	- 2025-11-04 08:42 CET - Compliance audit flagged keyboard shortcut conflicts; marked "Needs Review" pending verification.
+    49	
+[2025-11-10T11:38:14] tokens used: 76,961
+
+[2025-11-10T11:38:20] thinking
+
+**Organizing final response plan**
+[2025-11-10T11:38:21] codex
+
+**Current State**
+- Latest deploy entry notes the preview URL `https://tinyutils-nlkdpr1l0-cavins-projects-7b0e00bb.vercel.app` is live but convert smoke was skipped for lack of `PREVIEW_SECRET`/`PREVIEW_FENCE_HEADER` evidence (`docs/AGENT_RUN_LOG.md:44`).
+- The active checklist explicitly calls out this missing smoke run, so closing it requires smoke artifacts plus a log update (`docs/AGENT_TASK_CHECKLIST.md:42`).
+
+**Secret Sources**
+- `.env.preview` (checked into the repo) already carries `PREVIEW_SECRET`, `VERCEL_AUTOMATION_BYPASS_SECRET`, and the bypass tokens pulled from Vercel (`.env.preview:2-12`).
+- `.env.preview.local` is the human-edited file that should mirror the current preview URL and includes the multi-line `PREVIEW_FENCE_HEADER` (`.env.preview.local:1-6`). Refresh the `PREVIEW_URL` there or override it at runtime if the URL changed.
+- `vercel env pull --environment=preview .vercel/.env.preview.local` regenerates the automation copy under `.vercel/` (see the previous `vercel_pull.log` in `artifacts/convert/20251110/smoke-preview-20251110T053627/vercel_pull.log:1`); use this if the repo files are stale or if the secret is missing locally.
+- When exporting headers in shells, strip the newline Vercel appends—`scripts/deploy_and_smoke_convert.sh` shows the trimming routine used by automation (`scripts/deploy_and_smoke_convert.sh:12-26`).
+
+**Fence Validation Steps**
+- Prepare environment and artifact path (required layout `artifacts/convert/<YYYYMMDD>/smoke-preview-<timestamp>` is baked into the smoke script, but you can pre-create it for curl captures too):
+  ```bash
+  export PREVIEW_URL="https://tinyutils-nlkdpr1l0-cavins-projects-7b0e00bb.vercel.app"
+  export PREVIEW_SECRET="e6bcb14e19a2877a30b0bab299ba236c40708d0b1a3234518ba8ccc56807d715"
+  export PREVIEW_FENCE_HEADER=$'x-vercel-protection-bypass: EdOM9aDhTRFTL10cznBkkaMXR0ECqkPR\nCookie: vercel-protection-bypass=a5426296112627424e9f33ecfbeb98323b3b6ea1ca9ca61d'
+  UTC_DATE=$(TZ=UTC date +%Y%m%d)
+  MAD_TS=$(TZ=Europe/Madrid date +%Y%m%dT%H%M%S)
+  ART_DIR="artifacts/convert/${UTC_DATE}/smoke-preview-${MAD_TS}"
+  mkdir -p "$ART_DIR"
+  ```
+- Capture the 401 → 200 story for the convert shell (fence logic lives in `api/fence.js:3-105`, so `/api/fence` is the canonical unlock path):
+  ```bash
+  curl -sS -D "$ART_DIR/convert_401.txt" -o /dev/null \
+    "$PREVIEW_URL/tools/convert/"
+  curl -sS -c "$ART_DIR/preview_cookies.txt" \
+    -D "$ART_DIR/fence_setcookie.txt" \
+    "$PREVIEW_URL/api/fence?preview_secret=$PREVIEW_SECRET&target=/tools/convert"
+  curl -sS -b "$ART_DIR/preview_cookies.txt" \
+    -D "$ART_DIR/convert_200.txt" -o /dev/null \
+    "$PREVIEW_URL/tools/convert/"
+  ```
+- Repeat the same pattern for the API endpoint if you want explicit evidence that `/api/convert` rejects requests without the fence header and succeeds once `PREVIEW_FENCE_HEADER` is supplied (store as `api_convert_401.txt` / `api_convert_200.txt` in the same directory).
+
+**Smoke Script Run**
+- The smoke script reads `PREVIEW_URL`, `PREVIEW_FENCE_HEADER`, and writes artifacts into the same directory (see `scripts/smoke_convert_preview.mjs:7-111`). Run it with the prepared env so the artifacts for curl + smoke co-exist:
+  ```bash
+  CONVERT_SMOKE_ARTIFACTS="$ART_DIR" \
+  PREVIEW_URL="$PREVIEW_URL" \
+  PREVIEW_FENCE_HEADER="$PREVIEW_FENCE_HEADER" \
+  node scripts/smoke_convert_preview.mjs | tee "$ART_DIR/smoke.log"
+  ```
+- Expected outputs: `resp_md_md_txt.json`, `resp_md_html.json`, and the console log `smoke_convert_preview: artifacts stored in …`. Failures set a non-zero exit code—if that happens, keep the `resp_*.json` payloads as failure evidence.
+- After the run, stash `preview_fence_header.txt` (optional) and an `ls -R` snapshot or checksum file in the same directory for traceability.
+
+**Docs & Blockers**
+- Once evidence exists, append a new session to `docs/AGENT_RUN_LOG.md` summarizing the smoke, referencing the artifact directory, and log the 401→200 captures. Also flip the relevant note in `docs/AGENT_TASK_CHECKLIST.md` from “Awaiting PREVIEW_SECRET” to “Completed” with the same artifact pointer.
+- If neither `.env.preview` nor `.env.preview.local` contains a usable secret and `vercel env pull` is blocked (e.g., no Vercel credentials/network), record that as the blocker: no fence secret means `/api/fence` will keep returning `preview_required`, so curls and the smoke script will keep failing with 401.
+
+Next steps:
+1. Run `vercel env pull --environment=preview` (if needed) to refresh secrets, then set the exports above.
+2. Capture the 401/200 curl evidence plus logs in the dated `artifacts/convert/…` directory and run `node scripts/smoke_convert_preview.mjs`.
+3. Update `docs/AGENT_RUN_LOG.md` and `docs/AGENT_TASK_CHECKLIST.md` to reflect the completed smoke, citing the artifact folder.
+[2025-11-10T11:38:33] tokens used: 117,154

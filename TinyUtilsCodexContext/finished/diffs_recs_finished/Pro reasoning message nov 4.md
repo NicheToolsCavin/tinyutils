@@ -28,7 +28,7 @@ Cavin — dropping in with the full audit, concrete fixes, and PR‑ready patche
 - **Acceptance**:
 
   ```bash
-  curl -isX POST https://tinyutils-eight.vercel.app/api/check -H 'content-type: application/json' \
+  curl -isX POST https://tinyutils.net/api/check -H 'content-type: application/json' \
     -d '{"mode":"list","urls":["https://example.com"]}' | grep -i '^cache-control:'
   # expected: cache-control: no-store
   ```
@@ -65,7 +65,7 @@ Cavin — dropping in with the full audit, concrete fixes, and PR‑ready patche
 - **Acceptance**:
 
   ```bash
-  curl -Is https://tinyutils-eight.vercel.app/ | egrep -i 'content-security-policy|strict-transport-security|x-frame-options'
+  curl -Is https://tinyutils.net/ | egrep -i 'content-security-policy|strict-transport-security|x-frame-options'
   ```
 
 1. **Preview fence missing for half‑working tools (prod)**
@@ -87,11 +87,11 @@ Cavin — dropping in with the full audit, concrete fixes, and PR‑ready patche
 
   ```bash
   # 401 when secret absent
-  curl -is https://tinyutils-eight.vercel.app/tools/keyword-density/ | head -n 20
+  curl -is https://tinyutils.net/tools/keyword-density/ | head -n 20
   # Now allow with query (sets cookie for 24h)
-  curl -is "https://tinyutils-eight.vercel.app/tools/keyword-density/?preview_secret=$PREVIEW_SECRET" | head -n 20
+  curl -is "https://tinyutils.net/tools/keyword-density/?preview_secret=$PREVIEW_SECRET" | head -n 20
   # or allow with header
-  curl -is https://tinyutils-eight.vercel.app/tools/keyword-density/ -H "x-preview-secret: $PREVIEW_SECRET" | head -n 20
+  curl -is https://tinyutils.net/tools/keyword-density/ -H "x-preview-secret: $PREVIEW_SECRET" | head -n 20
   ```
 
 ------
@@ -134,7 +134,7 @@ Cavin — dropping in with the full audit, concrete fixes, and PR‑ready patche
 - **Acceptance**:
 
   ```bash
-  curl -Is https://tinyutils-eight.vercel.app/public/styles.css | grep -i cache-control
+  curl -Is https://tinyutils.net/public/styles.css | grep -i cache-control
   ```
 
 ------
@@ -203,7 +203,7 @@ Smokes (prod/preview):
 
 ```bash
 # Provided already in repo:
-export TINYUTILS_BASE="https://tinyutils-eight.vercel.app"
+export TINYUTILS_BASE="https://tinyutils.net"
 pnpm smoke:extras
 
 # Preview smoke (CI or local)
@@ -225,7 +225,7 @@ Artifacts: UI smokes (Tiny‑Reactive) already wired (`ui:smoke:dlf`, `ui:smoke:
 **Preview vs Prod smokes**
 
 - **Preview**: Set `PREVIEW_URL` → `npm run smoke:preview`.
-- **Prod**: `pnpm smoke:extras` uses `TINYUTILS_BASE` (defaults to tinyutils‑eight.vercel.app).
+- **Prod**: `pnpm smoke:extras` uses `TINYUTILS_BASE` (defaults to https://tinyutils.net).
 
 **Gated routes (after PR1+PR3)**
 
@@ -379,7 +379,7 @@ npm i
 npm test
 
 # Optional: smokes
-export TINYUTILS_BASE="https://tinyutils-eight.vercel.app"
+export TINYUTILS_BASE="https://tinyutils.net"
 pnpm smoke:extras
 ```
 

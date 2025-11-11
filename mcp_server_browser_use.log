@@ -1,0 +1,7 @@
+2025-11-07 21:43:52,508 - root - INFO - Anonymized telemetry enabled. See https://docs.browser-use.com/development/telemetry for more information.
+2025-11-07 21:44:56,674 - mcp.server.lowlevel.server - ERROR - Received exception from stream: 1 validation error for JSONRPCMessage
+  Invalid JSON: EOF while parsing a value at line 2 column 0 [type=json_invalid, input_value='\n', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.12/v/json_invalid
+2025-11-07 21:44:58,153 - mcp.server.lowlevel.server - ERROR - Received exception from stream: 1 validation error for JSONRPCMessage
+  Invalid JSON: EOF while parsing a value at line 2 column 0 [type=json_invalid, input_value='\n', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.12/v/json_invalid

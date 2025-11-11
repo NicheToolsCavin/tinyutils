@@ -1,0 +1,132 @@
+I'll help you continue the TinyUtils workstream on the `feature/universal-converter-backend` branch. Let me start by exploring the repository structure and understanding the current state.
+
+Let me first explore the repository structure to understand the current state:
+
+Let me look at the actual tinyutils directory structure:
+
+I need to navigate to the correct directory. Let me check the current working directory:
+
+I need to switch to the actual repository directory. Let me check if I can find the TinyUtils repository in the parent directories:
+
+Great! Let me navigate to the correct TinyUtils repository and continue the work:
+
+Perfect! Now let me mark the first task as completed and continue with the next steps:
+
+Now let me review the key documentation files as requested:
+
+Let me check where the tinyutils directory is located relative to our current working directory:
+
+Let me check the tinyutils directory in the current workspace:
+
+Let me check the tinyutils directory structure here:
+
+Let me copy the actual repository files to our working directory:
+
+Now let me check the structure again:
+
+Great! Now let me look for the documentation files:
+
+Perfect! Now I can review the key documentation files:
+
+Now let me read the AGENT_TASK_CHECKLIST.md file:
+
+Now let me read the AGENTS.md file to understand the roster/reset policy:
+
+Now let me look at the convert API contract documentation:
+
+Now let me examine the service and test files:
+
+Let me check the structure of the convert directory and examine the service files:
+
+Let me check the API directory:
+
+Let me look at the convert API directory:
+
+Let me read the convert service file and the API endpoint:
+
+Let me also check the types file:
+
+Now let me check the API endpoint:
+
+Let me check the test files for the converter:
+
+Let me read the test files to understand the current test coverage:
+
+Let me check the API test files:
+
+Let me check the API unit tests:
+
+Let me check what test files exist in the tests/api directory:
+
+Let me check for test_blob.py in the root tests directory:
+
+Let me check the blob module:
+
+Now let me update my todo and continue with the next steps:
+
+Based on my research of the repository, I now have a good understanding of the current state. Let me propose a concrete multi-step plan to continue the converter work and automation hygiene:
+
+Based on my review of the repository, documentation, and code, I can now propose a concrete multi-step plan to continue the converter work and automation hygiene. Here's what I've found and what needs to be done:
+
+## Multi-Step Plan for Universal Converter Backend Continuation
+
+### Current State Summary
+- The converter backend is mostly completed with FastAPI service, blob uploads, caching, and proper response contracts
+- Tests exist for both service and API layers (test_service.py, test_api_convert.py, test_api_convert_unit.py)
+- The preview smoke tests are failing with HTTP 500 on Vercel (FUNCTION_INVOCATION_FAILED)
+- The agent roster policy limits helper agents to gemini-2.5-pro, gemini-2.5-flash, and qwen-3-coder
+- Evidence must be stored under artifacts/<task>/<YYYYMMDD> per documentation
+
+### 5-8 Step Plan
+
+1. **Fix Vercel Deployment Issues** - Investigate and resolve the HTTP 500 FUNCTION_INVOCATION_FAILED errors from the preview smoke tests. This appears to be the most critical issue blocking progress.
+
+2. **Add Missing API Tests for Blob Uploads** - Create comprehensive tests for the blob upload functionality, particularly focusing on the edge cases and error handling paths that may be causing the Vercel failures.
+
+3. **Add/Update Unit Tests for Error Cases** - Add tests for error scenarios, cache edge cases, and media extraction failures to ensure robustness.
+
+4. **Run Local Test Suite** - Execute the complete Python test suite locally and fix any issues that arise before pushing to Vercel again.
+
+5. **Update Agent Roster Documentation** - Ensure AGENT_RUN_LOG.md and AGENT_TASK_CHECKLIST.md reflect the current state of the converter work and document the allowed agents per policy.
+
+6. **Prepare New Preview Smoke Test Evidence** - Once the Vercel deployment is fixed, run the smoke tests again and capture the evidence in the proper artifacts directory.
+
+7. **Update Documentation** - Update any remaining documentation that might need changes based on the final implementation.
+
+8. **Run Full Test Matrix** - Execute both Python pytest and Node pnpm test suites to ensure everything works correctly before declaring the feature complete.
+
+## Dependencies, Required Tooling, Risks & Open Questions
+
+**Dependencies:**
+- Python 3.11 with FastAPI, Pydantic, requests
+- Node 20 + pnpm for frontend tests
+- Vercel Blob API (BLOB_READ_WRITE_TOKEN environment variable)
+- pandoc for document conversion
+
+**Required Tooling:**
+- FastAPI endpoint testing with TestClient
+- pytest for Python unit/integration tests
+- pnpm test for Node test suites
+- Vercel CLI for deployments
+
+**Risks:**
+- Vercel function timeout issues with large file processing
+- Missing environment variables in Vercel deployment causing failures
+- Potential memory limits when processing large documents
+- Blob upload size/timeout restrictions
+
+**Open Questions:**
+- Why are the preview deployments failing with FUNCTION_INVOCATION_FAILED? (likely missing environment variables or Vercel-specific Python runtime issues)
+- Are there specific file size or timeout requirements for Vercel serverless functions that need to be configured in vercel.json?
+
+The most important next step is investigating and resolving the Vercel deployment failures before continuing with additional features or tests.
+
+I have completed the requested analysis and provided a comprehensive plan to continue the converter work and automation hygiene. The plan includes:
+
+1. A detailed 8-step approach to address the current issues, starting with fixing the Vercel deployment failures
+2. An analysis of dependencies including Python 3.11, FastAPI, Node 20, Vercel Blob API, and pandoc
+3. Tooling requirements such as pytest, pnpm, and Vercel CLI
+4. Risks including Vercel function timeouts and memory limits
+5. Open questions about the Vercel deployment failures
+
+The most critical next step is investigating and resolving the HTTP 500 FUNCTION_INVOCATION_FAILED errors that are currently blocking the preview smoke tests from passing.

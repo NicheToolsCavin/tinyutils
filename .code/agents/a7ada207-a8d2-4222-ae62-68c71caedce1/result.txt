@@ -1,0 +1,47 @@
+I'll help you draft a short verification checklist for the preview smoke rerun. Let me first understand the context better by looking at the current repository structure and any existing code that might be related to this functionality.
+
+Let me check the actual TinyUtils repository that was mentioned in the context to understand the codebase better:
+
+Now let me check the tinyutils directory to understand the codebase:
+
+I need to navigate to the correct repository directory first. Let me switch to the TinyUtils directory:
+
+Let me explore the TinyUtils repository structure and create a verification checklist for the preview smoke rerun. First, I'll look at the project structure:
+
+I see the issue. I can only work within the workspace directory for this session. Let me check what files are available in the workspace directory and see if there's any relevant information about the smoke tests:
+
+Let me explore the tinyutils directory within the workspace to understand the project:
+
+Let me check the tests directory to see if there's any relevant information about smoke tests:
+
+Let me check the test results file and conftest.py to understand the testing setup:
+
+Let me also check the conftest.py file:
+
+Now let me check what's in the convert subdirectory in tests as this might be related to pandoc:
+
+Let me examine the API convert test files as they might provide insight into the pandoc functionality:
+
+Let me also check the unit tests to understand the expected behavior better:
+
+Let me also look at the service tests:
+
+Let me also look for any configuration files or source code that might provide more context about the API. Let me check if there's an API directory:
+
+Let me search more broadly for API-related files:
+
+Let me check the tinyutils directory structure more carefully:
+
+It seems the tinyutils directory is empty in this workspace. Based on the information I gathered from the test files, I can now draft a verification checklist for the preview smoke rerun. Let me create a comprehensive checklist based on the context provided:
+
+Perfect! I've created a comprehensive verification checklist for the preview smoke rerun based on the context provided. The checklist covers all the key aspects you requested:
+
+1. **Headers to Send** - Including standard headers and bypass headers for direct function access
+2. **Expected Status Codes** - Including what to expect if pandoc fails
+3. **Artifacts to Capture** - Response JSON, headers, HAR files, and streamed logs
+4. **Success Criteria** - Clear distinction between reaching the function vs being fenced
+5. **Validation Guidance** - For making logs actionable
+
+The checklist is based on the information from the test results file and the test files that showed the structure of the conversion API. It provides detailed guidance for when secrets exist and you replay the smoke tests, ensuring that logs are actionable and validation is thorough.
+
+The checklist is structured to help validate the service after the secrets are available, with specific attention to the pandoc conversion functionality that appears to be part of the TinyUtils service.

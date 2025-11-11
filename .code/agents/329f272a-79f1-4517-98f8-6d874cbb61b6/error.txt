@@ -1,0 +1,5 @@
+Command failed: YOLO mode is enabled. All tool calls will be automatically approved.
+Error when talking to Gemini API Full report available at: /var/folders/96/y6nc0x193yd217b9v7cl5qb80000gp/T/gemini-client-error-Turn.run-sendMessageStream-2025-11-08T18-02-47-540Z.json
+[API Error: You have exhausted your daily quota on this model.]
+An unexpected critical error occurred:
+[object Object]

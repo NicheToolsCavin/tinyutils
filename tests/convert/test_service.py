@@ -6,7 +6,21 @@ from pathlib import Path
 import pytest
 
 from tinyutils.convert import ConversionOptions, convert_batch, convert_one
-from tinyutils.convert.types import InputPayload
+from tinyutils.convert.types import (
+    ConversionError,
+    ConversionResult,
+    InputPayload,
+    TargetArtifact,
+)
+
+
+@pytest.fixture(autouse=True)
+def clear_cache(monkeypatch):
+    import tinyutils.convert.service as service_module
+
+    with service_module._CACHE_LOCK:
+        service_module._CACHE.clear()
+    yield
 
 
 @pytest.fixture(autouse=True)
@@ -36,6 +50,7 @@ def stub_pandoc(monkeypatch, tmp_path):
 
     monkeypatch.setattr(pandoc_runner, "convert_to_markdown", fake_convert_to_markdown)
     monkeypatch.setattr(pandoc_runner, "apply_lua_filters", fake_apply_lua_filters)
+    monkeypatch.setattr(pandoc_runner, "ensure_pandoc", lambda: None)
 
     def fake_render_markdown_target(cleaned_path: Path, target: str) -> bytes:
         text = cleaned_path.read_text("utf-8")
@@ -99,3 +114,112 @@ def test_convert_batch_aggregates_results(monkeypatch):
     assert any("first.docx" in log for log in batch.logs)
     first = batch.results[0]
     assert [artifact.target for artifact in first.outputs] == ["md", "txt"]
+
+
+def test_convert_one_cache_hit(monkeypatch):
+    call_count = {"convert": 0}
+
+    def counting_convert(source: Path, destination: Path, **kwargs):  # type: ignore[override]
+        call_count["convert"] += 1
+        destination.write_text(Path(source).read_text("utf-8"), "utf-8")
+        extract_media_dir = kwargs.get("extract_media_dir")
+        if extract_media_dir:
+            extract_media_dir.mkdir(parents=True, exist_ok=True)
+            sample = extract_media_dir / "media" / "image.png"
+            sample.parent.mkdir(parents=True, exist_ok=True)
+            sample.write_bytes(b"png")
+
+    from tinyutils.api._lib import pandoc_runner
+
+    monkeypatch.setattr(pandoc_runner, "convert_to_markdown", counting_convert)
+
+    payload = b"# Cached"
+    first = convert_one(input_bytes=payload, name="cached.docx", targets=["md", "txt"])
+    second = convert_one(input_bytes=payload, name="cached.docx", targets=["md", "txt"])
+
+    assert call_count["convert"] == 1
+    assert second.logs[-1] == "cache=hit"
+
+
+def test_convert_one_cache_miss_for_different_targets(monkeypatch):
+    call_count = {"convert": 0}
+
+    def counting_convert(source: Path, destination: Path, **kwargs):  # type: ignore[override]
+        call_count["convert"] += 1
+        destination.write_text(Path(source).read_text("utf-8"), "utf-8")
+
+    from tinyutils.api._lib import pandoc_runner
+
+    monkeypatch.setattr(pandoc_runner, "convert_to_markdown", counting_convert)
+
+    payload = b"# Cached"
+    convert_one(input_bytes=payload, name="cached.docx", targets=["md"])
+    convert_one(input_bytes=payload, name="cached.docx", targets=["md", "html"])
+
+    assert call_count["convert"] == 2
+
+
+def test_convert_batch_reuses_cache_with_duplicate_inputs(monkeypatch):
+    from tinyutils.api._lib import pandoc_runner
+
+    call_count = {"convert": 0}
+
+    def counting_convert(source: Path, destination: Path, **kwargs):  # type: ignore[override]
+        call_count["convert"] += 1
+        destination.write_text(Path(source).read_text("utf-8"), "utf-8")
+
+    monkeypatch.setattr(pandoc_runner, "convert_to_markdown", counting_convert)
+
+    payloads = [
+        InputPayload(name="dup.docx", data=b"cache me"),
+        InputPayload(name="dup.docx", data=b"cache me"),
+    ]
+
+    convert_batch(inputs=payloads, targets=["md", "txt"])
+
+    assert call_count["convert"] == 1
+
+
+def test_convert_one_handles_missing_pandoc(monkeypatch):
+    from tinyutils.api._lib import pandoc_runner
+
+    def raise_pandoc():
+        raise pandoc_runner.PandocError("not installed")
+
+    monkeypatch.setattr(pandoc_runner, "ensure_pandoc", raise_pandoc)
+
+    result = convert_one(input_bytes=b"Hello", name="missing.docx", targets=["md", "txt"])
+
+    assert result.error is None
+    assert [artifact.target for artifact in result.outputs] == ["md", "txt"]
+    assert any(log.startswith("pandoc_unavailable=") for log in result.logs)
+
+
+def test_convert_batch_collects_errors(monkeypatch):
+    def fake_convert_one(**kwargs):
+        name = kwargs.get("name")
+        if name == "bad.docx":
+            return ConversionResult(
+                name=name,
+                outputs=[],
+                logs=["failed"],
+                error=ConversionError(message="boom", kind="RuntimeError"),
+            )
+        return ConversionResult(
+            name=name,
+            outputs=[TargetArtifact("md", f"{name}.md", "text/markdown", b"good")],
+            logs=["ok"],
+        )
+
+    monkeypatch.setattr("tinyutils.convert.service.convert_one", fake_convert_one)
+
+    payloads = [
+        InputPayload(name="good.docx", data=b"good"),
+        InputPayload(name="bad.docx", data=b"bad"),
+    ]
+
+    batch = convert_batch(inputs=payloads, targets=["md"])
+
+    assert batch.errors[0].message == "boom"
+    assert any(log.endswith("ok") for log in batch.logs)
+    assert "bad.docx:failed" in batch.logs

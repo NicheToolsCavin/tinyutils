@@ -1,0 +1,3 @@
+The files `tinyutils/api/_lib/blob.py` and `tinyutils/api/convert/index.py` (and even the `tinyutils/api/` directory) do not appear to exist in the current project structure. The `tinyutils/` directory is empty.
+
+Could you please verify the correct paths and filenames for `blob.py` and `index.py`? This information is crucial for me to proceed with the task.

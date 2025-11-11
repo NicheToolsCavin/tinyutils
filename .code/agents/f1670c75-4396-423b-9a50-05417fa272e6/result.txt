@@ -1,0 +1,11 @@
+I am unable to locate the necessary files to complete your request within the current working directory: `/Users/cav/.code/working/tinyutils/branches/code-gemini-2-5-flash-tinyutils-universal-converter/`.
+
+Specifically, I could not find:
+*   `AGENTS.md`, `docs/AGENT_RUN_LOG.md`, `docs/AGENT_TASK_CHECKLIST.md`
+*   `vercel_problems_nov_7.md`, `vercel_build.log`, `artifacts/convert/20251107/*`
+*   `api/convert/index.py`, `convert/service.py`, `docs/convert_api_contract.md`
+*   `scripts/log_run_entry.py`, `scripts/add_task_checklist_entry.py`
+
+The `tinyutils/` directory within the current working directory appears to be empty, and the `tests/convert/` directory exists, but the corresponding source files (`api/convert/index.py`, `convert/service.py`) are missing.
+
+To proceed, please ensure that all relevant files are present in the current working directory or provide the correct absolute path to the project root where these files can be accessed.

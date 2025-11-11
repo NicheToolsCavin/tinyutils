@@ -1,0 +1,492 @@
+[2025-11-08T11:10:16] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/dev/TinyUtils
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: auto
+--------
+[2025-11-08T11:10:16] User instructions:
+Context: Repo root /Users/cav/dev/TinyUtils, branch universal-converter-backend. Preview deployment succeeded moments ago. Need to finish smoke_convert_preview, archive artifacts, update docs/AGENT_RUN_LOG.md.
+
+Agent: Review the current TinyUtils state (recent preview deploy at https://tinyutils-dond63lpw-cavins-projects-7b0e00bb.vercel.app) and outline the concrete steps still needed to finish the converter preview smoke + log updates. Highlight required env vars and scripts to run.
+
+Files to consider: tinyutils/scripts, tinyutils/docs, tinyutils/artifacts, tinyutils/tests
+
+[Running in read-only mode - no modifications allowed]
+[2025-11-08T11:10:19] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/dev/TinyUtils
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: auto
+--------
+[2025-11-08T11:10:19] User instructions:
+Context: Repo root /Users/cav/dev/TinyUtils, branch universal-converter-backend. Preview deployment succeeded moments ago. Need to finish smoke_convert_preview, archive artifacts, update docs/AGENT_RUN_LOG.md.
+
+Agent: Review the current TinyUtils state (recent preview deploy at https://tinyutils-dond63lpw-cavins-projects-7b0e00bb.vercel.app) and outline the concrete steps still needed to finish the converter preview smoke + log updates. Highlight required env vars and scripts to run.
+
+Files to consider: tinyutils/scripts, tinyutils/docs, tinyutils/artifacts, tinyutils/tests
+
+[Running in read-only mode - no modifications allowed]
+
+[2025-11-08T11:10:21] thinking
+
+**Gathering task context**
+[2025-11-08T11:10:21] exec /bin/bash -lc ls in /Users/cav/dev/TinyUtils
+[2025-11-08T11:10:21] /bin/bash -lc ls succeeded in 103ms:
+mcp_server_browser_use.log
+PATH
+print1
+tests
+tinyutils
+TinyUtilsCodexContext
+vercel_problem.log
+vercel_problems_nov_7.md
+[2025-11-08T11:10:21] tokens used: 6,664
+
+[2025-11-08T11:10:23] thinking
+
+**Inspecting utility directories and docs**
+[2025-11-08T11:10:23] exec /bin/bash -lc "sed -n '1,160p' tinyutils/docs/AGENT_RUN_LOG.md" in /Users/cav/dev/TinyUtils
+[2025-11-08T11:10:23] /bin/bash -lc "sed -n '1,160p' tinyutils/docs/AGENT_RUN_LOG.md" succeeded in 96ms:
+# Agent Run Log
+
+## Sessions
+
+### 2025-11-08 16:12 CET - manual - converter backend wrap-up
+- **Mode:** manual
+- **Branch:** `feature/universal-converter-backend`
+- **CWD:** repo root
+- **Summary:**
+  - Finalized converter docs (checklist + docs/convert_api_contract.md) and Blob-backed response behaviors
+  - Reran Python + Node suites with cache/Blob coverage; stored logs under `artifacts/convert/20251108/final/`
+  - Preview smoke script skipped because `PREVIEW_URL`/`PREVIEW_SECRET` are unset (see log)
+- **Evidence:**
+  - `artifacts/convert/20251108/final/pytest.log`
+  - `artifacts/convert/20251108/final/pnpm-test.log`
+  - `artifacts/convert/20251108/final/smoke_convert_preview.log`
+- **Follow-ups:** When preview credentials are available, rerun `scripts/smoke_convert_preview.mjs` to capture gated evidence.
+
+### 2025-11-08 01:17 CET - Auto - deploy_and_smoke_convert
+- **Status:** smoke_failed
+[2025-11-08T11:10:23] tokens used: 6,916
+
+[2025-11-08T11:10:25] thinking
+
+**Preparing to finalize smoke conversion**
+[2025-11-08T11:10:26] exec /bin/bash -lc 'ls tinyutils/scripts' in /Users/cav/dev/TinyUtils
+[2025-11-08T11:10:26] /bin/bash -lc 'ls tinyutils/scripts' succeeded in 98ms:
+add_task_checklist_entry.py
+backup_repo.sh
+consent.js
+deploy_and_smoke_convert.sh
+deploy_and_smoke_preview.sh
+deploy_preview.sh
+log_run_entry.py
+preview_smoke.mjs
+smoke_convert_preview_latest.sh
+smoke_convert_preview.mjs
+smoke_dlf_extras.sh
+smoke_dlf_local.mjs
+smoke_dlf_preview.mjs
+test_edge_handlers.mjs
+ui_smoke_dlf.mjs
+ui_smoke_sitemap.mjs
+ui_smoke_wayback.mjs
+vercel_check.sh
+[2025-11-08T11:10:26] tokens used: 9,105
+
+[2025-11-08T11:10:27] thinking
+
+**Checking script requirements**
+[2025-11-08T11:10:28] exec /bin/bash -lc "sed -n '1,200p' tinyutils/scripts/smoke_convert_preview.mjs" in /Users/cav/dev/TinyUtils
+[2025-11-08T11:10:28] /bin/bash -lc "sed -n '1,200p' tinyutils/scripts/smoke_convert_preview.mjs" succeeded in 103ms:
+#!/usr/bin/env node
+import { mkdir, writeFile } from 'node:fs/promises';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const previewUrl = process.env.PREVIEW_URL;
+
+if (!previewUrl) {
+  console.error('smoke_convert_preview: PREVIEW_URL not set; skipping.');
+  process.exit(0);
+}
+
+const base = previewUrl.replace(/\/$/, '');
+const endpoint = `${base}/api/convert`;
+
+const now = new Date();
+const fmt = (tz, opts) => new Intl.DateTimeFormat('en-CA', {
+  timeZone: tz,
+  ...opts,
+[2025-11-08T11:10:28] tokens used: 9,367
+
+[2025-11-08T11:10:29] thinking
+
+**Reviewing environment variables and related scripts**
+[2025-11-08T11:10:30] exec /bin/bash -lc "sed -n '1,200p' tinyutils/scripts/smoke_convert_preview_latest.sh" in /Users/cav/dev/TinyUtils
+[2025-11-08T11:10:30] /bin/bash -lc "sed -n '1,200p' tinyutils/scripts/smoke_convert_preview_latest.sh" succeeded in 97ms:
+#!/usr/bin/env sh
+set -eu
+
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+ART_ROOT="$ROOT_DIR/artifacts/convert"
+SMOKE_SCRIPT="$ROOT_DIR/scripts/smoke_convert_preview.mjs"
+STATUS="pending"
+MESSAGE="initialized"
+
+find_latest_artifacts() {
+  find "$ART_ROOT" -maxdepth 2 -type d -name 'smoke-preview-*' -print 2>/dev/null | sort | tail -n 1
+}
+
+write_status() {
+  SMOKE_ONLY_STATUS_FILE="$ART_DIR/smoke_only_status.txt"
+  TS="$(TZ=Europe/Madrid date '+%Y-%m-%d %H:%M:%S %Z')"
+  {
+    printf 'timestamp=%s\n' "$TS"
+    printf 'status=%s\n' "$STATUS"
+    printf 'message=%s\n' "$MESSAGE"
+[2025-11-08T11:10:30] tokens used: 10,630
+
+[2025-11-08T11:10:32] thinking
+
+**Preparing deployment script overview**
+[2025-11-08T11:10:32] exec /bin/bash -lc 'ls tinyutils/artifacts' in /Users/cav/dev/TinyUtils
+[2025-11-08T11:10:32] /bin/bash -lc 'ls tinyutils/artifacts' succeeded in 105ms:
+a11y
+audit
+backup-relocation
+convert
+docs-refresh
+phase2-roster
+pr1-security-cache
+pr2-ux-noindex-debug
+pr3-fence
+pr4-tests
+[2025-11-08T11:10:32] tokens used: 11,763
+
+[2025-11-08T11:10:33] thinking
+
+**Converting subscription list**
+[2025-11-08T11:10:34] exec /bin/bash -lc 'ls tinyutils/artifacts/convert' in /Users/cav/dev/TinyUtils
+[2025-11-08T11:10:34] /bin/bash -lc 'ls tinyutils/artifacts/convert' succeeded in 97ms:
+20251107
+20251108
+[2025-11-08T11:10:34] tokens used: 11,997
+
+[2025-11-08T11:10:35] thinking
+
+**Inspecting latest directories**
+[2025-11-08T11:10:36] exec /bin/bash -lc 'ls tinyutils/artifacts/convert/20251108' in /Users/cav/dev/TinyUtils
+[2025-11-08T11:10:36] /bin/bash -lc 'ls tinyutils/artifacts/convert/20251108' succeeded in 102ms:
+final
+smoke-preview-20251108T010018
+smoke-preview-20251108T010413
+smoke-preview-20251108T010544
+smoke-preview-20251108T011632
+[2025-11-08T11:10:36] tokens used: 12,195
+
+[2025-11-08T11:10:38] thinking
+
+**Verifying preview success and artifacts**
+[2025-11-08T11:10:38] exec /bin/bash -lc 'ls tinyutils/artifacts/convert/20251108/final' in /Users/cav/dev/TinyUtils
+[2025-11-08T11:10:38] /bin/bash -lc 'ls tinyutils/artifacts/convert/20251108/final' succeeded in 107ms:
+pnpm-test.log
+pytest.log
+smoke_convert_preview.log
+[2025-11-08T11:10:38] tokens used: 13,055
+
+[2025-11-08T11:10:39] thinking
+
+**Checking smoke test logs**
+[2025-11-08T11:10:40] exec /bin/bash -lc "sed -n '1,80p' tinyutils/artifacts/convert/20251108/final/smoke_convert_preview.log" in /Users/cav/dev/TinyUtils
+[2025-11-08T11:10:40] /bin/bash -lc "sed -n '1,80p' tinyutils/artifacts/convert/20251108/final/smoke_convert_preview.log" succeeded in 100ms:
+smoke_convert_preview: PREVIEW_URL not set; skipping.
+[2025-11-08T11:10:40] tokens used: 13,308
+
+[2025-11-08T11:10:42] thinking
+
+**Searching for deployment status file**
+[2025-11-08T11:10:48] exec /bin/bash -lc 'rg -n "dond63" -n tinyutils -g"*"' in /Users/cav/dev/TinyUtils
+[2025-11-08T11:10:48] /bin/bash -lc 'rg -n "dond63" -n tinyutils -g"*"' exited 1 in 164ms:
+ERROR
+[2025-11-08T11:10:48] tokens used: 25,316
+
+[2025-11-08T11:10:50] thinking
+
+**Checking deployment status file**
+[2025-11-08T11:10:50] exec /bin/bash -lc 'for d in tinyutils/artifacts/convert/20251108/smoke-preview-*; do echo "== $d"; ls "$d"; done' in /Users/cav/dev/TinyUtils
+[2025-11-08T11:10:51] /bin/bash -lc 'for d in tinyutils/artifacts/convert/20251108/smoke-preview-*; do echo "== $d"; ls "$d"; done' succeeded in 192ms:
+== tinyutils/artifacts/convert/20251108/smoke-preview-20251108T010018
+deploy_status.txt
+preview_bypass_cookie.log
+preview_bypass_headers.txt
+resp_md_html.json
+resp_md_md_txt.json
+smoke.log
+vercel_deploy_attempt1.log
+vercel_deploy.log
+vercel_inspect.log
+vercel_pull.log
+vercel_version.txt
+vercel_whoami.log
+== tinyutils/artifacts/convert/20251108/smoke-preview-20251108T010413
+deploy_status.txt
+preview_bypass_cookie.log
+preview_bypass_headers.txt
+preview_fence_header.txt
+preview_headers.txt
+resp_md_html.json
+[2025-11-08T11:10:51] tokens used: 25,687
+
+[2025-11-08T11:10:52] thinking
+
+**Retrieving latest deploy status**
+[2025-11-08T11:10:53] exec /bin/bash -lc 'cat tinyutils/artifacts/convert/20251108/smoke-preview-20251108T011632/deploy_status.txt' in /Users/cav/dev/TinyUtils
+[2025-11-08T11:10:53] /bin/bash -lc 'cat tinyutils/artifacts/convert/20251108/smoke-preview-20251108T011632/deploy_status.txt' succeeded in 232ms:
+timestamp=2025-11-08 01:17:23 CET
+status=smoke_failed
+message=Converter preview smoke failed
+preview_url=https://tinyutils-56o1r8z9h-cavins-projects-7b0e00bb.vercel.app
+artifacts=artifacts/convert/20251108/smoke-preview-20251108T011632
+[2025-11-08T11:10:53] tokens used: 26,331
+
+[2025-11-08T11:10:56] thinking
+
+**Preparing to finalize preview tasks**
+[2025-11-08T11:10:56] exec /bin/bash -lc 'ls tinyutils/tests' in /Users/cav/dev/TinyUtils
+[2025-11-08T11:10:56] /bin/bash -lc 'ls tinyutils/tests' succeeded in 103ms:
+api_contracts.test.mjs
+csv_hardening.unit.test.mjs
+dlf_api_error_json.test.mjs
+dlf_envelope_invariants.test.mjs
+helpers
+[2025-11-08T11:10:56] tokens used: 26,771
+
+[2025-11-08T11:11:00] thinking
+
+**Considering script references and deployment commands**
+[2025-11-08T11:11:00] exec /bin/bash -lc "sed -n '1,200p' tinyutils/scripts/deploy_and_smoke_convert.sh" in /Users/cav/dev/TinyUtils
+[2025-11-08T11:11:00] /bin/bash -lc "sed -n '1,200p' tinyutils/scripts/deploy_and_smoke_convert.sh" succeeded in 102ms:
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}" )/.." && pwd)"
+SMOKE_SCRIPT="${ROOT_DIR}/scripts/smoke_convert_preview.mjs"
+set -a
+[ -f "$ROOT_DIR/.env.preview" ] && . "$ROOT_DIR/.env.preview"
+set +a
+cd "$ROOT_DIR"
+declare -a PREVIEW_HEADERS=()
+strip_secret_var() {
+  local var=$1
+  local value="${!var-}"
+  [[ -z "$value" ]] && return 0
+  value="${value//$'\r'/}"
+  value="${value//$'\n'/}"
+  printf -v "$var" '%s' "$value"
+}
+
+normalize_secret_vars() {
+[2025-11-08T11:11:00] tokens used: 27,977
+
+[2025-11-08T11:11:03] thinking
+
+**Checking documentation and environment variables**
+[2025-11-08T11:11:03] exec /bin/bash -lc 'ls tinyutils/docs' in /Users/cav/dev/TinyUtils
+[2025-11-08T11:11:03] /bin/bash -lc 'ls tinyutils/docs' succeeded in 95ms:
+AGENT_RUN_LOG.md
+AGENT_TASK_CHECKLIST.md
+BACKUP.md
+chatgpt-convo-2025-10-28.md
+convert_api_contract.md
+features
+[2025-11-08T11:11:03] tokens used: 30,046
+
+[2025-11-08T11:11:05] thinking
+
+**Checking for features documentation**
+[2025-11-08T11:11:06] exec /bin/bash -lc 'ls tinyutils/docs/features' in /Users/cav/dev/TinyUtils
+[2025-11-08T11:11:06] /bin/bash -lc 'ls tinyutils/docs/features' succeeded in 98ms:
+dead-link-finder.md
+[2025-11-08T11:11:06] tokens used: 30,303
+
+[2025-11-08T11:11:19] thinking
+
+**Outlining final smoke test steps**
+
+I’m gathering all the detailed steps needed to finish updating the converter preview smoke and log updates, including required environment variables, commands to run, verifying outputs, archiving artifacts under `tinyutils/artifacts/convert/`, and updating the `docs/AGENT_RUN_LOG.md`. I’ll also reference relevant script paths and highlight how to retrieve preview gating headers and URLs from artifacts or deploy status to ensure the process is complete and clear.
+[2025-11-08T11:11:21] exec /bin/bash -lc "sed -n '1,160p' tinyutils/scripts/log_run_entry.py" in /Users/cav/dev/TinyUtils
+[2025-11-08T11:11:21] /bin/bash -lc "sed -n '1,160p' tinyutils/scripts/log_run_entry.py" succeeded in 99ms:
+#!/usr/bin/env python3
+"""Insert a structured entry into docs/AGENT_RUN_LOG.md."""
+
+import argparse
+from datetime import datetime
+from pathlib import Path
+
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:  # pragma: no cover
+    ZoneInfo = None  # type: ignore
+
+ROOT = Path(__file__).resolve().parents[1]
+LOG_PATH = ROOT / "docs" / "AGENT_RUN_LOG.md"
+SESSIONS_MARKER = "## Sessions\n\n"
+
+
+def format_timestamp(ts: datetime) -> str:
+    if ZoneInfo is None:
+        return ts.strftime("%Y-%m-%d %H:%M CET")
+[2025-11-08T11:11:21] tokens used: 31,430
+
+[2025-11-08T11:11:24] thinking
+
+**Preparing detailed instructions with file references**
+[2025-11-08T11:11:25] exec /bin/bash -lc "nl -ba tinyutils/scripts/smoke_convert_preview.mjs | sed -n '1,200p'" in /Users/cav/dev/TinyUtils
+[2025-11-08T11:11:25] /bin/bash -lc "nl -ba tinyutils/scripts/smoke_convert_preview.mjs | sed -n '1,200p'" succeeded in 135ms:
+     1	#!/usr/bin/env node
+     2	import { mkdir, writeFile } from 'node:fs/promises';
+     3	import { dirname, join, resolve } from 'node:path';
+     4	import { fileURLToPath } from 'node:url';
+     5	
+     6	const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+     7	const previewUrl = process.env.PREVIEW_URL;
+     8	
+     9	if (!previewUrl) {
+    10	  console.error('smoke_convert_preview: PREVIEW_URL not set; skipping.');
+    11	  process.exit(0);
+    12	}
+    13	
+    14	const base = previewUrl.replace(/\/$/, '');
+    15	const endpoint = `${base}/api/convert`;
+    16	
+    17	const now = new Date();
+    18	const fmt = (tz, opts) => new Intl.DateTimeFormat('en-CA', {
+    19	  timeZone: tz,
+    20	  ...opts,
+[2025-11-08T11:11:25] tokens used: 32,767
+
+[2025-11-08T11:11:26] thinking
+
+**Preparing to reference script lines**
+[2025-11-08T11:11:27] exec /bin/bash -lc 'nl -ba tinyutils/scripts/smoke_convert_preview_latest.sh' in /Users/cav/dev/TinyUtils
+[2025-11-08T11:11:27] /bin/bash -lc 'nl -ba tinyutils/scripts/smoke_convert_preview_latest.sh' succeeded in 101ms:
+     1	#!/usr/bin/env sh
+     2	set -eu
+     3	
+     4	ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+     5	ART_ROOT="$ROOT_DIR/artifacts/convert"
+     6	SMOKE_SCRIPT="$ROOT_DIR/scripts/smoke_convert_preview.mjs"
+     7	STATUS="pending"
+     8	MESSAGE="initialized"
+     9	
+    10	find_latest_artifacts() {
+    11	  find "$ART_ROOT" -maxdepth 2 -type d -name 'smoke-preview-*' -print 2>/dev/null | sort | tail -n 1
+    12	}
+    13	
+    14	write_status() {
+    15	  SMOKE_ONLY_STATUS_FILE="$ART_DIR/smoke_only_status.txt"
+    16	  TS="$(TZ=Europe/Madrid date '+%Y-%m-%d %H:%M:%S %Z')"
+    17	  {
+    18	    printf 'timestamp=%s\n' "$TS"
+    19	    printf 'status=%s\n' "$STATUS"
+    20	    printf 'message=%s\n' "$MESSAGE"
+[2025-11-08T11:11:27] tokens used: 34,803
+
+[2025-11-08T11:11:29] thinking
+
+**Referencing log entries with line numbers**
+[2025-11-08T11:11:29] exec /bin/bash -lc "nl -ba tinyutils/docs/AGENT_RUN_LOG.md | sed -n '1,120p'" in /Users/cav/dev/TinyUtils
+[2025-11-08T11:11:29] /bin/bash -lc "nl -ba tinyutils/docs/AGENT_RUN_LOG.md | sed -n '1,120p'" succeeded in 113ms:
+     1	# Agent Run Log
+     2	
+     3	## Sessions
+     4	
+     5	### 2025-11-08 16:12 CET - manual - converter backend wrap-up
+     6	- **Mode:** manual
+     7	- **Branch:** `feature/universal-converter-backend`
+     8	- **CWD:** repo root
+     9	- **Summary:**
+    10	  - Finalized converter docs (checklist + docs/convert_api_contract.md) and Blob-backed response behaviors
+    11	  - Reran Python + Node suites with cache/Blob coverage; stored logs under `artifacts/convert/20251108/final/`
+    12	  - Preview smoke script skipped because `PREVIEW_URL`/`PREVIEW_SECRET` are unset (see log)
+    13	- **Evidence:**
+    14	  - `artifacts/convert/20251108/final/pytest.log`
+    15	  - `artifacts/convert/20251108/final/pnpm-test.log`
+    16	  - `artifacts/convert/20251108/final/smoke_convert_preview.log`
+    17	- **Follow-ups:** When preview credentials are available, rerun `scripts/smoke_convert_preview.mjs` to capture gated evidence.
+    18	
+    19	### 2025-11-08 01:17 CET - Auto - deploy_and_smoke_convert
+    20	- **Status:** smoke_failed
+[2025-11-08T11:11:29] tokens used: 55,213
+
+[2025-11-08T11:11:34] thinking
+
+**Outlining preview smoke conversion workflow**
+
+I’m mapping out key steps for the preview smoke conversion process, like acquiring credentials, running the conversion script with proper environment variables, validating outputs, and managing artifact storage and log updates; I’ll also look into how gating headers and run logs are referenced and verified to ensure the pipeline’s completeness.
+[2025-11-08T11:11:35] exec /bin/bash -lc 'nl -ba tinyutils/artifacts/convert/20251108/final/smoke_convert_preview.log' in /Users/cav/dev/TinyUtils
+[2025-11-08T11:11:35] /bin/bash -lc 'nl -ba tinyutils/artifacts/convert/20251108/final/smoke_convert_preview.log' succeeded in 152ms:
+     1	smoke_convert_preview: PREVIEW_URL not set; skipping.
+[2025-11-08T11:11:35] tokens used: 58,015
+
+[2025-11-08T11:11:44] thinking
+
+**Outlining deployment and smoke test process**
+
+I'm organizing a detailed response covering the current state and the next steps for running and verifying the preview and smoke tests, including how to acquire necessary environment variables, run smoke scripts, verify outputs, and update logs, all while referencing key file paths and scripts like those in tinyutils/artifacts and scripts directories. I'll structure it with sections for clarity and emphasize commands, environment variables, and verification points.
+[2025-11-08T11:11:45] codex
+
+**State Check**
+- `tinyutils/docs/AGENT_RUN_LOG.md:5-23` already logs today’s backend wrap-up plus multiple failed auto `deploy_and_smoke_convert` runs; the top entry explicitly calls out that `smoke_convert_preview` was skipped because `PREVIEW_URL`/`PREVIEW_SECRET` were unset, and lists the follow-up you’re now tackling.
+- `tinyutils/artifacts/convert/20251108/final/smoke_convert_preview.log:1` confirms the last smoke attempt bailed immediately for missing `PREVIEW_URL`.
+- Manual smoke tooling is ready: `tinyutils/scripts/smoke_convert_preview.mjs:7-116` requires `PREVIEW_URL`, optionally `PREVIEW_FENCE_HEADER`, and writes JSON responses plus logs under `artifacts/convert/<UTC date>/preview-smoke-<ts>` unless `CONVERT_SMOKE_ARTIFACTS` overrides. `tinyutils/scripts/smoke_convert_preview_latest.sh:34-95` can re-use the latest `deploy_and_smoke_convert` artifact to inject both the preview URL and fence header automatically.
+
+**Next Actions**
+- **Capture preview credentials**
+  - Use the freshly deployed preview `https://tinyutils-dond63lpw-cavins-projects-7b0e00bb.vercel.app` (or parse it from `deploy_status.txt` inside the newest `artifacts/convert/20251108/smoke-preview-*` folder once the deployment job writes it).
+  - Export `PREVIEW_URL=<above>` for the smoke script. If the preview is fenced, either (a) grab the header blob from `preview_fence_header.txt` inside the matching artifact directory and feed it via `PREVIEW_FENCE_HEADER="$(cat …)"`, or (b) supply whatever cookie/header bundle you received out-of-band. Without this header, `smoke_convert_preview_latest.sh` exits early (`missing_cookie`), and the Node script will hit 403s.
+  - Decide where to stash fresh evidence: either let the Node script auto-create `artifacts/convert/<UTC date>/preview-smoke-<Madrid timestamp>` or pre-create a directory (e.g., `tinyutils/artifacts/convert/20251108/preview-smoke-20251108T171500`) and export `CONVERT_SMOKE_ARTIFACTS=/Users/cav/dev/TinyUtils/tinyutils/artifacts/convert/20251108/preview-smoke-20251108T171500` so everything lands beside the earlier runs.
+
+- **Run the converter preview smoke**
+  - Fast path (if you trust the latest deploy artifact’s secrets): `cd tinyutils && CONVERT_SMOKE_ARTIFACTS=… ./scripts/smoke_convert_preview_latest.sh`. That wrapper pulls `preview_url` and `PREVIEW_FENCE_HEADER` from the artifact (`lines 63-76`) and writes a `smoke_only.log`.
+  - Manual path: `cd tinyutils && PREVIEW_URL=… PREVIEW_FENCE_HEADER="$(cat …/preview_fence_header.txt)" CONVERT_SMOKE_ARTIFACTS=… node ./scripts/smoke_convert_preview.mjs`. The script fires two Markdown→(md/txt) and Markdown→HTML POSTs to `<preview>/api/convert`, saving `resp_md_md_txt.json` and `resp_md_html.json`. Exit code ≠0 indicates a failed case; inspect the JSON payloads for error metadata before retrying.
+
+- **Archive & summarize artifacts**
+  - Ensure the chosen artifact directory now contains:
+    - `resp_md_md_txt.json` / `resp_md_html.json` (success payloads)
+    - `smoke_only.log` (if you used the wrapper) or stdout redirect from the raw Node run
+    - `deploy_status.txt` copied or symlinked from the preview deploy folder so future readers know which preview was tested
+    - Any secrets used (e.g., `preview_fence_header.txt`) redacted or replaced with a note if policy disallows keeping them.
+  - If additional evidence (screenshots, cURL traces) is needed, drop them beside the JSON responses and note the filenames for the log entry.
+
+- **Update `docs/AGENT_RUN_LOG.md`**
+  - Append a manual session entry right after the “## Sessions” marker noting the successful preview smoke, referencing the new artifact path and the preview URL. You can use `tinyutils/scripts/log_run_entry.py` with flags such as:
+    ```
+    cd tinyutils
+    ./scripts/log_run_entry.py \
+      --title "manual - smoke_convert_preview" \
+      --mode manual \
+      --branch universal-converter-backend \
+      --cwd tinyutils \
+      --summary "Ran scripts/smoke_convert_preview.mjs against https://tinyutils-dond63lpw-cavins-projects-7b0e00bb.vercel.app" \
+      --summary "Archived responses under artifacts/convert/20251108/preview-smoke-20251108T171500/" \
+      --evidence "artifacts/convert/20251108/preview-smoke-20251108T171500/" \
+      --followup NONE
+    ```
+    This keeps the log formatting consistent with the existing entries (`AGENT_RUN_LOG.md:5-18`).
+
+- **Smoke verification callout**
+  - After the script runs, spot-check the live preview via the Vercel URL to confirm UI still renders (per the repo mandate to visually inspect previewed UX). Use the browser tool or `open` locally; no code changes needed, but note any regressions before sign-off.
+
+Once those steps are done you’ll have: (1) fresh, fenced preview smoke evidence under `tinyutils/artifacts/convert/...`, (2) a passing log in `smoke_only.log`, and (3) the AGENT_RUN_LOG updated to reflect the successful manual intervention. No code changes were needed in this read-only session.
+[2025-11-08T11:11:57] tokens used: 60,062

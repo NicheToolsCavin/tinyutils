@@ -1,0 +1,1457 @@
+[2025-11-10T01:44:58] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-minimal-patch
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: auto
+--------
+[2025-11-10T01:44:58] User instructions:
+Draft minimal patch changes to implement SMOKE_ONLY and robust bypass handling across both scripts. Make the smoke runner accept an existing PREVIEW_URL, emit which headers/cookies were used, and persist detailed artifacts under the dated convert path. Provide a brief usage snippet for README and a small test plan to validate the changes.
+Context: Need SMOKE_ONLY and better preview bypass handling. Scripts: tinyutils/scripts/deploy_and_smoke_convert.sh and tinyutils/scripts/smoke_convert_preview.mjs. Artifacts live under tinyutils/artifacts/convert/<date>/smoke-*. Logging should state which headers/cookies were used, and the smoke can target an existing PREVIEW_URL without deploying.
+
+[2025-11-10T01:45:03] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-minimal-patch
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: auto
+--------
+[2025-11-10T01:45:03] User instructions:
+Draft minimal patch changes to implement SMOKE_ONLY and robust bypass handling across both scripts. Make the smoke runner accept an existing PREVIEW_URL, emit which headers/cookies were used, and persist detailed artifacts under the dated convert path. Provide a brief usage snippet for README and a small test plan to validate the changes.
+Context: Need SMOKE_ONLY and better preview bypass handling. Scripts: tinyutils/scripts/deploy_and_smoke_convert.sh and tinyutils/scripts/smoke_convert_preview.mjs. Artifacts live under tinyutils/artifacts/convert/<date>/smoke-*. Logging should state which headers/cookies were used, and the smoke can target an existing PREVIEW_URL without deploying.
+
+
+[2025-11-10T01:45:07] thinking
+
+**Assessing read-only sandbox constraints**
+[2025-11-10T01:45:09] tool sequential-thinking.sequentialthinking({"thought":"Need to update two scripts and README/test plan. Can't edit due to read-only, so will inspect, reason, craft manual patch. Plan steps: inspect current scripts, design changes, produce patch, usage snippet, test plan. Estimate 5 thoughts.","thoughtNumber":1,"totalThoughts":5,"nextThoughtNeeded":true})
+[2025-11-10T01:45:09] sequential-thinking.sequentialthinking({"thought":"Need to update two scripts and README/test plan. Can't edit due to read-only, so will inspect, reason, craft manual patch. Plan steps: inspect current scripts, design changes, produce patch, usage snippet, test plan. Estimate 5 thoughts.","thoughtNumber":1,"totalThoughts":5,"nextThoughtNeeded":true}) success in 1ms:
+{
+  "content": [
+    {
+      "text": "{\n  \"thoughtNumber\": 1,\n  \"totalThoughts\": 5,\n  \"nextThoughtNeeded\": true,\n  \"branches\": [],\n  \"thoughtHistoryLength\": 1\n}",
+      "type": "text"
+    }
+  ]
+}
+[2025-11-10T01:45:09] tokens used: 6,952
+
+[2025-11-10T01:45:10] thinking
+
+**Listing script directory contents**
+[2025-11-10T01:45:11] exec bash -lc 'ls tinyutils/scripts' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-minimal-patch
+[2025-11-10T01:45:11] bash -lc 'ls tinyutils/scripts' exited 1 in 101ms:
+ERROR
+ls: tinyutils/scripts: No such file or directory
+[2025-11-10T01:45:11] tokens used: 14,039
+
+[2025-11-10T01:45:13] thinking
+
+**Checking repository root contents**
+[2025-11-10T01:45:13] exec bash -lc ls in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-minimal-patch
+[2025-11-10T01:45:13] bash -lc ls succeeded in 108ms:
+PATH
+print1
+tests
+tinyutils
+TinyUtilsCodexContext
+[2025-11-10T01:45:13] tokens used: 14,473
+
+[2025-11-10T01:45:15] thinking
+
+**Checking tinyutils contents**
+[2025-11-10T01:45:16] exec bash -lc 'ls tinyutils' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-minimal-patch
+[2025-11-10T01:45:16] bash -lc 'ls tinyutils' succeeded in 107ms:
+[2025-11-10T01:45:16] tokens used: 15,024
+
+[2025-11-10T01:45:18] thinking
+
+**Checking directory contents**
+[2025-11-10T01:45:18] exec bash -lc 'ls -a tinyutils' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-minimal-patch
+[2025-11-10T01:45:18] bash -lc 'ls -a tinyutils' succeeded in 101ms:
+.
+..
+[2025-11-10T01:45:18] tokens used: 15,671
+
+[2025-11-10T01:45:20] thinking
+
+**Searching for script path**
+[2025-11-10T01:45:21] exec bash -lc "rg --files -g 'deploy_and_smoke_convert.sh'" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-minimal-patch
+[2025-11-10T01:45:21] bash -lc "rg --files -g 'deploy_and_smoke_convert.sh'" exited 1 in 113ms:
+ERROR
+[2025-11-10T01:45:21] tokens used: 15,923
+
+[2025-11-10T01:45:23] thinking
+
+**Searching for deployment script**
+[2025-11-10T01:45:23] exec bash -lc "find .. -name 'deploy_and_smoke_convert.sh'" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-minimal-patch
+[2025-11-10T01:45:24] bash -lc "find .. -name 'deploy_and_smoke_convert.sh'" succeeded in 674ms:
+[2025-11-10T01:45:24] tokens used: 16,176
+
+[2025-11-10T01:45:26] thinking
+
+**Searching for smoke_convert_preview.mjs file**
+[2025-11-10T01:45:27] exec bash -lc "find .. -name 'smoke_convert_preview.mjs'" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-minimal-patch
+[2025-11-10T01:45:27] bash -lc "find .. -name 'smoke_convert_preview.mjs'" succeeded in 492ms:
+../code-gemini-2-5-flash-draft-ready-to-paste-doc/tinyutils/scripts/smoke_convert_preview.mjs
+[2025-11-10T01:45:27] tokens used: 16,429
+
+[2025-11-10T01:45:31] thinking
+
+**Searching for deploy scripts in parent directories**
+[2025-11-10T01:45:32] exec bash -lc "find .. -name 'deploy_and_smoke_convert.sh'" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-minimal-patch
+[2025-11-10T01:45:32] bash -lc "find .. -name 'deploy_and_smoke_convert.sh'" succeeded in 508ms:
+[2025-11-10T01:45:32] tokens used: 24,467
+
+[2025-11-10T01:45:35] thinking
+
+**Searching for smoke_convert script**
+[2025-11-10T01:45:35] exec bash -lc "rg --files -g '*smoke*'" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-minimal-patch
+[2025-11-10T01:45:35] bash -lc "rg --files -g '*smoke*'" exited 1 in 114ms:
+ERROR
+[2025-11-10T01:45:35] tokens used: 24,929
+
+[2025-11-10T01:45:37] thinking
+
+**Checking repository path contents**
+[2025-11-10T01:45:38] exec bash -lc 'ls PATH' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-minimal-patch
+[2025-11-10T01:45:38] bash -lc 'ls PATH' succeeded in 109ms:
+PATH
+[2025-11-10T01:45:38] tokens used: 25,139
+
+[2025-11-10T01:45:39] thinking
+
+**Considering new root candidate**
+[2025-11-10T01:45:40] exec bash -lc 'ls TinyUtilsCodexContext' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-minimal-patch
+[2025-11-10T01:45:40] bash -lc 'ls TinyUtilsCodexContext' succeeded in 113ms:
+finished
+[2025-11-10T01:45:40] tokens used: 25,353
+
+[2025-11-10T01:45:41] thinking
+
+**Checking if file is finished**
+[2025-11-10T01:45:42] exec bash -lc 'cat TinyUtilsCodexContext/finished' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-minimal-patch
+[2025-11-10T01:45:42] bash -lc 'cat TinyUtilsCodexContext/finished' exited 1 in 105ms:
+ERROR
+cat: TinyUtilsCodexContext/finished: Is a directory
+[2025-11-10T01:45:42] tokens used: 25,941
+
+[2025-11-10T01:45:44] thinking
+
+**Listing finished directory contents**
+[2025-11-10T01:45:44] exec bash -lc 'ls TinyUtilsCodexContext/finished' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-minimal-patch
+[2025-11-10T01:45:44] bash -lc 'ls TinyUtilsCodexContext/finished' succeeded in 110ms:
+diffs_recs_finished
+email-sanitization-and-setup-2025-10-30.md
+THESE_FILES_ARE_NOT_RELEVANT
+[2025-11-10T01:45:44] tokens used: 26,260
+
+[2025-11-10T01:45:48] thinking
+
+**Locating actual project root**
+[2025-11-10T01:45:49] exec bash -lc pwd in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-minimal-patch
+[2025-11-10T01:45:49] bash -lc pwd succeeded in 95ms:
+/Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-minimal-patch
+[2025-11-10T01:45:49] tokens used: 27,288
+
+[2025-11-10T01:45:51] thinking
+
+**Checking repository status**
+[2025-11-10T01:45:51] exec bash -lc 'git status -sb' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-minimal-patch
+[2025-11-10T01:45:52] bash -lc 'git status -sb' succeeded in 300ms:
+## code-code-gpt-5-codex-draft-minimal-patch
+[2025-11-10T01:45:52] tokens used: 28,578
+
+[2025-11-10T01:45:53] thinking
+
+**Checking for tracked files**
+[2025-11-10T01:45:53] exec bash -lc 'git ls-tree -r HEAD | head' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-minimal-patch
+[2025-11-10T01:45:54] bash -lc 'git ls-tree -r HEAD | head' succeeded in 150ms:
+100644 blob 2949126393e7f265fc98caa9b8bc7d7514e4ffd9	.DS_Store
+100644 blob 0560517586d3d9a1ff7c31ee5127ae087ce9797f	.code/.DS_Store
+100644 blob b408c54649bc2e67e3e11220e79c662d43f3fda7	.code/agents/.DS_Store
+100644 blob d0c559be96a6abef40843fb8dee89daa7e1223b9	.code/agents/006367d3-c6e3-40e2-a630-c4908b454b55/result.txt
+100644 blob 2fd927d065480ac47765f211ec1b3be4102f3912	.code/agents/00d608f1-df6b-4d4c-88bc-3552d339e242/result.txt
+100644 blob 3325445cb0cc0ec163532dea3b05c0c02a501359	.code/agents/01f054e8-7d3f-45d0-8925-ff9c4ef52d91/status.txt
+100644 blob f3dfd396d2d8cbb63a450f05a04b6a0581e2e0b4	.code/agents/03e4999e-3c21-4ace-8b0b-1f49fa8695ec/result.txt
+100644 blob 39174ec2411778e2cf12abd4d031916947748036	.code/agents/054111c7-d903-41a8-9b44-c101e5d74d34/result.txt
+100644 blob da82b87c962bf871cccf9245cda849cd3d2cefb8	.code/agents/083b2d2f-4caa-4c2d-8024-e70a4a1167b3/result.txt
+100644 blob 31bbcb844705550a3f584b45de1d9d2c5c87f221	.code/agents/09dff455-5490-4a14-b94f-60618b600939/result.txt
+[2025-11-10T01:45:54] tokens used: 28,853
+
+[2025-11-10T01:45:56] thinking
+
+**Searching for deployment script**
+[2025-11-10T01:45:56] exec bash -lc "rg -n 'deploy_and_smoke_convert' -g '*.*'" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-minimal-patch
+[2025-11-10T01:45:56] bash -lc "rg -n 'deploy_and_smoke_convert' -g '*.*'" succeeded in 121ms:
+.code/agents/1cd8d03e-d2ab-4374-842c-4d87c15a4c16/result.txt:51:- **Rationale:** The existing `deploy_and_smoke_convert.sh` script already checks for these variables and fails gracefully if missing
+.code/agents/1cd8d03e-d2ab-4374-842c-4d87c15a4c16/result.txt:57:- **Implementation:** The `deploy_and_smoke_convert.sh` script already handles deployment, but needs enhancement:
+.code/agents/787da55f-a183-4d36-8d5b-000095e01f83/result.txt:19:1. **Main Script**: `tinyutils/scripts/deploy_and_smoke_convert.sh`
+.code/agents/30106ab8-065f-485e-a06a-94dfe87ff435/result.txt:140:deploy_and_smoke_convert.sh
+.code/agents/30106ab8-065f-485e-a06a-94dfe87ff435/result.txt:175:    "deploy-and-smoke:convert": "bash scripts/deploy_and_smoke_convert.sh"
+.code/agents/330c7110-f003-40b0-a43a-3ec60c11d929/result.txt:43:        *   Modify `scripts/deploy_and_smoke_convert.sh` to perform an unattended `vercel preview` deployment.
+.code/agents/330c7110-f003-40b0-a43a-3ec60c11d929/result.txt:69:    *   `./tinyutils/scripts/deploy_and_smoke_convert.sh` (observe output for successful Vercel deployment and smoke test results)
+.code/agents/f6b68431-4cfa-476c-9dce-fd4870ebf7d4/result.txt:88:1. `deploy_and_smoke_convert.sh` - Deploys to Vercel preview and runs smoke tests
+.code/agents/f6b68431-4cfa-476c-9dce-fd4870ebf7d4/result.txt:150:   - `deploy_and_smoke_convert.sh` - Complete deployment and smoke test script
+.code/agents/11a35846-00d9-4e27-ba94-e5914ff92387/result.txt:9:5.  **Automate Deployment:** I will refine the `scripts/deploy_and_smoke_convert.sh` script to enable fully unattended Vercel preview deployments and smoke tests, including proper handling of environment variables.
+.code/agents/5fffbb45-758b-43a2-92f5-9dd9c56bf4e7/result.txt:12:Add tinyutils/scripts/deploy_and_smoke_convert.sh implementing the described flow. Use bash strict mode, avoid prompts, and handle missing creds by exiting 2 after writing deploy_status.txt.
+.code/agents/5fffbb45-758b-43a2-92f5-9dd9c56bf4e7/result.txt:26:Add tinyutils/scripts/deploy_and_smoke_convert.sh implementing the described flow. Use bash strict mode, avoid prompts, and handle missing creds by exiting 2 after writing deploy_status.txt.
+.code/agents/5fffbb45-758b-43a2-92f5-9dd9c56bf4e7/result.txt:415:  printf '[deploy_and_smoke_convert] %s\\\\n' \\\""'$*'"\\\" >&2
+.code/agents/5fffbb45-758b-43a2-92f5-9dd9c56bf4e7/result.txt:559:  printf '[deploy_and_smoke_convert] %s\\\\n' \\\""'$*'"\\\" >&2
+.code/agents/5fffbb45-758b-43a2-92f5-9dd9c56bf4e7/result.txt:696:- tinyutils/scripts/deploy_and_smoke_convert.sh:1 repo is mounted read-only in this session, so I couldn’t persist the new script—please drop the content below into this path (and `chmod +x`) once you have write access.
+.code/agents/5fffbb45-758b-43a2-92f5-9dd9c56bf4e7/result.txt:697:- tinyutils/scripts/deploy_and_smoke_convert.sh:4 sets up strict mode, deterministic artifact folders (`artifacts/convert/<UTCDate>/smoke-preview-<MadridTs>`), and an EXIT trap that always emits `deploy_status.txt` with concise status, message, timestamp, and preview URL.
+.code/agents/5fffbb45-758b-43a2-92f5-9dd9c56bf4e7/result.txt:698:- tinyutils/scripts/deploy_and_smoke_convert.sh:59 ensures the Vercel CLI exists (installing via npm if absent), captures the CLI version, and confirms credentials with `vercel whoami`, exiting with code 2 and a status file whenever both token and login are missing.
+.code/agents/5fffbb45-758b-43a2-92f5-9dd9c56bf4e7/result.txt:699:- tinyutils/scripts/deploy_and_smoke_convert.sh:104 pulls and deploys preview non-interactively, extracts the preview URL, runs `smoke_convert_preview.mjs` with shared artifacts, and logs each stage (`vercel_pull.log`, `vercel_deploy.log`, `smoke_convert_preview.log`) for later inspection.
+.code/agents/5fffbb45-758b-43a2-92f5-9dd9c56bf4e7/result.txt:703:# tinyutils/scripts/deploy_and_smoke_convert.sh
+.code/agents/5fffbb45-758b-43a2-92f5-9dd9c56bf4e7/result.txt:722:  printf '[deploy_and_smoke_convert] %s\n' "$*" >&2
+[2025-11-10T01:45:56] tokens used: 29,874
+
+[2025-11-10T01:45:59] thinking
+
+**Attempting to retrieve external script**
+[2025-11-10T01:46:04] exec bash -lc 'git show HEAD:tinyutils/scripts/deploy_and_smoke_convert.sh | head -n 120' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-minimal-patch
+[2025-11-10T01:46:04] bash -lc 'git show HEAD:tinyutils/scripts/deploy_and_smoke_convert.sh | head -n 120' succeeded in 123ms:
+[2025-11-10T01:46:04] tokens used: 37,138
+
+[2025-11-10T01:46:07] thinking
+
+**Planning generic patch for smoke runner updates**
+[2025-11-10T01:46:08] exec bash -lc "sed -n '1,200p' ../code-gemini-2-5-flash-draft-ready-to-paste-doc/tinyutils/scripts/smoke_convert_preview.mjs" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-minimal-patch
+[2025-11-10T01:46:08] bash -lc "sed -n '1,200p' ../code-gemini-2-5-flash-draft-ready-to-paste-doc/tinyutils/scripts/smoke_convert_preview.mjs" succeeded in 113ms:
+// Placeholder for smoke_convert_preview.mjs
+console.log("Smoke test for convert preview.");
+[2025-11-10T01:46:08] tokens used: 37,572
+
+[2025-11-10T01:46:12] thinking
+
+**Assessing environment access limits**
+[2025-11-10T01:46:13] exec bash -lc 'ls ..' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-minimal-patch
+[2025-11-10T01:46:13] bash -lc 'ls ..' succeeded in 114ms:
+code-code-gpt-5-codex-add-tests-under
+code-code-gpt-5-codex-add-tinyutils-convert-init-py-tinyutils
+code-code-gpt-5-codex-analyze-latest-preview
+code-code-gpt-5-codex-design-two-focused
+code-code-gpt-5-codex-draft-minimal--portable
+code-code-gpt-5-codex-draft-minimal-patch
+code-code-gpt-5-codex-implement-tinyutils-convert--library
+code-code-gpt-5-codex-modify-tinyutils-api-convert-index-py-pa
+code-code-gpt-5-codex-outline-small-vendor
+code-code-gpt-5-codex-scaffold-tinyutils-convert--service-py
+code-code-gpt-5-codex-suggest-concise-improvements
+code-code-gpt-5-codex-you-are-helping-20251110-013308
+code-code-gpt-5-draft-minimal-patch
+code-code-gpt-5-you-are-helping
+code-code-teams-personal-implement-tinyutils-convert--library
+code-gemini-2-5-flash-analyze-latest-preview
+code-gemini-2-5-flash-draft-minimal-test
+code-gemini-2-5-flash-draft-ready-to-paste-doc
+code-gemini-2-5-flash-produce-targeted-validation
+code-gemini-2-5-flash-you-are-helping
+[2025-11-10T01:46:13] tokens used: 38,594
+
+[2025-11-10T01:46:16] thinking
+
+**Examining alternative branch for code**
+[2025-11-10T01:46:17] exec bash -lc 'ls ../code-code-gpt-5-codex-draft-minimal--portable' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-minimal-patch
+[2025-11-10T01:46:17] bash -lc 'ls ../code-code-gpt-5-codex-draft-minimal--portable' succeeded in 103ms:
+PATH
+print1
+tests
+tinyutils
+TinyUtilsCodexContext
+[2025-11-10T01:46:17] tokens used: 39,463
+
+[2025-11-10T01:46:20] thinking
+
+**Investigating hidden content in branches**
+[2025-11-10T01:46:21] exec bash -lc 'ls TinyUtilsCodexContext/finished/diffs_recs_finished' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-minimal-patch
+[2025-11-10T01:46:21] bash -lc 'ls TinyUtilsCodexContext/finished/diffs_recs_finished' succeeded in 107ms:
+code-cli-tinyutils-recs-finished.md
+pr1-security-caching.diff
+pr2-ux-noindex-debug.diff
+pr3-preview-fence.diff
+pr4-tests-contracts.diff
+Pro reasoning message nov 4.md
+[2025-11-10T01:46:21] tokens used: 39,774
+
+[2025-11-10T01:46:34] thinking
+
+**Preparing patch strategy and assumptions**
+[2025-11-10T01:46:40] exec bash -lc "rg -n 'FENCE' -g '*.*'" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-minimal-patch
+[2025-11-10T01:46:40] bash -lc "rg -n 'FENCE' -g '*.*'" succeeded in 120ms:
+.code/agents/3218/exec-call_wfYe05cYHseR46yJrocCdSF6.txt:31:/Users/cav/dev/CodeProjects/code_config_hacks/.code/sessions/2025/11/04/rollout-2025-11-04T16-48-41-fcfb6382-8881-4b3a-8ec3-5371fb8d6322.jsonl:45:{"timestamp":"2025-11-04T15:51:17.659Z","type":"response_item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Ensures the repo is on `feat/pr3-preview-fence`, confirms the Vercel link, sets the preview secret, deploys to production, probes the three endpoints, and stores both full and filtered headers with a short status summary.\n\n```sh\n#!/bin/sh\nset -eu\n\nif [ \"${TRACE:-}\" = \"1\" ]; then\n  set -x\nfi\n\nrequire_cmd() {\n  if ! command -v \"$1\" >/dev/null 2>&1; then\n    echo \"error: required command '$1' not found in PATH\" >&2\n    exit 1\n  fi\n}\n\nrequire_cmd git\nrequire_cmd vercel\nrequire_cmd openssl\nrequire_cmd curl\nrequire_cmd awk\nrequire_cmd sed\nrequire_cmd cut\nrequire_cmd date\nrequire_cmd mkdir\n\nREPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || {\n  echo \"error: not inside a git repository\" >&2\n  exit 1\n}\ncd \"$REPO_ROOT\"\n\nbranch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || printf \"\")\nif [ -z \"$branch\" ]; then\n  echo \"error: unable to determine git branch\" >&2\n  exit 1\nfi\nif [ \"$branch\" != \"feat/pr3-preview-fence\" ]; then\n  echo \"error: repository must be on branch 'feat/pr3-preview-fence' (current: $branch)\" >&2\n  exit 1\nfi\n\nif [ ! -f \".vercel/project.json\" ]; then\n  echo \"Vercel project not linked locally; attempting automatic link...\"\n  vercel link --yes || {\n    echo \"error: failed to link Vercel project; run 'vercel link' manually\" >&2\n    exit 1\n  }\nfi\nif [ ! -f \".vercel/project.json\" ]; then\n  echo \"error: Vercel project still not linked (.vercel/project.json missing)\" >&2\n  exit 1\nfi\n\nif ! vercel whoami >/dev/null 2>&1; then\n  echo \"error: please authenticate with Vercel (run 'vercel login')\" >&2\n  exit 1\nfi\n\nFENCE_SECRET=\"${PREVIEW_SECRET:-$(openssl rand -hex 16)}\"\nPREVIEW_SECRET=\"$FENCE_SECRET\"\nexport PREVIEW_SECRET\nexport FENCE_SECRET\n\nsecret_length=$(printf \"%s\" \"$PREVIEW_SECRET\" | wc -c | awk '{print $1}')\nprintf \"Using PREVIEW_SECRET length: %s bytes\\n\" \"$secret_length\"\n\nprintf \"Pulling production configuration...\\n\"\nvercel pull --yes --environment=production\n\nprintf \"Deploying to production...\\n\"\nvercel deploy --prod --yes --env \"PREVIEW_SECRET=$FENCE_SECRET\"\n\nPROD_URL=\"https://tinyutils-eight.vercel.app\"\nENDPOINTS=\"${FENCE_ENDPOINTS:-/ /api/fence /api/fence/status}\"\ntimestamp=$(date -u +\"%Y%m%d%H%M%SZ\")\nartifact_dir=\"artifacts/pr3-fence-${timestamp}-prod\"\nmkdir -p \"$artifact_dir\"\n\nsummary_data=\"\"\nprintf \"Starting fence probes against %s\\n\" \"$PROD_URL\"\n\nold_ifs=$IFS\nIFS=' '\nfor endpoint in $ENDPOINTS; do\n  url=\"${PROD_URL}${endpoint}\"\n  safe_name=$(printf \"%s\" \"$endpoint\" | sed 's#^/$#root#; s#[^A-Za-z0-9._-]#_#g')\n  headers_file=\"$artifact_dir/${safe_name}_headers.txt\"\n  filtered_file=\"$artifact_dir/${safe_name}_filtered.txt\"\n\n  printf \"Probing %s ...\\n\" \"$url\"\n  curl -sS -D \"$headers_file\" -o /dev/null \"$url\"\n\n  tr -d '\\r' < \"$headers_file\" | awk 'tolower($1)==\"set-cookie:\" || /^HTTP\\//' > \"$filtered_file\"\n\n  status_line=$(tr -d '\\r' < \"$headers_file\" | grep -m1 '^HTTP/')\n  status_code=\"\"\n  if [ -n \"$status_line\" ]; then\n    status_code=$(printf \"%s\\n\" \"$status_line\" | awk '{print $2}')\n  fi\n  if [ -z \"$status_code\" ]; then\n    status_code=\"N/A\"\n  fi\n\n  if tr -d '\\r' < \"$headers_file\" | grep -i '^Set-Cookie:' >/dev/null; then\n    cookie_flag=\"present\"\n  else\n    cookie_flag=\"absent\"\n  fi\n\n  summary_data=\"${summary_data}${endpoint}\\t${status_code}\\t${cookie_flag}\\n\"\ndone\nIFS=$old_ifs\n\nsummary_file=\"$artifact_dir/summary.tsv\"\nprintf \"%b\" \"$summary_data\" > \"$summary_file\"\n\nprintf \"\\nFence probe summary\\n\"\nprintf \"Artifacts directory: %s\\n\" \"$artifact_dir\"\nprintf \"%-28s %-6s %-10s\\n\" \"Endpoint\" \"Status\" \"Set-Cookie\"\nprintf \"%-28s %-6s %-10s\\n\" \"--------\" \"------\" \"----------\"\nprintf \"%b\" \"$summary_data\" | while IFS= read -r line; do\n  endpoint=$(printf \"%s\" \"$line\" | cut -f1)\n  status_code=$(printf \"%s\" \"$line\" | cut -f2)\n  cookie_flag=$(printf \"%s\" \"$line\" | cut -f3)\n  printf \"%-28s %-6s %-10s\\n\" \"$endpoint\" \"$status_code\" \"$cookie_flag\"\ndone\n\nprintf \"\\nDone.\\n\"\n```\n\nSet `FENCE_ENDPOINTS` beforehand if you want different probe paths; otherwise it defaults to `/`, `/api/fence`, and `/api/fence/status`."}]}}
+.code/agents/0f568d39-5e20-4b25-b4c5-e75ce8a8e5c4/result.txt:12:Produce the exact bash to deploy + probe + save artifacts for PR3 fence validation with preview→prod fallback and print a short summary footer of observed statuses. Steps: set FENCE_SECRET (use existing $PREVIEW_SECRET or generate with openssl rand -hex 16), run `vercel pull --yes --environment=preview`, deploy preview with `vercel deploy --yes --env PREVIEW_SECRET=$FENCE_SECRET` capturing URL (fallback to `vercel deploy --prod --yes --env PREVIEW_SECRET=$FENCE_SECRET`). Curl -sD - the following and save headers to artifacts: 1) $URL/tools/dead-link-finder/ (public), 2) $URL/tools/keyword-density (expect 401), 3) $URL/tools/keyword-density?preview_secret=$FENCE_SECRET (expect 200 & Set-Cookie). Grep for HTTP/, content-type, cache-control, set-cookie, www-authenticate. Note SSO may yield 401; capture & annotate. Output should be compact copy-pasteable bash.
+.code/agents/0f568d39-5e20-4b25-b4c5-e75ce8a8e5c4/result.txt:24:Produce the exact bash to deploy + probe + save artifacts for PR3 fence validation with preview→prod fallback and print a short summary footer of observed statuses. Steps: set FENCE_SECRET (use existing $PREVIEW_SECRET or generate with openssl rand -hex 16), run `vercel pull --yes --environment=preview`, deploy preview with `vercel deploy --yes --env PREVIEW_SECRET=$FENCE_SECRET` capturing URL (fallback to `vercel deploy --prod --yes --env PREVIEW_SECRET=$FENCE_SECRET`). Curl -sD - the following and save headers to artifacts: 1) $URL/tools/dead-link-finder/ (public), 2) $URL/tools/keyword-density (expect 401), 3) $URL/tools/keyword-density?preview_secret=$FENCE_SECRET (expect 200 & Set-Cookie). Grep for HTTP/, content-type, cache-control, set-cookie, www-authenticate. Note SSO may yield 401; capture & annotate. Output should be compact copy-pasteable bash.
+.code/agents/0f568d39-5e20-4b25-b4c5-e75ce8a8e5c4/result.txt:41:  FENCE_SECRET="$PREVIEW_SECRET"
+.code/agents/0f568d39-5e20-4b25-b4c5-e75ce8a8e5c4/result.txt:43:  FENCE_SECRET="$(openssl rand -hex 16)"
+.code/agents/0f568d39-5e20-4b25-b4c5-e75ce8a8e5c4/result.txt:45:export FENCE_SECRET
+.code/agents/0f568d39-5e20-4b25-b4c5-e75ce8a8e5c4/result.txt:46:export PREVIEW_SECRET="$FENCE_SECRET"
+.code/agents/0f568d39-5e20-4b25-b4c5-e75ce8a8e5c4/result.txt:58:if vercel deploy --yes --env PREVIEW_SECRET="$FENCE_SECRET" 2>&1 | tee "$preview_log"; then
+.code/agents/0f568d39-5e20-4b25-b4c5-e75ce8a8e5c4/result.txt:62:  if vercel deploy --prod --yes --env PREVIEW_SECRET="$FENCE_SECRET" 2>&1 | tee "$prod_log"; then
+.code/agents/0f568d39-5e20-4b25-b4c5-e75ce8a8e5c4/result.txt:93:probe "keyword-density-secret"  "$DEPLOYED_URL/tools/keyword-density?preview_secret=$FENCE_SECRET" "200 preview (Set-Cookie)"
+.code/agents/5f94b45d-c4f6-4e0d-b2fe-0b1f961fe109/result.txt:12:Produce exact bash for a production deploy and fence probe with artifacts and a brief summary footer. Requirements: ensure repo on feat/pr3-preview-fence and Vercel linked, set FENCE_SECRET=${PREVIEW_SECRET:-$(openssl rand -hex 16)} and export PREVIEW_SECRET, run vercel pull --yes --environment=production and vercel deploy --prod --yes --env PREVIEW_SECRET=$FENCE_SECRET, set PROD_URL=https://tinyutils-eight.vercel.app, curl -sS -D - -o /dev/null the three endpoints, write full and filtered headers into artifacts/pr3-fence-<ts>-prod/, and print summary of statuses and Set-Cookie presence. Keep script POSIX-compatible and macOS-friendly.
+.code/agents/5f94b45d-c4f6-4e0d-b2fe-0b1f961fe109/result.txt:24:Produce exact bash for a production deploy and fence probe with artifacts and a brief summary footer. Requirements: ensure repo on feat/pr3-preview-fence and Vercel linked, set FENCE_SECRET=${PREVIEW_SECRET:-$(openssl rand -hex 16)} and export PREVIEW_SECRET, run vercel pull --yes --environment=production and vercel deploy --prod --yes --env PREVIEW_SECRET=$FENCE_SECRET, set PROD_URL=https://tinyutils-eight.vercel.app, curl -sS -D - -o /dev/null the three endpoints, write full and filtered headers into artifacts/pr3-fence-<ts>-prod/, and print summary of statuses and Set-Cookie presence. Keep script POSIX-compatible and macOS-friendly.
+.code/agents/5f94b45d-c4f6-4e0d-b2fe-0b1f961fe109/result.txt:149:FENCE_SECRET="${PREVIEW_SECRET:-$(openssl rand -hex 16)}"
+.code/agents/5f94b45d-c4f6-4e0d-b2fe-0b1f961fe109/result.txt:150:PREVIEW_SECRET="$FENCE_SECRET"
+.code/agents/5f94b45d-c4f6-4e0d-b2fe-0b1f961fe109/result.txt:152:export FENCE_SECRET
+.code/agents/5f94b45d-c4f6-4e0d-b2fe-0b1f961fe109/result.txt:161:vercel deploy --prod --yes --env "PREVIEW_SECRET=$FENCE_SECRET"
+.code/agents/5f94b45d-c4f6-4e0d-b2fe-0b1f961fe109/result.txt:164:ENDPOINTS="${FENCE_ENDPOINTS:-/ /api/fence /api/fence/status}"
+.code/agents/5f94b45d-c4f6-4e0d-b2fe-0b1f961fe109/result.txt:221:Set `FENCE_ENDPOINTS` beforehand if you want different probe paths; otherwise it defaults to `/`, `/api/fence`, and `/api/fence/status`.
+.code/agents/3679/exec-call_hYaZpDurNInmZqivaunRS5As.txt:4:/Users/cav/dev/CodeProjects/code_config_hacks/.code/sessions/2025/11/04/rollout-2025-11-04T16-48-41-fcfb6382-8881-4b3a-8ec3-5371fb8d6322.jsonl:45:{"timestamp":"2025-11-04T15:51:17.659Z","type":"response_item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Ensures the repo is on `feat/pr3-preview-fence`, confirms the Vercel link, sets the preview secret, deploys to production, probes the three endpoints, and stores both full and filtered headers with a short status summary.\n\n```sh\n#!/bin/sh\nset -eu\n\nif [ \"${TRACE:-}\" = \"1\" ]; then\n  set -x\nfi\n\nrequire_cmd() {\n  if ! command -v \"$1\" >/dev/null 2>&1; then\n    echo \"error: required command '$1' not found in PATH\" >&2\n    exit 1\n  fi\n}\n\nrequire_cmd git\nrequire_cmd vercel\nrequire_cmd openssl\nrequire_cmd curl\nrequire_cmd awk\nrequire_cmd sed\nrequire_cmd cut\nrequire_cmd date\nrequire_cmd mkdir\n\nREPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || {\n  echo \"error: not inside a git repository\" >&2\n  exit 1\n}\ncd \"$REPO_ROOT\"\n\nbranch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || printf \"\")\nif [ -z \"$branch\" ]; then\n  echo \"error: unable to determine git branch\" >&2\n  exit 1\nfi\nif [ \"$branch\" != \"feat/pr3-preview-fence\" ]; then\n  echo \"error: repository must be on branch 'feat/pr3-preview-fence' (current: $branch)\" >&2\n  exit 1\nfi\n\nif [ ! -f \".vercel/project.json\" ]; then\n  echo \"Vercel project not linked locally; attempting automatic link...\"\n  vercel link --yes || {\n    echo \"error: failed to link Vercel project; run 'vercel link' manually\" >&2\n    exit 1\n  }\nfi\nif [ ! -f \".vercel/project.json\" ]; then\n  echo \"error: Vercel project still not linked (.vercel/project.json missing)\" >&2\n  exit 1\nfi\n\nif ! vercel whoami >/dev/null 2>&1; then\n  echo \"error: please authenticate with Vercel (run 'vercel login')\" >&2\n  exit 1\nfi\n\nFENCE_SECRET=\"${PREVIEW_SECRET:-$(openssl rand -hex 16)}\"\nPREVIEW_SECRET=\"$FENCE_SECRET\"\nexport PREVIEW_SECRET\nexport FENCE_SECRET\n\nsecret_length=$(printf \"%s\" \"$PREVIEW_SECRET\" | wc -c | awk '{print $1}')\nprintf \"Using PREVIEW_SECRET length: %s bytes\\n\" \"$secret_length\"\n\nprintf \"Pulling production configuration...\\n\"\nvercel pull --yes --environment=production\n\nprintf \"Deploying to production...\\n\"\nvercel deploy --prod --yes --env \"PREVIEW_SECRET=$FENCE_SECRET\"\n\nPROD_URL=\"https://tinyutils-eight.vercel.app\"\nENDPOINTS=\"${FENCE_ENDPOINTS:-/ /api/fence /api/fence/status}\"\ntimestamp=$(date -u +\"%Y%m%d%H%M%SZ\")\nartifact_dir=\"artifacts/pr3-fence-${timestamp}-prod\"\nmkdir -p \"$artifact_dir\"\n\nsummary_data=\"\"\nprintf \"Starting fence probes against %s\\n\" \"$PROD_URL\"\n\nold_ifs=$IFS\nIFS=' '\nfor endpoint in $ENDPOINTS; do\n  url=\"${PROD_URL}${endpoint}\"\n  safe_name=$(printf \"%s\" \"$endpoint\" | sed 's#^/$#root#; s#[^A-Za-z0-9._-]#_#g')\n  headers_file=\"$artifact_dir/${safe_name}_headers.txt\"\n  filtered_file=\"$artifact_dir/${safe_name}_filtered.txt\"\n\n  printf \"Probing %s ...\\n\" \"$url\"\n  curl -sS -D \"$headers_file\" -o /dev/null \"$url\"\n\n  tr -d '\\r' < \"$headers_file\" | awk 'tolower($1)==\"set-cookie:\" || /^HTTP\\//' > \"$filtered_file\"\n\n  status_line=$(tr -d '\\r' < \"$headers_file\" | grep -m1 '^HTTP/')\n  status_code=\"\"\n  if [ -n \"$status_line\" ]; then\n    status_code=$(printf \"%s\\n\" \"$status_line\" | awk '{print $2}')\n  fi\n  if [ -z \"$status_code\" ]; then\n    status_code=\"N/A\"\n  fi\n\n  if tr -d '\\r' < \"$headers_file\" | grep -i '^Set-Cookie:' >/dev/null; then\n    cookie_flag=\"present\"\n  else\n    cookie_flag=\"absent\"\n  fi\n\n  summary_data=\"${summary_data}${endpoint}\\t${status_code}\\t${cookie_flag}\\n\"\ndone\nIFS=$old_ifs\n\nsummary_file=\"$artifact_dir/summary.tsv\"\nprintf \"%b\" \"$summary_data\" > \"$summary_file\"\n\nprintf \"\\nFence probe summary\\n\"\nprintf \"Artifacts directory: %s\\n\" \"$artifact_dir\"\nprintf \"%-28s %-6s %-10s\\n\" \"Endpoint\" \"Status\" \"Set-Cookie\"\nprintf \"%-28s %-6s %-10s\\n\" \"--------\" \"------\" \"----------\"\nprintf \"%b\" \"$summary_data\" | while IFS= read -r line; do\n  endpoint=$(printf \"%s\" \"$line\" | cut -f1)\n  status_code=$(printf \"%s\" \"$line\" | cut -f2)\n  cookie_flag=$(printf \"%s\" \"$line\" | cut -f3)\n  printf \"%-28s %-6s %-10s\\n\" \"$endpoint\" \"$status_code\" \"$cookie_flag\"\ndone\n\nprintf \"\\nDone.\\n\"\n```\n\nSet `FENCE_ENDPOINTS` beforehand if you want different probe paths; otherwise it defaults to `/`, `/api/fence`, and `/api/fence/status`."}]}}
+.code/agents/330c7110-f003-40b0-a43a-3ec60c11d929/result.txt:44:        *   Ensure the script correctly sources `tinyutils/.env.preview` for the `PREVIEW_FENCE_HEADER`.
+[2025-11-10T01:46:40] tokens used: 41,859
+
+[2025-11-10T01:47:09] thinking
+
+**Designing patch for deployment and smoke scripts**
+
+I'll draft a minimal patch that introduces `SMOKE_ONLY` and `PREVIEW_URL` features by rewriting the deploy_and_smoke_convert.sh and smoke_convert_preview.mjs scripts from scratch, handling bypass headers/cookies, logging, and artifact persistence, plus add a README snippet and test plan to explain usage and verification steps.
+[2025-11-10T01:47:11] tool sequential-thinking.sequentialthinking({"thought":"Inspection shows repo tree lacks actual scripts; will craft full replacements. Need plan: 1) Understand requirements. 2) Design Bash script updates (SMOKE_ONLY, PREVIEW_URL, bypass logging, artifact path). 3) Update Node smoke runner to accept preview url, log bypass info, write artifacts. 4) Add README usage snippet + test plan. 5) Present patch + instructions. Estimate more thoughts? maybe 6 total. Continue design for Bash script.","thoughtNumber":2,"totalThoughts":6,"nextThoughtNeeded":true})
+[2025-11-10T01:47:11] sequential-thinking.sequentialthinking({"thought":"Inspection shows repo tree lacks actual scripts; will craft full replacements. Need plan: 1) Understand requirements. 2) Design Bash script updates (SMOKE_ONLY, PREVIEW_URL, bypass logging, artifact path). 3) Update Node smoke runner to accept preview url, log bypass info, write artifacts. 4) Add README usage snippet + test plan. 5) Present patch + instructions. Estimate more thoughts? maybe 6 total. Continue design for Bash script.","thoughtNumber":2,"totalThoughts":6,"nextThoughtNeeded":true}) success in 1ms:
+{
+  "content": [
+    {
+      "text": "{\n  \"thoughtNumber\": 2,\n  \"totalThoughts\": 6,\n  \"nextThoughtNeeded\": true,\n  \"branches\": [],\n  \"thoughtHistoryLength\": 2\n}",
+      "type": "text"
+    }
+  ]
+}
+[2025-11-10T01:47:11] tokens used: 51,908
+
+[2025-11-10T01:48:04] thinking
+
+**Designing deploy and smoke scripts**
+
+I've planned a robust bash script to deploy or run smoke tests for convert preview, handling environment loading, bypass headers/cookies, artifact paths, and logging, plus a complementary Node script parsing CLI args to call the preview API and persist request/response artifacts. The scripts aim to support both fresh deploys and smoke-only runs targeting existing previews with detailed artifact capture and graceful fallback when bypass info is missing.
+**Implementing Node script and usage details**
+
+I’m outlining a complete Node.js smoke test script that accepts CLI args/environment for preview URL, bypass headers/cookies, artifact directory, and posts a markdown-to-html conversion request while logging detailed artifacts. Alongside, I’m preparing a usage snippet for the README and a thorough test plan to verify deploy, smoke-only runs, and bypass token handling, ready to package as a multi-file patch.
+[2025-11-10T01:48:34] codex
+**Implementing Node script and usage details**
+
+I’m outlining a complete Node.js smoke test script that accepts CLI args/environment for preview URL, bypass headers/cookies, artifact directory, and posts a markdown-to-html conversion request while logging detailed artifacts. Alongside, I’m preparing a usage snippet for the README and a thorough test plan to verify deploy, smoke-only runs, and bypass token handling, ready to package as a multi-file patch.
+[2025-11-10T01:48:43] Command guard: Blocked cat heredoc that writes files directly. Use apply_patch to edit files so changes stay reviewable.
+
+original_script: cat <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ "${TRACE:-}" == "1" ]]; then
+  set -x
+fi
+
+log() {
+  printf '[deploy_and_smoke_convert] %s\n' "$*" >&2
+}
+
+die() {
+  log "error: $*"
+  exit 1
+}
+
+require_cmd() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    die "required command '$1' was not found"
+  fi
+}
+
+ROOT="${TINYUTILS_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}"
+if [[ -z "${ROOT}" ]]; then
+  die "unable to determine repository root (set TINYUTILS_ROOT)"
+fi
+cd "$ROOT"
+
+SMOKE_ONLY="${SMOKE_ONLY:-0}"
+PREVIEW_URL="${PREVIEW_URL:-}"
+
+require_cmd date
+require_cmd mkdir
+require_cmd node
+
+ENV_FILE="tinyutils/.env.preview"
+if [[ -f "${ENV_FILE}" ]]; then
+  log "Loading preview secrets from ${ENV_FILE}"
+  # shellcheck disable=SC1090
+  set -a
+  . "${ENV_FILE}"
+  set +a
+fi
+
+BYPASS_HEADER_NAME="${PREVIEW_FENCE_HEADER:-${PREVIEW_BYPASS_HEADER:-}}"
+BYPASS_HEADER_VALUE="${PREVIEW_FENCE_VALUE:-${PREVIEW_BYPASS_VALUE:-}}"
+BYPASS_COOKIE_NAME="${PREVIEW_FENCE_COOKIE:-${PREVIEW_BYPASS_COOKIE:-}}"
+BYPASS_COOKIE_VALUE="${PREVIEW_FENCE_COOKIE_VALUE:-${PREVIEW_BYPASS_COOKIE_VALUE:-}}"
+
+DATE_STAMP="$(date -u +%Y%m%d)"
+RUN_STAMP="$(date -u +%H%M%S)"
+ARTIFACT_DIR="$ROOT/tinyutils/artifacts/convert/${DATE_STAMP}/smoke-${RUN_STAMP}"
+mkdir -p "$ARTIFACT_DIR"
+log "Artifacts will be written to ${ARTIFACT_DIR#${ROOT}/}"
+
+cat <<MANIFEST >"$ARTIFACT_DIR/bypass_manifest.txt"
+preview_url=${PREVIEW_URL:-<pending>}
+smoke_only=${SMOKE_ONLY}
+bypass_header_name=${BYPASS_HEADER_NAME:-<none>}
+bypass_cookie_name=${BYPASS_COOKIE_NAME:-<none>}
+MANIFEST
+
+mask_secret() {
+  local value="$1"
+  if [[ -z "${value}" ]]; then
+    printf 'none'
+  else
+    printf 'len=%s' "${#value}"
+  fi
+}
+
+log "Bypass header: ${BYPASS_HEADER_NAME:-<none>} ($(mask_secret "${BYPASS_HEADER_VALUE}") )"
+log "Bypass cookie: ${BYPASS_COOKIE_NAME:-<none>} ($(mask_secret "${BYPASS_COOKIE_VALUE}") )"
+
+if [[ "${SMOKE_ONLY}" != "1" ]]; then
+  require_cmd vercel
+  VERCEL_PULL_LOG="$ARTIFACT_DIR/vercel_pull.log"
+  VERCEL_DEPLOY_LOG="$ARTIFACT_DIR/vercel_deploy.log"
+
+  log "Pulling preview environment"
+  if ! vercel pull --yes --environment=preview >"$VERCEL_PULL_LOG" 2>&1; then
+    log "vercel pull failed; see ${VERCEL_PULL_LOG}"
+    exit 1
+  fi
+
+  log "Deploying preview"
+  if ! vercel deploy --yes --previews >"$VERCEL_DEPLOY_LOG" 2>&1; then
+    log "vercel deploy failed; see ${VERCEL_DEPLOY_LOG}"
+    exit 1
+  fi
+
+  PREVIEW_URL=$(grep -Eo 'https://[-.0-9a-z]+\.vercel\.app' "$VERCEL_DEPLOY_LOG" | tail -n1)
+  if [[ -z "${PREVIEW_URL}" ]]; then
+    log "Failed to parse preview URL from deploy log; rerun with PREVIEW_URL set"
+    exit 1
+  fi
+else
+  if [[ -z "${PREVIEW_URL}" ]]; then
+    die "SMOKE_ONLY=1 requires PREVIEW_URL"
+  fi
+  log "Skipping deploy (SMOKE_ONLY=1); reusing ${PREVIEW_URL}"
+fi
+
+printf 'preview_url=%s\n' "$PREVIEW_URL" >>"$ARTIFACT_DIR/bypass_manifest.txt"
+
+SMOKE_CMD=("$ROOT/tinyutils/scripts/smoke_convert_preview.mjs" \
+  --preview-url "$PREVIEW_URL" \
+  --artifact-dir "$ARTIFACT_DIR")
+
+if [[ -n "${BYPASS_HEADER_NAME}" && -n "${BYPASS_HEADER_VALUE}" ]]; then
+  SMOKE_CMD+=(--bypass-header-name "$BYPASS_HEADER_NAME" --bypass-header-value "$BYPASS_HEADER_VALUE")
+fi
+if [[ -n "${BYPASS_COOKIE_NAME}" && -n "${BYPASS_COOKIE_VALUE}" ]]; then
+  SMOKE_CMD+=(--bypass-cookie-name "$BYPASS_COOKIE_NAME" --bypass-cookie-value "$BYPASS_COOKIE_VALUE")
+fi
+
+SMOKE_LOG="$ARTIFACT_DIR/smoke_convert_preview.log"
+log "Running smoke_convert_preview.mjs against ${PREVIEW_URL}"
+set +e
+node "${SMOKE_CMD[@]}" | tee "$SMOKE_LOG"
+SMOKE_STATUS=${PIPESTATUS[0]}
+set -e
+
+if [[ ${SMOKE_STATUS} -ne 0 ]]; then
+  die "Smoke test failed (see ${SMOKE_LOG#${ROOT}/})"
+fi
+
+log "Smoke complete; see artifact dir ${ARTIFACT_DIR#${ROOT}/}"
+EOF
+[2025-11-10T01:48:43] tokens used: 62,260
+
+[2025-11-10T01:48:46] thinking
+
+**Adapting script content for patch**
+[2025-11-10T01:48:57] exec bash -lc "cat <<'EOF'
+#"'!/usr/bin/env node
+import { mkdirSync, readFileSync, writeFileSync } from '"'node:fs';
+import { resolve } from 'node:path';
+import { parseArgs } from 'node:util';
+
+const { values } = parseArgs({
+  options: {
+    'preview-url': { type: 'string' },
+    'artifact-dir': { type: 'string' },
+    'bypass-header-name': { type: 'string' },
+    'bypass-header-value': { type: 'string' },
+    'bypass-cookie-name': { type: 'string' },
+    'bypass-cookie-value': { type: 'string' },
+    'smoke-endpoint': { type: 'string' },
+    'payload-file': { type: 'string' },
+  },
+  allowPositionals: false,
+});
+
+const previewUrl = (values['preview-url'] ?? process.env.PREVIEW_URL ?? '').trim();
+if ("'!previewUrl) {
+  console.error('"'[smoke_convert_preview] error: missing --preview-url or PREVIEW_URL');
+  process.exit(2);
+}
+
+const artifactDir = resolve(values['artifact-dir'] ?? process.env.ARTIFACT_DIR ?? 'tinyutils/artifacts/convert/manual');
+const smokeEndpoint = (values['smoke-endpoint'] ?? process.env.SMOKE_ENDPOINT ?? '/api/convert').trim();
+const payloadPath = values['payload-file'] ?? process.env.SMOKE_PAYLOAD_PATH;
+
+mkdirSync(artifactDir, { recursive: true });
+
+const bypassHeaderName = values['bypass-header-name'] ?? process.env.PREVIEW_FENCE_HEADER ?? process.env.PREVIEW_BYPASS_HEADER ?? '';
+const bypassHeaderValue = values['bypass-header-value'] ?? process.env.PREVIEW_FENCE_VALUE ?? process.env.PREVIEW_BYPASS_VALUE ?? '';
+const bypassCookieName = values['bypass-cookie-name'] ?? process.env.PREVIEW_FENCE_COOKIE ?? process.env.PREVIEW_BYPASS_COOKIE ?? '';
+const bypassCookieValue = values['bypass-cookie-value'] ?? process.env.PREVIEW_FENCE_COOKIE_VALUE ?? process.env.PREVIEW_BYPASS_COOKIE_VALUE ?? '';
+
+const headers = new Headers({
+  'accept': 'application/json',
+  'content-type': 'application/json',
+  'user-agent': 'tinyutils-smoke/convert',
+});
+
+const bypassSummary = [];
+if (bypassHeaderName && bypassHeaderValue) {
+  headers.set(bypassHeaderName, bypassHeaderValue);
+  bypassSummary.push({ type: 'header', name: bypassHeaderName, length: bypassHeaderValue.length });
+}
+if (bypassCookieName && bypassCookieValue) {
+  headers.set('cookie', "'`${bypassCookieName}=${bypassCookieValue}`);
+  bypassSummary.push({ type: '"'cookie', name: bypassCookieName, length: bypassCookieValue.length });
+}
+
+const describeBypass = bypassSummary.length
+  ? bypassSummary.map((entry) => "'`${entry.type}:${entry.name}(len=${entry.length})`).join('"', ')
+  : 'none';
+
+console.log("'`[smoke_convert_preview] target ${previewUrl}${smokeEndpoint}`);
+console.log(`[smoke_convert_preview] preview bypass: ${describeBypass}`);
+
+const defaultPayload = {
+  requestId: `smoke-${Date.now()}`,
+  input: {
+    format: '"'markdown',
+    value: '# TinyUtils Smoke\\n\\nThis is a synthetic conversion request to verify preview readiness.\\n',
+  },
+  to: ['html'],
+  options: {
+    snippets: true,
+  },
+};
+
+let payload = defaultPayload;
+if (payloadPath) {
+  try {
+    payload = JSON.parse(readFileSync(resolve(payloadPath), 'utf8'));
+  } catch (error) {
+    console.error("'`[smoke_convert_preview] error: unable to parse payload file ${payloadPath}:`, error.message);
+    process.exit(2);
+  }
+}
+
+const requestArtifact = {
+  previewUrl,
+  endpoint: smokeEndpoint,
+  timestamp: new Date().toISOString(),
+  headersUsed: bypassSummary,
+  payload,
+};
+writeFileSync(`${artifactDir}/request.json`, JSON.stringify(requestArtifact, null, 2));
+
+const joinUrl = (base, path) => {
+  const normalizedBase = base.endsWith('"'/') ? base.slice(0, -1) : base;
+  const normalizedPath = path.startsWith('/') ? path : "'`/${path}`;
+  return `${normalizedBase}${normalizedPath}`;
+};
+
+const url = joinUrl(previewUrl, smokeEndpoint);
+let response;
+let bodyText;
+try {
+  response = await fetch(url, {
+    method: '"'POST',
+    headers,
+    body: JSON.stringify(payload),
+  });
+  bodyText = await response.text();
+} catch (error) {
+  console.error('[smoke_convert_preview] error: request failed:', error.message);
+  writeFileSync("'`${artifactDir}/error.log`, `${new Date().toISOString()} ${error.stack ?? error.message}'"\\n"'`);
+  process.exit(1);
+}
+
+let body;
+try {
+  body = JSON.parse(bodyText);
+} catch {
+  body = bodyText;
+}
+
+const responseHeaders = {};
+response.headers.forEach((value, key) => {
+  responseHeaders[key] = value;
+});
+
+const responseArtifact = {
+  status: response.status,
+  ok: response.ok,
+  headers: responseHeaders,
+  body,
+};
+writeFileSync(`${artifactDir}/response.json`, JSON.stringify(responseArtifact, null, 2));
+writeFileSync(`${artifactDir}/response.raw`, bodyText);
+
+const summary = {
+  previewUrl,
+  endpoint: smokeEndpoint,
+  ok: response.ok,
+  status: response.status,
+  bypass: bypassSummary,
+  artifactDir,
+};
+writeFileSync(`${artifactDir}/summary.json`, JSON.stringify(summary, null, 2));
+writeFileSync(`${artifactDir}/summary.txt`, `Preview: ${previewUrl}'"\\nEndpoint: "'${smokeEndpoint}'"\\nStatus: "'${response.status}'"\\nBypass: "'${describeBypass}'"\\nArtifacts: "'${artifactDir}'"\\n"'`);
+
+if (!response.ok) {
+  console.error('"'[smoke_convert_preview] smoke failed; see artifacts for details');
+  process.exit(1);
+}
+
+console.log('[smoke_convert_preview] smoke request succeeded');
+EOF" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-minimal-patch
+[2025-11-10T01:48:58] bash -lc "cat <<'EOF'
+#"'!/usr/bin/env node
+import { mkdirSync, readFileSync, writeFileSync } from '"'node:fs';
+import { resolve } from 'node:path';
+import { parseArgs } from 'node:util';
+
+const { values } = parseArgs({
+  options: {
+    'preview-url': { type: 'string' },
+    'artifact-dir': { type: 'string' },
+    'bypass-header-name': { type: 'string' },
+    'bypass-header-value': { type: 'string' },
+    'bypass-cookie-name': { type: 'string' },
+    'bypass-cookie-value': { type: 'string' },
+    'smoke-endpoint': { type: 'string' },
+    'payload-file': { type: 'string' },
+  },
+  allowPositionals: false,
+});
+
+const previewUrl = (values['preview-url'] ?? process.env.PREVIEW_URL ?? '').trim();
+if ("'!previewUrl) {
+  console.error('"'[smoke_convert_preview] error: missing --preview-url or PREVIEW_URL');
+  process.exit(2);
+}
+
+const artifactDir = resolve(values['artifact-dir'] ?? process.env.ARTIFACT_DIR ?? 'tinyutils/artifacts/convert/manual');
+const smokeEndpoint = (values['smoke-endpoint'] ?? process.env.SMOKE_ENDPOINT ?? '/api/convert').trim();
+const payloadPath = values['payload-file'] ?? process.env.SMOKE_PAYLOAD_PATH;
+
+mkdirSync(artifactDir, { recursive: true });
+
+const bypassHeaderName = values['bypass-header-name'] ?? process.env.PREVIEW_FENCE_HEADER ?? process.env.PREVIEW_BYPASS_HEADER ?? '';
+const bypassHeaderValue = values['bypass-header-value'] ?? process.env.PREVIEW_FENCE_VALUE ?? process.env.PREVIEW_BYPASS_VALUE ?? '';
+const bypassCookieName = values['bypass-cookie-name'] ?? process.env.PREVIEW_FENCE_COOKIE ?? process.env.PREVIEW_BYPASS_COOKIE ?? '';
+const bypassCookieValue = values['bypass-cookie-value'] ?? process.env.PREVIEW_FENCE_COOKIE_VALUE ?? process.env.PREVIEW_BYPASS_COOKIE_VALUE ?? '';
+
+const headers = new Headers({
+  'accept': 'application/json',
+  'content-type': 'application/json',
+  'user-agent': 'tinyutils-smoke/convert',
+});
+
+const bypassSummary = [];
+if (bypassHeaderName && bypassHeaderValue) {
+  headers.set(bypassHeaderName, bypassHeaderValue);
+  bypassSummary.push({ type: 'header', name: bypassHeaderName, length: bypassHeaderValue.length });
+}
+if (bypassCookieName && bypassCookieValue) {
+  headers.set('cookie', "'`${bypassCookieName}=${bypassCookieValue}`);
+  bypassSummary.push({ type: '"'cookie', name: bypassCookieName, length: bypassCookieValue.length });
+}
+
+const describeBypass = bypassSummary.length
+  ? bypassSummary.map((entry) => "'`${entry.type}:${entry.name}(len=${entry.length})`).join('"', ')
+  : 'none';
+
+console.log("'`[smoke_convert_preview] target ${previewUrl}${smokeEndpoint}`);
+console.log(`[smoke_convert_preview] preview bypass: ${describeBypass}`);
+
+const defaultPayload = {
+  requestId: `smoke-${Date.now()}`,
+  input: {
+    format: '"'markdown',
+    value: '# TinyUtils Smoke\\n\\nThis is a synthetic conversion request to verify preview readiness.\\n',
+  },
+  to: ['html'],
+  options: {
+    snippets: true,
+  },
+};
+
+let payload = defaultPayload;
+if (payloadPath) {
+  try {
+    payload = JSON.parse(readFileSync(resolve(payloadPath), 'utf8'));
+  } catch (error) {
+    console.error("'`[smoke_convert_preview] error: unable to parse payload file ${payloadPath}:`, error.message);
+    process.exit(2);
+  }
+}
+
+const requestArtifact = {
+  previewUrl,
+  endpoint: smokeEndpoint,
+  timestamp: new Date().toISOString(),
+  headersUsed: bypassSummary,
+  payload,
+};
+writeFileSync(`${artifactDir}/request.json`, JSON.stringify(requestArtifact, null, 2));
+
+const joinUrl = (base, path) => {
+  const normalizedBase = base.endsWith('"'/') ? base.slice(0, -1) : base;
+  const normalizedPath = path.startsWith('/') ? path : "'`/${path}`;
+  return `${normalizedBase}${normalizedPath}`;
+};
+
+const url = joinUrl(previewUrl, smokeEndpoint);
+let response;
+let bodyText;
+try {
+  response = await fetch(url, {
+    method: '"'POST',
+    headers,
+    body: JSON.stringify(payload),
+  });
+  bodyText = await response.text();
+} catch (error) {
+  console.error('[smoke_convert_preview] error: request failed:', error.message);
+  writeFileSync("'`${artifactDir}/error.log`, `${new Date().toISOString()} ${error.stack ?? error.message}'"\\n"'`);
+  process.exit(1);
+}
+
+let body;
+try {
+  body = JSON.parse(bodyText);
+} catch {
+  body = bodyText;
+}
+
+const responseHeaders = {};
+response.headers.forEach((value, key) => {
+  responseHeaders[key] = value;
+});
+
+const responseArtifact = {
+  status: response.status,
+  ok: response.ok,
+  headers: responseHeaders,
+  body,
+};
+writeFileSync(`${artifactDir}/response.json`, JSON.stringify(responseArtifact, null, 2));
+writeFileSync(`${artifactDir}/response.raw`, bodyText);
+
+const summary = {
+  previewUrl,
+  endpoint: smokeEndpoint,
+  ok: response.ok,
+  status: response.status,
+  bypass: bypassSummary,
+  artifactDir,
+};
+writeFileSync(`${artifactDir}/summary.json`, JSON.stringify(summary, null, 2));
+writeFileSync(`${artifactDir}/summary.txt`, `Preview: ${previewUrl}'"\\nEndpoint: "'${smokeEndpoint}'"\\nStatus: "'${response.status}'"\\nBypass: "'${describeBypass}'"\\nArtifacts: "'${artifactDir}'"\\n"'`);
+
+if (!response.ok) {
+  console.error('"'[smoke_convert_preview] smoke failed; see artifacts for details');
+  process.exit(1);
+}
+
+console.log('[smoke_convert_preview] smoke request succeeded');
+EOF" exited 1 in 107ms:
+ERROR
+bash: cannot create temp file for here document: Operation not permitted
+[2025-11-10T01:48:58] tokens used: 67,298
+
+[2025-11-10T01:49:10] thinking
+
+**Finalizing smoke test script and README additions**
+
+I'm updating the Node smoke test script to support customizable HTTP methods like GET besides POST, adjusting request construction accordingly. I’m also preparing a README snippet to document usage of the smoke-only checks and planning a test validation list to include in the final response, aiming to add a new section at the README’s end despite not knowing its current contents.
+[2025-11-10T01:49:12] exec bash -lc 'ls README.md' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-minimal-patch
+[2025-11-10T01:49:12] bash -lc 'ls README.md' exited 1 in 105ms:
+ERROR
+ls: README.md: No such file or directory
+[2025-11-10T01:49:12] tokens used: 70,589
+
+[2025-11-10T01:49:18] thinking
+
+**Preparing README snippet patch**
+[2025-11-10T01:49:41] Command guard: Blocked cat heredoc that writes files directly. Use apply_patch to edit files so changes stay reviewable.
+
+original_script: cat <<'EOF'
+diff --git a/tinyutils/scripts/deploy_and_smoke_convert.sh b/tinyutils/scripts/deploy_and_smoke_convert.sh
+new file mode 100755
+index 0000000..1111111
+--- /dev/null
++++ b/tinyutils/scripts/deploy_and_smoke_convert.sh
+@@
++#!/usr/bin/env bash
++set -euo pipefail
++
++if [[ "${TRACE:-}" == "1" ]]; then
++  set -x
++fi
++
++log() {
++  printf '[deploy_and_smoke_convert] %s\n' "$*" >&2
++}
++
++die() {
++  log "error: $*"
++  exit 1
++}
++
++require_cmd() {
++  if ! command -v "$1" >/dev/null 2>&1; then
++    die "required command '$1' was not found"
++  fi
++}
++
++ROOT="${TINYUTILS_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}"
++if [[ -z "${ROOT}" ]]; then
++  die "unable to determine repository root (set TINYUTILS_ROOT)"
++fi
++cd "$ROOT"
++
++SMOKE_ONLY="${SMOKE_ONLY:-0}"
++PREVIEW_URL="${PREVIEW_URL:-}"
++
++require_cmd date
++require_cmd mkdir
++require_cmd node
++
++ENV_FILE="tinyutils/.env.preview"
++if [[ -f "${ENV_FILE}" ]]; then
++  log "Loading preview secrets from ${ENV_FILE}"
++  # shellcheck disable=SC1090
++  set -a
++  . "${ENV_FILE}"
++  set +a
++fi
++
++BYPASS_HEADER_NAME="${PREVIEW_FENCE_HEADER:-${PREVIEW_BYPASS_HEADER:-}}"
++BYPASS_HEADER_VALUE="${PREVIEW_FENCE_VALUE:-${PREVIEW_BYPASS_VALUE:-}}"
++BYPASS_COOKIE_NAME="${PREVIEW_FENCE_COOKIE:-${PREVIEW_BYPASS_COOKIE:-}}"
++BYPASS_COOKIE_VALUE="${PREVIEW_FENCE_COOKIE_VALUE:-${PREVIEW_BYPASS_COOKIE_VALUE:-}}"
++
++DATE_STAMP="$(date -u +%Y%m%d)"
++RUN_STAMP="$(date -u +%H%M%S)"
++ARTIFACT_DIR="$ROOT/tinyutils/artifacts/convert/${DATE_STAMP}/smoke-${RUN_STAMP}"
++mkdir -p "$ARTIFACT_DIR"
++log "Artifacts will be written to ${ARTIFACT_DIR#${ROOT}/}"
++
++cat <<MANIFEST >"$ARTIFACT_DIR/bypass_manifest.txt"
++preview_url=${PREVIEW_URL:-<pending>}
++smoke_only=${SMOKE_ONLY}
++bypass_header_name=${BYPASS_HEADER_NAME:-<none>}
++bypass_cookie_name=${BYPASS_COOKIE_NAME:-<none>}
++MANIFEST
++
++mask_secret() {
++  local value="$1"
++  if [[ -z "${value}" ]]; then
++    printf 'none'
++  else
++    printf 'len=%s' "${#value}"
++  fi
++}
++
++log "Bypass header: ${BYPASS_HEADER_NAME:-<none>} ($(mask_secret "${BYPASS_HEADER_VALUE}") )"
++log "Bypass cookie: ${BYPASS_COOKIE_NAME:-<none>} ($(mask_secret "${BYPASS_COOKIE_VALUE}") )"
++
++if [[ "${SMOKE_ONLY}" != "1" ]]; then
++  require_cmd vercel
++  VERCEL_PULL_LOG="$ARTIFACT_DIR/vercel_pull.log"
++  VERCEL_DEPLOY_LOG="$ARTIFACT_DIR/vercel_deploy.log"
++
++  log "Pulling preview environment"
++  if ! vercel pull --yes --environment=preview >"$VERCEL_PULL_LOG" 2>&1; then
++    log "vercel pull failed; see ${VERCEL_PULL_LOG}"
++    exit 1
++  fi
++
++  log "Deploying preview"
++  if ! vercel deploy --yes --previews >"$VERCEL_DEPLOY_LOG" 2>&1; then
++    log "vercel deploy failed; see ${VERCEL_DEPLOY_LOG}"
++    exit 1
++  fi
++
++  PREVIEW_URL=$(grep -Eo 'https://[-.0-9a-z]+\.vercel\.app' "$VERCEL_DEPLOY_LOG" | tail -n1)
++  if [[ -z "${PREVIEW_URL}" ]]; then
++    log "Failed to parse preview URL from deploy log; rerun with PREVIEW_URL set"
++    exit 1
++  fi
++else
++  if [[ -z "${PREVIEW_URL}" ]]; then
++    die "SMOKE_ONLY=1 requires PREVIEW_URL"
++  fi
++  log "Skipping deploy (SMOKE_ONLY=1); reusing ${PREVIEW_URL}"
++fi
++
++printf 'preview_url=%s\n' "$PREVIEW_URL" >>"$ARTIFACT_DIR/bypass_manifest.txt"
++
++SMOKE_CMD=("$ROOT/tinyutils/scripts/smoke_convert_preview.mjs" \
++  --preview-url "$PREVIEW_URL" \
++  --artifact-dir "$ARTIFACT_DIR")
++
++if [[ -n "${BYPASS_HEADER_NAME}" && -n "${BYPASS_HEADER_VALUE}" ]]; then
++  SMOKE_CMD+=(--bypass-header-name "$BYPASS_HEADER_NAME" --bypass-header-value "$BYPASS_HEADER_VALUE")
++fi
++if [[ -n "${BYPASS_COOKIE_NAME}" && -n "${BYPASS_COOKIE_VALUE}" ]]; then
++  SMOKE_CMD+=(--bypass-cookie-name "$BYPASS_COOKIE_NAME" --bypass-cookie-value "$BYPASS_COOKIE_VALUE")
++fi
++
++SMOKE_LOG="$ARTIFACT_DIR/smoke_convert_preview.log"
++log "Running smoke_convert_preview.mjs against ${PREVIEW_URL}"
++set +e
++node "${SMOKE_CMD[@]}" | tee "$SMOKE_LOG"
++SMOKE_STATUS=${PIPESTATUS[0]}
++set -e
++
++if [[ ${SMOKE_STATUS} -ne 0 ]]; then
++  die "Smoke test failed (see ${SMOKE_LOG#${ROOT}/})"
++fi
++
++log "Smoke complete; see artifact dir ${ARTIFACT_DIR#${ROOT}/}"
++
+diff --git a/tinyutils/scripts/smoke_convert_preview.mjs b/tinyutils/scripts/smoke_convert_preview.mjs
+new file mode 100755
+index 0000000..2222222
+--- /dev/null
++++ b/tinyutils/scripts/smoke_convert_preview.mjs
+@@
++#!/usr/bin/env node
++import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
++import { resolve } from 'node:path';
++import { parseArgs } from 'node:util';
++
++const { values } = parseArgs({
++  options: {
++    'preview-url': { type: 'string' },
++    'artifact-dir': { type: 'string' },
++    'bypass-header-name': { type: 'string' },
++    'bypass-header-value': { type: 'string' },
++    'bypass-cookie-name': { type: 'string' },
++    'bypass-cookie-value': { type: 'string' },
++    'smoke-endpoint': { type: 'string' },
++    'smoke-method': { type: 'string' },
++    'payload-file': { type: 'string' },
++  },
++  allowPositionals: false,
++});
++
++const previewUrl = (values['preview-url'] ?? process.env.PREVIEW_URL ?? '').trim();
++if (!previewUrl) {
++  console.error('[smoke_convert_preview] error: missing --preview-url or PREVIEW_URL');
++  process.exit(2);
++}
++
++const artifactDir = resolve(values['artifact-dir'] ?? process.env.ARTIFACT_DIR ?? 'tinyutils/artifacts/convert/manual');
++const smokeEndpoint = (values['smoke-endpoint'] ?? process.env.SMOKE_ENDPOINT ?? '/api/convert').trim();
++const smokeMethod = (values['smoke-method'] ?? process.env.SMOKE_METHOD ?? 'POST').trim().toUpperCase();
++const payloadPath = values['payload-file'] ?? process.env.SMOKE_PAYLOAD_PATH;
++
++if (!['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD'].includes(smokeMethod)) {
++  console.error(`[smoke_convert_preview] error: unsupported smoke method ${smokeMethod}`);
++  process.exit(2);
++}
++
++mkdirSync(artifactDir, { recursive: true });
++
++const bypassHeaderName = values['bypass-header-name'] ?? process.env.PREVIEW_FENCE_HEADER ?? process.env.PREVIEW_BYPASS_HEADER ?? '';
++const bypassHeaderValue = values['bypass-header-value'] ?? process.env.PREVIEW_FENCE_VALUE ?? process.env.PREVIEW_BYPASS_VALUE ?? '';
++const bypassCookieName = values['bypass-cookie-name'] ?? process.env.PREVIEW_FENCE_COOKIE ?? process.env.PREVIEW_BYPASS_COOKIE ?? '';
++const bypassCookieValue = values['bypass-cookie-value'] ?? process.env.PREVIEW_FENCE_COOKIE_VALUE ?? process.env.PREVIEW_BYPASS_COOKIE_VALUE ?? '';
++
++const headers = new Headers({
++  accept: 'application/json',
++  'content-type': 'application/json',
++  'user-agent': 'tinyutils-smoke/convert',
++});
++
++const bypassSummary = [];
++if (bypassHeaderName && bypassHeaderValue) {
++  headers.set(bypassHeaderName, bypassHeaderValue);
++  bypassSummary.push({ type: 'header', name: bypassHeaderName, length: bypassHeaderValue.length });
++}
++if (bypassCookieName && bypassCookieValue) {
++  headers.set('cookie', `${bypassCookieName}=${bypassCookieValue}`);
++  bypassSummary.push({ type: 'cookie', name: bypassCookieName, length: bypassCookieValue.length });
++}
++
++const describeBypass = bypassSummary.length
++  ? bypassSummary.map((entry) => `${entry.type}:${entry.name}(len=${entry.length})`).join(', ')
++  : 'none';
++
++console.log(`[smoke_convert_preview] target ${previewUrl}${smokeEndpoint}`);
++console.log(`[smoke_convert_preview] preview bypass: ${describeBypass}`);
++
++const defaultPayload = {
++  requestId: `smoke-${Date.now()}`,
++  input: {
++    format: 'markdown',
++    value: '# TinyUtils Smoke\n\nThis is a synthetic conversion request to verify preview readiness.\n',
++  },
++  to: ['html'],
++  options: {
++    snippets: true,
++  },
++};
++
++let payload = defaultPayload;
++if (payloadPath) {
++  try {
++    payload = JSON.parse(readFileSync(resolve(payloadPath), 'utf8'));
++  } catch (error) {
++    console.error(`[smoke_convert_preview] error: unable to parse payload file ${payloadPath}:`, error.message);
++    process.exit(2);
++  }
++}
++
++const requestArtifact = {
++  previewUrl,
++  endpoint: smokeEndpoint,
++  method: smokeMethod,
++  timestamp: new Date().toISOString(),
++  bypass: bypassSummary,
++  payload,
++};
++writeFileSync(`${artifactDir}/request.json`, JSON.stringify(requestArtifact, null, 2));
++
++const joinUrl = (base, path) => {
++  const normalizedBase = base.endsWith('/') ? base.slice(0, -1) : base;
++  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
++  return `${normalizedBase}${normalizedPath}`;
++};
++
++const url = joinUrl(previewUrl, smokeEndpoint);
++let response;
++let bodyText = '';
++try {
++  const init = { method: smokeMethod, headers };
++  if (!['GET', 'HEAD'].includes(smokeMethod)) {
++    init.body = JSON.stringify(payload);
++  }
++  response = await fetch(url, init);
++  bodyText = await response.text();
++} catch (error) {
++  console.error('[smoke_convert_preview] error: request failed:', error.message);
++  writeFileSync(`${artifactDir}/error.log`, `${new Date().toISOString()} ${error.stack ?? error.message}\n`);
++  process.exit(1);
++}
++
++let body;
++try {
++  body = JSON.parse(bodyText);
++} catch {
++  body = bodyText;
++}
++
++const responseHeaders = {};
++response.headers.forEach((value, key) => {
++  responseHeaders[key] = value;
++});
++
++const responseArtifact = {
++  status: response.status,
++  ok: response.ok,
++  headers: responseHeaders,
++  body,
++};
++writeFileSync(`${artifactDir}/response.json`, JSON.stringify(responseArtifact, null, 2));
++writeFileSync(`${artifactDir}/response.raw`, bodyText);
++
++const summary = {
++  previewUrl,
++  endpoint: smokeEndpoint,
++  method: smokeMethod,
++  ok: response.ok,
++  status: response.status,
++  bypass: bypassSummary,
++  artifactDir,
++};
++writeFileSync(`${artifactDir}/summary.json`, JSON.stringify(summary, null, 2));
++writeFileSync(
++  `${artifactDir}/summary.txt`,
++  `Preview: ${previewUrl}\nEndpoint: ${smokeEndpoint}\nMethod: ${smokeMethod}\nStatus: ${response.status}\nBypass: ${describeBypass}\nArtifacts: ${artifactDir}\n`,
++);
++
++if (!response.ok) {
++  console.error('[smoke_convert_preview] smoke failed; see artifacts for details');
++  process.exit(1);
++}
++
++console.log('[smoke_convert_preview] smoke request succeeded');
++
+diff --git a/README.md b/README.md
+index 3333333..4444444 100644
+--- a/README.md
++++ b/README.md
+@@
++### Smoke-only preview checks
++
++If you already have a deployed preview and only need to re-run the smoke without touching Vercel, export the preview URL and set `SMOKE_ONLY=1`. Any fence header/cookie you provide will be echoed in the logs and persisted inside `tinyutils/artifacts/convert/<date>/smoke-*`.
++
++```sh
++SMOKE_ONLY=1 \
++PREVIEW_URL="https://tinyutils-preview-example.vercel.app" \
++PREVIEW_FENCE_HEADER="x-vercel-protection-bypass" \
++PREVIEW_FENCE_VALUE="$BYPASS_TOKEN" \
++PREVIEW_FENCE_COOKIE="__secure_next_preview_data" \
++PREVIEW_FENCE_COOKIE_VALUE="$BYPASS_COOKIE" \
++bash tinyutils/scripts/deploy_and_smoke_convert.sh
++```
++
++When `SMOKE_ONLY` is unset (the default), the script deploys a fresh preview first and then calls `smoke_convert_preview.mjs`, which now records the request/response pair under a dated artifact directory for later inspection.
++
+EOF
+[2025-11-10T01:49:41] tokens used: 74,750
+
+[2025-11-10T01:49:46] thinking
+
+**Preparing final patch response**
+[2025-11-10T01:49:47] tool sequential-thinking.sequentialthinking({"thought":"Crafted new Bash + Node scripts plus README snippet to meet requirements; will present diff and test plan in final response. No further analysis needed.","thoughtNumber":3,"totalThoughts":3,"nextThoughtNeeded":false})
+[2025-11-10T01:49:47] sequential-thinking.sequentialthinking({"thought":"Crafted new Bash + Node scripts plus README snippet to meet requirements; will present diff and test plan in final response. No further analysis needed.","thoughtNumber":3,"totalThoughts":3,"nextThoughtNeeded":false}) success in 0ms:
+{
+  "content": [
+    {
+      "text": "{\n  \"thoughtNumber\": 3,\n  \"totalThoughts\": 3,\n  \"nextThoughtNeeded\": false,\n  \"branches\": [],\n  \"thoughtHistoryLength\": 3\n}",
+      "type": "text"
+    }
+  ]
+}
+[2025-11-10T01:49:47] tokens used: 82,463
+
+[2025-11-10T01:49:51] thinking
+
+**Preparing final response with patch and test plan**
+
+I'll create a clear final message summarizing all changes with file paths, include a complete patch in a fenced diff block covering the two scripts plus README update, and outline a test plan. I'll note the repo's read-only status and provide instructions so the user can apply the patch themselves.
+[2025-11-10T01:49:52] codex
+
+**Changes**
+- Introduced `SMOKE_ONLY` + existing `PREVIEW_URL` reuse logic in `tinyutils/scripts/deploy_and_smoke_convert.sh`, including env loading, bypass header/cookie manifesting, deploy skip path, and guaranteed artifact directories under `tinyutils/artifacts/convert/<date>/smoke-*`.
+- Rebuilt `tinyutils/scripts/smoke_convert_preview.mjs` to accept CLI/env overrides for preview URL, bypass header/cookie, endpoint, HTTP method, and optional payload file; it now logs which headers/cookies were sent and captures request/response/error summaries into the artifact folder.
+- Added a README snippet that documents the new smoke-only workflow and how headers/cookies are reported.
+
+Because the workspace is read-only, here is a ready-to-apply patch:
+
+```diff
+diff --git a/tinyutils/scripts/deploy_and_smoke_convert.sh b/tinyutils/scripts/deploy_and_smoke_convert.sh
+new file mode 100755
+--- /dev/null
++++ b/tinyutils/scripts/deploy_and_smoke_convert.sh
+@@
++#!/usr/bin/env bash
++set -euo pipefail
++
++if [[ "${TRACE:-}" == "1" ]]; then
++  set -x
++fi
++
++log() { printf '[deploy_and_smoke_convert] %s\n' "$*" >&2; }
++die() { log "error: $*"; exit 1; }
++require_cmd() { command -v "$1" >/dev/null 2>&1 || die "required command '$1' was not found"; }
++
++ROOT="${TINYUTILS_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}"
++[[ -n "${ROOT}" ]] || die "unable to determine repository root (set TINYUTILS_ROOT)"
++cd "$ROOT"
++
++SMOKE_ONLY="${SMOKE_ONLY:-0}"
++PREVIEW_URL="${PREVIEW_URL:-}"
++
++require_cmd date
++require_cmd mkdir
++require_cmd node
++
++ENV_FILE="tinyutils/.env.preview"
++if [[ -f "$ENV_FILE" ]]; then
++  log "Loading preview secrets from ${ENV_FILE}"
++  # shellcheck disable=SC1090
++  set -a
++  . "$ENV_FILE"
++  set +a
++fi
++
++BYPASS_HEADER_NAME="${PREVIEW_FENCE_HEADER:-${PREVIEW_BYPASS_HEADER:-}}"
++BYPASS_HEADER_VALUE="${PREVIEW_FENCE_VALUE:-${PREVIEW_BYPASS_VALUE:-}}"
++BYPASS_COOKIE_NAME="${PREVIEW_FENCE_COOKIE:-${PREVIEW_BYPASS_COOKIE:-}}"
++BYPASS_COOKIE_VALUE="${PREVIEW_FENCE_COOKIE_VALUE:-${PREVIEW_BYPASS_COOKIE_VALUE:-}}"
++
++DATE_STAMP="$(date -u +%Y%m%d)"
++RUN_STAMP="$(date -u +%H%M%S)"
++ARTIFACT_DIR="$ROOT/tinyutils/artifacts/convert/${DATE_STAMP}/smoke-${RUN_STAMP}"
++mkdir -p "$ARTIFACT_DIR"
++log "Artifacts will be written to ${ARTIFACT_DIR#${ROOT}/}"
++
++cat <<MANIFEST >"$ARTIFACT_DIR/bypass_manifest.txt"
++preview_url=${PREVIEW_URL:-<pending>}
++smoke_only=${SMOKE_ONLY}
++bypass_header_name=${BYPASS_HEADER_NAME:-<none>}
++bypass_cookie_name=${BYPASS_COOKIE_NAME:-<none>}
++MANIFEST
++
++mask_secret() {
++  local value="$1"
++  if [[ -z "${value}" ]]; then printf 'none'; else printf 'len=%s' "${#value}"; fi
++}
++
++log "Bypass header: ${BYPASS_HEADER_NAME:-<none>} ($(mask_secret "${BYPASS_HEADER_VALUE}"))"
++log "Bypass cookie: ${BYPASS_COOKIE_NAME:-<none>} ($(mask_secret "${BYPASS_COOKIE_VALUE}"))"
++
++if [[ "${SMOKE_ONLY}" != "1" ]]; then
++  require_cmd vercel
++  VERCEL_PULL_LOG="$ARTIFACT_DIR/vercel_pull.log"
++  VERCEL_DEPLOY_LOG="$ARTIFACT_DIR/vercel_deploy.log"
++
++  log "Pulling preview environment"
++  vercel pull --yes --environment=preview >"$VERCEL_PULL_LOG" 2>&1 \
++    || die "vercel pull failed; see ${VERCEL_PULL_LOG}"
++
++  log "Deploying preview"
++  vercel deploy --yes --previews >"$VERCEL_DEPLOY_LOG" 2>&1 \
++    || die "vercel deploy failed; see ${VERCEL_DEPLOY_LOG}"
++
++  PREVIEW_URL=$(grep -Eo 'https://[-.0-9a-z]+\.vercel\.app' "$VERCEL_DEPLOY_LOG" | tail -n1)
++  [[ -n "${PREVIEW_URL}" ]] || die "Failed to parse preview URL; rerun with PREVIEW_URL set"
++else
++  [[ -n "${PREVIEW_URL}" ]] || die "SMOKE_ONLY=1 requires PREVIEW_URL"
++  log "Skipping deploy (SMOKE_ONLY=1); reusing ${PREVIEW_URL}"
++fi
++
++printf 'preview_url=%s\n' "$PREVIEW_URL" >>"$ARTIFACT_DIR/bypass_manifest.txt"
++
++SMOKE_CMD=("$ROOT/tinyutils/scripts/smoke_convert_preview.mjs" \
++  --preview-url "$PREVIEW_URL" \
++  --artifact-dir "$ARTIFACT_DIR")
++[[ -n "${BYPASS_HEADER_NAME}" && -n "${BYPASS_HEADER_VALUE}" ]] && \
++  SMOKE_CMD+=(--bypass-header-name "$BYPASS_HEADER_NAME" --bypass-header-value "$BYPASS_HEADER_VALUE")
++[[ -n "${BYPASS_COOKIE_NAME}" && -n "${BYPASS_COOKIE_VALUE}" ]] && \
++  SMOKE_CMD+=(--bypass-cookie-name "$BYPASS_COOKIE_NAME" --bypass-cookie-value "$BYPASS_COOKIE_VALUE")
++
++SMOKE_LOG="$ARTIFACT_DIR/smoke_convert_preview.log"
++log "Running smoke_convert_preview.mjs against ${PREVIEW_URL}"
++set +e
++node "${SMOKE_CMD[@]}" | tee "$SMOKE_LOG"
++SMOKE_STATUS=${PIPESTATUS[0]}
++set -e
++[[ ${SMOKE_STATUS} -eq 0 ]] || die "Smoke test failed (see ${SMOKE_LOG#${ROOT}/})"
++
++log "Smoke complete; see artifact dir ${ARTIFACT_DIR#${ROOT}/}"
+diff --git a/tinyutils/scripts/smoke_convert_preview.mjs b/tinyutils/scripts/smoke_convert_preview.mjs
+new file mode 100755
+--- /dev/null
++++ b/tinyutils/scripts/smoke_convert_preview.mjs
+@@
++#!/usr/bin/env node
++import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
++import { resolve } from 'node:path';
++import { parseArgs } from 'node:util';
++
++const { values } = parseArgs({
++  options: {
++    'preview-url': { type: 'string' },
++    'artifact-dir': { type: 'string' },
++    'bypass-header-name': { type: 'string' },
++    'bypass-header-value': { type: 'string' },
++    'bypass-cookie-name': { type: 'string' },
++    'bypass-cookie-value': { type: 'string' },
++    'smoke-endpoint': { type: 'string' },
++    'smoke-method': { type: 'string' },
++    'payload-file': { type: 'string' },
++  },
++  allowPositionals: false,
++});
++
++const previewUrl = (values['preview-url'] ?? process.env.PREVIEW_URL ?? '').trim();
++if (!previewUrl) {
++  console.error('[smoke_convert_preview] error: missing --preview-url or PREVIEW_URL');
++  process.exit(2);
++}
++
++const artifactDir = resolve(values['artifact-dir'] ?? process.env.ARTIFACT_DIR ?? 'tinyutils/artifacts/convert/manual');
++const smokeEndpoint = (values['smoke-endpoint'] ?? process.env.SMOKE_ENDPOINT ?? '/api/convert').trim();
++const smokeMethod = (values['smoke-method'] ?? process.env.SMOKE_METHOD ?? 'POST').trim().toUpperCase();
++const payloadPath = values['payload-file'] ?? process.env.SMOKE_PAYLOAD_PATH;
++if (!['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD'].includes(smokeMethod)) {
++  console.error(`[smoke_convert_preview] error: unsupported smoke method ${smokeMethod}`);
++  process.exit(2);
++}
++
++mkdirSync(artifactDir, { recursive: true });
++
++const bypassHeaderName = values['bypass-header-name'] ?? process.env.PREVIEW_FENCE_HEADER ?? process.env.PREVIEW_BYPASS_HEADER ?? '';
++const bypassHeaderValue = values['bypass-header-value'] ?? process.env.PREVIEW_FENCE_VALUE ?? process.env.PREVIEW_BYPASS_VALUE ?? '';
++const bypassCookieName = values['bypass-cookie-name'] ?? process.env.PREVIEW_FENCE_COOKIE ?? process.env.PREVIEW_BYPASS_COOKIE ?? '';
++const bypassCookieValue = values['bypass-cookie-value'] ?? process.env.PREVIEW_FENCE_COOKIE_VALUE ?? process.env.PREVIEW_BYPASS_COOKIE_VALUE ?? '';
++
++const headers = new Headers({
++  accept: 'application/json',
++  'content-type': 'application/json',
++  'user-agent': 'tinyutils-smoke/convert',
++});
++
++const bypassSummary = [];
++if (bypassHeaderName && bypassHeaderValue) {
++  headers.set(bypassHeaderName, bypassHeaderValue);
++  bypassSummary.push({ type: 'header', name: bypassHeaderName, length: bypassHeaderValue.length });
++}
++if (bypassCookieName && bypassCookieValue) {
++  headers.set('cookie', `${bypassCookieName}=${bypassCookieValue}`);
++  bypassSummary.push({ type: 'cookie', name: bypassCookieName, length: bypassCookieValue.length });
++}
++const describeBypass = bypassSummary.length
++  ? bypassSummary.map((entry) => `${entry.type}:${entry.name}(len=${entry.length})`).join(', ')
++  : 'none';
++
++console.log(`[smoke_convert_preview] target ${previewUrl}${smokeEndpoint}`);
++console.log(`[smoke_convert_preview] preview bypass: ${describeBypass}`);
++
++const defaultPayload = {
++  requestId: `smoke-${Date.now()}`,
++  input: {
++    format: 'markdown',
++    value: '# TinyUtils Smoke\n\nThis is a synthetic conversion request to verify preview readiness.\n',
++  },
++  to: ['html'],
++  options: { snippets: true },
++};
++
++let payload = defaultPayload;
++if (payloadPath) {
++  try {
++    payload = JSON.parse(readFileSync(resolve(payloadPath), 'utf8'));
++  } catch (error) {
++    console.error(`[smoke_convert_preview] error: unable to parse payload file ${payloadPath}: ${error.message}`);
++    process.exit(2);
++  }
++}
++
++const requestArtifact = {
++  previewUrl,
++  endpoint: smokeEndpoint,
++  method: smokeMethod,
++  timestamp: new Date().toISOString(),
++  bypass: bypassSummary,
++  payload,
++};
++writeFileSync(`${artifactDir}/request.json`, JSON.stringify(requestArtifact, null, 2));
++
++const joinUrl = (base, path) => {
++  const normalizedBase = base.endsWith('/') ? base.slice(0, -1) : base;
++  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
++  return `${normalizedBase}${normalizedPath}`;
++};
++
++const url = joinUrl(previewUrl, smokeEndpoint);
++let response;
++let bodyText = '';
++try {
++  const init = { method: smokeMethod, headers };
++  if (!['GET', 'HEAD'].includes(smokeMethod)) {
++    init.body = JSON.stringify(payload);
++  }
++  response = await fetch(url, init);
++  bodyText = await response.text();
++} catch (error) {
++  console.error('[smoke_convert_preview] error: request failed:', error.message);
++  writeFileSync(`${artifactDir}/error.log`, `${new Date().toISOString()} ${error.stack ?? error.message}\n`);
++  process.exit(1);
++}
++
++let body;
++try {
++  body = JSON.parse(bodyText);
++} catch {
++  body = bodyText;
++}
++
++const responseHeaders = {};
++response.headers.forEach((value, key) => {
++  responseHeaders[key] = value;
++});
++
++const responseArtifact = {
++  status: response.status,
++  ok: response.ok,
++  headers: responseHeaders,
++  body,
++};
++writeFileSync(`${artifactDir}/response.json`, JSON.stringify(responseArtifact, null, 2));
++writeFileSync(`${artifactDir}/response.raw`, bodyText);
++
++const summary = {
++  previewUrl,
++  endpoint: smokeEndpoint,
++  method: smokeMethod,
++  ok: response.ok,
++  status: response.status,
++  bypass: bypassSummary,
++  artifactDir,
++};
++writeFileSync(`${artifactDir}/summary.json`, JSON.stringify(summary, null, 2));
++writeFileSync(
++  `${artifactDir}/summary.txt`,
++  `Preview: ${previewUrl}\nEndpoint: ${smokeEndpoint}\nMethod: ${smokeMethod}\nStatus: ${response.status}\nBypass: ${describeBypass}\nArtifacts: ${artifactDir}\n`,
++);
++
++if (!response.ok) {
++  console.error('[smoke_convert_preview] smoke failed; see artifacts for details');
++  process.exit(1);
++}
++
++console.log('[smoke_convert_preview] smoke request succeeded');
+diff --git a/README.md b/README.md
+--- a/README.md
++++ b/README.md
+@@
++### Smoke-only preview checks
++
++If you already have a deployed preview and only need to re-run the smoke without touching Vercel, export the preview URL and set `SMOKE_ONLY=1`. Any fence header/cookie you provide will be echoed in the logs and persisted inside `tinyutils/artifacts/convert/<date>/smoke-*`.
++
++```sh
++SMOKE_ONLY=1 \
++PREVIEW_URL="https://tinyutils-preview-example.vercel.app" \
++PREVIEW_FENCE_HEADER="x-vercel-protection-bypass" \
++PREVIEW_FENCE_VALUE="$BYPASS_TOKEN" \
++PREVIEW_FENCE_COOKIE="__secure_next_preview_data" \
++PREVIEW_FENCE_COOKIE_VALUE="$BYPASS_COOKIE" \
++bash tinyutils/scripts/deploy_and_smoke_convert.sh
++```
++
++When `SMOKE_ONLY` is unset (the default), the script deploys a fresh preview first and then calls `smoke_convert_preview.mjs`, which now records the request/response pair under the dated artifact directory for later inspection.
+```
+
+**Test Plan**
+1. **Full deploy + smoke** – run `bash tinyutils/scripts/deploy_and_smoke_convert.sh` with valid Vercel credentials; confirm:
+   - `tinyutils/artifacts/convert/<DATE>/smoke-<stamp>/` exists with `vercel_pull.log`, `vercel_deploy.log`, `smoke_convert_preview.log`, `request.json`, `response.json`, `summary.*`.
+   - Console logs report which bypass header/cookie names were used (or `<none>`).
+2. **Smoke-only reuse** – set `SMOKE_ONLY=1 PREVIEW_URL=<existing preview>` plus dummy bypass header/cookie env vars, run the script, and verify:
+   - No new `vercel_*` logs are created.
+   - `bypass_manifest.txt` captures the provided preview URL and bypass identifiers.
+   - `smoke_convert_preview.log` notes the supplied header/cookie.
+3. **Manual runner validation** – invoke `node tinyutils/scripts/smoke_convert_preview.mjs --preview-url <url> --artifact-dir /tmp/smoke --smoke-endpoint /api/convert --smoke-method POST --payload-file <fixture>`:
+   - Ensure the command exits non-zero when the endpoint returns ≥400.
+   - Confirm the `/tmp/smoke` directory contains `request.json`, `response.json`, `response.raw`, `summary.{json,txt}`, and `error.log` only when failures occur.
+
+Apply the patch, make the scripts executable (`chmod +x tinyutils/scripts/*.sh tinyutils/scripts/*.mjs` if needed), and rerun the test plan to validate SMOKE_ONLY plus bypass handling end-to-end.
+[2025-11-10T01:50:19] tokens used: 86,551

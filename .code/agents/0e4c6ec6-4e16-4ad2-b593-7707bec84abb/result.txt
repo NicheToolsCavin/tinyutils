@@ -1,0 +1,61 @@
+[2025-11-08T17:59:05] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-outline-small-vendor
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: auto
+--------
+[2025-11-08T17:59:05] User instructions:
+Context: TinyUtils backend converter depends on pandoc via tinyutils/api/_lib/pandoc_runner.py. We need a tiny vendor script approach and runner wiring that works locally (macOS dev) and on Vercel preview/serverless. Keep changes surgical and reversible. Vendored binary should live under tinyutils/api/_vendor/pandoc/pandoc (linux-amd64 3.1.11.1).
+
+Agent: Outline a small vendor script strategy (file name/paths and key steps) to fetch/place the Linux pandoc binary and wire it via PYPANDOC_PANDOC or direct path use in the runner. Include minimal test adjustments and local vs preview behavior notes. Provide concrete paths and outcomes, not command sequences.
+
+Files to consider: tinyutils/api/_lib/pandoc_runner.py, tinyutils/convert/service.py, scripts
+[2025-11-08T17:59:08] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-outline-small-vendor
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: auto
+--------
+[2025-11-08T17:59:08] User instructions:
+Context: TinyUtils backend converter depends on pandoc via tinyutils/api/_lib/pandoc_runner.py. We need a tiny vendor script approach and runner wiring that works locally (macOS dev) and on Vercel preview/serverless. Keep changes surgical and reversible. Vendored binary should live under tinyutils/api/_vendor/pandoc/pandoc (linux-amd64 3.1.11.1).
+
+Agent: Outline a small vendor script strategy (file name/paths and key steps) to fetch/place the Linux pandoc binary and wire it via PYPANDOC_PANDOC or direct path use in the runner. Include minimal test adjustments and local vs preview behavior notes. Provide concrete paths and outcomes, not command sequences.
+
+Files to consider: tinyutils/api/_lib/pandoc_runner.py, tinyutils/convert/service.py, scripts
+
+[2025-11-08T17:59:11] thinking
+
+**Outlining strategy and instructions**
+[2025-11-08T17:59:11] codex
+
+**Vendor Outline**
+
+- **Fetch script**: add `scripts/vendor_pandoc.py` (or `.sh` if preferred, just keep it under `scripts/`). Script responsibilities: download Linux `pandoc-3.1.11.1` tarball from upstream release, verify checksum if available, extract binary, and write it to `tinyutils/api/_vendor/pandoc/pandoc` with `0755` mode. Script intentionally refrains from touching macOS binaries to keep repo thin; mac devs keep using their local `pandoc` installation.
+
+- **Repo layout**: introduce `tinyutils/api/_vendor/` with `.gitkeep` if needed; actual binary ends up at `tinyutils/api/_vendor/pandoc/pandoc`. Ignore other extracted files to stay surgical.
+
+- **Runner wiring (`tinyutils/api/_lib/pandoc_runner.py`)**:  
+  - First preference: honor `os.environ.get("PYPANDOC_PANDOC")` so local overrides or future config keep working.  
+  - If unset, construct the vendored path (`Path(__file__).resolve().parent.parent / "_vendor" / "pandoc" / "pandoc"`).  
+  - If that file exists, pass its string path into the pandoc invocation (either by setting `os.environ["PYPANDOC_PANDOC"]` before calling `pypandoc` or by pointing subprocess calls directly).  
+  - If neither env nor vendor binary exists, fall back to current behavior (likely relying on system `pandoc`) so mac devs aren’t blocked.
+
+- **Service layer touch point (`tinyutils/convert/service.py`)**: ensure whatever helper constructs the converter uses the runner’s resolved path—no hard-coded references elsewhere. A brief comment there explaining that Vercel uses the vendored binary helps future maintainers.
+
+- **Tests**: add/adjust a lightweight test (probably under existing service tests) that mocks `pandoc_runner` resolution to confirm it prefers env var, then vendored path, then default. Since we won’t ship the actual binary into CI for the test, use `tmp_path` or monkeypatch `Path.exists` to simulate presence/absence.
+
+- **Local vs preview behavior**:  
+  - Local mac devs: normal workflow continues; `PYPANDOC_PANDOC` remains optional. They can run the vendor script to update the Linux binary but don’t need it for day-to-day work.  
+  - Vercel preview/serverless: deploy artifact includes `tinyutils/api/_vendor/pandoc/pandoc`; the runner automatically picks it up because system `pandoc` isn’t available. No extra env configuration required in Vercel—just ensure deploy step runs the vendor script before build (or commit the binary if policy allows).  
+  - Document in script docstring or README snippet that the vendor script must be run manually when bumping pandoc.
+
+Outcome: single script for reproducible vendoring, explicit runner fallback chain, minimal test coverage proving resolution order, and clear behavior split between developer laptops and serverless previews.
+[2025-11-08T17:59:16] tokens used: 7,333

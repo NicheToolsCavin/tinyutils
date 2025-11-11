@@ -1,0 +1,5 @@
+I cannot locate the artifact files (e.g., `smoke.log`, `resp_md_md_txt.json`) within the current working directory `/Users/cav/.code/working/tinyutils/branches/code-gemini-2-5-flash-analyze-latest-preview/`.
+
+The tools are restricted to operating within this directory. The path you provided in the context, `/Users/cav/dev/TinyUtils/tinyutils/artifacts/convert/20251110/smoke-preview-20251110T021702/`, is outside of the current workspace.
+
+Please provide the correct absolute path to the artifact directory *within* the current working directory, or move the artifacts into the current working directory so I can access them.

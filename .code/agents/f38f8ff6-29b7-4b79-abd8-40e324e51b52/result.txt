@@ -1,0 +1,441 @@
+[2025-11-11T01:34:54] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/dev/TinyUtils
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-11T01:34:54] User instructions:
+Context: You are one of several planning agents tasked with drafting the next-phase plan for TinyUtils (repo at tinyutils/). The document conversion backend (/api/convert) is now GREEN on Vercel Preview as of 2025-11-11. Health returns 200 JSON with vendored pandoc 3.1.11.1; convert POST returns 200 JSON for md→md/txt/html when both the preview fence header and cookie (_vercel_jwt) are present and x-preview-secret is included.
+
+Key technical facts and files to review:
+- Runtime: Vercel serverless, Python 3.12. Vendored pydantic-core (cp312 manylinux) and vendored pandoc.xz unpacked to /tmp at runtime.
+- API: tinyutils/api/convert/app.py (FastAPI, Pydantic v2 models with ConfigDict + field_validator). Includes alias routes for /api/convert(/index.py) and /api/convert/health, preview diagnostics, and JSON error shaping in preview.
+- Converter lib: tinyutils/convert/service.py prefers imports from api._lib.* at runtime; local dev falls back to tinyutils.api._lib.*. Uses pypandoc and Lua filters via pandoc_runner utilities.
+- Pandoc runner + vendors: tinyutils/api/_lib/pandoc_runner.py; vendors under tinyutils/api/_vendor/{pandoc/pandoc.xz,pydantic_core/**}.
+- Vercel routing/build: tinyutils/vercel.json (includeFiles/excludeFiles for api/convert/index.py, headers, rewrites), ensure convert/** and filters/** are shipped.
+- Smoke: tinyutils/scripts/smoke_convert_preview.mjs — sends POSTs with PREVIEW_URL, PREVIEW_SECRET, and PREVIEW_FENCE_HEADER (should include x-vercel-protection-bypass and the _vercel_jwt cookie). I partially added cookie bootstrap; manual curl cookie bootstrap currently works.
+- Evidence & docs:
+  • artifacts/convert/20251111/smoke-preview-005854 (manual curls passing)
+  • artifacts/convert/20251111/preview-smoke-20251111020637 (Node smoke passing after cookie bootstrap)
+  • docs/AGENT_RUN_LOG.md updated with green entry
+  • docs/AGENT_TASK_CHECKLIST.md Plan Updates mention preview green; script JWT bootstrap still to complete
+  • .debug/AGENT_TMP_STATE.md snapshot updated (safe after compaction)
+
+Goal: Propose a comprehensive, actionable plan to move from GREEN preview to “auto” and production-readiness. Address: finalizing smoke automation, CI integration, reliability/observability, security, and a cautious production rollout. Avoid inventing facts; use the repo and above context.
+
+Deliverables expected from you:
+1) A clear, stepwise plan (7–15 steps) with rationale for each step.
+2) Call out any risky assumptions and how to validate them quickly.
+3) Minimal diffs principle: keep changes surgical and consistent with repo style.
+4) Concrete paths/commands where helpful (e.g., files to edit, envs to set, vercel commands).
+5) A verification checklist for declaring “auto on” and a separate one for “ship to prod”.
+
+Please review these files first: tinyutils/api/convert/app.py, tinyutils/convert/service.py, tinyutils/vercel.json, tinyutils/scripts/smoke_convert_preview.mjs, tinyutils/docs/AGENT_RUN_LOG.md, tinyutils/docs/AGENT_TASK_CHECKLIST.md, tinyutils/.debug/AGENT_TMP_STATE.md. You may refer to additional files as needed.
+
+Your output should be a concise plan (bulleted or numbered), not code. Include rationale, risks, and checklists as requested.
+
+Desired output: Stepwise plan + rationale + risks + two checklists (auto, prod)
+
+Files to consider: tinyutils/api/convert/app.py, tinyutils/convert/service.py, tinyutils/vercel.json, tinyutils/scripts/smoke_convert_preview.mjs, tinyutils/docs/AGENT_RUN_LOG.md, tinyutils/docs/AGENT_TASK_CHECKLIST.md, tinyutils/.debug/AGENT_TMP_STATE.md
+
+[Running in read-only mode - no modifications allowed]
+[2025-11-11T01:34:59] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/dev/TinyUtils
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: auto
+--------
+[2025-11-11T01:34:59] User instructions:
+Context: You are one of several planning agents tasked with drafting the next-phase plan for TinyUtils (repo at tinyutils/). The document conversion backend (/api/convert) is now GREEN on Vercel Preview as of 2025-11-11. Health returns 200 JSON with vendored pandoc 3.1.11.1; convert POST returns 200 JSON for md→md/txt/html when both the preview fence header and cookie (_vercel_jwt) are present and x-preview-secret is included.
+
+Key technical facts and files to review:
+- Runtime: Vercel serverless, Python 3.12. Vendored pydantic-core (cp312 manylinux) and vendored pandoc.xz unpacked to /tmp at runtime.
+- API: tinyutils/api/convert/app.py (FastAPI, Pydantic v2 models with ConfigDict + field_validator). Includes alias routes for /api/convert(/index.py) and /api/convert/health, preview diagnostics, and JSON error shaping in preview.
+- Converter lib: tinyutils/convert/service.py prefers imports from api._lib.* at runtime; local dev falls back to tinyutils.api._lib.*. Uses pypandoc and Lua filters via pandoc_runner utilities.
+- Pandoc runner + vendors: tinyutils/api/_lib/pandoc_runner.py; vendors under tinyutils/api/_vendor/{pandoc/pandoc.xz,pydantic_core/**}.
+- Vercel routing/build: tinyutils/vercel.json (includeFiles/excludeFiles for api/convert/index.py, headers, rewrites), ensure convert/** and filters/** are shipped.
+- Smoke: tinyutils/scripts/smoke_convert_preview.mjs — sends POSTs with PREVIEW_URL, PREVIEW_SECRET, and PREVIEW_FENCE_HEADER (should include x-vercel-protection-bypass and the _vercel_jwt cookie). I partially added cookie bootstrap; manual curl cookie bootstrap currently works.
+- Evidence & docs:
+  • artifacts/convert/20251111/smoke-preview-005854 (manual curls passing)
+  • artifacts/convert/20251111/preview-smoke-20251111020637 (Node smoke passing after cookie bootstrap)
+  • docs/AGENT_RUN_LOG.md updated with green entry
+  • docs/AGENT_TASK_CHECKLIST.md Plan Updates mention preview green; script JWT bootstrap still to complete
+  • .debug/AGENT_TMP_STATE.md snapshot updated (safe after compaction)
+
+Goal: Propose a comprehensive, actionable plan to move from GREEN preview to “auto” and production-readiness. Address: finalizing smoke automation, CI integration, reliability/observability, security, and a cautious production rollout. Avoid inventing facts; use the repo and above context.
+
+Deliverables expected from you:
+1) A clear, stepwise plan (7–15 steps) with rationale for each step.
+2) Call out any risky assumptions and how to validate them quickly.
+3) Minimal diffs principle: keep changes surgical and consistent with repo style.
+4) Concrete paths/commands where helpful (e.g., files to edit, envs to set, vercel commands).
+5) A verification checklist for declaring “auto on” and a separate one for “ship to prod”.
+
+Please review these files first: tinyutils/api/convert/app.py, tinyutils/convert/service.py, tinyutils/vercel.json, tinyutils/scripts/smoke_convert_preview.mjs, tinyutils/docs/AGENT_RUN_LOG.md, tinyutils/docs/AGENT_TASK_CHECKLIST.md, tinyutils/.debug/AGENT_TMP_STATE.md. You may refer to additional files as needed.
+
+Your output should be a concise plan (bulleted or numbered), not code. Include rationale, risks, and checklists as requested.
+
+Desired output: Stepwise plan + rationale + risks + two checklists (auto, prod)
+
+Files to consider: tinyutils/api/convert/app.py, tinyutils/convert/service.py, tinyutils/vercel.json, tinyutils/scripts/smoke_convert_preview.mjs, tinyutils/docs/AGENT_RUN_LOG.md, tinyutils/docs/AGENT_TASK_CHECKLIST.md, tinyutils/.debug/AGENT_TMP_STATE.md
+
+[Running in read-only mode - no modifications allowed]
+
+[2025-11-11T01:35:03] thinking
+
+**Planning file reading approach**
+[2025-11-11T01:35:03] exec bash -lc "sed -n '1,200p' tinyutils/api/convert/app.py" in /Users/cav/dev/TinyUtils
+[2025-11-11T01:35:03] bash -lc "sed -n '1,200p' tinyutils/api/convert/app.py" succeeded in 122ms:
+"""Universal document converter endpoint backed by tinyutils.convert."""
+from __future__ import annotations
+
+import logging
+import os
+import subprocess
+import sys
+import time
+import traceback
+from pathlib import Path
+from typing import TYPE_CHECKING, List, Optional
+import uuid
+
+def _ensure_pydantic_core() -> None:
+    """Ensure the native pydantic-core extension is importable on cold starts.
+
+    On some serverless builds, Pydantic v2 is installed without its native
+    `pydantic_core` wheel. If import fails, download an appropriate manylinux
+    wheel for the current Python version and extract it into /tmp so imports
+    succeed. This runs only once per cold start and avoids build-time wheel
+[2025-11-11T01:35:03] tokens used: 7,549
+
+[2025-11-11T01:35:05] thinking
+
+**Waiting for more content**
+[2025-11-11T01:35:05] exec bash -lc "sed -n '200,400p' tinyutils/api/convert/app.py" in /Users/cav/dev/TinyUtils
+[2025-11-11T01:35:05] bash -lc "sed -n '200,400p' tinyutils/api/convert/app.py" succeeded in 161ms:
+class Options(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    acceptTrackedChanges: bool = True
+    extractMedia: bool = False
+    removeZeroWidth: bool = True
+
+
+class ConvertRequest(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    inputs: List[InputItem]
+    source_format: Optional[str] = Field(default=None, alias="from")
+    targets: List[str] = Field(default_factory=lambda: ["md"], alias="to")
+    options: Options = Field(default_factory=Options)
+
+    @field_validator("targets", mode="before")
+    def _normalise_targets(cls, value):
+        return _coerce_targets(value)
+
+[2025-11-11T01:35:05] tokens used: 9,542
+
+[2025-11-11T01:35:06] thinking
+
+**Needing more input**
+[2025-11-11T01:35:07] exec bash -lc "sed -n '400,800p' tinyutils/api/convert/app.py" in /Users/cav/dev/TinyUtils
+[2025-11-11T01:35:07] bash -lc "sed -n '400,800p' tinyutils/api/convert/app.py" succeeded in 486ms:
+
+    download_payloads_fn = getattr(convert_index, "_download_payloads", _download_payloads)
+    convert_batch_fn = convert_batch  # always use the converter module's function
+    if response is _TEST_RESPONSE_SENTINEL:
+        response = Response()
+    try:
+        if not request.inputs:
+            _log_failure(resolved_request_id, "validation_error", "no_inputs", start_time)
+            raise HTTPException(
+                status_code=400,
+                detail="No inputs provided",
+                headers=_response_headers(resolved_request_id),
+            )
+
+        logger.info(
+            "convert request request_id=%s inputs=%d targets=%s",
+            resolved_request_id,
+            len(request.inputs),
+            request.targets,
+        )
+[2025-11-11T01:35:07] tokens used: 11,572
+
+[2025-11-11T01:35:08] thinking
+
+**Preparing for conversion/service**
+[2025-11-11T01:35:09] exec bash -lc "sed -n '1,200p' tinyutils/convert/service.py" in /Users/cav/dev/TinyUtils
+[2025-11-11T01:35:09] bash -lc "sed -n '1,200p' tinyutils/convert/service.py" succeeded in 117ms:
+"""Reusable converter service for TinyUtils APIs."""
+from __future__ import annotations
+
+import hashlib
+import html
+import json
+import logging
+import os
+import threading
+import time
+import zipfile
+from collections import OrderedDict
+from pathlib import Path
+from typing import Any, Iterable, List, Optional, Sequence
+
+try:
+    # Prefer function-bundle-local imports (serverless env) where the project
+    # root isn't packaged as a top-level `tinyutils` module.
+    from api._lib.manifests import build_snippets, collect_headings, media_manifest  # type: ignore
+    from api._lib.text_clean import normalise_markdown  # type: ignore
+[2025-11-11T01:35:09] tokens used: 13,737
+
+[2025-11-11T01:35:10] thinking
+
+**Requesting remainder of content**
+[2025-11-11T01:35:10] exec bash -lc "sed -n '200,400p' tinyutils/convert/service.py" in /Users/cav/dev/TinyUtils
+[2025-11-11T01:35:10] bash -lc "sed -n '200,400p' tinyutils/convert/service.py" succeeded in 121ms:
+        )
+
+
+def convert_batch(
+    *,
+    inputs: Sequence[InputPayload],
+    targets: Optional[Sequence[str]] = None,
+    from_format: Optional[str] = None,
+    options: Optional[ConversionOptions] = None,
+) -> BatchResult:
+    """Convert multiple payloads, capturing per-input errors."""
+
+    if not inputs:
+        raise ValueError("inputs must contain at least one payload")
+
+    opts = options or ConversionOptions()
+    normalized_targets = _normalize_targets(targets)
+    job_id = generate_job_id()
+    batch_logs = [
+        f"job_id={job_id}",
+[2025-11-11T01:35:10] tokens used: 15,617
+
+[2025-11-11T01:35:11] thinking
+
+**Requesting more content**
+[2025-11-11T01:35:12] exec bash -lc "sed -n '400,800p' tinyutils/convert/service.py" in /Users/cav/dev/TinyUtils
+[2025-11-11T01:35:12] bash -lc "sed -n '400,800p' tinyutils/convert/service.py" succeeded in 121ms:
+        while len(_CACHE) > max(_CACHE_MAX_ENTRIES, 1):
+            _CACHE.popitem(last=False)
+
+
+def _clone_result(result: ConversionResult) -> ConversionResult:
+    outputs = [
+        TargetArtifact(
+            target=artifact.target,
+            name=artifact.name,
+            content_type=artifact.content_type,
+            data=artifact.data,
+        )
+        for artifact in result.outputs
+    ]
+    preview = None
+    if result.preview:
+        preview = PreviewData(
+            headings=list(result.preview.headings),
+            snippets=list(result.preview.snippets),
+            images=list(result.preview.images),
+[2025-11-11T01:35:12] tokens used: 17,489
+
+[2025-11-11T01:35:13] thinking
+
+**Reviewing vercel.json file**
+[2025-11-11T01:35:13] exec bash -lc 'cat tinyutils/vercel.json' in /Users/cav/dev/TinyUtils
+[2025-11-11T01:35:14] bash -lc 'cat tinyutils/vercel.json' succeeded in 111ms:
+{
+  "version": 2,
+  "functions": {
+    "api/convert/index.py": {
+      "includeFiles": "{api/convert/**,api/_lib/**,api/_vendor/pandoc/pandoc.xz,api/_vendor/pydantic_core/**,convert/**,filters/**,__init__.py}",
+      "excludeFiles": "{artifacts/**,.code/**,tests/**,TinyBackups/**,.vercel/**,node_modules/**,**/__pycache__/**,api/_vendor/pandoc/pandoc}",
+      "maxDuration": 180
+    },
+    "api/findreplace/preview.py": {
+      "includeFiles": "{api/findreplace/**,api/_lib/**}",
+      "excludeFiles": "{api/_vendor/**,artifacts/**,.code/**,tests/**,TinyBackups/**,.vercel/**,node_modules/**,**/__pycache__/**}",
+      "maxDuration": 60
+    },
+    "api/findreplace/apply.py": {
+      "includeFiles": "{api/findreplace/**,api/_lib/**}",
+      "excludeFiles": "{api/_vendor/**,artifacts/**,.code/**,tests/**,TinyBackups/**,.vercel/**,node_modules/**,**/__pycache__/**}",
+      "maxDuration": 60
+    }
+  },
+  "headers": [
+[2025-11-11T01:35:14] tokens used: 17,923
+
+[2025-11-11T01:35:14] thinking
+
+**Inspecting script files**
+[2025-11-11T01:35:15] exec bash -lc "sed -n '1,200p' tinyutils/scripts/smoke_convert_preview.mjs" in /Users/cav/dev/TinyUtils
+[2025-11-11T01:35:15] bash -lc "sed -n '1,200p' tinyutils/scripts/smoke_convert_preview.mjs" succeeded in 100ms:
+#!/usr/bin/env node
+import { mkdir, writeFile, readFile } from 'node:fs/promises';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { execFile as _execFile } from 'node:child_process';
+import { promisify } from 'node:util';
+const execFile = promisify(_execFile);
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const previewUrl = process.env.PREVIEW_URL;
+
+if (!previewUrl) {
+  console.error('smoke_convert_preview: PREVIEW_URL not set; skipping.');
+  process.exit(0);
+}
+
+const base = previewUrl.replace(/\/$/, '');
+const endpoint = `${base}/api/convert`;
+
+const now = new Date();
+[2025-11-11T01:35:15] tokens used: 19,705
+
+[2025-11-11T01:35:17] thinking
+
+**Checking file ending and hooks**
+[2025-11-11T01:35:17] exec bash -lc "sed -n '200,400p' tinyutils/scripts/smoke_convert_preview.mjs" in /Users/cav/dev/TinyUtils
+[2025-11-11T01:35:17] bash -lc "sed -n '200,400p' tinyutils/scripts/smoke_convert_preview.mjs" succeeded in 157ms:
+
+main().catch((error) => {
+  console.error('smoke_convert_preview: unexpected error', error);
+  process.exit(1);
+});
+[2025-11-11T01:35:17] tokens used: 21,900
+
+[2025-11-11T01:35:19] thinking
+
+**Reviewing AGENT_RUN_LOG file**
+[2025-11-11T01:35:19] exec bash -lc 'tail -n 120 tinyutils/docs/AGENT_RUN_LOG.md' in /Users/cav/dev/TinyUtils
+[2025-11-11T01:35:19] bash -lc 'tail -n 120 tinyutils/docs/AGENT_RUN_LOG.md' succeeded in 123ms:
+### 2025-11-07 21:20 CET - Auto - deploy_and_smoke_convert
+- **Status:** smoke_failed
+- **Preview:** <preview-url>
+- **Artifacts:** artifacts/convert/20251107/smoke-preview-20251107T211959
+
+
+### 2025-11-07 21:19 CET - Auto - deploy_and_smoke_convert
+- **Status:** smoke_failed
+- **Preview:** <preview-url>
+- **Artifacts:** artifacts/convert/20251107/smoke-preview-20251107T211909
+
+
+### 2025-11-07 20:58 CET - Auto - deploy_and_smoke_convert
+- **Status:** smoke_failed
+- **Preview:** <preview-url>
+- **Artifacts:** artifacts/convert/20251107/smoke-preview-20251107T205734
+
+
+### 2025-11-07 20:56 CET - Auto - deploy_and_smoke_convert
+- **Status:** vercel_deploy_failed
+[2025-11-11T01:35:19] tokens used: 22,186
+
+[2025-11-11T01:35:21] thinking
+
+**Searching for AGENT_TASK_CHECKLIST documentation**
+[2025-11-11T01:35:21] exec bash -lc "sed -n '1,200p' tinyutils/docs/AGENT_TASK_CHECKLIST.md" in /Users/cav/dev/TinyUtils
+[2025-11-11T01:35:21] bash -lc "sed -n '1,200p' tinyutils/docs/AGENT_TASK_CHECKLIST.md" succeeded in 112ms:
+# Agent Task Checklist
+
+Shared tracker so agents can see which work items are planned, in progress, or finished - and how plans have evolved.
+
+## How to Use
+- **Append-only:** Add new tasks to the top of the relevant table (newest first).
+- **Always timestamp:** Record Europe/Madrid (CET) timestamps for new entries and status changes.
+- **Reference the source:** Link each task to the session ID / plan entry that created it (e.g., `rollout-2025-11-04T16-26-36-...`).
+- **Update status promptly:** When a task is completed, move it to the Completed section with evidence pointers. If a task becomes obsolete, mark it as "Superseded" with the reason.
+- **Plan changes:** Log scope or approach changes under Plan Updates and cross-reference the affected task.
+- **Helper script:** Use `python scripts/add_task_checklist_entry.py --help` to insert rows and plan updates quickly.
+
+## Active Tasks (Newest First)
+
+| Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
+| --- | --- | --- | --- |
+| *(none — converted tasks moved to Completed)* |  |  |  |
+| Converter artifacts & evidence path setup | manual-2025-11-06T23-55 | Completed | Smoke evidence captured at `tinyutils/artifacts/convert/20251107/smoke-local-20251107T034352/` and logged in AGENT_RUN_LOG (2025-11-07 03:46 CET). |
+<!-- NOTE: This file is a task tracker only. Authoritative instructions live in AGENTS.md. -->
+| Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
+[2025-11-11T01:35:21] tokens used: 23,735
+
+[2025-11-11T01:35:22] thinking
+
+**Checking temporary debug state**
+[2025-11-11T01:35:23] exec bash -lc 'tail -n 200 tinyutils/.debug/AGENT_TMP_STATE.md' in /Users/cav/dev/TinyUtils
+[2025-11-11T01:35:23] bash -lc 'tail -n 200 tinyutils/.debug/AGENT_TMP_STATE.md' succeeded in 202ms:
+# Agent Temp State (safe to delete after green preview)
+
+- Last intended preview (latest deploy log): use the newest URL from `artifacts/convert/*/vercel-deploy-*/vercel_deploy.log`.
+- Smokes use Automation Bypass in both header and cookie + x-preview-secret.
+- Current deps (Py3.12):
+  - fastapi==0.111.0, starlette==0.37.2
+  - pydantic==2.7.4, pydantic-core==2.18.4 (vendored for cp312 manylinux)
+- Vendor helper: `python3 scripts/vendor_pydantic_core.py --version 2.18.4 --python 312`
+- Convert now imports from `convert` (fallback to `tinyutils.convert`) to avoid package name issues in serverless.
+- Health/convert return JSON errors in preview mode (with `errorType`/`errorMessage`) to accelerate diagnosis.
+
+Next steps checklist:
+- [ ] Deploy new preview and target that exact URL for curls/smoke.
+- [ ] Verify `/api/convert/health` returns JSON (OK or degraded) instead of 500.
+- [ ] Verify `/api/convert` returns 200 JSON envelope on a small md→md request.
+- [ ] Append run log + checklist entries with the new URL and artifacts path.
+
+Snapshot (safe after compact)
+- Latest preview (as of now): https://tinyutils-5mra8am1c-cavins-projects-7b0e00bb.vercel.app
+- Last smoke artifacts: artifacts/convert/20251111/smoke-preview-005854
+[2025-11-11T01:35:23] tokens used: 26,367
+
+[2025-11-11T01:35:51] thinking
+
+**Outlining detailed migration plan**
+
+I’m putting together a thorough step-by-step plan—from freezing the current preview state to production rollout—that covers finalizing smoke automation, CI integration, observability, security, and cautious deployment. Each step includes a rationale and references key files, while calling out assumptions and providing verification checklists for enabling automation and shipping to production, all with an emphasis on minimal changes.
+[2025-11-11T01:35:52] codex
+
+1. Lock in the green preview baseline by appending the latest preview URL, smoke artifacts path, and token sources to `docs/AGENT_RUN_LOG.md`, `docs/AGENT_TASK_CHECKLIST.md` (Plan Updates), and `.debug/AGENT_TMP_STATE.md`; this preserves evidence and keeps the next agents aligned without touching runtime code (minimal diff, doc-only).  
+2. Finish the JWT bootstrap in `scripts/smoke_convert_preview.mjs`: promote the curl fallback into the primary path, persist the captured `_vercel_jwt` cookie beside the existing artifacts, and surface structured failures (status code + body snippet) so CI logs remain actionable; this removes the last manual step before automation.  
+3. Expose a stable CLI entry point (e.g., `package.json` script `smoke:convert:preview` that calls `node tinyutils/scripts/smoke_convert_preview.mjs`) plus a `.env.preview.local.example` stanza documenting `PREVIEW_URL`, `PREVIEW_SECRET`, `PREVIEW_FENCE_HEADER`; this standardizes how humans/CI invoke the smoke while keeping edits surgical (one script alias + docs).  
+4. Wire the smoke into the dormant `deploy_and_smoke_convert` automation (GitHub Actions or whichever runner owns prior logs): add steps to pull preview env (`vercel env pull .env.preview.local --environment preview`), install deps, run `pnpm smoke:convert:preview`, and upload `artifacts/convert/...` regardless of success. Gate the workflow so failures block “auto” status but keep manual override possible.  
+5. Enhance observability in `tinyutils/api/convert/app.py`: emit structured `logger.info` lines for health and convert outcomes (request_id/job_id/duration/targets), surface `_pandoc_runner.get_configured_pandoc_path()` in preview diagnostics, and ensure `_log_failure` tags the Vercel region (from `VERCEL_REGION`). This keeps telemetry minimal-diff (log-only) yet makes postmortems faster once auto is on.  
+6. Bolster reliability with targeted tests around `tinyutils/convert/service.py`: add fixtures that simulate cached hits, pandoc failures (ensuring `_fallback_conversion` stays lossless), and `_vercel_jwt` cookie-less preview calls. Keep edits scoped to `tests/convert/*` so core code stays untouched unless gaps surface.  
+7. Security + supply-chain hardening: script the SHA256 verification for `tinyutils/api/_vendor/pandoc/pandoc.xz` and `api/_vendor/pydantic_core/**` (e.g., new `scripts/verify_vendors.py`) and document the expected hashes in `docs/AGENT_TASK_CHECKLIST.md` Plan Updates. Also audit `vercel.json` headers to ensure `/api/convert/**` remains `no-store` and extend the rewrites to cover future `filters/**` paths so only necessary files ship.  
+8. Implement lightweight runtime health pings: add a scheduled job (GitHub Action or cron hitting `scripts/smoke_convert_preview.mjs`) that runs every few hours against the latest preview to detect regressions before the next deploy. Persist failures in `artifacts/convert/<date>/smoke-cron-*` and point `docs/AGENT_RUN_LOG.md` entries at them.  
+9. Cautious production rollout: once steps 2–8 are green, run a staged deploy — first enable the “auto” workflow, observe 2–3 consecutive green preview smokes, then trigger `vercel deploy --prebuilt --prod` followed by a restricted version of the smoke (production URL, prod secrets, no preview fence). Update the docs checklist with prod evidence and only then declare the convert backend production-ready.
+
+Risks & fast validations  
+- Assumption: the `deploy_and_smoke_convert` workflow file still exists and only needs smoke-step fixes—confirm by listing `.github/workflows` and opening the relevant YAML before editing.  
+- Assumption: `VERCEL_AUTOMATION_BYPASS_SECRET` remains valid in both preview and CI—validate by running the updated smoke script against today’s preview before committing pipeline changes.  
+- Assumption: shipping `filters/**` is still required for pandoc Lua filters—double-check `vercel.json` includeFiles against the actual filter paths using `rg --files filters`.  
+
+Auto-On Verification Checklist  
+- Latest preview deployed (`vercel deploy --prebuilt --env preview`) and URL recorded in docs.  
+- `node tinyutils/scripts/smoke_convert_preview.mjs` run via the new script target with `PREVIEW_URL`, `PREVIEW_SECRET`, and fence header set; artifacts stored under `artifacts/convert/<date>/preview-smoke-*`.  
+- `_vercel_jwt` cookie automatically captured (inspect `set_cookie.headers` or `cookies.txt`).  
+- `/api/convert/health` and `/api/convert` responses logged with `status=200` in CI output; failures surface `errorType`/`errorMessage`.  
+- GitHub Action (or equivalent) finishes green twice consecutively, uploading artifacts and appending AGENT logs.  
+- `.debug/AGENT_TMP_STATE.md` snapshot updated with the new preview URL, artifacts path, and token sources.
+
+Production Ship Verification Checklist  
+- Preview automation has stayed green for at least 2 back-to-back deploys after enabling auto.  
+- Vendor hash script reports expected checksums for `pandoc.xz` and `pydantic_core` blobs.  
+- Manual curl against preview confirms health + convert with fence headers (serves as pre-prod sanity).  
+- `vercel deploy --prebuilt --prod` (or promotion) completes; URL noted.  
+- Targeted prod smoke (curl or adapted script without preview fence, using prod secrets) returns 200 JSON for md→md/txt/html.  
+- Observability logs show prod traffic with request IDs; no unexpected 5xx spikes in Vercel dashboard for 30 minutes post-ship.  
+- Docs updated: AGENT run log entry for prod smoke, checklist row moved to Completed, and .debug snapshot refreshed with prod status signal.
+
+Natural next steps for me (once write access is available): update the smoke script, add the CLI target, adjust the workflow, and extend logging/tests per the plan.
+[2025-11-11T01:36:06] tokens used: 33,305

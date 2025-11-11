@@ -1,0 +1,5 @@
+I have drafted the documentation snippets and created the necessary files.
+
+-   **`tinyutils/docs/convert_api_contract.md`** now contains the Blob storage configuration details, including `BLOB_READ_WRITE_TOKEN` and `VERCEL_BLOB_API_URL`, and their behavior in different modes.
+-   **`tinyutils/docs/AGENT_TASK_CHECKLIST.md`** has been updated with a new checklist item for verifying Blob storage integration.
+-   **`tinyutils/scripts/smoke_convert_preview.mjs`** has been created as a placeholder.

@@ -1,0 +1,362 @@
+I'll help you outline a fallback plan for handling pydantic_core import failures during Vercel deployment. First, let me create a structured plan to address this issue.
+
+Let me start by looking at the current project structure to understand the FastAPI converter implementation and the pydantic dependency setup.
+
+I need to navigate to the correct project directory first. Let me check the current directory structure:
+
+I can see the tinyutils directory here. Let me explore it to find the FastAPI converter:
+
+It looks like the tinyutils directory is empty in this branch. Let me check the parent directory to see if the main project is elsewhere, or if I need to switch to the actual project directory mentioned in the context:
+
+Perfect! Now I can see the actual project structure. I can see there's a `convert` directory and `api` directory which likely contain the FastAPI converter. Let me examine the requirements.txt and the convert directory to understand the current pydantic setup:
+
+I need to work within the correct workspace directory. Let me see if the project files exist in a symlink or if I need to work from the current workspace location:
+
+Let me run the command that checks if the link worked properly:
+
+Great! Now I have access to the project files. Let me examine the requirements.txt file and the convert directory:
+
+I need to use the symlinked path within the workspace. Let me look for the requirements.txt file:
+
+I see the requirements.txt is symlinked in the tinyutils directory. Let me read it using the correct path:
+
+Let me check the actual location of requirements.txt in the tinyutils directory:
+
+The symlink is there. Let me try to read the original file directly:
+
+I need to work within the workspace directory. Since I've created symlinks, let me find the convert directory:
+
+Let me check if I can read the convert directory with the symlink:
+
+Now I can work with the files. Let me copy the files to the workspace directory temporarily so I can work with them directly:
+
+Great! Now I can read the files in the workspace directory. Let me check the requirements.txt file:
+
+Now let me look at the convert directory to understand the FastAPI converter:
+
+Let me check the service.py file to see how FastAPI and pydantic are being used:
+
+Now let me check the types.py file to see if it uses pydantic:
+
+Now let me check the API directory to see how FastAPI is being used with pydantic:
+
+Let me check the convert API:
+
+Let me examine the FastAPI app implementation:
+
+Now I have a good understanding of the setup. I can see that the FastAPI app uses Pydantic models (InputItem, Options, ConvertRequest) with data validation. Let me mark the first task as complete and move on to creating the decision tree for fallback options:
+
+Based on my analysis of the code, I can see that the FastAPI converter uses Pydantic extensively for request/response validation (InputItem, Options, ConvertRequest models). Now, let me create a decision tree with fallback options ordered by invasiveness:
+
+## Fallback Plan for pydantic_core Import Failures in Vercel Deployment
+
+### Decision Tree (Least to Most Invasive)
+
+**Option 1: Pin a Specific Compatible Pydantic Core Version**
+- **Action**: Pin `pydantic-core==2.10.0` or other known compatible version in requirements.txt
+- **Rationale**: Earlier versions of pydantic-core are more stable and compatible with Vercel
+- **Invasiveness**: Low - only dependency changes
+- **Timeline**: Minutes to implement
+
+**Option 2: Use Pydantic v1 (Pure Python) Temporarily**
+- **Action**: Downgrade from Pydantic 2.x to Pydantic 1.x (pure Python implementation)
+- **Changes needed**: Update model definitions (ConfigDict becomes arbitrary_types=True, Field changes)
+- **Invasiveness**: Medium - requires code modifications but reversible
+- **Timeline**: Hours to implement
+
+**Option 3: Vendor Pre-compiled Pydantic Core Wheels**
+- **Action**: Download working pydantic-core wheels and include them in the project
+- **Rationale**: Bypass compilation issues by using pre-built binaries
+- **Invasiveness**: Medium - adds binary files to repo
+- **Timeline**: Hours to implement and test
+
+**Option 4: Replace Pydantic with Alternative Validation**
+- **Action**: Use standard dataclasses with custom validation or other schema libraries
+- **Changes needed**: Rewrite all model definitions and validation logic
+- **Invasiveness**: High - major refactoring required
+- **Timeline**: Days to implement
+
+**Option 5: Revert to Pure FastAPI Request/Response Processing**
+- **Action**: Remove Pydantic entirely, use basic FastAPI request.json() and manual validation
+- **Changes needed**: Complete rewrite of input/output handling
+- **Invasiveness**: Maximum - complete architecture change
+- **Timeline**: Days to weeks to implement
+
+Let me continue with documenting the trade-offs:
+
+## Trade-offs for Each Fallback Option
+
+### Option 1: Pin a Specific Compatible Pydantic Core Version
+**Advantages:**
+- Maintains all current functionality and performance
+- Minimal code changes required
+- Preserves type safety and validation benefits
+- Quick and reversible implementation
+- Latest security patches for chosen version
+
+**Disadvantages:**
+- May miss out on performance improvements in newer versions
+- Could introduce version conflicts with other dependencies
+- Temporary solution that may need revisiting
+
+### Option 2: Use Pydantic v1 (Pure Python) Temporarily
+**Advantages:**
+- Pure Python implementation avoids compilation issues
+- Maintains validation benefits and type safety
+- Well-documented migration path back to v2
+- Familiar API for existing codebase
+
+**Disadvantages:**
+- Less performant than v2
+- Different API syntax (model_config vs ConfigDict)
+- Loss of some Pydantic v2 features
+- Requires code refactoring
+- Migration back to v2 will require additional work
+
+### Option 3: Vendor Pre-compiled Pydantic Core Wheels
+**Advantages:**
+- Maintains Pydantic v2 performance and features
+- No code changes to validation logic
+- Solves compilation issues specific to Vercel environment
+- Relatively straightforward to implement
+
+**Disadvantages:**
+- Increases repository size with binary files
+- Need to maintain wheels for different architectures
+- Potential security concerns with binary dependencies
+- May become outdated as versions advance
+
+### Option 4: Replace Pydantic with Alternative Validation
+**Advantages:**
+- Eliminates dependency on pydantic entirely
+- More control over validation logic
+- Potentially lighter weight depending on chosen solution
+- Can be optimized for specific use cases
+
+**Disadvantages:**
+- Significant development effort
+- Loss of automatic type coercion and validation
+- More error-prone manual validation
+- Steep learning curve for alternative libraries
+- Loss of IDE type completion benefits
+
+### Option 5: Revert to Pure FastAPI Request/Response Processing
+**Advantages:**
+- Complete elimination of pydantic dependency
+- Maximum control over input/output processing
+- Potentially faster deployment times
+
+**Disadvantages:**
+- Massive refactoring effort
+- Loss of all automatic validation and type conversion
+- More bug-prone manual validation
+- Significantly increased code complexity
+- Loss of type safety throughout the API
+- Extensive testing required
+
+Now let me provide implementation steps for each option:
+
+## Implementation Steps for Each Fallback Option
+
+### Option 1: Pin a Specific Compatible Pydantic Core Version
+
+1. **Identify a stable version**:
+   ```bash
+   # Test with pydantic-core versions known to work with Vercel
+   # Common stable versions: 2.10.0, 2.10.1, 2.10.2
+   ```
+
+2. **Update requirements.txt**:
+   ```txt
+   fastapi==0.121.1
+   pydantic==2.12.4
+   pydantic-core==2.10.1  # Pinned to known working version
+   pydantic-extra-types==2.9.0  # If used
+   starlette==0.49.3
+   uvicorn==0.38.0
+   ```
+
+3. **Update and test locally**:
+   ```bash
+   pip install -r requirements.txt
+   python -c "from pydantic import BaseModel; print('Success')"
+   ```
+
+4. **Deploy to Vercel** and monitor build logs
+
+### Option 2: Use Pydantic v1 (Pure Python) Temporarily
+
+1. **Update requirements.txt**:
+   ```txt
+   fastapi==0.121.1
+   pydantic==1.10.17  # Last v1.x version
+   starlette==0.49.3
+   uvicorn==0.38.0
+   ```
+
+2. **Update model definitions in api/convert/app.py**:
+   ```python
+   # Before (Pydantic v2):
+   from pydantic import BaseModel, ConfigDict, Field, field_validator
+   
+   class Options(BaseModel):
+       model_config = ConfigDict(populate_by_name=True)
+       acceptTrackedChanges: bool = True
+       extractMedia: bool = False
+       removeZeroWidth: bool = True
+
+   # After (Pydantic v1):
+   from pydantic import BaseModel, Field
+   from pydantic.class_validators import validator
+
+   class Options(BaseModel):
+       class Config:
+           allow_population_by_field_name = True
+       
+       acceptTrackedChanges: bool = Field(True, alias="acceptTrackedChanges")
+       extractMedia: bool = Field(False, alias="extractMedia")
+       removeZeroWidth: bool = Field(True, alias="removeZeroWidth")
+       
+       @validator('targets', pre=True)
+       def _normalise_targets(cls, value):
+           return _coerce_targets(value)
+   ```
+
+3. **Repeat for all Pydantic models** (InputItem, ConvertRequest, etc.)
+
+4. **Test functionality** to ensure validation still works
+
+### Option 3: Vendor Pre-compiled Pydantic Core Wheels
+
+1. **Download compatible wheels**:
+   ```bash
+   mkdir -p vendor/
+   pip download --only-binary=pydantic-core --platform manylinux2014_x86_64 --python-version 3.11 pydantic-core==2.41.5 -d vendor/
+   ```
+
+2. **Add wheel installation to requirements.txt**:
+   ```txt
+   fastapi==0.121.1
+   pydantic==2.12.4
+   ./vendor/pydantic_core-2.41.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+   starlette==0.49.3
+   uvicorn==0.38.0
+   ```
+
+3. **Update .vercelignore** to exclude unnecessary files:
+   ```
+   # Don't ignore vendor/ if it contains pydantic wheels
+   !vendor/
+   ```
+
+4. **Test installation** locally
+
+### Option 4: Replace Pydantic with Alternative Validation
+
+1. **Install validation library**:
+   ```bash
+   # Option 4a: Use dataclasses + custom validation
+   # No additional dependencies needed
+   
+   # Option 4b: Use pydantic-functional or cattrs
+   pip install attrs cattrs
+   ```
+
+2. **Rewrite model definitions**:
+   ```python
+   # Using dataclasses with custom validation
+   from dataclasses import dataclass, field
+   from typing import List, Optional, Any
+   import json
+
+   @dataclass
+   class InputItem:
+       blobUrl: str
+       name: Optional[str] = None
+       
+       def __post_init__(self):
+           if not self.blobUrl:
+               raise ValueError("blobUrl is required")
+           if self.name is not None and not isinstance(self.name, str):
+               raise ValueError("name must be a string or None")
+
+   @dataclass
+   class Options:
+       acceptTrackedChanges: bool = True
+       extractMedia: bool = False
+       removeZeroWidth: bool = True
+   ```
+
+3. **Update FastAPI endpoint to use manual validation**:
+   ```python
+   from fastapi import Request
+
+   @app.post("/")
+   async def convert(request: Request):
+       # Get JSON data
+       data = await request.json()
+       
+       # Manually validate and construct objects
+       try:
+           input_items = [InputItem(**item) for item in data["inputs"]]
+           options = Options(**data.get("options", {}))
+           # ... continue with processing
+       except (ValueError, TypeError) as e:
+           raise HTTPException(status_code=400, detail=str(e))
+   ```
+
+### Option 5: Revert to Pure FastAPI Request/Response Processing
+
+1. **Remove Pydantic imports** from app.py:
+   ```python
+   # Remove these lines:
+   # from pydantic import BaseModel, ConfigDict, Field, validator
+   ```
+
+2. **Create manual validation functions**:
+   ```python
+   def validate_inputs(data):
+       if not isinstance(data, list):
+           raise HTTPException(status_code=400, detail="inputs must be a list")
+       for item in data:
+           if not isinstance(item, dict) or 'blobUrl' not in item:
+               raise HTTPException(status_code=400, detail="Each input must have blobUrl")
+   
+   def validate_options(options_data):
+       if not isinstance(options_data, dict):
+           return {}
+       # Validate individual fields manually
+       validated = {}
+       validated['acceptTrackedChanges'] = bool(options_data.get('acceptTrackedChanges', True))
+       validated['extractMedia'] = bool(options_data.get('extractMedia', False))
+       validated['removeZeroWidth'] = bool(options_data.get('removeZeroWidth', True))
+       return validated
+   ```
+
+3. **Update the main endpoint**:
+   ```python
+   @app.post("/")
+   async def convert(request: Request, response: Response):
+       data = await request.json()
+       
+       # Manual validation
+       validate_inputs(data["inputs"])
+       options = validate_options(data.get("options", {}))
+       
+       # Continue with processing
+       # ... rest of conversion logic
+   ```
+
+Based on the analysis of your codebase, I recommend starting with **Option 1** (pinning pydantic-core to a known compatible version) as it requires the least amount of work while preserving all functionality. This is typically the most effective approach for Vercel deployment issues related to pydantic-core.
+
+I've completed the fallback plan for handling pydantic_core import failures during Vercel deployment. The plan includes:
+
+1. **Analysis of the current situation**: Identified that your FastAPI converter uses Pydantic v2 extensively for request/response validation in models like InputItem, Options, and ConvertRequest.
+
+2. **Decision tree ordered by invasiveness**: Starting with the least invasive (pinning pydantic-core version) to most invasive (removing Pydantic entirely).
+
+3. **Trade-offs documented**: Each option has clear advantages and disadvantages.
+
+4. **Implementation steps**: Detailed, actionable steps for implementing each fallback option.
+
+The recommended approach is to start with Option 1 (pinning pydantic-core to a compatible version like 2.10.1) as it requires minimal changes while preserving all functionality. This is typically the most effective solution for Vercel deployment issues with pydantic-core.

@@ -1,0 +1,133 @@
+I'll help you draft a short verification recipe for testing after instrumentation. Let me create a todo list to organize this task.
+
+I'll draft the verification recipe for you. Let me start by marking the first task as in progress and working on it.
+
+# Verification Recipe: Post-Instrumentation Testing
+
+## Endpoints to Call
+
+First, perform a health check to ensure the service is running:
+
+```bash
+curl -X GET https://your-service-url/health
+```
+
+Then, test two conversion cases:
+
+### Case 1: Basic Conversion
+```bash
+curl -X POST https://your-service-url/convert \
+  -H "Content-Type: application/json" \
+  -d '{
+    "input": "test data",
+    "format": "target_format"
+  }'
+```
+
+### Case 2: Error-Prone Conversion
+```bash
+curl -X POST https://your-service-url/convert \
+  -H "Content-Type: application/json" \
+  -d '{
+    "input": "problematic data",
+    "format": "target_format"
+  }'
+```
+
+Next, I'll work on defining the artifacts to save.
+
+I've completed the health check and conversion endpoints. Now I'll mark the second task as completed and move on to specifying the artifacts to save.
+
+## Artifacts to Save
+
+After running the smoke tests, save these artifacts:
+
+1. Updated smoke test result files:
+   ```bash
+   cp tests/test_results_nov4.md tests/test_results_nov4_POST_INSTRUMENTATION.md
+   ```
+
+2. Capture Vercel logs tail with JSON format:
+   ```bash
+   vercel logs your-deployment-url --json --tail 100 > vercel_logs_POST_INSTRUMENTATION.json
+   ```
+
+Now I'll work on the final part - defining the acceptance line for exception capture.
+
+## Acceptance Line
+
+The verification is successful if the logs contain a line that proves we captured the exception type and message causing exit 1:
+
+```json
+{"level":"error","message":"Exception captured: {\"type\":\"ErrorName\",\"message\":\"Error message that caused exit 1\",\"stack\":\"stack trace\"}","timestamp":"..."}
+```
+
+Or specifically, look for this pattern in the vercel_logs_POST_INSTRUMENTATION.json file:
+```
+Exception captured: {"type":"<EXCEPTION_TYPE>","message":"<EXCEPTION_MESSAGE>"
+```
+
+This confirms that the instrumentation successfully caught and logged the exception that was previously causing the exit 1, allowing for proper debugging and resolution.
+
+I've completed all the tasks in the verification recipe. Here's the full recipe:
+
+# Verification Recipe: Post-Instrumentation Testing
+
+## Endpoints to Call
+
+First, perform a health check to ensure the service is running:
+
+```bash
+curl -X GET https://your-service-url/health
+```
+
+Then, test two conversion cases:
+
+### Case 1: Basic Conversion
+```bash
+curl -X POST https://your-service-url/convert \
+  -H "Content-Type: application/json" \
+  -d '{
+    "input": "test data",
+    "format": "target_format"
+  }'
+```
+
+### Case 2: Error-Prone Conversion
+```bash
+curl -X POST https://your-service-url/convert \
+  -H "Content-Type: application/json" \
+  -d '{
+    "input": "problematic data",
+    "format": "target_format"
+  }'
+```
+
+## Artifacts to Save
+
+After running the smoke tests, save these artifacts:
+
+1. Updated smoke test result files:
+   ```bash
+   cp tests/test_results_nov4.md tests/test_results_nov4_POST_INSTRUMENTATION.md
+   ```
+
+2. Capture Vercel logs tail with JSON format:
+   ```bash
+   vercel logs your-deployment-url --json --tail 100 > vercel_logs_POST_INSTRUMENTATION.json
+   ```
+
+## Acceptance Line
+
+The verification is successful if the logs contain a line that proves we captured the exception type and message causing exit 1:
+
+```json
+{"level":"error","message":"Exception captured: {\"type\":\"ErrorName\",\"message\":\"Error message that caused exit 1\",\"stack\":\"stack trace\"}","timestamp":"..."}
+```
+
+Or specifically, look for this pattern in the vercel_logs_POST_INSTRUMENTATION.json file:
+```
+Exception captured: {"type":"<EXCEPTION_TYPE>","message":"<EXCEPTION_MESSAGE>"
+```
+
+This confirms that the instrumentation successfully caught and logged the exception that was previously causing the exit 1, allowing for proper debugging and resolution.

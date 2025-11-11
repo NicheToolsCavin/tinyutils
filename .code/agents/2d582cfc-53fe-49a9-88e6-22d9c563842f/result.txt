@@ -1,0 +1,149 @@
+I'll create a targeted validation plan for confirming Vercel Blob upload works in preview. Let me first understand the context by examining the relevant file.
+
+Let me check the tinyutils directory structure to understand where the blob functionality might be located:
+
+That's unexpected. Let me check the overall project structure to better understand the codebase:
+
+Let me check if there are any more directories inside tinyutils that might not have been visible:
+
+Let me check if there are hidden files or subdirectories in tinyutils:
+
+It appears the tinyutils directory is indeed empty. Let me check the PATH file to understand the project structure better:
+
+Let me also check the tests directory to see if there are any related files there:
+
+Let me check the convert directory in tests:
+
+Based on the context information provided earlier, the blob.py file is supposed to be in tinyutils/api/_lib/blob.py. Since it doesn't exist in the current directory, it might be in a different branch or location. Let me search for any blob-related files:
+
+Let me try searching with a different approach:
+
+Since I can't find the blob.py file in the current location but the context mentions it should be at tinyutils/api/_lib/blob.py, I'll proceed with creating the validation plan based on the information provided. Let me check if there are any environment files that might contain relevant configuration:
+
+Let me look for any Python files that might reference blob functionality:
+
+Great! Now I found references to blob functionality. Let me examine the test file to better understand how the blob functionality works:
+
+Let me also check the other test file to get more context:
+
+Now let me check if there's a main file in the convert index that might be using the blob functionality:
+
+Let me search more broadly for index.py files:
+
+Based on the test files, I can see that the blob functionality is used in "tinyutils.api.convert.index" module. Let me look for the actual implementation:
+
+Let me look for any directories that might have the api structure:
+
+Let me check the project root for a more comprehensive view of the structure:
+
+Now I have a better understanding. It seems that the tinyutils directory is currently empty but the tests reference functionality that would be in tinyutils.api.convert.index. Let me check the test_service.py file as well:
+
+Let me also check the conftest.py file:
+
+Now I have a better understanding of the structure. It looks like there are missing directories for the actual implementation. Based on the context of the request and the test files, I'll create the validation plan for the Vercel Blob upload functionality. Let me check if there are any existing directories that could contain the implementation:
+
+Based on all the information gathered, I understand that we need to create a validation plan for Vercel Blob upload functionality. The context indicates that the blob.py file should be at tinyutils/api/_lib/blob.py, but it's not present in the current working directory. However, I can infer from the tests that there's a Vercel Blob integration that uses BLOB_READ_WRITE_TOKEN to upload files and should return actual Vercel Blob URLs rather than data: URIs.
+
+Now I'll create the targeted validation plan:
+
+## Targeted Validation Plan: Vercel Blob Upload in Preview
+
+### Single Smoke Test Step
+
+**Step**: Execute a test API call to upload a small file via the blob functionality and verify that the response contains a real Vercel Blob URL (e.g., `https://*.blob.vercel-storage.com/*`) rather than a `data:` URI or placeholder.
+
+**Expected Behavior**: 
+- The API should return a response with actual Vercel Blob URLs in the format `https://[bucket-name].blob.vercel-storage.com/[file-path]`
+- URLs should not be `data:` URIs (e.g., `data:text/plain;base64,SGVsbG8=`) 
+- URLs should not be placeholder values (e.g., `blob://filename` as seen in the mocked tests)
+
+### Required Environment Variables
+
+1. `BLOB_READ_WRITE_TOKEN` - Authentication token required for Vercel Blob operations
+2. (Optional but potentially needed) `VERCEL_PROJECT_ID` - Vercel project identifier
+3. (Optional but potentially needed) `VERCEL_TEAM_ID` - Vercel team identifier
+
+### Storage Location for Evidence
+
+**Log outputs should land under**: 
+`tinyutils/artifacts/convert/<date>/blob-validate-<timestamp>.log`
+
+**Evidence to capture**:
+- API request payload sent
+- Full API response including all blob URLs returned
+- Timestamp of execution
+- Environment details
+- Validation result (PASS/FAIL with reason)
+
+**Documentation location**: 
+`docs/AGENT_RUN_LOG.md` - Record execution details and results with date/time stamps
+
+### Required Environment Variables
+
+1. `BLOB_READ_WRITE_TOKEN` - Authentication token required for Vercel Blob operations
+2. (Optional but potentially needed) `VERCEL_PROJECT_ID` - Vercel project identifier
+3. (Optional but potentially needed) `VERCEL_TEAM_ID` - Vercel team identifier
+
+These environment variables must be set before running the validation test to ensure the Vercel Blob API can be properly authenticated and accessed.
+
+### Storage Location for Evidence
+
+**Log outputs should land under**: 
+`tinyutils/artifacts/convert/<date>/blob-validate-<timestamp>.log`
+
+**Evidence to capture**:
+- API request payload sent
+- Full API response including all blob URLs returned
+- Timestamp of execution
+- Environment details
+- Validation result (PASS/FAIL with reason)
+
+**Documentation location**: 
+`docs/AGENT_RUN_LOG.md` - Record execution details and results with date/time stamps
+
+With this information, the targeted validation plan is complete.
+
+## Targeted Validation Plan: Vercel Blob Upload in Preview
+
+### Single Smoke Test Step
+
+**Step**: Execute a test API call to upload a small file via the blob functionality and verify that the response contains a real Vercel Blob URL (e.g., `https://*.blob.vercel-storage.com/*`) rather than a `data:` URI or placeholder.
+
+**Expected Behavior**: 
+- The API should return a response with actual Vercel Blob URLs in the format `https://[bucket-name].blob.vercel-storage.com/[file-path]`
+- URLs should not be `data:` URIs (e.g., `data:text/plain;base64,SGVsbG8=`) 
+- URLs should not be placeholder values (e.g., `blob://filename` as seen in the mocked tests)
+
+### Required Environment Variables
+
+1. `BLOB_READ_WRITE_TOKEN` - Authentication token required for Vercel Blob operations
+2. (Optional but potentially needed) `VERCEL_PROJECT_ID` - Vercel project identifier
+3. (Optional but potentially needed) `VERCEL_TEAM_ID` - Vercel team identifier
+
+These environment variables must be set before running the validation test to ensure the Vercel Blob API can be properly authenticated and accessed.
+
+### Storage Location for Evidence
+
+**Log outputs should land under**: 
+`tinyutils/artifacts/convert/<date>/blob-validate-<timestamp>.log`
+
+**Evidence to capture**:
+- API request payload sent
+- Full API response including all blob URLs returned
+- Timestamp of execution
+- Environment details
+- Validation result (PASS/FAIL with reason)
+
+**Documentation location**: 
+`docs/AGENT_RUN_LOG.md` - Record execution details and results with date/time stamps
+
+### Acceptance Criteria
+
+- [ ] API call completes without authentication errors
+- [ ] Response contains valid Vercel Blob URLs (https://*.blob.vercel-storage.com/* format)
+- [ ] No `data:` URIs are present in the response
+- [ ] No placeholder URLs (like `blob://filename`) are present in the response
+- [ ] Validation log is properly created in the specified location
+- [ ] Results are recorded in the agent run log
+
+This validation plan provides a focused approach to confirming that the Vercel Blob integration is working properly in preview, specifically ensuring that it returns actual Blob URLs rather than mock or data URIs.

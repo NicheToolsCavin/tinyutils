@@ -1,0 +1,136 @@
+I need to understand the current codebase and the specific files mentioned to properly propose the minimal update. Let me first explore the repository structure and examine the files of interest.
+
+I see that I'm currently in the wrong directory. I need to navigate to the TinyUtils repository that was mentioned. However, I can only work within the current workspace directory. Let me understand what files exist in the current directory and see if I can find any relevant information about the TinyUtils repository structure.
+
+Let me explore the tinyutils directory to see if there's any information about the scripts mentioned:
+
+Let me check the tests directory:
+
+Let me check the PATH file to better understand the repository structure:
+
+I think there might be confusion about the directories. The user mentioned that the TinyUtils repository is at `/Users/cav/dev/TinyUtils` with branch `feature/universal-converter-backend`, but I'm currently in a different directory. Let me see if I can find any context about the actual TinyUtils repository in the current workspace:
+
+It seems there's an issue with the grep search tool. Let me try to understand the situation better. Since the user mentioned a specific repository structure and files, I'll create a todo list to plan my approach to proposing the minimal update for the smoke test script.
+
+Based on the user's request, I understand that I need to propose changes to a file called `scripts/smoke_convert_preview.mjs` in the TinyUtils repository. Even though I can't directly access the `/Users/cav/dev/TinyUtils` directory, I can outline the proposed changes based on the requirements. Let me mark the first task as in progress and work through the proposal.
+
+I'll outline the proposed minimal update for `scripts/smoke_convert_preview.mjs` based on the requirements. Since I can't access the actual file, I'll provide a complete solution proposal that addresses all the requirements.
+
+## Proposed Minimal Update for scripts/smoke_convert_preview.mjs
+
+### 1. Environment Variable Names
+
+**New environment variables to be defined in `.env.preview.local`:**
+- `PREVIEW_BYPASS_TOKEN` - The preview bypass token value
+- `PREVIEW_FENCE_HEADER_NAME` - The header name for the preview fence (e.g., "X-Preview-Token" or similar)
+
+### 2. Loading Environment Variables
+
+**In `scripts/smoke_convert_preview.mjs`, add at the top:**
+
+```javascript
+// Load preview environment variables from .env.preview.local
+import { config } from 'dotenv';
+config({ path: './.env.preview.local' });
+
+// Read preview-specific environment variables with fallbacks
+const PREVIEW_BYPASS_TOKEN = process.env.PREVIEW_BYPASS_TOKEN || '';
+const PREVIEW_FENCE_HEADER_NAME = process.env.PREVIEW_FENCE_HEADER_NAME || 'X-Preview-Token';
+```
+
+### 3. Sending the Correct Bypass Header
+
+**In the HTTP request function, modify headers to include:**
+
+```javascript
+const headers = {
+  // ... existing headers
+  [PREVIEW_FENCE_HEADER_NAME]: PREVIEW_BYPASS_TOKEN,
+  // ... other headers
+};
+```
+
+### 4. Recording Redacted Values in Artifacts
+
+**Before making requests, store redacted information:**
+
+```javascript
+// Create redacted header information for artifact recording
+const redactedHeaders = {
+  [PREVIEW_FENCE_HEADER_NAME]: PREVIEW_BYPASS_TOKEN ? '[REDACTED]' : '[NOT SET]'
+};
+
+// Record in artifact/triage file
+const fs = require('fs');
+const path = require('path');
+const artifactDir = 'tinyutils/artifacts/convert/20251108/triage/';
+const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+const artifactFile = path.join(artifactDir, `smoke_preview_${timestamp}.json`);
+
+// Ensure artifact directory exists
+fs.mkdirSync(artifactDir, { recursive: true });
+
+const artifactData = {
+  timestamp: new Date().toISOString(),
+  environment: 'preview',
+  headers: redactedHeaders,
+  // ... other relevant request data
+};
+
+fs.writeFileSync(artifactFile, JSON.stringify(artifactData, null, 2));
+```
+
+### 5. CI Usage Documentation - 4-6 Step Snippet
+
+**For documentation in relevant files:**
+
+```markdown
+## Using Preview Smoke Tests with CI
+
+1. Create `.env.preview.local` file with preview credentials:
+   ```env
+   PREVIEW_BYPASS_TOKEN=your_actual_token_here
+   PREVIEW_FENCE_HEADER_NAME=X-Preview-Token
+   ```
+
+2. Ensure `.env.preview.local` is git-ignored but available in CI environment:
+   ```bash
+   echo ".env.preview.local" >> .gitignore
+   ```
+
+3. Run smoke tests with preview configuration:
+   ```bash
+   node scripts/smoke_convert_preview.mjs
+   ```
+
+4. Check generated artifacts in `tinyutils/artifacts/convert/YYYYMMDD/triage/` for redacted header information.
+
+5. (Optional) Set up CI environment variables in your pipeline configuration instead of using local file.
+
+6. Verify tests pass and artifacts are properly recorded with redacted tokens.
+```
+
+**Note:** The actual token values should never be committed to the repository and should only be stored securely in the CI environment or local `.env.preview.local` file.
+
+This proposal ensures:
+- Secure handling of preview tokens through environment variables
+- Safe storage in `.env.preview.local` that can be git-ignored
+- Proper bypass header transmission to access preview endpoints
+- Redacted values in artifacts for audit trails without exposing secrets
+- Clear documentation for CI usage
+
+I've completed the proposal for the minimal update to `scripts/smoke_convert_preview.mjs`. Here's a summary of the changes I've outlined:
+
+## Summary of Proposed Changes
+
+1. **Environment Variables**: Introduced `PREVIEW_BYPASS_TOKEN` and `PREVIEW_FENCE_HEADER_NAME` to be stored in `.env.preview.local`
+
+2. **Loading Mechanism**: Added dotenv configuration to load preview-specific environment variables
+
+3. **Header Implementation**: Proposed adding the bypass header using the environment variables
+
+4. **Security**: Implemented redaction of sensitive values in artifacts while maintaining audit trails
+
+5. **Documentation**: Provided a clear 6-step usage guide for CI implementation
+
+This approach ensures that preview tokens are handled securely, with proper separation of secrets from code, and with appropriate redaction in logs and artifacts. The solution allows for safe CI usage while maintaining security best practices.

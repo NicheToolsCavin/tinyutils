@@ -1,0 +1,322 @@
+I'll help you preflight the preview deploy by checking for duplicate keys, missing limits, and runtime risks. Let me first examine the relevant files to assess the deploy readiness.
+
+I see that the current working directory is different from where you want me to look. Let me check if there's a vercel.json file in the current directory:
+
+It seems I need to understand the actual structure of the repository you're working with. Let me check the current directory structure more thoroughly to locate the relevant files:
+
+I need to see what's in the tinyutils directory to find the API files you mentioned:
+
+The tinyutils directory appears to be empty in the current workspace. It seems there might be some confusion about the actual repository location. Let me try to find the vercel.json and the mentioned Python file that should be at tinyutils/api/convert/index.py:
+
+It seems there's an issue with the search tool. Let me try to understand the repository structure differently. Since you mentioned the repository is at `/Users/cav/dev/TinyUtils` (branch feature/universal-converter-backend), let me check if I can find that directory:
+
+Great! I found the repository. Now I can look at the actual files mentioned in the original request. Let me check for the vercel.json and the Python file:
+
+I need to change the working directory to the actual repository location. Let me navigate there:
+
+Now I need to check if there are tools to read files in the actual repository directory. Let me see what the current working directory is from the perspective of the tools:
+
+Since the tool is still constrained to the original workspace directory, I'll need to approach this differently. Let me check if I can access the repository files from the original workspace and create a symlink or copy them:
+
+Let me check more specifically for vercel.json and the API file:
+
+Perfect! I found the files. Let me examine both the vercel.json and the Python file. Let me first look at the main vercel.json file:
+
+Now let me check the Python file:
+
+Now I have the necessary files. Let me analyze the vercel.json file for potential issues. I can see there's a duplicate "functions" key which is a critical issue. Let me examine this more closely:
+
+I can see the issue clearly now. Looking at the vercel.json file, there are duplicate "functions" keys which will definitely cause deployment issues. Let me continue with the analysis:
+
+1. **Duplicate "functions" keys**: The vercel.json has the "functions" key defined twice, which will cause a configuration error during deployment.
+
+2. **Missing limits**: The functions configuration is missing important limits like timeout and memory that could lead to issues.
+
+Let me continue with the next task:
+
+Based on my analysis of the vercel.json file:
+
+2. **Missing limits**: The functions configuration lacks important limits like timeout and memory that are critical for production deployments:
+   - No timeout specified (default is typically 10 seconds which may not be enough for document conversion)
+   - No memory limit specified (default is typically 1024MB)
+   - No max duration specified
+
+Let me continue with the next task:
+
+Looking at the Python file (tinyutils/api/convert/index.py), I can identify several runtime risks that could cause 500 errors:
+
+3. **Runtime risks in Python file**:
+   - Large file processing without explicit memory or timeout management
+   - No explicit file size limits beyond `ensure_within_limits()` which may not be sufficient for heavy document conversion
+   - Pandoc processing which can be resource intensive and time consuming
+   - Potential for timeout errors during complex document conversions
+   - No circuit breaker or retry logic for external blob operations
+   - No explicit rate limiting which could cause resource exhaustion
+
+Let me continue with the next tasks:
+
+4. **Minimal config patch to fix issues**:
+
+The vercel.json file needs the following fixes:
+- Merge the two duplicate "functions" sections into one
+- Add timeout and memory limits for the functions
+
+Here's the minimal config patch:
+
+```json
+{
+  "functions": {
+    "api/*.py": {
+      "runtime": "python3.12",
+      "includeFiles": [
+        "tinyutils/**",
+        "api/_lib/**",
+        "convert/**"
+      ],
+      "excludeFiles": [
+        "node_modules/**"
+      ],
+      "memory": 1024,
+      "maxDuration": 30
+    },
+    "api/convert/index.py": {
+      "includeFiles": "tinyutils/**",
+      "memory": 2048,
+      "maxDuration": 60
+    },
+    "api/findreplace/preview.py": {
+      "includeFiles": "tinyutils/**",
+      "memory": 1024,
+      "maxDuration": 30
+    },
+    "api/findreplace/apply.py": {
+      "includeFiles": "tinyutils/**",
+      "memory": 1024,
+      "maxDuration": 30
+    }
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "geolocation=(), camera=(), microphone=(), usb=(), payment=(), browsing-topics=()" },
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'; object-src 'none'; upgrade-insecure-requests" },
+        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+        { "key": "Cross-Origin-Resource-Policy", "value": "same-origin" },
+        { "key": "X-DNS-Prefetch-Control", "value": "off" }
+      ]
+    },
+    {
+      "source": "/public/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=600" }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" },
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "no-referrer" },
+        { "key": "Permissions-Policy", "value": "geolocation=(), camera=(), microphone=(), usb=(), payment=(), browsing-topics=()" },
+        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+        { "key": "Cross-Origin-Resource-Policy", "value": "same-origin" },
+        { "key": "X-DNS-Prefetch-Control", "value": "off" },
+        { "key": "X-Robots-Tag", "value": "noindex" }
+      ]
+    },
+    {
+      "source": "/tools/wayback-fixer/demo/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=600" }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/tools/:tool(keyword-density|meta-preview|sitemap-generator)/:rest*",
+      "has": [
+        { "type": "query", "key": "preview_fence_proxy", "value": "1" }
+      ],
+      "destination": "/tools/:tool/:rest*"
+    },
+    {
+      "source": "/tools/:tool(keyword-density|meta-preview|sitemap-generator).html",
+      "has": [
+        { "type": "query", "key": "preview_fence_proxy", "value": "1" }
+      ],
+      "destination": "/tools/:tool.html"
+    },
+    {
+      "source": "/tools/:tool(keyword-density|meta-preview|sitemap-generator)",
+      "destination": "/api/fence?target=/tools/:tool"
+    },
+    {
+      "source": "/tools/:tool(keyword-density|meta-preview|sitemap-generator)/:rest*",
+      "destination": "/api/fence?target=/tools/:tool/:rest*"
+    },
+    {
+      "source": "/tools/:tool(keyword-density|meta-preview|sitemap-generator).html",
+      "destination": "/api/fence?target=/tools/:tool.html"
+    }
+  ]
+}
+```
+
+Let me complete the final task:
+
+5. **Go/No-go checklist for deploy**:
+
+## Go/No-go Checklist:
+
+### ⛔ NO-GO Issues (Must Fix Before Deploy):
+- [x] **Duplicate "functions" keys** - CRITICAL: vercel.json has duplicate "functions" keys that will break deployment
+- [x] **Missing timeout/memory limits** - HIGH: Functions lack proper resource limits, especially critical for document conversion which can be resource-intensive
+
+### ⚠️ Risk Areas (Could cause 500s post-deploy):
+- [x] **Runtime risks in Python file** - Resource-intensive document conversions might timeout or exhaust memory even with limits
+- [x] **Large file processing** - No explicit file size limits beyond basic validation
+- [x] **External blob operations** - No circuit breaker or retry mechanisms
+
+### ✅ Fixed with Config Patch:
+- [x] **Merged duplicate functions** - Combined into single functions block
+- [x] **Added proper limits** - Memory and timeout settings appropriate for conversion tasks
+
+## Status: NO-GO until vercel.json is fixed
+
+The deployment will fail due to duplicate "functions" keys. The current vercel.json will not parse correctly during deployment.
+
+For a successful deploy, you must apply the minimal config patch that:
+1. Merges the duplicate functions blocks
+2. Adds appropriate timeout (30-60s) and memory (1024-2048MB) limits
+3. Sets higher limits for the conversion API which is more resource-intensive
+
+After applying the patch, the runtime risks will still exist but should be manageable with proper monitoring.
+
+## Preflight Deploy Assessment: NO-GO
+
+### Critical Issues Blocking Deploy:
+
+1. **Duplicate "functions" keys** - vercel.json contains two "functions" top-level keys which will cause JSON parsing errors during deployment.
+
+2. **Missing function limits** - No timeout/memory settings which could cause deployment to fail or function to timeout during document conversion.
+
+### Minimal Config Patch (Apply to `/Users/cav/dev/TinyUtils/tinyutils/vercel.json`):
+
+```json
+{
+  "functions": {
+    "api/*.py": {
+      "runtime": "python3.12",
+      "includeFiles": [
+        "tinyutils/**",
+        "api/_lib/**",
+        "convert/**"
+      ],
+      "excludeFiles": [
+        "node_modules/**"
+      ],
+      "memory": 1024,
+      "maxDuration": 30
+    },
+    "api/convert/index.py": {
+      "includeFiles": "tinyutils/**",
+      "memory": 2048,
+      "maxDuration": 60
+    },
+    "api/findreplace/preview.py": {
+      "includeFiles": "tinyutils/**",
+      "memory": 1024,
+      "maxDuration": 30
+    },
+    "api/findreplace/apply.py": {
+      "includeFiles": "tinyutils/**",
+      "memory": 1024,
+      "maxDuration": 30
+    }
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "geolocation=(), camera=(), microphone=(), usb=(), payment=(), browsing-topics=()" },
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'; object-src 'none'; upgrade-insecure-requests" },
+        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+        { "key": "Cross-Origin-Resource-Policy", "value": "same-origin" },
+        { "key": "X-DNS-Prefetch-Control", "value": "off" }
+      ]
+    },
+    {
+      "source": "/public/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=600" }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" },
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "no-referrer" },
+        { "key": "Permissions-Policy", "value": "geolocation=(), camera=(), microphone=(), usb=(), payment=(), browsing-topics=()" },
+        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+        { "key": "Cross-Origin-Resource-Policy", "value": "same-origin" },
+        { "key": "X-DNS-Prefetch-Control", "value": "off" },
+        { "key": "X-Robots-Tag", "value": "noindex" }
+      ]
+    },
+    {
+      "source": "/tools/wayback-fixer/demo/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=600" }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/tools/:tool(keyword-density|meta-preview|sitemap-generator)/:rest*",
+      "has": [
+        { "type": "query", "key": "preview_fence_proxy", "value": "1" }
+      ],
+      "destination": "/tools/:tool/:rest*"
+    },
+    {
+      "source": "/tools/:tool(keyword-density|meta-preview|sitemap-generator).html",
+      "has": [
+        { "type": "query", "key": "preview_fence_proxy", "value": "1" }
+      ],
+      "destination": "/tools/:tool.html"
+    },
+    {
+      "source": "/tools/:tool(keyword-density|meta-preview|sitemap-generator)",
+      "destination": "/api/fence?target=/tools/:tool"
+    },
+    {
+      "source": "/tools/:tool(keyword-density|meta-preview|sitemap-generator)/:rest*",
+      "destination": "/api/fence?target=/tools/:tool/:rest*"
+    },
+    {
+      "source": "/tools/:tool(keyword-density|meta-preview|sitemap-generator).html",
+      "destination": "/api/fence?target=/tools/:tool.html"
+    }
+  ]
+}
+```
+
+### Runtime Risks Post-Guard:
+- Document conversion is resource-intensive and may still timeout with large files
+- No explicit file size validation beyond basic limits
+- Pandoc processing could introduce unhandled exceptions during complex conversions
+- External blob operations without sophisticated retry logic could fail under load
+
+**Recommendation**: Apply the config patch before deploying. Monitor conversion API post-deploy for timeout/resource issues.

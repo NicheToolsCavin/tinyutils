@@ -1,0 +1,85 @@
+Okay, I will begin by reviewing the specified files to create the plan.
+
+Based on the provided context and file review, here is a comprehensive plan to move the document conversion backend from a GREEN preview state to production-readiness.
+
+### Risky Assumptions & Validations
+
+1.  **Assumption:** The in-memory cache in `tinyutils/convert/service.py` is effective.
+    *   **Risk:** This is incorrect. Vercel's serverless functions are stateless and likely short-lived. An in-memory cache will be ineffective, providing no performance benefit and consuming memory unnecessarily.
+    *   **Validation:** Confirm this by adding log statements for cache hits/misses in the preview environment. It's expected that hits will be near-zero across different invocations. The cache should be removed.
+2.  **Assumption:** The API will be publicly accessible without per-user authentication in production.
+    *   **Risk:** If the API is intended for specific users, it lacks authentication and authorization, posing a security risk.
+    *   **Validation:** Clarify the intended audience. If it's not fully public, an authentication layer (e.g., API keys, JWT) must be planned before production rollout. The current plan assumes a public API protected by rate limiting.
+
+---
+
+### Production-Readiness Plan
+
+Here is a stepwise plan to prepare the `/api/convert` endpoint for production.
+
+1.  **Finalize Smoke Test Automation**
+    *   **Action:** Refactor `tinyutils/scripts/smoke_convert_preview.mjs` to reliably bootstrap and use the `_vercel_jwt` cookie. The current implementation has fallbacks that indicate this is not robust. Use `curl`'s cookie-jar feature (`-c` and `-b`) which is more reliable for capturing and reusing cookies in scripts.
+    *   **Rationale:** Fully automated smoke tests are essential for reliable CI/CD. Manual steps are a bottleneck and prevent enabling automatic preview deployments.
+
+2.  **Integrate Smoke Tests into CI**
+    *   **Action:** Create a GitHub Actions workflow (e.g., `.github/workflows/preview_smoke_test.yml`) that triggers on pull requests to `main`. This workflow should deploy to Vercel Preview and then run the `smoke_convert_preview.mjs` script against the new preview URL.
+    *   **Rationale:** This ensures that no code change can be merged if it breaks the core functionality of the conversion API, providing a critical safety net.
+
+3.  **Remove In-Memory Caching**
+    *   **Action:** Remove the `_CACHE`, `_CACHE_LOCK`, and related caching logic from `tinyutils/convert/service.py`.
+    *   **Rationale:** As identified in the "Risky Assumptions," this cache is ineffective in a serverless environment and provides a false sense of performance optimization. Removing it simplifies the code and reflects the true execution model.
+
+4.  **Implement Structured Logging**
+    *   **Action:** Modify `tinyutils/api/convert/app.py` and `tinyutils/convert/service.py` to emit structured (JSON) logs. Include the `request_id` in every log entry to correlate all actions for a single request.
+    *   **Rationale:** Structured logs are crucial for observability and debugging in a distributed environment like Vercel. They allow for easy filtering and searching in a log aggregation service.
+
+5.  **Enhance the Health Endpoint**
+    *   **Action:** Expand the `/api/convert/health` endpoint to include a self-test. It should perform a minimal, non-pandoc conversion (e.g., the fallback path) to verify that the service logic itself is operational, in addition to checking for pandoc.
+    *   **Rationale:** A more comprehensive health check provides a better signal of service health for monitoring and alerting systems.
+
+6.  **Configure Production Environment**
+    *   **Action:** In the Vercel dashboard, create a production environment and securely add the necessary environment variables (e.g., `BLOB_READ_WRITE_TOKEN`). Ensure production variables are distinct from preview ones.
+    *   **Rationale:** Isolating production configuration from preview/development is a security best practice and prevents accidental use of production resources.
+
+7.  **Add Rate Limiting and Input Hardening**
+    *   **Action:** Introduce rate limiting to the API endpoint. This can be done in `vercel.json` or via middleware in `app.py`. Also, verify that the `ensure_within_limits` function in `api/_lib/utils.py` is robust against excessively large or malformed inputs.
+    *   **Rationale:** Protects the service from abuse, denial-of-service attacks, and excessive cost overruns in a public-facing environment.
+
+8.  **Introduce Observability and Alerting**
+    *   **Action:** Integrate Vercel's observability tools or a third-party provider. Create dashboards to monitor key metrics (request volume, error rate, p95 latency). Set up alerts for critical failure conditions (e.g., health endpoint failing, 5xx error rate > 1%).
+    *   **Rationale:** You cannot confidently run a service in production without knowing how it's performing and being notified automatically when it fails.
+
+9.  **Deploy to Production (Shadow Mode)**
+    *   **Action:** Promote a known-good commit from the `main` branch to production using the Vercel CLI: `vercel --prod`. Initially, do not route public traffic to it.
+    *   **Rationale:** This creates a stable production deployment that can be tested internally without affecting users.
+
+10. **Conduct Production Smoke Test**
+    *   **Action:** Create a production-specific smoke test script (e.g., `smoke_convert_prod.mjs`) that does not rely on preview fences. Run it against the production URL to validate its health and functionality.
+    *   **Rationale:** Verifies that the production environment is configured correctly and the service is fully operational before it receives live traffic.
+
+11. **Gradual Traffic Rollout**
+    *   **Action:** Update DNS to route a small percentage of live traffic (e.g., 10%) to the new production deployment. Monitor error rates and performance closely.
+    *   **Rationale:** A gradual rollout (canary release) minimizes the impact of any unforeseen issues, allowing for a safe rollback if problems are detected. Once stable, route 100% of traffic.
+
+---
+
+### Verification Checklists
+
+#### Checklist: Ready for "Auto On" (Automated Preview Deploys)
+
+-   [ ] `scripts/smoke_convert_preview.mjs` reliably passes locally, correctly handling the `_vercel_jwt` cookie.
+-   [ ] A CI workflow exists and successfully runs the smoke test on every pull request targeting `main`.
+-   [ ] The ineffective in-memory cache has been removed from `convert/service.py`.
+-   [ ] The development team agrees that the preview environment is stable enough for automated deployments.
+
+#### Checklist: Ready to "Ship to Prod"
+
+-   [ ] All items in the "Auto On" checklist are complete.
+-   [ ] Structured logging is implemented and `request_id` is present in all relevant logs.
+-   [ ] The `/health` endpoint includes a functional self-test.
+-   [ ] Rate limiting is configured and tested.
+-   [ ] Input size and validation limits have been reviewed and deemed sufficient.
+-   [ ] Monitoring dashboards and critical alerts are configured and tested.
+-   [ ] A production smoke test script (`smoke_convert_prod.mjs`) has been created.
+-   [ ] The initial production deployment has passed the production smoke test.
+-   [ ] A gradual traffic rollout plan is in place and has been communicated to stakeholders.

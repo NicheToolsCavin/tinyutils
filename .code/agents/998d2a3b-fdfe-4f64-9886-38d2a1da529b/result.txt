@@ -1,0 +1,417 @@
+[2025-11-10T10:34:38] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-precise-vercel-json
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: auto
+--------
+[2025-11-10T10:34:38] User instructions:
+Context: Repo root: /Users/cav/dev/TinyUtils/tinyutils. Goal: eliminate vercel.json routing conflicts that mix legacy 'routes' with top-level routing props. Preserve preview fence for beta tools, strict headers/CSP, and caching rules per AGENTS.md. Evidence of failure appears in artifacts/convert/20251110/smoke-preview-*/vercel_deploy_attempt*.log with an error like: cannot combine 'routes' with 'headers/rewrites'. Functions include api/convert/index.py; keep bundle size constraints <100MB and exclude artifacts/, .code/, tests/ from deploy.
+
+Agent: Draft a precise vercel.json transformation: remove 'routes' and re-express behavior using top-level 'rewrites' and 'headers' while preserving the preview fence (ensure /tools/(convert|find-replace) and their .html variants are gated), security headers, and asset caching. Include recommended functions config for api/* with includeFiles globs and exclusions. Provide a concise JSON patch proposal and rationale referencing AGENTS.md requirements.
+[2025-11-10T10:34:42] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-precise-vercel-json
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: auto
+--------
+[2025-11-10T10:34:42] User instructions:
+Context: Repo root: /Users/cav/dev/TinyUtils/tinyutils. Goal: eliminate vercel.json routing conflicts that mix legacy 'routes' with top-level routing props. Preserve preview fence for beta tools, strict headers/CSP, and caching rules per AGENTS.md. Evidence of failure appears in artifacts/convert/20251110/smoke-preview-*/vercel_deploy_attempt*.log with an error like: cannot combine 'routes' with 'headers/rewrites'. Functions include api/convert/index.py; keep bundle size constraints <100MB and exclude artifacts/, .code/, tests/ from deploy.
+
+Agent: Draft a precise vercel.json transformation: remove 'routes' and re-express behavior using top-level 'rewrites' and 'headers' while preserving the preview fence (ensure /tools/(convert|find-replace) and their .html variants are gated), security headers, and asset caching. Include recommended functions config for api/* with includeFiles globs and exclusions. Provide a concise JSON patch proposal and rationale referencing AGENTS.md requirements.
+
+[2025-11-10T10:34:47] thinking
+
+**Planning transformation task**
+[2025-11-10T10:34:48] exec bash -lc pwd in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-precise-vercel-json
+[2025-11-10T10:34:48] bash -lc pwd succeeded in 250ms:
+/Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-precise-vercel-json
+[2025-11-10T10:34:48] tokens used: 6,809
+
+[2025-11-10T10:34:50] thinking
+
+**Checking repo and vercel.json**
+[2025-11-10T10:35:12] exec bash -lc ls in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-precise-vercel-json
+[2025-11-10T10:35:12] bash -lc ls succeeded in 141ms:
+PATH
+print1
+tests
+tinyutils
+TinyUtilsCodexContext
+[2025-11-10T10:35:12] tokens used: 13,774
+
+[2025-11-10T10:35:14] thinking
+
+**Checking repository root and structure**
+[2025-11-10T10:35:15] exec bash -lc 'ls tinyutils' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-precise-vercel-json
+[2025-11-10T10:35:15] bash -lc 'ls tinyutils' succeeded in 165ms:
+[2025-11-10T10:35:15] tokens used: 15,100
+
+[2025-11-10T10:35:17] thinking
+
+**Investigating tinyutils directory contents**
+[2025-11-10T10:35:18] exec bash -lc 'ls tinyutils -a' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-precise-vercel-json
+[2025-11-10T10:35:18] bash -lc 'ls tinyutils -a' exited 1 in 156ms:
+tinyutils:
+
+ERROR
+ls: -a: No such file or directory
+[2025-11-10T10:35:18] tokens used: 15,295
+
+[2025-11-10T10:35:19] thinking
+
+**Listing all files in tinyutils**
+[2025-11-10T10:35:20] exec bash -lc 'ls -a tinyutils' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-precise-vercel-json
+[2025-11-10T10:35:20] bash -lc 'ls -a tinyutils' succeeded in 139ms:
+.
+..
+[2025-11-10T10:35:20] tokens used: 15,769
+
+[2025-11-10T10:35:22] thinking
+
+**Checking repository root path**
+[2025-11-10T10:35:23] exec bash -lc 'ls /Users/cav/dev/TinyUtils/tinyutils' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-precise-vercel-json
+[2025-11-10T10:35:23] bash -lc 'ls /Users/cav/dev/TinyUtils/tinyutils' succeeded in 144ms:
+__init__.py
+__pycache__
+ads.txt
+ADSENSE_SETUP.md
+AGENTS.md
+api
+artifacts
+CHANGES-v1.3.0-rc2.txt
+CHANGES-v1.3.0-rc3.txt
+config
+convert
+data
+DEPLOY_PRODUCTION_CHECKLIST.md
+docs
+feedback.html
+filters
+fixtures
+guides
+index
+index.html
+[2025-11-10T10:35:23] tokens used: 16,517
+
+[2025-11-10T10:35:25] thinking
+
+**Checking AGENTS file**
+[2025-11-10T10:35:26] exec bash -lc "sed -n '1,200p' /Users/cav/dev/TinyUtils/tinyutils/AGENTS.md" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-precise-vercel-json
+[2025-11-10T10:35:26] bash -lc "sed -n '1,200p' /Users/cav/dev/TinyUtils/tinyutils/AGENTS.md" succeeded in 137ms:
+# AGENTS.md
+
+**Goal**
+Keep the TinyUtils preview (the auto-generated Vercel preview URL shown after each deploy) green and ready to promote while production (`https://tinyutils.net`) stays stable. Public tools must load without secrets, preview-fenced betas must require `PREVIEW_SECRET`, and all Edge APIs should return valid JSON envelopes with request IDs.
+
+**Environments**
+- **Production:** https://tinyutils.net (public)
+- **Preview:** auto-generated Vercel preview URL (beta tools 401 until authenticated)
+- **Local dev:** Node 20.x, pnpm available, static build (no bundler). Use `workspace-write` sandbox rules from this repo.
+
+---
+
+## Constraints
+- **Branch + PR only.** Do not push straight to `main` unless explicitly told to ship to production.
+
+- **Minimal diffs.** Keep changes scoped; no new dependencies unless absolutely required and justified in the PR.
+
+- **Static export.** Framework preset “Other”, no build command, output directory `/`.
+
+ - **Vercel bundle size.** Serverless uploads must stay under the 100 MB per-file limit. Large assets (pandoc binary, artifacts, tests) are excluded via `vercel.json`; avoid reintroducing new large files into deploy bundles without updating the excludes.
+[2025-11-10T10:35:26] tokens used: 17,447
+
+[2025-11-10T10:35:28] thinking
+
+**Identifying missing configuration file**
+[2025-11-10T10:35:28] exec bash -lc 'cat /Users/cav/dev/TinyUtils/tinyutils/vercel.json' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-precise-vercel-json
+[2025-11-10T10:35:28] bash -lc 'cat /Users/cav/dev/TinyUtils/tinyutils/vercel.json' succeeded in 181ms:
+{
+  "version": 2,
+  "functions": {
+    "api/convert/index.py": {
+      "includeFiles": "{tinyutils/__init__.py,tinyutils/api/**,tinyutils/convert/**,tinyutils/filters/**}",
+      "excludeFiles": "{tinyutils/artifacts/**,tinyutils/.code/**,tinyutils/tests/**,tinyutils/__pycache__/**}",
+      "maxDuration": 60
+    },
+    "api/findreplace/preview.py": {
+      "includeFiles": "{tinyutils/api/**,tinyutils/convert/**,tinyutils/filters/**}",
+      "excludeFiles": "{tinyutils/artifacts/**,tinyutils/.code/**,tinyutils/tests/**,tinyutils/__pycache__/**}",
+      "maxDuration": 60
+    },
+    "api/findreplace/apply.py": {
+      "includeFiles": "{tinyutils/api/**,tinyutils/convert/**,tinyutils/filters/**}",
+      "excludeFiles": "{tinyutils/artifacts/**,tinyutils/.code/**,tinyutils/tests/**,tinyutils/__pycache__/**}",
+      "maxDuration": 60
+    }
+  },
+  "routes": [
+[2025-11-10T10:35:28] tokens used: 20,781
+
+[2025-11-10T10:35:35] thinking
+
+**Planning Vercel config restructure**
+
+I'm sorting out how to separate routes from top-level headers and rewrites in the Vercel config since mixing them causes errors. The plan is to analyze current headers, caching, and preview gating, then map these to top-level arrays for headers, rewrites, and redirects, ensuring preview fencing and caching rules are preserved and extended as needed.
+[2025-11-10T10:35:35] exec bash -lc 'rg -n "Cache-Control" -n /Users/cav/dev/TinyUtils/tinyutils/vercel.json' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-precise-vercel-json
+[2025-11-10T10:35:36] bash -lc 'rg -n "Cache-Control" -n /Users/cav/dev/TinyUtils/tinyutils/vercel.json' succeeded in 178ms:
+39:        "Cache-Control": "public, max-age=600"
+46:        "Cache-Control": "no-store",
+61:        "Cache-Control": "public, max-age=600"
+[2025-11-10T10:35:36] tokens used: 33,506
+
+[2025-11-10T10:35:38] thinking
+
+**Searching for AGENT caching details**
+[2025-11-10T10:35:39] exec bash -lc 'rg -n "cache" AGENTS.md' in /Users/cav/dev/TinyUtils/tinyutils
+[2025-11-10T10:35:39] bash -lc 'rg -n "cache" AGENTS.md' succeeded in 144ms:
+105:- **Responses:** Always return JSON with `content-type: application/json; charset=utf-8`, include `cache-control: no-store`, and set `x-request-id`.
+159:- `cache-control: no-store`
+[2025-11-10T10:35:39] tokens used: 34,471
+
+[2025-11-10T10:36:28] thinking
+
+**Designing Vercel config transformation**
+[2025-11-10T10:36:28] exec bash -lc 'rg -n "find-replace" -n /Users/cav/dev/TinyUtils/tinyutils/vercel.json' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-precise-vercel-json
+[2025-11-10T10:36:29] bash -lc 'rg -n "find-replace" -n /Users/cav/dev/TinyUtils/tinyutils/vercel.json' exited 1 in 192ms:
+ERROR
+[2025-11-10T10:36:29] tokens used: 39,611
+
+[2025-11-10T10:37:27] thinking
+
+**Drafting detailed vercel.json patch and rationale**
+**Preparing vercel.json patch with headers, rewrites, and rationale**
+
+I’m putting together a JSON patch that removes the old routes, adds the new headers and rewrites with proper order for preview fence bypass before gating, and includes detailed references to the AGENTS guidelines on security headers, caching, preview gating, and bundle size management. I’ll also mention the recommended functions config and caching rules with line number references from AGENTS.md to make the explanation clear and complete.
+[2025-11-10T10:37:38] codex
+**Preparing vercel.json patch with headers, rewrites, and rationale**
+
+I’m putting together a JSON patch that removes the old routes, adds the new headers and rewrites with proper order for preview fence bypass before gating, and includes detailed references to the AGENTS guidelines on security headers, caching, preview gating, and bundle size management. I’ll also mention the recommended functions config and caching rules with line number references from AGENTS.md to make the explanation clear and complete.
+[2025-11-10T10:37:39] exec bash -lc "nl -ba /Users/cav/dev/TinyUtils/tinyutils/AGENTS.md | sed -n '120,220p'" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-precise-vercel-json
+[2025-11-10T10:37:39] bash -lc "nl -ba /Users/cav/dev/TinyUtils/tinyutils/AGENTS.md | sed -n '120,220p'" succeeded in 270ms:
+   120	- Evidence path: `tinyutils/artifacts/pr3-fence/<YYYYMMDD>/` with smoke logs + 401/200 curl headers + cookie jar.
+   121	- **Vercel Blob** credentials (read/write). Do not embed in client; serverless functions sign uploads/links.
+   122	- Keep using `PREVIEW_SECRET` for beta fences; converter/find-replace endpoints must accept the fence header/cookie.
+   123	
+   124	### Quick curl
+   125	```bash
+   126	export PREVIEW=<auto-generated-preview-url>
+   127	curl -I "$PREVIEW/tools/keyword-density"                   # 401 preview_required
+   128	curl -c cookies.txt "$PREVIEW/api/fence?preview_secret=$PREVIEW_SECRET&target=/tools/keyword-density"
+   129	curl -b cookies.txt -I "$PREVIEW/tools/keyword-density"    # 200 OK
+   130	```
+   131	
+   132	---
+   133	
+   134	## Tool Descriptions & Change Logs
+   135	- Keep behaviour specs synced in:
+   136	  - `tool_desc_deadlinkfinder.md`
+   137	  - `tool_desc_sitemapdelta.md`
+   138	  - `tool_desc_waybackfixer.md`
+   139	- Append-only updates using Europe/Madrid timestamps (`YYYY-MM-DD HH:MM ZZZ (UTC±HH:MM)`).
+[2025-11-10T10:37:39] tokens used: 51,484
+
+[2025-11-10T10:37:43] thinking
+
+**Identifying relevant code sections**
+[2025-11-10T10:37:44] exec bash -lc "nl -ba /Users/cav/dev/TinyUtils/tinyutils/AGENTS.md | sed -n '60,140p'" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-precise-vercel-json
+[2025-11-10T10:37:44] bash -lc "nl -ba /Users/cav/dev/TinyUtils/tinyutils/AGENTS.md | sed -n '60,140p'" succeeded in 184ms:
+    60	
+    61	  - [ ] `/api/check.js`
+    62	  - [ ] `/api/sitemap-delta.js`
+    63	  - [ ] `/api/wayback-fixer.js`
+    64	  - [ ] `/api/metafetch.js`
+    65	  - [ ] `/api/fence.js`
+    66	  - [ ] `/api/health.js`
+    67	
+    68	-  **Serverless APIs (Python)**
+    69	
+    70	  -  `/api/convert/index.py`
+    71	
+    72	  -  `/api/findreplace/preview.py`
+    73	
+    74	  -  `/api/findreplace/apply.py`
+    75	
+    76	    > [!NOTE]
+    77	    >
+    78	    > Serverless APIs must return JSON envelopes with request IDs and Blob URLs to outputs; large artifacts are never inlined in responses.
+    79	
+[2025-11-10T10:37:44] tokens used: 55,444
+
+[2025-11-10T10:37:46] thinking
+
+**Checking constraints for bundle size reference**
+[2025-11-10T10:37:46] exec bash -lc "nl -ba /Users/cav/dev/TinyUtils/tinyutils/AGENTS.md | sed -n '1,80p'" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-precise-vercel-json
+[2025-11-10T10:37:47] bash -lc "nl -ba /Users/cav/dev/TinyUtils/tinyutils/AGENTS.md | sed -n '1,80p'" succeeded in 187ms:
+     1	# AGENTS.md
+     2	
+     3	**Goal**
+     4	Keep the TinyUtils preview (the auto-generated Vercel preview URL shown after each deploy) green and ready to promote while production (`https://tinyutils.net`) stays stable. Public tools must load without secrets, preview-fenced betas must require `PREVIEW_SECRET`, and all Edge APIs should return valid JSON envelopes with request IDs.
+     5	
+     6	**Environments**
+     7	- **Production:** https://tinyutils.net (public)
+     8	- **Preview:** auto-generated Vercel preview URL (beta tools 401 until authenticated)
+     9	- **Local dev:** Node 20.x, pnpm available, static build (no bundler). Use `workspace-write` sandbox rules from this repo.
+    10	
+    11	---
+    12	
+    13	## Constraints
+    14	- **Branch + PR only.** Do not push straight to `main` unless explicitly told to ship to production.
+    15	
+    16	- **Minimal diffs.** Keep changes scoped; no new dependencies unless absolutely required and justified in the PR.
+    17	
+    18	- **Static export.** Framework preset “Other”, no build command, output directory `/`.
+    19	
+    20	 - **Vercel bundle size.** Serverless uploads must stay under the 100 MB per-file limit. Large assets (pandoc binary, artifacts, tests) are excluded via `vercel.json`; avoid reintroducing new large files into deploy bundles without updating the excludes.
+[2025-11-10T10:37:47] tokens used: 57,191
+
+[2025-11-10T10:38:12] thinking
+
+**Summarizing key Vercel config changes**
+
+I’m gathering detailed notes for the final message about vercel.json updates, including removing `routes` in favor of `rewrites` and `headers`, enforcing cache-control no-store for APIs, restructuring paths to fix deployment errors, and bundsize limits from AGENTS.md. I’ll prepare a JSON patch with jsonpatch ops reflecting these changes, plus recommended functions config to keep bundles under 100MB, referencing exact line ranges for clarity. I’ll also include next steps like running `pnpm smoke:preview` to verify and emphasize the fixes are “unstoppable.”
+[2025-11-10T10:38:14] exec bash -lc 'nl -ba /Users/cav/dev/TinyUtils/tinyutils/vercel.json' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-draft-precise-vercel-json
+[2025-11-10T10:38:14] bash -lc 'nl -ba /Users/cav/dev/TinyUtils/tinyutils/vercel.json' succeeded in 160ms:
+     1	{
+     2	  "version": 2,
+     3	  "functions": {
+     4	    "api/convert/index.py": {
+     5	      "includeFiles": "{tinyutils/__init__.py,tinyutils/api/**,tinyutils/convert/**,tinyutils/filters/**}",
+     6	      "excludeFiles": "{tinyutils/artifacts/**,tinyutils/.code/**,tinyutils/tests/**,tinyutils/__pycache__/**}",
+     7	      "maxDuration": 60
+     8	    },
+     9	    "api/findreplace/preview.py": {
+    10	      "includeFiles": "{tinyutils/api/**,tinyutils/convert/**,tinyutils/filters/**}",
+    11	      "excludeFiles": "{tinyutils/artifacts/**,tinyutils/.code/**,tinyutils/tests/**,tinyutils/__pycache__/**}",
+    12	      "maxDuration": 60
+    13	    },
+    14	    "api/findreplace/apply.py": {
+    15	      "includeFiles": "{tinyutils/api/**,tinyutils/convert/**,tinyutils/filters/**}",
+    16	      "excludeFiles": "{tinyutils/artifacts/**,tinyutils/.code/**,tinyutils/tests/**,tinyutils/__pycache__/**}",
+    17	      "maxDuration": 60
+    18	    }
+    19	  },
+    20	  "routes": [
+[2025-11-10T10:38:14] tokens used: 60,517
+
+[2025-11-10T10:38:48] thinking
+
+**Summarizing comprehensive Vercel config update**
+
+I’m preparing a detailed summary explaining the need to replace the legacy `routes` in `vercel.json` with new top-level `headers` and `rewrites` fields, referencing exact line ranges and the AGENTS.md security and caching requirements. I’ll include proposed JSON patch snippets for `headers` (security, caching, API controls) and `rewrites` (health endpoints, extension removal, preview fences with gating and bypass logic). Additionally, I’ll note the existing restrictive `functions` config and recommend keeping its file includes and excludes for bundsize control. The summary will also cover verifying logs under `artifacts/`, mention next steps like running preview smoke tests, and provide rationale referencing AGENTS. The final message will use bullet points to clearly communicate all these changes and their context.
+[2025-11-10T10:38:50] codex
+
+**Vercel Config Update**
+- `vercel.json:20-112` currently relies on legacy `routes`, which now conflicts with top-level `headers/rewrites` (see the `artifacts/convert/20251110/smoke-preview-*/vercel_deploy_attempt*.log` failure). Replacing that block with explicit `headers` preserves the strict transport, CSP, and caching semantics AGENTS requires for every response plus the public asset carve-outs (AGENTS.md:13-22, 82-94, 99-107).
+- New `rewrites` entries re-express the `/api/convert` health + execution paths and the extension-stripping shim without `routes`, keeping the Python bundle exclusions and `maxDuration` limits already defined in `vercel.json:3-18` so serverless uploads stay under the 100 MB ceiling (AGENTS.md:13-22, 147-171).
+- The preview fence logic now lives entirely inside `rewrites`, extending the PREVIEW_SECRET gate to `/tools/(keyword-density|meta-preview|sitemap-generator|convert|find-replace)` and their `.html` shells per the preview instructions (AGENTS.md:52-58, 116-124, 173-175) while still honoring the `preview_fence_proxy=1` bypass used by `api/fence`.
+
+Recommended `functions` block (unchanged) already satisfies the bundle rules: each `api/*` entry includes only `tinyutils/__init__.py`, `tinyutils/api/**`, `tinyutils/convert/**`, and `tinyutils/filters/**`, while excluding `tinyutils/artifacts/**`, `tinyutils/.code/**`, `tinyutils/tests/**`, and `tinyutils/__pycache__/**` with `maxDuration: 60`.
+
+### JSON patch
+```json
+[
+  { "op": "remove", "path": "/routes" },
+  {
+    "op": "add",
+    "path": "/headers",
+    "value": [
+      {
+        "source": "/(.*)",
+        "headers": [
+          { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+          { "key": "X-Frame-Options", "value": "DENY" },
+          { "key": "X-Content-Type-Options", "value": "nosniff" },
+          { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+          { "key": "Permissions-Policy", "value": "geolocation=(), camera=(), microphone=(), usb=(), payment=(), browsing-topics=()" },
+          { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'; object-src 'none'; upgrade-insecure-requests" },
+          { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+          { "key": "Cross-Origin-Resource-Policy", "value": "same-origin" },
+          { "key": "X-DNS-Prefetch-Control", "value": "off" }
+        ]
+      },
+      {
+        "source": "/public/(.*)",
+        "headers": [
+          { "key": "Cache-Control", "value": "public, max-age=600" }
+        ]
+      },
+      {
+        "source": "/api/(.*)",
+        "headers": [
+          { "key": "Cache-Control", "value": "no-store" },
+          { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+          { "key": "X-Content-Type-Options", "value": "nosniff" },
+          { "key": "Referrer-Policy", "value": "no-referrer" },
+          { "key": "Permissions-Policy", "value": "geolocation=(), camera=(), microphone=(), usb=(), payment=(), browsing-topics=()" },
+          { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+          { "key": "Cross-Origin-Resource-Policy", "value": "same-origin" },
+          { "key": "X-DNS-Prefetch-Control", "value": "off" },
+          { "key": "X-Robots-Tag", "value": "noindex" }
+        ]
+      },
+      {
+        "source": "/tools/wayback-fixer/demo/(.*)",
+        "headers": [
+          { "key": "Cache-Control", "value": "public, max-age=600" }
+        ]
+      }
+    ]
+  },
+  {
+    "op": "add",
+    "path": "/rewrites",
+    "value": [
+      { "source": "/api/convert/health",  "destination": "/api/convert/index.py?__health=1" },
+      { "source": "/api/convert/health/", "destination": "/api/convert/index.py?__health=1" },
+      { "source": "/api/convert",  "destination": "/api/convert/index.py" },
+      { "source": "/api/convert/", "destination": "/api/convert/index.py" },
+      { "source": "/api/:name(.+)\\.(?:py|js)", "destination": "/api/:name" },
+
+      {
+        "source": "/tools/:beta(keyword-density|meta-preview|sitemap-generator|convert|find-replace)",
+        "has": [ { "type": "query", "key": "preview_fence_proxy", "value": "1" } ],
+        "destination": "/tools/:beta"
+      },
+      {
+        "source": "/tools/:beta(keyword-density|meta-preview|sitemap-generator|convert|find-replace)/:rest+",
+        "has": [ { "type": "query", "key": "preview_fence_proxy", "value": "1" } ],
+        "destination": "/tools/:beta/:rest"
+      },
+      {
+        "source": "/tools/:beta(keyword-density|meta-preview|sitemap-generator|convert|find-replace).html",
+        "has": [ { "type": "query", "key": "preview_fence_proxy", "value": "1" } ],
+        "destination": "/tools/:beta.html"
+      },
+
+      {
+        "source": "/tools/:beta(keyword-density|meta-preview|sitemap-generator|convert|find-replace)",
+        "destination": "/api/fence?target=/tools/:beta"
+      },
+      {
+        "source": "/tools/:beta(keyword-density|meta-preview|sitemap-generator|convert|find-replace)/:rest+",
+        "destination": "/api/fence?target=/tools/:beta/:rest"
+      },
+      {
+        "source": "/tools/:beta(keyword-density|meta-preview|sitemap-generator|convert|find-replace).html",
+        "destination": "/api/fence?target=/tools/:beta.html"
+      }
+    ]
+  }
+]
+```
+
+**Rationale**
+- Removes the mixed `routes` usage that Vercel now rejects while retaining the strict transport, CSP, and cache headers mandated in AGENTS (AGENTS.md:13-22, 99-107) and protecting public assets with the same 10-minute TTL the team has been using.
+- Keeps API responses `no-store` and `noindex` in line with the serverless response contract (AGENTS.md:149-160) and forces all beta tooling (including `/tools/convert(.html)` and `/tools/find-replace(.html)`) back through `api/fence` unless `preview_fence_proxy=1` is set by the PREVIEW_SECRET handshake (AGENTS.md:52-58, 116-175).
+- Maintains the existing Python function packaging so the deploy bundle excludes `artifacts/`, `.code/`, and `tests/`, preventing oversize uploads while shipping only the converter and filter modules required under the ≤100 MB guideline (AGENTS.md:13-22, 147-171).
+
+Next steps: run the usual preview smoke (`pnpm smoke:preview` plus `node scripts/smoke_convert_preview.mjs`) once this JSON lands to confirm the rewrites still enforce the fence before promoting the deploy.
+[2025-11-10T10:39:01] tokens used: 67,284

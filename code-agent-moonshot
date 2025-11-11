@@ -1,0 +1,16 @@
+#!/bin/bash
+# Wrapper script for Moonshot AI API integration
+# Sets up the environment for Moonshot API usage
+
+# Set CODE_HOME to the Moonshot configuration directory
+export CODE_HOME="$HOME/dev/CodeProjects/code_config_hacks/.code-moonshot"
+export CODEX_HOME="$CODE_HOME"
+
+# Print confirmation
+echo "Moonshot API environment configured"
+echo "CODE_HOME set to: $CODE_HOME"
+
+# If arguments provided, execute them, otherwise just set the environment
+if [ $# -gt 0 ]; then
+    exec "$@"
+fi

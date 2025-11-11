@@ -1,0 +1,3 @@
+The blob validation recipe has been drafted and saved to `/Users/cav/.code/working/tinyutils/branches/code-gemini-2-5-flash-draft-precise-blob/tinyutils/artifacts/convert/2025-11-10/blob-validation-recipe.md`.
+
+A summary of this action has been added to `/Users/cav/.code/working/tinyutils/branches/code-gemini-2-5-flash-draft-precise-blob/docs/AGENT_RUN_LOG.md`.

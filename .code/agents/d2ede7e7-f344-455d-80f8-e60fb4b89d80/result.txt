@@ -1,0 +1,935 @@
+[2025-11-10T02:33:04] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: auto
+--------
+[2025-11-10T02:33:04] User instructions:
+List the specific heavy imports to lazily import in the convert API (index.py) and service (convert/service.py) to avoid import-time failures on serverless. Provide a concise diff outline (what to move where) and note any state that must remain module-level.
+Context: Goal: avoid import-time crashes and reduce cold-start risk. We need a focused list of heavy imports in tinyutils/api/convert/index.py and tinyutils/convert/service.py to move under function scope.
+
+[2025-11-10T02:33:07] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: auto
+--------
+[2025-11-10T02:33:07] User instructions:
+List the specific heavy imports to lazily import in the convert API (index.py) and service (convert/service.py) to avoid import-time failures on serverless. Provide a concise diff outline (what to move where) and note any state that must remain module-level.
+Context: Goal: avoid import-time crashes and reduce cold-start risk. We need a focused list of heavy imports in tinyutils/api/convert/index.py and tinyutils/convert/service.py to move under function scope.
+
+
+[2025-11-10T02:33:12] thinking
+
+**Preparing to analyze imports**
+[2025-11-10T02:33:12] exec bash -lc ls in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:33:12] bash -lc ls succeeded in 129ms:
+PATH
+print1
+tests
+tinyutils
+TinyUtilsCodexContext
+[2025-11-10T02:33:12] tokens used: 6,739
+
+[2025-11-10T02:33:13] thinking
+
+**Inspecting convert module**
+[2025-11-10T02:33:14] exec bash -lc "sed -n '1,200p' tinyutils/api/convert/index.py" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:33:14] bash -lc "sed -n '1,200p' tinyutils/api/convert/index.py" exited 1 in 108ms:
+ERROR
+sed: tinyutils/api/convert/index.py: No such file or directory
+[2025-11-10T02:33:14] tokens used: 6,963
+
+[2025-11-10T02:33:16] thinking
+
+**Exploring directory structure**
+[2025-11-10T02:33:21] exec bash -lc 'ls tinyutils' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:33:21] bash -lc 'ls tinyutils' succeeded in 99ms:
+[2025-11-10T02:33:21] tokens used: 13,959
+
+[2025-11-10T02:33:23] thinking
+
+**Checking directory structure depth**
+[2025-11-10T02:33:23] exec bash -lc 'find tinyutils -maxdepth 2 -type d' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:33:23] bash -lc 'find tinyutils -maxdepth 2 -type d' succeeded in 103ms:
+tinyutils
+[2025-11-10T02:33:23] tokens used: 14,160
+
+[2025-11-10T02:33:25] thinking
+
+**Checking tinyutils directory contents**
+[2025-11-10T02:33:25] exec bash -lc 'ls -a tinyutils' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:33:25] bash -lc 'ls -a tinyutils' succeeded in 103ms:
+.
+..
+[2025-11-10T02:33:25] tokens used: 15,635
+
+[2025-11-10T02:33:27] thinking
+
+**Checking for git submodules**
+[2025-11-10T02:33:28] exec bash -lc 'git status -sb' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:33:28] bash -lc 'git status -sb' succeeded in 274ms:
+## code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:33:28] tokens used: 23,011
+
+[2025-11-10T02:33:30] thinking
+
+**Searching for conversion-related code**
+[2025-11-10T02:33:30] exec bash -lc "rg --files -g '*index.py'" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:33:30] bash -lc "rg --files -g '*index.py'" exited 1 in 108ms:
+ERROR
+[2025-11-10T02:33:30] tokens used: 23,343
+
+[2025-11-10T02:33:31] thinking
+
+**Checking for uppercase files in root**
+[2025-11-10T02:33:32] exec bash -lc 'ls -a' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:33:32] bash -lc 'ls -a' succeeded in 97ms:
+.
+..
+.code
+.DS_Store
+.git
+.gitignore
+PATH
+print1
+tests
+tinyutils
+TinyUtilsCodexContext
+[2025-11-10T02:33:32] tokens used: 24,168
+
+[2025-11-10T02:33:33] thinking
+
+**Checking code path in context class**
+[2025-11-10T02:33:34] exec bash -lc 'ls TinyUtilsCodexContext' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:33:34] bash -lc 'ls TinyUtilsCodexContext' succeeded in 96ms:
+finished
+[2025-11-10T02:33:34] tokens used: 24,362
+
+[2025-11-10T02:33:36] thinking
+
+**Searching files with "convert" in name**
+[2025-11-10T02:33:36] exec bash -lc 'rg --files | grep convert' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:33:36] bash -lc 'rg --files | grep convert' succeeded in 114ms:
+tests/convert/test_service.py
+tests/convert/test_api_convert_unit.py
+tests/convert/__pycache__/test_api_convert_unit.cpython-314-pytest-8.4.2.pyc
+tests/convert/test_api_convert.py
+tests/convert/__pycache__/test_api_convert.cpython-314-pytest-8.4.2.pyc
+tests/convert/__pycache__/test_service.cpython-314-pytest-8.4.2.pyc
+[2025-11-10T02:33:36] tokens used: 24,532
+
+[2025-11-10T02:33:38] thinking
+
+**Checking for PATH file**
+[2025-11-10T02:33:38] exec bash -lc "sed -n '1,200p' PATH" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:33:38] bash -lc "sed -n '1,200p' PATH" succeeded in 99ms:
+/Users/cav/.opt/bin
+[2025-11-10T02:33:38] tokens used: 24,917
+
+[2025-11-10T02:33:41] thinking
+
+**Checking file accessibility**
+[2025-11-10T02:33:42] exec bash -lc 'git ls-files | head' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:33:42] bash -lc 'git ls-files | head' succeeded in 126ms:
+.DS_Store
+.code/.DS_Store
+.code/agents/.DS_Store
+.code/agents/006367d3-c6e3-40e2-a630-c4908b454b55/result.txt
+.code/agents/00d608f1-df6b-4d4c-88bc-3552d339e242/result.txt
+.code/agents/01f054e8-7d3f-45d0-8925-ff9c4ef52d91/status.txt
+.code/agents/03e4999e-3c21-4ace-8b0b-1f49fa8695ec/result.txt
+.code/agents/054111c7-d903-41a8-9b44-c101e5d74d34/result.txt
+.code/agents/083b2d2f-4caa-4c2d-8024-e70a4a1167b3/result.txt
+.code/agents/09dff455-5490-4a14-b94f-60618b600939/result.txt
+[2025-11-10T02:33:42] tokens used: 26,317
+
+[2025-11-10T02:33:43] thinking
+
+**Scrolling to find conversion code**
+[2025-11-10T02:33:43] exec bash -lc 'git ls-files | grep tinyutils | head' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:33:43] bash -lc 'git ls-files | grep tinyutils | head' succeeded in 118ms:
+TinyUtilsCodexContext/finished/diffs_recs_finished/code-cli-tinyutils-recs-finished.md
+tinyutils
+[2025-11-10T02:33:43] tokens used: 26,772
+
+[2025-11-10T02:33:45] thinking
+
+**Checking file type of 'tinyutils'**
+[2025-11-10T02:33:46] exec bash -lc 'file tinyutils' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:33:46] bash -lc 'file tinyutils' succeeded in 123ms:
+tinyutils: directory
+[2025-11-10T02:33:46] tokens used: 26,971
+
+[2025-11-10T02:33:48] thinking
+
+**Checking for submodule configuration**
+[2025-11-10T02:33:48] exec bash -lc 'cat .gitmodules' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:33:48] bash -lc 'cat .gitmodules' exited 1 in 96ms:
+ERROR
+cat: .gitmodules: No such file or directory
+[2025-11-10T02:33:48] tokens used: 28,971
+
+[2025-11-10T02:33:50] thinking
+
+**Searching for service files**
+[2025-11-10T02:33:50] exec bash -lc "rg --files -g '*service.py'" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:33:50] bash -lc "rg --files -g '*service.py'" succeeded in 112ms:
+tests/convert/test_service.py
+[2025-11-10T02:33:50] tokens used: 29,196
+
+[2025-11-10T02:33:52] thinking
+
+**Searching for missing main code**
+[2025-11-10T02:33:52] exec bash -lc 'fd index.py' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:33:53] bash -lc 'fd index.py' exited 127 in 118ms:
+ERROR
+bash: fd: command not found
+[2025-11-10T02:33:53] tokens used: 29,677
+
+[2025-11-10T02:33:54] thinking
+
+**Searching for index.py file**
+[2025-11-10T02:33:54] exec bash -lc "find . -name 'index.py'" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:33:54] bash -lc "find . -name 'index.py'" succeeded in 119ms:
+[2025-11-10T02:33:54] tokens used: 30,038
+
+[2025-11-10T02:33:56] thinking
+
+**Checking for zipped contents**
+[2025-11-10T02:33:57] exec bash -lc 'ls print1' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:33:57] bash -lc 'ls print1' succeeded in 95ms:
+print1
+[2025-11-10T02:33:57] tokens used: 30,243
+
+[2025-11-10T02:33:58] thinking
+
+**Checking repo structure with tree**
+[2025-11-10T02:33:59] exec bash -lc "python3 - <<'PY'
+import os
+for root, dirs, files in os.walk('.', topdown=True):
+    depth = root.count(os.sep)
+    if depth > 2:
+        dirs[:] = []
+        continue
+    print(root)
+    for name in files:
+        print('  ', os.path.join(root, name))
+PY" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:34:00] bash -lc "python3 - <<'PY'
+import os
+for root, dirs, files in os.walk('.', topdown=True):
+    depth = root.count(os.sep)
+    if depth > 2:
+        dirs[:] = []
+        continue
+    print(root)
+    for name in files:
+        print('  ', os.path.join(root, name))
+PY" exited 1 in 119ms:
+ERROR
+bash: cannot create temp file for here document: Operation not permitted
+[2025-11-10T02:34:00] tokens used: 30,514
+
+[2025-11-10T02:34:04] thinking
+
+**Navigating read-only environment constraints**
+[2025-11-10T02:34:05] exec bash -lc "sed -n '1,160p' TinyUtilsCodexContext/finished/diffs_recs_finished/code-cli-tinyutils-recs-finished.md" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:34:05] bash -lc "sed -n '1,160p' TinyUtilsCodexContext/finished/diffs_recs_finished/code-cli-tinyutils-recs-finished.md" succeeded in 137ms:
+# TinyUtils QA Notes (2025-11-02)
+
+## Overview
+Manual smoke tests against https://tinyutils-eight.vercel.app on 2025-11-02 surfaced several regressions. Dead Link Finder still returns data, Wayback Fixer’s UI fails to render results, Sitemap Delta + Redirect Mapper never surfaces compare output, and several advertised tools 404. Findings below capture what to fix next.
+
+## Issues
+1. **Wayback Fixer front-end dead.** Clicking “Find Wayback Replacements” leaves the status stuck on `Ready.` and no `fetch` fires; programmatic clicks show the same. Yet `POST /api/wayback-fixer` succeeds (returns `note: "network_error"` for test URLs). Likely JS errors (duplicate `protectCSVCell` helpers, malformed template literals) stop the handler from binding. Need to restore the event listener and ensure CSV/JSON exports only enable once results load.
+2. **Sitemap Delta compare broken for URLs.** UI never changes from `Ready.` and the console shows no network call. Direct API POST with `sitemapAUrl`/`sitemapBUrl` returns HTTP 404, while raw XML text works. Client should surface the failure instead of silently idling, and the server must revive URL fetch support.
+3. **Missing demo assets.** UI references `sample-data/dead-links-demo.csv` and sitemap sample XML files that now 404. Update the buttons to use the checked-in `tools/wayback-fixer/demo` files or restore the assets on Vercel.
+4. **Sitemap Delta script bugs.** HTML duplicates `id="fileA"` inside both upload blocks and JS calls `filtered.unmapped` before `filtered` is declared, causing runtime errors. Clean up IDs and ensure `computeFiltered()` output is used when rendering tables/exports.
+5. **Stale tool links.** `/tools/wayback-index`, `/tools/indexed-urls`, and `/tools/redirect-plan` all 404. Either redeploy those tools or remove them from the listing to avoid dead navigation.
+6. **Global JS syntax regressions.** Multiple duplicate `protectCSVCell` definitions and broken expressions such as `protectCSVCell(JSON).stringify(...)` likely break bundling. Consolidate helper functions, lint, and rerun the build.
+
+## Suggested Next Steps
+- Restore working UI flows for Wayback Fixer and Sitemap Delta (buttons fire requests, status updates, errors surface politely).
+- Fix the `/api/sitemap-delta` handler to honor URL-based comparisons again.
+- Rehost or rewire demo/sample datasets so the “Try a demo” buttons work.
+- Remove or ship the missing tool pages before publishing links.
+- After script cleanup, run the project lint/test suite (e.g., `npm test` or `npm run lint`) to catch duplicate helper issues going forward.
+[2025-11-10T02:34:05] tokens used: 32,472
+
+[2025-11-10T02:34:07] thinking
+
+**Checking sparse-checkout configuration**
+[2025-11-10T02:34:07] exec bash -lc 'ls .git/info' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:34:07] bash -lc 'ls .git/info' exited 1 in 107ms:
+ERROR
+ls: .git/info: Not a directory
+[2025-11-10T02:34:07] tokens used: 34,138
+
+[2025-11-10T02:34:09] thinking
+
+**Checking if .git is a file**
+[2025-11-10T02:34:10] exec bash -lc 'file .git' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:34:10] bash -lc 'file .git' succeeded in 114ms:
+.git: ASCII text
+[2025-11-10T02:34:10] tokens used: 34,393
+
+[2025-11-10T02:34:11] thinking
+
+**Checking .git file for worktree**
+[2025-11-10T02:34:12] exec bash -lc 'cat .git' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:34:12] bash -lc 'cat .git' succeeded in 101ms:
+gitdir: /Users/cav/dev/TinyUtils/.git/worktrees/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:34:12] tokens used: 34,623
+
+[2025-11-10T02:34:15] thinking
+
+**Investigating repository file presence**
+[2025-11-10T02:34:16] exec bash -lc 'ls /Users/cav/dev/TinyUtils' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:34:16] bash -lc 'ls /Users/cav/dev/TinyUtils' succeeded in 97ms:
+bk-restore
+code-agent-moonshot
+mcp_server_browser_use.log
+moonshot_client.py
+moonshot_config.json
+moonshot_setup_guide.md
+PATH
+print1
+tests
+TinyBackups
+tinyutils
+TinyUtilsCodexContext
+vercel_problem.log
+vercel_problems_nov_7.md
+[2025-11-10T02:34:16] tokens used: 34,926
+
+[2025-11-10T02:34:19] thinking
+
+**Checking actual code location**
+[2025-11-10T02:34:19] exec bash -lc 'ls /Users/cav/dev/TinyUtils/tinyutils' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:34:19] bash -lc 'ls /Users/cav/dev/TinyUtils/tinyutils' succeeded in 103ms:
+__init__.py
+__pycache__
+ads.txt
+ADSENSE_SETUP.md
+AGENTS.md
+api
+artifacts
+CHANGES-v1.3.0-rc2.txt
+CHANGES-v1.3.0-rc3.txt
+config
+convert
+data
+DEPLOY_PRODUCTION_CHECKLIST.md
+docs
+feedback.html
+filters
+fixtures
+guides
+index
+index.html
+[2025-11-10T02:34:19] tokens used: 35,223
+
+[2025-11-10T02:34:22] thinking
+
+**Investigating file path context**
+[2025-11-10T02:34:22] exec bash -lc 'ls /Users/cav/dev/TinyUtils/tinyutils/api' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:34:22] bash -lc 'ls /Users/cav/dev/TinyUtils/tinyutils/api' succeeded in 102ms:
+__init__.py
+__pycache__
+_lib
+_vendor
+check.js
+convert
+fence.js
+findreplace
+health.js
+metafetch.js
+sitemap-delta.js
+wayback-fixer.js
+[2025-11-10T02:34:22] tokens used: 35,749
+
+[2025-11-10T02:34:24] thinking
+
+**Listing convert/index.py contents**
+[2025-11-10T02:34:24] exec bash -lc 'ls /Users/cav/dev/TinyUtils/tinyutils/api/convert' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:34:24] bash -lc 'ls /Users/cav/dev/TinyUtils/tinyutils/api/convert' succeeded in 106ms:
+__init__.py
+__pycache__
+index.py
+index.py.bak
+[2025-11-10T02:34:24] tokens used: 36,060
+
+[2025-11-10T02:34:26] thinking
+
+**Preparing to view file**
+[2025-11-10T02:34:26] exec bash -lc "sed -n '1,200p' /Users/cav/dev/TinyUtils/tinyutils/api/convert/index.py" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:34:26] bash -lc "sed -n '1,200p' /Users/cav/dev/TinyUtils/tinyutils/api/convert/index.py" succeeded in 129ms:
+"""Universal document converter endpoint backed by tinyutils.convert."""
+from __future__ import annotations
+
+import logging
+import os
+import subprocess
+import sys
+import time
+import traceback
+from pathlib import Path
+from typing import TYPE_CHECKING, List, Optional
+import uuid
+
+try:  # pragma: no cover - Pydantic v2
+    from pydantic import BaseModel, Field, ConfigDict, field_validator
+    _USE_PYDANTIC_V2 = True
+except ImportError:  # pragma: no cover - fallback to Pydantic v1
+    from pydantic import BaseModel, Field, validator
+    ConfigDict = None  # type: ignore
+    field_validator = None  # type: ignore
+[2025-11-10T02:34:26] tokens used: 37,145
+
+[2025-11-10T02:34:28] thinking
+
+**Continuing to review file end**
+[2025-11-10T02:34:29] exec bash -lc "sed -n '200,400p' /Users/cav/dev/TinyUtils/tinyutils/api/convert/index.py" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:34:29] bash -lc "sed -n '200,400p' /Users/cav/dev/TinyUtils/tinyutils/api/convert/index.py" succeeded in 99ms:
+@app.get("/", include_in_schema=False)
+def convert_root(request: Request) -> JSONResponse:
+    if request.query_params.get("__health") == "1":
+        return convert_health()
+    raise HTTPException(status_code=405, detail="Method not allowed")
+
+
+@app.post("/")
+def convert(
+    request: ConvertRequest,
+    response: Response,
+    request_id: Optional[str] = Header(default=None, alias="x-request-id"),
+) -> dict:
+    resolved_request_id = request_id or uuid.uuid4().hex
+    start_time = time.time()
+    _ensure_convert_imports()
+    try:
+        if not request.inputs:
+            _log_failure(resolved_request_id, "validation_error", "no_inputs", start_time)
+            raise HTTPException(
+[2025-11-10T02:34:29] tokens used: 42,195
+
+[2025-11-10T02:34:31] thinking
+
+**Continuing to review pandoc-related functions**
+[2025-11-10T02:34:31] exec bash -lc "sed -n '400,800p' /Users/cav/dev/TinyUtils/tinyutils/api/convert/index.py" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:34:31] bash -lc "sed -n '400,800p' /Users/cav/dev/TinyUtils/tinyutils/api/convert/index.py" succeeded in 100ms:
+    return {"headings": [], "snippets": [], "images": []}
+
+
+def _serialize_errors(batch) -> List[dict]:
+    errors: List[dict] = []
+    for result in batch.results:
+        if result.error:
+            errors.append(
+                {
+                    "input": result.name,
+                    "message": result.error.message,
+                    "kind": result.error.kind,
+                }
+            )
+    return errors
+
+
+def _coerce_targets(value):
+    if value is None:
+        return ["md"]
+[2025-11-10T02:34:31] tokens used: 44,238
+
+[2025-11-10T02:34:34] thinking
+
+**Identifying candidates for lazy import**
+[2025-11-10T02:34:34] exec bash -lc "sed -n '1,200p' /Users/cav/dev/TinyUtils/tinyutils/convert/service.py" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:34:35] bash -lc "sed -n '1,200p' /Users/cav/dev/TinyUtils/tinyutils/convert/service.py" succeeded in 107ms:
+"""Reusable converter service for TinyUtils APIs."""
+from __future__ import annotations
+
+import hashlib
+import html
+import json
+import logging
+import os
+import threading
+import time
+import zipfile
+from collections import OrderedDict
+from pathlib import Path
+from typing import Any, Iterable, List, Optional, Sequence
+
+from tinyutils.api._lib import pandoc_runner
+from tinyutils.api._lib.manifests import build_snippets, collect_headings, media_manifest
+from tinyutils.api._lib.text_clean import normalise_markdown
+from tinyutils.api._lib.utils import ensure_within_limits, generate_job_id, job_workspace
+
+[2025-11-10T02:34:35] tokens used: 44,930
+
+[2025-11-10T02:34:36] thinking
+
+**Planning to review imports**
+[2025-11-10T02:34:37] exec bash -lc "sed -n '200,400p' /Users/cav/dev/TinyUtils/tinyutils/convert/service.py" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:34:37] bash -lc "sed -n '200,400p' /Users/cav/dev/TinyUtils/tinyutils/convert/service.py" succeeded in 101ms:
+        f"inputs={len(inputs)}",
+        f"targets={','.join(normalized_targets)}",
+    ]
+
+    results: List[ConversionResult] = []
+    for payload in inputs:
+        result = convert_one(
+            input_bytes=payload.data,
+            name=payload.name,
+            targets=normalized_targets,
+            from_format=payload.source_format or from_format,
+            options=opts,
+        )
+        for entry in result.logs:
+            batch_logs.append(f"{payload.name}:{entry}")
+        results.append(result)
+
+    return BatchResult(job_id=job_id, results=results, logs=batch_logs)
+
+
+[2025-11-10T02:34:37] tokens used: 46,828
+
+[2025-11-10T02:34:39] thinking
+
+**Waiting for more input**
+[2025-11-10T02:34:51] exec bash -lc "sed -n '400,800p' /Users/cav/dev/TinyUtils/tinyutils/convert/service.py" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:34:51] bash -lc "sed -n '400,800p' /Users/cav/dev/TinyUtils/tinyutils/convert/service.py" succeeded in 103ms:
+        )
+    media = None
+    if result.media:
+        media = MediaArtifact(
+            name=result.media.name,
+            content_type=result.media.content_type,
+            data=result.media.data,
+        )
+    error = None
+    if result.error:
+        error = ConversionError(
+            message=result.error.message,
+            kind=result.error.kind,
+        )
+    return ConversionResult(
+        name=result.name,
+        outputs=outputs,
+        preview=preview,
+        media=media,
+        logs=list(result.logs),
+[2025-11-10T02:34:51] tokens used: 49,630
+
+[2025-11-10T02:34:54] thinking
+
+**Identifying heavy imports for lazy loading**
+[2025-11-10T02:34:55] exec bash -lc 'rg -n "pandoc_runner" -n /Users/cav/dev/TinyUtils/tinyutils/api/convert/index.py' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:34:55] bash -lc 'rg -n "pandoc_runner" -n /Users/cav/dev/TinyUtils/tinyutils/api/convert/index.py' succeeded in 108ms:
+83:    path = pandoc_runner.get_configured_pandoc_path()
+89:            pandoc_runner.VENDORED_PANDOC_PATH,
+141:    pandoc_path = pandoc_runner.get_configured_pandoc_path()
+142:    pandoc_version = pandoc_runner.get_pandoc_version()
+170:            pandoc_path = pandoc_runner.ensure_pandoc()
+285:            "toolVersions": {"pandoc": pandoc_runner.get_pandoc_version()},
+320:        "toolVersions": {"pandoc": pandoc_runner.get_pandoc_version()},
+[2025-11-10T02:34:55] tokens used: 69,799
+
+[2025-11-10T02:34:57] thinking
+
+**Searching for import definition**
+[2025-11-10T02:34:57] exec bash -lc 'rg -n "pandoc_runner" /Users/cav/dev/TinyUtils/tinyutils/api/convert/index.py' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:34:57] bash -lc 'rg -n "pandoc_runner" /Users/cav/dev/TinyUtils/tinyutils/api/convert/index.py' succeeded in 111ms:
+83:    path = pandoc_runner.get_configured_pandoc_path()
+89:            pandoc_runner.VENDORED_PANDOC_PATH,
+141:    pandoc_path = pandoc_runner.get_configured_pandoc_path()
+142:    pandoc_version = pandoc_runner.get_pandoc_version()
+170:            pandoc_path = pandoc_runner.ensure_pandoc()
+285:            "toolVersions": {"pandoc": pandoc_runner.get_pandoc_version()},
+320:        "toolVersions": {"pandoc": pandoc_runner.get_pandoc_version()},
+[2025-11-10T02:34:57] tokens used: 71,128
+
+[2025-11-10T02:34:59] thinking
+
+**Checking for pandoc_runner import**
+[2025-11-10T02:34:59] exec bash -lc "sed -n '1,120p' /Users/cav/dev/TinyUtils/tinyutils/api/convert/index.py" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:35:00] bash -lc "sed -n '1,120p' /Users/cav/dev/TinyUtils/tinyutils/api/convert/index.py" succeeded in 87ms:
+"""Universal document converter endpoint backed by tinyutils.convert."""
+from __future__ import annotations
+
+import logging
+import os
+import subprocess
+import sys
+import time
+import traceback
+from pathlib import Path
+from typing import TYPE_CHECKING, List, Optional
+import uuid
+
+try:  # pragma: no cover - Pydantic v2
+    from pydantic import BaseModel, Field, ConfigDict, field_validator
+    _USE_PYDANTIC_V2 = True
+except ImportError:  # pragma: no cover - fallback to Pydantic v1
+    from pydantic import BaseModel, Field, validator
+    ConfigDict = None  # type: ignore
+    field_validator = None  # type: ignore
+[2025-11-10T02:35:00] tokens used: 71,422
+
+[2025-11-10T02:35:04] thinking
+
+**Searching for pandoc_runner import**
+[2025-11-10T02:35:04] exec bash -lc 'rg -n "pandoc_runner" /Users/cav/dev/TinyUtils/tinyutils/api/convert -n' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:35:04] bash -lc 'rg -n "pandoc_runner" /Users/cav/dev/TinyUtils/tinyutils/api/convert -n' succeeded in 106ms:
+/Users/cav/dev/TinyUtils/tinyutils/api/convert/index.py.bak:32:from .._lib.pandoc_runner import get_pandoc_version
+/Users/cav/dev/TinyUtils/tinyutils/api/convert/index.py:83:    path = pandoc_runner.get_configured_pandoc_path()
+/Users/cav/dev/TinyUtils/tinyutils/api/convert/index.py:89:            pandoc_runner.VENDORED_PANDOC_PATH,
+/Users/cav/dev/TinyUtils/tinyutils/api/convert/index.py:141:    pandoc_path = pandoc_runner.get_configured_pandoc_path()
+/Users/cav/dev/TinyUtils/tinyutils/api/convert/index.py:142:    pandoc_version = pandoc_runner.get_pandoc_version()
+/Users/cav/dev/TinyUtils/tinyutils/api/convert/index.py:170:            pandoc_path = pandoc_runner.ensure_pandoc()
+/Users/cav/dev/TinyUtils/tinyutils/api/convert/index.py:285:            "toolVersions": {"pandoc": pandoc_runner.get_pandoc_version()},
+/Users/cav/dev/TinyUtils/tinyutils/api/convert/index.py:320:        "toolVersions": {"pandoc": pandoc_runner.get_pandoc_version()},
+[2025-11-10T02:35:04] tokens used: 73,100
+
+[2025-11-10T02:35:09] thinking
+
+**Searching for pandoc_runner import statement**
+[2025-11-10T02:35:09] exec bash -lc "python3 -c 'import inspect, textwrap'" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:35:10] bash -lc "python3 -c 'import inspect, textwrap'" succeeded in 187ms:
+[2025-11-10T02:35:10] tokens used: 73,877
+
+[2025-11-10T02:35:13] thinking
+
+**Considering line numbering command**
+[2025-11-10T02:35:14] exec bash -lc "nl -ba /Users/cav/dev/TinyUtils/tinyutils/api/convert/index.py | sed -n '1,120p'" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:35:14] bash -lc "nl -ba /Users/cav/dev/TinyUtils/tinyutils/api/convert/index.py | sed -n '1,120p'" succeeded in 126ms:
+     1	"""Universal document converter endpoint backed by tinyutils.convert."""
+     2	from __future__ import annotations
+     3	
+     4	import logging
+     5	import os
+     6	import subprocess
+     7	import sys
+     8	import time
+     9	import traceback
+    10	from pathlib import Path
+    11	from typing import TYPE_CHECKING, List, Optional
+    12	import uuid
+    13	
+    14	try:  # pragma: no cover - Pydantic v2
+    15	    from pydantic import BaseModel, Field, ConfigDict, field_validator
+    16	    _USE_PYDANTIC_V2 = True
+    17	except ImportError:  # pragma: no cover - fallback to Pydantic v1
+    18	    from pydantic import BaseModel, Field, validator
+    19	    ConfigDict = None  # type: ignore
+    20	    field_validator = None  # type: ignore
+[2025-11-10T02:35:14] tokens used: 74,131
+
+[2025-11-10T02:35:17] thinking
+
+**Investigating pandoc_runner usage**
+[2025-11-10T02:35:17] exec bash -lc 'rg -n "_get_pandoc_runner" /Users/cav/dev/TinyUtils/tinyutils/api/convert/index.py' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:35:18] bash -lc 'rg -n "_get_pandoc_runner" /Users/cav/dev/TinyUtils/tinyutils/api/convert/index.py' succeeded in 105ms:
+69:def _get_pandoc_runner():
+93:    runner = _get_pandoc_runner()
+[2025-11-10T02:35:18] tokens used: 79,162
+
+[2025-11-10T02:35:20] thinking
+
+**Verifying pandoc runner usage**
+[2025-11-10T02:35:21] exec bash -lc "sed -n '80,160p' /Users/cav/dev/TinyUtils/tinyutils/api/convert/index.py" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:35:21] bash -lc "sed -n '80,160p' /Users/cav/dev/TinyUtils/tinyutils/api/convert/index.py" succeeded in 96ms:
+
+    trace = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+    logger.error(
+        "convert unexpected error request_id=%s type=%s message=%s",
+        request_id,
+        exc.__class__.__name__,
+        str(exc),
+    )
+    print(trace, file=sys.stderr)
+
+
+@app.on_event("startup")
+async def _log_pandoc_availability() -> None:
+    runner = _get_pandoc_runner()
+    path = runner.get_configured_pandoc_path()
+    if path:
+        logger.info("pandoc availability status=ready path=%s", path)
+    else:
+        logger.warning(
+            "pandoc availability status=missing action=fallback vendor_path=%s",
+[2025-11-10T02:35:21] tokens used: 81,073
+
+[2025-11-10T02:35:24] thinking
+
+**Investigating undefined variable issue**
+[2025-11-10T02:35:28] exec bash -lc 'rg -n "pandoc_runner" /Users/cav/dev/TinyUtils/tinyutils/api/convert/index.py' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:35:28] bash -lc 'rg -n "pandoc_runner" /Users/cav/dev/TinyUtils/tinyutils/api/convert/index.py' succeeded in 94ms:
+49:_pandoc_runner = None
+69:def _get_pandoc_runner():
+70:    global _pandoc_runner
+71:    if _pandoc_runner is None:
+72:        from tinyutils.api._lib import pandoc_runner as _module  # type: ignore
+74:        _pandoc_runner = _module
+75:    return _pandoc_runner
+93:    runner = _get_pandoc_runner()
+152:    pandoc_path = pandoc_runner.get_configured_pandoc_path()
+153:    pandoc_version = pandoc_runner.get_pandoc_version()
+180:        runner = _get_pandoc_runner()
+297:            "toolVersions": {"pandoc": pandoc_runner.get_pandoc_version()},
+332:        "toolVersions": {"pandoc": pandoc_runner.get_pandoc_version()},
+[2025-11-10T02:35:28] tokens used: 82,002
+
+[2025-11-10T02:35:35] thinking
+
+**Evaluating heavy imports for lazy loading**
+[2025-11-10T02:35:36] exec bash -lc "sed -n '1,200p' /Users/cav/dev/TinyUtils/tinyutils/api/_lib/pandoc_runner.py" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:35:36] bash -lc "sed -n '1,200p' /Users/cav/dev/TinyUtils/tinyutils/api/_lib/pandoc_runner.py" succeeded in 101ms:
+"""Pandoc runner utilities for conversions and Lua-filter passes."""
+from __future__ import annotations
+
+from pathlib import Path
+import tempfile
+import lzma
+from typing import Iterable, List, Optional, Tuple
+
+import logging
+import os
+import re
+import shutil
+
+try:  # pragma: no cover - optional dependency
+    import pypandoc  # type: ignore
+except ImportError:  # pragma: no cover - optional dependency
+    pypandoc = None
+
+
+PANDOC_ENV_VAR = "PYPANDOC_PANDOC"
+[2025-11-10T02:35:36] tokens used: 82,972
+
+[2025-11-10T02:35:40] thinking
+
+**Identifying heavy imports to lazy-load**
+[2025-11-10T02:35:41] exec bash -lc "sed -n '1,200p' /Users/cav/dev/TinyUtils/tinyutils/api/_lib/manifests.py" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:35:41] bash -lc "sed -n '1,200p' /Users/cav/dev/TinyUtils/tinyutils/api/_lib/manifests.py" succeeded in 80ms:
+"""Manifest helpers for converter outputs and previews."""
+from __future__ import annotations
+
+import difflib
+from pathlib import Path
+from typing import Dict, List, Optional
+
+from .utils import PREVIEW_HEADINGS_N, PREVIEW_SNIPPETS_M
+
+
+def collect_headings(markdown: str) -> List[str]:
+    headings: List[str] = []
+    for line in markdown.splitlines():
+        if line.startswith("#"):
+            headings.append(line.strip())
+            if len(headings) >= PREVIEW_HEADINGS_N:
+                break
+    return headings
+
+
+[2025-11-10T02:35:41] tokens used: 85,736
+
+[2025-11-10T02:35:44] thinking
+
+**Checking module size**
+[2025-11-10T02:35:44] exec bash -lc "sed -n '1,200p' /Users/cav/dev/TinyUtils/tinyutils/api/_lib/text_clean.py" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:35:44] bash -lc "sed -n '1,200p' /Users/cav/dev/TinyUtils/tinyutils/api/_lib/text_clean.py" succeeded in 83ms:
+"""Unicode and whitespace cleanup utilities for Markdown output."""
+from __future__ import annotations
+
+import re
+import unicodedata
+from dataclasses import dataclass
+
+ZERO_WIDTH_RE = re.compile("[\u200B\u200C\u200D\uFEFF]")
+MULTI_BLANK_RE = re.compile(r"\n{3,}")
+
+
+@dataclass
+class CleanupStats:
+    softbreaks_replaced: int = 0
+    nbsp_replaced: int = 0
+    zero_width_removed: int = 0
+
+
+def normalise_markdown(
+    text: str,
+[2025-11-10T02:35:44] tokens used: 87,028
+
+[2025-11-10T02:35:49] thinking
+
+**Identifying heavy imports for lazy loading**
+[2025-11-10T02:35:49] exec bash -lc "sed -n '1,200p' /Users/cav/dev/TinyUtils/tinyutils/api/_lib/utils.py" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:35:50] bash -lc "sed -n '1,200p' /Users/cav/dev/TinyUtils/tinyutils/api/_lib/utils.py" succeeded in 106ms:
+"""Shared utility helpers for TinyUtils Python backends."""
+from __future__ import annotations
+
+import json
+import logging
+import os
+import tempfile
+import uuid
+from contextlib import contextmanager
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, Iterator, List, Optional
+
+DEFAULT_MAX_FILE_MB = 100
+DEFAULT_MAX_BATCH_MB = 1024
+DEFAULT_PREVIEW_HEADINGS = 8
+DEFAULT_PREVIEW_SNIPPETS = 4
+DEFAULT_DIFF_TRUNCATE_KB = 256
+
+MAX_FILE_MB = int(os.getenv("MAX_FILE_MB", str(DEFAULT_MAX_FILE_MB)))
+[2025-11-10T02:35:50] tokens used: 87,937
+
+[2025-11-10T02:35:52] thinking
+
+**Checking potential Google library usage in blob module**
+[2025-11-10T02:35:53] exec bash -lc "sed -n '1,200p' /Users/cav/dev/TinyUtils/tinyutils/api/_lib/blob.py" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:35:53] bash -lc "sed -n '1,200p' /Users/cav/dev/TinyUtils/tinyutils/api/_lib/blob.py" succeeded in 104ms:
+"""Helpers for downloading inputs and uploading outputs."""
+from __future__ import annotations
+
+import base64
+import json
+import logging
+import os
+import re
+from pathlib import Path
+from typing import Optional, Tuple
+from urllib.parse import urlparse
+
+import requests
+
+DEFAULT_TIMEOUT = float(os.getenv("BLOB_DOWNLOAD_TIMEOUT", "30"))
+USER_AGENT = os.getenv("TINYUTILS_BLOB_UA", "tinyutils-backend/0.1")
+BLOB_UPLOAD_URL = os.getenv("VERCEL_BLOB_API_URL", "https://api.vercel.com/v2/blob/upload")
+
+logger = logging.getLogger(__name__)
+
+[2025-11-10T02:35:53] tokens used: 88,917
+
+[2025-11-10T02:36:06] thinking
+
+**Identifying heavy imports to lazy-load**
+[2025-11-10T02:36:06] exec bash -lc "sed -n '1,200p' /Users/cav/dev/TinyUtils/tinyutils/convert/__init__.py" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:36:07] bash -lc "sed -n '1,200p' /Users/cav/dev/TinyUtils/tinyutils/convert/__init__.py" succeeded in 102ms:
+"""Public exports for the TinyUtils converter library."""
+from .service import ConversionOptions, convert_batch, convert_one
+from .types import (
+    BatchResult,
+    ConversionError,
+    ConversionResult,
+    InputPayload,
+    MediaArtifact,
+    PreviewData,
+    TargetArtifact,
+)
+
+__all__ = [
+    "BatchResult",
+    "ConversionError",
+    "ConversionOptions",
+    "ConversionResult",
+    "InputPayload",
+    "MediaArtifact",
+    "PreviewData",
+[2025-11-10T02:36:07] tokens used: 92,045
+
+[2025-11-10T02:36:10] thinking
+
+**Examining import-related performance issues**
+[2025-11-10T02:36:11] exec bash -lc 'rg -n "runner" /Users/cav/dev/TinyUtils/tinyutils/api/convert/index.py' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:36:11] bash -lc 'rg -n "runner" /Users/cav/dev/TinyUtils/tinyutils/api/convert/index.py' succeeded in 99ms:
+49:_pandoc_runner = None
+69:def _get_pandoc_runner():
+70:    global _pandoc_runner
+71:    if _pandoc_runner is None:
+72:        from tinyutils.api._lib import pandoc_runner as _module  # type: ignore
+74:        _pandoc_runner = _module
+75:    return _pandoc_runner
+93:    runner = _get_pandoc_runner()
+94:    path = runner.get_configured_pandoc_path()
+100:            runner.VENDORED_PANDOC_PATH,
+152:    runner = _get_pandoc_runner()
+153:    pandoc_path = runner.get_configured_pandoc_path()
+154:    pandoc_version = runner.get_pandoc_version()
+181:        runner = _get_pandoc_runner()
+183:            pandoc_path = runner.ensure_pandoc()
+229:    runner = _get_pandoc_runner()
+299:            "toolVersions": {"pandoc": runner.get_pandoc_version()},
+[2025-11-10T02:36:11] tokens used: 92,505
+
+[2025-11-10T02:36:14] thinking
+
+**Checking runner usage in code around line 229**
+[2025-11-10T02:36:15] exec bash -lc "sed -n '140,320p' /Users/cav/dev/TinyUtils/tinyutils/api/convert/index.py" in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-list-specific-heavy
+[2025-11-10T02:36:15] bash -lc "sed -n '140,320p' /Users/cav/dev/TinyUtils/tinyutils/api/convert/index.py" succeeded in 102ms:
+    """Report pypandoc availability and vendored pandoc version."""
+
+    errors: List[str] = []
+    try:
+        import pypandoc  # type: ignore
+
+        _ = pypandoc.__version__
+        pypandoc_status = "ok"
+    except Exception as exc:  # pragma: no cover - diagnostics only
+        pypandoc_status = f"error: {exc.__class__.__name__}"
+        errors.append(str(exc))
+
+    runner = _get_pandoc_runner()
+    pandoc_path = runner.get_configured_pandoc_path()
+    pandoc_version = runner.get_pandoc_version()
+
+    return {
+        "pypandoc": pypandoc_status,
+        "pandoc_path": pandoc_path,
+        "pandoc_version": pandoc_version,
+[2025-11-10T02:36:15] tokens used: 93,031
+
+[2025-11-10T02:36:52] thinking
+
+**Identifying heavy imports and lazy-load plan**
+
+I'm gathering which modules in `tinyutils/api/convert/index.py` and `tinyutils/convert/service.py` bring in heavy optional dependencies like `pypandoc` and `requests` that risk import-time failures on serverless environments. I’ll list those imports per file, explain why to lazy-load them, and provide a concise diff outline describing how to move them inside functions while noting essential module-level state to keep. This should help prepare a focused, actionable plan for reducing cold-start overhead and avoiding import crashes.
+[2025-11-10T02:36:54] codex
+
+**Convert API (`tinyutils/api/convert/index.py`)**
+- Heavy imports to lazy-load:
+  - `tinyutils.convert` symbols (`ConversionOptions`, `InputPayload`, `convert_batch`) and `tinyutils.convert.types.BatchResult` (lines 56‑62) because importing `tinyutils.convert` pulls in `pypandoc` via the service implementation.
+  - `tinyutils.api._lib.pandoc_runner` (lines 69‑75) because it eagerly checks for the vendored pandoc binary and imports `pypandoc`.
+- Diff outline:
+  - Keep only the sentinel globals at module scope (`ConverterOptions = InputPayload = convert_batch = BatchResult = None` plus `_pandoc_runner = None`).
+  - Retain `_ensure_convert_imports()` exactly as the single gateway for touching `tinyutils.convert`; update any direct imports to call this helper before use (already the case for `_download_payloads`, `convert`, etc.).
+  - Ensure every reference to pandoc utilities calls `runner = _get_pandoc_runner()` first (e.g., `_log_pandoc_availability`, both `/health` handlers, and the main `convert` request handler). Remove any stray direct `pandoc_runner` imports/usages.
+- Must stay module-level:
+  - FastAPI app construction (`app = FastAPI()`), Pydantic model definitions, and the lazy-import sentinels/loggers (`ConverterOptions`, `_pandoc_runner`, `logger`) so routing keeps working at import time.
+
+**Convert Service (`tinyutils/convert/service.py`)**
+- Heavy imports to lazy-load:
+  - `tinyutils.api._lib.pandoc_runner` (current module-level import around lines 17‑25) since it imports `pypandoc` and probes the filesystem for vendored binaries.
+- Diff outline:
+  - Remove the top-level `from tinyutils.api._lib import pandoc_runner`.
+  - Introduce a module-level sentinel (e.g., `_pandoc_runner = None`) plus a `_get_pandoc_runner()` helper that imports `tinyutils.api._lib.pandoc_runner` on first use and caches it.
+  - Replace every direct call (`pandoc_runner.get_pandoc_version()`, `.ensure_pandoc()`, `.convert_to_markdown()`, `.apply_lua_filters()`) with `runner = _get_pandoc_runner()` at the start of each function (`convert_one`, `_render_markdown_target`, etc.) and then use `runner.*`.
+- Must stay module-level:
+  - Configuration constants and caches (`TARGET_EXTENSIONS`, `TARGET_CONTENT_TYPES`, `_PYPANDOC`, `_CACHE_MAX_ENTRIES`, `_CACHE_LOCK`, `_CACHE`) plus the `_get_pypandoc()` helper, because they back the conversion cache and shared state across invocations.
+
+With those adjustments the only modules that perform optional dependency checks (`tinyutils.convert` and `tinyutils.api._lib.pandoc_runner`) will load inside request/worker code paths, preventing serverless import-time crashes and shaving cold-start latency.
+[2025-11-10T02:36:59] tokens used: 99,240

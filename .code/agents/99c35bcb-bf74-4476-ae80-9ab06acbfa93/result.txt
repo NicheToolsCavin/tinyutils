@@ -1,0 +1,281 @@
+I'll help you create a comprehensive plan to move from the current GREEN preview state to auto and production readiness for the TinyUtils document conversion backend. Let me first create a task list to organize this planning process.
+
+I need to read the files that were specified to understand the current implementation before creating the plan.
+
+I apologize for the error. Let me check the correct path for the file within the TinyUtils directory:
+
+Now I'll read the service.py file:
+
+Now I'll read the vercel.json file:
+
+Now I'll read the smoke test script:
+
+Let me read the AGENT_RUN_LOG.md file:
+
+Let me read the AGENT_TASK_CHECKLIST.md file:
+
+Let me check the AGENT_TMP_STATE.md file:
+
+Now I'll mark the first task as completed and move on to analyzing the current state and creating the plan:
+
+Based on my review of the files, I now have a good understanding of the current state. Let me analyze the gaps between the current GREEN preview state and the requirements for auto and production readiness.
+
+The current state shows:
+1. The document conversion backend is operational on Vercel Preview with vendored pandoc 3.1.11.1
+2. The API runs on Vercel serverless with Python 3.12
+3. The smoke test script handles JWT cookie bootstrap but still needs completion
+4. Health checks return 200 JSON and convert POST returns 200 JSON for md→md/txt/html
+5. Security is maintained via preview fence headers and cookies
+
+The gaps I identified include:
+- Need finalizing smoke automation
+- CI integration requirements
+- Reliability/observability improvements needed
+- Security hardening for production
+- Cautious production rollout strategy
+
+Now I'll mark task 2 as completed and move to creating the stepwise plan:
+
+# Comprehensive Plan: Moving TinyUtils Convert from Preview to Production
+
+## Stepwise Plan with Rationale (7-15 steps)
+
+1. **Complete Automated Cookie Bootstrap**  
+   - Finalize the JWT cookie bootstrap in `scripts/smoke_convert_preview.mjs` to eliminate manual curl requirement
+   - Rationale: Automation is critical for reliable CI/CD pipeline; current partial implementation still requires manual intervention
+
+2. **Implement Comprehensive CI Integration**  
+   - Set up automated build and test pipeline that runs smoke tests on every PR to the convert backend
+   - Include unit tests, integration tests, and end-to-end conversion tests
+   - Rationale: Ensure code changes don't break the conversion functionality in preview environment
+
+3. **Add Production-Grade Observability**  
+   - Implement structured logging with request IDs for traceability across the conversion pipeline
+   - Add metrics collection for conversion success rates, latency, and error patterns
+   - Set up alerts for conversion failures and performance degradation
+   - Rationale: Critical for monitoring production health and debugging issues
+
+4. **Strengthen Security and Input Validation**  
+   - Add input sanitization and file type validation beyond current size limits
+   - Implement rate limiting to prevent abuse
+   - Add security headers and validate all user inputs to prevent injection attacks
+   - Rationale: Production systems require defense against malicious inputs and DoS attacks
+
+5. **Set Up Staging Environment**  
+   - Create a staging environment that mirrors production with the same security and configuration
+   - Rationale: Allows testing of production-like scenarios before deploying to production
+
+6. **Performance Testing and Optimization**  
+   - Run load tests to identify performance bottlenecks with multiple concurrent conversions
+   - Optimize the caching strategy for repeated conversions
+   - Test large file handling and memory usage
+   - Rationale: Ensure the service can handle production traffic volumes
+
+7. **Add Circuit Breakers and Graceful Degradation**  
+   - Implement fallback mechanisms when pandoc is unavailable (already partially implemented with fallback conversion)
+   - Add circuit breakers for external dependencies
+   - Rationale: Maintain service availability when underlying tools fail
+
+8. **Implement Backup and Recovery Procedures**  
+   - Set up automated backups for critical configurations
+   - Document recovery procedures for various failure scenarios
+   - Rationale: Critical for production resilience and business continuity
+
+9. **Create Production Deployment Pipeline**  
+   - Set up a multi-stage deployment pipeline (dev → preview → staging → production)
+   - Include automated smoke tests at each stage
+   - Implement blue-green deployment to minimize downtime
+   - Rationale: Ensures safe, reliable deployments to production
+
+10. **Documentation and Runbooks**  
+   - Create operational runbooks for common troubleshooting scenarios
+   - Document the API contract and usage patterns
+   - Add deployment and rollback procedures
+   - Rationale: Essential for operational support and maintainability
+
+11. **Final Production Readiness Testing**  
+   - Execute full test suite in staging environment
+   - Validate security controls and compliance requirements
+   - Verify all monitoring and alerting systems work as expected
+   - Rationale: Final verification before production release
+
+12. **Gradual Production Rollout**  
+   - Start with limited traffic using feature flags or percentage-based rollouts
+   - Monitor metrics closely during initial phase
+   - Gradually increase traffic as confidence builds
+   - Rationale: Minimize risk of widespread impact from unforeseen production issues
+
+## Risky Assumptions & Validation Methods
+
+**Assumption 1**: Vercel serverless environment will handle pandoc's resource requirements consistently
+- *Validation*: Run extended load testing to validate memory and CPU constraints during concurrent conversions
+
+**Assumption 2**: Pandoc binary will be available and responsive in all serverless instances
+- *Validation*: Test cold start scenarios and measure warm-up time for pandoc availability
+
+**Assumption 3**: Cookie-based authentication will work reliably in all production scenarios
+- *Validation*: Test various client configurations and verify bypass token behavior
+
+**Assumption 4**: Large file processing won't exceed serverless time/memory limits
+- *Validation*: Test with maximum allowed file sizes and measure resource consumption
+
+**Assumption 5**: Current caching strategy suffices for production load
+- *Validation*: Measure cache hit rates under realistic load patterns
+
+Now I'll mark task 3 as completed and move to task 4:
+
+I've already included the risky assumptions and validation methods in the previous response as part of the comprehensive plan. Let me mark task 4 as completed and move to task 5:
+
+## Verification Checklists
+
+### "Auto ON" Verification Checklist
+- [ ] Automated cookie bootstrap in `scripts/smoke_convert_preview.mjs` works without manual intervention
+- [ ] CI pipeline successfully runs smoke tests on every PR
+- [ ] All unit and integration tests pass consistently
+- [ ] Preview environment accepts automation bypass tokens correctly
+- [ ] Health endpoint returns 200 JSON consistently
+- [ ] Conversion endpoints return 200 JSON for basic operations
+- [ ] Error handling returns proper JSON responses in preview mode
+- [ ] Dependencies (pandoc, pydantic-core) are properly vendored and accessible
+- [ ] Import paths work correctly in serverless environment
+- [ ] Smoke tests pass in automated environment with all required environment variables
+
+### "Ship to Production" Verification Checklist
+- [ ] Staging environment fully tested and validated
+- [ ] Performance benchmarks met under load testing
+- [ ] All security scans and penetration tests passed
+- [ ] Production monitoring and alerting configured and tested
+- [ ] Circuit breakers and fallback mechanisms validated
+- [ ] Rate limiting implemented and tested
+- [ ] Security headers properly configured
+- [ ] Input validation and sanitization working correctly
+- [ ] Documentation and runbooks completed
+- [ ] Rollback procedures tested and documented
+- [ ] Production deployment pipeline configured with all stages
+- [ ] Feature flags or gradual rollout mechanism implemented
+- [ ] Backup and recovery procedures validated
+- [ ] Production-specific configurations reviewed and approved
+- [ ] Legal/compliance requirements verified (if applicable)
+- [ ] Zero-downtime deployment capability confirmed
+
+Let me mark the final task as completed:
+
+I've completed the requested comprehensive plan to move the TinyUtils document conversion backend from the current GREEN preview state to auto and production readiness. Here's the complete output as requested:
+
+# Comprehensive Plan: Moving TinyUtils Convert from Preview to Production
+
+## Stepwise Plan with Rationale (7-15 steps)
+
+1. **Complete Automated Cookie Bootstrap**  
+   - Finalize the JWT cookie bootstrap in `scripts/smoke_convert_preview.mjs` to eliminate manual curl requirement
+   - Rationale: Automation is critical for reliable CI/CD pipeline; current partial implementation still requires manual intervention
+
+2. **Implement Comprehensive CI Integration**  
+   - Set up automated build and test pipeline that runs smoke tests on every PR to the convert backend
+   - Include unit tests, integration tests, and end-to-end conversion tests
+   - Rationale: Ensure code changes don't break the conversion functionality in preview environment
+
+3. **Add Production-Grade Observability**  
+   - Implement structured logging with request IDs for traceability across the conversion pipeline
+   - Add metrics collection for conversion success rates, latency, and error patterns
+   - Set up alerts for conversion failures and performance degradation
+   - Rationale: Critical for monitoring production health and debugging issues
+
+4. **Strengthen Security and Input Validation**  
+   - Add input sanitization and file type validation beyond current size limits
+   - Implement rate limiting to prevent abuse
+   - Add security headers and validate all user inputs to prevent injection attacks
+   - Rationale: Production systems require defense against malicious inputs and DoS attacks
+
+5. **Set Up Staging Environment**  
+   - Create a staging environment that mirrors production with the same security and configuration
+   - Rationale: Allows testing of production-like scenarios before deploying to production
+
+6. **Performance Testing and Optimization**  
+   - Run load tests to identify performance bottlenecks with multiple concurrent conversions
+   - Optimize the caching strategy for repeated conversions
+   - Test large file handling and memory usage
+   - Rationale: Ensure the service can handle production traffic volumes
+
+7. **Add Circuit Breakers and Graceful Degradation**  
+   - Implement fallback mechanisms when pandoc is unavailable (already partially implemented with fallback conversion)
+   - Add circuit breakers for external dependencies
+   - Rationale: Maintain service availability when underlying tools fail
+
+8. **Implement Backup and Recovery Procedures**  
+   - Set up automated backups for critical configurations
+   - Document recovery procedures for various failure scenarios
+   - Rationale: Critical for production resilience and business continuity
+
+9. **Create Production Deployment Pipeline**  
+   - Set up a multi-stage deployment pipeline (dev → preview → staging → production)
+   - Include automated smoke tests at each stage
+   - Implement blue-green deployment to minimize downtime
+   - Rationale: Ensures safe, reliable deployments to production
+
+10. **Documentation and Runbooks**  
+    - Create operational runbooks for common troubleshooting scenarios
+    - Document the API contract and usage patterns
+    - Add deployment and rollback procedures
+    - Rationale: Essential for operational support and maintainability
+
+11. **Final Production Readiness Testing**  
+    - Execute full test suite in staging environment
+    - Validate security controls and compliance requirements
+    - Verify all monitoring and alerting systems work as expected
+    - Rationale: Final verification before production release
+
+12. **Gradual Production Rollout**  
+    - Start with limited traffic using feature flags or percentage-based rollouts
+    - Monitor metrics closely during initial phase
+    - Gradually increase traffic as confidence builds
+    - Rationale: Minimize risk of widespread impact from unforeseen production issues
+
+## Risky Assumptions & Validation Methods
+
+**Assumption 1**: Vercel serverless environment will handle pandoc's resource requirements consistently
+- *Validation*: Run extended load testing to validate memory and CPU constraints during concurrent conversions
+
+**Assumption 2**: Pandoc binary will be available and responsive in all serverless instances
+- *Validation*: Test cold start scenarios and measure warm-up time for pandoc availability
+
+**Assumption 3**: Cookie-based authentication will work reliably in all production scenarios
+- *Validation*: Test various client configurations and verify bypass token behavior
+
+**Assumption 4**: Large file processing won't exceed serverless time/memory limits
+- *Validation*: Test with maximum allowed file sizes and measure resource consumption
+
+**Assumption 5**: Current caching strategy suffices for production load
+- *Validation*: Measure cache hit rates under realistic load patterns
+
+## Verification Checklists
+
+### "Auto ON" Verification Checklist
+- [ ] Automated cookie bootstrap in `scripts/smoke_convert_preview.mjs` works without manual intervention
+- [ ] CI pipeline successfully runs smoke tests on every PR
+- [ ] All unit and integration tests pass consistently
+- [ ] Preview environment accepts automation bypass tokens correctly
+- [ ] Health endpoint returns 200 JSON consistently
+- [ ] Conversion endpoints return 200 JSON for basic operations
+- [ ] Error handling returns proper JSON responses in preview mode
+- [ ] Dependencies (pandoc, pydantic-core) are properly vendored and accessible
+- [ ] Import paths work correctly in serverless environment
+- [ ] Smoke tests pass in automated environment with all required environment variables
+
+### "Ship to Production" Verification Checklist
+- [ ] Staging environment fully tested and validated
+- [ ] Performance benchmarks met under load testing
+- [ ] All security scans and penetration tests passed
+- [ ] Production monitoring and alerting configured and tested
+- [ ] Circuit breakers and fallback mechanisms validated
+- [ ] Rate limiting implemented and tested
+- [ ] Security headers properly configured
+- [ ] Input validation and sanitization working correctly
+- [ ] Documentation and runbooks completed
+- [ ] Rollback procedures tested and documented
+- [ ] Production deployment pipeline configured with all stages
+- [ ] Feature flags or gradual rollout mechanism implemented
+- [ ] Backup and recovery procedures validated
+- [ ] Production-specific configurations reviewed and approved
+- [ ] Legal/compliance requirements verified (if applicable)
+- [ ] Zero-downtime deployment capability confirmed

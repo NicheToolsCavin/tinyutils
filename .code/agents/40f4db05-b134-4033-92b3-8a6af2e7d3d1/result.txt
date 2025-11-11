@@ -1,0 +1,54 @@
+[2025-11-10T03:56:44] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-produce-concise-strategy
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: auto
+--------
+[2025-11-10T03:56:44] User instructions:
+Context: Repo: /Users/cav/dev/TinyUtils. Goal: reliably pin Vercel’s Python runtime to 3.11 for api/convert so the current FastAPI/Pydantic v1 stack runs. Need exact supported approaches (vercel.json functions mapping vs project settings/CLI), common pitfalls, and acceptance checks (runtime shown in .vc-config / logs).
+
+Agent: Produce a concise strategy to pin Python 3.11 for Vercel functions. Cover the correct vercel.json schema for per-function runtime, when to use project settings or env, and how to verify after deploy. Include a brief troubleshooting list if the runtime still shows 3.12.
+[2025-11-10T03:56:47] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-produce-concise-strategy
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: auto
+--------
+[2025-11-10T03:56:47] User instructions:
+Context: Repo: /Users/cav/dev/TinyUtils. Goal: reliably pin Vercel’s Python runtime to 3.11 for api/convert so the current FastAPI/Pydantic v1 stack runs. Need exact supported approaches (vercel.json functions mapping vs project settings/CLI), common pitfalls, and acceptance checks (runtime shown in .vc-config / logs).
+
+Agent: Produce a concise strategy to pin Python 3.11 for Vercel functions. Cover the correct vercel.json schema for per-function runtime, when to use project settings or env, and how to verify after deploy. Include a brief troubleshooting list if the runtime still shows 3.12.
+
+[2025-11-10T03:56:51] thinking
+
+**Formulating Vercel runtime pin strategy**
+[2025-11-10T03:56:51] codex
+
+**Pinning Strategy**
+
+- Use `vercel.json` per-function override: place at repo root with `"functions": { "api/convert.py": { "runtime": "python3.11" } }`. File path must match deployed file (e.g., `api/convert/index.py` → `"api/convert/index.py"`). This is the only Vercel-supported way to pin runtime per function; spelling must follow camelCase keys and valid runtime string.
+- If all Python endpoints should be 3.11, set the default runtime in Vercel Project Settings → Functions → Default Runtime = Python 3.11. CLI `vercel env pull`/project JSON doesn’t change runtimes—only `vercel.json` or the dashboard applies.
+- Environment variables are unrelated; do not rely on `PYTHON_VERSION`—Vercel ignores it for runtimes.
+
+**Verification After Deploy**
+
+- After `vercel deploy`, open the deployment’s build output: logs show `Function Runtime: python3.11` per function.
+- Download `.vercel/output/config.json` (formerly `.vc-config`) from the deployment artifact or via `vercel pull` and confirm the `runtime` entry under the matching function is `python3.11`.
+- Hit the API endpoint once; the function log in Vercel dashboard should list `Runtime: python3.11` in the invocation metadata.
+
+**Troubleshooting if 3.12 Appears**
+
+- File mismatch: ensure the key in `vercel.json` exactly matches the compiled entry file (`api/convert.py` vs `api/convert/index.py` depending on structure).
+- Missing repo root: `vercel.json` must live at project root committed before deploy; redeploy after changes.
+- Conflicting project default: dashboard default runtime set to 3.12 overrides functions without explicit entries—make sure your function is listed.
+- Cached build: run `vercel deploy --force` to bypass cached build artifacts that may have been produced before the config change.
+- Wrong framework preset: if using Vercel monorepo/project settings, verify the correct project directory is selected so `vercel.json` is picked up.
+[2025-11-10T03:56:56] tokens used: 7,126

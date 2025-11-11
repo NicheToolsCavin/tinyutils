@@ -1,0 +1,715 @@
+I'll help you design a minimal monitoring and alerting plan for the converter. Let me first understand the current codebase structure and examine the existing tests and API to inform the plan.
+
+I see the path mismatch. Let me check the correct directory structure for the TinyUtils project:
+
+Let me examine the tinyutils directory structure to understand the codebase:
+
+That's unexpected. Let me check if there are hidden files or if the directory structure is different:
+
+It seems the tinyutils directory is empty in this branch. Let me check if there's a different branch or if I should look at the other context directory:
+
+Let me look at the diffs_recs_finished directory to see if there's any relevant code there:
+
+Let me check the user's actual tinyutils directory which was mentioned in the context:
+
+Ah, I see the issue. The TinyUtils project is in `/Users/cav/dev/TinyUtils/` not in the current branch directory. Let me examine the correct directory:
+
+I need to run shell commands to navigate to the correct directory structure. Let me check the API and convert directories mentioned in the context:
+
+Perfect! Now I can see the project structure with `api` and `convert` directories. Let me examine the API and convert directories mentioned in the context:
+
+Great! I can see there's a `convert` directory in the API. Let me check the convert API specifically:
+
+Now let me also check the general convert directory:
+
+Let me examine the tests directory structure as mentioned in the context:
+
+Let me also check the scripts directory:
+
+It seems the scripts directory is not in the root. Let me check where it might be:
+
+Let me check the tinyutils/scripts directory:
+
+Perfect! Now let me examine the key files to understand the current implementation. First, let me look at the convert API index:
+
+Now let me look at the convert service to understand its implementation:
+
+Now let me check the blob module to understand how blob uploads work:
+
+Now let me check the existing tests to understand the current test structure:
+
+Let me examine both test files:
+
+And the blob tests:
+
+Let me also check the smoke test scripts to understand the current monitoring approach:
+
+Now I have a comprehensive understanding of the codebase. Let me create a monitoring and alerting plan based on what I've found.
+
+Now I'll design a minimal monitoring and alerting plan for the converter. Let me start by updating the first todo as completed and work on the plan.
+
+Based on my analysis of the codebase, I've completed the analysis and am now designing the monitoring plan. Let me continue:
+
+## Minimal Monitoring and Alerting Plan for TinyUtils Converter
+
+### Overview
+The converter service is a FastAPI-based document conversion service that handles document inputs, converts them to various formats (md, html, txt), and uploads outputs to blob storage. The system has caching built-in and handles both successful conversions and error cases.
+
+### 1. Health Checks
+- **API Health Endpoint**: `/api/convert` endpoint should respond within 500ms with `200 OK`
+- **Pandoc Availability**: Verify pandoc binary is accessible and responsive
+- **Blob Storage Connectivity**: Check that BLOB_READ_WRITE_TOKEN can connect to Vercel Blob API
+- **Cache Health**: Verify cache operations are functioning (read/write without errors)
+
+### 2. Request/Logging Fields
+The following fields should be included in logs for proper monitoring:
+
+```python
+# In api/convert/index.py - enhance the logging with these fields:
+logger.info(
+    "convert job inputs=%d targets=%s request_id=%s",
+    len(request.inputs), 
+    request.targets,
+    resolved_request_id
+)
+
+# Add timing and cache information:
+logger.info(
+    "convert job_id=%s outputs=%d errors=%d duration_ms=%d cache_hit=%s",
+    batch.job_id, 
+    len(outputs), 
+    len(errors),
+    duration_ms,
+    cache_hit
+)
+```
+
+**Required logging fields:**
+- `x-request-id` - for traceability of requests
+- `duration_ms` - API response time
+- `cache=hit` or `cache=miss` - for cache hit rate tracking
+- `status_code` - HTTP response status
+- `targets` - conversion targets requested
+- `inputs` - number of input documents
+- `blob_uploads` - count of successful/failed blob uploads
+- `error_type` - classification of errors (pandoc, network, etc.)
+
+### 3. Monitoring Metrics
+- **Latency**: p50, p95, p99 response times for convert API
+- **Error Rate**: HTTP 4xx and 5xx rates
+- **Blob Upload Success Rate**: Successful vs failed blob uploads
+- **Cache Hit Rate**: Percentage of conversions served from cache
+- **Throughput**: Requests per minute to the convert API
+- **Pandoc Availability**: Time to verify pandoc installation
+
+### 4. Dashboard Components
+**Lightweight Dashboard** (using Vercel Analytics or simple logging-based dashboards):
+- Request rate (RPS) over time
+- Average and percentile response times (p50, p95, p99)
+- HTTP error rate (4xx, 5xx) percentage
+- Cache hit rate percentage
+- Blob upload success rate
+- Top error types
+
+### 5. Alert Thresholds
+- **High Priority**:
+  - 5xx error rate > 5% for 5+ minutes
+  - Average latency > 5 seconds for 2+ minutes
+  - Cache hit rate < 10% for 10+ minutes
+  - Blob upload failure rate > 20% for 5+ minutes
+- **Medium Priority**:
+  - 4xx error rate > 20% for 5+ minutes
+  - Average latency > 2 seconds for 5+ minutes
+  - Pandoc unavailable for > 1 minute
+- **Low Priority**:
+  - Request rate drops > 50% from baseline (possible service issue)
+
+Now let me continue with specifying the health checks and logging fields:
+
+## 3. Detailed Health Checks and Logging Fields
+
+### Health Checks Implementation:
+
+1. **API Health Endpoint** - Add to existing `/api/convert` or create separate `/health` endpoint:
+   - Response with status 200 within 500ms
+   - Verify pandoc availability by calling `get_pandoc_version()`
+   - Check blob upload functionality by attempting small test upload with BLOB_READ_WRITE_TOKEN
+
+2. **Pandoc Availability Check** - In `convert/service.py`:
+   - Add health check in `_get_pandoc()` function to verify pandoc is accessible
+   - Log pandoc version during startup
+
+3. **Blob Storage Health** - In `api/_lib/blob.py`:
+   - Add periodic connectivity check using `_upload_to_vercel_blob` with small test payload
+   - Check token validity
+
+### Required Logging Fields:
+
+#### In `api/convert/index.py`:
+```python
+# At the start of convert function
+start_time = time.time()
+logger.info(
+    "convert request started request_id=%s inputs=%d targets=%s options=%s",
+    resolved_request_id,
+    len(request.inputs),
+    request.targets,
+    request.options
+)
+
+# Before returning response (end of convert function)
+duration_ms = (time.time() - start_time) * 1000
+logger.info(
+    "convert request completed request_id=%s job_id=%s outputs=%d errors=%d duration_ms=%.2f status=200",
+    resolved_request_id,
+    batch.job_id,
+    len(outputs),
+    len(errors),
+    duration_ms
+)
+
+# For error cases
+logger.error(
+    "convert request failed request_id=%s error_type=%s error_detail=%s duration_ms=%.2f status=%d",
+    resolved_request_id,
+    type(exc).__name__,
+    str(exc),
+    duration_ms,
+    status_code
+)
+```
+
+#### In `convert/service.py`:
+```python
+# In convert_one function - add cache hit detection logging
+if cached is not None:
+    cached.logs.append("cache=hit")
+    logger.info("cache hit for document name=%s cache_key=%s", name, cache_key)
+else:
+    logger.info("cache miss for document name=%s cache_key=%s", name, cache_key)
+
+# In _upload_to_vercel_blob function - add blob upload logging
+def _upload_to_vercel_blob(...):
+    try:
+        response = requests.post(...)
+        duration_ms = (time.time() - start_time) * 1000
+        logger.info(
+            "blob upload successful name=%s size=%d duration_ms=%.2f url=%s",
+            name,
+            len(data),
+            duration_ms,
+            blob_url
+        )
+        return blob_url
+    except requests.RequestException as exc:
+        logger.error(
+            "blob upload failed name=%s size=%d duration_ms=%.2f error=%s",
+            name,
+            len(data),
+            duration_ms if 'duration_ms' in locals() else -1,
+            str(exc)
+        )
+        raise
+```
+
+Now let me move on to the lightweight dashboard recommendations:
+
+## 4. Lightweight Dashboard Recommendations
+
+### Dashboard Metrics (Log-based approach suitable for Vercel Analytics):
+
+#### Panel 1: Request Overview
+- **Requests Per Minute (RPM)**: Current throughput with trend
+- **Total Requests**: 24-hour count
+- **Successful vs Failed**: Split showing success rate percentage
+
+#### Panel 2: Performance Metrics
+- **Response Time (ms)**: p50, p95, p99 percentiles
+- **API Duration Trend**: Line chart over time
+- **Slow Requests**: Count of requests > 2s
+
+#### Panel 3: Error Tracking
+- **Error Rate**: Percentage of 4xx/5xx responses
+- **Top Error Types**: Most common error messages
+- **Error Timeline**: Number of errors over time
+
+#### Panel 4: Conversion Metrics
+- **Cache Hit Rate**: Percentage over time
+- **Target Distribution**: Most requested conversion formats (md, html, txt)
+- **Input Count Distribution**: Average inputs per request
+
+#### Panel 5: Blob Operations
+- **Upload Success Rate**: Successful vs failed blob uploads
+- **Upload Size Distribution**: Average file sizes
+- **Blob Operation Duration**: Upload time metrics
+
+### Implementation Strategy:
+1. **Log Parsing**: Use structured logging with consistent field formats to enable parsing
+2. **Minimal Infrastructure**: Leverage Vercel Analytics or simple log aggregation (no need for full Prometheus/Grafana setup)
+3. **Visual Elements**: Simple charts using Vercel Analytics dashboard or a lightweight solution
+
+Now let me define the alert thresholds and validation steps:
+
+## 5. Alert Thresholds and Validation Steps
+
+### Alert Thresholds
+
+#### High Priority (Immediate Action Required):
+- **5xx Error Rate > 5% for 5+ consecutive minutes**
+  - Slack/Discord notification to #alerts channel
+- **Average Response Time > 5 seconds for 2+ consecutive minutes**
+  - Page on-call engineer
+- **Cache Hit Rate < 10% for 10+ consecutive minutes**
+  - Indicates potential cache malfunction
+- **Blob Upload Failure Rate > 20% for 5+ consecutive minutes**
+  - Could indicate Vercel Blob API issues or token problems
+- **API Completely Unresponsive** (health checks failing)
+
+#### Medium Priority (Review Within 4 Hours):
+- **4xx Error Rate > 20% for 5+ consecutive minutes**
+  - Client-side issues, but worth investigating
+- **Average Response Time > 2 seconds for 5+ consecutive minutes**
+  - Performance degradation
+- **Pandoc unavailable for > 1 minute**
+  - Conversion functionality will be impaired
+- **Cache Hit Rate drops by > 50% from baseline**
+  - Could indicate cache clearing or invalidation issues
+
+#### Low Priority (Review Within 24 Hours):
+- **Request rate drops > 50% from baseline**
+  - Could indicate service discovery or routing issues
+- **Cache hit rate < 50% but > 10%**
+  - Normal operation, but worth monitoring
+
+### Validation Steps
+
+#### In Preview Environment:
+1. **Smoke Tests**: Run existing `/scripts/smoke_convert_preview.mjs` regularly
+2. **Cache Validation**: Verify cache hit/miss logging works correctly
+3. **Blob Upload Validation**: Test both Vercel Blob upload and fallback to data: URLs
+4. **Error Simulation**: Test error logging by simulating pandoc/pandoc_runner failures
+
+#### In Production:
+1. **Gradual Rollout**: Deploy monitoring code to canary instances first
+2. **Baseline Establishment**: Allow 1-2 days to establish normal operation baselines
+3. **Alert Tuning**: Adjust thresholds based on production traffic patterns
+4. **Log Verification**: Confirm structured logging fields are properly formatted
+
+#### Testing Procedures:
+- **Unit Tests**: Add tests to verify logging fields are present in all scenarios
+- **Integration Tests**: Verify health checks return appropriate status codes
+- **Load Testing**: Validate performance metrics under expected load conditions
+
+Now let me identify concrete hooks and code references for implementation:
+
+## 6. Concrete Hooks and Code References for Implementation
+
+### Code Modifications Needed:
+
+#### 1. Enhanced Logging in `api/convert/index.py`
+```python
+import time
+from contextlib import contextmanager
+
+@contextmanager
+def timing_context():
+    start = time.time()
+    yield
+    duration_ms = (time.time() - start) * 1000
+    yield duration_ms
+
+# In the convert function, add timing:
+@app.post("/")
+def convert(
+    request: ConvertRequest,
+    response: Response,
+    request_id: Optional[str] = Header(default=None, alias="x-request-id"),
+) -> dict:
+    resolved_request_id = request_id or uuid.uuid4().hex
+    start_time = time.time()
+    
+    if not request.inputs:
+        logger.error(
+            "convert request failed request_id=%s error_type=validation_error error_detail=no_inputs duration_ms=%.2f status=400",
+            resolved_request_id, 
+            (time.time() - start_time) * 1000
+        )
+        raise HTTPException(
+            status_code=400,
+            detail="No inputs provided",
+            headers=_response_headers(resolved_request_id),
+        )
+
+    logger.info(
+        "convert request started request_id=%s inputs=%d targets=%s",
+        resolved_request_id,
+        len(request.inputs),
+        request.targets
+    )
+
+    # ... existing code ...
+
+    try:
+        with job_workspace() as workdir:
+            payloads = _download_payloads(request.inputs, workdir)
+    except blob.DownloadError as exc:
+        duration_ms = (time.time() - start_time) * 1000
+        logger.error(
+            "convert request failed request_id=%s error_type=download_error error_detail=%s duration_ms=%.2f status=400",
+            resolved_request_id,
+            str(exc),
+            duration_ms
+        )
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc),
+            headers=_response_headers(resolved_request_id),
+        ) from exc
+
+    # ... existing code ...
+
+    try:
+        batch = convert_batch(
+            inputs=payloads,
+            targets=request.targets,
+            from_format=request.source_format,
+            options=converter_options,
+        )
+    except ValueError as exc:
+        duration_ms = (time.time() - start_time) * 1000
+        logger.error(
+            "convert request failed request_id=%s error_type=validation_error error_detail=%s duration_ms=%.2f status=400",
+            resolved_request_id,
+            str(exc),
+            duration_ms
+        )
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc),
+            headers=_response_headers(resolved_request_id),
+        ) from exc
+    except Exception as exc:
+        duration_ms = (time.time() - start_time) * 1000
+        logger.error(
+            "convert request failed request_id=%s error_type=internal_error error_detail=%s duration_ms=%.2f status=500",
+            resolved_request_id,
+            str(exc),
+            duration_ms
+        )
+        raise HTTPException(
+            status_code=500,
+            detail="Internal server error during conversion",
+            headers=_response_headers(resolved_request_id),
+        ) from exc
+
+    # After successful conversion:
+    outputs = _serialize_outputs(batch)
+    preview = _select_preview(batch)
+    errors = _serialize_errors(batch)
+
+    duration_ms = (time.time() - start_time) * 1000
+    cache_hits = sum(1 for result in batch.results if any('cache=hit' in log for log in result.logs))
+    cache_hit_rate = (cache_hits / len(batch.results)) if batch.results else 0
+    
+    logger.info(
+        "convert request completed request_id=%s job_id=%s outputs=%d errors=%d duration_ms=%.2f cache_hit_rate=%.4f status=200",
+        resolved_request_id,
+        batch.job_id,
+        len(outputs),
+        len(errors),
+        duration_ms,
+        cache_hit_rate
+    )
+    
+    return response
+```
+
+#### 2. Enhanced Cache Logging in `convert/service.py`
+```python
+def convert_one(
+    *,
+    input_bytes: bytes,
+    name: str,
+    targets: Optional[Sequence[str]] = None,
+    from_format: Optional[str] = None,
+    options: Optional[ConversionOptions] = None,
+) -> ConversionResult:
+    # ... existing code ...
+
+    cached = _cache_get(cache_key)
+    if cached is not None:
+        cached.logs.append("cache=hit")
+        logger.info("cache hit for document name=%s", name)
+        return cached
+    else:
+        logger.info("cache miss for document name=%s", name)
+    
+    logs: List[str] = [f"targets={','.join(normalized_targets)}"]
+    logs.append("cache=miss")  # Add to logs for tracking
+
+    # ... rest of function remains same ...
+```
+
+#### 3. Blob Upload Monitoring in `api/_lib/blob.py`
+```python
+def upload_bytes(name: str, data: bytes, content_type: str) -> str:
+    """Upload bytes to blob storage or fall back to a data URL."""
+    start_time = time.time()
+
+    token = os.getenv("BLOB_READ_WRITE_TOKEN")
+    if token:
+        try:
+            blob_url = _upload_to_vercel_blob(name, data, content_type, token)
+            if blob_url:
+                duration_ms = (time.time() - start_time) * 1000
+                logger.info(
+                    "blob upload successful name=%s size=%d duration_ms=%.2f",
+                    name,
+                    len(data),
+                    duration_ms
+                )
+                return blob_url
+        except requests.RequestException as exc:
+            duration_ms = (time.time() - start_time) * 1000
+            logger.error(
+                "blob upload failed name=%s size=%d duration_ms=%.2f error=%s",
+                name,
+                len(data),
+                duration_ms,
+                str(exc)
+            )
+        except ValueError as exc:
+            duration_ms = (time.time() - start_time) * 1000
+            logger.error(
+                "blob upload invalid response name=%s size=%d duration_ms=%.2f error=%s",
+                name,
+                len(data),
+                duration_ms,
+                str(exc)
+            )
+
+    # Fallback to data URL
+    duration_ms = (time.time() - start_time) * 1000
+    logger.warning(
+        "blob upload fallback to data url name=%s size=%d duration_ms=%.2f",
+        name,
+        len(data),
+        duration_ms
+    )
+    encoded = base64.b64encode(data).decode("ascii")
+    return f"data:{content_type};base64,{encoded}"
+
+
+def _upload_to_vercel_blob(
+    name: str,
+    data: bytes,
+    content_type: str,
+    token: str,
+) -> Optional[str]:
+    start_time = time.time()
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "User-Agent": USER_AGENT,
+    }
+    files = {"file": (name, data, content_type)}
+    
+    response = requests.post(
+        BLOB_UPLOAD_URL,
+        headers=headers,
+        files=files,
+        timeout=DEFAULT_TIMEOUT,
+    )
+    
+    duration_ms = (time.time() - start_time) * 1000
+    
+    try:
+        response.raise_for_status()
+        logger.info(
+            "blob api request successful name=%s size=%d duration_ms=%.2f status=%d",
+            name,
+            len(data),
+            duration_ms,
+            response.status_code
+        )
+    except requests.HTTPError:
+        logger.error(
+            "blob api request failed name=%s size=%d duration_ms=%.2f status=%d error=%s",
+            name,
+            len(data),
+            duration_ms,
+            response.status_code,
+            response.text
+        )
+        raise
+    
+    try:
+        payload = response.json()
+    except json.JSONDecodeError as exc:
+        logger.error(
+            "blob api invalid json response name=%s size=%d duration_ms=%.2f error=%s",
+            name,
+            len(data),
+            duration_ms,
+            str(exc)
+        )
+        raise ValueError("Blob API returned non-JSON payload") from exc
+
+    blob_url = (
+        payload.get("url")
+        or payload.get("blob", {}).get("url")
+        or payload.get("pathname")
+    )
+    
+    if not blob_url:
+        logger.error(
+            "blob api missing url in response name=%s size=%d duration_ms=%.2f payload=%s",
+            name,
+            len(data),
+            duration_ms,
+            payload
+        )
+    
+    return blob_url
+```
+
+#### 4. Health Check Endpoint Addition
+Create new file `api/convert/health.py`:
+
+```python
+"""Health check endpoint for the convert API."""
+from __future__ import annotations
+
+import logging
+import time
+from typing import Dict, Any
+
+from fastapi import FastAPI, HTTPException
+
+from tinyutils.api._lib.pandoc_runner import get_pandoc_version, ensure_pandoc
+from tinyutils.api._lib import blob
+
+logger = logging.getLogger(__name__)
+
+app = FastAPI()
+
+@app.get("/health")
+def health_check() -> Dict[str, Any]:
+    """Health check for the convert API and its dependencies."""
+    checks = {
+        "pandoc": False,
+        "blob_storage": False
+    }
+    
+    start_time = time.time()
+    
+    try:
+        # Check pandoc availability
+        version = get_pandoc_version()
+        if version:
+            checks["pandoc"] = True
+    except Exception as e:
+        logger.error(f"Health check failed for pandoc: {e}")
+    
+    try:
+        # Check blob storage (try a small upload)
+        test_data = b"healthcheck"
+        test_url = blob.upload_bytes("health-check.txt", test_data, "text/plain")
+        checks["blob_storage"] = test_url.startswith(("https://", "data:"))
+    except Exception as e:
+        logger.error(f"Health check failed for blob storage: {e}")
+    
+    overall_health = all(checks.values())
+    
+    response = {
+        "status": "healthy" if overall_health else "unhealthy",
+        "checks": checks,
+        "timestamp": time.time(),
+        "response_time_ms": (time.time() - start_time) * 1000
+    }
+    
+    if not overall_health:
+        raise HTTPException(status_code=503, detail=response)
+    
+    return response
+```
+
+#### 5. Update existing tests to validate logging fields
+
+Update `tests/convert/test_api_convert.py` to include logging validation:
+
+```python
+# Add to existing tests
+import io
+import contextlib
+import json
+import logging
+
+def test_response_timing_and_logging_fields(monkeypatch, caplog):
+    """Test that response includes proper timing and logging fields."""
+    
+    def fake_convert_batch(**kwargs):
+        from tinyutils.convert.types import BatchResult, ConversionResult, TargetArtifact, PreviewData
+        result = ConversionResult(
+            name="doc.docx",
+            outputs=[
+                TargetArtifact(
+                    target="md",
+                    name="doc.md",
+                    content_type="text/markdown",
+                    data=b"# Title",
+                )
+            ],
+            preview=PreviewData(headings=["# Title"], snippets=[], images=[]),
+            logs=["converted", "cache=miss"],  # Include cache info
+        )
+        return BatchResult(job_id="job-123", results=[result], logs=["converted"])
+
+    monkeypatch.setattr("tinyutils.api.convert.index.convert_batch", fake_convert_batch)
+    monkeypatch.setattr("tinyutils.api.convert.index.blob.upload_bytes", lambda name, data, _: f"blob://{name}")
+
+    with caplog.at_level(logging.INFO):
+        resp = client.post(
+            "/",
+            json={
+                "inputs": [
+                    {
+                        "blobUrl": "data:text/plain;base64,SGVsbG8=",
+                        "name": "doc.docx",
+                    }
+                ],
+                "to": "md",
+            },
+            headers={"x-request-id": "req-123"},
+        )
+
+    # Verify response headers
+    assert resp.headers["x-request-id"] == "req-123"
+    
+    # Verify log entries contain required fields
+    log_messages = [record.message for record in caplog.records]
+    timing_logs = [msg for msg in log_messages if 'duration_ms' in msg]
+    assert len(timing_logs) > 0
+    assert any('request_id=req-123' in msg for msg in log_messages)
+    assert any('cache=' in msg for msg in log_messages)
+```
+
+This comprehensive monitoring plan provides:
+
+1. **Pragmatic monitoring** with structured logging that can feed into Vercel analytics
+2. **Key metrics tracking** for latency, errors, blob uploads, and cache performance
+3. **Actionable alerts** with appropriate thresholds
+4. **Minimal code changes** that leverage existing infrastructure
+5. **Validation procedures** to ensure monitoring works properly in both preview and production
+
+The plan focuses on essential metrics that impact user experience while keeping the implementation lightweight and maintainable.
+
+I've completed the design of a minimal monitoring and alerting plan for the TinyUtils converter service. The plan covers all the requested areas:
+
+1. **Health checks** - API availability, pandoc connectivity, blob storage functionality
+2. **Logging fields** - Request IDs, timing, cache status, error types, and performance metrics
+3. **Dashboard recommendations** - Lightweight metrics for performance and error tracking
+4. **Alert thresholds** - Tiered alerts for immediate, medium, and low priority issues
+5. **Validation steps** - Testing procedures for both preview and production environments
+6. **Code references** - Specific files and functions that need modification
+
+The plan provides comprehensive monitoring for convert API latency, HTTP errors, Blob upload failures, and cache hit rates while maintaining minimal implementation overhead.

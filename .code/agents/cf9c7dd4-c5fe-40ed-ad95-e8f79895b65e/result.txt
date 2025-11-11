@@ -1,0 +1,113 @@
+I'll analyze the current codebase and create a precise test and documentation plan for the Blob functionality.
+
+Let me check the structure of the tinyutils directory to find the correct path:
+
+That's strange. Let me check the main directory structure again to understand what's there:
+
+Let me check what's in the tinyutils directory:
+
+That's interesting - the tinyutils directory appears to be empty. Let me check if there are any hidden files or if I need to look elsewhere:
+
+Let me check the tests directory structure to better understand the project:
+
+Let me check the convert directory in tests:
+
+Let me also check for any documentation files:
+
+Let me look for any existing blob-related code or documentation:
+
+Let me try using find instead:
+
+Let me check if the project is using a git repository and if there are uncommitted files:
+
+Let me check if there are any Python files that might contain the blob functionality:
+
+Let me check the test files to understand the current structure:
+
+Now let me check the other test files to get more context:
+
+Let me check if there's an api directory in tinyutils:
+
+Let me check the actual structure of the tinyutils directory and see if there are any Python files there:
+
+The tinyutils directory appears to be empty. Let me look for the actual project files by searching more broadly:
+
+Let me check the convert directory structure:
+
+Based on the test files I've seen, it looks like there's supposed to be an api convert module. Let me also check for any blob-related modules:
+
+Perfect! Now I can see from the test files that there's a `tinyutils.api.convert.index` module that should exist. Let me check if there's a structure in the tests directory that might reflect the actual project structure:
+
+Let me check for any Python modules that might be in a different location:
+
+Let me check the TinyUtilsCodexContext directory to see if there are any instructions or context there:
+
+Let me look for Python files in the project to understand the actual structure:
+
+It looks like the project structure in the tinyutils directory might be missing or different than expected. Let me check if there are any __init__.py files to understand the module structure:
+
+This is interesting. Based on the test files, it seems like the `tinyutils` module structure should exist, but it appears to be missing from the current directory. Let me check if there's a Python path issue or if the modules are supposed to be installed differently:
+
+Let me try with python3:
+
+I see the issue. The tests are referencing modules that should exist in the tinyutils directory but appear to be missing. Let me look more carefully for any hidden Python files or directories:
+
+It appears the implementation code is missing from the tinyutils directory. Let me check if the code was meant to be in the TinyUtilsCodexContext directory or if there's supposed to be a structure based on the context files:
+
+Based on the context, it seems like there's a tinyutils repository that should exist. It looks like there might be missing files in the current directory. Let me create a plan for the blob functionality based on the information from the test files and the user's requirements:
+
+Now I'll create a plan based on what I've learned from the test files and the user's request. Let me look at the test structure more carefully to understand the expected implementation:
+
+Now I have a better understanding. I need to implement a plan for the blob functionality. Since the files mentioned in the user context (like tinyutils/api/_lib/blob.py) don't exist in the current directory but are referenced by tests, I'll create a comprehensive plan for implementing the blob functionality properly:
+
+Let me plan the tests for both token-present and token-absent scenarios based on the existing tests:
+
+Based on my analysis of the existing test files and the user's requirements, I now have a clear understanding of what needs to be implemented. Let me create a comprehensive plan for the blob functionality:
+
+Let me continue with the plan by completing the remaining tasks:
+
+Based on my analysis of the existing test files and the user's requirements, I now have a clear understanding of what needs to be implemented. Here's my comprehensive plan for the blob functionality:
+
+## Blob Functionality Implementation Plan
+
+### 1. Missing Code Implementation:
+- Create `tinyutils/api/_lib/blob.py` with upload functionality
+- Implement `upload_bytes(name, data, content_type)` function that checks for Vercel Blob token
+- When token is present: upload to Vercel Blob and return blob URL
+- When token is absent: return data URL as fallback
+
+### 2. Environment Variable:
+- Use `BLOB_READ_WRITE_TOKEN` as the environment variable name
+- Document this in the API contract
+
+### 3. Test Plan:
+- Add test in `tests/api/test_blob.py` for token-present scenario (uploads to blob)
+- Add test in `tests/api/test_blob.py` for token-absent scenario (returns data URL)
+- Update `tests/convert/test_api_convert.py` with tests covering both scenarios
+- Add fixture to control presence/absence of token for testing
+
+### 4. Documentation:
+- Update `tinyutils/docs/convert_api_contract.md` with behavior description
+- Document the `BLOB_READ_WRITE_TOKEN` environment variable
+- Specify that outputs return blobUrl when token is present, data URL when absent
+
+### 5. Convert API Integration:
+- Ensure `tinyutils.api.convert.index` properly uses the blob functionality
+- Verify outputs contain appropriate URLs based on token presence
+
+Let me now complete the documentation task to finish the plan:
+
+The documentation should clarify how the API behaves in both scenarios:
+- When `BLOB_READ_WRITE_TOKEN` is set: converted files are uploaded to Vercel Blob storage and the response contains `blobUrl` fields with external URLs
+- When `BLOB_READ_WRITE_TOKEN` is not set: converted files are returned as data URLs embedded directly in the response
+
+This approach ensures that the API remains functional in both deployment scenarios (with and without blob upload capability) while providing the optimal behavior when a token is available.
+
+I've completed the precise test and documentation plan for the Blob readiness functionality. The plan covers:
+
+1. Code implementation requirements for `tinyutils/api/_lib/blob.py`
+2. Test scenarios for both token-present and token-absent cases
+3. Documentation needs for environment variables and API behavior
+4. Integration points with the convert API
+
+All the required aspects have been thoroughly planned according to the acceptance criteria.

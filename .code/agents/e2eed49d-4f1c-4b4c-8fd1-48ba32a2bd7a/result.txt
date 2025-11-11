@@ -1,0 +1,15 @@
+
+Here is a short checklist for Vercel Blob readiness:
+
+*   **Prerequisites:**
+    1.  Set `BLOB_READ_WRITE_TOKEN` with a valid Vercel Blob token in the deployment environment (e.g., Vercel project settings, `.env.production`, `.env.preview.local`).
+    2.  Verify `VERCEL_BLOB_API_URL` is correctly configured if not using the default.
+*   **Code/Test Updates:**
+    3.  Confirm `tinyutils/api/convert/index.py`'s `_serialize_outputs` correctly calls `blob.upload_bytes` for all output artifacts (main and media).
+    4.  Run existing unit/API tests (`tests/convert/*`, `tests/api/test_blob.py`) with a real or mocked Blob token.
+    5.  Add an integration test case to verify successful Blob upload and retrieval of a converted output.
+*   **Artifact Logging Steps:**
+    6.  Execute `scripts/smoke_convert_preview.mjs` against a deployed preview environment with `BLOB_READ_WRITE_TOKEN` configured.
+    7.  Capture the full response, including `blobUrl` for converted outputs, and store as evidence in `artifacts/convert/<date>/blob-smoke.log`.
+    8.  Verify that the `blobUrl`s returned in the response are valid and accessible.
+    9.  Document the process of setting up `BLOB_READ_WRITE_TOKEN` for preview deployments.

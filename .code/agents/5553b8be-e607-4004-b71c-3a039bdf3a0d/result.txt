@@ -1,0 +1,1043 @@
+[2025-11-08T13:01:01] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-review-convert-endpoint-service
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: auto
+--------
+[2025-11-08T13:01:01] User instructions:
+Context: Repo: /Users/cav/dev/TinyUtils. Diagnose runtime failures in tinyutils/api/convert/index.py and tinyutils/convert/service.py under Vercel (preview returns 500). Tests pass locally; preview hits FUNCTION_INVOCATION_FAILED for both smoke cases.
+
+Agent: Review convert endpoint/service code for failure paths causing 500 in serverless. Propose focused guards/fallbacks (pandoc absent, tmp permissions, strict validation) and a minimal patch plan. If low-risk, prepare a ready-to-apply diff.
+
+Files to consider: tinyutils/api/convert, tinyutils/convert, tinyutils/api/_lib, tests/convert
+[2025-11-08T13:01:04] OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-review-convert-endpoint-service
+model: gpt-5-codex
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: auto
+--------
+[2025-11-08T13:01:04] User instructions:
+Context: Repo: /Users/cav/dev/TinyUtils. Diagnose runtime failures in tinyutils/api/convert/index.py and tinyutils/convert/service.py under Vercel (preview returns 500). Tests pass locally; preview hits FUNCTION_INVOCATION_FAILED for both smoke cases.
+
+Agent: Review convert endpoint/service code for failure paths causing 500 in serverless. Propose focused guards/fallbacks (pandoc absent, tmp permissions, strict validation) and a minimal patch plan. If low-risk, prepare a ready-to-apply diff.
+
+Files to consider: tinyutils/api/convert, tinyutils/convert, tinyutils/api/_lib, tests/convert
+
+[2025-11-08T13:01:06] thinking
+
+**Checking read-only file access**
+[2025-11-08T13:01:07] exec bash -lc ls in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-review-convert-endpoint-service
+[2025-11-08T13:01:07] bash -lc ls succeeded in 110ms:
+PATH
+print1
+tests
+tinyutils
+TinyUtilsCodexContext
+[2025-11-08T13:01:07] tokens used: 6,711
+
+[2025-11-08T13:01:08] thinking
+
+**Inspecting tinyutils directory**
+[2025-11-08T13:01:09] exec bash -lc 'ls tinyutils' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-review-convert-endpoint-service
+[2025-11-08T13:01:09] bash -lc 'ls tinyutils' succeeded in 106ms:
+[2025-11-08T13:01:09] tokens used: 6,918
+
+[2025-11-08T13:01:11] thinking
+
+**Checking directory contents**
+[2025-11-08T13:01:11] exec bash -lc 'ls tinyutils/api' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-review-convert-endpoint-service
+[2025-11-08T13:01:11] bash -lc 'ls tinyutils/api' exited 1 in 108ms:
+ERROR
+ls: tinyutils/api: No such file or directory
+[2025-11-08T13:01:11] tokens used: 8,142
+
+[2025-11-08T13:01:13] thinking
+
+**Checking directory structure**
+[2025-11-08T13:01:13] exec bash -lc 'find . -maxdepth 2 -type d' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-review-convert-endpoint-service
+[2025-11-08T13:01:14] bash -lc 'find . -maxdepth 2 -type d' succeeded in 98ms:
+.
+./.code
+./.code/agents
+./tests
+./tests/__pycache__
+./tests/convert
+./TinyUtilsCodexContext
+./TinyUtilsCodexContext/finished
+./tinyutils
+[2025-11-08T13:01:14] tokens used: 8,352
+
+[2025-11-08T13:01:16] thinking
+
+**Investigating tinyutils directory contents**
+[2025-11-08T13:01:16] exec bash -lc 'find tinyutils -maxdepth 2 -type f' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-review-convert-endpoint-service
+[2025-11-08T13:01:16] bash -lc 'find tinyutils -maxdepth 2 -type f' succeeded in 108ms:
+[2025-11-08T13:01:16] tokens used: 8,924
+
+[2025-11-08T13:01:19] thinking
+
+**Investigating repository path and accessibility**
+[2025-11-08T13:01:19] exec bash -lc 'ls /Users/cav/dev' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-review-convert-endpoint-service
+[2025-11-08T13:01:19] bash -lc 'ls /Users/cav/dev' succeeded in 128ms:
+__pycache__
+12404074-DC76-45DA-AAF2-290FF5A59FA6.PNG
+3I_ATLAS_heliocentric_weekly.csv
+3IATLAS-astro-app-import
+3IATLAS-astro-app-import-docs-localized
+3IATLAS-astro-app-import.zip
+AdSkipperSafari
+arc
+Archive.zip
+astrobackup
+astrocore
+astrogold.txt
+atlas_ephemeris
+atlas_vectors_weekly.json
+atlas_vectors.json
+awakening.pdf
+build
+CGPTexport
+CGPTexport_better
+CGPTexport_split.zip
+[2025-11-08T13:01:19] tokens used: 9,715
+
+[2025-11-08T13:01:21] thinking
+
+**Checking repository path**
+[2025-11-08T13:01:22] exec bash -lc 'ls /Users/cav/dev/TinyUtils' in /Users/cav/.code/working/tinyutils/branches/code-code-gpt-5-codex-review-convert-endpoint-service
+[2025-11-08T13:01:22] bash -lc 'ls /Users/cav/dev/TinyUtils' succeeded in 104ms:
+code-agent-moonshot
+mcp_server_browser_use.log
+moonshot_client.py
+moonshot_config.json
+moonshot_setup_guide.md
+PATH
+print1
+tests
+tinyutils
+TinyUtilsCodexContext
+vercel_problem.log
+vercel_problems_nov_7.md
+[2025-11-08T13:01:22] tokens used: 10,664
+
+[2025-11-08T13:01:24] thinking
+
+**Preparing to inspect TinyUtils repo**
+[2025-11-08T13:01:27] exec bash -lc 'rg --files tinyutils | head' in /Users/cav/dev/TinyUtils
+[2025-11-08T13:01:27] bash -lc 'rg --files tinyutils | head' succeeded in 137ms:
+tinyutils/README.md
+tinyutils/sitemap.xml
+tinyutils/TESTING.md
+tinyutils/docs/chatgpt-convo-2025-10-28.md
+tinyutils/docs/convert_api_contract.md
+tinyutils/docs/BACKUP.md
+tinyutils/docs/AGENT_RUN_LOG.md
+tinyutils/guides/wayback-for-seo.html
+tinyutils/guides/index.html
+tinyutils/guides/fix-404s.html
+[2025-11-08T13:01:27] tokens used: 11,043
+
+[2025-11-08T13:01:29] thinking
+
+**Checking directory existence**
+[2025-11-08T13:01:30] exec bash -lc 'ls tinyutils/api' in /Users/cav/dev/TinyUtils
+[2025-11-08T13:01:30] bash -lc 'ls tinyutils/api' succeeded in 107ms:
+__init__.py
+__pycache__
+_lib
+check.js
+convert
+fence.js
+findreplace
+health.js
+metafetch.js
+sitemap-delta.js
+wayback-fixer.js
+[2025-11-08T13:01:30] tokens used: 11,361
+
+[2025-11-08T13:01:31] thinking
+
+**Reviewing conversion modules and tests**
+[2025-11-08T13:01:32] exec bash -lc "sed -n '1,200p' tinyutils/api/convert/index.py" in /Users/cav/dev/TinyUtils
+[2025-11-08T13:01:32] bash -lc "sed -n '1,200p' tinyutils/api/convert/index.py" succeeded in 104ms:
+"""Universal document converter endpoint backed by tinyutils.convert."""
+from __future__ import annotations
+
+import logging
+import os
+import sys
+from pathlib import Path
+from typing import List, Optional
+import uuid
+
+try:  # pragma: no cover - Pydantic v2
+    from pydantic import BaseModel, Field, ConfigDict, field_validator
+    _USE_PYDANTIC_V2 = True
+except ImportError:  # pragma: no cover - fallback to Pydantic v1
+    from pydantic import BaseModel, Field, validator
+    ConfigDict = None  # type: ignore
+    field_validator = None  # type: ignore
+    _USE_PYDANTIC_V2 = False
+
+from fastapi import FastAPI, Header, HTTPException, Response
+[2025-11-08T13:01:32] tokens used: 20,272
+
+[2025-11-08T13:01:33] thinking
+
+**Continuing to view rest of file**
+[2025-11-08T13:01:34] exec bash -lc "sed -n '200,400p' tinyutils/api/convert/index.py" in /Users/cav/dev/TinyUtils
+[2025-11-08T13:01:34] bash -lc "sed -n '200,400p' tinyutils/api/convert/index.py" succeeded in 105ms:
+        if result.preview:
+            return {
+                "headings": result.preview.headings,
+                "snippets": result.preview.snippets,
+                "images": result.preview.images,
+            }
+    return {"headings": [], "snippets": [], "images": []}
+
+
+def _serialize_errors(batch) -> List[dict]:
+    errors: List[dict] = []
+    for result in batch.results:
+        if result.error:
+            errors.append(
+                {
+                    "input": result.name,
+                    "message": result.error.message,
+                    "kind": result.error.kind,
+                }
+            )
+[2025-11-08T13:01:34] tokens used: 22,087
+
+[2025-11-08T13:01:36] thinking
+
+**Preparing service file with sed command**
+[2025-11-08T13:01:36] exec bash -lc "sed -n '1,200p' tinyutils/convert/service.py" in /Users/cav/dev/TinyUtils
+[2025-11-08T13:01:37] bash -lc "sed -n '1,200p' tinyutils/convert/service.py" succeeded in 109ms:
+"""Reusable converter service for TinyUtils APIs."""
+from __future__ import annotations
+
+import hashlib
+import html
+import json
+import os
+import threading
+import zipfile
+from collections import OrderedDict
+from pathlib import Path
+from typing import Any, Iterable, List, Optional, Sequence
+
+from tinyutils.api._lib import pandoc_runner
+from tinyutils.api._lib.manifests import build_snippets, collect_headings, media_manifest
+from tinyutils.api._lib.text_clean import normalise_markdown
+from tinyutils.api._lib.utils import ensure_within_limits, generate_job_id, job_workspace
+
+from .types import (
+    BatchResult,
+[2025-11-08T13:01:37] tokens used: 22,614
+[2025-11-08T13:01:39] exec bash -lc "sed -n '200,400p' tinyutils/convert/service.py" in /Users/cav/dev/TinyUtils
+[2025-11-08T13:01:39] bash -lc "sed -n '200,400p' tinyutils/convert/service.py" succeeded in 106ms:
+def _normalize_targets(targets: Optional[Sequence[str]]) -> List[str]:
+    if not targets:
+        return ["md"]
+    normalized: List[str] = []
+    seen = set()
+    for target in targets:
+        if target is None:
+            continue
+        slug = target.lower().strip()
+        if slug == "markdown":
+            slug = "md"
+        elif slug == "text":
+            slug = "txt"
+        if slug not in TARGET_EXTENSIONS:
+            raise ValueError(f"Unsupported target '{target}'")
+        if slug not in seen:
+            seen.add(slug)
+            normalized.append(slug)
+    return normalized or ["md"]
+
+[2025-11-08T13:01:39] tokens used: 24,453
+
+[2025-11-08T13:01:41] thinking
+
+**Finishing review**
+[2025-11-08T13:01:41] exec bash -lc "sed -n '400,800p' tinyutils/convert/service.py" in /Users/cav/dev/TinyUtils
+[2025-11-08T13:01:41] bash -lc "sed -n '400,800p' tinyutils/convert/service.py" succeeded in 104ms:
+        error=error,
+    )
+[2025-11-08T13:01:41] tokens used: 26,359
+
+[2025-11-08T13:01:44] thinking
+
+**Investigating serverless environment issues**
+[2025-11-08T13:01:44] exec bash -lc "sed -n '1,200p' tinyutils/api/_lib/utils.py" in /Users/cav/dev/TinyUtils
+[2025-11-08T13:01:44] bash -lc "sed -n '1,200p' tinyutils/api/_lib/utils.py" succeeded in 103ms:
+"""Shared utility helpers for TinyUtils Python backends."""
+from __future__ import annotations
+
+import json
+import logging
+import os
+import tempfile
+import uuid
+from contextlib import contextmanager
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, Iterator, List, Optional
+
+DEFAULT_MAX_FILE_MB = 100
+DEFAULT_MAX_BATCH_MB = 1024
+DEFAULT_PREVIEW_HEADINGS = 8
+DEFAULT_PREVIEW_SNIPPETS = 4
+DEFAULT_DIFF_TRUNCATE_KB = 256
+
+MAX_FILE_MB = int(os.getenv("MAX_FILE_MB", str(DEFAULT_MAX_FILE_MB)))
+[2025-11-08T13:01:44] tokens used: 26,632
+
+[2025-11-08T13:01:46] thinking
+
+**Preparing pandoc runner**
+[2025-11-08T13:01:47] exec bash -lc "sed -n '1,200p' tinyutils/api/_lib/pandoc_runner.py" in /Users/cav/dev/TinyUtils
+[2025-11-08T13:01:47] bash -lc "sed -n '1,200p' tinyutils/api/_lib/pandoc_runner.py" succeeded in 111ms:
+"""Pandoc runner utilities for conversions and Lua-filter passes."""
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Iterable, List, Optional, Tuple
+
+import re
+import sys
+
+try:  # pragma: no cover - optional dependency
+    import pypandoc  # type: ignore
+except ImportError:  # pragma: no cover - optional dependency
+    pypandoc = None
+
+
+def ensure_pandoc():
+    """Download and ensure pandoc is available in /tmp when not found."""
+    if pypandoc is None:
+        raise PandocError("pypandoc not installed")
+    import os
+[2025-11-08T13:01:47] tokens used: 42,066
+
+[2025-11-08T13:01:51] thinking
+
+**Analyzing pandoc download issues on serverless**
+[2025-11-08T13:01:52] exec bash -lc 'ls tests/convert' in /Users/cav/dev/TinyUtils
+[2025-11-08T13:01:52] bash -lc 'ls tests/convert' succeeded in 104ms:
+__pycache__
+test_api_convert.py
+test_service.py
+[2025-11-08T13:01:52] tokens used: 44,150
+
+[2025-11-08T13:01:53] thinking
+
+**Checking tests for clues**
+[2025-11-08T13:01:54] exec bash -lc "sed -n '1,200p' tests/convert/test_api_convert.py" in /Users/cav/dev/TinyUtils
+[2025-11-08T13:01:54] bash -lc "sed -n '1,200p' tests/convert/test_api_convert.py" succeeded in 110ms:
+"""Integration tests for the FastAPI converter endpoint."""
+from __future__ import annotations
+
+import pytest
+
+pytest.importorskip("httpx")
+
+from fastapi.testclient import TestClient
+
+from tinyutils.api.convert.index import app
+from tinyutils.convert.types import (
+    BatchResult,
+    ConversionError,
+    ConversionResult,
+    MediaArtifact,
+    PreviewData,
+    TargetArtifact,
+)
+
+
+[2025-11-08T13:01:54] tokens used: 44,413
+
+[2025-11-08T13:01:56] thinking
+
+**Preparing to add service tests**
+[2025-11-08T13:01:57] exec bash -lc "sed -n '1,200p' tests/convert/test_service.py" in /Users/cav/dev/TinyUtils
+[2025-11-08T13:01:57] bash -lc "sed -n '1,200p' tests/convert/test_service.py" succeeded in 103ms:
+"""Unit tests for tinyutils.convert.service."""
+from __future__ import annotations
+
+from pathlib import Path
+
+import pytest
+
+from tinyutils.convert import ConversionOptions, convert_batch, convert_one
+from tinyutils.convert.types import (
+    ConversionError,
+    ConversionResult,
+    InputPayload,
+    TargetArtifact,
+)
+
+
+@pytest.fixture(autouse=True)
+def clear_cache(monkeypatch):
+    import tinyutils.convert.service as service_module
+
+[2025-11-08T13:01:57] tokens used: 46,557
+
+[2025-11-08T13:02:00] thinking
+
+**Investigating runtime failure on Vercel**
+[2025-11-08T13:02:00] exec bash -lc "sed -n '1,200p' tinyutils/api/_lib/blob.py" in /Users/cav/dev/TinyUtils
+[2025-11-08T13:02:01] bash -lc "sed -n '1,200p' tinyutils/api/_lib/blob.py" succeeded in 110ms:
+"""Helpers for downloading inputs and uploading outputs."""
+from __future__ import annotations
+
+import base64
+import json
+import logging
+import os
+import re
+from pathlib import Path
+from typing import Optional, Tuple
+from urllib.parse import urlparse
+
+import requests
+
+DEFAULT_TIMEOUT = float(os.getenv("BLOB_DOWNLOAD_TIMEOUT", "30"))
+USER_AGENT = os.getenv("TINYUTILS_BLOB_UA", "tinyutils-backend/0.1")
+BLOB_UPLOAD_URL = os.getenv("VERCEL_BLOB_API_URL", "https://api.vercel.com/v2/blob/upload")
+
+logger = logging.getLogger(__name__)
+
+[2025-11-08T13:02:01] tokens used: 53,736
+
+[2025-11-08T13:02:06] thinking
+
+**Analyzing Vercel serverless constraints**
+[2025-11-08T13:02:07] exec bash -lc 'rg -n "requests" -g"requirements*.txt" -g"pyproject.toml"' in /Users/cav/dev/TinyUtils
+[2025-11-08T13:02:07] bash -lc 'rg -n "requests" -g"requirements*.txt" -g"pyproject.toml"' succeeded in 137ms:
+tinyutils/requirements.txt:4:requests==2.31.0
+[2025-11-08T13:02:07] tokens used: 55,240
+
+[2025-11-08T13:02:09] thinking
+
+**Checking requirements file**
+[2025-11-08T13:02:09] exec bash -lc 'cat tinyutils/requirements.txt' in /Users/cav/dev/TinyUtils
+[2025-11-08T13:02:09] bash -lc 'cat tinyutils/requirements.txt' succeeded in 108ms:
+pypandoc-binary==1.11
+regex==2023.10.3
+chardet==5.2.0
+requests==2.31.0
+fastapi==0.104.1
+pydantic==2.5.0
+uvicorn==0.24.0.post1
+[2025-11-08T13:02:09] tokens used: 56,059
+
+[2025-11-08T13:02:13] thinking
+
+**Investigating pandoc inclusion and Vercel failure**
+[2025-11-08T13:02:14] exec bash -lc 'cat /Users/cav/dev/TinyUtils/vercel_problem.log' in /Users/cav/dev/TinyUtils
+[2025-11-08T13:02:14] bash -lc 'cat /Users/cav/dev/TinyUtils/vercel_problem.log' succeeded in 101ms:
+[2025-11-08T13:02:14] tokens used: 57,161
+
+[2025-11-08T13:02:16] thinking
+
+**Noticing another markdown file**
+[2025-11-08T13:02:16] exec bash -lc "sed -n '1,160p' /Users/cav/dev/TinyUtils/vercel_problems_nov_7.md" in /Users/cav/dev/TinyUtils
+[2025-11-08T13:02:16] bash -lc "sed -n '1,160p' /Users/cav/dev/TinyUtils/vercel_problems_nov_7.md" succeeded in 105ms:
+from the agent:
+
+
+
+ Sourced tinyutils/.env.preview, exported the identity overrides, and reran the hardened deploy script with extended
+   timeouts, but Vercel still rejected the deploy:
+     Artifact: tinyutils/artifacts/convert/20251107/smoke-preview-20251107T131816
+     deploy_status.txt shows status=vercel_deploy_failed with preview_url=n/a.
+     vercel_deploy_attempt1.log again reports: “Git author cavingraves@gmail.com must have access to the team Cavin's
+   projects on Vercel to create deployments.”
+
+   - Because the CLI blocks immediately at the author check, no preview URL was produced; smoke-only can’t run until
+      someone with Cavin’s team access (or a properly scoped token) runs the deploy. Options:
+     1.  Add cavingraves@gmail.com to the Vercel team (or supply an author identity that already has access).
+     2.  Provide a Vercel token/scope tied to a permitted identity; set VERCEL_TOKEN/VERCEL_SCOPE and rerun.
+     3.  If neither is possible quickly, open a Vercel support ticket attaching the artifact logs above so they can
+        rebind the account.
+
+   - Agents:
+     •  Env/Vercel precheck hit an upstream limit before reporting (no repo impact).
+[2025-11-08T13:02:16] tokens used: 57,342
+
+[2025-11-08T13:02:24] thinking
+
+**Analyzing serverless 500 error causes**
+
+I’m digging into the tinyutils/api/convert code and environment to find why the preview deployment fails with 500 errors while local tests pass. I want to pinpoint any serverless-specific pitfalls like disk limits, download issues, or unhandled exceptions impacting function invocation under Vercel. I’m also planning to review key files for failure paths and prepare a minimal patch addressing common runtime pitfalls.
+[2025-11-08T13:02:25] exec bash -lc "sed -n '1,200p' tinyutils/convert/__init__.py" in /Users/cav/dev/TinyUtils
+[2025-11-08T13:02:25] bash -lc "sed -n '1,200p' tinyutils/convert/__init__.py" succeeded in 111ms:
+"""Public exports for the TinyUtils converter library."""
+from .service import ConversionOptions, convert_batch, convert_one
+from .types import (
+    BatchResult,
+    ConversionError,
+    ConversionResult,
+    InputPayload,
+    MediaArtifact,
+    PreviewData,
+    TargetArtifact,
+)
+
+__all__ = [
+    "BatchResult",
+    "ConversionError",
+    "ConversionOptions",
+    "ConversionResult",
+    "InputPayload",
+    "MediaArtifact",
+    "PreviewData",
+[2025-11-08T13:02:25] tokens used: 58,561
+
+[2025-11-08T13:02:27] thinking
+
+**Inspecting type structures**
+[2025-11-08T13:02:28] exec bash -lc "sed -n '1,200p' tinyutils/convert/types.py" in /Users/cav/dev/TinyUtils
+[2025-11-08T13:02:28] bash -lc "sed -n '1,200p' tinyutils/convert/types.py" succeeded in 129ms:
+"""Type definitions for the TinyUtils converter library."""
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import List, Optional, Sequence
+
+
+SUPPORTED_TARGETS: Sequence[str] = ("md", "html", "txt")
+
+
+@dataclass(slots=True)
+class ConversionOptions:
+    """Options that align with the public converter API."""
+
+    accept_tracked_changes: bool = True
+    extract_media: bool = False
+    remove_zero_width: bool = True
+
+
+@dataclass(slots=True)
+[2025-11-08T13:02:28] tokens used: 58,871
+
+[2025-11-08T13:02:36] thinking
+
+**Analyzing serverless conversion failure causes**
+
+I'm examining the convert API for potential unhandled issues causing serverless 500 errors, especially around `pypandoc` and network-dependent `ensure_pandoc` downloads on Vercel. The Vercel environment’s ephemeral /tmp, possible network blocks, and redundant downloads might be triggering failures, so I plan to search logs for `FUNCTION_INVOCATION_FAILED` to gather clues.
+[2025-11-08T13:02:37] exec bash -lc 'rg -n "FUNCTION_INVOCATION_FAILED" -R' in /Users/cav/dev/TinyUtils
+[2025-11-08T13:02:37] bash -lc 'rg -n "FUNCTION_INVOCATION_FAILED" -R' exited 2 in 101ms:
+ERROR
+rg: unrecognized flag -R
+[2025-11-08T13:02:37] tokens used: 60,236
+
+[2025-11-08T13:02:40] thinking
+
+**Trying ripgrep command variations**
+[2025-11-08T13:02:41] exec bash -lc 'rg -n "FUNCTION_INVOCATION_FAILED"' in /Users/cav/dev/TinyUtils
+[2025-11-08T13:02:41] bash -lc 'rg -n "FUNCTION_INVOCATION_FAILED"' succeeded in 158ms:
+tinyutils/docs/AGENT_RUN_LOG.md:11:  - Both md/md+txt and md/html cases returned HTTP 500 FUNCTION_INVOCATION_FAILED; see resp_* and smoke.log for traces.
+tinyutils/artifacts/convert/20251108/preview-smoke-20251108T123100/resp_md_md_txt.json:3:FUNCTION_INVOCATION_FAILED
+tinyutils/artifacts/convert/20251108/preview-smoke-20251108T123100/resp_md_html.json:3:FUNCTION_INVOCATION_FAILED
+tinyutils/artifacts/convert/20251108/smoke-preview-20251108T010413/resp_md_md_txt.json:3:FUNCTION_INVOCATION_FAILED
+tinyutils/artifacts/convert/20251108/smoke-preview-20251108T011632/resp_md_md_txt.json:3:FUNCTION_INVOCATION_FAILED
+tinyutils/artifacts/convert/20251108/smoke-preview-20251108T010413/resp_md_html.json:3:FUNCTION_INVOCATION_FAILED
+tinyutils/artifacts/convert/20251108/smoke-preview-20251108T011632/resp_md_html.json:3:FUNCTION_INVOCATION_FAILED
+tinyutils/artifacts/convert/20251108/smoke-preview-20251108T010544/resp_md_md_txt.json:3:FUNCTION_INVOCATION_FAILED
+tinyutils/artifacts/convert/20251107/smoke-preview-20251107T214204/resp_md_md_txt.json:3:FUNCTION_INVOCATION_FAILED
+tinyutils/artifacts/convert/20251108/smoke-preview-20251108T010544/resp_md_html.json:3:FUNCTION_INVOCATION_FAILED
+tinyutils/artifacts/convert/20251107/smoke-preview-20251107T214204/resp_md_html.json:3:FUNCTION_INVOCATION_FAILED
+tinyutils/artifacts/convert/20251107/smoke-preview-20251107T214954/resp_md_md_txt.json:3:FUNCTION_INVOCATION_FAILED
+tinyutils/artifacts/convert/20251107/smoke-preview-20251107T214954/resp_md_html.json:3:FUNCTION_INVOCATION_FAILED
+tinyutils/artifacts/convert/20251107/smoke-preview-20251107T214615/resp_md_md_txt.json:3:FUNCTION_INVOCATION_FAILED
+tinyutils/artifacts/convert/20251107/smoke-preview-20251107T214615/resp_md_html.json:3:FUNCTION_INVOCATION_FAILED
+tinyutils/artifacts/convert/20251107/smoke-preview-20251107T215756/resp_md_md_txt.json:3:FUNCTION_INVOCATION_FAILED
+tinyutils/artifacts/convert/20251107/smoke-preview-20251107T215236/resp_md_md_txt.json:3:FUNCTION_INVOCATION_FAILED
+tinyutils/artifacts/convert/20251107/smoke-preview-20251107T215236/resp_md_html.json:3:FUNCTION_INVOCATION_FAILED
+tinyutils/artifacts/convert/20251107/smoke-preview-20251107T215546/resp_md_md_txt.json:3:FUNCTION_INVOCATION_FAILED
+tinyutils/artifacts/convert/20251107/smoke-preview-20251107T215756/resp_md_html.json:3:FUNCTION_INVOCATION_FAILED
+[2025-11-08T13:02:41] tokens used: 60,420
+
+[2025-11-08T13:02:43] thinking
+
+**Checking agent run logs**
+[2025-11-08T13:02:51] exec bash -lc "sed -n '1,160p' tinyutils/docs/AGENT_RUN_LOG.md" in /Users/cav/dev/TinyUtils
+[2025-11-08T13:02:51] bash -lc "sed -n '1,160p' tinyutils/docs/AGENT_RUN_LOG.md" succeeded in 118ms:
+# Agent Run Log
+
+## Sessions
+
+### 2025-11-08 12:49 CET - manual - smoke_convert_preview
+- **Mode:** manual
+- **Branch:** `feature/universal-converter-backend`
+- **CWD:** tinyutils
+- **Summary:**
+  - Ran scripts/smoke_convert_preview.mjs against https://tinyutils-dond63lpw-cavins-projects-7b0e00bb.vercel.app using x-vercel-protection-bypass + preview cookie headers.
+  - Both md/md+txt and md/html cases returned HTTP 500 FUNCTION_INVOCATION_FAILED; see resp_* and smoke.log for traces.
+- **Evidence:** artifacts/convert/20251108/preview-smoke-20251108T123100/
+- **Follow-ups:**
+  - Investigate convert API failure on preview (Vercel logs) and rerun smoke once fixed.
+
+### 2025-11-08 16:12 CET - manual - converter backend wrap-up
+- **Mode:** manual
+- **Branch:** `feature/universal-converter-backend`
+- **CWD:** repo root
+- **Summary:**
+[2025-11-08T13:02:51] tokens used: 61,376
+
+[2025-11-08T13:02:53] thinking
+
+**Checking response artifact files**
+[2025-11-08T13:02:54] exec bash -lc 'cat tinyutils/artifacts/convert/20251108/preview-smoke-20251108T123100/resp_md_md_txt.json' in /Users/cav/dev/TinyUtils
+[2025-11-08T13:02:54] bash -lc 'cat tinyutils/artifacts/convert/20251108/preview-smoke-20251108T123100/resp_md_md_txt.json' succeeded in 125ms:
+A server error has occurred
+
+FUNCTION_INVOCATION_FAILED
+
+cdg1::g9x54-1762601461438-2fdd66a1d817
+[2025-11-08T13:02:54] tokens used: 64,253
+
+[2025-11-08T13:02:56] thinking
+
+**Checking for more logs**
+[2025-11-08T13:02:57] exec bash -lc "sed -n '1,200p' tinyutils/artifacts/convert/20251108/preview-smoke-20251108T123100/smoke.log" in /Users/cav/dev/TinyUtils
+[2025-11-08T13:02:57] bash -lc "sed -n '1,200p' tinyutils/artifacts/convert/20251108/preview-smoke-20251108T123100/smoke.log" succeeded in 114ms:
+smoke_convert_preview: md_md_txt failed with 500
+smoke_convert_preview: md_html failed with 500
+smoke_convert_preview: artifacts stored in artifacts/convert/20251108/preview-smoke-20251108T123100
+[2025-11-08T13:02:57] tokens used: 65,371
+
+[2025-11-08T13:03:00] thinking
+
+**Searching logs for errors**
+[2025-11-08T13:03:01] exec bash -lc 'rg -n "Traceback" -n tinyutils/artifacts -g"*.log"' in /Users/cav/dev/TinyUtils
+[2025-11-08T13:03:01] bash -lc 'rg -n "Traceback" -n tinyutils/artifacts -g"*.log"' exited 1 in 127ms:
+ERROR
+[2025-11-08T13:03:01] tokens used: 66,703
+
+[2025-11-08T13:03:35] thinking
+
+**Analyzing causes of conversion service 500 errors**
+
+I’m reasoning through the potential causes of HTTP 500 errors in the conversion service on Vercel, focusing on unhandled exceptions from `ensure_pandoc` due to network failures, stray top-level calls to `ensure_pandoc` outside try/catch in `convert/service.py`, and permission issues with temporary directories. I’m outlining a patch plan that includes removing the unguarded `ensure_pandoc` call, wrapping network calls in `pandoc_runner` to convert exceptions into controlled `PandocError`s, and improving error handling around temporary directory creation and job size limits. I’ll reference specific files and lines for precise fixes.
+[2025-11-08T13:03:37] exec bash -lc "nl -ba tinyutils/convert/service.py | sed -n '1,120p'" in /Users/cav/dev/TinyUtils
+[2025-11-08T13:03:37] bash -lc "nl -ba tinyutils/convert/service.py | sed -n '1,120p'" succeeded in 105ms:
+     1	"""Reusable converter service for TinyUtils APIs."""
+     2	from __future__ import annotations
+     3	
+     4	import hashlib
+     5	import html
+     6	import json
+     7	import os
+     8	import threading
+     9	import zipfile
+    10	from collections import OrderedDict
+    11	from pathlib import Path
+    12	from typing import Any, Iterable, List, Optional, Sequence
+    13	
+    14	from tinyutils.api._lib import pandoc_runner
+    15	from tinyutils.api._lib.manifests import build_snippets, collect_headings, media_manifest
+    16	from tinyutils.api._lib.text_clean import normalise_markdown
+    17	from tinyutils.api._lib.utils import ensure_within_limits, generate_job_id, job_workspace
+    18	
+    19	from .types import (
+    20	    BatchResult,
+[2025-11-08T13:03:37] tokens used: 69,489
+
+[2025-11-08T13:03:40] thinking
+
+**Preparing line references for ensure_pandoc**
+[2025-11-08T13:03:40] exec bash -lc "nl -ba tinyutils/api/_lib/pandoc_runner.py | sed -n '1,200p'" in /Users/cav/dev/TinyUtils
+[2025-11-08T13:03:40] bash -lc "nl -ba tinyutils/api/_lib/pandoc_runner.py | sed -n '1,200p'" succeeded in 103ms:
+     1	"""Pandoc runner utilities for conversions and Lua-filter passes."""
+     2	from __future__ import annotations
+     3	
+     4	from pathlib import Path
+     5	from typing import Iterable, List, Optional, Tuple
+     6	
+     7	import re
+     8	import sys
+     9	
+    10	try:  # pragma: no cover - optional dependency
+    11	    import pypandoc  # type: ignore
+    12	except ImportError:  # pragma: no cover - optional dependency
+    13	    pypandoc = None
+    14	
+    15	
+    16	def ensure_pandoc():
+    17	    """Download and ensure pandoc is available in /tmp when not found."""
+    18	    if pypandoc is None:
+    19	        raise PandocError("pypandoc not installed")
+    20	    import os
+[2025-11-08T13:03:40] tokens used: 71,176
+
+[2025-11-08T13:03:42] thinking
+
+**Previewing convert endpoint code**
+[2025-11-08T13:03:43] exec bash -lc "nl -ba tinyutils/api/convert/index.py | sed -n '1,200p'" in /Users/cav/dev/TinyUtils
+[2025-11-08T13:03:43] bash -lc "nl -ba tinyutils/api/convert/index.py | sed -n '1,200p'" succeeded in 125ms:
+     1	"""Universal document converter endpoint backed by tinyutils.convert."""
+     2	from __future__ import annotations
+     3	
+     4	import logging
+     5	import os
+     6	import sys
+     7	from pathlib import Path
+     8	from typing import List, Optional
+     9	import uuid
+    10	
+    11	try:  # pragma: no cover - Pydantic v2
+    12	    from pydantic import BaseModel, Field, ConfigDict, field_validator
+    13	    _USE_PYDANTIC_V2 = True
+    14	except ImportError:  # pragma: no cover - fallback to Pydantic v1
+    15	    from pydantic import BaseModel, Field, validator
+    16	    ConfigDict = None  # type: ignore
+    17	    field_validator = None  # type: ignore
+    18	    _USE_PYDANTIC_V2 = False
+    19	
+    20	from fastapi import FastAPI, Header, HTTPException, Response
+[2025-11-08T13:03:43] tokens used: 74,354
+
+[2025-11-08T13:03:56] thinking
+
+**Analyzing error handling and patch planning**
+
+I'm gathering details on converting uncaught `JobTooLargeError` into HTTP 413 and guarding temporary file workspace creation against permission errors with HTTP 500 responses. I’m mapping out coordinated fixes across service and API layers to improve error conversion, fallback logic, and testing, while also considering environment constraints and memory impact of downloads. Next, I’ll draft a detailed diff proposal for these improvements.
+[2025-11-08T13:03:57] exec bash -lc 'rg -n "pandoc" -R tinyutils/artifacts | head' in /Users/cav/dev/TinyUtils
+[2025-11-08T13:03:57] bash -lc 'rg -n "pandoc" -R tinyutils/artifacts | head' succeeded in 99ms:
+[2025-11-08T13:03:57] tokens used: 77,746
+
+[2025-11-08T13:04:00] thinking
+
+**Troubleshooting ripgrep flags**
+[2025-11-08T13:04:01] exec bash -lc 'rg -n "pandoc" tinyutils/artifacts | head' in /Users/cav/dev/TinyUtils
+[2025-11-08T13:04:02] bash -lc 'rg -n "pandoc" tinyutils/artifacts | head' succeeded in 117ms:
+tinyutils/artifacts/convert/20251107/smoke-local-20251107T034305/resp_md_html.json:1:{"jobId":"cccb04efe94348e8b9db181042393a8e","toolVersions":{"pandoc":"3.7.0.2"},"outputs":[{"name":"hello.html","size":24,"blobUrl":"data:text/html; charset=utf-8;base64,PHA+SGVsbG8gVGlueVV0aWxzITwvcD4K","target":"html"}],"preview":{"headings":[],"snippets":[{"before":"Hello TinyUtils!\n","after":"Hello TinyUtils!"}],"images":[]},"logs":["job_id=cccb04efe94348e8b9db181042393a8e","inputs=1","targets=html","hello.md:targets=html","hello.md:input_bytes=16","hello.md:cleanup_stats={\"nbsp_replaced\": 0, \"softbreaks_replaced\": 0, \"zero_width_removed\": 0}"],"errors":[]}
+tinyutils/artifacts/convert/20251107/smoke-local-20251107T034305/resp_md_txt.json:1:{"jobId":"5c388fb2e1254da9841eea0b0942f63b","toolVersions":{"pandoc":"3.7.0.2"},"outputs":[{"name":"hello.md","size":16,"blobUrl":"data:text/markdown; charset=utf-8;base64,SGVsbG8gVGlueVV0aWxzIQ==","target":"md"},{"name":"hello.txt","size":17,"blobUrl":"data:text/plain; charset=utf-8;base64,SGVsbG8gVGlueVV0aWxzIQo=","target":"txt"}],"preview":{"headings":[],"snippets":[{"before":"Hello TinyUtils!\n","after":"Hello TinyUtils!"}],"images":[]},"logs":["job_id=5c388fb2e1254da9841eea0b0942f63b","inputs=1","targets=md,txt","hello.md:targets=md,txt","hello.md:input_bytes=16","hello.md:cleanup_stats={\"nbsp_replaced\": 0, \"softbreaks_replaced\": 0, \"zero_width_removed\": 0}"],"errors":[]}
+tinyutils/artifacts/convert/20251107/smoke-local-20251107T034352/resp_md_md_txt.json:1:{"jobId":"0899037b9b714d678ad9c4122830eeee","toolVersions":{"pandoc":"3.7.0.2"},"outputs":[{"name":"hello.md","size":16,"blobUrl":"data:text/markdown; charset=utf-8;base64,SGVsbG8gVGlueVV0aWxzIQ==","target":"md"},{"name":"hello.txt","size":17,"blobUrl":"data:text/plain; charset=utf-8;base64,SGVsbG8gVGlueVV0aWxzIQo=","target":"txt"}],"preview":{"headings":[],"snippets":[{"before":"Hello TinyUtils!\n","after":"Hello TinyUtils!"}],"images":[]},"logs":["job_id=0899037b9b714d678ad9c4122830eeee","inputs=1","targets=md,txt","hello.md:targets=md,txt","hello.md:input_bytes=16","hello.md:cleanup_stats={\"nbsp_replaced\": 0, \"softbreaks_replaced\": 0, \"zero_width_removed\": 0}"],"errors":[]}
+tinyutils/artifacts/convert/20251107/smoke-local-20251107T034352/resp_md_html.json:1:{"jobId":"02e5361532ce4ed79c51728e81f664f6","toolVersions":{"pandoc":"3.7.0.2"},"outputs":[{"name":"hello.html","size":24,"blobUrl":"data:text/html; charset=utf-8;base64,PHA+SGVsbG8gVGlueVV0aWxzITwvcD4K","target":"html"}],"preview":{"headings":[],"snippets":[{"before":"Hello TinyUtils!\n","after":"Hello TinyUtils!"}],"images":[]},"logs":["job_id=02e5361532ce4ed79c51728e81f664f6","inputs=1","targets=html","hello.md:targets=html","hello.md:input_bytes=16","hello.md:cleanup_stats={\"nbsp_replaced\": 0, \"softbreaks_replaced\": 0, \"zero_width_removed\": 0}"],"errors":[]}
+[2025-11-08T13:04:02] tokens used: 77,929
+
+[2025-11-08T13:04:57] thinking
+
+**Summarizing diagnosis and patch plan**
+**Detailing pandoc error wrapping and error handling improvements**
+
+This chunk outlines wrapping the pandoc download and installation steps inside `ensure_pandoc()` with precise exception handling to convert all network and file errors into `PandocError`. It also plans to update the convert API to catch `JobTooLargeError` and `OSError` properly, returning HTTP 413 or descriptive 500 errors. Additionally, new tests will verify these error pathways and fallback behaviors. I’m preparing a coherent patch plan with diffs modifying `convert/service.py`, `pandoc_runner.py`, and `convert/index.py` plus test additions to demonstrate these improvements.
+[2025-11-08T13:05:34] codex
+**Detailing pandoc error wrapping and error handling improvements**
+
+This chunk outlines wrapping the pandoc download and installation steps inside `ensure_pandoc()` with precise exception handling to convert all network and file errors into `PandocError`. It also plans to update the convert API to catch `JobTooLargeError` and `OSError` properly, returning HTTP 413 or descriptive 500 errors. Additionally, new tests will verify these error pathways and fallback behaviors. I’m preparing a coherent patch plan with diffs modifying `convert/service.py`, `pandoc_runner.py`, and `convert/index.py` plus test additions to demonstrate these improvements.
+[2025-11-08T13:05:35] exec bash -lc "nl -ba tinyutils/api/_lib/utils.py | sed -n '20,120p'" in /Users/cav/dev/TinyUtils
+[2025-11-08T13:05:35] bash -lc "nl -ba tinyutils/api/_lib/utils.py | sed -n '20,120p'" succeeded in 138ms:
+    20	MAX_FILE_MB = int(os.getenv("MAX_FILE_MB", str(DEFAULT_MAX_FILE_MB)))
+    21	MAX_BATCH_MB = int(os.getenv("MAX_BATCH_MB", str(DEFAULT_MAX_BATCH_MB)))
+    22	PREVIEW_HEADINGS_N = int(
+    23	    os.getenv("PREVIEW_HEADINGS_N", str(DEFAULT_PREVIEW_HEADINGS))
+    24	)
+    25	PREVIEW_SNIPPETS_M = int(
+    26	    os.getenv("PREVIEW_SNIPPETS_M", str(DEFAULT_PREVIEW_SNIPPETS))
+    27	)
+    28	DIFF_TRUNCATE_KB = int(
+    29	    os.getenv("DIFF_TRUNCATE_KB", str(DEFAULT_DIFF_TRUNCATE_KB))
+    30	)
+    31	
+    32	LOGGER_NAME = "tinyutils.python"
+    33	
+    34	
+    35	class JobTooLargeError(Exception):
+    36	    """Raised when a file or batch exceeds configured limits."""
+    37	
+    38	
+    39	@dataclass
+[2025-11-08T13:05:35] tokens used: 87,911
+
+[2025-11-08T13:05:42] thinking
+
+**Organizing final report structure**
+[2025-11-08T13:05:42] codex
+
+**Diagnosis**
+- Every preview failure shows `FUNCTION_INVOCATION_FAILED` (see `tinyutils/docs/AGENT_RUN_LOG.md:8`) which means the lambda crashed before FastAPI could format an error response. The only unhandled path early in a request is the eager `ensure_pandoc()` call at the top of `convert_one` (`tinyutils/convert/service.py:46-88`). On Vercel that call tries to download a 140 MB tarball from GitHub on cold start (`tinyutils/api/_lib/pandoc_runner.py:16-78`). Network timeouts, tmp quota issues, or blocked outbound traffic raise `requests`/`OSError` exceptions that are **not** wrapped in `PandocError`, so the general `try/except` later never runs and the exception bubbles up to FastAPI as a 500. Local tests pass because pandoc is already present so the eager call never raises.
+- When `_download_input` enforces limits via `ensure_within_limits` it raises `JobTooLargeError` (`tinyutils/api/_lib/utils.py:35-80`). The API layer only handles `blob.DownloadError` and turns every other exception (including `JobTooLargeError` or `PermissionError` creating the temp workspace) into a 500 (`tinyutils/api/convert/index.py:94-125`). In a size spike or a `/tmp` permission issue the preview will fail indistinguishably from a server bug, making smoke triage painful.
+- Because `pandoc_runner.ensure_pandoc` does not wrap download/extract failures, even after removing the eager call any transient network issue will still raise a raw `requests.RequestException` and skip the markdown fallback path. This keeps the converter brittle in exactly the environment we are targeting (serverless).
+
+**Patch Plan**
+1. `tinyutils/convert/service.py` – remove the direct `ensure_pandoc()` call near the top of `convert_one` so that all pandoc provisioning is covered by the existing guarded block. No behaviour change when pandoc is available; when it is not, the converter will drop into `_fallback_conversion` instead of crashing the request.
+2. `tinyutils/api/_lib/pandoc_runner.py` – wrap the download/extract logic in `try/except` blocks that re-raise every `requests.RequestException`, `tarfile.TarError`, or `OSError` as `PandocError`. Add a modest download timeout so cold starts fail fast. With this in place any provisioning issue is converted into the same error type `convert_one` already knows how to degrade.
+3. `tinyutils/api/convert/index.py` – import `JobTooLargeError` and add dedicated handlers both around `_download_payloads` and around `convert_batch`. Return `413 Payload Too Large` when the size guard triggers, and emit a clearer `500 Temporary storage unavailable` if `/tmp` cannot be created. This directly addresses the “strict validation / tmp permissions” guard-rail request.
+4. Tests – extend `tests/convert/test_service.py` with a regression that forces `pandoc_runner.ensure_pandoc` to raise and asserts that we fall back to passthrough output instead of crashing. Extend `tests/convert/test_api_convert.py` with two FastAPI tests that prove we now return 413 when `_download_payloads` or `convert_batch` surfaces `JobTooLargeError`.
+
+**Ready-to-Apply Diff**
+```diff
+diff --git a/tinyutils/convert/service.py b/tinyutils/convert/service.py
+@@
+-def convert_one(
+-
+-    *,
+-    input_bytes: bytes,
+-    name: str,
+-    targets: Optional[Sequence[str]] = None,
+-    from_format: Optional[str] = None,
+-    options: Optional[ConversionOptions] = None,
+-) -> ConversionResult:
+-    """Convert a single payload into the requested textual outputs."""
+-    from tinyutils.api._lib.pandoc_runner import ensure_pandoc
+-    ensure_pandoc()
+-
+-
++def convert_one(
++
++    *,
++    input_bytes: bytes,
++    name: str,
++    targets: Optional[Sequence[str]] = None,
++    from_format: Optional[str] = None,
++    options: Optional[ConversionOptions] = None,
++) -> ConversionResult:
++    """Convert a single payload into the requested textual outputs."""
++
++
+     opts = options or ConversionOptions()
+diff --git a/tinyutils/api/_lib/pandoc_runner.py b/tinyutils/api/_lib/pandoc_runner.py
+@@
+ def ensure_pandoc():
+     """Download and ensure pandoc is available in /tmp when not found."""
+     if pypandoc is None:
+         raise PandocError("pypandoc not installed")
+-    import os
+-    import stat
+-    import tempfile
+-    import requests
+-    
++    import os
++    import stat
++    import tempfile
++    import tarfile
++    import requests
++
++    timeout = float(os.getenv("PANDOC_DOWNLOAD_TIMEOUT", "45"))
++
+     # Check if pandoc is already available via pypandoc
+     try:
+         if hasattr(pypandoc, "get_pandoc_path"):
+-            try:
+-                pypandoc.get_pandoc_path()
+-                return  # Pandoc is already available
+-            except:
+-                pass
+-    except ImportError:
+-        pass
+-    
++            try:
++                pypandoc.get_pandoc_path()
++                return  # Pandoc is already available
++            except OSError:
++                pass
++    except ImportError:
++        pass
++
+     # Define the path where we'll put pandoc
+     pandoc_tmp_dir = os.path.join(tempfile.gettempdir(), "tinyutils-pandoc")
+     os.makedirs(pandoc_tmp_dir, exist_ok=True)
+     
+     pandoc_executable_path = os.path.join(pandoc_tmp_dir, "pandoc")
+@@
+-    if not os.path.exists(pandoc_executable_path) or not os.access(pandoc_executable_path, os.X_OK):
+-        print(f"Downloading pandoc to {pandoc_executable_path}", file=sys.stderr)
+-        # Download Linux pandoc binary
+-        url = "https://github.com/jgm/pandoc/releases/download/3.1.11.1/pandoc-3.1.11.1-linux-amd64.tar.gz"
+-        response = requests.get(url)
+-        response.raise_for_status()
+-        
+-        # Save the tar.gz file
+-        tar_path = os.path.join(pandoc_tmp_dir, "pandoc.tar.gz")
+-        with open(tar_path, "wb") as f:
+-            f.write(response.content)
+-        
+-        # Extract the pandoc binary
+-        import tarfile
+-        with tarfile.open(tar_path, "r:gz") as tar:
+-            import os
+-            def is_pandoc_member(member):
+-                return "pandoc" in os.path.basename(member.name) and not member.name.endswith(("/", ".so", ".man"))
+-            members = [m for m in tar.getmembers() if is_pandoc_member(m)]
+-            for member in members:
+-                # Extract the pandoc binary from the bin directory
+-                tar.extract(member, path=pandoc_tmp_dir)
+-                member_path = os.path.join(pandoc_tmp_dir, member.name)
+-                if os.path.isfile(member_path) and "pandoc" in os.path.basename(member_path):
+-                    # Move to our desired location and make executable
+-                    os.rename(member_path, pandoc_executable_path)
+-                    os.chmod(pandoc_executable_path, stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
+-                    break
+-        
+-        # Cleanup the tar file
+-        if os.path.exists(tar_path):
+-            os.remove(tar_path)
++    if not os.path.exists(pandoc_executable_path) or not os.access(pandoc_executable_path, os.X_OK):
++        print(f"Downloading pandoc to {pandoc_executable_path}", file=sys.stderr)
++        url = "https://github.com/jgm/pandoc/releases/download/3.1.11.1/pandoc-3.1.11.1-linux-amd64.tar.gz"
++        tar_path = os.path.join(pandoc_tmp_dir, "pandoc.tar.gz")
++        try:
++            response = requests.get(url, stream=True, timeout=timeout)
++            response.raise_for_status()
++            with open(tar_path, "wb") as handle:
++                for chunk in response.iter_content(chunk_size=1024 * 1024):
++                    if chunk:
++                        handle.write(chunk)
++            with tarfile.open(tar_path, "r:gz") as archive:
++                for member in archive.getmembers():
++                    basename = os.path.basename(member.name)
++                    if basename == "pandoc":
++                        archive.extract(member, path=pandoc_tmp_dir)
++                        member_path = os.path.join(pandoc_tmp_dir, member.name)
++                        os.rename(member_path, pandoc_executable_path)
++                        os.chmod(
++                            pandoc_executable_path,
++                            stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH,
++                        )
++                        break
++        except requests.RequestException as exc:
++            raise PandocError(f"pandoc download failed: {exc}") from exc
++        except (tarfile.TarError, OSError) as exc:
++            raise PandocError(f"pandoc install failed: {exc}") from exc
++        finally:
++            if os.path.exists(tar_path):
++                os.remove(tar_path)
+     
+     # Set the environment variable so pypandoc can find it
+     os.environ["PYPANDOC_PANDOC"] = pandoc_executable_path
+diff --git a/tinyutils/api/convert/index.py b/tinyutils/api/convert/index.py
+@@
+-from .._lib.utils import DownloadMetadata, ensure_within_limits, job_workspace
++from .._lib.utils import (
++    DownloadMetadata,
++    JobTooLargeError,
++    ensure_within_limits,
++    job_workspace,
++)
+@@
+     try:
+         with job_workspace() as workdir:
+             payloads = _download_payloads(request.inputs, workdir)
+     except blob.DownloadError as exc:
+         raise HTTPException(
+             status_code=400,
+             detail=str(exc),
+             headers=_response_headers(resolved_request_id),
+         ) from exc
++    except JobTooLargeError as exc:
++        raise HTTPException(
++            status_code=413,
++            detail=str(exc),
++            headers=_response_headers(resolved_request_id),
++        ) from exc
++    except OSError as exc:
++        logger.error("convert workspace unavailable: %s", exc)
++        raise HTTPException(
++            status_code=500,
++            detail="Temporary storage unavailable",
++            headers=_response_headers(resolved_request_id),
++        ) from exc
+@@
+-    except ValueError as exc:
++    except JobTooLargeError as exc:
++        logger.warning("convert rejected oversized payload: %s", exc)
++        raise HTTPException(
++            status_code=413,
++            detail=str(exc),
++            headers=_response_headers(resolved_request_id),
++        ) from exc
++    except ValueError as exc:
+         logger.error("convert validation failed: %s", str(exc))
+         raise HTTPException(
+             status_code=400,
+             detail=str(exc),
+             headers=_response_headers(resolved_request_id),
+diff --git a/tests/convert/test_api_convert.py b/tests/convert/test_api_convert.py
+@@
+ def test_generates_request_id_when_missing(monkeypatch):
+@@
+     assert resp.headers["x-request-id"]
++
++
++def test_returns_413_when_download_hits_size_limit(monkeypatch):
++    from tinyutils.api._lib.utils import JobTooLargeError
++
++    def too_large(*args, **kwargs):
++        raise JobTooLargeError("over limit")
++
++    monkeypatch.setattr("tinyutils.api.convert.index._download_payloads", too_large)
++
++    resp = client.post(
++        "/",
++        json={"inputs": [{"blobUrl": "data:text/plain;base64,SGk="}], "to": "md"},
++    )
++
++    assert resp.status_code == 413
++    assert resp.json()["detail"] == "over limit"
++
++
++def test_returns_413_when_service_detects_overflow(monkeypatch):
++    from tinyutils.api._lib.utils import JobTooLargeError
++
++    def fake_download(inputs, job_dir):
++        return [InputPayload(name="doc.docx", data=b"hi")]
++
++    def blow_up(**kwargs):
++        raise JobTooLargeError("batch too large")
++
++    monkeypatch.setattr("tinyutils.api.convert.index._download_payloads", fake_download)
++    monkeypatch.setattr("tinyutils.api.convert.index.convert_batch", blow_up)
++
++    resp = client.post(
++        "/",
++        json={"inputs": [{"blobUrl": "data:text/plain;base64,SGk="}], "to": "md"},
++    )
++
++    assert resp.status_code == 413
++    assert resp.json()["detail"] == "batch too large"
+diff --git a/tests/convert/test_service.py b/tests/convert/test_service.py
+@@
+ def test_convert_batch_collects_errors(monkeypatch):
+@@
+     convert_batch(inputs=payloads, targets=[“md”, “txt”])
+ 
+     assert call_count["convert"] == 1
++
++
++def test_convert_one_falls_back_when_pandoc_unavailable(monkeypatch):
++    from tinyutils.api._lib import pandoc_runner
++
++    def boom():
++        raise pandoc_runner.PandocError("network timeout")
++
++    monkeypatch.setattr(pandoc_runner, "ensure_pandoc", boom)
++
++    result = convert_one(input_bytes=b"# Hi", name="doc.docx", targets=["md", "txt"])
++
++    assert result.error is None
++    assert result.logs[-1] == "fallback=1"
++    assert {artifact.target for artifact in result.outputs} == {"md", "txt"}
+```
+
+**Next Steps**
+- Run `pytest tests/convert` to revalidate both the FastAPI and service suites once the patch is applied.
+- Trigger the preview smoke (`scripts/smoke_convert_preview.mjs`) after deploying; the API should now return 200 with fallback markdown even if pandoc provisioning is blocked, and 413s for over-limit payloads instead of `FUNCTION_INVOCATION_FAILED`.
+
+Let me know if you’d like me to implement the patch directly once write access is available or help inspect the Vercel logs after redeploy.
+[2025-11-08T13:06:04] tokens used: 92,606

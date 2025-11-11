@@ -1,0 +1,102 @@
+
+Here's a comprehensive plan to move the TinyUtils document conversion backend from GREEN preview to "auto" and production-readiness.
+
+## Plan: Convert API Production Readiness
+
+**Goal:** Transition the `tinyutils/api/convert` backend from a functionally verified preview state to a fully automated, production-ready service.
+
+### Stepwise Plan
+
+1.  **Complete `smoke_convert_preview.mjs` JWT Cookie Automation**
+    *   **Rationale:** The current smoke script partially handles cookie bootstrapping but needs to reliably acquire and use the `_vercel_jwt` cookie for consistent authentication against Vercel Protection. This is critical for robust automated testing.
+    *   **Action:** Enhance `tinyutils/scripts/smoke_convert_preview.mjs` to fully automate the `_vercel_jwt` cookie acquisition and injection into subsequent requests.
+    *   **Risks:** Incorrect cookie handling could lead to flaky tests or continued 401 errors, masking actual conversion issues.
+    *   **Validation:** Run the updated smoke script against a fresh preview deployment and verify all cases pass consistently.
+
+2.  **Integrate Smoke Tests into CI/CD Pipeline**
+    *   **Rationale:** Automated verification of every preview deployment ensures regressions are caught early and provides confidence before manual review or promotion.
+    *   **Action:** Configure the Vercel project to trigger `tinyutils/scripts/smoke_convert_preview.mjs` as part of the build or deploy process for every preview branch.
+    *   **Concrete Paths/Commands:** Update Vercel project settings (e.g., `vercel.json` or Vercel dashboard build commands) to include `pnpm install && pnpm smoke:convert:preview`.
+    *   **Risks:** Slow tests could increase build times. Flaky tests could block deployments.
+    *   **Validation:** Observe CI runs for several preview deployments, ensuring tests pass reliably and quickly.
+
+3.  **Implement Comprehensive Logging and Monitoring**
+    *   **Rationale:** Production services require detailed visibility into their operation, performance, and errors for quick diagnosis and proactive issue resolution.
+    *   **Action:**
+        *   Ensure all critical paths (request start/end, external API calls, conversion steps, error handling) have appropriate log levels (INFO, WARNING, ERROR).
+        *   Integrate with Vercel's logging (Log Drains) or a dedicated monitoring solution (e.g., Sentry, Datadog) for error tracking and performance metrics.
+        *   Add custom metrics for conversion duration, success rates, and error types.
+    *   **Concrete Paths/Commands:** Review `tinyutils/api/convert/app.py` and `tinyutils/convert/service.py` for existing `logger.info`/`error` calls; add more as needed. Configure Vercel Log Drains.
+    *   **Risks:** Excessive logging can incur costs or performance overhead. Insufficient logging can hinder debugging.
+    *   **Validation:** Deploy to preview, generate traffic, and verify logs appear in the chosen monitoring system. Trigger known error conditions to test error reporting.
+
+4.  **Review and Harden Security Configuration**
+    *   **Rationale:** Production environments are targets for attacks; existing Vercel protections should be augmented with application-level security best practices.
+    *   **Action:**
+        *   **Input Validation:** Double-check all input validation in `ConvertRequest` (e.g., `blobUrl` sanitization, `targets` coercion) to prevent injection attacks or unexpected behavior.
+        *   **Rate Limiting:** Implement API rate limiting to prevent abuse and protect against DoS attacks.
+        *   **Secret Management:** Ensure `BLOB_READ_WRITE_TOKEN` and `PREVIEW_SECRET` are securely managed as environment variables and never committed to source control.
+        *   **Dependency Security:** Regularly scan Python dependencies (`requirements.txt`) for known vulnerabilities.
+    *   **Concrete Paths/Commands:** Review `tinyutils/api/convert/app.py` and `tinyutils/convert/service.py` for validation logic. Investigate Vercel's built-in rate limiting or add FastAPI middleware.
+    *   **Risks:** Overly strict validation could reject legitimate requests. Inadequate security could lead to breaches.
+    *   **Validation:** Conduct a security review. Test rate limiting with simulated traffic.
+
+5.  **Optimize Performance and Resource Usage**
+    *   **Rationale:** Efficient resource usage reduces costs and improves user experience.
+    *   **Action:**
+        *   **Cold Start Optimization:** Investigate and minimize cold start times for the Python lambda. The `_ensure_pydantic_core()` and `_get_pandoc_runner()` functions already address this, but further profiling might be beneficial.
+        *   **Caching Strategy:** Review the `_CACHE` in `tinyutils/convert/service.py` to ensure it's effective and appropriately sized for production traffic patterns.
+        *   **Pandoc Resource Limits:** Monitor Pandoc's memory and CPU usage during conversions to ensure it stays within Vercel's lambda limits.
+    *   **Concrete Paths/Commands:** Use Vercel's analytics to monitor cold starts and execution duration. Adjust `CONVERT_CACHE_MAX_ENTRIES` environment variable.
+    *   **Risks:** Aggressive caching could lead to stale data. Inefficient resource usage could lead to higher costs or `FUNCTION_INVOCATION_FAILED` errors.
+    *   **Validation:** Load test the API in a preview environment. Monitor Vercel function logs for performance metrics.
+
+6.  **Update Documentation for Production**
+    *   **Rationale:** Clear and up-to-date documentation is essential for maintenance, onboarding, and troubleshooting.
+    *   **Action:**
+        *   Update `tinyutils/README.md` and `tinyutils/README_DEPLOY.md` with production deployment instructions, environment variables, and monitoring setup.
+        *   Create a `tinyutils/docs/OPERATIONS.md` document detailing common operational procedures, troubleshooting guides, and contact points.
+        *   Ensure `tinyutils/docs/AGENT_TASK_CHECKLIST.md` and `tinyutils/docs/AGENT_RUN_LOG.md` are finalized and archived or cleared for the next phase.
+    *   **Risks:** Outdated documentation can lead to operational errors.
+    *   **Validation:** Internal review by a team member.
+
+7.  **Define Cautious Production Rollout Strategy**
+    *   **Rationale:** A phased rollout minimizes risk and allows for quick rollback if issues arise.
+    *   **Action:**
+        *   **Staged Rollout:** Consider a staged rollout (e.g., canary deployment) if supported by Vercel or by routing a small percentage of traffic to the new version initially.
+        *   **Feature Flag:** Implement a feature flag for the new conversion service if it's integrated into a larger application, allowing for gradual enablement.
+        *   **Rollback Plan:** Document a clear rollback procedure in case of critical production issues.
+    *   **Concrete Paths/Commands:** Vercel aliases for traffic splitting, or application-level feature flag implementation.
+    *   **Risks:** Rapid rollout could expose all users to critical bugs. Slow rollout could delay benefits.
+    *   **Validation:** Successful execution of the rollout plan with no critical incidents.
+
+### Risky Assumptions and Validation
+
+*   **Assumption:** Vercel's Python 3.12 runtime environment is stable and fully compatible with all vendored dependencies (`pydantic-core`, `pandoc`).
+    *   **Validation:** Continue to monitor Vercel's platform announcements and logs for any runtime-specific issues. Perform a full suite of integration tests (beyond smoke) in a preview environment.
+*   **Assumption:** The `_vercel_jwt` cookie mechanism for bypassing Vercel Protection will remain stable and consistent.
+    *   **Validation:** Regularly test the cookie bootstrapping in `smoke_convert_preview.mjs`. Monitor Vercel's documentation for changes to their protection mechanisms.
+*   **Assumption:** The `BLOB_READ_WRITE_TOKEN` and `VERCEL_BLOB_API_URL` are correctly configured and provide reliable blob storage.
+    *   **Validation:** Ensure the smoke tests include cases that verify successful blob uploads and downloads. Monitor Vercel Blob storage for any errors or performance degradation.
+*   **Assumption:** The `maxDuration` of 180 seconds for the `convert` function is sufficient for all expected conversion workloads.
+    *   **Validation:** Monitor conversion times in preview and early production. If conversions frequently approach this limit, investigate performance bottlenecks or consider increasing the duration (if feasible and cost-effective).
+
+### Verification Checklist: "Auto On" (Automated Preview Verification)
+
+*   [ ] `smoke_convert_preview.mjs` reliably acquires and uses the `_vercel_jwt` cookie.
+*   [ ] All test cases in `smoke_convert_preview.mjs` pass consistently on every preview deployment.
+*   [ ] The CI/CD pipeline automatically runs `smoke_convert_preview.mjs` for all preview deployments.
+*   [ ] CI/CD pipeline reports clear success/failure status for the smoke tests.
+*   [ ] No regressions are observed in manual testing of preview deployments after CI integration.
+
+### Verification Checklist: "Ship to Prod" (Production Rollout)
+
+*   [ ] Comprehensive logging and monitoring are configured and actively reporting metrics and errors.
+*   [ ] Security review completed, and any identified vulnerabilities addressed.
+*   [ ] Rate limiting is enabled and configured appropriately.
+*   [ ] Performance metrics (cold start, duration, memory usage) are within acceptable limits in preview.
+*   [ ] All production environment variables (e.g., `BLOB_READ_WRITE_TOKEN`, `VERCEL_BLOB_API_URL`) are securely set in Vercel.
+*   [ ] Production documentation is updated and accessible.
+*   [ ] Rollback plan is clearly defined and understood.
+*   [ ] A staged rollout strategy (if applicable) is ready for execution.
+*   [ ] Final manual smoke test against the production environment passes.
