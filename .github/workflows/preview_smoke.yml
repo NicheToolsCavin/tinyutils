@@ -3,7 +3,12 @@ name: Convert Preview Smoke
 on:
   pull_request:
     branches: [ main ]
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      preview_url:
+        description: Optional preview URL to smoke (if no Vercel creds)
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -23,41 +28,72 @@ jobs:
         with:
           node-version: '20.x'
 
-      - name: Pull Vercel preview env
+      - name: Resolve Vercel creds presence
+        id: vars
+        shell: bash
+        run: |
+          set -euo pipefail
+          has_creds=0
+          if [[ -n "${{ secrets.VERCEL_TOKEN }}${{ secrets.VERCEL_ORG_ID }}${{ secrets.VERCEL_PROJECT_ID }}" ]]; then
+            has_creds=1
+          fi
+          echo "has_creds=$has_creds" | tee -a "$GITHUB_OUTPUT"
+
+      - name: Pull Vercel preview env (conditional)
+        if: steps.vars.outputs.has_creds == '1'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
           mkdir -p .vercel
-          npx vercel env pull .vercel/.env.preview.local --environment preview --yes
+          npx -y vercel@latest env pull .vercel/.env.preview.local --environment preview --yes
+
+      - name: Deploy Vercel preview (conditional)
+        if: steps.vars.outputs.has_creds == '1'
+        id: deploy
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-
-      - name: Deploy Vercel preview
-        id: deploy
         run: |
           mkdir -p artifacts/convert/github-${{ github.run_id }}
-          npx vercel deploy --yes --target preview 2>&1 | tee artifacts/convert/github-${{ github.run_id }}/vercel_deploy.log
-          PREVIEW_URL=$(grep -Eo 'https://[^ ]+\.vercel\.app' artifacts/convert/github-${{ github.run_id }}/vercel_deploy.log | tail -1)
-          echo "preview_url=$PREVIEW_URL" >> "$GITHUB_OUTPUT"
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          npx -y vercel@latest deploy --yes --target preview 2>&1 | tee artifacts/convert/github-${{ github.run_id }}/vercel_deploy.log
+          url=$(grep -Eo 'https://[^ ]+\.vercel\.app' artifacts/convert/github-${{ github.run_id }}/vercel_deploy.log | tail -1 || true)
+          echo "preview_url=$url" >> "$GITHUB_OUTPUT"
 
       - name: Vendor integrity (informational)
         run: python3 scripts/verify_vendors.py || true
 
-      - name: Run convert preview smoke
+      - name: Resolve preview URL
+        id: resolve
+        run: |
+          set -euo pipefail
+          url="${{ steps.deploy.outputs.preview_url }}"
+          if [[ -z "$url" ]]; then
+            url="${{ inputs.preview_url }}"
+          fi
+          echo "Using preview URL: ${url:-<none>}"
+          echo "preview_url=$url" >> "$GITHUB_OUTPUT"
+
+      - name: Run convert preview smoke (conditional)
+        if: steps.resolve.outputs.preview_url != ''
         env:
           CONVERT_SMOKE_ARTIFACTS: artifacts/convert/github-${{ github.run_id }}
-          PREVIEW_URL: ${{ steps.deploy.outputs.preview_url }}
+          PREVIEW_URL: ${{ steps.resolve.outputs.preview_url }}
           PREVIEW_SECRET: ${{ secrets.PREVIEW_SECRET }}
           VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
         run: |
+          set -e
           set -a
           source .vercel/.env.preview.local || true
           set +a
           node scripts/smoke_convert_preview.mjs
+
+      - name: Note skipped smoke (no URL)
+        if: steps.resolve.outputs.preview_url == ''
+        run: |
+          echo "No preview URL and no Vercel creds; smoke skipped gracefully. Provide 'preview_url' via workflow_dispatch or add repo secrets."
 
       - name: Upload artifacts
         if: always()
