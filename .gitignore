@@ -4,3 +4,4 @@ tinyutils/.env.local
 *.env
 *.env.local
 !tinyutils/.env.preview.example
+.code/agents/*/exec-call_*.txt
