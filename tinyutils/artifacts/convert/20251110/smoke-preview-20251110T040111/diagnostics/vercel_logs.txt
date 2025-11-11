@@ -1,0 +1,18 @@
+Vercel CLI 48.8.2
+The "--since" option was ignored because it is now deprecated. Please remove it.
+Fetching deployment "tinyutils-j2scpavpr-cavins-projects-7b0e00bb.vercel.app" in cavins-projects-7b0e00bb
+Displaying runtime logs for deployment tinyutils-j2scpavpr-cavins-projects-7b0e00bb.vercel.app (dpl_4H6HtSLeWwDLN6UyLBctybfJKsXh) starting from Nov Mo 04:09:55.07
+
+waiting for new logs...
+04:10:18.21  ℹ️  POST  ---  tinyutils-j2scpavpr-cavins-projects-7b0e00bb.vercel.app  ƒ  /api/convert
+----------------------------------------------------------------------------------------------------
+Python process exited with exit status: 1. The logs above can help with debugging the issue.
+
+waiting for new logs...
+04:10:18.21  ℹ️  POST  ---  tinyutils-j2scpavpr-cavins-projects-7b0e00bb.vercel.app  ƒ  /api/convert
+----------------------------------------------------------------------------------------------------
+Python process exited with exit status: 1. The logs above can help with debugging the issue.
+
+waiting for new logs...
+WARN! Exceeded query duration limit of 5 minutes
+

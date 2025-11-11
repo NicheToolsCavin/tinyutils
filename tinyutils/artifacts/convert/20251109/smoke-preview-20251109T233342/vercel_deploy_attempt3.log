@@ -1,0 +1,5 @@
+Vercel CLI 48.8.2
+Retrieving project…
+Deploying cavins-projects-7b0e00bb/tinyutils
+Error: Invalid vercel.json - Invalid request: `functions.api/convert/index.py.includeFiles` should be string..
+View Documentation: https://vercel.com/docs/concepts/projects/project-configuration

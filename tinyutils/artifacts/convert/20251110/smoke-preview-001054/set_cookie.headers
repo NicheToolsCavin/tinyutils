@@ -1,0 +1,11 @@
+HTTP/2 307 
+cache-control: public, max-age=0, must-revalidate
+content-type: text/plain
+date: Mon, 10 Nov 2025 23:10:54 GMT
+location: /api/convert
+server: Vercel
+set-cookie: _vercel_jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3NjI4MTYyNTQsImJ5cGFzcyI6IkVkT005YURoVFJGVEwxMGN6bkJra2FNWFIwRUNxa1BSIiwic3ViIjoicHJvdGVjdGlvbi1ieXBhc3MtYXV0b21hdGlvbiIsImF1ZCI6InRpbnl1dGlscy1qeDhvd2w3bDQtY2F2aW5zLXByb2plY3RzLTdiMGUwMGJiLnZlcmNlbC5hcHAifQ.u07H9ODe6RGRU_2mdYVYBsY3uNWbJeWVWqBbDG2iDVI; Max-Age=604800; Path=/; Secure; HttpOnly; SameSite=Lax
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+x-robots-tag: noindex
+x-vercel-id: cdg1::qdb5z-1762816254953-57a94d99c330
+

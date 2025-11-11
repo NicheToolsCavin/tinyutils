@@ -1,0 +1,5 @@
+timestamp=2025-11-10 04:17:49 CET
+status=smoke_failed
+message=Converter preview smoke failed
+preview_url=https://tinyutils-pt19dd5fb-cavins-projects-7b0e00bb.vercel.app
+artifacts=artifacts/convert/20251110/smoke-preview-20251110T041449

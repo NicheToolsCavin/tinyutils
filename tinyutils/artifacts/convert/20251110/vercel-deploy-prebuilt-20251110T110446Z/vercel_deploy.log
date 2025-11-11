@@ -1,0 +1,17 @@
+Vercel CLI 48.8.2
+Retrieving project…
+Deploying cavins-projects-7b0e00bb/tinyutils
+Uploading [--------------------] (0.0B/346.6MB)
+Uploading [=====---------------] (86.6MB/346.6MB)
+Uploading [==========----------] (173.3MB/346.6MB)
+Uploading [===============-----] (259.9MB/346.6MB)
+Uploading [====================] (346.6MB/346.6MB)
+Error: File size limit exceeded (100 MB)
+This error originated either by throwing inside of an async function without a catch block, or by rejecting a promise which was not handled with .catch(). The promise rejected with the reason:
+Error: AbortError: The user aborted a request.
+    at uploadList.<computed>.retries (/usr/local/lib/node_modules/vercel/dist/index.js:59155:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+Error: An unexpected error occurred!
+Error: AbortError: The user aborted a request.
+    at uploadList.<computed>.retries (/usr/local/lib/node_modules/vercel/dist/index.js:59155:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)

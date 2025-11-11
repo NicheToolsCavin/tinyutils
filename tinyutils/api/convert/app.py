@@ -1,0 +1,634 @@
+"""Universal document converter endpoint backed by tinyutils.convert."""
+from __future__ import annotations
+
+import logging
+import os
+import subprocess
+import sys
+import time
+import traceback
+from pathlib import Path
+from typing import TYPE_CHECKING, List, Optional
+import uuid
+
+def _ensure_pydantic_core() -> None:
+    """Ensure the native pydantic-core extension is importable on cold starts.
+
+    On some serverless builds, Pydantic v2 is installed without its native
+    `pydantic_core` wheel. If import fails, download an appropriate manylinux
+    wheel for the current Python version and extract it into /tmp so imports
+    succeed. This runs only once per cold start and avoids build-time wheel
+    compilation.
+    """
+
+    # First, add vendored dir to sys.path if present
+    try:
+        from pathlib import Path
+        vendor_base = Path(__file__).resolve().parents[1] / "_vendor"
+        # Ensure parent of the package is on sys.path so `import pydantic_core` resolves
+        if vendor_base.exists() and str(vendor_base) not in sys.path:
+            sys.path.insert(0, str(vendor_base))
+    except Exception:
+        pass
+
+    try:  # quick path
+        import pydantic_core  # noqa: F401
+        return
+    except Exception:  # pragma: no cover - best-effort fallback
+        pass
+
+    try:
+        import json
+        import urllib.request
+        import zipfile
+        import tempfile
+
+        major = sys.version_info.major
+        minor = sys.version_info.minor
+        # Build a conservative tag; Vercel uses manylinux glibc images.
+        cp_tag = f"cp{major}{minor}-cp{major}{minor}"
+        arch_tag = "manylinux_2_17_x86_64"
+
+        with urllib.request.urlopen("https://pypi.org/pypi/pydantic-core/json", timeout=5) as r:
+            data = json.load(r)
+        version = data["info"]["version"]
+        files = data["releases"].get(version, [])
+
+        wheel = None
+        for f in files:
+            name = f.get("filename", "")
+            if name.endswith(f"{cp_tag}-{arch_tag}.whl"):
+                wheel = f
+                break
+        # Fallback: any manylinux x86_64 for this cp tag
+        if wheel is None:
+            for f in files:
+                name = f.get("filename", "")
+                if name.startswith(f"pydantic_core-{version}-{cp_tag}") and "manylinux" in name and name.endswith("x86_64.whl"):
+                    wheel = f
+                    break
+        if wheel is None:
+            return  # give up; FastAPI will raise a clear import error
+
+        url = wheel["url"]
+        tmpdir = tempfile.mkdtemp(prefix="pydantic_core_")
+        whl_path = os.path.join(tmpdir, wheel["filename"])
+        with urllib.request.urlopen(url, timeout=10) as src, open(whl_path, "wb") as dst:
+            dst.write(src.read())
+        with zipfile.ZipFile(whl_path, "r") as z:
+            for name in z.namelist():
+                if name.startswith("pydantic_core/"):
+                    z.extract(name, path=tmpdir)
+        # Prepend extracted parent to sys.path so `import pydantic_core` resolves.
+        if tmpdir not in sys.path:
+            sys.path.insert(0, tmpdir)
+    except Exception:
+        # Best effort: if anything fails, let the normal import error surface.
+        pass
+
+
+_ensure_pydantic_core()
+
+from pydantic import BaseModel, Field, field_validator, ConfigDict
+
+from fastapi import FastAPI, Header, HTTPException, Request, Response
+from fastapi.responses import JSONResponse
+
+if TYPE_CHECKING:  # pragma: no cover - type checking only
+    from tinyutils.convert import (
+        ConversionOptions as _ConverterOptions,
+        InputPayload as _InputPayload,
+        convert_batch as _convert_batch,
+    )
+    from tinyutils.convert.types import BatchResult as _BatchResult
+
+from .._lib import blob
+from .._lib.utils import DownloadMetadata, ensure_within_limits, job_workspace
+
+
+logging.basicConfig(level=os.getenv("TINYUTILS_LOG_LEVEL", "INFO"))
+logger = logging.getLogger(__name__)
+print("[tinyutils] convert API module imported", file=sys.stderr)
+
+
+app = FastAPI()
+_TEST_RESPONSE_SENTINEL = Response()
+
+ConverterOptions = None
+InputPayload = None
+convert_batch = None
+BatchResult = None
+_pandoc_runner = None
+
+
+def _ensure_convert_imports() -> None:
+    global ConverterOptions, InputPayload, convert_batch, BatchResult
+    if ConverterOptions is not None:
+        return
+    try:
+        from convert import (  # type: ignore
+            ConversionOptions as _ConverterOptions,
+            InputPayload as _InputPayload,
+            convert_batch as _convert_batch,
+        )
+        from convert.types import BatchResult as _BatchResult  # type: ignore
+    except Exception as first_exc:
+        # Fallback for local dev where the package might be available as
+        # `tinyutils.convert`. If that also fails, raise the original error to
+        # avoid masking the root cause with a different ModuleNotFoundError.
+        try:
+            from tinyutils.convert import (  # type: ignore
+                ConversionOptions as _ConverterOptions,
+                InputPayload as _InputPayload,
+                convert_batch as _convert_batch,
+            )
+            from tinyutils.convert.types import BatchResult as _BatchResult  # type: ignore
+        except Exception:
+            raise first_exc
+
+    ConverterOptions = _ConverterOptions
+    InputPayload = _InputPayload
+    convert_batch = _convert_batch
+    BatchResult = _BatchResult
+
+
+def _get_pandoc_runner():
+    global _pandoc_runner
+    if _pandoc_runner is None:
+        try:
+            # Prefer a package-relative import so the function bundle does not
+            # depend on a top-level 'tinyutils' package name at runtime.
+            from .._lib import pandoc_runner as _module  # type: ignore
+        except Exception:  # pragma: no cover - fallback for local runs
+            from tinyutils.api._lib import pandoc_runner as _module  # type: ignore
+
+        _pandoc_runner = _module
+    return _pandoc_runner
+
+
+def _log_unexpected_trace(request_id: str, exc: BaseException) -> None:
+    """Emit a concise error plus full traceback for diagnostics."""
+
+    trace = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+    logger.error(
+        "convert unexpected error request_id=%s type=%s message=%s",
+        request_id,
+        exc.__class__.__name__,
+        str(exc),
+    )
+    print(trace, file=sys.stderr)
+
+
+@app.on_event("startup")
+async def _log_pandoc_availability() -> None:
+    runner = _get_pandoc_runner()
+    path = runner.get_configured_pandoc_path()
+    if path:
+        logger.info("pandoc availability status=ready path=%s", path)
+    else:
+        logger.warning(
+            "pandoc availability status=missing action=fallback vendor_path=%s",
+            runner.VENDORED_PANDOC_PATH,
+        )
+
+
+class InputItem(BaseModel):
+    blobUrl: str
+    name: Optional[str] = None
+
+
+class Options(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    acceptTrackedChanges: bool = True
+    extractMedia: bool = False
+    removeZeroWidth: bool = True
+
+
+class ConvertRequest(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    inputs: List[InputItem]
+    source_format: Optional[str] = Field(default=None, alias="from")
+    targets: List[str] = Field(default_factory=lambda: ["md"], alias="to")
+    options: Options = Field(default_factory=Options)
+
+    @field_validator("targets", mode="before")
+    def _normalise_targets(cls, value):
+        return _coerce_targets(value)
+
+
+# Single health endpoint (mounted on /health and mirrored by rewrite)
+@app.get("/health", include_in_schema=False)
+def convert_health() -> JSONResponse:
+    """Check pypandoc import and vendored pandoc availability."""
+
+    try:
+        diagnostics: dict = {"status": "ok"}
+        errors: List[str] = []
+
+        try:
+            import pypandoc  # type: ignore
+            diagnostics["pypandocVersion"] = getattr(pypandoc, "__version__", "unknown")
+        except Exception as exc:  # pragma: no cover - diagnostics only
+            diagnostics["pypandoc"] = "error"
+            diagnostics["pypandocError"] = str(exc)
+            errors.append("pypandoc")
+
+        runner = _get_pandoc_runner()
+        try:
+            pandoc_path = runner.ensure_pandoc()
+            completed = subprocess.run(
+                [pandoc_path, "--version"],
+                capture_output=True,
+                text=True,
+                timeout=5,
+                check=False,
+            )
+            first_line = (completed.stdout or completed.stderr or "").splitlines()
+            diagnostics["pandocPath"] = pandoc_path
+            diagnostics["pandocExitCode"] = completed.returncode
+            diagnostics["pandocVersion"] = first_line[0] if first_line else None
+            if completed.returncode != 0:
+                errors.append("pandoc")
+        except Exception as exc:  # pragma: no cover - diagnostics only
+            diagnostics["pandocPath"] = None
+            diagnostics["pandocError"] = str(exc)
+            errors.append("pandoc")
+
+        status_code = 200 if not errors else 503
+        if errors:
+            diagnostics["status"] = "degraded"
+        return JSONResponse(status_code=status_code, content=diagnostics)
+    except Exception as exc:  # pragma: no cover - diagnostics only
+        _log_unexpected_trace("health", exc)
+        payload = {"status": "error", "detail": "Health probe failed", "errorType": exc.__class__.__name__, "errorMessage": str(exc)}
+        return JSONResponse(status_code=500, content=payload)
+    
+    
+
+
+@app.get("/", include_in_schema=False)
+def convert_root(request: Request) -> JSONResponse:
+    if request.query_params.get("__health") == "1":
+        return convert_health()
+    raise HTTPException(status_code=405, detail="Method not allowed")
+
+# --- Aliases so the app also matches the full Vercel path (/api/convert) ---
+@app.get("/api/convert/health", include_in_schema=False)
+def convert_health_alias() -> JSONResponse:  # pragma: no cover - simple delegate
+    return convert_health()
+
+
+@app.post("/api/convert", include_in_schema=False)
+async def convert_alias(
+    request: Request,
+    response: Response = _TEST_RESPONSE_SENTINEL,
+    request_id: Optional[str] = Header(default=None, alias="x-request-id"),
+) -> Response:  # pragma: no cover - simple delegate
+    try:
+        payload = await request.json()
+        model = ConvertRequest.model_validate(payload)
+    except Exception as exc:
+        if _is_preview_env():
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "detail": "Invalid request payload",
+                    "errorType": exc.__class__.__name__,
+                    "errorMessage": str(exc),
+                },
+            )
+        raise HTTPException(status_code=400, detail="Invalid request payload") from exc
+    try:
+        return convert(model, response, request_id)
+    except HTTPException as exc:
+        if _is_preview_env():
+            return JSONResponse(
+                status_code=exc.status_code,
+                content={
+                    "detail": exc.detail if isinstance(exc.detail, str) else str(exc.detail),
+                    "errorType": exc.__class__.__name__,
+                },
+                headers=dict(exc.headers or {}),
+            )
+        raise
+    except Exception as exc:
+        if _is_preview_env():
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "detail": "Unhandled error in convert",
+                    "errorType": exc.__class__.__name__,
+                    "errorMessage": str(exc),
+                },
+            )
+        raise
+
+# Compatibility for Vercel rewrites that still forward to the filename path
+@app.get("/api/convert/index.py", include_in_schema=False)
+def convert_health_filename_alias(request: Request) -> JSONResponse:  # pragma: no cover
+    if request.query_params.get("__health") == "1":
+        return convert_health()
+    raise HTTPException(status_code=404, detail="Not Found")
+
+
+@app.post("/api/convert/index.py", include_in_schema=False)
+async def convert_filename_alias(
+    request: Request,
+    response: Response = _TEST_RESPONSE_SENTINEL,
+    request_id: Optional[str] = Header(default=None, alias="x-request-id"),
+) -> Response:  # pragma: no cover
+    try:
+        payload = await request.json()
+        model = ConvertRequest.model_validate(payload)
+    except Exception as exc:
+        if _is_preview_env():
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "detail": "Invalid request payload",
+                    "errorType": exc.__class__.__name__,
+                    "errorMessage": str(exc),
+                },
+            )
+        raise HTTPException(status_code=400, detail="Invalid request payload") from exc
+    try:
+        return convert(model, response, request_id)
+    except HTTPException as exc:
+        if _is_preview_env():
+            return JSONResponse(
+                status_code=exc.status_code,
+                content={
+                    "detail": exc.detail if isinstance(exc.detail, str) else str(exc.detail),
+                    "errorType": exc.__class__.__name__,
+                },
+                headers=dict(exc.headers or {}),
+            )
+        raise
+    except Exception as exc:
+        if _is_preview_env():
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "detail": "Unhandled error in convert",
+                    "errorType": exc.__class__.__name__,
+                    "errorMessage": str(exc),
+                },
+            )
+        raise
+
+
+@app.post("/")
+def convert(
+    request: ConvertRequest,
+    response: Response = _TEST_RESPONSE_SENTINEL,
+    request_id: Optional[str] = Header(default=None, alias="x-request-id"),
+) -> dict:
+    request_id_value = request_id if isinstance(request_id, str) else None
+    resolved_request_id = request_id_value or uuid.uuid4().hex
+    start_time = time.time()
+    _ensure_convert_imports()
+    runner = _get_pandoc_runner()
+    # Import the lightweight bootstrap module only to reuse its downloader
+    # helpers. Avoid pulling convert_batch from it to prevent circular import
+    # timing where the symbol resolves to None at import time.
+    try:
+        from api.convert import index as convert_index  # type: ignore
+    except Exception:  # pragma: no cover - local/dev fallback
+        from tinyutils.api.convert import index as convert_index  # type: ignore
+
+    download_payloads_fn = getattr(convert_index, "_download_payloads", _download_payloads)
+    convert_batch_fn = convert_batch  # always use the converter module's function
+    if response is _TEST_RESPONSE_SENTINEL:
+        response = Response()
+    try:
+        if not request.inputs:
+            _log_failure(resolved_request_id, "validation_error", "no_inputs", start_time)
+            raise HTTPException(
+                status_code=400,
+                detail="No inputs provided",
+                headers=_response_headers(resolved_request_id),
+            )
+
+        logger.info(
+            "convert request request_id=%s inputs=%d targets=%s",
+            resolved_request_id,
+            len(request.inputs),
+            request.targets,
+        )
+        for header_name, header_value in _response_headers(resolved_request_id).items():
+            response.headers[header_name] = header_value
+
+        try:
+            # Ensure pandoc binary is configured for pypandoc
+            try:
+                runner.ensure_pandoc()
+            except Exception:
+                # convert_health handles diagnostics; here we proceed and let
+                # conversion raise a structured error if pandoc is missing
+                pass
+            with job_workspace() as workdir:
+                payloads = download_payloads_fn(request.inputs, workdir)
+        except blob.DownloadError as exc:
+            _log_failure(resolved_request_id, "download_error", str(exc), start_time)
+            raise HTTPException(
+                status_code=400,
+                detail=str(exc),
+                headers=_response_headers(resolved_request_id),
+            ) from exc
+        converter_options = ConverterOptions(
+            accept_tracked_changes=request.options.acceptTrackedChanges,
+            extract_media=request.options.extractMedia,
+            remove_zero_width=request.options.removeZeroWidth,
+        )
+
+        try:
+            batch = convert_batch_fn(
+                inputs=payloads,
+                targets=request.targets,
+                from_format=request.source_format,
+                options=converter_options,
+            )
+        except ValueError as exc:
+            logger.error(
+                "convert validation failed request_id=%s detail=%s",
+                resolved_request_id,
+                str(exc),
+                exc_info=True,
+            )
+            _log_failure(resolved_request_id, "validation_error", str(exc), start_time)
+            raise HTTPException(
+                status_code=400,
+                detail=str(exc),
+                headers=_response_headers(resolved_request_id),
+            ) from exc
+        except Exception as exc:
+            _log_unexpected_trace(resolved_request_id, exc)
+            _log_failure(resolved_request_id, exc.__class__.__name__, str(exc), start_time)
+            if _is_preview_env():
+                return JSONResponse(
+                    status_code=500,
+                    content={
+                        "detail": "Internal server error during conversion",
+                        "errorType": exc.__class__.__name__,
+                        "errorMessage": str(exc),
+                    },
+                    headers=_response_headers(resolved_request_id),
+                )
+            raise HTTPException(
+                status_code=500,
+                detail="Internal server error during conversion",
+                headers=_response_headers(resolved_request_id),
+            ) from exc
+
+        outputs = _serialize_outputs(batch)
+        preview = _select_preview(batch)
+        errors = _serialize_errors(batch)
+
+        response_payload = {
+            "jobId": batch.job_id,
+            "toolVersions": {"pandoc": runner.get_pandoc_version()},
+            "outputs": outputs,
+            "preview": preview,
+            "logs": batch.logs,
+            "errors": errors,
+        }
+        if _is_preview_env():
+            duration_ms = (time.time() - start_time) * 1000
+            logger.info(
+                "convert preview success request_id=%s job_id=%s duration_ms=%.2f outputs=%d errors=%d",
+                resolved_request_id,
+                batch.job_id,
+                duration_ms,
+                len(outputs),
+                len(errors),
+            )
+        logger.info("convert job_id=%s outputs=%d errors=%d", batch.job_id, len(outputs), len(errors))
+        return response_payload
+    except HTTPException:
+        raise
+    except Exception as exc:  # pragma: no cover - safety net for diagnostics
+        _log_unexpected_trace(resolved_request_id, exc)
+        _log_failure(resolved_request_id, exc.__class__.__name__, str(exc), start_time)
+        return JSONResponse(
+            status_code=500,
+            content={
+                "detail": "Internal server error during conversion",
+                "errorType": exc.__class__.__name__,
+                "errorMessage": str(exc),
+            },
+            headers=_response_headers(resolved_request_id),
+        )
+
+def _download_payloads(inputs: List[InputItem], job_dir: Path) -> List[InputPayload]:
+    _ensure_convert_imports()
+    payloads: List[InputPayload] = []
+    for index, item in enumerate(inputs, start=1):
+        metadata = _download_input(item, job_dir)
+        data = metadata.path.read_bytes()
+        name = (item.name or metadata.original_name or f"document-{index}").strip() or f"document-{index}"
+        payloads.append(InputPayload(name=name, data=data, source_format=None))
+    return payloads
+
+
+def _download_input(item: InputItem, job_dir: Path) -> DownloadMetadata:
+    target = job_dir / (item.name or "input")
+    size, content_type = blob.download_to_path(item.blobUrl, target)
+    ensure_within_limits(size)
+    mime_type = content_type
+
+    if not mime_type:
+        mime_type = "application/octet-stream"
+    return DownloadMetadata(
+        path=target,
+        size_bytes=size,
+        content_type=mime_type,
+        original_name=item.name,
+    )
+
+
+def _serialize_outputs(batch) -> List[dict]:
+    entries: List[dict] = []
+    for result in batch.results:
+        for artifact in result.outputs:
+            blob_url = blob.upload_bytes(artifact.name, artifact.data, artifact.content_type)
+            entry = {
+                "name": artifact.name,
+                "size": artifact.size,
+                "blobUrl": blob_url,
+                "target": artifact.target,
+            }
+            entries.append(entry)
+        if result.media:
+            blob_url = blob.upload_bytes(result.media.name, result.media.data, result.media.content_type)
+            entries.append(
+                {
+                    "name": result.media.name,
+                    "size": result.media.size,
+                    "blobUrl": blob_url,
+                    "target": "media",
+                }
+            )
+    return entries
+
+
+def _select_preview(batch) -> dict:
+    for result in batch.results:
+        if result.preview:
+            return {
+                "headings": result.preview.headings,
+                "snippets": result.preview.snippets,
+                "images": result.preview.images,
+            }
+    return {"headings": [], "snippets": [], "images": []}
+
+
+def _serialize_errors(batch) -> List[dict]:
+    errors: List[dict] = []
+    for result in batch.results:
+        if result.error:
+            errors.append(
+                {
+                    "input": result.name,
+                    "message": result.error.message,
+                    "kind": result.error.kind,
+                }
+            )
+    return errors
+
+
+def _coerce_targets(value):
+    if value is None:
+        return ["md"]
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, list) and value:
+        return value
+    raise ValueError("`to` must be a string or non-empty list")
+
+
+def _response_headers(request_id: Optional[str]) -> dict:
+    resolved = request_id or uuid.uuid4().hex
+    return {
+        "x-request-id": resolved,
+        "cache-control": "no-store",
+        "content-type": "application/json; charset=utf-8",
+    }
+
+
+def _is_preview_env() -> bool:
+    return os.getenv("VERCEL_ENV") == "preview"
+
+
+def _log_failure(request_id: str, error_type: str, detail: str, start_time: float) -> None:
+    if not _is_preview_env():
+        return
+    duration_ms = (time.time() - start_time) * 1000
+    logger.error(
+        "convert preview failure request_id=%s error_type=%s duration_ms=%.2f detail=%s",
+        request_id,
+        error_type,
+        duration_ms,
+        detail,
+    )

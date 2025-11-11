@@ -1,0 +1,17 @@
+Import failure in convert lambda:
+Traceback (most recent call last):
+  File "/var/task/api/convert/index.py", line 10, in <module>
+    from .app import (  # pragma: no cover - Vercel entrypoint
+  File "/var/task/api/convert/app.py", line 14, in <module>
+    from pydantic import BaseModel, ConfigDict, Field, field_validator
+  File "/var/task/_vendor/pydantic/__init__.py", line 5, in <module>
+    from ._migration import getattr_migration
+  File "/var/task/_vendor/pydantic/_migration.py", line 4, in <module>
+    from pydantic.warnings import PydanticDeprecatedSince20
+  File "/var/task/_vendor/pydantic/warnings.py", line 5, in <module>
+    from .version import version_short
+  File "/var/task/_vendor/pydantic/version.py", line 7, in <module>
+    from pydantic_core import __version__ as __pydantic_core_version__
+  File "/var/task/_vendor/pydantic_core/__init__.py", line 8, in <module>
+    from ._pydantic_core import (
+ModuleNotFoundError: No module named 'pydantic_core._pydantic_core'

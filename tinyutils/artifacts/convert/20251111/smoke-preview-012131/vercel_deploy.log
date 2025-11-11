@@ -1,0 +1,19 @@
+Vercel CLI 48.8.2
+WARN! `--confirm` is deprecated, please use `--yes` instead
+Retrieving project…
+Error: The "--prebuilt" option was used with the target environment "production", but the prebuilt output found in ".vercel/output" was built with target environment "preview". Please run `vercel --prebuilt`.
+Learn More: https://vercel.link/prebuilt-environment-mismatch
+Vercel CLI 48.8.2
+Retrieving project…
+Deploying cavins-projects-7b0e00bb/tinyutils
+Uploading [--------------------] (0.0B/36.5KB)
+Uploading [=========-----------] (16.7KB/36.5KB)
+Uploading [==========----------] (19.3KB/36.5KB)
+Uploading [==================--] (33.3KB/36.5KB)
+Uploading [====================] (36.5KB/36.5KB)
+Inspect: https://vercel.com/cavins-projects-7b0e00bb/tinyutils/7XHZkuHvMNVwKtez9ELVu1xpnLtb [5s]
+Preview: https://tinyutils-64zm9zttb-cavins-projects-7b0e00bb.vercel.app [5s]
+https://tinyutils-64zm9zttb-cavins-projects-7b0e00bb.vercel.appQueued
+Building
+Completing
+To deploy to production (www.tinyutils.net), run `vercel --prod`

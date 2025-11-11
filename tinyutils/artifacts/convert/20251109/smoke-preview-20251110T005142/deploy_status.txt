@@ -1,0 +1,5 @@
+timestamp=2025-11-10 00:55:06 CET
+status=vercel_deploy_failed
+message=vercel deploy failed
+preview_url=n/a
+artifacts=artifacts/convert/20251109/smoke-preview-20251110T005142

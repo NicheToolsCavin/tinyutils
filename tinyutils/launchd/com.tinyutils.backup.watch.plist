@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.tinyutils.backup.watch</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>-lc</string>
+    <string>cd /Users/cav/dev/TinyUtils/tinyutils && MIN_INTERVAL_SECONDS=600 SKIP_IF_CLEAN=1 ./scripts/backup_repo.sh</string>
+  </array>
+  <key>WatchPaths</key>
+  <array>
+    <string>/Users/cav/dev/TinyUtils/tinyutils</string>
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>StandardOutPath</key>
+  <string>/Users/cav/dev/TinyBackups/watch-backup.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/cav/dev/TinyBackups/watch-backup.err</string>
+</dict>
+</plist>

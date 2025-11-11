@@ -1,0 +1,11 @@
+Vercel CLI 48.8.2
+Retrieving project…
+Deploying cavins-projects-7b0e00bb/tinyutils
+Uploading [--------------------] (0.0B/29.7KB)
+Uploading [==========----------] (16.1KB/29.7KB)
+Uploading [====================] (29.7KB/29.7KB)
+Inspect: https://vercel.com/cavins-projects-7b0e00bb/tinyutils/9G7aBoSg71jTKSXZwrzHR78upbfW [3s]
+Preview: https://tinyutils-c0p11zbds-cavins-projects-7b0e00bb.vercel.app [3s]
+https://tinyutils-c0p11zbds-cavins-projects-7b0e00bb.vercel.appQueued
+Building
+Error: Function Runtimes must have a valid version, for example `now-php@1.0.0`.
