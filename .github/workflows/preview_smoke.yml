@@ -9,6 +9,22 @@ on:
         description: 'Optional: URL of the Vercel preview deployment to test'
         required: false
         type: string
+      vercel_token:
+        description: 'Optional: Vercel API Token for deployment'
+        required: false
+        type: string
+      vercel_org_id:
+        description: 'Optional: Vercel Organization ID'
+        required: false
+        type: string
+      vercel_project_id:
+        description: 'Optional: Vercel Project ID'
+        required: false
+        type: string
+      preview_secret:
+        description: 'Optional: Secret for preview protection bypass'
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -34,9 +50,9 @@ jobs:
           mkdir -p .vercel
           npx vercel env pull .vercel/.env.preview.local --environment preview --yes
         env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TOKEN: ${{ github.event.inputs.vercel_token || secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ github.event.inputs.vercel_org_id || secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ github.event.inputs.vercel_project_id || secrets.VERCEL_PROJECT_ID }}
 
       - name: Deploy Vercel preview
         id: deploy
@@ -45,11 +61,10 @@ jobs:
           mkdir -p artifacts/convert/github-${{ github.run_id }}
           npx vercel deploy --yes --target preview 2>&1 | tee artifacts/convert/github-${{ github.run_id }}/vercel_deploy.log
           PREVIEW_URL=$(grep -Eo 'https://[^ ]+\.vercel\.app' artifacts/convert/github-${{ github.run_id }}/vercel_deploy.log | tail -1)
-          echo "preview_url=$PREVIEW_URL" >> "$GITHUB_OUTPUT"
         env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TOKEN: ${{ github.event.inputs.vercel_token || secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ github.event.inputs.vercel_org_id || secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ github.event.inputs.vercel_project_id || secrets.VERCEL_PROJECT_ID }}
 
       - name: Set PREVIEW_URL for smoke test
         id: set_preview_url
@@ -73,8 +88,8 @@ jobs:
         env:
           CONVERT_SMOKE_ARTIFACTS: artifacts/convert/github-${{ github.run_id }}
           PREVIEW_URL: ${{ steps.set_preview_url.outputs.preview_url }}
-          PREVIEW_SECRET: ${{ secrets.PREVIEW_SECRET }}
-          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+          PREVIEW_SECRET: ${{ github.event.inputs.preview_secret || secrets.PREVIEW_SECRET }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ github.event.inputs.vercel_automation_bypass_secret || secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
         run: |
           set -a
           source .vercel/.env.preview.local || true
