@@ -24,18 +24,13 @@ jobs:
           node-version: '20.x'
           cache: 'npm'
 
-      - name: Install pnpm
-        run: |
-          npm i -g pnpm@9
-          pnpm --version
-
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Pull Vercel preview env
         run: |
           mkdir -p .vercel
-          pnpm dlx vercel env pull .vercel/.env.preview.local --environment preview --yes
+          npx vercel env pull .vercel/.env.preview.local --environment preview --yes
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -45,7 +40,7 @@ jobs:
         id: deploy
         run: |
           mkdir -p artifacts/convert/github-${{ github.run_id }}
-          pnpm dlx vercel deploy --yes --target preview 2>&1 | tee artifacts/convert/github-${{ github.run_id }}/vercel_deploy.log
+          npx vercel deploy --yes --target preview 2>&1 | tee artifacts/convert/github-${{ github.run_id }}/vercel_deploy.log
           PREVIEW_URL=$(grep -Eo 'https://[^ ]+\.vercel\.app' artifacts/convert/github-${{ github.run_id }}/vercel_deploy.log | tail -1)
           echo "preview_url=$PREVIEW_URL" >> "$GITHUB_OUTPUT"
         env:
