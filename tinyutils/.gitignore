@@ -4,3 +4,4 @@ node_modules/
 *.zip
 .vercel
 .env*.local
+.code/agents/*/exec-call_*.txt
