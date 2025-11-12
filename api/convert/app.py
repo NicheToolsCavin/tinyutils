@@ -372,6 +372,13 @@ def convert(
     request_id_value = request_id if isinstance(request_id, str) else None
     resolved_request_id = request_id_value or uuid.uuid4().hex
     start_time = time.time()
+
+    # Early debug logging
+    print(f"\n{'='*80}", file=sys.stderr, flush=True)
+    print(f"CONVERT START [{resolved_request_id}]", file=sys.stderr, flush=True)
+    print(f"Inputs: {len(request.inputs)}, Targets: {request.targets}", file=sys.stderr, flush=True)
+    print(f"{'='*80}\n", file=sys.stderr, flush=True)
+
     _ensure_convert_imports()
     runner = _get_pandoc_runner()
 
