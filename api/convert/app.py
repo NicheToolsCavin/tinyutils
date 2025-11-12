@@ -126,46 +126,19 @@ def _ensure_convert_imports() -> None:
     global ConverterOptions, InputPayload, convert_batch, BatchResult
     if ConverterOptions is not None:
         return
-    try:
-        # Try standard tinyutils.convert import first
-        from tinyutils.convert import (  # type: ignore
-            ConversionOptions as _ConverterOptions,
-            InputPayload as _InputPayload,
-            convert_batch as _convert_batch,
-        )
-        from tinyutils.convert.types import BatchResult as _BatchResult  # type: ignore
+    # Import from local copies in api/convert/ directory (no cross-package imports needed)
+    from .convert_service import (  # type: ignore
+        ConversionOptions as _ConverterOptions,
+        InputPayload as _InputPayload,
+        convert_batch as _convert_batch,
+    )
+    from .convert_types import BatchResult as _BatchResult  # type: ignore
 
-        ConverterOptions = _ConverterOptions
-        InputPayload = _InputPayload
-        convert_batch = _convert_batch
-        BatchResult = _BatchResult
-        logger.info("tinyutils.convert package loaded successfully")
-    except Exception as exc1:
-        # Fallback: try relative import from convert/ in same directory
-        logger.warning("tinyutils.convert not found, trying relative import: %s", exc1)
-        try:
-            import sys
-            from pathlib import Path
-            # Add parent directory to path so we can import from convert/
-            parent = Path(__file__).resolve().parents[1]
-            if str(parent) not in sys.path:
-                sys.path.insert(0, str(parent))
-
-            from convert import (  # type: ignore
-                ConversionOptions as _ConverterOptions,
-                InputPayload as _InputPayload,
-                convert_batch as _convert_batch,
-            )
-            from convert.types import BatchResult as _BatchResult  # type: ignore
-
-            ConverterOptions = _ConverterOptions
-            InputPayload = _InputPayload
-            convert_batch = _convert_batch
-            BatchResult = _BatchResult
-            logger.info("convert package loaded successfully via relative import")
-        except Exception as exc2:
-            logger.error("Failed to import convert package: %s, %s", exc1, exc2)
-            raise RuntimeError("Cannot import convert package from any location") from exc2
+    ConverterOptions = _ConverterOptions
+    InputPayload = _InputPayload
+    convert_batch = _convert_batch
+    BatchResult = _BatchResult
+    logger.info("converter modules loaded successfully from local copies")
 
 
 def _get_pandoc_runner():
