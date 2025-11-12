@@ -13,8 +13,8 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 ## Active Tasks (Newest First)
 
 | Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
-| Automated Vercel log downloading to ~/dev/TinyUtils/logs/ | manual-2025-11-12 14:25 CET | Todo | Create script/command to fetch Vercel logs automatically instead of manual fetch |
-| Converter API — Debug remaining 500 error on POST /api/convert | manual-2025-11-12 14:25 CET | In Progress | Fixed 5 issues (deps, pandoc, imports, pydantic, package). Health check ✅. Conversion still 500. Need Python traceback from Vercel logs. |
+| Automated Vercel log downloading to ~/dev/TinyUtils/logs/ | manual-2025-11-12 14:25 CET | Todo | Create script/command to fetch Vercel logs automatically instead of manual fetch. Log grabber script exists at ~/dev/TinyUtils/logs/grab_logs_converter_preview.sh |
+| Converter API — Debug remaining 500 error on POST /api/convert | manual-2025-11-12 14:25 & 16:10 CET | Completed | ✅ FIXED! 16 commits total (91e28d1→8dee8bd). Final solution: Copied convert modules into api/convert/ to avoid cross-package imports. Health check ✅. POST /api/convert ✅. Evidence: artifacts/convert/20251112/success_test_final.json |
 | Enforce per-turn logging (AGENTS.md + converter heartbeat) | manual-2025-11-12 10:42 CET | Completed | AGENTS.md updated; tool_desc_converter.md heartbeat added; artifacts/convert/20251112/heartbeat/ |
 | Converter — ZIP input (minimal) | auto-2025-11-12T10-35 CET | Completed | Safe extraction; per-member guard; supported formats only |
 | Converter — extended Options + filters (graceful) | auto-2025-11-12T10-35 CET | Completed | normalize*/wrap/headers/ascii; runner.apply_lua_filters best‑effort; filters under /filters |
