@@ -150,7 +150,7 @@ def _get_pandoc_runner():
     if _pandoc_runner is not None:
         return _pandoc_runner
     try:  # prefer real runner
-        from tinyutils.api._lib import pandoc_runner as _module  # type: ignore
+        from api._lib import pandoc_runner as _module  # type: ignore
 
         _pandoc_runner = _module
         return _pandoc_runner
