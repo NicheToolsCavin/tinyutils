@@ -1,5 +1,44 @@
 ## Converter Tool — Description and Change Log
 
+### Major changes — 2025-11-12 14:25 CET (UTC+01:00)
+
+Added
+• Five sequential fixes to resolve converter API startup failures
+• Python package dependencies file (`api/requirements.txt`) with fastapi, pydantic, requests, pypandoc
+• Error handling for missing packages (graceful fallbacks instead of crashes)
+• Restored missing converter service code (convert/service.py, convert/types.py, convert/__init__.py)
+• Root package initialization file (__init__.py) to make tinyutils importable as a Python module
+• Pydantic v2 configuration updates (model_config syntax)
+
+Modified
+• Pydantic model configuration changed from v1 syntax (`allow_population_by_field_name = True` in nested Config class) to v2 syntax (`model_config = {"populate_by_name": True}`)
+• Import error handling now catches and logs package availability issues instead of crashing
+
+Removed
+• None.
+
+Human-readable summary
+The converter was completely broken because five separate pieces were missing or misconfigured. Think of it like a car that won't start - we had to check the battery, fuel, spark plugs, and more.
+
+**Problem 1: Missing software libraries** - The Python code couldn't run because it was missing essential software pieces (like FastAPI and Pydantic). We added a list of required software so Vercel knows what to install.
+
+**Problem 2: Configuration mismatch** - One piece of software (Pydantic) was updated to a new version, but our code was still using old instructions. We updated the instructions to match the new version.
+
+**Problem 3: Missing converter logic** - The actual code that does the conversion work was accidentally not included in the project. We restored three important files (service.py, types.py, __init__.py) from backup copies.
+
+**Problem 4: Python couldn't find the code** - Even after restoring the code, Python couldn't locate it because the folder wasn't marked as a "Python package." We added a special marker file (__init__.py) at the project root so Python knows where to look.
+
+**Problem 5: No safety nets** - When things went wrong, the system crashed instead of handling errors gracefully. We added "try-except" blocks so errors are logged instead of causing crashes.
+
+The good news: The health check now passes - pandoc (the conversion engine) is working correctly. The bad news: The actual conversion still returns an error, so there's one more issue to track down. We need better error logging from Vercel to see what's failing.
+
+Impact
+• Health check ✅ passes: pandoc v3.1.11.1 working at /tmp/pandoc-vendored
+• All Python imports now succeed (previously crashing with ModuleNotFoundError)
+• Error messages are now in JSON format instead of plain text crashes
+• System logs warnings instead of crashing when optional features are missing
+• Remaining issue: POST /api/convert returns 500 error - needs detailed Python error logs to debug
+
 ### Major changes — 2025-11-12 12:40 CET (UTC+01:00)
 
 Added
