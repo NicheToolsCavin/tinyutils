@@ -4,10 +4,12 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Iterable, List, Optional, Tuple
 
+import lzma
 import logging
 import os
 import re
 import shutil
+import tempfile
 
 try:  # pragma: no cover - optional dependency
     import pypandoc  # type: ignore
@@ -17,6 +19,7 @@ except ImportError:  # pragma: no cover - optional dependency
 
 PANDOC_ENV_VAR = "PYPANDOC_PANDOC"
 VENDORED_PANDOC_PATH = Path(__file__).resolve().parents[1] / "_vendor" / "pandoc" / "pandoc"
+VENDORED_PANDOC_XZ_PATH = Path(__file__).resolve().parents[1] / "_vendor" / "pandoc" / "pandoc.xz"
 _PANDOC_CACHE: Optional[str] = None
 _LOGGER = logging.getLogger(__name__)
 
@@ -164,6 +167,46 @@ def _lua_filter_args() -> Optional[List[str]]:
     return ["--lua-filter=" + str(path) for path in paths]
 
 
+def _decompress_pandoc_xz() -> Optional[str]:
+    """Decompress vendored pandoc.xz to /tmp and return path.
+
+    This is needed because the decompressed pandoc (142MB) exceeds Vercel's
+    50MB serverless function limit, so we store it compressed (18MB) and
+    decompress to /tmp on cold start.
+
+    Returns:
+        Path to decompressed pandoc binary in /tmp, or None on failure.
+    """
+    if not VENDORED_PANDOC_XZ_PATH.exists():
+        return None
+
+    try:
+        # Use a predictable path in /tmp so we don't decompress on every invocation
+        tmp_pandoc = Path(tempfile.gettempdir()) / "pandoc-vendored"
+
+        # If already decompressed and executable, reuse it
+        if tmp_pandoc.exists() and os.access(tmp_pandoc, os.X_OK):
+            _LOGGER.info("Reusing existing decompressed pandoc at %s", tmp_pandoc)
+            return str(tmp_pandoc)
+
+        _LOGGER.info("Decompressing vendored pandoc.xz to %s (one-time operation)", tmp_pandoc)
+
+        # Decompress to tmp
+        with lzma.open(VENDORED_PANDOC_XZ_PATH, "rb") as compressed:
+            with open(tmp_pandoc, "wb") as decompressed:
+                shutil.copyfileobj(compressed, decompressed)
+
+        # Make executable
+        tmp_pandoc.chmod(0o755)
+
+        _LOGGER.info("Successfully decompressed pandoc to %s", tmp_pandoc)
+        return str(tmp_pandoc)
+
+    except Exception as exc:
+        _LOGGER.error("Failed to decompress pandoc.xz: %s", exc)
+        return None
+
+
 def _resolve_pandoc_path() -> Optional[str]:
     global _PANDOC_CACHE
 
@@ -177,7 +220,11 @@ def _resolve_pandoc_path() -> Optional[str]:
     candidates: List[Path] = []
     if env_path:
         candidates.append(Path(env_path))
+
+    # Try uncompressed vendored binary first
     candidates.append(VENDORED_PANDOC_PATH)
+
+    # Try system pandoc
     system_path = shutil.which("pandoc")
     if system_path:
         candidates.append(Path(system_path))
@@ -189,5 +236,11 @@ def _resolve_pandoc_path() -> Optional[str]:
             return resolved
         if index == 0 and env_path and not candidate.exists():
             _LOGGER.warning("pandoc env override missing path=%s", candidate)
+
+    # Fall back to decompressing vendored .xz if nothing else worked
+    decompressed = _decompress_pandoc_xz()
+    if decompressed:
+        _PANDOC_CACHE = decompressed
+        return decompressed
 
     return None
