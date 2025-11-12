@@ -1,3 +1,35 @@
+### 2025-11-12 16:10 CET (UTC+0100) — Converter API FINAL FIX (ci/preview-prod-green) ✅
+- Mode: manual
+- Branch: `ci/preview-prod-green`
+- CWD: /Users/cav/dev/TinyUtils/tinyutils
+- Summary:
+  - **CONVERTER API NOW FULLY WORKING** after fixing cross-package import issues (3 commits)
+  - **Fix attempt 1 (failed):** Tried relative imports (`from ..api._lib`) in convert/service.py — e1acd5b
+    - Failed locally and on Vercel: "attempted relative import beyond top-level package"
+  - **Fix attempt 2 (failed):** Added sys.path manipulation in convert/__init__.py — 005cf6f
+    - Worked locally but failed on Vercel (still getting "Internal Server Error")
+  - **Fix attempt 3 (SUCCESS):** Copied convert modules into api/convert/ directory — 8dee8bd
+    - Created `api/convert/convert_service.py` and `api/convert/convert_types.py`
+    - Updated convert_service.py to use relative imports (`from .._lib`)
+    - Updated app.py to import from local modules instead of convert package
+    - **Result:** Eliminates all cross-package import issues, everything self-contained in api/convert/
+  - **Root cause:** Python package import context on Vercel deployment
+    - When Python imports convert as top-level package, it cannot see api (sibling directory)
+    - Sys.path manipulation worked locally but not on Vercel due to deployment structure
+    - Solution: Copy files into api/convert/ where relative imports (.._lib) work perfectly
+  - Test results ✅:
+    - Health check: `{"status":"ok","pypandocVersion":"1.16","pandocPath":"/tmp/pandoc-vendored","pandocVersion":"pandoc-vendored 3.1.11.1"}`
+    - POST /api/convert: Success! Returns JSON with jobId, outputs, preview, logs
+    - Sample conversion: markdown→html works perfectly (tested with "# Test Doc")
+    - Output: `<h1 id="test-doc">Test Doc</h1><p>This is a <strong>test</strong> markdown file.</p>`
+- Evidence:
+  - Success artifact: artifacts/convert/20251112/success_test_final.json
+  - Commits: e1acd5b (failed attempt 1), 005cf6f (failed attempt 2), 8dee8bd (SUCCESS)
+  - Total session: 16 commits across 2 sessions (from 91e28d1 to 8dee8bd)
+- Follow-ups:
+  - None — converter API fully operational
+  - Future: Consider consolidating convert/ and api/convert/convert_* files
+
 ### 2025-11-12 14:25 CET (UTC+0100) — Converter API 5-fix sequence (ci/preview-prod-green)
 - Mode: manual
 - Branch: `ci/preview-prod-green`
