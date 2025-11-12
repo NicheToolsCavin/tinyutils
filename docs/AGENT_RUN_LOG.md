@@ -1,3 +1,25 @@
+### 2025-11-12 14:25 CET (UTC+0100) — Converter API 5-fix sequence (ci/preview-prod-green)
+- Mode: manual
+- Branch: `ci/preview-prod-green`
+- CWD: /Users/cav/dev/TinyUtils/tinyutils
+- Summary:
+  - Fixed 5 critical converter API issues in sequence (7 commits total)
+  - **Fix 1:** Added `api/requirements.txt` with Python dependencies (fastapi, pydantic, requests, pypandoc) — 91e28d1
+  - **Fix 2:** Implemented runtime pandoc.xz decompression to /tmp (18MB→142MB, bypasses Vercel 50MB limit) — 3914b51
+  - **Fix 3:** Fixed import path from `tinyutils.api._lib` to `api._lib` — 6ef9af9
+  - **Fix 4:** Pydantic v2 compatibility (`allow_population_by_field_name` → `populate_by_name`) — 7e92627
+  - **Fix 5a:** Added error handling for missing tinyutils.convert package — f309a05
+  - **Fix 5b:** Restored missing `convert/` package (service.py, types.py, __init__.py) from build artifacts — 3de24a0
+  - **Fix 5c:** Added root `__init__.py` to make tinyutils a proper Python package — 4b1f894
+  - Health check ✅: `{"status":"ok","pandocPath":"/tmp/pandoc-vendored","pandocVersion":"pandoc-vendored 3.1.11.1"}`
+  - POST /api/convert still returns 500 — needs Python traceback from Vercel logs to debug further
+- Evidence:
+  - Artifacts: artifacts/convert/20251112/ (conversion tests, health checks, responses)
+  - Commits: 91e28d1, 3914b51, 6ef9af9, 7e92627, f309a05, 3de24a0, 4b1f894
+- Follow-ups:
+  - Investigate remaining 500 error on POST /api/convert (need detailed Python traceback)
+  - Add automated Vercel log downloading (tracked in AGENT_TASK_CHECKLIST.md)
+
 ### 2025-11-12 12:40 CET (UTC+0100) — Converter pandoc binary fix (ci/preview-prod-green)
 - Mode: manual
 - Branch: `ci/preview-prod-green`
