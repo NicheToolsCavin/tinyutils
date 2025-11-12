@@ -332,19 +332,13 @@ def _render_markdown_target(cleaned_path: Path, target: str) -> bytes:
 
 
 def _render_pdf_via_reportlab(markdown_path: Path) -> bytes:
-    """Convert markdown to PDF using reportlab.
+    """Convert markdown to PDF using fpdf2.
 
     This provides a pure-Python PDF generation solution without requiring LaTeX.
-    The output won't be as polished as pandoc+LaTeX, but it works on Vercel.
+    Uses fpdf2 for better compatibility on serverless environments.
     """
     try:
-        from reportlab.lib.pagesizes import letter
-        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-        from reportlab.lib.units import inch
-        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Preformatted
-        from reportlab.lib.enums import TA_LEFT
-        from reportlab.lib import colors
-        import io
+        from fpdf import FPDF
         import re
 
         # Read markdown content
@@ -352,108 +346,87 @@ def _render_pdf_via_reportlab(markdown_path: Path) -> bytes:
         if not markdown_text.strip():
             markdown_text = "Empty document"
 
-        # Create PDF in memory
-        buffer = io.BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=letter,
-                               topMargin=0.75*inch, bottomMargin=0.75*inch,
-                               leftMargin=0.75*inch, rightMargin=0.75*inch)
+        # Create PDF
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_auto_page_break(auto=True, margin=15)
 
-        story = []
-        styles = getSampleStyleSheet()
-
-        # Define custom styles - create from scratch to avoid missing style dependencies
-        normal_style = styles["Normal"]
-        heading1_style = ParagraphStyle(
-            'CustomHeading1',
-            parent=styles['Heading1'],
-            fontSize=18,
-            spaceAfter=12,
-            textColor=colors.black
-        )
-        heading2_style = ParagraphStyle(
-            'CustomHeading2',
-            parent=styles['Heading2'],
-            fontSize=14,
-            spaceAfter=10,
-            textColor=colors.black
-        )
-        # Create code style from Normal instead of assuming 'Code' exists
-        code_style = ParagraphStyle(
-            'CustomCode',
-            parent=normal_style,
-            fontName='Courier',
-            fontSize=9,
-            leftIndent=20,
-            textColor=colors.black,
-            backColor=colors.lightgrey
-        )
-
-        # Simple markdown parser (basic support)
+        # Process markdown line by line
         lines = markdown_text.split('\n')
         i = 0
+
         while i < len(lines):
             line = lines[i].rstrip()
 
-            # Skip empty lines
-            if not line:
-                story.append(Spacer(1, 0.1*inch))
-                i += 1
-                continue
-
             try:
-                # Headings
+                # Skip empty lines
+                if not line:
+                    pdf.ln(5)
+                    i += 1
+                    continue
+
+                # Heading 1
                 if line.startswith('# '):
                     text = line[2:].strip()
-                    if text:
-                        story.append(Paragraph(text, heading1_style))
-                        story.append(Spacer(1, 0.1*inch))
+                    pdf.set_font('Arial', 'B', 18)
+                    pdf.multi_cell(0, 10, text)
+                    pdf.ln(2)
+                # Heading 2
                 elif line.startswith('## '):
                     text = line[3:].strip()
-                    if text:
-                        story.append(Paragraph(text, heading2_style))
-                        story.append(Spacer(1, 0.1*inch))
-                # Code blocks
+                    pdf.set_font('Arial', 'B', 14)
+                    pdf.multi_cell(0, 8, text)
+                    pdf.ln(2)
+                # Heading 3
+                elif line.startswith('### '):
+                    text = line[4:].strip()
+                    pdf.set_font('Arial', 'B', 12)
+                    pdf.multi_cell(0, 7, text)
+                    pdf.ln(2)
+                # Code block
                 elif line.startswith('```'):
                     code_lines = []
                     i += 1
                     while i < len(lines) and not lines[i].startswith('```'):
                         code_lines.append(lines[i])
                         i += 1
-                    code_text = '\n'.join(code_lines)
-                    if code_text.strip():
-                        story.append(Preformatted(code_text, code_style))
-                        story.append(Spacer(1, 0.1*inch))
-                # Regular text with basic markdown formatting
+                    if code_lines:
+                        pdf.set_font('Courier', '', 9)
+                        pdf.set_fill_color(240, 240, 240)
+                        for code_line in code_lines:
+                            pdf.multi_cell(0, 5, code_line, fill=True)
+                        pdf.ln(2)
+                # Bullet list
+                elif line.startswith('- ') or line.startswith('* '):
+                    text = line[2:].strip()
+                    # Simple formatting removal for bullet points
+                    text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)  # Bold
+                    text = re.sub(r'\*(.+?)\*', r'\1', text)      # Italic
+                    pdf.set_font('Arial', '', 11)
+                    pdf.cell(10, 6, chr(149), 0, 0)  # Bullet character
+                    pdf.multi_cell(0, 6, text)
+                # Regular paragraph
                 else:
-                    # Escape special XML characters first
-                    text = line.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
-
-                    # Then apply markdown formatting (which uses HTML-like tags)
-                    # Bold: **text** → <b>text</b>
-                    text = re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', text)
-                    # Italic: *text* or _text_ → <i>text</i>
-                    text = re.sub(r'(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)', r'<i>\1</i>', text)
-                    text = re.sub(r'_(.+?)_', r'<i>\1</i>', text)
-                    # Links: [text](url) → text
-                    text = re.sub(r'\[(.+?)\]\((.+?)\)', r'\1', text)
+                    # Remove markdown formatting for simplicity
+                    text = line
+                    text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)  # Bold
+                    text = re.sub(r'\*(.+?)\*', r'\1', text)      # Italic
+                    text = re.sub(r'_(.+?)_', r'\1', text)        # Italic underscore
+                    text = re.sub(r'\[(.+?)\]\((.+?)\)', r'\1', text)  # Links
 
                     if text.strip():
-                        story.append(Paragraph(text, normal_style))
-                        story.append(Spacer(1, 0.05*inch))
+                        pdf.set_font('Arial', '', 11)
+                        pdf.multi_cell(0, 6, text)
+                        pdf.ln(1)
+
             except Exception as line_error:
                 # If a single line fails, log and continue
                 print(f"Warning: Failed to process line: {line_error}")
-                continue
 
             i += 1
 
-        # Ensure story has at least one element
-        if not story:
-            story.append(Paragraph("Empty document", normal_style))
-
-        # Build PDF
-        doc.build(story)
-        return buffer.getvalue()
+        # Generate PDF bytes
+        return pdf.output(dest='S').encode('latin-1')
 
     except Exception as e:
         # If PDF generation fails completely, raise a more informative error
