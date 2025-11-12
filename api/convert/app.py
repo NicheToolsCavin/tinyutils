@@ -523,6 +523,16 @@ def convert(
     except Exception as exc:  # pragma: no cover - safety net for diagnostics
         _log_unexpected_trace(resolved_request_id, exc)
         _log_failure(resolved_request_id, exc.__class__.__name__, str(exc), start_time)
+
+        # DEBUG: Return traceback in response for preview env
+        if _is_preview_env():
+            trace = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+            raise HTTPException(
+                status_code=500,
+                detail=f"DEBUG: {exc.__class__.__name__}: {str(exc)}\n\n{trace}",
+                headers=_response_headers(resolved_request_id),
+            ) from exc
+
         raise HTTPException(
             status_code=500,
             detail="Internal server error during conversion",
