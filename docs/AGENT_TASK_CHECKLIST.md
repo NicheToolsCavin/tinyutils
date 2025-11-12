@@ -13,6 +13,11 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 ## Active Tasks (Newest First)
 
 | Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
+| Enforce per-turn logging (AGENTS.md + converter heartbeat) | manual-2025-11-12 10:42 CET | Completed | AGENTS.md updated; tool_desc_converter.md heartbeat added; artifacts/convert/20251112/heartbeat/ |
+| Converter — ZIP input (minimal) | auto-2025-11-12T10-35 CET | Completed | Safe extraction; per-member guard; supported formats only |
+| Converter — extended Options + filters (graceful) | auto-2025-11-12T10-35 CET | Completed | normalize*/wrap/headers/ascii; runner.apply_lua_filters best‑effort; filters under /filters |
+| Converter — preview flag + consistent manifest | auto-2025-11-12T10-35 CET | Completed | Always return preview object; signature-aware pass to convert_batch |
+| Lander + sitemap — html-to-markdown | auto-2025-11-12T10-35 CET | Completed | Redirect + sitemap entry |
 | PR4 test suites | manual-2025-11-05T01-29 | Completed | Artifacts: tinyutils/artifacts/pr4-tests/20251105/ |
 | PR3 preview fence evidence | manual-2025-11-05T00-49 | Completed | Preview smoke PASS; 401→200 curl captures and cookies stored in tinyutils/artifacts/pr3-fence/20251105/. |
 | PR2 noindex + debug hook | manual-2025-11-05T00-14 | Completed | Meta shells now carry noindex meta; DLF debug paragraph has data-testid. Evidence: tinyutils/artifacts/pr2-ux-noindex-debug/20251105/. |
