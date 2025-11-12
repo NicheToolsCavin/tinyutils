@@ -1,5 +1,105 @@
 ## Converter Tool — Description and Change Log
 
+### Major changes — 2025-11-12 11:35 CET (UTC+01:00)
+
+Added
+• Declared Python runtime dependencies for the convert function in `api/requirements.txt` (`fastapi`, `pydantic`, `requests`, `pypandoc`).
+
+Modified
+• None.
+
+Removed
+• None.
+
+Human-readable summary
+Preview POST to `/api/convert` failed with `ModuleNotFoundError: No module named 'pydantic'`. Vercel Python functions install packages from `requirements.txt`; the file was missing. We added `api/requirements.txt` with the minimal set required by the existing code so deployments bundle dependencies and the endpoint can execute.
+
+Impact
+• Converter API should load successfully on the next Preview deployment; `health` and `convert` routes will respond with JSON instead of 500 text errors.
+
+### Minor changes — 2025-11-12 10:42 CET (UTC+01:00)
+
+Added
+• Documentation-only heartbeat entry to comply with mandatory per-turn logging.
+
+Modified
+• AGENTS.md now mandates logging every turn and requires a same-day converter heartbeat while the converter is in active scope; this entry reflects that policy. No changes to runtime behavior.
+
+Removed
+• None.
+
+Human-readable summary
+No behavior change. This is a documentation heartbeat recording that today’s work focused on policy enforcement and logging hygiene. Converter behavior, API contract, normalization options, and UI remain as previously described.
+
+Impact
+• None on users. Improves auditability and hand-offs by guaranteeing per-turn updates in both the run log and this file.
+
+### Major changes — 2025-11-12 10:35 CET (UTC+01:00)
+
+Added
+• Request model now accepts `preview: boolean`; when requested, the API always returns a `preview` manifest object (`headings[]`, `snippets[]`, `images[]`) even when empty.
+• Extended `Options` with normalization/format flags (safe defaults): `normalizeLists`, `normalizeUnicode`, `removeNbsp`, `wrap`, `headers`, `asciiPunctuation`.
+• Graceful filter wiring: the API calls a runner hook to apply Lua filters when available; otherwise it no‑ops without breaking responses.
+• ZIP input (minimal): server detects `.zip` by content‑type/extension, safely extracts supported files, enforces per‑member limits, and processes each as an input.
+• Lua filters under `/filters/`:
+  – `softbreak_to_space.lua` — converts SoftBreak to Space.
+  – `strip_empty_spans.lua` — removes empty Span elements.
+  – `normalize_lists.lua` — forces ordered lists to start at 1 (Decimal style).
+
+Modified
+• Signature‑aware option passing to the underlying `ConversionOptions` and `convert_batch` (`preview` only when supported).
+• Response contract remains unchanged: `jobId`, `outputs[] { name, size, blobUrl, target }`, `preview`, `logs`, `errors`.
+
+Removed
+• None.
+
+Human-readable summary
+The converter API now supports a preview‑first flow and exposes a richer normalization surface without breaking existing clients. When `preview:true` is sent, the response always contains a consistent manifest for quick inspection. Normalization flags are accepted and, when the runner is present, Pandoc Lua filters are applied; otherwise the request degrades gracefully. Basic ZIP batch input is supported by safely extracting supported files and converting them individually.
+
+Impact
+• UI Preview button reliably sees a `preview` object; clients can progressively enable normalization features.
+• Larger/batch work can be sent as a `.zip` of supported files without changing the response schema.
+• Future runner updates can activate more normalization without changing this API surface.
+
+### Major changes — 2025-11-12 Late PM CET (UTC+01:00)
+
+Added
+• ZIP batch input handling in API: detects ZIP archives (via Content-Type `application/zip` or `.zip` extension), safely extracts supported text/document formats (.docx, .odt, .rtf, .md, .markdown, .txt, .html, .htm), and produces individual InputPayload entries for each file.
+• Size guards applied per ZIP member via `ensure_within_limits`; skips macOS metadata (`__MACOSX/`, hidden dot-directories) and unsupported file types.
+• Preview parameter now passed to `convert_batch` when supported (signature-aware introspection).
+• Lua filter documentation: clarified what each filter does and how `pandoc_runner.apply_lua_filters` applies them.
+
+Modified
+• `_download_payloads` now detects ZIP inputs and delegates to `_extract_zip_payloads` for batch processing.
+• `convert` endpoint passes `preview` parameter to `convert_batch` when the signature supports it.
+
+Removed
+• None.
+
+Human-readable summary
+ZIP batch input is now fully supported: users can upload a ZIP archive containing multiple documents, and the API will extract and convert each supported file individually. The preview-first flow is complete: when `preview=true` is requested, the API passes it through to the backend (if supported) and consistently returns preview manifests. All normalization options flow correctly into the conversion path, and Lua filters are applied when available.
+
+Impact
+• Batch workflows: users can convert multiple documents in one request by uploading a ZIP.
+• Preview parity: API now respects the `preview` flag end-to-end.
+• Normalization pipeline: filters apply cleanly when `pandoc_runner.apply_lua_filters` is available.
+
+Notes / follow-ups
+• ZIP outputs: currently, each converted file is returned as a separate blob. Packaging multiple outputs into a single ZIP remains future work.
+• Test coverage: validate ZIP extraction with mixed supported/unsupported files, hidden directories, and size limits.
+
+#### Lua Filters
+
+The `/filters` directory contains Pandoc Lua filters that implement the normalization pipeline:
+
+**`softbreak_to_space.lua`**: Replaces Pandoc `SoftBreak` elements with `Space` elements. This prevents hard-wrapped markdown and ensures consistent spacing across formats.
+
+**`strip_empty_spans.lua`**: Removes empty `Span` elements that are often generated by word processors. This cleans up unnecessary markup in the output.
+
+**`normalize_lists.lua`**: Forces `OrderedList` elements to start at 1 with `Decimal` style. This ensures deterministic, consistent markdown list formatting.
+
+The `pandoc_runner.apply_lua_filters(converter_options, opts_dict)` method (when available) applies these filters based on the normalization options in the request. If the runner is unavailable, the API degrades gracefully with a no-op.
+
 ### Major changes — 2025-11-12 PM CET (UTC+01:00)
 
 Added
@@ -58,4 +158,3 @@ Notes / follow-ups
 • Batch ZIP input, media packaging as ZIP, and extended normalization toggles (`normalizeLists`, `normalizeUnicode`, `wrap`, `headers`, `asciiPunctuation`) are planned; UI stubs can be surfaced once backend wiring lands.
 • Add Lua filters under `/filters` and wire in `pandoc_runner` for full cleanup parity.
 • Consider switching canonical domains at release time to production domain.
-

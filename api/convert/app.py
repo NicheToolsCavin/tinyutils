@@ -7,6 +7,7 @@ import subprocess
 import sys
 import time
 import traceback
+import zipfile
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Optional
 import uuid
@@ -435,12 +436,19 @@ def convert(
             pass  # graceful no-op when runner or method is absent
 
         try:
-            batch = convert_batch_fn(
-                inputs=payloads,
-                targets=request.targets,
-                from_format=request.source_format,
-                options=converter_options,
-            )
+            # Check if convert_batch supports preview parameter (signature-aware)
+            import inspect
+            batch_sig = inspect.signature(convert_batch_fn)
+            batch_kwargs = {
+                "inputs": payloads,
+                "targets": request.targets,
+                "from_format": request.source_format,
+                "options": converter_options,
+            }
+            if "preview" in batch_sig.parameters:
+                batch_kwargs["preview"] = request.preview
+
+            batch = convert_batch_fn(**batch_kwargs)
         except ValueError as exc:
             logger.error(
                 "convert validation failed request_id=%s detail=%s",
@@ -498,14 +506,105 @@ def convert(
             headers=_response_headers(resolved_request_id),
         ) from exc
 
+def _extract_zip_payloads(zip_path: Path, job_dir: Path, batch_index: int) -> List[InputPayload]:
+    """Extract supported files from a ZIP archive and return InputPayload entries.
+
+    Args:
+        zip_path: Path to the ZIP file
+        job_dir: Working directory for extraction
+        batch_index: Index of the ZIP file in the batch
+
+    Returns:
+        List of InputPayload instances for supported files
+    """
+    _ensure_convert_imports()
+    payloads: List[InputPayload] = []
+
+    # Supported text/document formats
+    SUPPORTED_EXTENSIONS = {
+        ".docx", ".odt", ".rtf", ".md", ".markdown",
+        ".txt", ".html", ".htm"
+    }
+
+    extract_dir = job_dir / f"zip_{batch_index}"
+    extract_dir.mkdir(exist_ok=True)
+
+    try:
+        with zipfile.ZipFile(zip_path, "r") as zf:
+            for member in zf.namelist():
+                # Skip macOS metadata and hidden directories
+                parts = Path(member).parts
+                if any(p.startswith(".") or p == "__MACOSX" for p in parts):
+                    logger.debug("Skipping ZIP entry: %s", member)
+                    continue
+
+                # Skip directories
+                if member.endswith("/"):
+                    continue
+
+                # Check if supported format
+                suffix = Path(member).suffix.lower()
+                if suffix not in SUPPORTED_EXTENSIONS:
+                    logger.info("Skipping unsupported file in ZIP: %s", member)
+                    continue
+
+                # Check member size before extraction
+                info = zf.getinfo(member)
+                ensure_within_limits(info.file_size)
+
+                # Extract with relative path preserved
+                target_path = extract_dir / member
+                target_path.parent.mkdir(parents=True, exist_ok=True)
+
+                with zf.open(member) as source:
+                    data = source.read()
+                    target_path.write_bytes(data)
+
+                # Create payload
+                payload_name = Path(member).name
+                payloads.append(
+                    InputPayload(
+                        name=payload_name,
+                        data=data,
+                        source_format=None
+                    )
+                )
+                logger.info("Extracted from ZIP: %s (size=%d)", member, len(data))
+
+    except zipfile.BadZipFile as exc:
+        logger.error("Invalid ZIP file: %s", exc)
+        raise ValueError(f"Invalid ZIP file: {exc}") from exc
+    except Exception as exc:
+        logger.error("ZIP extraction failed: %s", exc)
+        raise ValueError(f"ZIP extraction failed: {exc}") from exc
+
+    if not payloads:
+        raise ValueError("No supported files found in ZIP archive")
+
+    return payloads
+
+
 def _download_payloads(inputs: List[InputItem], job_dir: Path) -> List[InputPayload]:
     _ensure_convert_imports()
     payloads: List[InputPayload] = []
     for index, item in enumerate(inputs, start=1):
         metadata = _download_input(item, job_dir)
-        data = metadata.path.read_bytes()
-        name = (item.name or metadata.original_name or f"document-{index}").strip() or f"document-{index}"
-        payloads.append(InputPayload(name=name, data=data, source_format=None))
+
+        # Check if this is a ZIP file
+        is_zip = (
+            metadata.content_type == "application/zip" or
+            metadata.path.suffix.lower() == ".zip"
+        )
+
+        if is_zip:
+            # Extract ZIP and create payloads for each supported file
+            extracted = _extract_zip_payloads(metadata.path, job_dir, index)
+            payloads.extend(extracted)
+        else:
+            # Single file payload
+            data = metadata.path.read_bytes()
+            name = (item.name or metadata.original_name or f"document-{index}").strip() or f"document-{index}"
+            payloads.append(InputPayload(name=name, data=data, source_format=None))
     return payloads
 
 
