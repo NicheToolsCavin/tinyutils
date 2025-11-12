@@ -31,11 +31,13 @@ from .convert_types import (
 )
 
 
-TARGET_EXTENSIONS = {"md": "md", "html": "html", "txt": "txt"}
+TARGET_EXTENSIONS = {"md": "md", "html": "html", "txt": "txt", "docx": "docx", "pdf": "pdf"}
 TARGET_CONTENT_TYPES = {
     "md": "text/markdown; charset=utf-8",
     "html": "text/html; charset=utf-8",
     "txt": "text/plain; charset=utf-8",
+    "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "pdf": "application/pdf",
 }
 
 
@@ -111,8 +113,15 @@ def convert_one(
             media_dir = workspace / "media"
             extract_dir: Optional[Path] = media_dir if opts.extract_media else None
 
+            # Pre-process PDFs: extract text using pypdf before pandoc
+            source_for_pandoc = input_path
+            if from_format == "pdf" or (from_format is None and input_path.suffix.lower() == ".pdf"):
+                logs.append("preprocessing=pdf_text_extraction")
+                source_for_pandoc = _extract_text_from_pdf(input_path, workspace)
+                from_format = "markdown"  # Extracted text is markdown
+
             pandoc_runner.convert_to_markdown(
-                source=input_path,
+                source=source_for_pandoc,
                 destination=raw_md,
                 from_format=from_format,
                 accept_tracked_changes=opts.accept_tracked_changes,
@@ -295,14 +304,139 @@ def _fallback_conversion(*, name: str, input_bytes: bytes, targets: Sequence[str
 
 def _render_markdown_target(cleaned_path: Path, target: str) -> bytes:
     pypandoc = _get_pypandoc()
-    pandoc_target = "plain" if target == "txt" else target
-    rendered = pypandoc.convert_file(
-        str(cleaned_path),
-        to=pandoc_target,
-        format="gfm",
-        extra_args=["--wrap=none"],
-    )
-    return rendered.encode("utf-8")
+
+    if target == "pdf":
+        # PDF requires special handling - use reportlab for pure Python solution
+        return _render_pdf_via_reportlab(cleaned_path)
+    elif target == "docx":
+        # DOCX output via pandoc (native support)
+        output_path = cleaned_path.parent / f"{cleaned_path.stem}.docx"
+        pypandoc.convert_file(
+            str(cleaned_path),
+            to="docx",
+            format="gfm",
+            outputfile=str(output_path),
+            extra_args=["--wrap=none"],
+        )
+        return output_path.read_bytes()
+    else:
+        # Standard text-based outputs (html, txt, md)
+        pandoc_target = "plain" if target == "txt" else target
+        rendered = pypandoc.convert_file(
+            str(cleaned_path),
+            to=pandoc_target,
+            format="gfm",
+            extra_args=["--wrap=none"],
+        )
+        return rendered.encode("utf-8")
+
+
+def _render_pdf_via_reportlab(markdown_path: Path) -> bytes:
+    """Convert markdown to PDF using reportlab.
+
+    This provides a pure-Python PDF generation solution without requiring LaTeX.
+    The output won't be as polished as pandoc+LaTeX, but it works on Vercel.
+    """
+    from reportlab.lib.pagesizes import letter
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import inch
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Preformatted
+    from reportlab.lib.enums import TA_LEFT
+    import io
+    import re
+
+    # Read markdown content
+    markdown_text = markdown_path.read_text("utf-8")
+
+    # Create PDF in memory
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter,
+                           topMargin=0.75*inch, bottomMargin=0.75*inch,
+                           leftMargin=0.75*inch, rightMargin=0.75*inch)
+
+    story = []
+    styles = getSampleStyleSheet()
+
+    # Define custom styles
+    normal_style = styles["Normal"]
+    heading1_style = ParagraphStyle('CustomHeading1', parent=styles['Heading1'], fontSize=18, spaceAfter=12)
+    heading2_style = ParagraphStyle('CustomHeading2', parent=styles['Heading2'], fontSize=14, spaceAfter=10)
+    code_style = ParagraphStyle('Code', parent=styles['Code'], fontSize=9, leftIndent=20)
+
+    # Simple markdown parser (basic support)
+    lines = markdown_text.split('\n')
+    i = 0
+    while i < len(lines):
+        line = lines[i].rstrip()
+
+        # Skip empty lines
+        if not line:
+            story.append(Spacer(1, 0.1*inch))
+            i += 1
+            continue
+
+        # Headings
+        if line.startswith('# '):
+            text = line[2:].strip()
+            story.append(Paragraph(text, heading1_style))
+        elif line.startswith('## '):
+            text = line[3:].strip()
+            story.append(Paragraph(text, heading2_style))
+        # Code blocks
+        elif line.startswith('```'):
+            code_lines = []
+            i += 1
+            while i < len(lines) and not lines[i].startswith('```'):
+                code_lines.append(lines[i])
+                i += 1
+            code_text = '\n'.join(code_lines)
+            story.append(Preformatted(code_text, code_style))
+        # Bold/italic/links (simple regex replacement)
+        else:
+            # Convert markdown formatting to HTML-like tags for reportlab
+            text = line
+            # Bold: **text** → <b>text</b>
+            text = re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', text)
+            # Italic: *text* or _text_ → <i>text</i>
+            text = re.sub(r'(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)', r'<i>\1</i>', text)
+            text = re.sub(r'_(.+?)_', r'<i>\1</i>', text)
+            # Links: [text](url) → text (url)
+            text = re.sub(r'\[(.+?)\]\((.+?)\)', r'\1 (\2)', text)
+
+            story.append(Paragraph(text, normal_style))
+            story.append(Spacer(1, 0.1*inch))
+
+        i += 1
+
+    # Build PDF
+    doc.build(story)
+    return buffer.getvalue()
+
+
+def _extract_text_from_pdf(pdf_path: Path, workspace: Path) -> Path:
+    """Extract text from PDF using pypdf and return as markdown file.
+
+    This allows us to read PDFs without requiring pdftotext or poppler-utils.
+    The extracted text will be formatted as simple markdown.
+    """
+    from pypdf import PdfReader
+
+    reader = PdfReader(pdf_path)
+    extracted_lines = []
+
+    # Extract text from all pages
+    for page_num, page in enumerate(reader.pages, start=1):
+        text = page.extract_text()
+        if text.strip():
+            # Add page marker for multi-page PDFs
+            if len(reader.pages) > 1:
+                extracted_lines.append(f"\n\n---\n\n**Page {page_num}**\n\n")
+            extracted_lines.append(text)
+
+    # Save as markdown
+    md_path = workspace / f"{pdf_path.stem}_extracted.md"
+    md_path.write_text("\n".join(extracted_lines), "utf-8")
+    return md_path
 
 
 def _get_pypandoc():
