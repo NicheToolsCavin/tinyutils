@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Text File Converter — TinyUtils</title>
   <meta name="description" content="Convert text files between Markdown, HTML, and plain text formats. Paste or upload your content and download the converted files.">
-  <link rel="canonical" href="https://tinyutils-eight.vercel.app/tools/text-converter/">
+  <link rel="canonical" href="/tools/text-converter/">
   <link rel="icon" href="/public/favicon.ico">
   <meta property="og:title" content="Text File Converter — TinyUtils">
   <meta property="og:description" content="Convert text files between Markdown, HTML, and plain text formats.">
@@ -70,17 +70,40 @@
               Choose a Markdown or text file to convert.
             </span>
           </label>
-          <input type="file" id="fileInput" accept=".md,.txt,.markdown">
+          <input type="file" id="fileInput" accept=".md,.markdown,.txt,.html,.htm,.docx,.odt,.rtf">
         </div>
 
-        <div class="format-options">
-          <label>Convert to:</label>
+        <div class="format-options" aria-label="Format options">
+          <label for="fromFormat"><strong>From:</strong></label>
+          <select id="fromFormat" name="from">
+            <option value="auto" selected>Auto-detect</option>
+            <option value="markdown">Markdown (.md)</option>
+            <option value="text">Plain Text (.txt)</option>
+            <option value="html">HTML (.html)</option>
+            <option value="docx">Word (.docx)</option>
+            <option value="odt">OpenDocument (.odt)</option>
+            <option value="rtf">RTF (.rtf)</option>
+          </select>
+        </div>
+
+        <div class="format-options" aria-label="Target formats">
+          <label><strong>Convert to:</strong></label>
           <label><input type="checkbox" id="toMd" checked> Markdown</label>
           <label><input type="checkbox" id="toTxt" checked> Plain Text</label>
           <label><input type="checkbox" id="toHtml" checked> HTML</label>
+          <label><input type="checkbox" id="toDocx"> Word (.docx)</label>
+          <label><input type="checkbox" id="toRtf"> RTF (.rtf)</label>
+        </div>
+
+        <div class="format-options" aria-label="Options">
+          <label><strong>Options:</strong></label>
+          <label title="Accept tracked changes in Word docs"><input type="checkbox" id="optAcceptTracked" checked> Accept tracked changes</label>
+          <label title="Extract embedded images/media when available"><input type="checkbox" id="optExtractMedia"> Extract media</label>
+          <label title="Remove zero-width characters"><input type="checkbox" id="optRemoveZW" checked> Remove zero-width</label>
         </div>
 
         <div class="actions-row">
+          <button id="previewBtn" class="secondary" type="button">Preview</button>
           <button id="convertBtn" class="primary" type="button">Convert</button>
           <button id="clearBtn" class="secondary" type="button">Clear</button>
           <span class="badge">Shortcut: <kbd>Ctrl/Cmd + Enter</kbd> to convert</span>
@@ -90,6 +113,18 @@
 
       <section class="card" role="region" aria-labelledby="resultsHeading">
         <h2 id="resultsHeading">Results</h2>
+        <div id="previewPanel" class="tableWrap" style="display:none">
+          <table id="previewTable">
+            <thead>
+              <tr>
+                <th scope="col">Headings</th>
+                <th scope="col">Snippets</th>
+                <th scope="col">Images</th>
+              </tr>
+            </thead>
+            <tbody><tr><td id="prevHeadings">—</td><td id="prevSnippets">—</td><td id="prevImages">—</td></tr></tbody>
+          </table>
+        </div>
         <div class="tableWrap">
           <table id="results">
             <thead>
@@ -122,6 +157,17 @@
     const toMd = document.getElementById('toMd');
     const toTxt = document.getElementById('toTxt');
     const toHtml = document.getElementById('toHtml');
+    const toDocx = document.getElementById('toDocx');
+    const toRtf = document.getElementById('toRtf');
+    const fromSelect = document.getElementById('fromFormat');
+    const optAcceptTracked = document.getElementById('optAcceptTracked');
+    const optExtractMedia = document.getElementById('optExtractMedia');
+    const optRemoveZW = document.getElementById('optRemoveZW');
+    const previewBtn = document.getElementById('previewBtn');
+    const prevHeadings = document.getElementById('prevHeadings');
+    const prevSnippets = document.getElementById('prevSnippets');
+    const prevImages = document.getElementById('prevImages');
+    const previewPanel = document.getElementById('previewPanel');
     const convertBtn = document.getElementById('convertBtn');
     const clearBtn = document.getElementById('clearBtn');
     const progressEl = document.getElementById('progress');
@@ -184,10 +230,15 @@
     function inferFormat(filename) {
       const ext = filename.toLowerCase().split('.').pop();
       if (ext === 'md' || ext === 'markdown') return 'markdown';
-      return 'text';
+      if (ext === 'txt') return 'text';
+      if (ext === 'htm' || ext === 'html') return 'html';
+      if (ext === 'docx') return 'docx';
+      if (ext === 'odt') return 'odt';
+      if (ext === 'rtf') return 'rtf';
+      return 'markdown';
     }
 
-    convertBtn.addEventListener('click', async () => {
+    async function runConvert({ previewOnly = false } = {}) {
       const content = textInput.value.trim();
       if (!content) {
         showToast('Please enter or upload some content first.');
@@ -198,6 +249,8 @@
       if (toMd.checked) selectedFormats.push('md');
       if (toTxt.checked) selectedFormats.push('txt');
       if (toHtml.checked) selectedFormats.push('html');
+      if (toDocx.checked) selectedFormats.push('docx');
+      if (toRtf.checked) selectedFormats.push('rtf');
 
       if (selectedFormats.length === 0) {
         showToast('Please select at least one output format.');
@@ -205,19 +258,27 @@
       }
 
       convertBtn.disabled = true;
-      progressEl.textContent = 'Converting...';
+      previewBtn.disabled = true;
+      progressEl.textContent = previewOnly ? 'Generating preview…' : 'Converting…';
       resultsBody.innerHTML = '';
+      previewPanel.style.display = 'none';
 
       try {
         const filename = currentFile ? currentFile.name : 'input.md';
-        const fromFormat = inferFormat(filename);
+        let fromFormat = fromSelect.value;
+        if (fromFormat === 'auto') fromFormat = inferFormat(filename);
         const input = await createDataUrl(content, filename);
 
         const payload = {
           inputs: [input],
           from: fromFormat,
           to: selectedFormats,
-          options: { extractMedia: false }
+          options: {
+            acceptTrackedChanges: !!optAcceptTracked.checked,
+            extractMedia: !!optExtractMedia.checked,
+            removeZeroWidth: !!optRemoveZW.checked
+          },
+          preview: previewOnly ? true : undefined
         };
 
         const controller = new AbortController();
@@ -256,15 +317,26 @@
           throw new Error(`${errorType}: ${errorMsg}`);
         }
 
-        if (!data.ok || !data.outputs || data.outputs.length === 0) {
+        if (!data.outputs || data.outputs.length === 0) {
           throw new Error(data?.errorMessage || 'No outputs returned from conversion.');
+        }
+
+        // Optional preview rendering
+        if (previewOnly && data.preview) {
+          const headings = Array.isArray(data.preview.headings) ? data.preview.headings.slice(0, 10) : [];
+          const snippets = Array.isArray(data.preview.snippets) ? data.preview.snippets.slice(0, 5) : [];
+          const images = Array.isArray(data.preview.images) ? data.preview.images : [];
+          prevHeadings.textContent = headings.join('\n');
+          prevSnippets.textContent = snippets.map(s => `${(s.before||'').slice(0,80)} → ${(s.after||'').slice(0,80)}`).join('\n');
+          prevImages.textContent = String(images.length);
+          previewPanel.style.display = '';
         }
 
         // Render results
         data.outputs.forEach((output) => {
           const tr = document.createElement('tr');
-          const format = output.format || output.to || 'unknown';
-          const filename = output.filename || `output.${format}`;
+          const format = output.target || output.format || output.to || 'unknown';
+          const filename = output.name || output.filename || `output.${format}`;
           const blobUrl = output.blobUrl || output.url;
           const size = output.size ? formatBytes(output.size) : '—';
 
@@ -286,14 +358,18 @@
           resultsBody.appendChild(tr);
         });
 
-        progressEl.textContent = `Conversion complete! ${data.outputs.length} file(s) ready.`;
+        progressEl.textContent = previewOnly ? `Preview generated.` : `Conversion complete! ${data.outputs.length} file(s) ready.`;
       } catch (err) {
         progressEl.textContent = 'Error: ' + (err.message || 'Conversion failed');
         console.error('Conversion error:', err);
       } finally {
         convertBtn.disabled = false;
+        previewBtn.disabled = false;
       }
-    });
+    }
+
+    convertBtn.addEventListener('click', () => runConvert({ previewOnly: false }));
+    previewBtn.addEventListener('click', () => runConvert({ previewOnly: true }));
 
     clearBtn.addEventListener('click', () => {
       textInput.value = '';
