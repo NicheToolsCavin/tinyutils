@@ -139,12 +139,43 @@ def _ensure_convert_imports() -> None:
 
 
 def _get_pandoc_runner():
+    """Best-effort import of the pandoc runner.
+
+    If tinyutils.api._lib.pandoc_runner is unavailable in this build, return a
+    tiny stub that exposes the attributes used in this file so the API degrades
+    gracefully without breaking the contract.
+    """
     global _pandoc_runner
-    if _pandoc_runner is None:
+    if _pandoc_runner is not None:
+        return _pandoc_runner
+    try:  # prefer real runner
         from tinyutils.api._lib import pandoc_runner as _module  # type: ignore
 
         _pandoc_runner = _module
-    return _pandoc_runner
+        return _pandoc_runner
+    except Exception:
+        class _StubRunner:  # minimal surface used by this module
+            VENDORED_PANDOC_PATH = str(Path(__file__).resolve().parents[1] / "_vendor" / "pandoc" / "pandoc.xz")
+
+            @staticmethod
+            def get_configured_pandoc_path() -> Optional[str]:
+                return None
+
+            @staticmethod
+            def get_pandoc_version() -> str:
+                return "unknown"
+
+            @staticmethod
+            def ensure_pandoc() -> Optional[str]:
+                return None
+
+            @staticmethod
+            def apply_lua_filters(_converter_options, _opts_dict) -> None:
+                # No-op: real runner may replace this
+                return None
+
+        _pandoc_runner = _StubRunner()
+        return _pandoc_runner
 
 
 def _log_unexpected_trace(request_id: str, exc: BaseException) -> None:
@@ -365,11 +396,43 @@ def convert(
                 detail=str(exc),
                 headers=_response_headers(resolved_request_id),
             ) from exc
-        converter_options = ConverterOptions(
-            accept_tracked_changes=request.options.acceptTrackedChanges,
-            extract_media=request.options.extractMedia,
-            remove_zero_width=request.options.removeZeroWidth,
-        )
+        # Build converter options, including extra flags only if supported by the
+        # underlying ConversionOptions signature (for forward/backward compat).
+        try:
+            import inspect
+
+            sig = inspect.signature(ConverterOptions)  # type: ignore[arg-type]
+            kwargs = {
+                "accept_tracked_changes": request.options.acceptTrackedChanges,
+                "extract_media": request.options.extractMedia,
+                "remove_zero_width": request.options.removeZeroWidth,
+            }
+            # Optional normalization flags – include only if present
+            extra_map = {
+                "normalize_lists": request.options.normalizeLists,
+                "normalize_unicode": request.options.normalizeUnicode,
+                "remove_nbsp": request.options.removeNbsp,
+                "wrap": request.options.wrap,
+                "headers": request.options.headers,
+                "ascii_punctuation": request.options.asciiPunctuation,
+            }
+            for k, v in extra_map.items():
+                if k in sig.parameters:
+                    kwargs[k] = v
+            converter_options = ConverterOptions(**kwargs)
+        except Exception:
+            # Fall back to the legacy, minimal set
+            converter_options = ConverterOptions(
+                accept_tracked_changes=request.options.acceptTrackedChanges,
+                extract_media=request.options.extractMedia,
+                remove_zero_width=request.options.removeZeroWidth,
+            )
+
+        # Best-effort: ask the runner to apply Lua filters if supported.
+        try:
+            runner.apply_lua_filters(converter_options, request.options.dict())  # type: ignore[attr-defined]
+        except Exception:
+            pass  # graceful no-op when runner or method is absent
 
         try:
             batch = convert_batch_fn(
