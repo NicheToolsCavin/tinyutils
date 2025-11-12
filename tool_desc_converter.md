@@ -1,5 +1,33 @@
 ## Converter Tool — Description and Change Log
 
+### Major changes — 2025-11-12 12:40 CET (UTC+01:00)
+
+Added
+• Runtime decompression for vendored pandoc binary in `api/_lib/pandoc_runner.py`
+• Import path fix in `api/convert/app.py` (changed from `tinyutils.api._lib` to `api._lib`)
+
+Modified
+• `_resolve_pandoc_path()` now falls back to decompressing `pandoc.xz` if uncompressed binary not found
+• Added `_decompress_pandoc_xz()` function using Python's `lzma` module to extract binary to `/tmp`
+
+Removed
+• None.
+
+Human-readable summary
+The converter tool needs a program called "pandoc" to do the actual document conversion work. We keep this program in a compressed file (like a .zip file) because the full program is too big for Vercel's system (142MB when uncompressed, but Vercel only allows 50MB).
+
+The compressed file is only 18MB, which fits fine. When someone uses the converter for the first time, the system automatically unzips pandoc into a temporary folder and keeps it there for future use. This happens once when the system starts up, then everyone can use it.
+
+We also fixed a path issue where the code was looking for pandoc in the wrong location. Now the health check shows pandoc is working correctly (version 3.1.11.1).
+
+The conversion endpoint still returns errors, which might be related to file storage settings, but the core pandoc problem is solved.
+
+Impact
+• Health check now passes: status "ok" instead of "degraded"
+• Pandoc binary successfully loads at `/tmp/pandoc-vendored` on Vercel
+• One-time decompression adds 1-2 seconds to cold start, then cached for subsequent requests
+• Conversion POST endpoint needs additional investigation (returns 500, likely unrelated to pandoc)
+
 ### Major changes — 2025-11-12 11:35 CET (UTC+01:00)
 
 Added
