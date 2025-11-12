@@ -126,17 +126,26 @@ def _ensure_convert_imports() -> None:
     global ConverterOptions, InputPayload, convert_batch, BatchResult
     if ConverterOptions is not None:
         return
-    from tinyutils.convert import (  # type: ignore
-        ConversionOptions as _ConverterOptions,
-        InputPayload as _InputPayload,
-        convert_batch as _convert_batch,
-    )
-    from tinyutils.convert.types import BatchResult as _BatchResult  # type: ignore
+    try:
+        from tinyutils.convert import (  # type: ignore
+            ConversionOptions as _ConverterOptions,
+            InputPayload as _InputPayload,
+            convert_batch as _convert_batch,
+        )
+        from tinyutils.convert.types import BatchResult as _BatchResult  # type: ignore
 
-    ConverterOptions = _ConverterOptions
-    InputPayload = _InputPayload
-    convert_batch = _convert_batch
-    BatchResult = _BatchResult
+        ConverterOptions = _ConverterOptions
+        InputPayload = _InputPayload
+        convert_batch = _convert_batch
+        BatchResult = _BatchResult
+        logger.info("tinyutils.convert package loaded successfully")
+    except Exception as exc:
+        # tinyutils.convert not available - this is expected for minimal deployments
+        # API will use pypandoc directly via local fallback functions
+        logger.warning(
+            "tinyutils.convert package not available, using direct pypandoc fallback: %s",
+            exc
+        )
 
 
 def _get_pandoc_runner():
