@@ -92,6 +92,22 @@ Add new tool files at the repository root using the naming pattern `tool_desc_<k
 - Always record timestamps in Europe/Madrid using the 24-hour clock and explicit UTC offset (e.g., `2025-10-08 21:05 CEST (UTC+02:00)`).
 - Append-only: never rewrite existing entries; if you need to correct something, add a follow-up note.
 
+## Secret files (preview/dev)
+- Tokens for PREVIEW_SECRET, PREVIEW_BYPASS_TOKEN, BYPASS_TOKEN, and the automation bypass are stored in env files under `tinyutils/` and `.vercel/`.
+  - `/Users/cav/dev/TinyUtils/tinyutils/tinyutils/.env`
+  - `/Users/cav/dev/TinyUtils/tinyutils/tinyutils/.env.local`
+  - `/Users/cav/dev/TinyUtils/tinyutils/tinyutils/.env.preview`
+  - `/Users/cav/dev/TinyUtils/tinyutils/tinyutils/.env.preview.local`
+  - `/Users/cav/dev/TinyUtils/tinyutils/.vercel/.env.preview.local`
+  These files are read directly by preview-smoke scripts; if they disappear from your `PATH`, just cat the file to re-export the secrets for the current terminal.
+
+### Logging Every Turn (Mandatory)
+- On every agent turn, append an entry to `docs/AGENT_RUN_LOG.md` capturing: timestamp (Europe/Madrid), branch, CWD, summary, evidence paths, and follow-ups — even for documentation-only updates.
+- While the Converter is in active scope, also append a same-day entry to `tool_desc_converter.md` (use a short “Minor changes — …” heartbeat if behavior is unchanged). This guarantees a per-turn audit trail for the converter.
+- If nothing user-visible changed, explicitly state “No behavior change” under the entry and list any docs/evidence added.
+- Store any screenshots, curl outputs, or ancillary artifacts under `artifacts/<task>/<YYYYMMDD>/` and reference the path in both files.
+
+
 **Format for entries:**
 - Append a new section headed `### Major changes — <YYYY-MM-DD [HH:MM] ZZZ (UTC±HH:MM)>`.
 - Include subsections for **Added**, **Removed**, and **Modified** (use `•` bullet lists; leave `•` followed by `None` if empty).
