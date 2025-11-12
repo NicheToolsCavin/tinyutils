@@ -185,6 +185,12 @@ class Options(BaseModel):
     acceptTrackedChanges: bool = True
     extractMedia: bool = False
     removeZeroWidth: bool = True
+    normalizeLists: bool = False
+    normalizeUnicode: bool = False
+    removeNbsp: bool = False
+    wrap: Optional[str] = None
+    headers: Optional[str] = None
+    asciiPunctuation: bool = False
 
 
 class ConvertRequest(BaseModel):
@@ -195,6 +201,7 @@ class ConvertRequest(BaseModel):
     source_format: Optional[str] = Field(default=None, alias="from")
     targets: List[str] = Field(default_factory=lambda: ["md"], alias="to")
     options: Options = Field(default_factory=Options)
+    preview: bool = False
 
     @validator("targets", pre=True)
     def _normalise_targets(cls, value):
