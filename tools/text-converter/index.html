@@ -70,7 +70,7 @@
               Choose a Markdown or text file to convert.
             </span>
           </label>
-          <input type="file" id="fileInput" accept=".md,.markdown,.txt,.html,.htm,.docx,.odt,.rtf">
+          <input type="file" id="fileInput" accept=".md,.markdown,.txt,.html,.htm,.docx,.odt,.rtf,.zip">
         </div>
 
         <div class="format-options" aria-label="Format options">
@@ -349,8 +349,9 @@
           const downloadCell = document.createElement('td');
           downloadCell.appendChild(downloadLink);
 
+          const isZip = /\.zip$/i.test(filename);
           tr.innerHTML = `
-            <td>${escapeHtml(format)}</td>
+            <td>${escapeHtml(format)}${isZip ? ' <span class="badge" title="ZIP package">ZIP</span>' : ''}</td>
             <td>${escapeHtml(filename)}</td>
             <td>${escapeHtml(size)}</td>
           `;
