@@ -426,7 +426,7 @@ def _render_pdf_via_reportlab(markdown_path: Path) -> bytes:
             i += 1
 
         # Generate PDF bytes
-        return pdf.output(dest='S').encode('latin-1')
+        return pdf.output()
 
     except Exception as e:
         # If PDF generation fails completely, raise a more informative error
