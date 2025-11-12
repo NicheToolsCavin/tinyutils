@@ -198,7 +198,11 @@ def _log_unexpected_trace(request_id: str, exc: BaseException) -> None:
         exc.__class__.__name__,
         str(exc),
     )
-    print(trace, file=sys.stderr)
+    # Force immediate stderr output for Vercel logs
+    print(f"\n{'='*80}", file=sys.stderr, flush=True)
+    print(f"CONVERT ERROR [{request_id}]: {exc.__class__.__name__}", file=sys.stderr, flush=True)
+    print(trace, file=sys.stderr, flush=True)
+    print(f"{'='*80}\n", file=sys.stderr, flush=True)
 
 
 @app.on_event("startup")
