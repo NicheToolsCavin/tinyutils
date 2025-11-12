@@ -13,10 +13,17 @@ from collections import OrderedDict
 from pathlib import Path
 from typing import Any, Iterable, List, Optional, Sequence
 
-from tinyutils.api._lib import pandoc_runner
-from tinyutils.api._lib.manifests import build_snippets, collect_headings, media_manifest
-from tinyutils.api._lib.text_clean import normalise_markdown
-from tinyutils.api._lib.utils import ensure_within_limits, generate_job_id, job_workspace
+try:
+    from tinyutils.api._lib import pandoc_runner
+    from tinyutils.api._lib.manifests import build_snippets, collect_headings, media_manifest
+    from tinyutils.api._lib.text_clean import normalise_markdown
+    from tinyutils.api._lib.utils import ensure_within_limits, generate_job_id, job_workspace
+except ImportError:
+    # Fallback for when tinyutils isn't in path (e.g. Vercel deployment)
+    from api._lib import pandoc_runner
+    from api._lib.manifests import build_snippets, collect_headings, media_manifest
+    from api._lib.text_clean import normalise_markdown
+    from api._lib.utils import ensure_within_limits, generate_job_id, job_workspace
 
 from .types import (
     BatchResult,
