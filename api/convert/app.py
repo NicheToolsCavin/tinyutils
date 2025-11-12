@@ -361,10 +361,15 @@ def convert(
     start_time = time.time()
     _ensure_convert_imports()
     runner = _get_pandoc_runner()
-    from tinyutils.api.convert import index as convert_index  # local import to avoid cycles
 
-    download_payloads_fn = getattr(convert_index, "_download_payloads", _download_payloads)
-    convert_batch_fn = getattr(convert_index, "convert_batch", convert_batch)
+    # Try to import convert_index for enhanced features, fall back to local functions
+    try:
+        from tinyutils.api.convert import index as convert_index  # type: ignore
+        download_payloads_fn = getattr(convert_index, "_download_payloads", _download_payloads)
+        convert_batch_fn = getattr(convert_index, "convert_batch", convert_batch)
+    except Exception:
+        download_payloads_fn = _download_payloads
+        convert_batch_fn = convert_batch
     if response is _TEST_RESPONSE_SENTINEL:
         response = Response()
     try:
