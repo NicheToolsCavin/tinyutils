@@ -1,3 +1,22 @@
+### 2025-11-12 12:40 CET (UTC+0100) — Converter pandoc binary fix (ci/preview-prod-green)
+- Mode: manual
+- Branch: `ci/preview-prod-green`
+- CWD: /Users/cav/dev/TinyUtils/tinyutils
+- Summary:
+  - Fixed converter API pandoc binary availability issue (3 sequential fixes)
+  - Added Python runtime dependencies (`api/requirements.txt`) - commit 91e28d1
+  - Implemented runtime decompression for vendored pandoc.xz (142MB → /tmp) - commit 3914b51
+  - Fixed import path from `tinyutils.api._lib` to `api._lib` - commit 6ef9af9
+  - Health check now passes: pandoc v3.1.11.1 available at `/tmp/pandoc-vendored`
+  - Conversion POST endpoint still returns 500 (likely blob storage config issue)
+- Evidence:
+  - Artifacts: artifacts/convert/20251112/ (health checks, test requests, summaries)
+  - Health before: `{"status":"degraded","pandocPath":null}`
+  - Health after: `{"status":"ok","pandocPath":"/tmp/pandoc-vendored","pandocVersion":"pandoc-vendored 3.1.11.1"}`
+- Follow-ups:
+  - Investigate POST /api/convert 500 error (check Vercel function logs)
+  - Verify blob storage environment variables are configured correctly
+
 ### 2025-11-11 21:43 CET (UTC+0100) — DLF Quick Extras hardened (ci/preview-prod-green)
 - Added preview_url input, resolve+gate step, unconditional artifact upload.
 - scripts/smoke_dlf_extras.sh: bypass cookie + 200/JSON gating; artifacts saved.
