@@ -211,8 +211,7 @@ class InputItem(BaseModel):
 
 
 class Options(BaseModel):
-    class Config:
-        allow_population_by_field_name = True
+    model_config = {"populate_by_name": True}
 
     acceptTrackedChanges: bool = True
     extractMedia: bool = False
@@ -226,8 +225,7 @@ class Options(BaseModel):
 
 
 class ConvertRequest(BaseModel):
-    class Config:
-        allow_population_by_field_name = True
+    model_config = {"populate_by_name": True}
 
     inputs: List[InputItem]
     source_format: Optional[str] = Field(default=None, alias="from")
