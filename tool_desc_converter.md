@@ -1,5 +1,42 @@
 ## Converter Tool — Description and Change Log
 
+### Major changes — 2025-11-13 13:53 CET (UTC+01:00)
+
+Added
+• Whitespace stripping for environment variables loaded from Vercel:
+  - `BLOB_READ_WRITE_TOKEN` now strips trailing newlines in `api/_lib/blob.py`
+  - `PDF_RENDERER_URL` strips whitespace before path normalization in `api/convert/_pdf_external.py`
+  - `CONVERTER_SHARED_SECRET` strips whitespace in `api/convert/_pdf_external.py`
+• Git repository cleanup: added `artifacts/` and `.DS_Store` to `.gitignore`
+
+Modified
+• Environment variable loading now defensive against trailing whitespace characters
+
+Removed
+• 268MB `libreoffice-7.6.4.1.tar.xz` and all artifacts from git history (via `git filter-branch`)
+
+Human-readable summary
+
+**Problem 7: The "invisible character" issue**
+
+Imagine you're trying to unlock a door with a key, but there's a tiny piece of lint stuck to the end of the key. The lock can't recognize the key because of that extra bit of garbage on the end!
+
+That's exactly what was happening with our environment variables (configuration values). When we stored secret keys like `BLOB_READ_WRITE_TOKEN` in Vercel's system, they accidentally got an invisible "newline" character (like pressing Enter) added to the end.
+
+When the code tried to use these keys in HTTP headers (like showing an ID badge), the system said "Invalid header value" because headers can't have newline characters in them. It's like trying to write your name on a form but accidentally pressing Enter in the middle - the form won't accept it!
+
+**The fix:** We added `.strip()` to all three affected environment variables. Think of `.strip()` as a lint roller that removes any invisible whitespace (spaces, tabs, newlines) from the beginning and end of text. Now the keys are clean and work perfectly in HTTP headers.
+
+We also cleaned up the git repository by removing a huge 268MB test file that was blocking pushes to GitHub, and added rules to prevent test artifacts from being accidentally committed in the future.
+
+Impact
+• **Blob uploads now work** ✅ - Files can be uploaded to Vercel Blob storage without "invalid header value" errors
+• **PDF rendering authentication works** ✅ - Calls to Google Cloud Run PDF renderer include properly formatted secret headers
+• **External PDF renderer URL works** ✅ - Cloud Run endpoint URL is cleanly formatted without trailing whitespace
+• Zero breaking changes - fix is purely defensive (strips whitespace if present, doesn't affect clean values)
+• Git repository size reduced and protected against future large file commits
+• All three environment variables (BLOB token, PDF URL, shared secret) now resilient to whitespace pollution
+
 ### FINAL FIX ✅ — 2025-11-12 16:10 CET (UTC+01:00)
 
 Added
