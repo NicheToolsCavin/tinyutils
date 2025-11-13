@@ -1,0 +1,7 @@
+fastapi>=0.110,<1.0
+pydantic>=2.6,<3.0
+requests>=2.31,<3.0
+pypandoc>=1.12,<2.0
+pypdf>=3.17,<5.0
+xhtml2pdf>=0.2.13,<1.0
+

@@ -3,20 +3,54 @@ name: DLF Quick Extras
 on:
   pull_request:
     branches: [ main ]
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      preview_url:
+        description: 'Override preview base URL (https://*.vercel.app)'
+        required: false
+        type: string
 
 jobs:
   smoke:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Setup Node 20 (for parity)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
       - name: Ensure jq
         run: |
           if ! command -v jq >/dev/null 2>&1; then
             sudo apt-get update
             sudo apt-get install -y jq
           fi
-      - name: API smokes (extras)
+      - name: Resolve preview base
+        id: resolve_base
         env:
-          TINYUTILS_BASE: https://tinyutils-eight.vercel.app
+          DISPATCH_PREVIEW_URL: ${{ inputs.preview_url }}
+          SECRET_PREVIEW_BASE: ${{ secrets.TINYUTILS_BASE }}
+        run: |
+          base="${DISPATCH_PREVIEW_URL:-$SECRET_PREVIEW_BASE}"
+          if [ -n "$base" ]; then
+            echo "TINYUTILS_BASE=$base" >> "$GITHUB_ENV"
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Using preview base ${base}"
+          else
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::No preview_url input or TINYUTILS_BASE secret provided; skipping smoke step."
+          fi
+      - name: API smokes (extras)
+        if: ${{ steps.resolve_base.outputs.skip != 'true' }}
+        env:
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+          PREVIEW_SECRET: ${{ secrets.PREVIEW_SECRET }}
+          DLF_SMOKE_ARTIFACTS: tinyutils/artifacts/dlf_extras/github-${{ github.run_id }}
         run: bash scripts/smoke_dlf_extras.sh
+      - name: Upload smoke artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: dlf-extras-${{ github.run_id }}
+          path: tinyutils/artifacts/dlf_extras/github-${{ github.run_id }}
+          if-no-files-found: warn

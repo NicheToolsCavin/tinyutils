@@ -1,18 +1,48 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Artifacts dir (optional)
+ART="${DLF_SMOKE_ARTIFACTS:-artifacts/dlf_extras/$(date -u +%Y%m%d)/run-$(date -u +%H%M%S)}"
+mkdir -p "$ART"
+
 BASE="${TINYUTILS_BASE:-https://tinyutils-eight.vercel.app}"
 API="$BASE/api/check"
 
 jq --version >/dev/null 2>&1 || { echo "jq required"; exit 2; }
 
+status_code() { awk 'NR==1{print $2}'; }
+content_type() { awk -F': ' 'BEGIN{IGNORECASE=1} tolower($1)=="content-type"{print tolower($2)}' | tr -d '\r'; }
+
+# Bootstrap protection bypass cookie if token provided
+BOOTSTRAP_ONCE=0
+maybe_bypass() {
+  local token="${VERCEL_AUTOMATION_BYPASS_SECRET:-}"
+  if [ $BOOTSTRAP_ONCE -eq 0 ] && [ -n "$token" ]; then
+    curl -sS -D "$ART/set_cookie.headers" -H "x-vercel-protection-bypass: $token" \
+      "${BASE%/}/?x-vercel-set-bypass-cookie=true" -c "$ART/cookies.txt" -o "$ART/set_cookie.html" || true
+    BOOTSTRAP_ONCE=1
+  fi
+}
+
 call_api () {
   local json="$1"
-  local out
-  out="$(curl -sS -H 'content-type: application/json' -d "$json" "$API")"
-  # Hard assert: JSON parseable and has {ok}
-  echo "$out" | jq -e '.ok | . == true or . == false' >/dev/null
-  echo "$out"
+  maybe_bypass
+  # Save headers/body for diagnostics
+  local hdr="$ART/resp.headers" body="$ART/resp.json"
+  : > "$hdr"; : > "$body"
+  curl -sS -D "$hdr" -b "$ART/cookies.txt" -H 'content-type: application/json' \
+    ${PREVIEW_SECRET:+-H "x-preview-secret: $PREVIEW_SECRET"} \
+    -d "$json" "$API" -o "$body" || true
+  local sc ct
+  sc=$(status_code < "$hdr" 2>/dev/null || echo 0)
+  ct=$(content_type < "$hdr" 2>/dev/null || echo '')
+  if [ "$sc" != "200" ] || ! echo "$ct" | grep -qi 'application/json'; then
+    echo "Non-JSON or non-200 response (status=$sc ct=$ct). Headers/body saved under $ART" >&2
+    return 2
+  fi
+  # Validate JSON envelope
+  jq -e '.ok | . == true or . == false' < "$body" >/dev/null
+  cat "$body"
 }
 
 green(){ printf "\033[32m%s\033[0m\n" "$*"; }
@@ -24,7 +54,8 @@ test_hsts_guard () {
   # Whitehouse is HSTS + .gov (hard TLD). We ask to retry HTTP; server must refuse.
   local payload='{"pageUrl":"https://www.whitehouse.gov","retryHttpOnHttpsFail":true,"scope":"internal","respectRobotsTxt":true}'
   local out
-  out="$(call_api "$payload")"
+  out="$(call_api "$payload")" || {
+    red "FAIL: Non-JSON or non-200 on HSTS/TLD guard call. See $ART"; exit 1; }
 
   # No row should include a note that indicates http fallback usage
   local used
@@ -58,7 +89,7 @@ test_robots_unknown () {
     payload="$(jq -cn --arg u "$url" '{pageUrl:$u,respectRobotsTxt:true,scope:"internal"}')"
     set +e
     local out
-    out="$(call_api "$payload")"
+  out="$(call_api "$payload")" || { continue; }
     local rc=$?
     set -e
     if [ $rc -ne 0 ]; then

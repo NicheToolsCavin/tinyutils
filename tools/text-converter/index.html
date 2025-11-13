@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Text File Converter — TinyUtils</title>
+  <meta name="description" content="Convert text files between Markdown, HTML, and plain text formats. Paste or upload your content and download the converted files.">
+  <link rel="canonical" href="/tools/text-converter/">
+  <link rel="icon" href="/public/favicon.ico">
+  <meta property="og:title" content="Text File Converter — TinyUtils">
+  <meta property="og:description" content="Convert text files between Markdown, HTML, and plain text formats.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="/public/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/public/styles.css">
+  <link rel="stylesheet" href="/styles/site.css">
+  <script defer src="/scripts/consent.js"></script>
+  <style>
+    main { padding-bottom: 48px; }
+    .tool-intro h1 { margin-bottom: 0.25rem; }
+    .tool-intro p { margin-top: 0; color: var(--muted, #97a3c2); }
+    .card { margin-top: 1rem; }
+    .input-section { margin-top: 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
+    .input-section textarea { min-height: 200px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; }
+    .format-options { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; margin-top: 1rem; }
+    .format-options label { display: flex; align-items: center; gap: 0.5rem; }
+    .actions-row { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin-top: 1rem; }
+    .actions-row button.primary { background: var(--brand, #3b82f6); color: #fff; border: none; padding: 0.65rem 1.4rem; border-radius: 0.75rem; cursor: pointer; }
+    .actions-row button.primary[disabled] { opacity: 0.6; cursor: not-allowed; }
+    .actions-row button.secondary { background: transparent; color: inherit; border: 1px solid rgba(255,255,255,0.2); border-radius: 0.75rem; padding: 0.55rem 1.25rem; cursor: pointer; }
+    #progress { min-height: 1.5rem; display: flex; align-items: center; gap: 0.5rem; margin-top: 1rem; }
+    .tableWrap { margin-top: 1rem; max-height: 70vh; overflow: auto; border: 1px solid #eee; border-radius: 8px; }
+    #results thead th { position: sticky; top: 0; z-index: 2; background: #fff; box-shadow: 0 1px 0 rgba(0,0,0,0.05); }
+    .download-link { color: var(--brand, #3b82f6); text-decoration: underline; cursor: pointer; }
+    .toast { position: fixed; right: 16px; bottom: 16px; background: #0b1224; color: #e6edf7; border: 1px solid rgba(255,255,255,0.12); padding: 10px 14px; border-radius: 10px; z-index: 9999; box-shadow: 0 12px 30px rgba(0,0,0,0.35); }
+    .badge { color: var(--muted, #97a3c2); font-size: 0.85rem; }
+    kbd { background: rgba(255,255,255,0.1); padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container row between center">
+      <a class="brand" href="/">TinyUtils</a>
+      <nav class="nav">
+        <a class="active" href="/tools/">Tools</a>
+        <a href="/privacy.html">Privacy</a>
+        <a href="/terms.html">Terms</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="container tool-intro">
+      <h1>📝 Text File Converter</h1>
+      <p>Convert text files between Markdown, HTML, and plain text formats. Paste your content or upload a file.</p>
+      <p><a class="cta" href="/tools/">See all tools →</a></p>
+
+      <section class="card" role="region" aria-labelledby="inputHeading">
+        <h2 id="inputHeading">Input</h2>
+        <div class="input-section">
+          <label for="textInput">Paste your text content
+            <span class="help" style="color: var(--muted, #97a3c2); font-size: 0.85rem; display: block; margin-top: 0.2rem;">
+              Enter or paste your Markdown or plain text content here.
+            </span>
+          </label>
+          <textarea id="textInput" placeholder="Enter your text content here..."></textarea>
+
+          <label for="fileInput">Or upload a file (.md, .txt)
+            <span class="help" style="color: var(--muted, #97a3c2); font-size: 0.85rem; display: block; margin-top: 0.2rem;">
+              Choose a Markdown or text file to convert.
+            </span>
+          </label>
+          <input type="file" id="fileInput" accept=".md,.markdown,.txt,.html,.htm,.docx,.odt,.rtf,.zip">
+        </div>
+
+        <div class="format-options" aria-label="Format options">
+          <label for="fromFormat"><strong>From:</strong></label>
+          <select id="fromFormat" name="from">
+            <option value="auto" selected>Auto-detect</option>
+            <option value="markdown">Markdown (.md)</option>
+            <option value="text">Plain Text (.txt)</option>
+            <option value="html">HTML (.html)</option>
+            <option value="docx">Word (.docx)</option>
+            <option value="odt">OpenDocument (.odt)</option>
+            <option value="rtf">RTF (.rtf)</option>
+          </select>
+        </div>
+
+        <div class="format-options" aria-label="Target formats">
+          <label><strong>Convert to:</strong></label>
+          <label><input type="checkbox" id="toMd" checked> Markdown</label>
+          <label><input type="checkbox" id="toTxt" checked> Plain Text</label>
+          <label><input type="checkbox" id="toHtml" checked> HTML</label>
+          <label><input type="checkbox" id="toDocx"> Word (.docx)</label>
+          <label><input type="checkbox" id="toRtf"> RTF (.rtf)</label>
+        </div>
+
+        <div class="format-options" aria-label="Options">
+          <label><strong>Options:</strong></label>
+          <label title="Accept tracked changes in Word docs"><input type="checkbox" id="optAcceptTracked" checked> Accept tracked changes</label>
+          <label title="Extract embedded images/media when available"><input type="checkbox" id="optExtractMedia"> Extract media</label>
+          <label title="Remove zero-width characters"><input type="checkbox" id="optRemoveZW" checked> Remove zero-width</label>
+        </div>
+
+        <div class="actions-row">
+          <button id="previewBtn" class="secondary" type="button">Preview</button>
+          <button id="convertBtn" class="primary" type="button">Convert</button>
+          <button id="clearBtn" class="secondary" type="button">Clear</button>
+          <span class="badge">Shortcut: <kbd>Ctrl/Cmd + Enter</kbd> to convert</span>
+        </div>
+        <div id="progress" aria-live="polite"></div>
+      </section>
+
+      <section class="card" role="region" aria-labelledby="resultsHeading">
+        <h2 id="resultsHeading">Results</h2>
+        <div id="previewPanel" class="tableWrap" style="display:none">
+          <table id="previewTable">
+            <thead>
+              <tr>
+                <th scope="col">Headings</th>
+                <th scope="col">Snippets</th>
+                <th scope="col">Images</th>
+              </tr>
+            </thead>
+            <tbody><tr><td id="prevHeadings">—</td><td id="prevSnippets">—</td><td id="prevImages">—</td></tr></tbody>
+          </table>
+        </div>
+        <div class="tableWrap">
+          <table id="results">
+            <thead>
+              <tr>
+                <th scope="col">Format</th>
+                <th scope="col">Filename</th>
+                <th scope="col">Size</th>
+                <th scope="col">Download</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container row between wrap">
+      <span>© <span id="year"></span> TinyUtils</span>
+      <span><a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a></span>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    const textInput = document.getElementById('textInput');
+    const fileInput = document.getElementById('fileInput');
+    const toMd = document.getElementById('toMd');
+    const toTxt = document.getElementById('toTxt');
+    const toHtml = document.getElementById('toHtml');
+    const toDocx = document.getElementById('toDocx');
+    const toRtf = document.getElementById('toRtf');
+    const fromSelect = document.getElementById('fromFormat');
+    const optAcceptTracked = document.getElementById('optAcceptTracked');
+    const optExtractMedia = document.getElementById('optExtractMedia');
+    const optRemoveZW = document.getElementById('optRemoveZW');
+    const previewBtn = document.getElementById('previewBtn');
+    const prevHeadings = document.getElementById('prevHeadings');
+    const prevSnippets = document.getElementById('prevSnippets');
+    const prevImages = document.getElementById('prevImages');
+    const previewPanel = document.getElementById('previewPanel');
+    const convertBtn = document.getElementById('convertBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const progressEl = document.getElementById('progress');
+    const resultsBody = document.querySelector('#results tbody');
+
+    let currentFile = null;
+
+    function showToast(message) {
+      const existing = document.querySelector('.toast');
+      if (existing) existing.remove();
+      const div = document.createElement('div');
+      div.className = 'toast';
+      div.textContent = message;
+      document.body.appendChild(div);
+      setTimeout(() => { div.remove(); }, 4000);
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>"']/g, (ch) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      })[ch]);
+    }
+
+    function formatBytes(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    }
+
+    fileInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      try {
+        const content = await file.text();
+        textInput.value = content;
+        currentFile = file;
+        showToast('File loaded: ' + file.name);
+      } catch (err) {
+        showToast('Failed to read file: ' + err.message);
+      }
+    });
+
+    async function createDataUrl(content, filename) {
+      const blob = new Blob([content], { type: 'text/plain' });
+      const reader = new FileReader();
+      return new Promise((resolve, reject) => {
+        reader.onloadend = () => resolve({ blobUrl: reader.result, name: filename });
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    function inferFormat(filename) {
+      const ext = filename.toLowerCase().split('.').pop();
+      if (ext === 'md' || ext === 'markdown') return 'markdown';
+      if (ext === 'txt') return 'text';
+      if (ext === 'htm' || ext === 'html') return 'html';
+      if (ext === 'docx') return 'docx';
+      if (ext === 'odt') return 'odt';
+      if (ext === 'rtf') return 'rtf';
+      return 'markdown';
+    }
+
+    async function runConvert({ previewOnly = false } = {}) {
+      const content = textInput.value.trim();
+      if (!content) {
+        showToast('Please enter or upload some content first.');
+        return;
+      }
+
+      const selectedFormats = [];
+      if (toMd.checked) selectedFormats.push('md');
+      if (toTxt.checked) selectedFormats.push('txt');
+      if (toHtml.checked) selectedFormats.push('html');
+      if (toDocx.checked) selectedFormats.push('docx');
+      if (toRtf.checked) selectedFormats.push('rtf');
+
+      if (selectedFormats.length === 0) {
+        showToast('Please select at least one output format.');
+        return;
+      }
+
+      convertBtn.disabled = true;
+      previewBtn.disabled = true;
+      progressEl.textContent = previewOnly ? 'Generating preview…' : 'Converting…';
+      resultsBody.innerHTML = '';
+      previewPanel.style.display = 'none';
+
+      try {
+        const filename = currentFile ? currentFile.name : 'input.md';
+        let fromFormat = fromSelect.value;
+        if (fromFormat === 'auto') fromFormat = inferFormat(filename);
+        const input = await createDataUrl(content, filename);
+
+        const payload = {
+          inputs: [input],
+          from: fromFormat,
+          to: selectedFormats,
+          options: {
+            acceptTrackedChanges: !!optAcceptTracked.checked,
+            extractMedia: !!optExtractMedia.checked,
+            removeZeroWidth: !!optRemoveZW.checked
+          },
+          preview: previewOnly ? true : undefined
+        };
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 40000);
+
+        let response;
+        try {
+          response = await fetch('/api/convert', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify(payload),
+            signal: controller.signal
+          });
+        } catch (err) {
+          if (err.name === 'AbortError') {
+            throw new Error('Request timed out. Please try again.');
+          }
+          throw err;
+        } finally {
+          clearTimeout(timeoutId);
+        }
+
+        const contentType = response.headers.get('content-type') || '';
+        let data;
+
+        if (contentType.includes('application/json')) {
+          data = await response.json();
+        } else {
+          const text = await response.text();
+          throw new Error(text || `Non-JSON response (${response.status})`);
+        }
+
+        if (!response.ok) {
+          const errorMsg = data?.errorMessage || data?.message || `Conversion failed (${response.status})`;
+          const errorType = data?.errorType || 'Unknown error';
+          throw new Error(`${errorType}: ${errorMsg}`);
+        }
+
+        if (!data.outputs || data.outputs.length === 0) {
+          throw new Error(data?.errorMessage || 'No outputs returned from conversion.');
+        }
+
+        // Optional preview rendering
+        if (previewOnly && data.preview) {
+          const headings = Array.isArray(data.preview.headings) ? data.preview.headings.slice(0, 10) : [];
+          const snippets = Array.isArray(data.preview.snippets) ? data.preview.snippets.slice(0, 5) : [];
+          const images = Array.isArray(data.preview.images) ? data.preview.images : [];
+          prevHeadings.textContent = headings.join('\n');
+          prevSnippets.textContent = snippets.map(s => `${(s.before||'').slice(0,80)} → ${(s.after||'').slice(0,80)}`).join('\n');
+          prevImages.textContent = String(images.length);
+          previewPanel.style.display = '';
+        }
+
+        // Render results
+        data.outputs.forEach((output) => {
+          const tr = document.createElement('tr');
+          const format = output.target || output.format || output.to || 'unknown';
+          const filename = output.name || output.filename || `output.${format}`;
+          const blobUrl = output.blobUrl || output.url;
+          const size = output.size ? formatBytes(output.size) : '—';
+
+          const downloadLink = document.createElement('a');
+          downloadLink.href = blobUrl;
+          downloadLink.download = filename;
+          downloadLink.textContent = 'Download';
+          downloadLink.className = 'download-link';
+
+          const downloadCell = document.createElement('td');
+          downloadCell.appendChild(downloadLink);
+
+          const isZip = /\.zip$/i.test(filename);
+          tr.innerHTML = `
+            <td>${escapeHtml(format)}${isZip ? ' <span class="badge" title="ZIP package">ZIP</span>' : ''}</td>
+            <td>${escapeHtml(filename)}</td>
+            <td>${escapeHtml(size)}</td>
+          `;
+          tr.appendChild(downloadCell);
+          resultsBody.appendChild(tr);
+        });
+
+        progressEl.textContent = previewOnly ? `Preview generated.` : `Conversion complete! ${data.outputs.length} file(s) ready.`;
+      } catch (err) {
+        progressEl.textContent = 'Error: ' + (err.message || 'Conversion failed');
+        console.error('Conversion error:', err);
+      } finally {
+        convertBtn.disabled = false;
+        previewBtn.disabled = false;
+      }
+    }
+
+    convertBtn.addEventListener('click', () => runConvert({ previewOnly: false }));
+    previewBtn.addEventListener('click', () => runConvert({ previewOnly: true }));
+
+    clearBtn.addEventListener('click', () => {
+      textInput.value = '';
+      fileInput.value = '';
+      currentFile = null;
+      resultsBody.innerHTML = '';
+      progressEl.textContent = '';
+    });
+
+    // Keyboard shortcut: Cmd/Ctrl+Enter to convert
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        // Only trigger if not already typing in the textarea
+        if (document.activeElement !== textInput) {
+          e.preventDefault();
+          convertBtn.click();
+        }
+      }
+    });
+  </script>
+</body>
+</html>
