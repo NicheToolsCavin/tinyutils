@@ -1,5 +1,9 @@
 node_modules/
 .env.local
+# Ignore all env files (secrets) everywhere; keep *.example templates
+.env*
+**/.env*
+!*.example
 .vercel/
 *.zip
 .code/
@@ -7,3 +11,16 @@ node_modules/
 .vercel
 artifacts/
 .DS_Store
+
+# Python cache and compiled files
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.so
+*.egg-info/
+
+# Debug and temporary files
+.debug/
+**/*.bak
+*.tmp
