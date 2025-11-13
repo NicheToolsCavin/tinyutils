@@ -190,8 +190,29 @@
         optAcceptTracked.checked = true;
       }
 
-      // "Extract Media" applies to all formats with embedded media
-      // Keep it always enabled for now, but could be refined later
+      // "Extract Media" only applies to formats with embedded media
+      const hasEmbeddedMedia = isWordLike || fromFormat === 'html';
+
+      // Also check if any media-capable outputs are selected
+      const hasMediaCapableOutput = toMd.checked || toHtml.checked || toDocx.checked;
+
+      const extractMediaApplicable = hasEmbeddedMedia && hasMediaCapableOutput;
+
+      optExtractMedia.disabled = !extractMediaApplicable;
+      optExtractMedia.parentElement.style.opacity = extractMediaApplicable ? '1' : '0.5';
+
+      // Update title text to explain when disabled
+      if (!hasEmbeddedMedia) {
+        optExtractMedia.parentElement.title = 'Extract media only available for documents with embedded images (DOCX, ODT, RTF, HTML)';
+      } else if (!hasMediaCapableOutput) {
+        optExtractMedia.parentElement.title = 'Extract media requires selecting at least one media-capable output format (Markdown, HTML, DOCX)';
+      } else {
+        optExtractMedia.parentElement.title = 'Extract embedded images/media when available';
+      }
+
+      if (!extractMediaApplicable) {
+        optExtractMedia.checked = false;
+      }
     }
 
     function showToast(message) {
@@ -410,6 +431,13 @@
 
     // Update option availability when format selection changes
     fromSelect.addEventListener('change', updateOptionAvailability);
+
+    // Update when output format checkboxes change (affects Extract Media availability)
+    toMd.addEventListener('change', updateOptionAvailability);
+    toTxt.addEventListener('change', updateOptionAvailability);
+    toHtml.addEventListener('change', updateOptionAvailability);
+    toDocx.addEventListener('change', updateOptionAvailability);
+    toRtf.addEventListener('change', updateOptionAvailability);
 
     // Initialize option availability on page load
     updateOptionAvailability();

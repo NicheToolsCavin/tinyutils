@@ -67,6 +67,10 @@ FILTERS = (
     "strip_empty_spans.lua",
     "normalize_lists.lua",
 )
+# HTML-specific filters for semantic element conversion
+HTML_FILTERS = (
+    "figure_to_markdown.lua",
+)
 
 
 def get_pandoc_version() -> Optional[str]:
@@ -93,6 +97,13 @@ def convert_to_markdown(
         args.append("--track-changes=accept")
     if extract_media_dir:
         args.append(f"--extract-media={extract_media_dir}")
+
+    # Apply HTML-specific filters for semantic element conversion
+    if from_format == "html":
+        html_filter_args = _lua_filter_args(HTML_FILTERS)
+        if html_filter_args:
+            args.extend(html_filter_args)
+
     if extra_args:
         args.extend(str(arg) for arg in extra_args)
 
@@ -156,9 +167,18 @@ def _version_tuple(raw: str) -> Tuple[int, ...]:
     return tuple(parts)
 
 
-def _lua_filter_args() -> Optional[List[str]]:
+def _lua_filter_args(filter_list: Optional[Tuple[str, ...]] = None) -> Optional[List[str]]:
+    """Build Lua filter arguments for pandoc.
+
+    Args:
+        filter_list: Tuple of filter filenames to use. Defaults to FILTERS.
+
+    Returns:
+        List of --lua-filter arguments, or None if no filters found.
+    """
+    filters_to_use = filter_list if filter_list is not None else FILTERS
     paths = []
-    for name in FILTERS:
+    for name in filters_to_use:
         candidate = FILTER_DIR / name
         if candidate.exists():
             paths.append(candidate)
