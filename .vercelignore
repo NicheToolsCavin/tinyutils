@@ -1,0 +1,8 @@
+# Vercel ignore file - exclude from deployment
+artifacts/
+docker/
+tinyutils/
+.debug/
+.env.gcloud
+*.zip
+node_modules/

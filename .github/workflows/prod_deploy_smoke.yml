@@ -1,0 +1,76 @@
+name: Prod Deploy + Smoke
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  prod-deploy-smoke:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tinyutils
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Remove stale Vercel output
+        run: rm -rf .vercel/output || true
+
+      - name: Pull Vercel production env (optional)
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          mkdir -p .vercel || true
+          npx -y vercel@latest env pull .vercel/.env.production.local --environment production --yes || true
+
+      - name: Deploy Production
+        id: deploy
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          UTC=$(date -u +%Y%m%d)
+          ART=artifacts/prod/${UTC}/deploy-$(date -u +%H%M%S)
+          mkdir -p "$ART"
+          npx -y vercel@latest deploy --prod --yes 2>&1 | tee "$ART/vercel_deploy_prod.log"
+          url=$(grep -Eo '^Production: https://[^ ]+' "$ART/vercel_deploy_prod.log" | awk '{print $2}' | tail -1)
+          echo "prod_url=$url" >> "$GITHUB_OUTPUT"
+          echo "$url" > "$ART/PROD_URL.txt"
+
+      - name: Run prod smoke (bypassed)
+        if: steps.deploy.outputs.prod_url != ''
+        env:
+          PROD_URL: ${{ steps.deploy.outputs.prod_url }}
+          PREVIEW_SECRET: ${{ secrets.PREVIEW_SECRET }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+        run: |
+          set -e
+          UTC=$(date -u +%Y%m%d)
+          ART=artifacts/prod/${UTC}/deploy-$(date -u +%H%M%S)
+          mkdir -p "$ART"
+          curl -sS -D "$ART/set_cookie.headers" -H "x-vercel-protection-bypass: ${VERCEL_AUTOMATION_BYPASS_SECRET}" "${PROD_URL%/}/?x-vercel-set-bypass-cookie=true" -c "$ART/cookies.txt" -o "$ART/set_cookie.html" || true
+          curl -sS -b "$ART/cookies.txt" -D "$ART/health.headers" "${PROD_URL%/}/api/convert/health" -o "$ART/health.json" || true
+          PREVIEW_URL="$PROD_URL" CONVERT_SMOKE_ARTIFACTS="$ART" node scripts/smoke_convert_preview.mjs || true
+          code=$(awk 'NR==1{print $2}' "$ART/health.headers" 2>/dev/null || echo 0)
+          if [ "$code" != "200" ]; then
+            echo "Health check failed with $code"; exit 1; fi
+
+      - name: Upload prod artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prod-deploy-smoke-${{ github.run_id }}
+          path: tinyutils/artifacts/prod
+          if-no-files-found: warn
+
