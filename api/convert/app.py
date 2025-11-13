@@ -212,8 +212,19 @@ async def _log_pandoc_availability() -> None:
 
 
 class InputItem(BaseModel):
-    blobUrl: str
+    blobUrl: Optional[str] = None
+    text: Optional[str] = None
     name: Optional[str] = None
+
+    @validator('blobUrl', 'text', pre=True)
+    def check_one_source(cls, v, values):
+        """Ensure exactly one of blobUrl or text is provided."""
+        if 'blobUrl' in values and 'text' in values:
+            if values.get('blobUrl') and v:
+                raise ValueError('Provide either blobUrl or text, not both')
+            if not values.get('blobUrl') and not v:
+                raise ValueError('Either blobUrl or text is required')
+        return v
 
 
 class Options(BaseModel):
@@ -668,6 +679,24 @@ def _download_payloads(inputs: List[InputItem], job_dir: Path) -> List[InputPayl
 
 
 def _download_input(item: InputItem, job_dir: Path) -> DownloadMetadata:
+    # Handle direct text input (for markdown → PDF via Cloud Run)
+    if item.text is not None:
+        name = item.name or "input.md"
+        target = job_dir / name
+        text_bytes = item.text.encode('utf-8')
+        target.write_bytes(text_bytes)
+        size = len(text_bytes)
+        ensure_within_limits(size)
+        # Assume markdown if no extension specified
+        mime_type = "text/markdown" if not target.suffix or target.suffix == ".md" else "text/plain"
+        return DownloadMetadata(
+            path=target,
+            size_bytes=size,
+            content_type=mime_type,
+            original_name=name,
+        )
+
+    # Handle blob URL input (existing flow)
     target = job_dir / (item.name or "input")
     size, content_type = blob.download_to_path(item.blobUrl, target)
     ensure_within_limits(size)
