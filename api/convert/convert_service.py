@@ -332,10 +332,11 @@ def _render_markdown_target(cleaned_path: Path, target: str) -> bytes:
 
 
 def _render_pdf_via_reportlab(markdown_path: Path) -> bytes:
-    """Convert markdown to PDF using xhtml2pdf.
+    """Convert markdown to PDF using external Chromium renderer or xhtml2pdf fallback.
 
-    Strategy: Convert markdown → HTML (via pandoc) → PDF (via xhtml2pdf).
-    This is more reliable than custom PDF generation.
+    Strategy: Convert markdown → HTML (via pandoc) → PDF (via Chromium or xhtml2pdf).
+    Prefers external Chromium renderer (PDF_RENDERER_URL) for higher fidelity.
+    Falls back to local xhtml2pdf when external renderer is not configured.
     """
     try:
         from xhtml2pdf import pisa
@@ -372,14 +373,33 @@ def _render_pdf_via_reportlab(markdown_path: Path) -> bytes:
         </html>
         """
 
-        # Convert HTML to PDF
-        pdf_buffer = io.BytesIO()
-        pisa_status = pisa.CreatePDF(html_with_style, dest=pdf_buffer)
-
-        if pisa_status.err:
-            raise RuntimeError(f"PDF generation had errors: {pisa_status.err}")
-
-        return pdf_buffer.getvalue()
+        # Prefer external Chromium renderer if available
+        use_external = bool(os.getenv("PDF_RENDERER_URL"))
+        if use_external:
+            from ._pdf_external import render_html_to_pdf_via_external, RemotePdfError
+            try:
+                import uuid
+                request_id = uuid.uuid4().hex
+                pdf_bytes, meta = render_html_to_pdf_via_external(
+                    html_with_style,
+                    f"{markdown_path.stem or 'output'}.pdf",
+                    request_id
+                )
+                _LOGGER.info(
+                    "PDF rendered via external Chromium: engine=%s version=%s",
+                    meta.get('pdfEngine'),
+                    meta.get('pdfEngineVersion')
+                )
+                return pdf_bytes
+            except RemotePdfError as exc:
+                raise RuntimeError(f"external_pdf_error:{exc.code}:{exc.message}") from exc
+        else:
+            # Fallback: local xhtml2pdf (reduced fidelity)
+            pdf_buffer = io.BytesIO()
+            pisa_status = pisa.CreatePDF(html_with_style, dest=pdf_buffer)
+            if pisa_status.err:
+                raise RuntimeError(f"PDF generation had errors: {pisa_status.err}")
+            return pdf_buffer.getvalue()
 
     except Exception as e:
         # If PDF generation fails completely, raise a more informative error
