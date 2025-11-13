@@ -5,3 +5,5 @@ node_modules/
 .code/
 .code/
 .vercel
+artifacts/
+.DS_Store
