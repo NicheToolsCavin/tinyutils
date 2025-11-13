@@ -149,21 +149,16 @@ def convert_one(
                 cleaned_text = html_text
             else:
                 logs.append("conversion_strategy=via_markdown")
-                # Add special handling for HTML→Markdown to improve complex element conversion
-                extra_md_args = []
+                # HTML conversion uses specialized Lua filters to convert semantic elements
                 if from_format == "html":
-                    # Use --from=html-raw_html to force conversion of all elements
-                    # instead of preserving figure/figcaption/etc as raw HTML
-                    extra_md_args.extend(["--from=html-raw_html"])
-                    logs.append("html_conversion_mode=force_semantic")
+                    logs.append("html_semantic_filter=enabled")
 
                 pandoc_runner.convert_to_markdown(
                     source=source_for_pandoc,
                     destination=raw_md,
-                    from_format=from_format if from_format != "html" else None,  # Already specified in --from arg
+                    from_format=from_format,
                     accept_tracked_changes=opts.accept_tracked_changes,
                     extract_media_dir=extract_dir,
-                    extra_args=extra_md_args,
                 )
                 pandoc_runner.apply_lua_filters(raw_md, filtered_md)
 
