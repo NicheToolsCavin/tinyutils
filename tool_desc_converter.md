@@ -1,5 +1,111 @@
 ## Converter Tool — Description and Change Log
 
+### Major changes — 2025-11-14 (UTC+01:00) — HTML conversion fixes + UX improvements
+
+Added
+• HTML semantic element conversion via Lua filter (`filters/figure_to_markdown.lua`):
+  - Converts `<figure><img><figcaption>` to Markdown image + italicized caption
+  - Converts `<aside>` to blockquote
+  - Converts `<mark>` to code (backticks)
+  - Applied during HTML→Markdown conversions only
+• Direct HTML conversion path for HTML→Plain Text and HTML→HTML:
+  - New `_build_direct_html_artifacts()` function in `convert_service.py`
+  - Bypasses markdown intermediate to prevent truncation
+  - Uses `--columns=1000` for wide plain text rendering
+• Smart "Extract Media" option availability:
+  - Disables when input format lacks embedded media (Markdown, Plain Text)
+  - Disables when no media-capable output formats selected (e.g., only Plain Text)
+  - Contextual tooltips explain why option is disabled
+  - Auto-unchecks when disabled to prevent user confusion
+• Dynamic "Accept Tracked Changes" option availability:
+  - Disables for non-Word documents (HTML, Markdown, Plain Text)
+  - Shows at 50% opacity when disabled
+• Request counter to prevent race conditions on rapid convert clicks
+• Updated UI text to reflect full format support:
+  - Title: "Document Converter" (was "Text File Converter")
+  - Description mentions "100+ formats" instead of just "Markdown and plain text"
+  - File upload label lists common formats: ".md, .html, .docx, .pdf, .rtf, .odt, etc."
+
+Modified
+• HTML→Markdown conversion strategy:
+  - Removed incorrect `--from=html-raw_html` flag
+  - Now applies HTML-specific Lua filters during `convert_to_markdown()`
+  - Logs: `html_semantic_filter=enabled`
+• Pandoc runner filter system:
+  - Added `HTML_FILTERS` tuple alongside existing `FILTERS`
+  - Modified `_lua_filter_args()` to accept optional `filter_list` parameter
+  - Filters applied based on input format (HTML gets figure_to_markdown.lua)
+• UI reactivity:
+  - Option availability updates when input format changes
+  - Option availability updates when output format checkboxes change
+  - Real-time feedback via disabled state + opacity
+
+Fixed
+• HTML→Plain Text truncation (HIGH priority):
+  - **Problem:** Output truncated to `<!doctype html>\n\n </li>\n` (only doctype + stray closing tag)
+  - **Root cause:** HTML→Markdown→Plain Text conversion path lost content
+  - **Fix:** Direct HTML→Plain Text conversion via pandoc (no markdown intermediate)
+  - **Evidence:** Codex testing shows full content now returned
+• HTML→HTML stray code blocks:
+  - **Problem:** Stray `</li>` appearing inside code blocks during HTML→HTML conversion
+  - **Root cause:** HTML→Markdown→HTML roundtrip creating artifacts
+  - **Fix:** Direct HTML→HTML conversion (no markdown intermediate)
+  - **Evidence:** Codex re-test confirms no stray tags
+• HTML→Markdown figure/figcaption raw passthrough:
+  - **Problem:** `<figure>` and `<figcaption>` passed through as raw HTML instead of converting to Markdown
+  - **Root cause:** Pandoc preserves unknown elements as raw HTML by default
+  - **Fix:** Created `figure_to_markdown.lua` filter to handle semantic conversion
+  - **Evidence:** Codex re-test confirms figure converts to image + italic caption
+• Results table transient oddities:
+  - **Problem:** Doubled/empty rows when rapidly clicking convert or toggling formats
+  - **Root cause:** Multiple overlapping conversion requests updating table simultaneously
+  - **Fix:** Request counter to ignore stale responses
+  - **Evidence:** Codex testing shows table now stable
+
+Human-readable summary
+
+**Problem 8: The "incomplete document" and "messy conversion" issues**
+
+Imagine you're translating a book from Spanish to English, but you accidentally rip out half the pages during translation. That's what was happening with HTML documents!
+
+When users tried to convert HTML to plain text, the system would:
+1. Convert HTML → Markdown (first translation)
+2. Convert Markdown → Plain Text (second translation)
+
+But something went wrong in step 1, and most of the content got lost. Users would upload a full HTML document and get back just a few characters like `<!doctype html>\n </li>\n` - basically nothing useful!
+
+**The fix:** We created a "direct path" that skips the markdown step entirely. Now HTML→Plain Text goes straight from source to destination without the risky intermediate conversion. Think of it like using Google Translate directly instead of translating Spanish→French→English.
+
+We also fixed issues where HTML elements like `<figure>` (image containers) and `<figcaption>` (image captions) weren't being converted to Markdown properly - they were just left as raw HTML code. Now we have a smart "filter" that recognizes these elements and converts them to proper Markdown: images become `![alt](url)` and captions become *italicized text*.
+
+Finally, we made the UI much clearer:
+- The "Extract Media" option now disables when it doesn't make sense (e.g., if you're only outputting plain text, there's nowhere to put extracted images!)
+- The "Accept Tracked Changes" option disables for formats that don't support tracked changes
+- Updated all the text to mention "100+ formats" instead of just "Markdown and plain text" - because the converter actually supports Word, PDF, HTML, LaTeX, and tons more!
+
+Impact
+• **HTML→Plain Text works perfectly** ✅ - No more truncation, full content extracted
+• **HTML→HTML clean conversions** ✅ - No stray tags or code block artifacts
+• **HTML→Markdown semantic conversion** ✅ - Figures/captions convert to proper Markdown
+• **Better UX** ✅ - Options disable when inapplicable with helpful tooltips
+• **Accurate UI text** ✅ - Users know the tool supports 100+ formats
+• **No race conditions** ✅ - Results table stable even with rapid clicking
+• Zero breaking changes - all existing conversions still work, new paths only used for HTML sources
+
+Testing
+• Codex (ChatGPT) comprehensive re-test ✅ - All scenarios GREEN
+• HTML with figure/figcaption → Markdown: Converts to image + italic caption ✅
+• HTML → Plain Text: Full content, no truncation ✅
+• HTML → HTML: No stray `</li>` in code blocks ✅
+• Extract Media: Disables appropriately, clear tooltips ✅
+• Results table: Stable across multiple convert/toggle cycles ✅
+• No regressions in previously fixed issues ✅
+
+Commits
+• 76e911d - fix(converter): fix HTML conversion issues and add UX improvements
+• 42c0866 - feat(converter): add HTML semantic element conversion and improve Extract Media UX
+• 90e6fb5 - docs(converter): update UI text to reflect full format support
+
 ### Major changes — 2025-11-13 13:53 CET (UTC+01:00)
 
 Added
