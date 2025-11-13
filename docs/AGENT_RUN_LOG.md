@@ -337,3 +337,105 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
   - Captured why the preview smoke/convert investigation took longer: chasing bypass cookies, verifying 405/500 output, and rerunning curl flows to ensure we had evidence before editing config.
 - Evidence: none (doc-only change).
 - Follow-ups: None.
+### 2025-11-13 14:27 CET (UTC+01:00) — Repo review + checklist verification (preview-prod-green)
+- Mode: manual
+- Branch: `preview-prod-green`
+- CWD: /Users/cav/dev/TinyUtils/tinyutils
+- Summary:
+  - Performed full repo scan against AGENTS.md checklist: required pages and Edge APIs all present and ESM-compliant.
+  - Verified hardening in Edge APIs: public-only networking, AbortSignal timeouts, single retry on 429/5xx with jitter, global/per-origin concurrency caps, DLF HSTS/TLD guards, and JSON content-type headers.
+  - Confirmed `vercel.json` has security headers; also contains rewrites for preview fence routing (no `functions`/`runtime` blocks).
+  - Validated UI a11y/UX points: sticky table headers, guarded keyboard shortcuts, CSV hardening in exports.
+  - Collected evidence artifacts (file presence, patterns, and config dumps).
+- Evidence:
+  - artifacts/review/20251113/tree.txt
+  - artifacts/review/20251113/checklist_status.txt
+  - artifacts/review/20251113/edge_runtime_hits.txt
+  - artifacts/review/20251113/cjs_in_api.txt
+  - artifacts/review/20251113/package_json.txt
+  - artifacts/review/20251113/vercel_json.txt
+  - artifacts/review/20251113/md_files.txt
+- Follow-ups:
+  - Clarify policy on `vercel.json` "headers only" vs current `rewrites` used for preview fence. If strict, propose documenting the exception or moving fence routing elsewhere.
+### 2025-11-13 14:46 CET (UTC+01:00) — Orientation + status recap
+- Mode: manual
+- Branch: `HEAD
+unknown`
+- CWD: /Users/cav/dev/TinyUtils/tinyutils
+- Summary: Scanned repo, READMEs, AGENTS.md; verified key pages and Edge APIs exist; ran Node tests (9/10 pass, PDF test expects PREVIEW_URL); noted converter external PDF path (_pdf_external.py) + env strip fixes; saved evidence under tinyutils/artifacts/orientation/20251113/.
+- Evidence: tinyutils/artifacts/orientation/20251113/tree.txt, tinyutils/artifacts/orientation/20251113/docs_list.txt
+- Follow-ups: Set PREVIEW_URL to run pdf_envelope test locally; confirm preview bypass token for browser smokes; decide on PDF renderer path (external vs xhtml2pdf).
+
+### 2025-11-13 15:24 CET (UTC+01:00) — Converter E2E smoke against preview
+- Mode: manual
+- Branch: 
+- CWD: /Users/cav/dev/TinyUtils/tinyutils
+- Summary:
+  - Exercised /api/convert with MD(simple/complex), HTML, remote DOCX, remote PDF (to text), ZIP batch using x-vercel-protection-bypass header.
+  - Saved outputs (PDF/HTML/DOCX/TXT) and headers; wrote REPORT.md.
+- Evidence: tinyutils/artifacts/converter_e2e/20251113 (REPORT.md, *.resp.json, *.headers.txt, saved outputs)
+- Findings:
+  - All conversions OK except PDF→text (remote) which failed: ModuleNotFoundError: pypdf (missing in preview runtime).
+  - meta.pdfExternalAvailable=true but x-pdf-engine header shows xhtml2pdf; engine likely fell back locally or detection needs refining.
+  - GET /api/convert?__health=1 returns 405; consider exposing GET /api/convert/health 200.
+- Follow-ups:
+  1) Ensure  installed for preview; 2) Verify external renderer + surface engine/version in meta; 3) Add ZIP batch test; 4) Document health path in TESTING.md.
+### 2025-11-13 15:25 CET (UTC+01:00) — Converter preview fixes (deps + PDF engine logs)
+- Mode: manual
+- Branch: `ci/preview-prod-green`
+- CWD: /Users/cav/dev/TinyUtils/tinyutils
+- Summary:
+  - Added `api/convert/requirements.txt` so Vercel installs Python deps for the convert function (includes `pypdf`) to unblock PDF→text extraction.
+  - Threaded PDF engine detection into per-job logs in `api/convert/convert_service.py` so `app.py` can fill `meta.pdfEngine` reliably. Logs now include either `PDF rendered via external Chromium: engine=… version=…` or `PDF rendered via xhtml2pdf`.
+  - Tightened `tests/pdf_envelope.test.mjs` to assert a non-empty `meta.pdfEngine` when `PREVIEW_URL` is set; skips when not set.
+- Evidence:
+  - Code: `tinyutils/api/convert/requirements.txt`, `tinyutils/api/convert/convert_service.py`, `tinyutils/tests/pdf_envelope.test.mjs`.
+  - Local tests: `pnpm test` → 9 pass, 0 fail, 1 skipped (pdf_envelope when PREVIEW_URL unset).
+- Follow-ups:
+  - Redeploy preview to ensure `pypdf` is installed for PDF→text; verify remote PDF → md/html/txt succeeds.
+  - Confirm external PDF renderer health; if used, `meta.pdfEngine` should report external engine and version.
+### 2025-11-13 16:28 CET (UTC+01:00) — Reviewed security emails (PDF) + logged next steps before changes
+- Mode: manual
+- Branch: 
+- CWD: /Users/cav/dev/TinyUtils/tinyutils
+- Evidence: tinyutils/artifacts/security_emails/20251113 (original PDFs + extracted text where possible; SUMMARY.txt)
+- Files: Re- [NicheToolsCavin:tinyutils] CI- Preview smoke (secrets-optional) + Prod depl 2.pdf,Re- [NicheToolsCavin:tinyutils] CI- Preview smoke (secrets-optional) + Prod depl 3.pdf,Re- [NicheToolsCavin:tinyutils] CI- Preview smoke (secrets-optional) + Prod depl.pdf,
+- Notes:
+  - Copied the three PDFs from /tmp to artifacts; extraction shows they are likely image-based PDFs (strings/binary). OCR not run pending approval.
+  - Logged next steps here before making changes per request.
+- Next steps captured from context (security hardening):
+  • Stop committing secrets: add global ignore for env files; keep *.example templates.
+  • Rotate preview/prod tokens stored in Vercel/Cloud Run (BYPASS_TOKEN, PREVIEW_BYPASS_TOKEN, VERCEL_AUTOMATION_BYPASS_SECRET, CONVERTER_SHARED_SECRET). Avoid sharing them in docs or artifacts.
+  • Redact tokens already present in long-form docs and artifacts; replace with placeholders.
+  • Confirm preview fence always required for gated tools; keep X-Robots-Tag noindex and CSP strict.
+  • Ensure client code never embeds server secrets (Blob token); keep server-only usage in Python.
+- Actions taken now (safe, minimal):
+  • Added ignore patterns to tinyutils/.gitignore to prevent committing any .env files (root and nested), preserving *.example.
+- Follow-ups requested:
+  • Approval to OCR the three PDFs to extract precise wording and any additional action items.
+  • Approval to redact tokens in large doc files automatically (adds a broad diff), or keep as-is locally.
+### 2025-11-13 16:47 CET (UTC+01:00) — OCR of security emails + Security policy added
+- Mode: manual
+- Branch: 
+- CWD: /Users/cav/dev/TinyUtils/tinyutils
+- Summary:
+  - Per request, OCR’d the three security emails from /tmp; saved  and updated .
+  - Added  and referenced it from AGENTS.md; expanded .gitignore to ignore all  files repo‑wide while preserving .
+- Evidence:
+  - tinyutils/artifacts/security_emails/20251113 (PDFs, OCR text, OCR excerpts in SUMMARY)
+- Follow-ups:
+  - Token rotation checklist is documented; ready to execute on approval.
+  - Auto‑redaction in website content is deferred per request.
+### ${NOW} — OCR of security emails + Security policy added
+- Mode: manual
+- Branch: `ci/preview-prod-green`
+- CWD: /Users/cav/dev/TinyUtils/tinyutils
+- Summary:
+  - Per request, OCR’d the three security emails from /tmp; saved `*.ocr.txt` and updated `SUMMARY.txt`.
+  - Added `SECURITY.md` and referenced it from AGENTS.md; expanded .gitignore to ignore all `.env*` files repo‑wide while preserving `*.example`.
+- Evidence:
+  - tinyutils/artifacts/security_emails/${TODAY} (PDFs, OCR text, OCR excerpts in SUMMARY)
+- Follow-ups:
+  - Token rotation checklist is documented; ready to execute on approval.
+  - Auto‑redaction in website content is deferred per request.
+- Added rotation helper: `tinyutils/scripts/rotate_tokens.sh` and playbook `tinyutils/docs/SECURITY_ROTATION_PLAYBOOK.md`.

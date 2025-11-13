@@ -25,6 +25,12 @@ Edge APIs must respond:
   - **No top-level `await` or `return`.** No referencing `req` outside the handler.
   - Do not use `require()`; use ESM only.
 
+### Security Policy (must read)
+- Follow `tinyutils/SECURITY.md` for handling secrets and logs.
+  - Do not commit real secrets or any `.env*` files (repo ignores them by default).
+  - Use platform environment variables (Vercel/Cloud Run) and redact tokens in evidence.
+  - Run the PR checklist in SECURITY.md before opening any PR.
+
 ---
 
 ## File existence checklist
