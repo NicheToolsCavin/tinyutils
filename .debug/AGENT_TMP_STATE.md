@@ -247,8 +247,8 @@ Then you told me to push it, so I did. Now the github has lost files, and the Ve
         -  POST $PROD_URL/api/convert (md→md/txt/html) with x-preview-secret (if used for prod), save headers/body.
       ·  Store artifacts in tinyutils/artifacts/prod/<YYYYMMDD>/deploy-<HHMMSS>/.
         -  Document and Handoff
-        ·  Update tinyutils/.debug/AGENT_TMP_STATE.md with production URL and artifact paths.
-        ·  Optionally add a minimal “prod smoke” workflow for manual verification.
+          ·  Update tinyutils/.debug/AGENT_TMP_STATE.md with production URL and artifact paths.
+          ·  Optionally add a minimal “prod smoke” workflow for manual verification.
       
          Critical Data and References
          - Preview URL (latest recorded): see tinyutils/.debug/AGENT_TMP_STATE.md and artifacts/convert/20251111/smoke-preview-005854.
@@ -292,3 +292,34 @@ Then you told me to push it, so I did. Now the github has lost files, and the Ve
   2) Run `scripts/smoke_convert_preview.mjs` with PREVIEW_URL + fence headers (uses VERCEL_AUTOMATION_BYPASS_SECRET and x-preview-secret).
   3) If red, open new `artifacts/convert/<date>/preview-smoke-*/resp_*.json` and triage via errorType/errorMessage.
   4) Append the new Preview URL and artifact path here and in docs/AGENT_RUN_LOG.md.
+
+ Here’s the concise status after reading the state file and scanning the repo.
+
+   What I Found
+   - Nested repo exists at tinyutils/.git; your working tree root is tinyutils/.
+   - Convert API and its vendors were missing under tinyutils/api/ (root cause of preview failure).
+   - Root-level scripts/smoke_convert_preview.mjs was also missing (CI pointed to it).
+
+   What I Restored
+   - From backup /Users/cav/dev/TinyBackups/tinyutils-20251111T000545Z.tar.gz into tinyutils/:
+     ·  api/convert/** (includes app.py, index.py)
+     ·  api/_vendor/pandoc/pandoc.xz
+     ·  api/_vendor/pydantic_core/**
+     ·  scripts/smoke_convert_preview.mjs
+   - Verified present: pandoc.xz, pydantic_core, api/convert/app.py.
+   - Logged the recovery in tinyutils/.debug/AGENT_TMP_STATE.md (Recovery checkpoint).
+
+   Git
+   - Committed in nested repo tinyutils on branch convert-preview-ci (no push).
+     ·  Message: restore(convert): recover api/convert + vendors from backup; add smoke script; append recovery checkpoint.
+
+   Next Actions (quick)
+   - Deploy a fresh Preview to get the exact URL.
+   - Run scripts/smoke_convert_preview.mjs with:
+     ·  PREVIEW_URL, PREVIEW_SECRET, and VERCEL_AUTOMATION_BYPASS_SECRET.
+     ·  It will set the bypass cookie, hit /api/convert/health, and run md→md/txt/html conversions, saving artifacts.
+   - If it fails, read errorType/errorMessage in the saved resp_*.json and iterate.
+
+   Want me to:
+   1) Kick off a fresh Preview deploy and run the smoke locally, or
+   2) Re-run the GitHub “Convert Preview Smoke” workflow on PR #24 and inspect its artifacts?
