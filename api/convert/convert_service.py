@@ -344,9 +344,6 @@ def _render_pdf_via_reportlab(markdown_path: Path) -> bytes:
     Falls back to local xhtml2pdf when external renderer is not configured.
     """
     try:
-        from xhtml2pdf import pisa
-        import io
-
         # First, convert markdown to HTML using pandoc (which we know works)
         pypandoc = _get_pypandoc()
         html_content = pypandoc.convert_file(
@@ -400,6 +397,8 @@ def _render_pdf_via_reportlab(markdown_path: Path) -> bytes:
                 raise RuntimeError(f"external_pdf_error:{exc.code}:{exc.message}") from exc
         else:
             # Fallback: local xhtml2pdf (reduced fidelity)
+            from xhtml2pdf import pisa
+            import io
             pdf_buffer = io.BytesIO()
             pisa_status = pisa.CreatePDF(html_with_style, dest=pdf_buffer)
             if pisa_status.err:
