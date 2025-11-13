@@ -13,6 +13,7 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 ## Active Tasks (Newest First)
 
 | Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
+| Fix environment variable whitespace (BLOB_READ_WRITE_TOKEN, PDF_RENDERER_URL, CONVERTER_SHARED_SECRET) | manual-2025-11-13 13:53 CET | Completed | ✅ Added .strip() calls to 3 env vars in blob.py and _pdf_external.py. Fixed "Invalid header value" errors. Commits: dc7e23a, 979eb0f. Also cleaned git history of 268MB artifacts file and added artifacts/ to .gitignore |
 | Automated Vercel log downloading to ~/dev/TinyUtils/logs/ | manual-2025-11-12 14:25 CET | Todo | Create script/command to fetch Vercel logs automatically instead of manual fetch. Log grabber script exists at ~/dev/TinyUtils/logs/grab_logs_converter_preview.sh |
 | Converter API — Debug remaining 500 error on POST /api/convert | manual-2025-11-12 14:25 & 16:10 CET | Completed | ✅ FIXED! 16 commits total (91e28d1→8dee8bd). Final solution: Copied convert modules into api/convert/ to avoid cross-package imports. Health check ✅. POST /api/convert ✅. Evidence: artifacts/convert/20251112/success_test_final.json |
 | Enforce per-turn logging (AGENTS.md + converter heartbeat) | manual-2025-11-12 10:42 CET | Completed | AGENTS.md updated; tool_desc_converter.md heartbeat added; artifacts/convert/20251112/heartbeat/ |
