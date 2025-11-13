@@ -455,3 +455,19 @@ Manual QA of https://www.tinyutils.net/tools/text-converter/ using the internal 
 
 Impact
 • No behavior change. Evidence added under artifacts.
+### Major changes — 2025-11-14 [00:20] CET (UTC+01:00)
+
+Added
+• Retest artifacts: tinyutils/artifacts/text-converter/20251114/retest-2.txt
+
+Removed
+• None
+
+Modified
+• None (manual QA only)
+
+Human-readable summary
+Re-tested Text Converter after fixes. Verified HTML→Plain Text truncation is resolved; HTML→HTML no stray code block; DOCX generation steady; RTF→Markdown with zero‑width removal OK. HTML→Markdown now maps figure/figcaption to image + italic caption; footnotes remain as lightweight HTML wrappers, which matches current UI help text. Extract media now clarifies scope via tooltip and behaves consistently for HTML-only output.
+
+Impact
+• No code change in repo. Preview tool appears green for tested cases.
