@@ -148,6 +148,7 @@ def convert_one(
                 cleaned_path=cleaned_md,
                 cleaned_text=cleaned_text,
                 base_name=_safe_stem(safe_name),
+                logs=logs,
             )
 
             preview = PreviewData(
@@ -259,13 +260,14 @@ def _build_target_artifacts(
     cleaned_path: Path,
     cleaned_text: str,
     base_name: str,
+    logs: Optional[List[str]] = None,
 ) -> List[TargetArtifact]:
     artifacts: List[TargetArtifact] = []
     for target in targets:
         if target == "md":
             data = cleaned_text.encode("utf-8")
         else:
-            data = _render_markdown_target(cleaned_path, target)
+            data = _render_markdown_target(cleaned_path, target, logs=logs)
         artifacts.append(
             TargetArtifact(
                 target=target,
@@ -307,12 +309,12 @@ def _fallback_conversion(*, name: str, input_bytes: bytes, targets: Sequence[str
     )
 
 
-def _render_markdown_target(cleaned_path: Path, target: str) -> bytes:
+def _render_markdown_target(cleaned_path: Path, target: str, *, logs: Optional[List[str]] = None) -> bytes:
     pypandoc = _get_pypandoc()
 
     if target == "pdf":
-        # PDF requires special handling - use reportlab for pure Python solution
-        return _render_pdf_via_reportlab(cleaned_path)
+        # PDF requires special handling - prefer external renderer when configured
+        return _render_pdf_via_reportlab(cleaned_path, logs=logs)
     elif target == "docx":
         # DOCX output via pandoc (native support)
         output_path = cleaned_path.parent / f"{cleaned_path.stem}.docx"
@@ -336,7 +338,7 @@ def _render_markdown_target(cleaned_path: Path, target: str) -> bytes:
         return rendered.encode("utf-8")
 
 
-def _render_pdf_via_reportlab(markdown_path: Path) -> bytes:
+def _render_pdf_via_reportlab(markdown_path: Path, *, logs: Optional[List[str]] = None) -> bytes:
     """Convert markdown to PDF using external Chromium renderer or xhtml2pdf fallback.
 
     Strategy: Convert markdown → HTML (via pandoc) → PDF (via Chromium or xhtml2pdf).
@@ -392,18 +394,35 @@ def _render_pdf_via_reportlab(markdown_path: Path) -> bytes:
                     meta.get('pdfEngine'),
                     meta.get('pdfEngineVersion')
                 )
+                if logs is not None:
+                    engine = meta.get('pdfEngine') or 'external'
+                    version = meta.get('pdfEngineVersion') or 'unknown'
+                    # Use format that app.py can parse: "pdf_engine=<value> pdf_engine_version=<value>"
+                    logs.append(f"pdf_engine={engine}")
+                    if version:
+                        logs.append(f"pdf_engine_version={version}")
                 return pdf_bytes
             except RemotePdfError as exc:
-                raise RuntimeError(f"external_pdf_error:{exc.code}:{exc.message}") from exc
-        else:
-            # Fallback: local xhtml2pdf (reduced fidelity)
-            from xhtml2pdf import pisa
-            import io
-            pdf_buffer = io.BytesIO()
-            pisa_status = pisa.CreatePDF(html_with_style, dest=pdf_buffer)
-            if pisa_status.err:
-                raise RuntimeError(f"PDF generation had errors: {pisa_status.err}")
-            return pdf_buffer.getvalue()
+                # External renderer failed - log warning and fall back to local renderer
+                _LOGGER.warning(
+                    "External PDF renderer failed (code=%s message=%s), falling back to xhtml2pdf",
+                    exc.code,
+                    exc.message
+                )
+                if logs is not None:
+                    logs.append(f"pdf_external_fallback={exc.code}:{exc.message}")
+                # Fall through to xhtml2pdf fallback below
+
+        # Local xhtml2pdf fallback (either external not configured or external failed)
+        from xhtml2pdf import pisa
+        import io
+        pdf_buffer = io.BytesIO()
+        pisa_status = pisa.CreatePDF(html_with_style, dest=pdf_buffer)
+        if pisa_status.err:
+            raise RuntimeError(f"PDF generation had errors: {pisa_status.err}")
+        if logs is not None:
+            logs.append("pdf_engine=xhtml2pdf")
+        return pdf_buffer.getvalue()
 
     except Exception as e:
         # If PDF generation fails completely, raise a more informative error
