@@ -55,7 +55,7 @@ async def init():
     global ENGINE_VERSION
     async with async_playwright() as p:
         browser = await p.chromium.launch()
-        ENGINE_VERSION = (await browser.version())
+        ENGINE_VERSION = browser.version
         await browser.close()
 
 @app.post("/convert", response_model=ConvertOut)
