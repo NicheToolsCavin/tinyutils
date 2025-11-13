@@ -1,3 +1,37 @@
+### 2025-11-14 (CET) — HTML conversion fixes + UX improvements (main)
+- Mode: manual
+- Branch: `main`
+- CWD: /Users/cav/dev/TinyUtils/tinyutils
+- Summary:
+  - **Fixed 4 critical converter bugs** reported by Codex (ChatGPT) testing:
+    1. **HTML→Plain Text truncation (HIGH):** Created direct conversion path bypassing markdown intermediate
+    2. **HTML→HTML stray code blocks:** Direct conversion eliminates roundtrip artifacts
+    3. **HTML→Markdown figure/figcaption raw passthrough:** New Lua filter converts semantic elements
+    4. **Results table race conditions:** Request counter prevents stale response rendering
+  - **UX improvements:**
+    - Smart "Extract Media" disable logic (only enabled when input has media AND output supports media)
+    - Smart "Accept Tracked Changes" disable logic (only for Word/ODF documents)
+    - Contextual tooltips explain why options are disabled
+    - Real-time option availability updates based on format selection
+  - **UI text accuracy:**
+    - Updated title: "Document Converter" (was "Text File Converter")
+    - Updated descriptions to mention "100+ formats" instead of just "Markdown and plain text"
+    - File upload label now shows: ".md, .html, .docx, .pdf, .rtf, .odt, etc."
+  - **New files:**
+    - `filters/figure_to_markdown.lua` - Converts HTML5 semantic elements (figure/figcaption/aside/mark) to Markdown
+    - `_build_direct_html_artifacts()` function in convert_service.py
+  - **Modified files:**
+    - `api/_lib/pandoc_runner.py` - Added HTML_FILTERS tuple and filter_list parameter
+    - `api/convert/convert_service.py` - Direct HTML conversion logic, simplified HTML→Markdown path
+    - `tools/text-converter/index.html` - UX improvements and UI text updates
+  - Commits: 76e911d (HTML fixes), 42c0866 (semantic elements), 90e6fb5 (UI text)
+- Evidence:
+  - Codex re-test artifacts: `tinyutils/artifacts/text-converter/20251114/retest-2.txt`
+  - All scenarios GREEN: HTML→Plain Text (full content), HTML→HTML (no stray tags), figure/figcaption (converts to image + caption), Extract Media (smart disable), results table (stable)
+  - No regressions in previously fixed issues
+- Follow-ups:
+  - None - all reported issues resolved and verified GREEN by Codex
+
 ### 2025-11-13 13:53 CET — Environment variable whitespace fix + git cleanup (ci/preview-prod-green)
 - Mode: manual
 - Branch: `ci/preview-prod-green`
