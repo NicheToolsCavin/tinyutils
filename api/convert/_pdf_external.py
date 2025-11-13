@@ -2,8 +2,8 @@ from __future__ import annotations
 import base64, os, requests, uuid
 from typing import Tuple, Dict
 
-URL = os.getenv("PDF_RENDERER_URL","").rstrip("/")
-SECRET = os.getenv("CONVERTER_SHARED_SECRET","")
+URL = os.getenv("PDF_RENDERER_URL","").strip().rstrip("/")
+SECRET = os.getenv("CONVERTER_SHARED_SECRET","").strip()
 TIMEOUT = float(os.getenv("REQUEST_TIMEOUT","25"))
 
 class RemotePdfError(Exception):
