@@ -90,7 +90,7 @@ def _ensure_pydantic_core() -> None:
 
 _ensure_pydantic_core()
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, validator, root_validator
 
 from fastapi import FastAPI, Header, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
