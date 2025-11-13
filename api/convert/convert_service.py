@@ -50,6 +50,11 @@ _CACHE: "OrderedDict[str, ConversionResult]" = OrderedDict()
 _LOGGER = logging.getLogger(__name__)
 
 
+def _is_preview_env() -> bool:
+    """Check if running in Vercel preview environment."""
+    return os.getenv("VERCEL_ENV") == "preview"
+
+
 def convert_one(
 
     *,
