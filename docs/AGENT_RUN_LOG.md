@@ -439,3 +439,19 @@ unknown`
   - Token rotation checklist is documented; ready to execute on approval.
   - Auto‑redaction in website content is deferred per request.
 - Added rotation helper: `tinyutils/scripts/rotate_tokens.sh` and playbook `tinyutils/docs/SECURITY_ROTATION_PLAYBOOK.md`.
+### Major changes — 2025-11-14 [00:00] CET (UTC+0100)
+
+Added
+• None
+
+Removed
+• None
+
+Modified
+• None (manual QA only)
+
+Human-readable summary
+Manual QA of https://www.tinyutils.net/tools/text-converter/ using the internal browser. Ran conversions across Markdown/HTML/Plain Text/RTF and toggled options. Saved notes at tinyutils/artifacts/text-converter/20251114/notes.txt
+
+Impact
+• No behavior change. Evidence added under artifacts.
