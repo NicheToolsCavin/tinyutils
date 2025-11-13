@@ -90,6 +90,11 @@ jobs:
           set +a
           node scripts/smoke_convert_preview.mjs
 
+      - name: PDF Smoke via curl (conditional)
+        if: steps.resolve.outputs.preview_url != ''
+        run: |
+          bash scripts/smoke_pdf.sh "${{ steps.resolve.outputs.preview_url }}"
+
       - name: Note skipped smoke (no URL)
         if: steps.resolve.outputs.preview_url == ''
         run: |
