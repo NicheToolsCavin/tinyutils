@@ -306,3 +306,16 @@ Notes / follow-ups
 • Batch ZIP input, media packaging as ZIP, and extended normalization toggles (`normalizeLists`, `normalizeUnicode`, `wrap`, `headers`, `asciiPunctuation`) are planned; UI stubs can be surfaced once backend wiring lands.
 • Add Lua filters under `/filters` and wire in `pandoc_runner` for full cleanup parity.
 • Consider switching canonical domains at release time to production domain.
+### Minor changes — 2025-11-13 14:27 CET (UTC+01:00)
+
+Added
+• Review heartbeat only — no behavior change. Collected repo review artifacts under `artifacts/review/20251113/` and referenced them in `docs/AGENT_RUN_LOG.md`.
+
+Modified
+• None
+
+Removed
+• None
+
+Human-readable summary
+Routine repo review; converter behavior unchanged. This entry satisfies the same‑day heartbeat requirement while converter work remains in scope.
