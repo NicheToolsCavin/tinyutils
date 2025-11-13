@@ -505,23 +505,12 @@ def convert(
         pdf_engine = None
         pdf_engine_version = None
         for log in batch.logs:
-            if "PDF rendered via external Chromium:" in log:
-                # Extract engine and version from log message
-                if "engine=" in log:
-                    parts = log.split("engine=")
-                    if len(parts) > 1:
-                        engine_part = parts[1].split()[0].strip()
-                        pdf_engine = engine_part
-                if "version=" in log:
-                    parts = log.split("version=")
-                    if len(parts) > 1:
-                        version_part = parts[1].split()[0].strip()
-                        pdf_engine_version = version_part
-                break
-
-        # If no external engine, check if PDF was generated locally
-        if pdf_engine is None and any(o.get("target") == "pdf" for o in outputs):
-            pdf_engine = "xhtml2pdf"
+            # Parse "pdf_engine=<value>" format
+            if log.startswith("pdf_engine="):
+                pdf_engine = log.split("=", 1)[1].strip()
+            # Parse "pdf_engine_version=<value>" format
+            elif log.startswith("pdf_engine_version="):
+                pdf_engine_version = log.split("=", 1)[1].strip()
 
         response_payload = {
             "ok": True,
