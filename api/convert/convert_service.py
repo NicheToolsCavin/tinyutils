@@ -413,16 +413,10 @@ def _render_pdf_via_reportlab(markdown_path: Path, *, logs: Optional[List[str]] 
                     logs.append(f"pdf_external_fallback={exc.code}:{exc.message}")
                 # Fall through to xhtml2pdf fallback below
 
-        # Local xhtml2pdf fallback (either external not configured or external failed)
-        from xhtml2pdf import pisa
-        import io
-        pdf_buffer = io.BytesIO()
-        pisa_status = pisa.CreatePDF(html_with_style, dest=pdf_buffer)
-        if pisa_status.err:
-            raise RuntimeError(f"PDF generation had errors: {pisa_status.err}")
-        if logs is not None:
-            logs.append("pdf_engine=xhtml2pdf")
-        return pdf_buffer.getvalue()
+        # Local fallback temporarily disabled due to xhtml2pdf/pycairo build issues on Vercel
+        # External PDF renderer is required for PDF generation
+        # TODO: Replace with reportlab-based fallback
+        raise RuntimeError("PDF generation requires external renderer (PDF_RENDERER_URL). Local fallback temporarily unavailable.")
 
     except Exception as e:
         # If PDF generation fails completely, raise a more informative error
