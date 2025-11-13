@@ -90,7 +90,7 @@ def _ensure_pydantic_core() -> None:
 
 _ensure_pydantic_core()
 
-from pydantic import BaseModel, Field, validator, root_validator
+from pydantic import BaseModel, Field, validator, model_validator
 
 from fastapi import FastAPI, Header, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
@@ -216,16 +216,14 @@ class InputItem(BaseModel):
     text: Optional[str] = None
     name: Optional[str] = None
 
-    @root_validator(pre=False)
-    def check_one_source(cls, values):
+    @model_validator(mode='after')
+    def check_one_source(self):
         """Ensure exactly one of blobUrl or text is provided."""
-        blob_url = values.get('blobUrl')
-        text = values.get('text')
-        if not blob_url and not text:
+        if not self.blobUrl and not self.text:
             raise ValueError('Either blobUrl or text is required')
-        if blob_url and text:
+        if self.blobUrl and self.text:
             raise ValueError('Provide either blobUrl or text, not both')
-        return values
+        return self
 
 
 class Options(BaseModel):
