@@ -69,6 +69,7 @@ def upload_bytes(name: str, data: bytes, content_type: str) -> str:
 
     token = os.getenv("BLOB_READ_WRITE_TOKEN")
     if token:
+        token = token.strip()  # Remove trailing newlines from environment variable
         try:
             blob_url = _upload_to_vercel_blob(name, data, content_type, token)
             if blob_url:
