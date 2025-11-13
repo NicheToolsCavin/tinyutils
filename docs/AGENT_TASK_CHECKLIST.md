@@ -13,6 +13,14 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 ## Active Tasks (Newest First)
 
 | Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
+| Fix environment variable whitespace (BLOB_READ_WRITE_TOKEN, PDF_RENDERER_URL, CONVERTER_SHARED_SECRET) | manual-2025-11-13 13:53 CET | Completed | ✅ Added .strip() calls to 3 env vars in blob.py and _pdf_external.py. Fixed "Invalid header value" errors. Commits: dc7e23a, 979eb0f. Also cleaned git history of 268MB artifacts file and added artifacts/ to .gitignore |
+| Automated Vercel log downloading to ~/dev/TinyUtils/logs/ | manual-2025-11-12 14:25 CET | Todo | Create script/command to fetch Vercel logs automatically instead of manual fetch. Log grabber script exists at ~/dev/TinyUtils/logs/grab_logs_converter_preview.sh |
+| Converter API — Debug remaining 500 error on POST /api/convert | manual-2025-11-12 14:25 & 16:10 CET | Completed | ✅ FIXED! 16 commits total (91e28d1→8dee8bd). Final solution: Copied convert modules into api/convert/ to avoid cross-package imports. Health check ✅. POST /api/convert ✅. Evidence: artifacts/convert/20251112/success_test_final.json |
+| Enforce per-turn logging (AGENTS.md + converter heartbeat) | manual-2025-11-12 10:42 CET | Completed | AGENTS.md updated; tool_desc_converter.md heartbeat added; artifacts/convert/20251112/heartbeat/ |
+| Converter — ZIP input (minimal) | auto-2025-11-12T10-35 CET | Completed | Safe extraction; per-member guard; supported formats only |
+| Converter — extended Options + filters (graceful) | auto-2025-11-12T10-35 CET | Completed | normalize*/wrap/headers/ascii; runner.apply_lua_filters best‑effort; filters under /filters |
+| Converter — preview flag + consistent manifest | auto-2025-11-12T10-35 CET | Completed | Always return preview object; signature-aware pass to convert_batch |
+| Lander + sitemap — html-to-markdown | auto-2025-11-12T10-35 CET | Completed | Redirect + sitemap entry |
 | PR4 test suites | manual-2025-11-05T01-29 | Completed | Artifacts: tinyutils/artifacts/pr4-tests/20251105/ |
 | PR3 preview fence evidence | manual-2025-11-05T00-49 | Completed | Preview smoke PASS; 401→200 curl captures and cookies stored in tinyutils/artifacts/pr3-fence/20251105/. |
 | PR2 noindex + debug hook | manual-2025-11-05T00-14 | Completed | Meta shells now carry noindex meta; DLF debug paragraph has data-testid. Evidence: tinyutils/artifacts/pr2-ux-noindex-debug/20251105/. |
@@ -35,3 +43,4 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 - 2025-11-04 13:47 CET - Preview fence commit omitted deployment evidence; tracked under "Preview fence evidence + smoke".
 - 2025-11-04 13:34 CET - PR1 commit landed without CSP and `/public` cache rule; captured as follow-up in active tasks.
 - 2025-11-04 08:42 CET - Compliance audit flagged keyboard shortcut conflicts; marked "Needs Review" pending verification.
+| DLF Quick Extras smoke gates + artifacts | 2025-11-11 21:43 CET (UTC+0100) | Completed | Green; gating + artifacts in place |
