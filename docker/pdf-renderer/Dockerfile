@@ -8,7 +8,7 @@ RUN pip install --no-cache-dir fastapi uvicorn[standard] pydantic==2.* \
     pydantic-settings==2.* playwright==1.* pypdf==4.* \
  && playwright install --with-deps chromium
 WORKDIR /app
-COPY docker/pdf-renderer/service /app
+COPY service /app
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
   CMD wget -qO- http://127.0.0.1:8080/healthz || exit 1
 EXPOSE 8080
