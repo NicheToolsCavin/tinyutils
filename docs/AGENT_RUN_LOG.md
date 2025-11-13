@@ -1,3 +1,25 @@
+### 2025-11-13 13:53 CET — Environment variable whitespace fix + git cleanup (ci/preview-prod-green)
+- Mode: manual
+- Branch: `ci/preview-prod-green`
+- CWD: /Users/cav/dev/TinyUtils/tinyutils
+- Summary:
+  - **Root cause identified:** Trailing newlines (`\n`) in environment variables causing HTTP header errors
+  - Fixed 3 environment variables by adding `.strip()` calls:
+    - `BLOB_READ_WRITE_TOKEN` in `api/_lib/blob.py` (line 72)
+    - `PDF_RENDERER_URL` in `api/convert/_pdf_external.py` (line 5)
+    - `CONVERTER_SHARED_SECRET` in `api/convert/_pdf_external.py` (line 6)
+  - Error was: `Invalid header value b'Bearer vercel_blob_rw_...\\n'` causing blob uploads to fail
+  - **Git cleanup:** Added `artifacts/` and `.DS_Store` to `.gitignore` (commit 979eb0f)
+  - Removed 268MB `libreoffice-7.6.4.1.tar.xz` and all artifacts from git history using `git filter-branch`
+  - Force-pushed cleaned history to unblock deployment
+  - Commits: dc7e23a (env var fix), 979eb0f (gitignore), b0cd766 (history rewrite)
+- Evidence:
+  - Error logs from previous session showed blob upload failures with trailing newlines
+  - Fix verified via code inspection; awaiting Vercel redeploy for integration test
+- Follow-ups:
+  - Test converter API POST endpoint once Vercel redeploys preview environment
+  - Verify blob uploads now succeed without "invalid header value" errors
+
 ### 2025-11-12 16:10 CET (UTC+0100) — Converter API FINAL FIX (ci/preview-prod-green) ✅
 - Mode: manual
 - Branch: `ci/preview-prod-green`
