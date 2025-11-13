@@ -125,37 +125,70 @@ def convert_one(
                 source_for_pandoc = _extract_text_from_pdf(input_path, workspace)
                 from_format = "markdown"  # Extracted text is markdown
 
-            pandoc_runner.convert_to_markdown(
-                source=source_for_pandoc,
-                destination=raw_md,
-                from_format=from_format,
-                accept_tracked_changes=opts.accept_tracked_changes,
-                extract_media_dir=extract_dir,
-            )
-            pandoc_runner.apply_lua_filters(raw_md, filtered_md)
+            # Check if we can do direct conversion without markdown intermediate
+            # This fixes HTML→Plain Text truncation and HTML→HTML stray code issues
+            can_do_direct = from_format == "html" and all(t in ["txt", "html"] for t in normalized_targets)
 
-            before_text = raw_md.read_text("utf-8")
-            filtered_text = filtered_md.read_text("utf-8")
-            cleaned_text, stats = normalise_markdown(
-                filtered_text,
-                remove_zero_width=opts.remove_zero_width,
-            )
-            cleaned_md.write_text(cleaned_text, "utf-8")
-            logs.append(f"cleanup_stats={json.dumps(stats.__dict__, sort_keys=True)}")
+            if can_do_direct:
+                logs.append("conversion_strategy=direct_html")
+                # Direct HTML conversion without markdown intermediate
+                outputs = _build_direct_html_artifacts(
+                    source_path=source_for_pandoc,
+                    targets=normalized_targets,
+                    base_name=_safe_stem(safe_name),
+                    logs=logs,
+                )
+                # Create minimal preview from HTML
+                html_text = source_for_pandoc.read_text("utf-8", errors="replace")
+                preview = PreviewData(
+                    headings=[],
+                    snippets=[html_text[:500]],
+                    images=[],
+                )
+                before_text = html_text
+                cleaned_text = html_text
+            else:
+                logs.append("conversion_strategy=via_markdown")
+                # Add special handling for HTML→Markdown to improve complex element conversion
+                extra_md_args = []
+                if from_format == "html":
+                    # Use --from=html-raw_html to force conversion of all elements
+                    # instead of preserving figure/figcaption/etc as raw HTML
+                    extra_md_args.extend(["--from=html-raw_html"])
+                    logs.append("html_conversion_mode=force_semantic")
 
-            outputs = _build_target_artifacts(
-                targets=normalized_targets,
-                cleaned_path=cleaned_md,
-                cleaned_text=cleaned_text,
-                base_name=_safe_stem(safe_name),
-                logs=logs,
-            )
+                pandoc_runner.convert_to_markdown(
+                    source=source_for_pandoc,
+                    destination=raw_md,
+                    from_format=from_format if from_format != "html" else None,  # Already specified in --from arg
+                    accept_tracked_changes=opts.accept_tracked_changes,
+                    extract_media_dir=extract_dir,
+                    extra_args=extra_md_args,
+                )
+                pandoc_runner.apply_lua_filters(raw_md, filtered_md)
 
-            preview = PreviewData(
-                headings=collect_headings(cleaned_text),
-                snippets=build_snippets(before_text, cleaned_text),
-                images=media_manifest(extract_dir),
-            )
+                before_text = raw_md.read_text("utf-8")
+                filtered_text = filtered_md.read_text("utf-8")
+                cleaned_text, stats = normalise_markdown(
+                    filtered_text,
+                    remove_zero_width=opts.remove_zero_width,
+                )
+                cleaned_md.write_text(cleaned_text, "utf-8")
+                logs.append(f"cleanup_stats={json.dumps(stats.__dict__, sort_keys=True)}")
+
+                outputs = _build_target_artifacts(
+                    targets=normalized_targets,
+                    cleaned_path=cleaned_md,
+                    cleaned_text=cleaned_text,
+                    base_name=_safe_stem(safe_name),
+                    logs=logs,
+                )
+
+                preview = PreviewData(
+                    headings=collect_headings(cleaned_text),
+                    snippets=build_snippets(before_text, cleaned_text),
+                    images=media_manifest(extract_dir),
+                )
 
             media_artifact = _build_media_artifact(extract_dir, _safe_stem(safe_name))
 
@@ -254,6 +287,61 @@ def _normalize_targets(targets: Optional[Sequence[str]]) -> List[str]:
     return normalized or ["md"]
 
 
+def _build_direct_html_artifacts(
+    *,
+    source_path: Path,
+    targets: Iterable[str],
+    base_name: str,
+    logs: Optional[List[str]] = None,
+) -> List[TargetArtifact]:
+    """Convert HTML directly to targets without markdown intermediate step.
+
+    This fixes HTML→Plain Text truncation and HTML→HTML stray code blocks.
+    Only used when from_format=="html" and all targets are txt/html.
+    """
+    pypandoc = _get_pypandoc()
+    artifacts: List[TargetArtifact] = []
+
+    for target in targets:
+        if target == "html":
+            # HTML→HTML: Clean via pandoc to normalize structure
+            rendered = pypandoc.convert_file(
+                str(source_path),
+                to="html",
+                format="html",
+                extra_args=["--wrap=none"],
+            )
+            data = rendered.encode("utf-8")
+            if logs:
+                logs.append(f"direct_html_to_html_bytes={len(data)}")
+        elif target == "txt":
+            # HTML→Plain Text: Direct conversion with wide columns to prevent truncation
+            rendered = pypandoc.convert_file(
+                str(source_path),
+                to="plain",
+                format="html",
+                extra_args=["--wrap=none", "--columns=1000"],
+            )
+            data = rendered.encode("utf-8")
+            if logs:
+                logs.append(f"direct_html_to_txt_bytes={len(data)}")
+        else:
+            # Shouldn't happen due to can_do_direct check, but handle gracefully
+            if logs:
+                logs.append(f"direct_html_unsupported_target={target}")
+            continue
+
+        artifacts.append(
+            TargetArtifact(
+                target=target,
+                name=f"{base_name}.{TARGET_EXTENSIONS[target]}",
+                content_type=TARGET_CONTENT_TYPES[target],
+                data=data,
+            )
+        )
+    return artifacts
+
+
 def _build_target_artifacts(
     *,
     targets: Iterable[str],
@@ -329,11 +417,17 @@ def _render_markdown_target(cleaned_path: Path, target: str, *, logs: Optional[L
     else:
         # Standard text-based outputs (html, txt, md)
         pandoc_target = "plain" if target == "txt" else target
+        # Add better args for plain text to preserve structure
+        extra_args = ["--wrap=none"]
+        if target == "txt":
+            # For plain text, preserve structure better
+            extra_args.extend(["--columns=1000"])
+
         rendered = pypandoc.convert_file(
             str(cleaned_path),
             to=pandoc_target,
             format="gfm",
-            extra_args=["--wrap=none"],
+            extra_args=extra_args,
         )
         return rendered.encode("utf-8")
 

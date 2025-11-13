@@ -25,6 +25,13 @@ Edge APIs must respond:
   - **No top-level `await` or `return`.** No referencing `req` outside the handler.
   - Do not use `require()`; use ESM only.
 
+### ChatGPT/Codex Agents
+- See top-level `CHATGPT.md` for communication preferences and workflow rules specific to ChatGPT/Codex agents.
+- Key points:
+  - Be explicit about environment/URL/branch/files; provide a one‑paragraph “why”.
+  - If unsure or the user is confused, browse for current docs and rephrase with concrete steps (don’t repeat the same wording).
+  - Save evidence to `tinyutils/artifacts/<task>/<YYYYMMDD>/` and log in `tinyutils/docs/AGENT_RUN_LOG.md`.
+
 ### Security Policy (must read)
 - Follow `tinyutils/SECURITY.md` for handling secrets and logs.
   - Do not commit real secrets or any `.env*` files (repo ignores them by default).

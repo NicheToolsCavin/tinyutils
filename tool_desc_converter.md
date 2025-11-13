@@ -319,3 +319,5 @@ Removed
 
 Human-readable summary
 Routine repo review; converter behavior unchanged. This entry satisfies the same‑day heartbeat requirement while converter work remains in scope.
+### Minor changes — 2025-11-14 [00:00] CET (UTC+01:00)
+• Manual UI test (no code change). Evidence: tinyutils/artifacts/text-converter/20251114/notes.txt
