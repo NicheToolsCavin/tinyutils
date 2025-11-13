@@ -216,15 +216,16 @@ class InputItem(BaseModel):
     text: Optional[str] = None
     name: Optional[str] = None
 
-    @validator('blobUrl', 'text', pre=True)
-    def check_one_source(cls, v, values):
+    @root_validator(pre=False)
+    def check_one_source(cls, values):
         """Ensure exactly one of blobUrl or text is provided."""
-        if 'blobUrl' in values and 'text' in values:
-            if values.get('blobUrl') and v:
-                raise ValueError('Provide either blobUrl or text, not both')
-            if not values.get('blobUrl') and not v:
-                raise ValueError('Either blobUrl or text is required')
-        return v
+        blob_url = values.get('blobUrl')
+        text = values.get('text')
+        if not blob_url and not text:
+            raise ValueError('Either blobUrl or text is required')
+        if blob_url and text:
+            raise ValueError('Provide either blobUrl or text, not both')
+        return values
 
 
 class Options(BaseModel):
