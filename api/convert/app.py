@@ -491,7 +491,36 @@ def convert(
         preview = _select_preview(batch)
         errors = _serialize_errors(batch)
 
+        # Extract PDF engine info from logs if available
+        pdf_engine = None
+        pdf_engine_version = None
+        for log in batch.logs:
+            if "PDF rendered via external Chromium:" in log:
+                # Extract engine and version from log message
+                if "engine=" in log:
+                    parts = log.split("engine=")
+                    if len(parts) > 1:
+                        engine_part = parts[1].split()[0].strip()
+                        pdf_engine = engine_part
+                if "version=" in log:
+                    parts = log.split("version=")
+                    if len(parts) > 1:
+                        version_part = parts[1].split()[0].strip()
+                        pdf_engine_version = version_part
+                break
+
+        # If no external engine, check if PDF was generated locally
+        if pdf_engine is None and any(o.get("target") == "pdf" for o in outputs):
+            pdf_engine = "xhtml2pdf"
+
         response_payload = {
+            "ok": True,
+            "meta": {
+                "requestId": resolved_request_id,
+                "pdfEngine": pdf_engine,
+                "pdfEngineVersion": pdf_engine_version,
+                "pdfExternalAvailable": bool(os.getenv("PDF_RENDERER_URL")),
+            },
             "jobId": batch.job_id,
             "toolVersions": {"pandoc": runner.get_pandoc_version()},
             "outputs": outputs,
@@ -499,6 +528,10 @@ def convert(
             "logs": batch.logs,
             "errors": errors,
         }
+
+        # Add PDF engine to response headers if available
+        if pdf_engine:
+            response.headers["x-pdf-engine"] = pdf_engine
         if _is_preview_env():
             duration_ms = (time.time() - start_time) * 1000
             logger.info(
