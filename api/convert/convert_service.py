@@ -413,10 +413,33 @@ def _render_pdf_via_reportlab(markdown_path: Path, *, logs: Optional[List[str]] 
                     logs.append(f"pdf_external_fallback={exc.code}:{exc.message}")
                 # Fall through to xhtml2pdf fallback below
 
-        # Local fallback temporarily disabled due to xhtml2pdf/pycairo build issues on Vercel
-        # External PDF renderer is required for PDF generation
-        # TODO: Replace with reportlab-based fallback
-        raise RuntimeError("PDF generation requires external renderer (PDF_RENDERER_URL). Local fallback temporarily unavailable.")
+        # Local reportlab fallback (pure Python, no system dependencies)
+        from reportlab.lib.pagesizes import letter
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+        from reportlab.lib.styles import getSampleStyleSheet
+        from reportlab.lib.units import inch
+        import io
+
+        pdf_buffer = io.BytesIO()
+        doc = SimpleDocTemplate(pdf_buffer, pagesize=letter)
+        styles = getSampleStyleSheet()
+        story = []
+
+        # Simple HTML to paragraphs conversion
+        # Remove HTML tags for basic text rendering
+        import re
+        clean_text = re.sub('<[^<]+?>', '', html_with_style)
+        lines = clean_text.strip().split('\n')
+
+        for line in lines:
+            if line.strip():
+                story.append(Paragraph(line, styles['Normal']))
+                story.append(Spacer(1, 0.2*inch))
+
+        doc.build(story)
+        if logs is not None:
+            logs.append("pdf_engine=reportlab")
+        return pdf_buffer.getvalue()
 
     except Exception as e:
         # If PDF generation fails completely, raise a more informative error
