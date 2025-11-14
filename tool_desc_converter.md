@@ -427,3 +427,27 @@ Human-readable summary
 Routine repo review; converter behavior unchanged. This entry satisfies the same‑day heartbeat requirement while converter work remains in scope.
 ### Minor changes — 2025-11-14 [00:00] CET (UTC+01:00)
 • Manual UI test (no code change). Evidence: tinyutils/artifacts/text-converter/20251114/notes.txt
+### Major changes — 2025-11-14 15:00 CET (UTC+01:00)
+
+Added
+• "Auto" option to Markdown dialect selector in UI.
+• API now uses heuristic-based auto-detection for Markdown dialect when "Auto" is selected (i.e., `mdDialect` is `None`). It detects LaTeX patterns and defaults to `gfm+tex_math_dollars`; otherwise, it defaults to GFM.
+
+Modified
+• UI: Markdown dialect selector now sends `undefined` to the API when "Auto" is selected, allowing backend auto-detection.
+• API: Implemented heuristic-based auto-detection for Markdown dialect in `_build_target_artifacts` in `api/convert/convert_service.py`.
+• Smoke tests: Added new test cases for the converter API, covering "Auto" Markdown dialect and explicit GFM dialect.
+
+Removed
+• None.
+
+Human-readable summary
+
+The converter tool now offers an "Auto" option for Markdown dialect selection in the user interface. When "Auto" is chosen, the system will automatically determine the most appropriate Markdown dialect for conversion. On the server-side, this now includes a heuristic that detects LaTeX patterns in the input content and applies a Markdown dialect that supports LaTeX math (`gfm+tex_math_dollars`). For other content, it defaults to GitHub Flavored Markdown (GFM). We've also updated our automated tests to ensure that both the "Auto" detection and explicit dialect selections work as expected.
+
+Impact
+• Users can now select "Auto" for Markdown dialect, simplifying the conversion process.
+• The system intelligently detects LaTeX content and applies appropriate Markdown dialect for better rendering.
+• For non-LaTeX content, the system defaults to GFM for "Auto" detection, providing a consistent and widely compatible Markdown output.
+• Enhanced test coverage for the converter API ensures reliability of Markdown dialect selection.
+• Zero breaking changes.

@@ -99,7 +99,8 @@
         <div class="format-options" aria-label="Markdown dialect" id="mdDialectRow">
           <label for="mdDialect"><strong>Markdown dialect:</strong></label>
           <select id="mdDialect" name="mdDialect">
-            <option value="gfm" selected>GitHub Flavored (GFM)</option>
+            <option value="auto" selected>Auto</option>
+            <option value="gfm">GitHub Flavored (GFM)</option>
             <option value="commonmark_x">CommonMark (extended)</option>
             <option value="markdown_strict">Strict (markdown_strict)</option>
           </select>
@@ -342,7 +343,7 @@
             acceptTrackedChanges: !!optAcceptTracked.checked,
             extractMedia: !!optExtractMedia.checked,
             removeZeroWidth: !!optRemoveZW.checked,
-            mdDialect: toMd.checked ? mdDialectSel.value : undefined
+            mdDialect: toMd.checked && mdDialectSel.value !== 'auto' ? mdDialectSel.value : undefined
           },
           preview: previewOnly ? true : undefined
         };
