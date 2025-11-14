@@ -1,5 +1,57 @@
 ## Converter Tool — Description and Change Log
 
+### Major changes — 2025-11-14 (CET) — PR#28 code review fixes
+
+Added
+• md_dialect input validation with allowlist (app.py:243-250):
+  - Validates mdDialect against: {gfm, commonmark, commonmark_x, markdown_strict}
+  - Prevents potential injection of arbitrary format strings to pandoc
+  - Returns validation error for unsupported dialects
+
+Modified
+• Cache key computation (convert_service.py:663):
+  - Now includes md_dialect parameter in hash
+  - Prevents different dialects from returning wrong cached results
+  - Ensures correct dialect-specific output for users
+• Magic string replaced with constant (convert_service.py:381-385):
+  - Replaced hardcoded "gfm" with pandoc_runner.DEFAULT_OUTPUT_FORMAT
+  - Improves maintainability and consistency
+
+Fixed
+• Code quality issue - unused variable (pandoc_runner.py:111):
+  - Removed dead code that created but never used extra_args list
+  - Cleaned up with explanatory comment
+• LaTeX detection patterns (Verified correct, no changes):
+  - Regex patterns correctly match LaTeX commands with single backslash
+  - Client-side .tex extension detection already implemented
+
+Human-readable summary
+
+**Problem 9: Security and cache correctness issues**
+
+Imagine you're at a bakery that caches cookies. You ask for "chocolate chip" but because the baker didn't write down which type you wanted, they give you the "oatmeal raisin" they made earlier for someone else!
+
+That's what was happening with our markdown dialect feature. Users could request different markdown styles (GFM, CommonMark, strict) but the cache system wasn't tracking which style was requested. So if User A asked for GFM and User B asked for CommonMark right after, User B would get GFM from the cache - completely wrong!
+
+**The fix:** We added the markdown dialect to the "cache key" (like writing it on the cookie box), so now each dialect gets its own cached result.
+
+We also discovered a security issue: users could type ANY value for the markdown dialect, potentially including malicious formatting strings that get passed directly to pandoc. Now we validate against an approved list of dialects, rejecting anything suspicious.
+
+Impact
+• **Cache correctness** ✅ - Different markdown dialects no longer return wrong cached results
+• **Security hardening** ✅ - Input validation prevents potential pandoc injection
+• **Code quality** ✅ - Removed dead code, replaced magic strings with constants
+• **LaTeX detection verified** ✅ - Regex patterns and extension detection working correctly
+• Zero breaking changes - all existing conversions continue to work
+
+Testing
+• Cache key differentiation verified (different dialects produce different keys) ✅
+• Validation rejects invalid dialects ✅
+• Code review issues all addressed ✅
+
+Commits
+• a72865c - fix(converter): address all PR#28 code review issues
+
 ### Major changes — 2025-11-14 (UTC+01:00) — HTML conversion fixes + UX improvements
 
 Added
