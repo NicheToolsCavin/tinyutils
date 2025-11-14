@@ -238,6 +238,16 @@ class Options(BaseModel):
     wrap: Optional[str] = None
     headers: Optional[str] = None
     asciiPunctuation: bool = False
+    mdDialect: Optional[str] = None
+
+    @validator("mdDialect")
+    def _validate_md_dialect(cls, value):
+        if value is None:
+            return value
+        allowed = {"gfm", "commonmark", "commonmark_x", "markdown_strict"}
+        if value not in allowed:
+            raise ValueError(f"mdDialect must be one of: {', '.join(sorted(allowed))}")
+        return value
 
 
 class ConvertRequest(BaseModel):
@@ -442,6 +452,7 @@ def convert(
                 "wrap": request.options.wrap,
                 "headers": request.options.headers,
                 "ascii_punctuation": request.options.asciiPunctuation,
+                "md_dialect": request.options.mdDialect,
             }
             for k, v in extra_map.items():
                 if k in sig.parameters:
