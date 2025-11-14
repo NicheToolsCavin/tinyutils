@@ -148,7 +148,7 @@ def convert_one(
 
             # Pre-process PDFs: extract text using pypdf before pandoc
             source_for_pandoc = input_path
-            if from_format == "pdf" or (from_format is None and input_path.suffix.lower() == ".pdf"):
+            if input_path.suffix.lower() == ".pdf" or from_format == "pdf":
                 logs.append("preprocessing=pdf_text_extraction")
                 source_for_pandoc = _extract_text_from_pdf(input_path, workspace)
                 from_format = "markdown"  # Extracted text is markdown
