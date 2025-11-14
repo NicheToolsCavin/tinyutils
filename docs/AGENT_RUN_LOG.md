@@ -760,3 +760,42 @@ Impact
 • PDF uploads via UI currently unreliable: bad preview + frequent timeout.
 • Next: fix client to treat PDFs as binary (arrayBuffer → data:application/pdf), force From=pdf, do not inject binary into textarea; increase timeout + retry; optionally harden server auto-detect.
 
+
+### Major changes — None
+
+Added
+• Bench: gemini-2.5-flash until 2025-11-15 15:00 CET (auto-unbench).
+• Orchestrator policy in .code/agents/roster.json: prefer enabled+non-benched, auto-unbench on expiry.
+
+Modified
+• .code/agents/roster.json updated with policy + bench block.
+
+Removed
+• None
+
+Human-readable summary
+
+Benched the fast ‘flash’ model per request until tomorrow 15:00 (Europe/Madrid). Updated the agents roster so the orchestrator always prefers enabled, non-benched agents and automatically unbenches when the bench period ends.
+
+Impact
+• Parallel /code runs will avoid gemini-2.5-flash until the bench expires; fallback order uses Code GPT-5 Codex, Claude Sonnet 4.5, then Qwen, etc.
+
+
+### Major changes — None
+
+Added
+• None
+
+Modified
+• code_config_hacks .code/config.toml: enabled claude-sonnet-4.5 and gemini-2.5-flash; fixed flash model typo in args-read-only.
+
+Removed
+• None
+
+Human-readable summary
+
+Aligned external agent config to ensure the orchestrator has more eligible agents. Flash remains benched via local roster until 2025-11-15 15:00 CET, but is now enabled so it auto-unbenches cleanly. Claude Sonnet 4.5 is enabled for immediate use.
+
+Impact
+• Prevents conflicts where disabled entries in code_config_hacks could override TUI settings.
+
