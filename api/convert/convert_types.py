@@ -15,6 +15,9 @@ class ConversionOptions:
     accept_tracked_changes: bool = True
     extract_media: bool = False
     remove_zero_width: bool = True
+    # Optional: desired markdown dialect for md outputs
+    # Examples: 'gfm' (default), 'commonmark_x', 'markdown_strict'
+    md_dialect: str | None = None
 
 
 @dataclass(slots=True)

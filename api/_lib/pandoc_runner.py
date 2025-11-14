@@ -104,6 +104,9 @@ def convert_to_markdown(
         if html_filter_args:
             args.extend(html_filter_args)
 
+    # LaTeX specific: preserve TeX math delimiters even when input detected as latex
+    # Note: tex_math_dollars extension is already included in DEFAULT_OUTPUT_FORMAT
+
     if extra_args:
         args.extend(str(arg) for arg in extra_args)
 

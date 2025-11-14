@@ -80,6 +80,7 @@
             <option value="markdown">Markdown (.md)</option>
             <option value="text">Plain Text (.txt)</option>
             <option value="html">HTML (.html)</option>
+            <option value="latex">LaTeX (.tex)</option>
             <option value="docx">Word (.docx)</option>
             <option value="odt">OpenDocument (.odt)</option>
             <option value="rtf">RTF (.rtf)</option>
@@ -93,6 +94,15 @@
           <label><input type="checkbox" id="toHtml" checked> HTML</label>
           <label><input type="checkbox" id="toDocx"> Word (.docx)</label>
           <label><input type="checkbox" id="toRtf"> RTF (.rtf)</label>
+        </div>
+
+        <div class="format-options" aria-label="Markdown dialect" id="mdDialectRow">
+          <label for="mdDialect"><strong>Markdown dialect:</strong></label>
+          <select id="mdDialect" name="mdDialect">
+            <option value="gfm" selected>GitHub Flavored (GFM)</option>
+            <option value="commonmark_x">CommonMark (extended)</option>
+            <option value="markdown_strict">Strict (markdown_strict)</option>
+          </select>
         </div>
 
         <div class="format-options" aria-label="Options">
@@ -159,6 +169,8 @@
     const toHtml = document.getElementById('toHtml');
     const toDocx = document.getElementById('toDocx');
     const toRtf = document.getElementById('toRtf');
+    const mdDialectRow = document.getElementById('mdDialectRow');
+    const mdDialectSel = document.getElementById('mdDialect');
     const fromSelect = document.getElementById('fromFormat');
     const optAcceptTracked = document.getElementById('optAcceptTracked');
     const optExtractMedia = document.getElementById('optExtractMedia');
@@ -213,6 +225,11 @@
       if (!extractMediaApplicable) {
         optExtractMedia.checked = false;
       }
+
+      // Markdown dialect selector availability
+      const mdOn = !!toMd.checked;
+      mdDialectSel.disabled = !mdOn;
+      mdDialectRow.style.opacity = mdOn ? '1' : '0.5';
     }
 
     function showToast(message) {
@@ -272,6 +289,7 @@
       if (ext === 'md' || ext === 'markdown') return 'markdown';
       if (ext === 'txt') return 'text';
       if (ext === 'htm' || ext === 'html') return 'html';
+      if (ext === 'tex') return 'latex';
       if (ext === 'docx') return 'docx';
       if (ext === 'odt') return 'odt';
       if (ext === 'rtf') return 'rtf';
@@ -309,7 +327,11 @@
       try {
         const filename = currentFile ? currentFile.name : 'input.md';
         let fromFormat = fromSelect.value;
-        if (fromFormat === 'auto') fromFormat = inferFormat(filename);
+        if (fromFormat === 'auto') {
+          // If pasting LaTeX content without a filename, try a simple heuristic
+          const looksLikeLatex = /\\documentclass\b|\\begin\{document\}|\\section\{|\\usepackage\b/.test(content);
+          fromFormat = looksLikeLatex ? 'latex' : inferFormat(filename);
+        }
         const input = await createDataUrl(content, filename);
 
         const payload = {
@@ -319,7 +341,8 @@
           options: {
             acceptTrackedChanges: !!optAcceptTracked.checked,
             extractMedia: !!optExtractMedia.checked,
-            removeZeroWidth: !!optRemoveZW.checked
+            removeZeroWidth: !!optRemoveZW.checked,
+            mdDialect: toMd.checked ? mdDialectSel.value : undefined
           },
           preview: previewOnly ? true : undefined
         };
