@@ -22,7 +22,7 @@ function buildUrl(path) {
 }
 
 const defaultHeaders = BYPASS_TOKEN
-  ? { 'x-vercel-protection-bypass': BYPASS_TOKEN }
+  ? { 'x-vercel-protection-bypass': BYPASS_TOKEN, 'x-vercel-bypass-token': BYPASS_TOKEN }
   : {};
 
 async function fetchWithBypass(path, options = {}) {

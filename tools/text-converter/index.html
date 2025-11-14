@@ -260,15 +260,31 @@
       return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
     }
 
+    function extOf(name) {
+      const n = String(name || '').toLowerCase();
+      const i = n.lastIndexOf('.');
+      return i >= 0 ? n.slice(i + 1) : '';
+    }
+
+    function isBinaryExt(ext) {
+      return ['pdf','docx','odt','rtf','zip','epub'].includes(String(ext||'').toLowerCase());
+    }
+
     fileInput.addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
 
       try {
-        const content = await file.text();
-        textInput.value = content;
         currentFile = file;
-        showToast('File loaded: ' + file.name);
+        const ext = extOf(file.name);
+        if (isBinaryExt(ext)) {
+          // Do not dump binary bytes into the textarea
+          showToast('File selected: ' + file.name);
+        } else {
+          const content = await file.text();
+          textInput.value = content;
+          showToast('File loaded: ' + file.name);
+        }
       } catch (err) {
         showToast('Failed to read file: ' + err.message);
       }
@@ -284,12 +300,22 @@
       });
     }
 
+    async function createDataUrlFromFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve({ blobUrl: reader.result, name: file.name });
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
     function inferFormat(filename) {
       const ext = filename.toLowerCase().split('.').pop();
       if (ext === 'md' || ext === 'markdown') return 'markdown';
       if (ext === 'txt') return 'text';
       if (ext === 'htm' || ext === 'html') return 'html';
       if (ext === 'tex') return 'latex';
+      if (ext === 'pdf') return 'pdf';
       if (ext === 'docx') return 'docx';
       if (ext === 'odt') return 'odt';
       if (ext === 'rtf') return 'rtf';
@@ -326,13 +352,22 @@
 
       try {
         const filename = currentFile ? currentFile.name : 'input.md';
+        const ext = extOf(filename);
         let fromFormat = fromSelect.value;
         if (fromFormat === 'auto') {
           // If pasting LaTeX content without a filename, try a simple heuristic
           const looksLikeLatex = /\\documentclass\b|\\begin\{document\}|\\section\{|\\usepackage\b/.test(content);
           fromFormat = looksLikeLatex ? 'latex' : inferFormat(filename);
         }
-        const input = await createDataUrl(content, filename);
+        if (currentFile && isBinaryExt(ext)) {
+          if (ext === 'pdf') fromFormat = 'pdf';
+          if (ext === 'docx') fromFormat = 'docx';
+          if (ext === 'odt') fromFormat = 'odt';
+          if (ext === 'rtf') fromFormat = 'rtf';
+        }
+        const input = currentFile && isBinaryExt(ext)
+          ? await createDataUrlFromFile(currentFile)
+          : await createDataUrl(content, filename);
 
         const payload = {
           inputs: [input],
@@ -347,24 +382,32 @@
           preview: previewOnly ? true : undefined
         };
 
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 40000);
+        async function sendOnce() {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 90000);
+          try {
+            return await fetch('/api/convert', {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify(payload),
+              signal: controller.signal
+            });
+          } finally {
+            clearTimeout(timeoutId);
+          }
+        }
 
         let response;
         try {
-          response = await fetch('/api/convert', {
-            method: 'POST',
-            headers: { 'content-type': 'application/json' },
-            body: JSON.stringify(payload),
-            signal: controller.signal
-          });
+          response = await sendOnce();
         } catch (err) {
-          if (err.name === 'AbortError') {
-            throw new Error('Request timed out. Please try again.');
+          if (err && err.name === 'AbortError') {
+            progressEl.textContent = 'Timed out, retrying…';
+            await new Promise(r => setTimeout(r, 50 + Math.random()*100));
+            response = await sendOnce();
+          } else {
+            throw err;
           }
-          throw err;
-        } finally {
-          clearTimeout(timeoutId);
         }
 
         const contentType = response.headers.get('content-type') || '';
