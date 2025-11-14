@@ -799,3 +799,24 @@ Aligned external agent config to ensure the orchestrator has more eligible agent
 Impact
 • Prevents conflicts where disabled entries in code_config_hacks could override TUI settings.
 
+
+### Major changes — None
+
+Added
+• Custom agents prioritized in local roster (code-teams-personal/tarot/teacher, ThomasR).
+
+Modified
+• Bench: claude-sonnet-4.5 until 2025-11-18 15:00 CET (auto-unbench).
+• External config: claude-sonnet-4.5 set enabled=false to reflect user setting.
+• Selection order updated to prefer custom ChatGPT accounts first.
+
+Removed
+• None
+
+Human-readable summary
+
+Ensured the orchestrator chooses your custom ChatGPT accounts by default. Claude is disabled until Tuesday. This removes conflicting signals between the external TOML and the local roster.
+
+Impact
+• /code and multi-agent flows will utilize the custom accounts immediately; Claude resumes after bench expiry.
+
