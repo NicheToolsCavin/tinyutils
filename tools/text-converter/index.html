@@ -80,6 +80,7 @@
             <option value="markdown">Markdown (.md)</option>
             <option value="text">Plain Text (.txt)</option>
             <option value="html">HTML (.html)</option>
+            <option value="latex">LaTeX (.tex)</option>
             <option value="docx">Word (.docx)</option>
             <option value="odt">OpenDocument (.odt)</option>
             <option value="rtf">RTF (.rtf)</option>
@@ -272,6 +273,7 @@
       if (ext === 'md' || ext === 'markdown') return 'markdown';
       if (ext === 'txt') return 'text';
       if (ext === 'htm' || ext === 'html') return 'html';
+      if (ext === 'tex') return 'latex';
       if (ext === 'docx') return 'docx';
       if (ext === 'odt') return 'odt';
       if (ext === 'rtf') return 'rtf';
@@ -309,7 +311,11 @@
       try {
         const filename = currentFile ? currentFile.name : 'input.md';
         let fromFormat = fromSelect.value;
-        if (fromFormat === 'auto') fromFormat = inferFormat(filename);
+        if (fromFormat === 'auto') {
+          // If pasting LaTeX content without a filename, try a simple heuristic
+          const looksLikeLatex = /\\documentclass\b|\\begin\{document\}|\\section\{|\\usepackage\b/.test(content);
+          fromFormat = looksLikeLatex ? 'latex' : inferFormat(filename);
+        }
         const input = await createDataUrl(content, filename);
 
         const payload = {

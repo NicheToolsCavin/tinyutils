@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+import re
 import html
 import json
 import logging
@@ -70,13 +71,35 @@ def convert_one(
     opts = options or ConversionOptions()
     normalized_targets = _normalize_targets(targets)
     pandoc_version = pandoc_runner.get_pandoc_version() or "unknown"
+
+    # Perform lightweight server-side format detection BEFORE computing cache key
+    # so that cache distinguishes auto→latex upgrades properly.
+    adjusted_from = from_format
+    try:
+        sample_text = input_bytes[:4096].decode("utf-8", errors="ignore")
+    except Exception:
+        sample_text = ""
+    def _looks_like_latex(t: str) -> bool:
+        return bool(t) and (
+            "\\documentclass" in t
+            or "\\begin{document}" in t
+            or re.search(r"\\(section|chapter|usepackage)\\{", t) is not None
+        )
+    # Name hint
+    name_lower = (name or "").lower()
+    looks_tex_name = name_lower.endswith('.tex')
+    if adjusted_from in (None, "md", "markdown", "text", "auto") and (
+        _looks_like_latex(sample_text) or looks_tex_name
+    ):
+        adjusted_from = "latex"
+
     cache_key = _build_cache_key(
         input_bytes=input_bytes,
         name=name,
         targets=normalized_targets,
         options=opts,
         pandoc_version=pandoc_version,
-        from_format=from_format,
+        from_format=adjusted_from,
     )
 
     cached = _cache_get(cache_key)
@@ -117,6 +140,11 @@ def convert_one(
             cleaned_md = workspace / "cleaned.md"
             media_dir = workspace / "media"
             extract_dir: Optional[Path] = media_dir if opts.extract_media else None
+
+            # Use the adjusted_from for the actual conversion (post-detection)
+            if adjusted_from != from_format:
+                logs.append("format_override=latex_detected_server")
+                from_format = adjusted_from
 
             # Pre-process PDFs: extract text using pypdf before pandoc
             source_for_pandoc = input_path
