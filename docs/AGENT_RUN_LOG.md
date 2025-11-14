@@ -216,6 +216,19 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-14 12:32 CET - Manual - PR#28 code review fixes
+- **Mode:** manual
+- **Branch:** `fix/converter-latex-detect`
+- **Summary:**
+  - Fixed 6 issues from Claude bot code review on PR#28
+  - CRITICAL: Added md_dialect to cache key (convert_service.py:663)
+  - SECURITY: Added md_dialect validation with allowlist (app.py:243-250)
+  - CODE QUALITY: Removed unused variable (pandoc_runner.py:111)
+  - CODE QUALITY: Replaced magic string with constant (convert_service.py:381-385)
+  - Verified LaTeX regex and .tex extension detection already correct
+- **Evidence:** Commit: a72865c. PR: https://github.com/NicheToolsCavin/tinyutils/pull/28
+- **Follow-ups:**
+
 ### 2025-11-05 01:57 CET - Auto - Phase2 wrap
 - **Mode:** auto
 - **Branch:** `feat/pr3-preview-fence`
