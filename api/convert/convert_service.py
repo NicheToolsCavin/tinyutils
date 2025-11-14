@@ -83,7 +83,7 @@ def convert_one(
         return bool(t) and (
             "\\documentclass" in t
             or "\\begin{document}" in t
-            or re.search(r"\\(section|chapter|usepackage)\\{", t) is not None
+            or re.search(r"\\(section|chapter|usepackage)\{", t) is not None
         )
     # Name hint
     name_lower = (name or "").lower()
@@ -378,8 +378,11 @@ def _build_target_artifacts(
     artifacts: List[TargetArtifact] = []
     for target in targets:
         if target == "md":
-            dialect = (md_dialect or "gfm").strip().lower()
-            if dialect in ("gfm", "markdown", "md", "gfm+pipe_tables+footnotes+tex_math_dollars"):
+            # Use DEFAULT_OUTPUT_FORMAT as default dialect
+            default_dialect = pandoc_runner.DEFAULT_OUTPUT_FORMAT.split('+')[0]  # Extract base format (gfm)
+            dialect = (md_dialect or default_dialect).strip().lower()
+            # If dialect matches our default cleaned markdown, use cached text directly
+            if dialect in (default_dialect, "markdown", "md", pandoc_runner.DEFAULT_OUTPUT_FORMAT):
                 data = cleaned_text.encode("utf-8")
             else:
                 pypandoc = _get_pypandoc()
@@ -660,6 +663,8 @@ def _build_cache_key(
     hasher.update(str(options.accept_tracked_changes).encode("ascii"))
     hasher.update(str(options.extract_media).encode("ascii"))
     hasher.update(str(options.remove_zero_width).encode("ascii"))
+    if options.md_dialect:
+        hasher.update(options.md_dialect.encode("utf-8", "ignore"))
     hasher.update(pandoc_version.encode("utf-8", "ignore"))
     if from_format:
         hasher.update(from_format.encode("utf-8", "ignore"))
