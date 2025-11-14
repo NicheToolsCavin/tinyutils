@@ -787,3 +787,23 @@ Impact
 • Starts the Preview deployment process.
 • No runtime behavior changes.
 
+
+### Major changes — 
+
+Added
+• Preview smoke output: artifacts/preview-boot/20251114/preview_smoke_output.txt (PASS).
+• PR comment: Preview GREEN.
+
+Modified
+• None
+
+Removed
+• None
+
+Human-readable summary
+
+Extracted the Preview URL from the PR, read the protection bypass token from local env files (stripped stray newlines), and ran the full preview smoke. All required pages and APIs returned 200 with JSON + request-id headers for APIs. Commented on the PR that the Preview is GREEN. No secrets were committed; evidence stored locally.
+
+Impact
+• Confirms the Vercel Preview is fully functional and ready for owner approval.
+
