@@ -747,3 +747,22 @@ Impact
 • Increases confidence that Preview will boot and required routes respond.
 • No behavior changes; documentation-only artifact.
 
+
+### Major changes — 
+
+Added
+• PR branch scaffolding and artifacts under artifacts/preview-boot/20251114/.
+
+Modified
+• None
+
+Removed
+• None
+
+Human-readable summary
+
+Opened a clean branch 'preview-boot' to trigger a fresh Vercel Preview without wrestling the existing fix/preview-boot remote. Minimal doc-only artifact included.
+
+Impact
+• Enables Vercel to deploy a new Preview build for verification.
+
