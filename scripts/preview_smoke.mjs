@@ -2,7 +2,8 @@
 // Smoke test preview URLs that may require a Vercel protection bypass cookie.
 
 const BASE_URL = process.env.PREVIEW_URL;
-const BYPASS_TOKEN = process.env.BYPASS_TOKEN || '';
+// Prefer Vercel's official automation bypass secret if present
+const BYPASS_TOKEN = process.env.BYPASS_TOKEN || process.env.VERCEL_AUTOMATION_BYPASS_SECRET || '';
 
 if (!BASE_URL) {
   console.error('PREVIEW_URL env var is required.');
@@ -37,6 +38,16 @@ async function fetchWithBypass(path, options = {}) {
 
 async function testPages() {
   const results = [];
+  // Best effort: set bypass cookie once if token present
+  if (BYPASS_TOKEN) {
+    try {
+      const setUrl = new URL(BASE_URL);
+      // force cookie with query params so platform sets vercel-protection-bypass
+      setUrl.searchParams.set('x-vercel-protection-bypass', BYPASS_TOKEN);
+      setUrl.searchParams.set('x-vercel-set-bypass-cookie', 'true');
+      await fetch(setUrl.toString(), { headers: defaultHeaders, redirect: 'manual' });
+    } catch {}
+  }
   for (const path of pages) {
     try {
       const res = await fetchWithBypass(path, { method: 'GET' });
