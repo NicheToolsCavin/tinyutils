@@ -13,6 +13,19 @@ How to use
 - Browser targets: Chrome (latest), Safari (latest), Firefox (latest), Edge (latest).
 - Network conditions: default; repeat select flows with 3G Fast throttling.
 
+## Agent‑Assisted Checkpoints (ChatGPT Agent Mode, Deep Research, Pro Reasoning)
+- Visual QA (Agent Mode): after any UI-affecting PR, run ChatGPT Agent Mode to capture annotated screenshots for:
+  - /, /tools/, /tools/dead-link-finder/, /tools/sitemap-delta/, /tools/wayback-fixer/, /tools/text-converter/
+  - A11y cues (focus outlines, contrast ≥ AA, sticky thead behavior), spacing, overflow, and component consistency.
+  - Save to artifacts/agent-mode/<DATE> and reference in AGENT_RUN_LOG.md.
+- Deep Research: for nuanced behaviors (robots, HSTS/TLD guards, Wayback APIs, sitemap .xml.gz support, Pandoc dialects), run a research pass to validate assumptions against primary sources; record citations in docs/research/<DATE> and link from AGENT_RUN_LOG.md.
+- Pro Reasoning: before merging high‑impact PRs (converter engine/UI, network guards, consent/ads), run a Pro Reasoning pass to surface edge cases, performance pitfalls, and migration risks; produce a “Risks & Mitigations” note under docs/research/<DATE>/risks.md.
+
+Milestone mapping
+- After PR A (PDF→MD engine), run Deep Research (pdfminer trade‑offs) + Pro Reasoning (heuristics risks), then Visual QA for converter preview.
+- After PR B (UI), run Visual QA (Agent Mode) across all tools + homepage.
+- For DLF/Sitemap/Wayback changes, run Deep Research on protocol/TLD/HSTS rules and Pro Reasoning on concurrency/timeout/jitter.
+
 ## 1) Pages (Render + A11y + Ads/CMP)
 Smoke
 - / — Renders, nav links clickable, no console errors.
@@ -105,3 +118,32 @@ Smoke
 - For each run: update `docs/AGENT_RUN_LOG.md` and `docs/AGENT_TASK_CHECKLIST.md` via helper scripts.
 - Save screenshots/JSONs under `artifacts/<task>/<YYYYMMDD>/`.
 
+## Pro Reasoning Window — Next ~20 days (through 2025-12-04)
+Owner-run checkpoints (you trigger; I prep inputs and verify results)
+- 2025-11-15 to 2025-11-17 — Converter PR A (engine)
+  - Deep Research: pdfminer.six vs pypdf trade-offs; layout heuristics references.
+  - Pro Reasoning: risks in paragraph merge, heading inference, list/table detection, perf in Vercel budgets.
+  - Artifacts: artifacts/agent-mode/20251117/ and artifacts/research/20251117/
+- 2025-11-18 — Converter preview visual
+  - Agent Mode Visual QA for /tools/text-converter/ (states: paste, file upload, preview, single-target vs multi-export hidden).
+  - A11y/contrast/spacing checks; annotate screenshots.
+- 2025-11-19 to 2025-11-22 — PR B (UI)
+  - Pro Reasoning: single-target default + "+ add another format" edge cases; restore-state; keyboard traps.
+  - Agent Mode sweep: /, /tools/, DLF, Sitemap Delta, Wayback Fixer, Converter.
+- 2025-11-23 — Edge API guards
+  - Deep Research: HSTS/TLD policies, robots semantics, retry/backoff norms.
+  - Pro Reasoning: concurrency caps, jitter, timeouts, private/loopback denylist coverage.
+- 2025-11-24 to 2025-11-27 — DLF/Sitemap/Wayback exports
+  - Deep Research: 410 CSV correctness; rewrite rules; .xml.gz handling.
+  - Pro Reasoning: CSV hardening vectors; state restore robustness.
+- 2025-11-28 — Cost safety + observability
+  - Pro Reasoning: log fields, request-id tracing, error classes; budget alerts.
+  - Run `scripts/gcp_cost_guard.sh` (read-only) and capture outputs.
+- 2025-11-29 to 2025-12-02 — Buffer & polish
+  - Close remaining issues; targeted Agent Mode re-checks; update docs.
+- 2025-12-03 to 2025-12-04 — Final sign-off
+  - Run full Agent Mode pass; reconcile open issues; freeze for redesign phase.
+
+How we coordinate
+- I prepare payloads, URLs, acceptance criteria, and capture diffs; file follow-ups.
+- You run Agent Mode / Deep Research / Pro Reasoning using docs/AGENT_ASSISTED_PROMPTS.md; drop outputs under artifacts/.
