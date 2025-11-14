@@ -505,3 +505,131 @@ Re-tested Text Converter after fixes. Verified HTML→Plain Text truncation is r
 
 Impact
 • No code change in repo. Preview tool appears green for tested cases.
+### Major changes — 2025-11-14 [00:45] CET (UTC+01:00)
+
+Added
+• Artifact: tinyutils/artifacts/text-converter/20251114/latex-empty-output.txt
+
+Removed
+• None
+
+Modified
+• None (manual QA only)
+
+Human-readable summary
+Ran fixture-style checks via internal browser (no uploads) on the Document Converter. Verified RTF→{md,txt} PASS with correct formatting; re-ran LaTeX→{md,txt} using a minimal snippet and observed empty Markdown and 1-byte TXT output. Captured evidence.
+
+Impact
+• One remaining issue: LaTeX path appears to return empty output for simple input.
+### Major changes — 2025-11-14 [03:26] CET (UTC:z)
+
+Added
+• Artifacts: artifacts/depmap/20251114/tinyutils-deps.mmd
+• Artifacts: artifacts/depmap/20251114/tinyutils-deps.md
+• Artifacts: artifacts/depmap/20251114/tinyutils-deps.svg
+
+Removed
+• None
+
+Modified
+• None
+
+Human-readable summary
+Generated a visual dependency map (Mermaid + SVG) from the repo using an external helper script placed in ../TinyUtils. Copied outputs into the repo's artifacts for reference. No code or behavior changed.
+
+Impact
+• No behavior change.
+• Provides a quick visual of file imports, script tags, npm packages, and external fetch hosts.
+
+Context
+• Branch: main
+• CWD: /Users/cav/dev/TinyUtils/tinyutils
+• Evidence: artifacts/depmap/20251114/
+
+### Major changes — 2025-11-14 [03:30] CET (UTC:z)
+
+Added
+• Artifacts: artifacts/depmap/20251114/tinyutils-deps.html
+
+Removed
+• None
+
+Modified
+• None
+
+Human-readable summary
+Added an interactive HTML mind map (pan/zoom, search, toggle packages/hosts, fit/freeze) for easier on-screen exploration.
+
+Impact
+• No behavior change; visualization only.
+• View locally: ~/dev/TinyUtils/deps/tinyutils-deps.html
+
+### Major changes — 2025-11-14 [03:33] CET (UTC:z)
+
+Added
+• Updated artifact: artifacts/depmap/20251114/tinyutils-deps.html (inline D3, offline-friendly)
+
+Removed
+• None
+
+Modified
+• None
+
+Human-readable summary
+Regenerated the interactive HTML with D3 embedded inline to avoid blank screen when CDN is blocked or offline.
+
+Impact
+• Opens reliably from file:// without network.
+
+### Major changes — 2025-11-14 [03:36] CET (UTC:z)
+
+Added
+• Defaulted folder filter to api,tools,scripts,tests,public,root (use --collapse all to include everything).
+• Updated artifact: artifacts/depmap/20251114/tinyutils-deps.html (default-focused view).
+
+Removed
+• None
+
+Modified
+• None
+
+Human-readable summary
+Interactive map now opens by default with only the core folders for readability. Pass --collapse all to see every bucket.
+
+Impact
+• Cleaner default view; no functional change to repo.
+
+### Major changes — 2025-11-14 [03:40] CET (UTC:z)
+
+Added
+• Local D3 fallback injected into deps/tinyutils-deps.html for file:// reliability.
+
+Removed
+• None
+
+Modified
+• Updated artifact: artifacts/depmap/20251114/tinyutils-deps.html.
+
+Human-readable summary
+Ensured the interactive map works offline by adding a local d3.v7.min.js reference before the graph code, in addition to inline code.
+
+Impact
+• No repo behavior change; visualization opens consistently from Finder/Preview.
+
+### Major changes — 2025-11-14 [03:42] CET (UTC:z)
+
+Added
+• Bucket toggle UI (All/None) in interactive HTML.\n• Updated artifact: artifacts/depmap/20251114/tinyutils-deps.html
+
+Removed
+• None
+
+Modified
+• Default-view refinements; no code behavior changes.
+
+Human-readable summary
+Added live folder filters so you can hide/show top-level buckets in the mind map without re-running the script.
+
+Impact
+• Improves readability for large graphs; no repo changes.
+

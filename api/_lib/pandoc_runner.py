@@ -104,6 +104,12 @@ def convert_to_markdown(
         if html_filter_args:
             args.extend(html_filter_args)
 
+    # LaTeX specific: preserve TeX math delimiters even when input detected as latex
+    if from_format == "latex":
+        # Use tex_math_dollars extension explicitly; default already includes it in DEFAULT_OUTPUT_FORMAT,
+        # but on some pandoc builds we need to ensure input is parsed with latex reader.
+        extra_args = [*(extra_args or [])]
+
     if extra_args:
         args.extend(str(arg) for arg in extra_args)
 
