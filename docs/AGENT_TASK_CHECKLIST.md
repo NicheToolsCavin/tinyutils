@@ -13,6 +13,8 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 ## Active Tasks (Newest First)
 
 | Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
+| Author comprehensive site test plan + GCP cost safety checklist | manual-2025-11-14 CET | Completed | ✅ Added docs/TEST_PLAN_SITE.md and docs/GCP_COST_SAFETY.md; added scripts/gcp_cost_guard.sh (read-only audit). Evidence: artifacts listed in AGENT_RUN_LOG.md. |
+| Expose PDF in Converter UI; fix RTF 400 | manual-2025-11-14 CET | Completed | ✅ UI adds PDF checkbox; backend now supports RTF target. Evidence: tinyutils/artifacts/text-converter/20251114/patch_pdf_rtf_ui_backend.diff; smoke payloads saved. Branch: fix/converter-pdf-rtf-ui-testplan-gcp |
 | Fix converter PDF upload (UI+server) | manual-2025-11-14 CET | Completed | ✅ UI+server patched. Evidence: artifacts/pdf-fix/20251114/notes.txt |
 | Link wrapper CODE_HOME configs | manual-2025-11-14 CET | Completed | ✅ Symlinked each `.code-teams-*` directory to share `.code/config.toml`, ensuring the wrappers load the same agent profile; evidence: artifacts/agent-config-change/20251114/summary.txt |
 | Enable code-gpt-5 agent | manual-2025-11-14 CET | Completed | ✅ Enabled code-gpt-5 in code_config_hacks/.code/config.toml so it picks up the shared mcp profile; evidence: artifacts/agent-config-change/20251114/summary.txt |
