@@ -51,8 +51,10 @@ export default async function handler(req) {
     const url = new URL(req.url);
     const params = url.searchParams;
     const expectedSecret = (process.env.PREVIEW_SECRET || '').trim();
+    const expectedBypass = (process.env.PREVIEW_BYPASS_TOKEN || '').trim();
 
     const headerSecret = req.headers.get('x-preview-secret');
+    const headerBypass = req.headers.get('x-vercel-bypass-token') || req.headers.get('x-vercel-protection-bypass');
     const querySecret = params.get('preview_secret');
     const cookies = parseCookies(req.headers.get('cookie'));
     const cookieSecret = cookies[COOKIE_NAME];
@@ -61,7 +63,10 @@ export default async function handler(req) {
     let allowed = false;
     let cookieToSet = null;
 
-    if (!expectedSecret) {
+    // Bypass header takes precedence when configured
+    if (expectedBypass && headerBypass && headerBypass.trim() === expectedBypass) {
+      allowed = true;
+    } else if (!expectedSecret) {
       allowed = true;
     } else if (presentedSecret && presentedSecret === expectedSecret) {
       allowed = true;
