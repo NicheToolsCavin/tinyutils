@@ -56,6 +56,15 @@ def _is_preview_env() -> bool:
     return os.getenv("VERCEL_ENV") == "preview"
 
 
+def _looks_like_latex(t: str) -> bool:
+    """Heuristic to detect if text content looks like LaTeX."""
+    return bool(t) and (
+        "\\documentclass" in t
+        or "\\begin{document}" in t
+        or re.search(r"\\(section|chapter|usepackage)\\{", t) is not None
+    )
+
+
 def convert_one(
 
     *,
@@ -79,12 +88,6 @@ def convert_one(
         sample_text = input_bytes[:4096].decode("utf-8", errors="ignore")
     except Exception:
         sample_text = ""
-    def _looks_like_latex(t: str) -> bool:
-        return bool(t) and (
-            "\\documentclass" in t
-            or "\\begin{document}" in t
-            or re.search(r"\\(section|chapter|usepackage)\\{", t) is not None
-        )
     # Name hint
     name_lower = (name or "").lower()
     looks_tex_name = name_lower.endswith('.tex')
@@ -378,7 +381,20 @@ def _build_target_artifacts(
     artifacts: List[TargetArtifact] = []
     for target in targets:
         if target == "md":
-            dialect = (md_dialect or "gfm").strip().lower()
+            dialect = (md_dialect or "").strip().lower()
+            if not dialect or dialect == "auto":
+                # Heuristic for "Auto" dialect detection
+                # If the text contains common LaTeX patterns, use a dialect that supports LaTeX math.
+                # Otherwise, default to GFM.
+                if _looks_like_latex(cleaned_text):
+                    dialect = "gfm+tex_math_dollars"
+                    if logs is not None:
+                        logs.append("md_dialect_auto_detected=latex")
+                else:
+                    dialect = "gfm"
+                    if logs is not None:
+                        logs.append("md_dialect_auto_detected=gfm")
+
             if dialect in ("gfm", "markdown", "md", "gfm+pipe_tables+footnotes+tex_math_dollars"):
                 data = cleaned_text.encode("utf-8")
             else:

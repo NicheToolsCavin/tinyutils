@@ -727,3 +727,23 @@ Reviewed current branch and files to regain context after session loss. Confirme
 
 Impact
 • No behavior change. All screenshot-listed agents are marked enabled for planning; future benching will toggle in agents/roster.json with timestamped log entries.
+
+### Major changes — 
+
+Added
+• Artifacts: Preview checklist inventory at artifacts/preview-boot/20251114/inventory.txt.
+
+Modified
+• None
+
+Removed
+• None
+
+Human-readable summary
+
+Audited required pages and Edge APIs for Vercel Preview. All checklist items exist (pages, APIs, public assets, robots/sitemap, package.json type=module). Preparing PR on branch fix/preview-boot to trigger a fresh Vercel preview build.
+
+Impact
+• Increases confidence that Preview will boot and required routes respond.
+• No behavior changes; documentation-only artifact.
+
