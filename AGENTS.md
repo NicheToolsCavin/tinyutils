@@ -363,3 +363,23 @@ If code changes a tool's observable behavior and no matching log entry is found 
 - **Completed:** Sitemap Delta/Wayback UI hardening, Edge API request-id + JSON headers, sitemap.xml trim, tools index cleanup, new demo fixtures, `scripts/preview_smoke.mjs` for instant smoke.
 - **Pending:** Vercel preview remains 401-protected; awaiting protection-bypass token.
 - **Next steps:** Run `PREVIEW_URL=<preview_url> BYPASS_TOKEN=<token> node scripts/preview_smoke.mjs` immediately after a token is provided.
+
+## Agent Orchestration — Sources, Priority, and Benches (2025-11-14 17:00 CET)
+
+Where configuration lives
+- Local roster (live precedence): `.code/agents/roster.json` (gitignored). Contains active/bench flags and selection policy used by the orchestrator.
+- External config (shared machine profile): `~/dev/CodeProjects/code_config_hacks/.code/config.toml`. Enables/disables named agents and sets wrapper args.
+
+Current policy (effective now)
+- Prefer enabled, non-benched agents; auto-unbench when bench expires.
+- Selection order: `code-teams-personal`, `code-teams-tarot`, `code-teams-teacher`, `SonicTornado`, `ThomasR`, `code-gpt-5-codex`, `qwen-3-coder`, `gemini-2.5-flash`, `claude-sonnet-4.5`.
+- Benches:
+  - `gemini-2.5-flash` benched until 2025-11-15 15:00 CET (auto-unbench).
+  - `claude-sonnet-4.5` disabled/benched until 2025-11-18 15:00 CET per owner instruction.
+
+How to change
+- Update local roster: edit `.code/agents/roster.json` (adjust `bench.until`, `selection_order`, or `active`). Takes effect immediately for new runs.
+- Update external defaults: edit `~/dev/CodeProjects/code_config_hacks/.code/config.toml` (toggle `[[agents]].enabled = true/false`). Keep this in sync with the roster to avoid conflicts.
+
+Reasoning
+- This alignment prevents the external TOML from silently disabling agents the roster/TUI tries to use, ensuring custom ChatGPT accounts are prioritized while temporarily excluding models on cooldown.
