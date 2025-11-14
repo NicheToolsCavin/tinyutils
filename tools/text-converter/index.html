@@ -95,6 +95,7 @@
           <label><input type="checkbox" id="toHtml" checked> HTML</label>
           <label><input type="checkbox" id="toDocx"> Word (.docx)</label>
           <label><input type="checkbox" id="toRtf"> RTF (.rtf)</label>
+          <label><input type="checkbox" id="toPdf"> PDF (.pdf)</label>
         </div>
 
         <div class="format-options" aria-label="Markdown dialect" id="mdDialectRow">
@@ -170,6 +171,7 @@
     const toHtml = document.getElementById('toHtml');
     const toDocx = document.getElementById('toDocx');
     const toRtf = document.getElementById('toRtf');
+    const toPdf = document.getElementById('toPdf');
     const mdDialectRow = document.getElementById('mdDialectRow');
     const mdDialectSel = document.getElementById('mdDialect');
     const fromSelect = document.getElementById('fromFormat');
@@ -336,6 +338,7 @@
       if (toHtml.checked) selectedFormats.push('html');
       if (toDocx.checked) selectedFormats.push('docx');
       if (toRtf.checked) selectedFormats.push('rtf');
+      if (toPdf.checked) selectedFormats.push('pdf');
 
       if (selectedFormats.length === 0) {
         showToast('Please select at least one output format.');
@@ -505,6 +508,7 @@
     toHtml.addEventListener('change', updateOptionAvailability);
     toDocx.addEventListener('change', updateOptionAvailability);
     toRtf.addEventListener('change', updateOptionAvailability);
+    toPdf.addEventListener('change', updateOptionAvailability);
 
     // Initialize option availability on page load
     updateOptionAvailability();

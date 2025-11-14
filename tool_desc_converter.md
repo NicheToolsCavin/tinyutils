@@ -1,5 +1,37 @@
 ## Converter Tool — Description and Change Log
 
+### Major changes — 2025-11-14 23:35 CET (UTC+01:00) — PDF target exposed in UI + RTF backend support
+
+Added
+• UI checkbox for PDF output in `tools/text-converter/index.html`.
+• Backend support for `rtf` target via Pandoc; `TARGET_EXTENSIONS`/`TARGET_CONTENT_TYPES` updated.
+
+Modified
+• Converter UI now sends `to:["pdf"]` when PDF is selected; preview and results table unchanged.
+
+Fixed
+• “Conversion failed (400)” when selecting RTF:
+  - Problem: UI offered RTF but backend rejected it (unsupported target), returning 400.
+  - Root cause: `rtf` missing from `TARGET_EXTENSIONS`/`TARGET_CONTENT_TYPES`.
+  - Fix: Add `rtf` to supported targets and route through standard Pandoc flow.
+  - Evidence: artifacts/text-converter/20251114/patch_pdf_rtf_ui_backend.diff; smoke payloads in artifacts/text-converter/20251114/smoke_payload_examples.json
+
+Human-readable summary
+
+The converter now actually lets you download PDF from the UI, and the RTF option no longer throws a 400 error. PDF rendering prefers an external Chromium renderer when configured (via `PDF_RENDERER_URL`), and falls back to a lightweight ReportLab path so preview builds still work.
+
+Impact
+• Users can export PDF directly from the tool ✅
+• RTF exports work without errors ✅
+• No changes to existing MD/HTML/TXT/DOCX flows ✅
+
+Testing
+• Manual payloads for md→{docx,rtf,pdf} and html→pdf prepared (see artifacts path above). ✅
+• Existing `tests/pdf_envelope.test.mjs` exercises `/api/convert` with `to:["pdf"]`. ✅
+
+Commits
+• (pending in this PR) — expose PDF in UI; add RTF backend support.
+
 ### Major changes — 2025-11-14 (CET) — PR#28 code review fixes
 
 Added
