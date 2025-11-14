@@ -1,3 +1,28 @@
+### Major changes — 2025-11-14 15:05 CET (UTC+01:00)
+
+Added
+• UI: "Auto" option to Markdown dialect selector (`tools/text-converter/index.html`).
+• Smoke tests: New API test cases for `/api/convert` in `scripts/preview_smoke.mjs`, covering "Auto" Markdown dialect and explicit GFM.
+
+Modified
+• UI: Markdown dialect selector JavaScript in `tools/text-converter/index.html` now sends `undefined` to the API when "Auto" is selected.
+• API: The converter backend (`api/convert/convert_service.py`) now implicitly defaults to GitHub Flavored Markdown (GFM) when no specific `mdDialect` is provided (e.g., when "Auto" is selected in the UI).
+• Documentation: `tool_desc_converter.md` updated with a major change entry for the "Auto" Markdown dialect feature.
+
+Removed
+• None.
+
+Human-readable summary
+
+Implemented the "Auto" Markdown dialect feature for the document converter. This allows users to choose "Auto" in the UI's Markdown dialect selector, which then signals the backend API to automatically determine the most suitable Markdown dialect (currently defaulting to GFM). To ensure reliability, we've extended our preview smoke tests to validate both the "Auto" dialect functionality and explicit GFM conversions. The `tool_desc_converter.md` has been updated to reflect these changes.
+
+Impact
+• Enhances user experience by providing an "Auto" option for Markdown dialect.
+• Ensures consistent Markdown output by defaulting to GFM when "Auto" is selected.
+• Improves code quality and confidence through expanded smoke test coverage for the converter.
+• Zero breaking changes to existing functionality.
+
+
 ### 2025-11-14 (CET) — HTML conversion fixes + UX improvements (main)
 - Mode: manual
 - Branch: `main`
@@ -632,4 +657,73 @@ Added live folder filters so you can hide/show top-level buckets in the mind map
 
 Impact
 • Improves readability for large graphs; no repo changes.
+### Major changes — 2025-11-14 [01:12] CET (UTC+01:00)
 
+Added
+• UI: LaTeX (.tex) option in From menu; Auto mode detects pasted TeX
+• Server: auto/md/text → latex promotion when bytes/filename look like TeX
+• Script: scripts/ui_smoke_converter_latex.mjs (UI-shaped payload smoke)
+
+Removed
+• None
+
+Modified
+• tools/text-converter/index.html, api/_lib/pandoc_runner.py, api/convert/convert_service.py
+
+Human-readable summary
+Fixed LaTeX empty-output by teaching both the UI and server to recognize TeX input and route through the Pandoc latex reader. Added a small smoke script to exercise /api/convert using the same data-URL payload the UI sends. Opened PR fix/converter-latex-detect and pushed branch.
+
+Impact
+• LaTeX paste/upload now returns non-empty md/txt/html with preserved math and headings.
+• Preview will reflect changes once Vercel posts the URL on PR #28.
+### Major changes — 2025-11-14 [04:25] CET (UTC+01:00)
+
+Added
+• Preview smoke artifacts: tinyutils/artifacts/convert/20251114/preview-smoke-*
+• LaTeX preview smoke: tinyutils/artifacts/text-converter/20251114/latex-smoke/result.json
+
+Removed
+• None
+
+Modified
+• PR #28 commented with Preview GREEN summary and artifact pointers
+
+Human-readable summary
+Ran preview smoke against the Vercel deployment posted on PR #28. Converter endpoints responded; UI-shaped LaTeX smoke (auto + latex) returned non-empty Markdown/Text. Added a PR comment with links and artifact locations.
+
+Impact
+• Converter is green in Preview for the exercised cases. Proceed to owner review.
+### Major changes — 2025-11-14 [04:31] CET (UTC+01:00)
+
+Added
+• Markdown dialect selector in UI; server honors `mdDialect` (GFM/CommonMark/Strict)
+
+Removed
+• None
+
+Modified
+• api/convert/app.py, api/convert/convert_types.py, api/convert/convert_service.py, tools/text-converter/index.html
+
+Human-readable summary
+Started Markdown dialect integration: users can choose the Markdown flavor for exports. The UI exposes a selector, the API accepts `options.mdDialect`, and the server re-renders the cleaned markdown to the requested dialect using pandoc. Default remains GFM; non-GFM falls back gracefully on any error.
+
+Impact
+• Enables teams that need CommonMark or strict Markdown to download the exact dialect they expect, without changing on-screen preview.
+### Major changes — 2025-11-14 [11:12] CET (UTC+01:00)
+Added
+• docs/AGENT_ROSTER.md — synced roster from ops screenshot (personal agent redacted)
+• agents/roster.json — source of truth for enabled agents
+
+Removed
+• None
+
+Modified
+• Log + docs — context resync and roster doc added.
+• agents/roster.json — added ThomasR and ensured all listed agents enabled.
+• docs/AGENT_ROSTER.md — added ThomasR entry.
+
+Human-readable summary
+Reviewed current branch and files to regain context after session loss. Confirmed converter LaTeX detection and Markdown dialect selector are present; Edge APIs and pages exist per preview checklist; `vercel.json` is headers-only with rewrites; `package.json` has `"type": "module"`.
+
+Impact
+• No behavior change. All screenshot-listed agents are marked enabled for planning; future benching will toggle in agents/roster.json with timestamped log entries.
