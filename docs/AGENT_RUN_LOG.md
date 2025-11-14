@@ -216,6 +216,17 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-14 21:09 CET - Manual - converter PDF upload fixes (UI+server)
+- **Mode:** manual
+- **Branch:** `pdf-upload-ui-server`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - UI: binary file handling via FileReader; no textarea dump; infer pdf; 90s timeout + single retry
+  - Server: always preprocess .pdf regardless of client 'from'
+  - Added artifacts/pdf-fix/20251114/notes.txt
+- **Evidence:** artifacts/pdf-fix/20251114/notes.txt
+- **Follow-ups:**
+
 ### 2025-11-14 19:03 CET - Manual - share config with wrapper CODE_HOME
 - **Mode:** manual
 - **Branch:** `main`

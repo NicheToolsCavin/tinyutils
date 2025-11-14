@@ -13,6 +13,10 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 ## Active Tasks (Newest First)
 
 | Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
+| Fix converter PDF upload (UI+server) | manual-2025-11-14 CET | Completed | ✅ UI+server patched. Evidence: artifacts/pdf-fix/20251114/notes.txt |
+| Link wrapper CODE_HOME configs | manual-2025-11-14 CET | Completed | ✅ Symlinked each `.code-teams-*` directory to share `.code/config.toml`, ensuring the wrappers load the same agent profile; evidence: artifacts/agent-config-change/20251114/summary.txt |
+| Enable code-gpt-5 agent | manual-2025-11-14 CET | Completed | ✅ Enabled code-gpt-5 in code_config_hacks/.code/config.toml so it picks up the shared mcp profile; evidence: artifacts/agent-config-change/20251114/summary.txt |
+| Enable MCP profile for code agents | manual-2025-11-14 CET | Completed | ✅ Added mcp profile + context7/sequential MCP definitions and taught all code agents to pass `-p mcp`; evidence: artifacts/agent-config-change/20251114/summary.txt |
 | Fix PR#28 code review issues (cache key, validation, code quality) | manual-2025-11-14 CET | Completed | ✅ Fixed 6 issues: (1) Added md_dialect to cache key, (2-3) Verified LaTeX detection correct, (4) Added md_dialect validation, (5) Removed unused variable, (6) Replaced magic strings. Commit: a72865c. All fixes pushed to PR#28 branch. |
 | Fix converter HTML conversion bugs (truncation, semantic elements, UX) | manual-2025-11-14 CET | Completed | ✅ Fixed 4 bugs: (1) HTML→Plain Text truncation via direct conversion path, (2) HTML→HTML stray code blocks, (3) HTML→Markdown figure/figcaption via Lua filter, (4) Results table race conditions. UX: Smart disable logic for Extract Media & Accept Tracked Changes. UI: Updated text to reflect 100+ format support. Commits: 76e911d, 42c0866, 90e6fb5. Codex re-test: ALL GREEN ✅. Evidence: tinyutils/artifacts/text-converter/20251114/retest-2.txt |
 | Fix environment variable whitespace (BLOB_READ_WRITE_TOKEN, PDF_RENDERER_URL, CONVERTER_SHARED_SECRET) | manual-2025-11-13 13:53 CET | Completed | ✅ Added .strip() calls to 3 env vars in blob.py and _pdf_external.py. Fixed "Invalid header value" errors. Commits: dc7e23a, 979eb0f. Also cleaned git history of 268MB artifacts file and added artifacts/ to .gitignore |
@@ -42,6 +46,7 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 | _None recorded yet_ |  |  |
 
 ## Plan Updates
+- 2025-11-14 21:09 CET - Set workspace to write; benched teams-personal/teacher; reassigned agents; applied minimal diffs.
 - 2025-11-04 13:47 CET - Preview fence commit omitted deployment evidence; tracked under "Preview fence evidence + smoke".
 - 2025-11-04 13:34 CET - PR1 commit landed without CSP and `/public` cache rule; captured as follow-up in active tasks.
 - 2025-11-04 08:42 CET - Compliance audit flagged keyboard shortcut conflicts; marked "Needs Review" pending verification.
