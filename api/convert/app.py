@@ -240,6 +240,15 @@ class Options(BaseModel):
     asciiPunctuation: bool = False
     mdDialect: Optional[str] = None
 
+    @validator("mdDialect")
+    def _validate_md_dialect(cls, value):
+        if value is None:
+            return value
+        allowed = {"gfm", "commonmark", "commonmark_x", "markdown_strict"}
+        if value not in allowed:
+            raise ValueError(f"mdDialect must be one of: {', '.join(sorted(allowed))}")
+        return value
+
 
 class ConvertRequest(BaseModel):
     model_config = {"populate_by_name": True}
