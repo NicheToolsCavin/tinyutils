@@ -216,6 +216,48 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-14 19:03 CET - Manual - share config with wrapper CODE_HOME
+- **Mode:** manual
+- **Branch:** `main`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Linked each `.code-teams-*` directory to the shared `.code/config.toml` so the per-account CODE_HOME directories load the same agent settings.
+  - This should keep the `code-teams-personal`/`code-teams-teacher` wrappers from starting with an empty config while still isolating account state.
+- **Evidence:** artifacts/agent-config-change/20251114/
+- **Follow-ups:**
+
+### 2025-11-14 18:59 CET - Manual - enable code-gpt-5 agent
+- **Mode:** manual
+- **Branch:** `main`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Enabled the `code-gpt-5` agent entry in code_config_hacks/.code/config.toml.
+  - Ensures ChatGPT-5 Codex is available via the shared `mcp` profile alongside the other Code agents.
+- **Evidence:** artifacts/agent-config-change/20251114/
+- **Follow-ups:**
+
+### 2025-11-14 18:48 CET - Manual - enable MCP profile for code agents
+- **Mode:** manual
+- **Branch:** `main`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Added an `mcp` profile and moved the context7/sequential-thinking MCP definitions under it so Code agents can share the same MCP servers.
+  - Every `code` wrapper now passes `-p mcp` in read-only and write args to load that profile before executing commands.
+- **Evidence:** artifacts/agent-config-change/20251114/
+- **Follow-ups:**
+  - None
+
+### 2025-11-14 18:32 CET - Manual - update agent command
+- **Mode:** manual
+- **Branch:** `main`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Swapped command for code-gpt-5 and code-gpt-5-codex to `code` inside code_config_hacks/.code/config.toml.
+  - Ensures chatgpt-5-code uses the new wrapper so the hidden-save-button issue is resolved.
+- **Evidence:** artifacts/agent-config-change/20251114/
+- **Follow-ups:**
+  - None (config update complete)
+
 ### 2025-11-14 12:32 CET - Manual - PR#28 code review fixes
 - **Mode:** manual
 - **Branch:** `fix/converter-latex-detect`
@@ -849,4 +891,22 @@ Modified
 Human-readable summary
 
 Avoided redundancy and potential drift by not duplicating bench windows in documentation.
+
+### Major changes — None
+
+Added
+• Project overrides in external config to force workspace-write for /Users/cav/dev/TinyUtils/tinyutils and /Users/cav/.code/working/tinyutils.
+
+Modified
+• None
+
+Removed
+• None
+
+Human-readable summary
+
+Enabled workspace-write sandbox for the repo and agent worktrees so reassigned agents can apply the PDF fix.
+
+Impact
+• Agents will be able to modify files and log documentation without approvals.
 
