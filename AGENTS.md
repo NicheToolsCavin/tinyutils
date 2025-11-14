@@ -8,6 +8,120 @@ Edge APIs must respond:
 
 ---
 
+## ⚠️ MANDATORY DOCUMENTATION REQUIREMENTS ⚠️
+
+**🚨 EVERY TASK MUST BE DOCUMENTED USING THE PYTHON SCRIPTS 🚨**
+
+When you complete ANY work (bug fix, feature, docs update, etc.), you MUST:
+
+### 1. Log to AGENT_RUN_LOG.md (REQUIRED for every session)
+```bash
+python scripts/log_run_entry.py \
+  --title "Manual - <brief task title>" \
+  --mode "manual" \
+  --branch "<branch-name>" \
+  --summary "<what changed>" \
+  --summary "<why it was needed>" \
+  --evidence "artifacts/<task>/<YYYYMMDD>/" \
+  --followup "<any remaining work>" \
+  # OR --followup NONE if complete
+```
+
+**Example:**
+```bash
+python scripts/log_run_entry.py \
+  --title "Manual - fix converter HTML truncation" \
+  --mode "manual" \
+  --branch "main" \
+  --summary "Fixed HTML→Plain Text truncation via direct conversion path" \
+  --summary "Created _build_direct_html_artifacts() function in convert_service.py" \
+  --summary "Added figure_to_markdown.lua filter for semantic element conversion" \
+  --evidence "artifacts/text-converter/20251114/retest-2.txt" \
+  --followup NONE
+```
+
+### 2. Update AGENT_TASK_CHECKLIST.md (REQUIRED for all tasks)
+```bash
+python scripts/add_task_checklist_entry.py \
+  --task "<descriptive task name>" \
+  --source "manual-<YYYY-MM-DD HH:MM CET>" \
+  --status "Completed" \
+  --notes "✅ <what was done> Commits: <hashes>. Evidence: <artifact paths>"
+```
+
+**Example:**
+```bash
+python scripts/add_task_checklist_entry.py \
+  --task "Fix converter HTML conversion bugs (truncation, semantic elements, UX)" \
+  --source "manual-2025-11-14 CET" \
+  --status "Completed" \
+  --notes "✅ Fixed 4 bugs: HTML→Plain Text truncation, HTML→HTML stray code blocks, figure/figcaption conversion, race conditions. Commits: 76e911d, 42c0866, 90e6fb5. Codex re-test: ALL GREEN. Evidence: tinyutils/artifacts/text-converter/20251114/retest-2.txt"
+```
+
+### 3. Update tool_desc_<toolname>.md (REQUIRED for tool changes)
+
+When you change ANY tool behavior, add a dated entry to the relevant `tool_desc_*.md` file:
+
+- `tool_desc_deadlinkfinder.md` - Dead Link Finder changes
+- `tool_desc_sitemapdelta.md` - Sitemap Delta changes
+- `tool_desc_waybackfixer.md` - Wayback Fixer changes
+- `tool_desc_converter.md` - Document Converter changes
+
+**Format:**
+```markdown
+### Major changes — YYYY-MM-DD HH:MM CET (UTC+HH:MM) — <brief title>
+
+Added
+• <new feature or functionality>
+• <another addition>
+
+Modified
+• <what changed>
+• <another modification>
+
+Fixed
+• <bug description>
+  - **Problem:** <what was broken>
+  - **Root cause:** <why it was broken>
+  - **Fix:** <how it was fixed>
+  - **Evidence:** <test results or artifacts>
+
+Human-readable summary
+
+**Problem N: <catchy title>**
+
+<Explain the problem using analogies/metaphors for non-technical users>
+
+**The fix:** <Explain the solution in simple terms>
+
+Impact
+• <User-facing benefit> ✅
+• <Another benefit> ✅
+
+Testing
+• <Test scenario> ✅
+• <Another test> ✅
+
+Commits
+• <hash> - <message>
+• <hash> - <message>
+```
+
+### 📋 Documentation Checklist
+
+Before considering ANY task complete, verify:
+
+- [ ] Ran `python scripts/log_run_entry.py` with all required fields
+- [ ] Ran `python scripts/add_task_checklist_entry.py` with status="Completed"
+- [ ] Updated relevant `tool_desc_*.md` file if tool behavior changed
+- [ ] Saved evidence artifacts to `artifacts/<task>/<YYYYMMDD>/`
+- [ ] Committed all documentation changes
+- [ ] Pushed to remote
+
+**⚠️ NO EXCEPTIONS: If you skip documentation, other agents cannot see what you did and will duplicate/undo your work! ⚠️**
+
+---
+
 ## Constraints
 - **Branch + PR only.** No DNS or Production deploys. No repository secrets. **The exception being when you are asked to push to production, in which case you will do so. Thanks.
 - **Minimal diffs.** No new dependencies unless strictly required & justified in the PR.
