@@ -840,3 +840,13 @@ Documented where the two agent configs live, the current selection order, and be
 Impact
 • Avoids future confusion about which config wins and how to update it.
 
+
+### Major changes — None
+
+Modified
+• AGENTS.md: Removed explicit bench/unbench listings; now references roster.json as the single source of truth and keeps only rules + locations + selection order.
+
+Human-readable summary
+
+Avoided redundancy and potential drift by not duplicating bench windows in documentation.
+
