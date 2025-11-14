@@ -13,17 +13,40 @@
   })();
   const needsPrompt = isEUByLang || isEUByTZ;
 
-  function loadScript(id, src){
+  function loadScript(id, src, attrs){
     if (document.getElementById(id)) return;
     const s = document.createElement('script');
     s.id = id;
     s.defer = true;
     s.src = src;
+    if (attrs && typeof attrs === 'object') {
+      for (const [k,v] of Object.entries(attrs)) {
+        try { if (k in s) { s[k] = v; } else { s.setAttribute(k, v); } } catch {}
+      }
+    }
     document.head.appendChild(s);
   }
 
   function enableAnalytics(){
     loadScript('plausible', 'https://plausible.io/js/script.js');
+  }
+
+  function enableAds(consentValue){
+    // Only on production/preview domains
+    const h = location.hostname;
+    const ok = (h === 'tinyutils.net' || h === 'www.tinyutils.net' || /vercel\.app$/.test(h));
+    if (!ok) return;
+    // Non-personalized ads when consent not granted
+    const npa = consentValue !== 'granted';
+    if (npa) {
+      try {
+        (window.adsbygoogle = window.adsbygoogle || []).requestNonPersonalizedAds = 1; // npa=1
+        (window.adsbygoogle = window.adsbygoogle || []).push({ params: { google_privacy_treatments: 'disablePersonalization' } });
+      } catch {}
+    }
+    // Load AdSense once; safe in head at runtime
+    const client = 'ca-pub-3079281180008443';
+    loadScript('adsbygoogle-js', `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${encodeURIComponent(client)}`, { async: true, crossorigin: 'anonymous' });
   }
 
   function save(key, value){ try{ localStorage.setItem(key, value); }catch{} }
@@ -32,6 +55,7 @@
   function applyConsent(value){
     if (value === 'granted') {
       enableAnalytics();
+      enableAds('granted');
     }
   }
 
@@ -75,16 +99,20 @@
     const consent = read(LS_KEY);
     if (consent === 'granted') {
       applyConsent('granted');
+    } else {
+      // Serve non-personalized ads when no consent or denied
+      enableAds(consent || 'denied');
     }
 
     if (needsPrompt) {
       mountBanner();
-    } else if (!consent) {
-      // Outside EU: respect stored choice if any, no banner by default.
-      applyConsent(consent);
     }
 
     initAdsToggle();
+    // Dev/ops toggle to force ads without banner (e.g., local testing)
+    try {
+      if (read('ads') === 'on') enableAds();
+    } catch {}
   }
 
   if (document.readyState === 'loading') {
