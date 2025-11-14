@@ -46,3 +46,4 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 - 2025-11-04 08:42 CET - Compliance audit flagged keyboard shortcut conflicts; marked "Needs Review" pending verification.
 | DLF Quick Extras smoke gates + artifacts | 2025-11-11 21:43 CET (UTC+0100) | Completed | Green; gating + artifacts in place |
 | Markdown dialect detection/output (GFM/CommonMark/strict) | manual-2025-11-14 01:10 CET (UTC+01:00) | Open | Add input heuristics + output selector to support multiple Markdown dialects; map Pandoc args accordingly; UI affordance and API pass-through. |
+\n- [Completed] 2025-11-14T11:15Z — Open PR for preview-boot (#29). Evidence: artifacts/preview-boot/20251114/pr.json

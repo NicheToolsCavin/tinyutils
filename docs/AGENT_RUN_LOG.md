@@ -766,3 +766,24 @@ Opened a clean branch 'preview-boot' to trigger a fresh Vercel Preview without w
 Impact
 • Enables Vercel to deploy a new Preview build for verification.
 
+
+### Major changes — 
+
+Added
+• Opened PR #: 
+• Artifacts: PR metadata at artifacts/preview-boot/20251114/pr.json.
+
+Modified
+• None
+
+Removed
+• None
+
+Human-readable summary
+
+Created PR to trigger a fresh Vercel Preview build and documented evidence. Waiting for the Vercel bot to comment with the Preview URL; smoke will run once BYPASS_TOKEN is available.
+
+Impact
+• Starts the Preview deployment process.
+• No runtime behavior changes.
+
