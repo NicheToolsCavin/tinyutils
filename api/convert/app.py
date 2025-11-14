@@ -238,6 +238,7 @@ class Options(BaseModel):
     wrap: Optional[str] = None
     headers: Optional[str] = None
     asciiPunctuation: bool = False
+    mdDialect: Optional[str] = None
 
 
 class ConvertRequest(BaseModel):
@@ -442,6 +443,7 @@ def convert(
                 "wrap": request.options.wrap,
                 "headers": request.options.headers,
                 "ascii_punctuation": request.options.asciiPunctuation,
+                "md_dialect": request.options.mdDialect,
             }
             for k, v in extra_map.items():
                 if k in sig.parameters:
