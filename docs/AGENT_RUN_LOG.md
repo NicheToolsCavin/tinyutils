@@ -216,6 +216,19 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-14 23:17 CET - Manual - Converter PDF+RTF + Test Plan + GCP Safety
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Exposed PDF output in UI; added RTF backend target (converter).
+  - Created comprehensive site test plan (docs/TEST_PLAN_SITE.md).
+  - Added GCP cost safety checklist and read-only audit script.
+  - Saved evidence artifacts and example payloads for smoke.
+- **Evidence:** tinyutils/artifacts/text-converter/20251114/smoke_payload_examples.json
+- **Follow-ups:**
+  - Prepare preview smoke for converter (md→docx,rtf,pdf; html→pdf).
+
 ### 2025-11-14 21:09 CET - Manual - converter PDF upload fixes (UI+server)
 - **Mode:** manual
 - **Branch:** `pdf-upload-ui-server`
