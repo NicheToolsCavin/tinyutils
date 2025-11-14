@@ -740,3 +740,23 @@ Reviewed current branch and files to regain context after session loss. Confirme
 
 Impact
 • No behavior change. All screenshot-listed agents are marked enabled for planning; future benching will toggle in agents/roster.json with timestamped log entries.
+
+### Major changes — 2025-11-14 16:21 CET (UTC:z)
+
+Added
+• Evidence: artifacts/pdf-b2-test/20251114/notes.txt (UI PDF test findings).
+
+Modified
+• None
+
+Removed
+• None
+
+Human-readable summary
+
+Manually tested the prod Document Converter with ‘B2 Moral Dilemmas … .pdf’. The preview textarea displayed binary PDF bytes; Convert timed out after ~45s. Root causes likely: client reads PDFs as text (uses file.text()) and infers markdown on Auto, preventing server PDF preprocessing; plus 40s client timeout too short for cold-start.
+
+Impact
+• PDF uploads via UI currently unreliable: bad preview + frequent timeout.
+• Next: fix client to treat PDFs as binary (arrayBuffer → data:application/pdf), force From=pdf, do not inject binary into textarea; increase timeout + retry; optionally harden server auto-detect.
+
