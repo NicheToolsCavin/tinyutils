@@ -204,6 +204,7 @@ def convert_one(
                     cleaned_path=cleaned_md,
                     cleaned_text=cleaned_text,
                     base_name=_safe_stem(safe_name),
+                    md_dialect=getattr(opts, "md_dialect", None),
                     logs=logs,
                 )
 
@@ -371,12 +372,31 @@ def _build_target_artifacts(
     cleaned_path: Path,
     cleaned_text: str,
     base_name: str,
+    md_dialect: Optional[str] = None,
     logs: Optional[List[str]] = None,
 ) -> List[TargetArtifact]:
     artifacts: List[TargetArtifact] = []
     for target in targets:
         if target == "md":
-            data = cleaned_text.encode("utf-8")
+            dialect = (md_dialect or "gfm").strip().lower()
+            if dialect in ("gfm", "markdown", "md", "gfm+pipe_tables+footnotes+tex_math_dollars"):
+                data = cleaned_text.encode("utf-8")
+            else:
+                pypandoc = _get_pypandoc()
+                try:
+                    rendered = pypandoc.convert_file(
+                        str(cleaned_path),
+                        to=dialect,
+                        format="gfm",
+                        extra_args=["--wrap=none"],
+                    )
+                    data = rendered.encode("utf-8")
+                    if logs is not None:
+                        logs.append(f"md_dialect={dialect}")
+                except Exception as exc:
+                    if logs is not None:
+                        logs.append(f"md_dialect_error={exc.__class__.__name__}")
+                    data = cleaned_text.encode("utf-8")
         else:
             data = _render_markdown_target(cleaned_path, target, logs=logs)
         artifacts.append(
