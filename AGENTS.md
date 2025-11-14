@@ -373,9 +373,7 @@ Where configuration lives
 Current policy (effective now)
 - Prefer enabled, non-benched agents; auto-unbench when bench expires.
 - Selection order: `code-teams-personal`, `code-teams-tarot`, `code-teams-teacher`, `SonicTornado`, `ThomasR`, `code-gpt-5-codex`, `qwen-3-coder`, `gemini-2.5-flash`, `claude-sonnet-4.5`.
-- Benches:
-  - `gemini-2.5-flash` benched until 2025-11-15 15:00 CET (auto-unbench).
-  - `claude-sonnet-4.5` disabled/benched until 2025-11-18 15:00 CET per owner instruction.
+- Bench status is defined only in the local roster (`.code/agents/roster.json`). Refer to that file for the current, authoritative bench windows.
 
 How to change
 - Update local roster: edit `.code/agents/roster.json` (adjust `bench.until`, `selection_order`, or `active`). Takes effect immediately for new runs.
