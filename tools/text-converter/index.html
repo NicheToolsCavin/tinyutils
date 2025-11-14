@@ -324,7 +324,7 @@
 
     async function runConvert({ previewOnly = false } = {}) {
       const content = textInput.value.trim();
-      if (!content) {
+      if (!content && !currentFile) {
         showToast('Please enter or upload some content first.');
         return;
       }
