@@ -820,3 +820,23 @@ Ensured the orchestrator chooses your custom ChatGPT accounts by default. Claude
 Impact
 • /code and multi-agent flows will utilize the custom accounts immediately; Claude resumes after bench expiry.
 
+
+### Major changes — None
+
+Added
+• Agents section in AGENTS.md describing sources, priority and benches.
+• External reminder note: ~/dev/CodeProjects/code_config_hacks/AGENTS-NOTES.md.
+
+Modified
+• None
+
+Removed
+• None
+
+Human-readable summary
+
+Documented where the two agent configs live, the current selection order, and bench windows; added a persistent reminder in code_config_hacks for future reference.
+
+Impact
+• Avoids future confusion about which config wins and how to update it.
+
