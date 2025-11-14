@@ -14,7 +14,7 @@ jobs:
       - name: Run unit tests
         run: npm test
       - name: Preview smoke
-        if: ${{ secrets.PREVIEW_URL != '' }}
+        if: secrets.PREVIEW_URL != ''
         run: npm run smoke:preview
         env:
           PREVIEW_URL: ${{ secrets.PREVIEW_URL }}
