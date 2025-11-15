@@ -216,6 +216,15 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-15 17:04 CET - Manual - convert_one PDF tests
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Ran convert_one on table-heavy and bookdown PDF fixtures with extract_media/aggressive; confirmed logs, artifacts, csv bundling.
+  - pdf_layout_mode, pdf_engine counts, media zip details verified.
+- **Evidence:** artifacts/convert/test-fixtures
+- **Follow-ups:**
+
 ### 2025-11-15 16:57 CET - Manual - PR A validation + preview smokes
 - **Mode:** manual
 - **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
