@@ -216,6 +216,59 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-15 01:15 CET - Manual - Add converter decisions + PR A checklist to big plan
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Pinned images/language/tables policies; added PR A implementation checklist and overnight auto mode runbook to docs/TEST_PLAN_SITE.md.
+- **Evidence:** tinyutils/docs/TEST_PLAN_SITE.md
+- **Follow-ups:**
+  - Implement PR A extractor and open preview for overnight auto mode.
+
+### 2025-11-15 01:07 CET - Manual - Converted 'Context from Repo.docx' to Markdown
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Used local converter to produce Context-from-Repo.md (fallback path due to missing pypandoc).
+  - Saved to: ~/dev/TinyUtils/Context-from-Repo.md and tinyutils/docs/Context-from-Repo.md.
+- **Evidence:** /Users/cav/dev/TinyUtils/Context-from-Repo.md
+- **Follow-ups:**
+  - Re-run with Pandoc available or in preview to get richer Markdown if needed.
+
+### 2025-11-15 00:01 CET - Manual - Save Deep Research prompt (PDF→MD)
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Saved final Deep Research paper prompt to ~/dev/TinyUtils/deep-research-prompt-pdf-md-2025-11-14.txt.
+  - Prompt references sanitized repo tar: tinyutils-context-20251114.tar (6.7 MB).
+- **Evidence:** /Users/cav/dev/TinyUtils/deep-research-prompt-pdf-md-2025-11-14.txt
+- **Follow-ups:**
+
+### 2025-11-14 23:25 CET - Manual - Deep Reasoning budget + usage log
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Added Deep Reasoning budget (40 runs) and allocation across milestones.
+  - Created docs/AGENT_ASSISTED_USAGE.md with counter and run ID scheme.
+  - Extended prompts with Deep Reasoning section.
+- **Evidence:** tinyutils/docs/AGENT_ASSISTED_USAGE.md
+- **Follow-ups:**
+  - Start DRN-allocations when Converter PR A begins.
+
+### 2025-11-14 23:24 CET - Manual - Extend Pro Reasoning window + prompts
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Extended Pro Reasoning schedule to 20 days (through 2025-12-04).
+  - Added Agent Mode / Deep Research / Pro Reasoning prompt templates.
+- **Evidence:** tinyutils/docs/AGENT_ASSISTED_PROMPTS.md
+- **Follow-ups:**
+
 ### 2025-11-14 23:17 CET - Manual - Converter PDF+RTF + Test Plan + GCP Safety
 - **Mode:** manual
 - **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
