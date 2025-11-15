@@ -216,6 +216,17 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-15 19:44 CET - Manual - PR #34 Vercel pdfminer fix + preview smokes
+- **Mode:** manual
+- **Branch:** `fix/pr-b-cookie-converter-ui`
+- **Summary:**
+  - Fixed PR #34 preview build by letting pdfplumber manage pdfminer.six instead of pinning it in api/convert/requirements.txt
+  - Verified convert virtualenv install + pdfminer/pdfplumber layout-aware imports; Vercel preview now builds but preview_smoke still reports /cookies.html 404 while tools/APIs are 200
+  - Ran preview_smoke and smoke_convert_preview against PR #34 preview; converter flows PASS, page smoke FAIL only on /cookies.html
+- **Evidence:** artifacts/pr-b-vercel-fix/20251115/
+- **Follow-ups:**
+  - Investigate why /cookies.html is 404 on preview despite cookies.html in repo; decide whether to adjust static export root or path
+
 ### 2025-11-15 19:11 CET - Manual - Converter PR B Phase 2 UI refinements
 - **Mode:** manual
 - **Branch:** `main`
