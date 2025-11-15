@@ -18,6 +18,7 @@ class ConversionOptions:
     # Optional: desired markdown dialect for md outputs
     # Examples: 'gfm' (default), 'commonmark_x', 'markdown_strict'
     md_dialect: str | None = None
+    aggressive_pdf_mode: bool = False
 
 
 @dataclass(slots=True)

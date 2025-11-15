@@ -239,6 +239,7 @@ class Options(BaseModel):
     headers: Optional[str] = None
     asciiPunctuation: bool = False
     mdDialect: Optional[str] = None
+    aggressivePdfMode: bool = False
 
     @validator("mdDialect")
     def _validate_md_dialect(cls, value):
@@ -453,6 +454,7 @@ def convert(
                 "headers": request.options.headers,
                 "ascii_punctuation": request.options.asciiPunctuation,
                 "md_dialect": request.options.mdDialect,
+                "aggressive_pdf_mode": request.options.aggressivePdfMode, # New option
             }
             for k, v in extra_map.items():
                 if k in sig.parameters:
@@ -464,6 +466,8 @@ def convert(
                 accept_tracked_changes=request.options.acceptTrackedChanges,
                 extract_media=request.options.extractMedia,
                 remove_zero_width=request.options.removeZeroWidth,
+                # Ensure aggressive_pdf_mode is also passed in fallback
+                aggressive_pdf_mode=request.options.aggressivePdfMode,
             )
 
         # Best-effort: ask the runner to apply Lua filters if supported.
