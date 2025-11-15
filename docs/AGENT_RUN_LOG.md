@@ -216,6 +216,16 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-15 06:26 CET - Manual - remove vercel rewrites (headers-only)
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Removed disallowed vercel.json rewrites; headers-only per AGENTS.md to prevent runtime version errors
+  - No functional changes to pages/APIs; aligns with Vercel Other/Static framework
+- **Evidence:** artifacts/convert/20251115/vercel_after.json
+- **Follow-ups:**
+  - Push branch, capture preview URL, run single-probe and smoke script
+
 ### 2025-11-15 02:04 CET - Manual - PR A engine + anti-adblock toast
 - **Mode:** manual
 - **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
@@ -997,4 +1007,23 @@ Enabled workspace-write sandbox for the repo and agent worktrees so reassigned a
 
 Impact
 • Agents will be able to modify files and log documentation without approvals.
+### Major changes — 2025-11-15 04:19 CET (UTC+01:00)
+
+Added
+• None
+
+Removed
+• None
+
+Modified
+• Observed current branch state (`fix/converter-pdf-rtf-ui-testplan-gcp`) and prep notes before diving into new tasks.
+
+Human-readable summary
+Prepared to continue work under `fix/converter-pdf-rtf-ui-testplan-gcp`, ensuring the mandatory per-turn log entry captures the state before deciding on actionable next steps.
+
+Impact
+• No code changes. This entry keeps documentation aligned with the latest agent turn.
+
+Follow-ups
+• None.
 
