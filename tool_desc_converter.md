@@ -635,3 +635,51 @@ Evidence
 
 Commits
 • fix/converter-pdf-rtf-ui-testplan-gcp — add QA audit follow-ups and doc updates
+
+### Minor changes — 2025-11-15 20:10 CET (UTC+01:00) — Agent context refresh (no behavior change)
+
+Added
+• None
+
+Removed
+• None
+
+Modified
+• Documentation/logging expectations clarified for this session; no converter inputs/outputs, timeouts, or engine behavior were changed.
+
+Human-readable summary
+
+No converter code or behavior changed in this turn. I refreshed the TinyUtils agent context (AGENTS.md, CHATGPT guides, SECURITY policy, run log, task checklist, and PDF→Markdown refactor plan) and logged the session so future agents understand the current ground rules without re-scanning everything.
+
+Impact
+• No behavior change for converter users; this is purely an internal bookkeeping heartbeat so the change log stays aligned with active work. ✅
+
+Testing
+• Not applicable (no runtime changes).
+
+Commits
+• (this branch) — context refresh heartbeat entry only
+
+### Minor changes — 2025-11-15 20:35 CET (UTC+01:00) — Type annotation fix for PDF heading thresholds
+
+Added
+• None
+
+Removed
+• None
+
+Modified
+• Corrected HEADING_SIZE_THRESHOLDS type annotation in `api/convert/convert_service.py` so it matches the tuple-of-pairs value and keeps static type checkers happy. No converter behavior or outputs changed.
+
+Human-readable summary
+
+Internally, the PDF extractor now has a small bookkeeping fix: the constant that defines what font sizes count as H1/H2/H3 is annotated correctly for type-checking tools. This doesn’t change how headings are detected or how Markdown is generated; it just prevents IDEs and automated type checks from flagging a false error.
+
+Impact
+• No user-visible behavior change; this is a pure type/maintenance fix to keep the converter’s typed module clean. ✅
+
+Testing
+• `python -m py_compile api/convert/convert_service.py` and `api/convert/app.py` succeed; runtime behavior unchanged. ✅
+
+Commits
+• (this branch) — fix HEADING_SIZE_THRESHOLDS type annotation
