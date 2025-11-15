@@ -48,3 +48,11 @@ tbody td{padding:10px;border-bottom:1px solid var(--border)}
 tbody tr:nth-child(odd){background:#10131a}
 
 .site-footer{border-top:1px solid var(--border);padding:16px 0;margin-top:24px;color:var(--muted)}
+
+/* Anti‑adblock toast */
+.adblock-toast{position:fixed;right:16px;bottom:16px;z-index:2147483000;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.35);max-width:320px}
+.adblock-toast__inner{padding:12px 14px}
+.adblock-toast strong{display:block;font-weight:600;margin-bottom:4px}
+.adblock-toast p{margin:0 0 8px 0;color:var(--muted);font-size:.9rem}
+.adblock-toast__dismiss{background:transparent;color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer}
+.adblock-toast__dismiss:focus{outline:2px solid var(--brand);outline-offset:2px}

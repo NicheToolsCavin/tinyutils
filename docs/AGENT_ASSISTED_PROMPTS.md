@@ -7,6 +7,9 @@ Check: sticky thead inside `.tableWrap`, focus outlines, AA contrast, spacing be
 ## Deep Research — Policies & Protocols
 Validate TinyUtils assumptions with primary sources: robots.txt semantics, HSTS and mixed-content rules, public-sector TLD sensitivities (.gov/.mil/.bank/.edu) for crawling, sitemap index and `.xml.gz` handling, Pandoc markdown dialects and flags. Provide citations and a 1-paragraph summary per topic. Save notes to `docs/research/YYYYMMDD/summary.md`.
 
+## Deep Reasoning — Focused Error Hunting (quota‑limited)
+Use one run only when a high‑impact decision or unclear failure needs deep analysis. Inputs I will provide: failing payloads/screenshots/logs, acceptance criteria, and constraints (Vercel budgets, no new deps). Output: prioritized root‑cause hypotheses, minimal diffs, and a test checklist to validate fixes. Save to `docs/research/YYYYMMDD/deep-reasoning.md` and artifacts under `artifacts/deep-reasoning/YYYYMMDD/`.
+
 ## Pro Reasoning — Converter Engine/UI
 Think step-by-step about failure modes for: (1) PDF→MD layout extraction (paragraph wrap merges, heading inference by size/weight, list bullets, table block detection, image extraction), (2) single-target default + advanced multi-export toggle (state persistence, keyboard flow, disabled options). Propose mitigations that fit Vercel budgets. Output a risk table and prioritized fixes.
 
