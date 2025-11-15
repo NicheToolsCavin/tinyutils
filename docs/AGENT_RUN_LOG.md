@@ -216,6 +216,15 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-15 14:38 CET - Manual - Supported Formats page + ODT target + UI/link
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Added tools/formats/ with Inputs/Outputs list (no external refs); tools/index.html links; removed external engine mentions
+  - Converter/UI: expose ODT as output; text-converter page references our Supported Formats page
+- **Evidence:** tools/formats/index.html
+- **Follow-ups:**
+
 ### 2025-11-15 14:36 CET - Manual - add ODT output + supported formats + loud preview note
 - **Mode:** manual
 - **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`

@@ -13,6 +13,7 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 ## Active Tasks (Newest First)
 
 | Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
+| Create Supported Formats page + link + ODT output | manual-2025-11-15 CET | Completed | ✅ New page at /tools/formats/; tools index link; converter adds ODT output; sitemap updated. Evidence: tools/formats/index.html |
 | Expose ODT output + Supported formats section + preview bypass callout | manual-2025-11-15 CET | Completed | ✅ Added ODT target; UI lists ODT; new Supported formats section; AGENTS.md loud preview bypass note. Evidence: converter service + UI file. |
 | Phase 3 — Text Converter UI + Converter smokes | manual-2025-11-15 CET | Completed | ✅ UI single-select + advanced toggle; dialect expansion; PDF progress copy. Smokes: added tiny PDF case with bypass precedence. Evidence: tools/text-converter/index.html, scripts/smoke_convert_preview.mjs |
 | PDF→MD refactor Phase 1–2 (engine guardrails) | manual-2025-11-15 CET | Completed | ✅ Added pdf_layout_mode option, timeout/memory guard, rtl meta; optional pdfplumber. Evidence: api/convert/convert_service.py, convert_types.py |
