@@ -27,7 +27,7 @@ if (!BASE_URL) {
   process.exit(1);
 }
 
-const pages = ['/', '/tools/', '/tools/dead-link-finder/', '/tools/sitemap-delta/', '/tools/wayback-fixer/'];
+const pages = ['/', '/tools/', '/tools/dead-link-finder/', '/tools/sitemap-delta/', '/tools/wayback-fixer/', '/cookies.html'];
 const apis = [
   { path: '/api/check', body: { pageUrl: 'https://example.com/' } },
   { path: '/api/metafetch', body: { url: 'https://example.com/' } },
