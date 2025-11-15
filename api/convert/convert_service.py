@@ -16,7 +16,11 @@ from typing import Any, Iterable, List, Optional, Sequence, Tuple
 
 import pdfminer.high_level
 import pdfminer.layout
-import pdfplumber # Lazy loaded for table extraction
+# pdfplumber is optional; import lazily/optionally
+try:  # pragma: no cover — optional dependency at runtime
+    import pdfplumber  # type: ignore
+except Exception:  # pragma: no cover
+    pdfplumber = None  # type: ignore
 
 # Use relative imports since we're in api/convert/ directory
 from .._lib import pandoc_runner
@@ -157,6 +161,9 @@ def _extract_markdown_from_pdf(
     images = 0
     pages = 0
     t0 = time.time()
+    mem_chars = 0
+    timed_out = False
+    rtl_detected = False
 
     lines_out: List[str] = []
 
@@ -164,12 +171,18 @@ def _extract_markdown_from_pdf(
         for page_layout in high.extract_pages(str(pdf_path), laparams=laparams):
             pages += 1
             page_blocks: List[str] = []
+            # Early timeout guard (~80s)
+            if (time.time() - t0) * 1000.0 > 80_000:
+                timed_out = True
+                break
             for element in page_layout:
                 name = element.__class__.__name__
                 # Text boxes → lines
                 if hasattr(element, "get_text"):
                     raw = element.get_text()
                     block = _merge_lines_and_fix_hyphen(raw.splitlines())
+                    if not rtl_detected and re.search(r"[\u0590-\u08FF]", block):
+                        rtl_detected = True
                     # Heading inference from LTChar sizes if available
                     sizes: List[float] = []
                     try:
@@ -198,12 +211,11 @@ def _extract_markdown_from_pdf(
             # Attempt table detection via pdfplumber lazily
             used_plumber = False
             try:
-                import pdfplumber  # type: ignore
-
-                used_plumber = True
-                with pdfplumber.open(str(pdf_path)) as pl:
-                    if 0 <= (pages - 1) < len(pl.pages):
-                        tbls = pl.pages[pages - 1].find_tables()
+                if pdfplumber is not None:
+                    used_plumber = True
+                    with pdfplumber.open(str(pdf_path)) as pl:  # type: ignore
+                        if 0 <= (pages - 1) < len(pl.pages):
+                            tbls = pl.pages[pages - 1].find_tables()
                         for idx, tbl in enumerate(tbls, start=1):
                             data = tbl.extract() or []
                             # Regular grid → Markdown table, else CSV fallback
@@ -244,6 +256,11 @@ def _extract_markdown_from_pdf(
             if page_blocks:
                 lines_out.extend(page_blocks)
                 lines_out.append("\n---\n")
+                # Memory guard (approximate)
+                mem_chars += sum(len(x) for x in page_blocks)
+                if mem_chars > 5_000_000:  # ~5 MB of plain text
+                    timed_out = True
+                    break
 
         text = "\n".join(lines_out).strip()
         md_path = workspace / f"{pdf_path.stem}_extracted.md"
@@ -262,13 +279,16 @@ def _extract_markdown_from_pdf(
             "lists_detected": lists,
             "tables_detected": {"markdown": tables_md, "csv_fallback": tables_csv},
             "images_placeholders_count": images,
+            "rtl_detected": rtl_detected,
             "timings_ms": {"total": int((time.time() - t0) * 1000)},
         }
 
         # Degradation guardrails
-        degraded = (len(text) < 64) or ("\n" not in text and len(text) > 0)
+        degraded = timed_out or (len(text) < 64) or ("\n" not in text and len(text) > 0)
         if degraded:
-            meta["degraded_reason"] = "too_short_or_single_line"
+            meta["degraded_reason"] = (
+                "timeout" if timed_out else "too_short_or_single_line"
+            )
         return md_path, meta
     except Exception as exc:  # pragma: no cover - pass to fallback
         raise RuntimeError(f"pdfminer_failed: {exc}")
@@ -367,10 +387,13 @@ def convert_one(
             # Pre-process PDFs: layout-aware extraction with legacy fallback
             source_for_pandoc = input_path
             if input_path.suffix.lower() == ".pdf" or from_format == "pdf":
-                mode = (os.getenv("PDF_LAYOUT_MODE", "default") or "default").lower()
+                # Prefer explicit option over env; keep env as default for safe rollout
+                sel_mode = (opts.pdf_layout_mode or os.getenv("PDF_LAYOUT_MODE", "default") or "default").lower()
+                if sel_mode not in ("default", "aggressive", "legacy"):
+                    sel_mode = "default"
                 try:
                     md_path, meta = _extract_markdown_from_pdf(
-                        input_path, workspace, mode=mode, extract_media=bool(extract_dir)
+                        input_path, workspace, mode=sel_mode, extract_media=bool(extract_dir)
                     )
                     logs.append("pdf_engine=pdfminer_six")
                     logs.append(f"pdf_mode={meta.get('mode_used')}")
@@ -381,6 +404,8 @@ def convert_one(
                     logs.append(f"pdf_tables_md={td.get('markdown',0)}")
                     logs.append(f"pdf_tables_csv={td.get('csv_fallback',0)}")
                     logs.append(f"pdf_images_placeholders={meta.get('images_placeholders_count')}")
+                    if meta.get('rtl_detected'):
+                        logs.append("pdf_rtl_detected=1")
                     if meta.get('degraded_reason'):
                         logs.append(f"pdf_degraded={meta['degraded_reason']}")
                         raise RuntimeError("degraded_output")

@@ -13,6 +13,8 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 ## Active Tasks (Newest First)
 
 | Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
+| PDF→MD refactor Phase 1–2 (engine guardrails) | manual-2025-11-15 CET | Completed | ✅ Added pdf_layout_mode option, timeout/memory guard, rtl meta; optional pdfplumber. Evidence: api/convert/convert_service.py, convert_types.py |
+| PDF→MD refactor unified plan | manual-2025-11-15 CET | Completed | ✅ Plan saved at tinyutils/artifacts/pdf-md-refactor/20251115/unified_plan.md |
 | Fix preview smoke bypass handshake | manual-2025-11-15 08:29 CET | Completed | ✅ Updated scripts/preview_smoke.mjs to handshake with Vercel protection tokens, then reran the smoke test. Commits: 959faf2. Evidence: tinyutils/artifacts/preview-green/20251115/preview_smoke.after_automation.log |
 | Preview GREEN verification (JWT) | manual-2025-11-15 CET | Completed | ✅ All pages/APIs 200 using SSO cookie (_vercel_jwt). Evidence: tinyutils/artifacts/preview-green/20251115/manual |
 | Preview smoke run (PR #33) | manual-2025-11-15 CET | Completed | Smoke FAIL. Evidence: tinyutils/artifacts/preview-green/20251115 |

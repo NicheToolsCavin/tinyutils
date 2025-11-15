@@ -18,6 +18,8 @@ class ConversionOptions:
     # Optional: desired markdown dialect for md outputs
     # Examples: 'gfm' (default), 'commonmark_x', 'markdown_strict'
     md_dialect: str | None = None
+    # PDF extractor mode: 'default' (layout-aware), 'aggressive' (denser joins), 'legacy' (text-only)
+    pdf_layout_mode: str | None = None
     aggressive_pdf_mode: bool = False
 
 
