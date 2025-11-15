@@ -12,7 +12,7 @@ import time
 import zipfile
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any, Iterable, List, Optional, Sequence
+from typing import Any, Iterable, List, Optional, Sequence, Tuple
 
 import pdfminer.high_level
 import pdfminer.layout
@@ -59,6 +59,219 @@ _LOGGER = logging.getLogger(__name__)
 def _is_preview_env() -> bool:
     """Check if running in Vercel preview environment."""
     return os.getenv("VERCEL_ENV") == "preview"
+
+
+# -------- Layout-aware PDF → Markdown preprocessor (pdfminer.six) --------
+
+def _try_import_pdfminer():
+    try:
+        import pdfminer.high_level as _high
+        import pdfminer.layout as _layout
+        return _high, _layout
+    except Exception as _exc:  # pragma: no cover - optional path
+        _LOGGER.warning("pdfminer_unavailable err=%s", _exc)
+        return None, None
+
+
+def _ligature_normalize(text: str) -> str:
+    return (
+        text.replace("ﬁ", "fi").replace("ﬂ", "fl").replace("ﬀ", "ff")
+        .replace("ﬃ", "ffi").replace("ﬄ", "ffl")
+    )
+
+
+def _merge_lines_and_fix_hyphen(lines: List[str]) -> str:
+    merged: List[str] = []
+    i = 0
+    while i < len(lines):
+        line = lines[i].rstrip("\n")
+        if i + 1 < len(lines):
+            nxt = lines[i + 1].lstrip()
+            # Conservative hyphen merge: line ends with '-' and next starts lowercase
+            if line.endswith("-") and (nxt[:1].islower()):
+                line = line[:-1] + nxt
+                i += 1
+        merged.append(line)
+        i += 1
+    paragraph = " ".join([l for l in merged if l.strip()])
+    return _ligature_normalize(paragraph)
+
+
+def _classify_heading(font_sizes: List[float]) -> Optional[int]:
+    if not font_sizes:
+        return None
+    # Heuristic: top size tiers → H1/H2/H3
+    mx = max(font_sizes)
+    if mx <= 0:
+        return None
+    # Map by relative thresholds
+    if mx >= 18:
+        return 1
+    if mx >= 16:
+        return 2
+    if mx >= 14:
+        return 3
+    return None
+
+
+def _format_list_marker(text: str) -> Optional[str]:
+    t = text.lstrip()
+    if not t:
+        return None
+    # Bullets or numbered
+    if t.startswith(("- ", "• ", "* ")):
+        return "-"
+    # Simple numbered list like '1. '
+    if len(t) > 2 and t[0].isdigit() and t[1] == ".":
+        return "1."
+    return None
+
+
+def _extract_markdown_from_pdf(
+    pdf_path: Path,
+    workspace: Path,
+    *,
+    mode: str = "default",
+    extract_media: bool = False,
+) -> Tuple[Path, dict]:
+    """Extract Markdown from PDF using pdfminer.six with light heuristics.
+
+    Returns a tuple of (markdown_path, meta dict). The caller decides whether
+    to accept or fall back based on the meta/degraded flags.
+    """
+    high, layout = _try_import_pdfminer()
+    if high is None or layout is None:
+        raise RuntimeError("pdfminer_unavailable")
+
+    laparams = layout.LAParams(
+        char_margin=2.0,
+        word_margin=0.1,
+        line_margin=0.5 if mode != "aggressive" else 0.2,
+        boxes_flow=0.5 if mode != "aggressive" else -0.5,
+    )
+
+    headings = 0
+    lists = 0
+    tables_md = 0
+    tables_csv = 0
+    images = 0
+    pages = 0
+    t0 = time.time()
+
+    lines_out: List[str] = []
+
+    try:
+        for page_layout in high.extract_pages(str(pdf_path), laparams=laparams):
+            pages += 1
+            page_blocks: List[str] = []
+            for element in page_layout:
+                name = element.__class__.__name__
+                # Text boxes → lines
+                if hasattr(element, "get_text"):
+                    raw = element.get_text()
+                    block = _merge_lines_and_fix_hyphen(raw.splitlines())
+                    # Heading inference from LTChar sizes if available
+                    sizes: List[float] = []
+                    try:
+                        for line_item in getattr(element, "_objs", []):
+                            for frag in getattr(line_item, "_objs", []):
+                                if frag.__class__.__name__ == "LTChar":
+                                    sizes.append(getattr(frag, "size", 0.0))
+                    except Exception:
+                        pass
+                    level = _classify_heading(sizes)
+                    marker = _format_list_marker(block)
+                    if level is not None and len(block) < 120:
+                        headings += 1
+                        page_blocks.append("#" * level + " " + block)
+                    elif marker is not None:
+                        lists += 1
+                        page_blocks.append(f"{marker} {block.lstrip('-•* ').lstrip()}")
+                    else:
+                        page_blocks.append(block)
+                # Very light image placeholder handling
+                elif name in ("LTImage", "LTFigure"):
+                    images += 1
+                    page_blocks.append(f"[IMAGE {images}]")
+                else:
+                    continue
+            # Attempt table detection via pdfplumber lazily
+            used_plumber = False
+            try:
+                import pdfplumber  # type: ignore
+
+                used_plumber = True
+                with pdfplumber.open(str(pdf_path)) as pl:
+                    if 0 <= (pages - 1) < len(pl.pages):
+                        tbls = pl.pages[pages - 1].find_tables()
+                        for idx, tbl in enumerate(tbls, start=1):
+                            data = tbl.extract() or []
+                            # Regular grid → Markdown table, else CSV fallback
+                            col_counts = {len(row) for row in data if isinstance(row, list)}
+                            if len(col_counts) == 1 and list(col_counts)[0] > 1:
+                                # Markdown table
+                                tables_md += 1
+                                cols = list(col_counts)[0]
+                                header = " | ".join([f"Col{i+1}" for i in range(cols)])
+                                sep = " | ".join(["---"] * cols)
+                                md_rows = [f"| {header} |", f"| {sep} |"]
+                                for r in data:
+                                    row = [str(c or "").replace("|", "\|") for c in r]
+                                    md_rows.append("| " + " | ".join(row) + " |")
+                                page_blocks.append("\n" + "\n".join(md_rows) + "\n")
+                            else:
+                                tables_csv += 1
+                                # CSV fallback fenced block
+                                csv_lines: List[str] = []
+                                for r in data:
+                                    row = []
+                                    for c in (r or []):
+                                        cell = str(c or "")
+                                        if cell[:1] in ("=", "+", "-", "@"):
+                                            cell = "'" + cell
+                                        row.append('"' + cell.replace('"', '""') + '"')
+                                    csv_lines.append(",".join(row))
+                                page_blocks.append(
+                                    "> Table (low confidence; CSV fallback)\n```csv\n"
+                                    + "\n".join(csv_lines)
+                                    + "\n```\n"
+                                )
+            except Exception:
+                # If pdfplumber not available or errors, ignore silently
+                pass
+
+            # Separate pages by thematic break
+            if page_blocks:
+                lines_out.extend(page_blocks)
+                lines_out.append("\n---\n")
+
+        text = "\n".join(lines_out).strip()
+        md_path = workspace / f"{pdf_path.stem}_extracted.md"
+        md_path.write_text(text or "", "utf-8")
+        meta = {
+            "engine": "pdfminer_six",
+            "mode_used": mode,
+            "la_params": {
+                "char_margin": laparams.char_margin,
+                "word_margin": laparams.word_margin,
+                "line_margin": laparams.line_margin,
+                "boxes_flow": laparams.boxes_flow,
+            },
+            "pages_count": pages,
+            "headings_detected": headings,
+            "lists_detected": lists,
+            "tables_detected": {"markdown": tables_md, "csv_fallback": tables_csv},
+            "images_placeholders_count": images,
+            "timings_ms": {"total": int((time.time() - t0) * 1000)},
+        }
+
+        # Degradation guardrails
+        degraded = (len(text) < 64) or ("\n" not in text and len(text) > 0)
+        if degraded:
+            meta["degraded_reason"] = "too_short_or_single_line"
+        return md_path, meta
+    except Exception as exc:  # pragma: no cover - pass to fallback
+        raise RuntimeError(f"pdfminer_failed: {exc}")
 
 
 def convert_one(
@@ -151,22 +364,33 @@ def convert_one(
                 logs.append("format_override=latex_detected_server")
                 from_format = adjusted_from
 
-            # Pre-process PDFs: extract text using pypdf before pandoc
+            # Pre-process PDFs: layout-aware extraction with legacy fallback
             source_for_pandoc = input_path
             if input_path.suffix.lower() == ".pdf" or from_format == "pdf":
-                logs.append("preprocessing=pdf_text_extraction")
+                mode = (os.getenv("PDF_LAYOUT_MODE", "default") or "default").lower()
                 try:
-                    # Attempt layout-aware extraction first
-                    source_for_pandoc = _extract_markdown_from_pdf(
-                        input_path, workspace, aggressive_mode=opts.aggressive_pdf_mode, logs=logs
+                    md_path, meta = _extract_markdown_from_pdf(
+                        input_path, workspace, mode=mode, extract_media=bool(extract_dir)
                     )
-                    from_format = "markdown"  # Extracted text is markdown
+                    logs.append("pdf_engine=pdfminer_six")
+                    logs.append(f"pdf_mode={meta.get('mode_used')}")
+                    logs.append(f"pdf_pages={meta.get('pages_count')}")
+                    logs.append(f"pdf_headings={meta.get('headings_detected')}")
+                    logs.append(f"pdf_lists={meta.get('lists_detected')}")
+                    td = meta.get('tables_detected', {})
+                    logs.append(f"pdf_tables_md={td.get('markdown',0)}")
+                    logs.append(f"pdf_tables_csv={td.get('csv_fallback',0)}")
+                    logs.append(f"pdf_images_placeholders={meta.get('images_placeholders_count')}")
+                    if meta.get('degraded_reason'):
+                        logs.append(f"pdf_degraded={meta['degraded_reason']}")
+                        raise RuntimeError("degraded_output")
+                    source_for_pandoc = md_path
+                    from_format = "markdown"
                     logs.append("pdf_extraction_strategy=layout_aware")
                 except Exception:
-                    # Fallback to legacy text extraction if layout-aware fails
                     logs.append("pdf_extraction_strategy=fallback_legacy")
                     source_for_pandoc = _extract_text_from_pdf_legacy(input_path, workspace)
-                    from_format = "markdown"  # Extracted text is markdown
+                    from_format = "markdown"
 
             # Check if we can do direct conversion without markdown intermediate
             # This fixes HTML→Plain Text truncation and HTML→HTML stray code issues
@@ -601,156 +825,22 @@ def _render_pdf_via_reportlab(markdown_path: Path, *, logs: Optional[List[str]] 
         raise RuntimeError(f"PDF generation failed: {str(e)}") from e
 
 
-def _extract_markdown_from_pdf(
-    pdf_path: Path, workspace: Path, aggressive_mode: bool = False, logs: Optional[List[str]] = None
-) -> Path:
-    """Extract layout-aware markdown from PDF using pdfminer.six and optionally pdfplumber.
 
-    This function attempts to preserve the document structure (headings, lists, tables)
-    when converting PDF content to Markdown.
-    """
-    if logs is None:
-        logs = []
 
-    markdown_lines: List[str] = []
-    _LOGGER.info("Starting PDF to Markdown extraction for %s (aggressive_mode=%s)", pdf_path.name, aggressive_mode)
-    logs.append(f"pdf_extract_mode=layout_aware aggressive={aggressive_mode}")
-
-    try:
-        # Use pdfminer.six for layout analysis
-        with pdfminer.high_level.extract_pages(pdf_path) as pages:
-            for page_num, page in enumerate(pages, start=1):
-                if page_num > 1:
-                    markdown_lines.append("\n\n---\n\n") # Page separator
-
-                page_content_added = False
-                # Store text elements with their properties to infer structure
-                text_elements = []
-                for element in page:
-                    if isinstance(element, pdfminer.layout.LTTextContainer):
-                        text_elements.append(element)
-                    elif isinstance(element, pdfminer.layout.LTFigure) and aggressive_mode:
-                        # Placeholder for figures/images in aggressive mode
-                        markdown_lines.append(f"\n\n![Figure on page {page_num}]\n\n")
-                        logs.append(f"page_{page_num}:figure_placeholder")
-                        page_content_added = True
-                    elif isinstance(element, pdfminer.layout.LTImage) and aggressive_mode:
-                        markdown_lines.append(f"\n\n![Image on page {page_num}]\n\n")
-                        logs.append(f"page_{page_num}:image_placeholder")
-                        page_content_added = True
-
-                # Sort text elements by their y-coordinate to process them top-down
-                text_elements.sort(key=lambda e: -e.y0)
-
-                last_font_size = 0
-                last_y = float('inf')
-                last_x = 0
-                last_line_was_list_item = False
-
-                for i, element in enumerate(text_elements):
-                    text = element.get_text().strip()
-                    if not text:
-                        continue
-
-                    current_font_size = 0
-                    # Attempt to get font size from the first text line in the element
-                    if hasattr(element, '_objs'):
-                        for obj in element._objs:
-                            if isinstance(obj, pdfminer.layout.LTTextLine):
-                                for char in obj._objs:
-                                    if isinstance(char, pdfminer.layout.LTChar):
-                                        current_font_size = char.size
-                                        break
-                            if current_font_size:
-                                break
-
-                    # Heading heuristic: larger font size, or significant vertical gap
-                    is_heading = False
-                    if current_font_size > last_font_size * 1.2 and current_font_size > 10: # Arbitrary threshold
-                        is_heading = True
-                    elif (last_y - element.y1) > (current_font_size * 2) and (last_y != float('inf')): # Large vertical gap
-                        is_heading = True
-
-                    # List heuristic: starts with bullet or number, and indented
-                    is_list_item = False
-                    if re.match(r"^(?:\*|-|\+|\d+\.)\s+", text) and element.x0 > last_x + 10: # Indented
-                        is_list_item = True
-
-                    if is_heading:
-                        markdown_lines.append(f"\n\n## {text}\n\n") # Use H2 for detected headings
-                        logs.append(f"page_{page_num}:heading_detected: {text[:50]}")
-                    elif is_list_item:
-                        if not last_line_was_list_item:
-                            markdown_lines.append("\n") # Add a newline before starting a new list
-                        markdown_lines.append(f"- {text.lstrip('*-+0123456789. ')}\n")
-                        logs.append(f"page_{page_num}:list_item_detected: {text[:50]}")
-                    else:
-                        markdown_lines.append(text + "\n")
-                    
-                    last_font_size = current_font_size
-                    last_y = element.y0
-                    last_x = element.x0
-                    last_line_was_list_item = is_list_item
-                    page_content_added = True
-
-                # Table extraction with pdfplumber if aggressive_mode is true
-                if aggressive_mode:
-                    try:
-                        with pdfplumber.open(pdf_path) as ppdf:
-                            pp_page = ppdf.pages[page_num - 1]
-                            tables = pp_page.extract_tables()
-                            for table in tables:
-                                if table:
-                                    markdown_lines.append("\n\n")
-                                    # Basic Markdown table formatting
-                                    header = table[0]
-                                    markdown_lines.append("| " + " | ".join(header) + " |\n")
-                                    markdown_lines.append("|" + "---|".join(["---"] * len(header)) + "|\n")
-                                    for row in table[1:]:
-                                        markdown_lines.append("| " + " | ".join(row) + " |\n")
-                                    markdown_lines.append("\n")
-                                    logs.append(f"page_{page_num}:table_detected")
-                                    page_content_added = True
-                    except Exception as e:
-                        _LOGGER.warning("pdfplumber table extraction failed for page %d: %s", page_num, e)
-                        logs.append(f"page_{page_num}:pdfplumber_table_error={e.__class__.__name__}")
-
-                if not page_content_added:
-                    logs.append(f"page_{page_num}:no_content_extracted")
-
-        # Save as markdown
-        md_path = workspace / f"{pdf_path.stem}_layout_extracted.md"
-        md_path.write_text("".join(markdown_lines), "utf-8")
-        logs.append(f"pdf_extract_success=true output_bytes={md_path.stat().st_size}")
-        return md_path
-
-    except Exception as e:
-        _LOGGER.error("Error during layout-aware PDF extraction for %s: %s", pdf_path.name, e, exc_info=True)
-        logs.append(f"pdf_extract_error={e.__class__.__name__}")
-        # Fallback will be handled by the caller
-        raise # Re-raise to trigger fallback
-    """Extract text from PDF using pypdf and return as markdown file.
-
-    This allows us to read PDFs without requiring pdftotext or poppler-utils.
-    The extracted text will be formatted as simple markdown.
-    """
+def _extract_text_from_pdf_legacy(pdf_path: Path, workspace: Path) -> Path:
+    """Extract simple text from PDF using pypdf and return as markdown file."""
     from pypdf import PdfReader
-
     reader = PdfReader(pdf_path)
-    extracted_lines = []
-
-    # Extract text from all pages
+    lines: List[str] = []
+    multi = len(reader.pages) > 1
     for page_num, page in enumerate(reader.pages, start=1):
-        text = page.extract_text()
+        text = page.extract_text() or ""
         if text.strip():
-            # Add page marker for multi-page PDFs
-            if len(reader.pages) > 1:
-                extracted_lines.append(f"\n\n---\n\n**Page {page_num}**\n\n")
-            extracted_lines.append(text)
-
-    # Save as markdown
-    md_path = workspace / f"{pdf_path.stem}_extracted.md"
-    md_path.write_text("\n".join(extracted_lines), "utf-8")
+            if multi:
+                lines.append(f"\n\n---\n\n**Page {page_num}**\n\n")
+            lines.append(text)
+    md_path = workspace / f"{pdf_path.stem}_legacy_extracted.md"
+    md_path.write_text("\n".join(lines), "utf-8")
     return md_path
 
 
