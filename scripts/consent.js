@@ -120,4 +120,18 @@
   } else {
     init();
   }
+
+  // Expose a minimal helper so pages like /cookies.html can politely request
+  // that the banner be shown again without duplicating consent logic.
+  try {
+    window.tuConsent = window.tuConsent || {};
+    window.tuConsent.reopen = function () {
+      try { localStorage.removeItem(LS_KEY); } catch (e) {}
+      // Show the banner again on the current page; applyConsent will only run
+      // after the user makes a fresh choice.
+      mountBanner();
+    };
+  } catch (e) {
+    // If the global cannot be set (very old browsers), we simply skip the helper.
+  }
 })();
