@@ -158,6 +158,13 @@ Failure Modes
 7.  **Logging Verification:**
     *   Review logs for all test cases to ensure correct `pdf_extraction_strategy`, `aggressive` mode, detected elements, and fallback messages.
 
+### QA audit follow-ups (from TinyUtils QA & UX/SEO Audit Nov 15)
+
+- **Size limits & errors:** Add converter tests that upload a 3+ MB DOCX/PDF and assert that the UI surfaces a helpful limit message (e.g., "Files larger than 2.5 MB are not supported") along with the HTTP code, instead of a raw 413/400. Capture the user-facing text in `artifacts/convert/20251115/size-limit.md`.
+- **Download links:** All conversion outputs must be served via HTTP downloads (no `data:` URIs). Test at least MD, HTML, DOCX, RTF outputs across Chrome/Firefox/Safari and document failures in `artifacts/convert/20251115/download-links.json`.
+- **Progress/feedback:** For slow conversions, verify UI shows a progress indicator or descriptive message ("Processing page X/Y" or "Evaluating format…"), not just a spinner. Capture the indicator in a screenshot and log the timing (per TEST_PLAN evidence rules).
+- **Option guidance:** Ensure disabled/conditional options like Extract Media and PDF output display tooltips explaining when they are available (e.g., "Extract media only for Word/PDF inputs"). Add this to the QA checklist and screenshot the tooltip.
+
 ### Overnight Auto Mode — Run Plan
 - Build preview branch with PR A changes; wait for Vercel Preview URL.
 - Run `scripts/preview_smoke.mjs` against preview (converter focus), save outputs under `artifacts/preview-smoke/<DATE>/`.
