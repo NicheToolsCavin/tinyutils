@@ -16,3 +16,11 @@ Think step-by-step about failure modes for: (1) PDF→MD layout extraction (para
 
 ## Pro Reasoning — Edge API Guards
 Examine network guard rails: private/loopback denial, scheme restriction, per-origin concurrency, global concurrency cap, jitter, retry-once 429/5xx, CSV hardening. Identify bypass vectors, race/timing hazards, and logging/observability gaps. Provide concrete tests and minimal diffs to close gaps. Save to `docs/research/YYYYMMDD/guards.md`.
+
+## Agent-Assisted Runbook
+1. **Open the new mode toggle:** In the ChatGPT UI, click the model drop-down, select “Agent Mode”, and choose whichever agent (deep research, visual agent, or pro reasoning) best fits the task. Once the session opens, click the “Upload file” button inside agent mode and attach `tinyutils-context-YYYYMMDD.tar` (located at `~/dev/TinyUtils/tinyutils-context-20251114.tar`) so the agent can inspect the repo.  
+2. **Deep Research:** Paste `deep-research-prompt-pdf-md-2025-11-14.txt` into the Deep Research composer after selecting Deep Research mode; ensure the uploaded tar is attached, then run. Save the returned paper under `artifacts/deep-research/YYYYMMDD/DRN-<id>.md` and log the file path in `docs/AGENT_RUN_LOG.md`.  
+3. **Agent Mode Visual QA:** For UI passes, capture annotated screenshots (tools pages + converter) in Agent Mode. Save the generated images to `artifacts/agent-mode/YYYYMMDD/AGM-<id>/` and note the path in the run log.  
+4. **Pro Reasoning:** Choose the Pro Reasoning option for high-stakes design reviews; use the prepared prompts from `docs/AGENT_ASSISTED_PROMPTS.md` as a base, run the reasoning, save outputs to `artifacts/pro-reasoning/YYYYMMDD/PRO-<id>.md`, and mention the path in the log.  
+5. **Document everything:** After each agent-run, update `docs/AGENT_RUN_LOG.md` and `docs/AGENT_TASK_CHECKLIST.md` via the helper scripts, referencing the new artifact paths and DRN/AGM/PRO IDs so future agents can find the evidence.
+6. **Headless preview fallback:** If Agent Mode can’t reach the preview, run `node scripts/headless_preview_fallback.mjs` using the same bypass headers/cookies. It saves raw HTML snapshots + `summary.json` under `artifacts/agent-mode/YYYYMMDD/headless-preview/`; link that directory and the JSON in your run log/checklist entry so others can review it.
