@@ -216,6 +216,17 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-15 02:04 CET - Manual - PR A engine + anti-adblock toast
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Added pdfminer.six layout-aware PDF→Markdown with pypdf fallback and structured logging (serverless-safe).
+  - Added dismissible anti‑adblock toast (7‑day persistence) triggered on AdSense load failure.
+- **Evidence:** artifacts/convert/20251115
+- **Follow-ups:**
+  - Run preview smokes in morning; attach before/after for B2 PDF.
+
 ### 2025-11-15 01:15 CET - Manual - Add converter decisions + PR A checklist to big plan
 - **Mode:** manual
 - **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
