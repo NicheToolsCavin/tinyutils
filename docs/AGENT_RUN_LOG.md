@@ -216,6 +216,23 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-15 17:12 CET - Manual - converter automated tests
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Ran npm test (node --test) to exercise /api/convert and related handlers.
+  - All converter-relevant tests passed; summary log at artifacts/tests/20251115/npm-test.log.
+- **Evidence:** artifacts/tests/20251115/npm-test.log
+- **Follow-ups:**
+
+### 2025-11-15 17:09 CET - Manual - Add agent-assisted runbook
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Documented how to run Agent Mode, Deep Research, and Pro Reasoning for this repo (upload tar, use prompts, store files).
+- **Evidence:** docs/AGENT_ASSISTED_PROMPTS.md
+- **Follow-ups:**
+
 ### 2025-11-15 17:04 CET - Manual - convert_one PDF tests
 - **Mode:** manual
 - **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
