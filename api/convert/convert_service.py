@@ -60,6 +60,13 @@ _CACHE: "OrderedDict[str, ConversionResult]" = OrderedDict()
 
 _LOGGER = logging.getLogger(__name__)
 
+HEADING_SIZE_THRESHOLDS: Tuple[Tuple[float, int], ...] = (
+    (18.0, 1),
+    (16.0, 2),
+    (14.0, 3),
+)
+MAX_HEADING_BLOCK_LENGTH = 120
+
 
 def _is_preview_env() -> bool:
     """Check if running in Vercel preview environment."""
@@ -138,12 +145,9 @@ def _classify_heading(font_sizes: List[float]) -> Optional[int]:
     if mx <= 0:
         return None
     # Map by relative thresholds
-    if mx >= 18:
-        return 1
-    if mx >= 16:
-        return 2
-    if mx >= 14:
-        return 3
+    for threshold, level in HEADING_SIZE_THRESHOLDS:
+        if mx >= threshold:
+            return level
     return None
 
 
@@ -225,7 +229,7 @@ def _extract_markdown_from_pdf(
                         pass
                     level = _classify_heading(sizes)
                     marker = _format_list_marker(block)
-                    if level is not None and len(block) < 120:
+                    if level is not None and len(block) < MAX_HEADING_BLOCK_LENGTH:
                         headings += 1
                         page_blocks.append("#" * level + " " + block)
                         list_indent_stack.clear()
@@ -272,10 +276,8 @@ def _extract_markdown_from_pdf(
                 else:
                     continue
             # Attempt table detection via pdfplumber lazily
-            used_plumber = False
             try:
                 if pdfplumber is not None:
-                    used_plumber = True
                     with pdfplumber.open(str(pdf_path)) as pl:  # type: ignore
                         if 0 <= (pages - 1) < len(pl.pages):
                             tbls = pl.pages[pages - 1].find_tables()
