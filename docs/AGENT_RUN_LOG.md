@@ -216,6 +216,47 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-15 23:22 CET - Manual - converter formats card + ad toast copy
+- **Mode:** manual
+- **Branch:** `fix/pr-b-cookie-converter-ui`
+- **Summary:**
+  - Adjusted the converter UI so the long 'Supported formats' list is now a collapsible card placed below the main Input/Results sections instead of a large box at the top of the page.
+  - Updated the anti-adblock toast in scripts/adsense-monitor.js to clarify that ads help cover hosting and development costs while explicitly stating that the tools still work if users keep blocking ads.
+  - No changes to /api/convert payloads or options; only layout and copy were touched, with behavior captured in a Minor changes entry in tool_desc_converter.md.
+- **Evidence:** artifacts/converter-ux-tweaks/20251115/
+- **Follow-ups:**
+
+### 2025-11-15 23:08 CET - Manual - PR #34 post-merge prod smokes
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - After merging PR #34 (PR B) into main, ran scripts/preview_smoke.mjs against https://www.tinyutils.net; /, /tools/*, /cookies.html, and all 4 APIs returned 200/JSON and overall Preview smoke: PASS.
+  - Ran scripts/smoke_convert_preview.mjs against production domain; converter flows (single-target + advanced multi-export, dialects, PDF progress) remain healthy with artifacts under artifacts/convert/20251115/.
+  - This confirms that the pdfminer/pdfplumber requirement fix and cookie/privacy settings page behave correctly in production as they did on the PR preview.
+- **Evidence:** artifacts/pr-b-prod-smoke/20251115/
+- **Follow-ups:**
+
+### 2025-11-15 23:05 CET - Manual - merge PR #34 (PR B) to main
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Merged PR #34 (PR B: cookie/privacy settings surface + Converter UI refinements) from fix/pr-b-cookie-converter-ui into main using gh pr merge --merge --auto after green preview + converter smokes.
+  - PR #34 included: cookies.html page + nav wiring, consent reopen hook, privacy copy alignment, and converter single-target + advanced multi-export, dialect selector cleanup, and PDF progress messaging.
+  - Vercel preview for PR #34 was already green (all pages including /cookies.html and all APIs 200/JSON; converter smoke PASS) before merge; production deploy will now follow your normal main-branch pipeline.
+- **Evidence:** artifacts/pr-b-vercel-fix/20251115/
+- **Follow-ups:**
+  - Optionally run preview_smoke.mjs and smoke_convert_preview.mjs against production once main deploy completes, and do a quick manual UX check on cookies.html and the Converter UI in prod.
+
+### 2025-11-15 19:50 CET - Manual - PR #34 cookies.html routing fix + green smokes
+- **Mode:** manual
+- **Branch:** `fix/pr-b-cookie-converter-ui`
+- **Summary:**
+  - Root cause for earlier PR #34 preview FAIL on /cookies.html was that cookies.html existed only as an untracked file locally, so it never reached Vercel; core tools and APIs were already 200/JSON.
+  - Minimal fix: add cookies.html to git on the PR branch and redeploy; vercel.json remains headers-only and no build/output settings changed.
+  - Re-ran preview_smoke.mjs and smoke_convert_preview.mjs against the refreshed PR preview; all pages (/ , /tools/*, /cookies.html) and APIs now PASS, and converter smoke PASS with existing artifacts.
+- **Evidence:** artifacts/pr-b-vercel-fix/20251115/
+- **Follow-ups:**
+
 ### 2025-11-15 19:44 CET - Manual - PR #34 Vercel pdfminer fix + preview smokes
 - **Mode:** manual
 - **Branch:** `fix/pr-b-cookie-converter-ui`
