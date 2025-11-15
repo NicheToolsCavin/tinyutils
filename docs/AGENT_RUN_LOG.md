@@ -216,6 +216,359 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-15 18:37 CET - Manual - fix heading thresholds type
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Adjusted HEADING_SIZE_THRESHOLDS annotation in api/convert/convert_service.py to Tuple[Tuple[float,int], ...] so it matches the configured heading threshold pairs.
+  - Verified converter modules still compile; no runtime behavior change, just a clean type signature for tooling and review bots.
+- **Evidence:** artifacts/preview-smoke/20251115/review-feedback/
+- **Follow-ups:**
+
+### 2025-11-15 18:29 CET - Manual - review fixes + smokes
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Addressed code-review feedback: added pdfplumber dependency, replaced magic heading numbers with named constants, removed unused table flag, sanitized smoke_pdf_new helper, and regenerated Context-from-Repo.md as text.
+  - Preview + converter smokes PASS via automation bypass tokens; logs stored in artifacts/preview-smoke/20251115/review-feedback/, convert smoke artifacts live under artifacts/convert/20251115/preview-smoke-20251115062851/.
+- **Evidence:** artifacts/convert/20251115/preview-smoke-20251115062851/
+- **Follow-ups:**
+
+### 2025-11-15 18:21 CET - Manual - refresh agent context & rules
+- **Mode:** manual
+- **Branch:** `converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Reskimmed AGENTS.md, CHATGPT guides, SECURITY, AGENT_RUN_LOG, AGENT_TASK_CHECKLIST, tool_desc_* docs, and PDF→MD Master Plan.
+  - Captured current constraints, logging rules, converter scope, and preview/protection expectations for this branch.
+- **Evidence:** artifacts/agent-context/20251115/
+- **Follow-ups:**
+
+### 2025-11-15 17:27 CET - Manual - headless preview fallback
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Captured headless preview HTML snapshots and JSON summary for /, /tools/, /tools/text-converter/ using scripts/headless_preview_fallback.mjs and bypass tokens.
+- **Evidence:** artifacts/agent-mode/20251115/headless-preview/summary.json
+- **Follow-ups:**
+
+### 2025-11-15 17:17 CET - Manual - Update plan checkpoint
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Documented PR A completion checkpoint in pdf-md-refactor-plan-2025-11-14.md with artifacts and next candidates.
+- **Evidence:** ../pdf-md-refactor-plan-2025-11-14.md
+- **Follow-ups:**
+
+### 2025-11-15 17:12 CET - Manual - converter automated tests
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Ran npm test (node --test) to exercise /api/convert and related handlers.
+  - All converter-relevant tests passed; summary log at artifacts/tests/20251115/npm-test.log.
+- **Evidence:** artifacts/tests/20251115/npm-test.log
+- **Follow-ups:**
+
+### 2025-11-15 17:09 CET - Manual - Add agent-assisted runbook
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Documented how to run Agent Mode, Deep Research, and Pro Reasoning for this repo (upload tar, use prompts, store files).
+- **Evidence:** docs/AGENT_ASSISTED_PROMPTS.md
+- **Follow-ups:**
+
+### 2025-11-15 17:04 CET - Manual - convert_one PDF tests
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Ran convert_one on table-heavy and bookdown PDF fixtures with extract_media/aggressive; confirmed logs, artifacts, csv bundling.
+  - pdf_layout_mode, pdf_engine counts, media zip details verified.
+- **Evidence:** artifacts/convert/test-fixtures
+- **Follow-ups:**
+
+### 2025-11-15 16:57 CET - Manual - PR A validation + preview smokes
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Ran convert_one against multiple PDFs (simple, table-heavy) with extract_media/adaptive mode to verify Markdown/TXT outputs, media artifacts, and csv logging.
+  - Captured preview smoke and converter smoke with bypass tokens; artifacts in artifacts/preview-smoke/20251115/
+- **Evidence:** artifacts/convert/test-fixtures/
+- **Follow-ups:**
+
+### 2025-11-15 16:53 CET - Manual - Preview URL captured
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Preview: https://tinyutils-git-fix-converter-pdf-bf1657-cavins-projects-7b0e00bb.vercel.app
+https://tinyutils-git-fix-converter-pdf-bf1657-cavins-projects-7b0e00bb.vercel.app (probe 000). Artifacts recorded under artifacts/convert/20251115.
+- **Evidence:** artifacts/convert/20251115/preview_url.txt
+- **Follow-ups:**
+  - Run smokes in morning; attach B2 before/after + meta.
+
+### 2025-11-15 16:51 CET - Manual - install deps for PR A
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Prepared venv and installed runtime deps for converter tests
+- **Follow-ups:**
+
+### 2025-11-15 16:46 CET - Manual - Capture QA audit follow-ups
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Documented QA findings from TinyUtils QA audit (size limits, downloads, progress).
+  - Updated TEST_PLAN_SITE, UX_REDESIGN_PLAN, and AGENT_ASSISTED_PROMPTS to include explicit checks and UX goals.
+- **Evidence:** docs/TEST_PLAN_SITE.md
+- **Follow-ups:**
+  - Address the audit follow-ups during PR A work.
+
+### 2025-11-15 16:32 CET - Manual - Update AGENTS constraints
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Clarified AGENTS constraints: vercel json relax only with owner approval, removed blanket dependency rule, added PR comment check cadence.
+  - Ensured preview bypass guidance remains and documented review cadence before prod pushes.
+- **Evidence:** AGENTS.md
+- **Follow-ups:**
+  - Review extractor wiring
+
+### 2025-11-15 14:38 CET - Manual - Supported Formats page + ODT target + UI/link
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Added tools/formats/ with Inputs/Outputs list (no external refs); tools/index.html links; removed external engine mentions
+  - Converter/UI: expose ODT as output; text-converter page references our Supported Formats page
+- **Evidence:** tools/formats/index.html
+- **Follow-ups:**
+
+### 2025-11-15 14:36 CET - Manual - add ODT output + supported formats + loud preview note
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Converter: added ODT output target (pandoc); UI: ODT in targets; formats section added before overview
+  - AGENTS.md: high-visibility preview bypass callout at top
+- **Evidence:** tools/text-converter/index.html
+- **Follow-ups:**
+
+### 2025-11-15 11:47 CET - Manual - converter smoke PASS (automation preflight)
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Added preflight GET + query-param bypass; converter smoke completed with artifacts
+- **Evidence:** artifacts/preview-green/20251115/automation_convert_smoke.preflight.log
+- **Follow-ups:**
+
+### 2025-11-15 10:24 CET - Manual - converter smoke (automation+JWT retry)
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Preview smoke PASS via automation bypass; converter smoke redirect loop persists even with _vercel_jwt cookie
+- **Evidence:** artifacts/preview-green/20251115/automation_convert_smoke.jwt.log
+- **Follow-ups:**
+  - Pending: project-side preview POST policy for /api/convert; code + smokes ready
+
+### 2025-11-15 10:19 CET - Manual - automation smoke run (no prompts)
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Preview smoke PASS via VERCEL_AUTOMATION_BYPASS_SECRET; convert smoke POST loop (redirect count exceeded)
+- **Evidence:** artifacts/preview-green/20251115/automation_convert_smoke.log
+- **Follow-ups:**
+
+### 2025-11-15 10:13 CET - Manual - /code Phase 3 UI+smokes
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - UI: single-select target + advanced multi-export; expanded mdDialect; persisted prefs; PDF progress copy
+  - Smokes: added tiny PDF case; aligned bypass precedence; set cookie header
+- **Evidence:** tool_desc_converter.md
+- **Follow-ups:**
+  - Run preview smokes once valid automation token is confirmed
+
+### 2025-11-15 08:45 CET - Manual - pdf-md Phase 1–2 pushed + smoke attempts
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Pushed converter guardrails; preview convert smoke 401 via bypass; SSO cookie path returns 308 redirects (protection)
+  - Next: owner-provided automation token validation or run smokes post-merge
+- **Evidence:** artifacts/convert/20251115/convert_smoke.after_refactor.log
+- **Follow-ups:**
+  - Phase 3 UI picker + dialects; preview re-smoke with valid bypass
+
+### 2025-11-15 08:44 CET - Manual - pdf-md Phase 1–2 (guardrails)
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Converter: optional pdfplumber import; per-page timeout+memory guard; rtl_detected meta; pdf_layout_mode option honored (opts/env)
+  - No API breakage; legacy fallback preserved; logs enriched for preview analysis
+- **Evidence:** api/convert/convert_types.py
+- **Follow-ups:**
+  - Phase 3 UI picker + dialects
+
+### 2025-11-15 08:43 CET - Manual - plan: PDF→MD refactor unified
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Synthesized 4-phase plan from multi-agent results; artifacts saved
+- **Evidence:** tinyutils/artifacts/pdf-md-refactor/20251115/unified_plan.md
+- **Follow-ups:**
+  - Implement Phase 1–2 (engine guardrails)
+
+### 2025-11-15 08:25 CET - Manual - Add automation bypass support + docs
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - preview_smoke.mjs now honors VERCEL_AUTOMATION_BYPASS_SECRET with cookie persist; keeps PREVIEW_BYPASS_TOKEN/BYPASS_TOKEN fallback; forwards PREVIEW_SECRET
+  - AGENTS.md: new Preview Protection — Automation Bypass section (env names, headers, precedence)
+- **Evidence:** scripts/preview_smoke.mjs
+- **Follow-ups:**
+  - If token still yields 401/redirect, verify project-level token validity; SSO cookie works as fallback
+
+### 2025-11-15 08:18 CET - Manual - Preview JWT smoke (PR #33)
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - SSO cookie (_vercel_jwt) probe: pages 200; APIs 200
+  - Pages: /=200 /tools/=200 dlf=200 sd=200 wbf=200
+  - APIs: check=200 metafetch=200 sitemap-delta=200 wayback-fixer=200
+- **Evidence:** tinyutils/artifacts/preview-green/20251115/manual/api-wbf.json
+- **Follow-ups:**
+
+### 2025-11-15 08:17 CET - Manual - Preview smoke (PR #33)
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Ran scripts/preview_smoke.mjs; exit=1
+  - Pages: /=401 /tools/=401 dlf=401 sd=401 wbf=401
+  - APIs: check=401 metafetch=401 sitemap-delta=401 wayback-fixer=401
+- **Evidence:** tinyutils/artifacts/preview-green/20251115/summary.txt
+- **Follow-ups:**
+
+### 2025-11-15 08:11 CET - Manual - /plan (multi-agent) for PR #33
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Launched 7 planning agents; synthesized unified Preview GREEN plan with exact commands and minimal diff fallbacks
+  - Saved final plan to artifacts/plan/20251115/final_plan.md
+- **Evidence:** artifacts/plan/20251115/final_plan.md
+- **Follow-ups:**
+
+### 2025-11-15 08:03 CET - Manual - Preview URL captured
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Preview: https://tinyutils-git-fix-converter-pdf-bf1657-cavins-projects-7b0e00bb.vercel.app (probe 401). Artifacts recorded under artifacts/convert/20251115.
+- **Evidence:** artifacts/convert/20251115/preview_url.txt
+- **Follow-ups:**
+  - Run smokes in morning; attach B2 before/after + meta.
+
+### 2025-11-15 08:03 CET - Manual - Preview URL captured (PR #33)
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Preview: https://tinyutils-git-fix-converter-pdf-bf1657-cavins-projects-7b0e00bb.vercel.app/ (probe 401). Used BYPASS_TOKEN from local secrets (redacted).
+- **Evidence:** artifacts/convert/20251115/preview_probe_status.txt
+- **Follow-ups:**
+  - Run one-pass preview smoke with BYPASS_TOKEN
+
+### 2025-11-15 06:42 CET - Manual - preview wait notice (PR #33)
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Posted PR status comment; awaiting Vercel preview URL after vercel.json cleanup
+  - Will write preview URL to artifacts/convert/20251115/preview_url.txt and run single probe on arrival
+- **Evidence:** artifacts/convert/20251115/vercel_after.json
+- **Follow-ups:**
+  - Poll for preview URL; smoke on success or timeout note after 2h
+
+### 2025-11-15 06:26 CET - Manual - remove vercel rewrites (headers-only)
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Removed disallowed vercel.json rewrites; headers-only per AGENTS.md to prevent runtime version errors
+  - No functional changes to pages/APIs; aligns with Vercel Other/Static framework
+- **Evidence:** artifacts/convert/20251115/vercel_after.json
+- **Follow-ups:**
+  - Push branch, capture preview URL, run single-probe and smoke script
+
+### 2025-11-15 02:04 CET - Manual - PR A engine + anti-adblock toast
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Added pdfminer.six layout-aware PDF→Markdown with pypdf fallback and structured logging (serverless-safe).
+  - Added dismissible anti‑adblock toast (7‑day persistence) triggered on AdSense load failure.
+- **Evidence:** artifacts/convert/20251115
+- **Follow-ups:**
+  - Run preview smokes in morning; attach before/after for B2 PDF.
+
+### 2025-11-15 01:15 CET - Manual - Add converter decisions + PR A checklist to big plan
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Pinned images/language/tables policies; added PR A implementation checklist and overnight auto mode runbook to docs/TEST_PLAN_SITE.md.
+- **Evidence:** tinyutils/docs/TEST_PLAN_SITE.md
+- **Follow-ups:**
+  - Implement PR A extractor and open preview for overnight auto mode.
+
+### 2025-11-15 01:07 CET - Manual - Converted 'Context from Repo.docx' to Markdown
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Used local converter to produce Context-from-Repo.md (fallback path due to missing pypandoc).
+  - Saved to: ~/dev/TinyUtils/Context-from-Repo.md and tinyutils/docs/Context-from-Repo.md.
+- **Evidence:** /Users/cav/dev/TinyUtils/Context-from-Repo.md
+- **Follow-ups:**
+  - Re-run with Pandoc available or in preview to get richer Markdown if needed.
+
+### 2025-11-15 00:01 CET - Manual - Save Deep Research prompt (PDF→MD)
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Saved final Deep Research paper prompt to ~/dev/TinyUtils/deep-research-prompt-pdf-md-2025-11-14.txt.
+  - Prompt references sanitized repo tar: tinyutils-context-20251114.tar (6.7 MB).
+- **Evidence:** /Users/cav/dev/TinyUtils/deep-research-prompt-pdf-md-2025-11-14.txt
+- **Follow-ups:**
+
+### 2025-11-14 23:25 CET - Manual - Deep Reasoning budget + usage log
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Added Deep Reasoning budget (40 runs) and allocation across milestones.
+  - Created docs/AGENT_ASSISTED_USAGE.md with counter and run ID scheme.
+  - Extended prompts with Deep Reasoning section.
+- **Evidence:** tinyutils/docs/AGENT_ASSISTED_USAGE.md
+- **Follow-ups:**
+  - Start DRN-allocations when Converter PR A begins.
+
+### 2025-11-14 23:24 CET - Manual - Extend Pro Reasoning window + prompts
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Extended Pro Reasoning schedule to 20 days (through 2025-12-04).
+  - Added Agent Mode / Deep Research / Pro Reasoning prompt templates.
+- **Evidence:** tinyutils/docs/AGENT_ASSISTED_PROMPTS.md
+- **Follow-ups:**
+
+### 2025-11-14 23:17 CET - Manual - Converter PDF+RTF + Test Plan + GCP Safety
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Exposed PDF output in UI; added RTF backend target (converter).
+  - Created comprehensive site test plan (docs/TEST_PLAN_SITE.md).
+  - Added GCP cost safety checklist and read-only audit script.
+  - Saved evidence artifacts and example payloads for smoke.
+- **Evidence:** tinyutils/artifacts/text-converter/20251114/smoke_payload_examples.json
+- **Follow-ups:**
+  - Prepare preview smoke for converter (md→docx,rtf,pdf; html→pdf).
+
 ### 2025-11-14 21:09 CET - Manual - converter PDF upload fixes (UI+server)
 - **Mode:** manual
 - **Branch:** `pdf-upload-ui-server`
@@ -920,4 +1273,63 @@ Enabled workspace-write sandbox for the repo and agent worktrees so reassigned a
 
 Impact
 • Agents will be able to modify files and log documentation without approvals.
+### Major changes — 2025-11-15 04:19 CET (UTC+01:00)
+
+Added
+• None
+
+Removed
+• None
+
+Modified
+• Observed current branch state (`fix/converter-pdf-rtf-ui-testplan-gcp`) and prep notes before diving into new tasks.
+
+Human-readable summary
+Prepared to continue work under `fix/converter-pdf-rtf-ui-testplan-gcp`, ensuring the mandatory per-turn log entry captures the state before deciding on actionable next steps.
+
+Impact
+• No code changes. This entry keeps documentation aligned with the latest agent turn.
+
+Follow-ups
+• None.
+### Major changes — 2025-11-15 08:24 CET (UTC+01:00)
+
+Added
+• None
+
+Removed
+• None
+
+Modified
+• Executed `scripts/preview_smoke.mjs` with the provided automation bypass tokens to capture the latest Preview run results.
+
+Human-readable summary
+The smoke run failed because every page and API fetch reported a "fetch failed" error; see `artifacts/preview-green/20251115/preview_smoke.after_automation.log` and the recorded exit code for details.
+
+Impact
+• Preview validation currently does not pass; all required pages/APIs are unreachable.<br>
+• Need to determine whether this is due to preview protection blocking requests or a networking issue inside the smoke script run environment.
+
+Follow-ups
+• Investigate the fetch failures (preview protection, headers, or timeout) before attempting another smoke run.
+### Major changes — 2025-11-15 08:29 CET (UTC+01:00)
+
+Added
+• Preview smoke now retries until a Vercel protection bypass handshake completes before returning a Response.
+
+Removed
+• None
+
+Modified
+• `scripts/preview_smoke.mjs` now cycles through automation/preview/legacy tokens, appends `_vercel_jwt` cookies, and keeps `redirect: 'manual'` to avoid infinite loops.
+
+Human-readable summary
+Updated the smoke script to gracefully handle Vercel's 307 bounce while trying different bypass tokens, then reran the tool; every required page and API now returns 200/JSON with the provided automation token, so the smoke test passes.
+
+Impact
+• Preview verification is green again (all pages/APIs reachable) after the new handshake logic. ✅
+• The script is resilient to redirect loops caused by tokens that only set `_vercel_jwt` cookies after the first request. ✅
+
+Follow-ups
+• None.
 

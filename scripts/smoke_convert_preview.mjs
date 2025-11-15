@@ -12,7 +12,7 @@ if (!previewUrl) {
 }
 
 const base = previewUrl.replace(/\/$/, '');
-const endpoint = `${base}/api/convert`;
+let endpoint = `${base}/api/convert`;
 
 const now = new Date();
 const fmt = (tz, opts) => new Intl.DateTimeFormat('en-CA', {
@@ -61,21 +61,43 @@ if (previewSecret) {
 
 // Fallback: if no explicit PREVIEW_FENCE_HEADER provided, try env tokens.
 const bypassToken =
+  process.env.VERCEL_AUTOMATION_BYPASS_SECRET ||
   process.env.PREVIEW_BYPASS_TOKEN ||
-  process.env.BYPASS_TOKEN ||
-  process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
+  process.env.BYPASS_TOKEN;
 
 if (bypassToken) {
   if (!('x-vercel-protection-bypass' in baseHeaders)) {
     baseHeaders['x-vercel-protection-bypass'] = bypassToken;
   }
+  baseHeaders['x-vercel-set-bypass-cookie'] = 'true';
   // Only add Cookie if not already present from PREVIEW_FENCE_HEADER
   if (!('Cookie' in baseHeaders) && !('cookie' in baseHeaders)) {
     baseHeaders['Cookie'] = `vercel-protection-bypass=${bypassToken}`;
   }
 }
 
+// If an authenticated preview cookie is provided, append it to Cookie
+const vercelJwt = process.env.VERCEL_JWT;
+if (vercelJwt) {
+  const prior = baseHeaders['Cookie'] || '';
+  const sep = prior && !prior.trim().endsWith(';') ? '; ' : '';
+  baseHeaders['Cookie'] = prior + sep + `_vercel_jwt=${vercelJwt}`;
+}
+
 const buildHeaders = () => ({ ...baseHeaders });
+
+async function preflightBypassCookie() {
+  try {
+    const res = await fetch(base, { method: 'GET', headers: buildHeaders(), redirect: 'manual' });
+    const sc = res.headers.get('set-cookie');
+    if (sc) {
+      const prior = baseHeaders['Cookie'] || '';
+      const sep = prior && !prior.trim().endsWith(';') ? '; ' : '';
+      // Append all cookies provided (collapse to one header); simplest is verbatim append
+      baseHeaders['Cookie'] = prior + sep + sc.split(',')[0].split(';')[0];
+    }
+  } catch {}
+}
 
 const cases = [
   {
@@ -100,7 +122,27 @@ const cases = [
       options: { extractMedia: false },
     },
   },
+  {
+    name: 'pdf_md_layout_aware',
+    body: {
+      inputs: [
+        // Minimal tiny PDF ("Hello") data URL fixture
+        { blobUrl: 'data:application/pdf;base64,JVBERi0xLjQKJcTl8uXrp/Og0MTGCjEgMCBvYmoKPDwKL1R5cGUgL1BhZ2UKL1BhcmVudCAyIDAgUgovUmVzb3VyY2VzIDw8IC9Gb250IDw8IC9GMSA0IDAgUj4+ID4+Ci9NZWRpYUJveCBbMCAwIDU5NSA4NDJdCi9Db250ZW50cyAzIDAgUgo+PgplbmRvYmoKMiAwIG9iago8PAovVHlwZSAvUGFnZXMKL0tpZHMgWzEgMCBSXQovQ291bnQgMQo+PgplbmRvYmoKMyAwIG9iago8PAovTGVuZ3RoIDQ3Cj4+CnN0cmVhbQpCBTAgMCBvYmogPDwvVHlwZSAvQ29udGVudHMgL0xlbmd0aCA0Nz4+CnN0cmVhbQpUIC9GMSAxMiBUZgovVDAgMCAwIDQwIDQwIDUwIChIZWxsbykgVGoKZW5kc3RyZWFtCmVuZG9iago0IDAgb2JqCjw8Ci9UeXBlIC9Gb250Ci9TdWJ0eXBlIC9UeXBlMQovTmFtZSAvRjEKL0Jhc2VGb250IC9IZWx2ZXRpY2EKPj4KZW5kb2JqCnhyZWYKMCA2CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDA5MCAwMDAwMCBuIAowMDAwMDAwMTY2IDAwMDAwIG4gCjAwMDAwMDAyNjUgMDAwMDAgbiAKMDAwMDAwMDQyMCAwMDAwMCBuIAowMDAwMDAwNTQ3IDAwMDAwIG4gCnRyYWlsZXIKPDwKL1Jvb3QgMiAwIFIKL1NpemUgNgovSW5mbyA8PCAvUHJvZHVjZXIgKE1pbmkpID4+Pj4Kc3RhcnR4cmVmCjY3NQolJUVPRg==', name: 'tiny.pdf' },
+      ],
+      from: 'pdf',
+      to: ['md'],
+      options: { }
+    },
+  },
 ];
+
+// If we have a bypass token, also append it as a query param to the endpoint to avoid auth redirects during POST.
+if (bypassToken) {
+  const qp = `x-vercel-protection-bypass=${encodeURIComponent(bypassToken)}`;
+  endpoint += (endpoint.includes('?') ? '&' : '?') + qp;
+  // Ask Vercel to set a bypass cookie via query param as well (helps some proxy paths)
+  endpoint += '&x-vercel-set-bypass-cookie=true';
+}
 
 const ensureArtifacts = async () => {
   await mkdir(artifactDir, { recursive: true });
@@ -108,11 +150,13 @@ const ensureArtifacts = async () => {
 };
 
 const runCase = async ({ name, body }) => {
+  // Preflight once to try to set a bypass cookie for POST
+  await preflightBypassCookie();
   const response = await fetch(endpoint, {
     method: 'POST',
     headers: buildHeaders(),
     body: JSON.stringify(body),
-  });
+    });
 
   const payload = await response.text();
   const outputPath = join(artifactDir, `resp_${name}.json`);

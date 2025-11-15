@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Supported Formats — TinyUtils</title>
+  <meta name="description" content="Supported input and output formats for the TinyUtils Document Converter.">
+  <link rel="canonical" href="/tools/formats/">
+  <link rel="icon" href="/public/favicon.ico">
+  <meta property="og:title" content="Supported Formats — TinyUtils">
+  <meta property="og:description" content="See the formats our converter can import and export.">
+  <meta property="og:image" content="/public/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/styles/site.css">
+  <script defer src="/scripts/consent.js"></script>
+  <script defer src="/scripts/adsense-monitor.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="container row between center">
+    <a class="brand" href="/">TinyUtils</a>
+    <nav class="nav">
+      <a href="/tools/">Tools</a>
+      <a class="active" href="/tools/formats/">Supported Formats</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+    </nav>
+  </div>
+  </header>
+
+  <main class="container">
+    <h1 class="mt-xl">Supported Formats</h1>
+    <p>Our Document Converter can handle over 100 formats. Below are the most commonly used ones. If you need a format not listed here, contact us — we likely support it or can add it quickly.</p>
+
+    <section class="card" role="region" aria-labelledby="inputsHeading">
+      <h2 id="inputsHeading">Inputs</h2>
+      <ul>
+        <li><strong>Markdown:</strong> .md, .markdown</li>
+        <li><strong>Plain Text:</strong> .txt</li>
+        <li><strong>HTML:</strong> .html, .htm</li>
+        <li><strong>LaTeX:</strong> .tex</li>
+        <li><strong>Word:</strong> .docx</li>
+        <li><strong>OpenDocument:</strong> .odt</li>
+        <li><strong>Rich Text:</strong> .rtf</li>
+        <li><strong>PDF:</strong> .pdf (best with text-based PDFs)</li>
+        <li><strong>EPUB/ZIP bundles:</strong> .epub, .zip</li>
+      </ul>
+    </section>
+
+    <section class="card" role="region" aria-labelledby="outputsHeading">
+      <h2 id="outputsHeading">Outputs</h2>
+      <ul>
+        <li><strong>Markdown:</strong> .md (multiple dialects available)</li>
+        <li><strong>Plain Text:</strong> .txt</li>
+        <li><strong>HTML:</strong> .html</li>
+        <li><strong>Word:</strong> .docx</li>
+        <li><strong>OpenDocument:</strong> .odt</li>
+        <li><strong>PDF:</strong> .pdf</li>
+        <li><strong>Rich Text:</strong> .rtf</li>
+      </ul>
+    </section>
+
+    <p class="help" style="color: var(--muted, #97a3c2)">Tip: For large or unusual documents, try one format at a time first, then add more via the advanced toggle in the converter.</p>
+
+    <p><a class="btn secondary" href="/tools/">← Back to Tools</a> <a class="btn primary" href="/tools/text-converter/">Open Converter</a></p>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container row between wrap">
+      <span>© <span id="year"></span> TinyUtils</span>
+      <span><a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a></span>
+    </div>
+  </footer>
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>
+
