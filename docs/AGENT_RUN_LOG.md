@@ -216,6 +216,22 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-15 17:27 CET - Manual - headless preview fallback
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Captured headless preview HTML snapshots and JSON summary for /, /tools/, /tools/text-converter/ using scripts/headless_preview_fallback.mjs and bypass tokens.
+- **Evidence:** artifacts/agent-mode/20251115/headless-preview/summary.json
+- **Follow-ups:**
+
+### 2025-11-15 17:17 CET - Manual - Update plan checkpoint
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Documented PR A completion checkpoint in pdf-md-refactor-plan-2025-11-14.md with artifacts and next candidates.
+- **Evidence:** ../pdf-md-refactor-plan-2025-11-14.md
+- **Follow-ups:**
+
 ### 2025-11-15 17:12 CET - Manual - converter automated tests
 - **Mode:** manual
 - **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
