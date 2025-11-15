@@ -13,6 +13,7 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 ## Active Tasks (Newest First)
 
 | Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
+| Preview smoke run (PR #33) | manual-2025-11-15 CET | Completed | Smoke FAIL. Evidence: tinyutils/artifacts/preview-green/20251115 |
 | /plan — PR #33 unified preview plan | manual-2025-11-15 CET | Completed | ✅ Synthesized multi-agent plan. Evidence: artifacts/plan/20251115/final_plan.md |
 | PR33 preview monitor + status comment | manual-2025-11-15 CET | Open | ✅ Comment posted; polling for preview URL via scripts/poll_preview_url.sh. Evidence: docs/AGENT_RUN_LOG.md. |
 | Vercel preview pass: enforce headers-only vercel.json | manual-2025-11-15 CET | Completed | ✅ Removed rewrites block from vercel.json. Evidence: tinyutils/artifacts/convert/20251115/vercel_before.json, vercel_after.json |

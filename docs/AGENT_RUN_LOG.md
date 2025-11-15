@@ -216,6 +216,16 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-15 08:17 CET - Manual - Preview smoke (PR #33)
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Ran scripts/preview_smoke.mjs; exit=1
+  - Pages: /=401 /tools/=401 dlf=401 sd=401 wbf=401
+  - APIs: check=401 metafetch=401 sitemap-delta=401 wayback-fixer=401
+- **Evidence:** tinyutils/artifacts/preview-green/20251115/summary.txt
+- **Follow-ups:**
+
 ### 2025-11-15 08:11 CET - Manual - /plan (multi-agent) for PR #33
 - **Mode:** manual
 - **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
