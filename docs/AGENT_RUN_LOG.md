@@ -216,6 +216,15 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-15 16:57 CET - Manual - PR A validation + preview smokes
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Ran convert_one against multiple PDFs (simple, table-heavy) with extract_media/adaptive mode to verify Markdown/TXT outputs, media artifacts, and csv logging.
+  - Captured preview smoke and converter smoke with bypass tokens; artifacts in artifacts/preview-smoke/20251115/
+- **Evidence:** artifacts/convert/test-fixtures/
+- **Follow-ups:**
+
 ### 2025-11-15 16:53 CET - Manual - Preview URL captured
 - **Mode:** manual
 - **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
