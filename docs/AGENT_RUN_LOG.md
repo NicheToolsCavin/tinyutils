@@ -216,6 +216,25 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-15 08:44 CET - Manual - pdf-md Phase 1–2 (guardrails)
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Converter: optional pdfplumber import; per-page timeout+memory guard; rtl_detected meta; pdf_layout_mode option honored (opts/env)
+  - No API breakage; legacy fallback preserved; logs enriched for preview analysis
+- **Evidence:** api/convert/convert_types.py
+- **Follow-ups:**
+  - Phase 3 UI picker + dialects
+
+### 2025-11-15 08:43 CET - Manual - plan: PDF→MD refactor unified
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Synthesized 4-phase plan from multi-agent results; artifacts saved
+- **Evidence:** tinyutils/artifacts/pdf-md-refactor/20251115/unified_plan.md
+- **Follow-ups:**
+  - Implement Phase 1–2 (engine guardrails)
+
 ### 2025-11-15 08:25 CET - Manual - Add automation bypass support + docs
 - **Mode:** manual
 - **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
