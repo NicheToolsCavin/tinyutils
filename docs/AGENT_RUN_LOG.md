@@ -216,6 +216,16 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-15 08:03 CET - Manual - Preview URL captured
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Preview: https://tinyutils-git-fix-converter-pdf-bf1657-cavins-projects-7b0e00bb.vercel.app (probe 401). Artifacts recorded under artifacts/convert/20251115.
+- **Evidence:** artifacts/convert/20251115/preview_url.txt
+- **Follow-ups:**
+  - Run smokes in morning; attach B2 before/after + meta.
+
 ### 2025-11-15 08:03 CET - Manual - Preview URL captured (PR #33)
 - **Mode:** manual
 - **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
