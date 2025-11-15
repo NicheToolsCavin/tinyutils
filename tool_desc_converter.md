@@ -530,3 +530,27 @@ Human-readable summary
 Routine repo review; converter behavior unchanged. This entry satisfies the same‑day heartbeat requirement while converter work remains in scope.
 ### Minor changes — 2025-11-14 [00:00] CET (UTC+01:00)
 • Manual UI test (no code change). Evidence: tinyutils/artifacts/text-converter/20251114/notes.txt
+
+### Minor changes — 2025-11-15 07:35 CET (UTC+01:00) — Preview infra alignment
+
+Added
+• None
+
+Modified
+• Documentation/logging only: recorded preview infra change (vercel.json headers-only) — no converter behavior impact.
+
+Fixed
+• None
+
+Human-readable summary
+
+No behavior change in the Converter. Logged preview infrastructure alignment (vercel.json headers-only) to support Vercel Preview stability; converter endpoints and UI unchanged.
+
+Impact
+• No user-facing change ✅
+
+Testing
+• Not applicable (docs-only) ✅
+
+Commits
+• pending – included with vercel.json cleanup PR commit
