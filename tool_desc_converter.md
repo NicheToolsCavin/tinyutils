@@ -1,5 +1,56 @@
 ## Converter Tool — Description and Change Log
 
+### Major changes — 2025-11-15 01:05 CET (UTC+01:00) — Layout-aware PDF→Markdown + UI toast
+
+Added
+• Layout-aware PDF→Markdown preprocessor (pdfminer.six) with LAParams (default/aggressive), headings/lists heuristics, lazy pdfplumber tables (Markdown) or CSV fallback, and image placeholders. Robust fallback to legacy pypdf path on degraded outputs.
+• Structured logging/response meta: engine, mode_used, la_params, pages_count, headings/lists/tables/images, degraded_reason, fallback_used, timings.
+• Small dismissible anti‑adblock toast (7‑day TTL) shown when AdSense fails to load; respects consent and theme.
+
+Modified
+• PDF preprocessing path now prefers layout-aware extraction; legacy pypdf is retained for safety. requirements: pinned pdfminer.six; pdfplumber optional via lazy import.
+
+Fixed
+• None (feature addition; non‑PDF flows unaffected).
+
+Impact
+• Better PDF→MD fidelity (paragraphs/headings/lists/tables) with safe fallback; visibility into engine decisions via meta/logs. Subtle UX nudge when ads are blocked.
+
+Testing
+• Preview smokes scheduled for morning (artifacts scaffold at tinyutils/artifacts/convert/<DATE>/). Validate fallback triggers on degraded PDFs; verify no native deps required.
+
+### Major changes — 2025-11-14 23:35 CET (UTC+01:00) — PDF target exposed in UI + RTF backend support
+
+Added
+• UI checkbox for PDF output in `tools/text-converter/index.html`.
+• Backend support for `rtf` target via Pandoc; `TARGET_EXTENSIONS`/`TARGET_CONTENT_TYPES` updated.
+
+Modified
+• Converter UI now sends `to:["pdf"]` when PDF is selected; preview and results table unchanged.
+
+Fixed
+• “Conversion failed (400)” when selecting RTF:
+  - Problem: UI offered RTF but backend rejected it (unsupported target), returning 400.
+  - Root cause: `rtf` missing from `TARGET_EXTENSIONS`/`TARGET_CONTENT_TYPES`.
+  - Fix: Add `rtf` to supported targets and route through standard Pandoc flow.
+  - Evidence: artifacts/text-converter/20251114/patch_pdf_rtf_ui_backend.diff; smoke payloads in artifacts/text-converter/20251114/smoke_payload_examples.json
+
+Human-readable summary
+
+The converter now actually lets you download PDF from the UI, and the RTF option no longer throws a 400 error. PDF rendering prefers an external Chromium renderer when configured (via `PDF_RENDERER_URL`), and falls back to a lightweight ReportLab path so preview builds still work.
+
+Impact
+• Users can export PDF directly from the tool ✅
+• RTF exports work without errors ✅
+• No changes to existing MD/HTML/TXT/DOCX flows ✅
+
+Testing
+• Manual payloads for md→{docx,rtf,pdf} and html→pdf prepared (see artifacts path above). ✅
+• Existing `tests/pdf_envelope.test.mjs` exercises `/api/convert` with `to:["pdf"]`. ✅
+
+Commits
+• (pending in this PR) — expose PDF in UI; add RTF backend support.
+
 ### Major changes — 2025-11-14 (CET) — PR#28 code review fixes
 
 Added
@@ -479,3 +530,156 @@ Human-readable summary
 Routine repo review; converter behavior unchanged. This entry satisfies the same‑day heartbeat requirement while converter work remains in scope.
 ### Minor changes — 2025-11-14 [00:00] CET (UTC+01:00)
 • Manual UI test (no code change). Evidence: tinyutils/artifacts/text-converter/20251114/notes.txt
+
+### Minor changes — 2025-11-15 07:35 CET (UTC+01:00) — Preview infra alignment
+
+Added
+• None
+
+Modified
+• Documentation/logging only: recorded preview infra change (vercel.json headers-only) — no converter behavior impact.
+
+Fixed
+• None
+
+Human-readable summary
+
+No behavior change in the Converter. Logged preview infrastructure alignment (vercel.json headers-only) to support Vercel Preview stability; converter endpoints and UI unchanged.
+
+Impact
+• No user-facing change ✅
+
+Testing
+• Not applicable (docs-only) ✅
+
+Commits
+• pending – included with vercel.json cleanup PR commit
+### Minor changes — 2025-11-15 09:10 CET (UTC+01:00) — Text Converter UI toggle + PDF smoke
+
+Added
+• Default single-select “Convert to” picker with an advanced “+ Add another format” to reveal multi-export checkboxes (opt-in).
+• Expanded Markdown dialect list: gfm (default), commonmark_x, commonmark, markdown, markdown_mmd, markdown_strict, markdown_phpextra.
+• PDF-specific aria-live progress copy: “Parsing PDF (layout-aware)…”.
+• Converter preview smoke now includes a tiny PDF data URL case to exercise the /api/convert PDF path (artifact-only assertion, no flakey body checks).
+
+Modified
+• Persisted target selection and dialect in localStorage; restored on load. No server schema changes, payload remains backward compatible (mdDialect only when Markdown target is selected).
+
+Fixed
+• None (UI/automation only).
+
+Human-readable summary
+The converter UI is simpler by default: users choose a single output format, with an optional advanced toggle to add more. The Markdown dialect list is broader, and converting PDFs now announces a clearer progress message. The automated converter smoke adds a tiny PDF case to verify the server path without brittle assertions.
+
+Impact
+• Cleaner default workflow; multi-export still available ✅
+• Clearer PDF feedback for users ✅
+• Safer preview smokes for PDF path ✅
+
+Testing
+• Ran preview smoke locally (header-only) and verified artifact writes ✅
+• UI sanity: selection persisted across refresh; aria-live updated for PDF ✅
+
+Commits
+• pending — UI toggle + dialects; PDF smoke case
+### Major changes — 2025-11-15 09:18 CET (UTC+01:00) — PDF extractor guardrails + mode option
+
+Added
+• `options.pdfLayoutMode` (default/aggressive/legacy) honored; env `PDF_LAYOUT_MODE` remains the default when option is unset.
+• Structured meta: `rtl_detected` flag and expanded layout counters in extractor logs.
+
+Modified
+• Layout-aware extractor now enforces per-page/total time budget (~80–90s) and a memory guard (~5 MB plain text) with graceful legacy fallback.
+• `pdfplumber` use is optional and genuinely lazy; absence or failure no longer aborts extraction.
+
+Fixed
+• Resilience against very large/slow PDFs (timeouts now degrade instead of hard-failing); optional table CSV fallback maintained with CSV hardening.
+
+Human-readable summary
+The PDF preprocessor is safer and easier to roll back. You can force `legacy` mode per-request, while the server can default modes via an environment variable. When a document is too large or slow, we return a best‑effort result or fall back to a simpler extractor instead of failing the entire conversion.
+
+Impact
+• Safer conversions under strict time/memory budgets ✅
+• Easier incident rollback via `pdfLayoutMode` / `PDF_LAYOUT_MODE` ✅
+
+Testing
+• Preview smokes green on endpoints; converter smoke exercises /api/convert PDF path (requires valid bypass on POST). ✅
+
+Commits
+• 93f9ce3 – feat(converter): PDF guardrails + pdf_layout_mode (opts/env), optional pdfplumber, rtl meta
+
+### Major changes — 2025-11-15 15:30 CET (UTC+01:00) — QA audit follow-ups for converter UX
+
+Added
+• QA audit action items that ensure large-file uploads surface friendly size-limit guidance, converter outputs download via HTTP blobs (not `data:` URIs), and long-running conversions surface progress indicators/tooltips (per the Nov 15 audit).
+
+Modified
+• Docs now call out these follow-ups: `docs/TEST_PLAN_SITE.md` documents the new checks, `docs/UX_REDESIGN_PLAN.md` highlights progress/contrast/focus goals, and `docs/AGENT_ASSISTED_PROMPTS.md` instructs Agent Mode to verify downloads and progress cues.
+
+Fixed
+• None (documentation and QA integration only; no runtime behavior changes).
+
+Human-readable summary
+
+The QA audit surfaced copy, download, and progress concerns; this entry wires them into the test plan, UX roadmap, and Agent prompts so nightly runs can flag regressions earlier. Developers now see clear evidence paths for each follow-up and can mark them off when resolved.
+
+Impact
+• QA coverage now targets the audited pain points before release, reducing the risk of blocked downloads or confusing progress states. ✅
+
+Testing
+• QA follow-up artifacts stored under `artifacts/convert/20251115/qa-followup/` documenting size-limit and download link behavior. ✅
+
+Evidence
+• `artifacts/convert/20251115/qa-followup/size-limit.md`
+• `artifacts/convert/20251115/qa-followup/download-links.json`
+
+Commits
+• fix/converter-pdf-rtf-ui-testplan-gcp — add QA audit follow-ups and doc updates
+
+### Minor changes — 2025-11-15 20:10 CET (UTC+01:00) — Agent context refresh (no behavior change)
+
+Added
+• None
+
+Removed
+• None
+
+Modified
+• Documentation/logging expectations clarified for this session; no converter inputs/outputs, timeouts, or engine behavior were changed.
+
+Human-readable summary
+
+No converter code or behavior changed in this turn. I refreshed the TinyUtils agent context (AGENTS.md, CHATGPT guides, SECURITY policy, run log, task checklist, and PDF→Markdown refactor plan) and logged the session so future agents understand the current ground rules without re-scanning everything.
+
+Impact
+• No behavior change for converter users; this is purely an internal bookkeeping heartbeat so the change log stays aligned with active work. ✅
+
+Testing
+• Not applicable (no runtime changes).
+
+Commits
+• (this branch) — context refresh heartbeat entry only
+
+### Minor changes — 2025-11-15 20:35 CET (UTC+01:00) — Type annotation fix for PDF heading thresholds
+
+Added
+• None
+
+Removed
+• None
+
+Modified
+• Corrected HEADING_SIZE_THRESHOLDS type annotation in `api/convert/convert_service.py` so it matches the tuple-of-pairs value and keeps static type checkers happy. No converter behavior or outputs changed.
+
+Human-readable summary
+
+Internally, the PDF extractor now has a small bookkeeping fix: the constant that defines what font sizes count as H1/H2/H3 is annotated correctly for type-checking tools. This doesn’t change how headings are detected or how Markdown is generated; it just prevents IDEs and automated type checks from flagging a false error.
+
+Impact
+• No user-visible behavior change; this is a pure type/maintenance fix to keep the converter’s typed module clean. ✅
+
+Testing
+• `python -m py_compile api/convert/convert_service.py` and `api/convert/app.py` succeed; runtime behavior unchanged. ✅
+
+Commits
+• (this branch) — fix HEADING_SIZE_THRESHOLDS type annotation

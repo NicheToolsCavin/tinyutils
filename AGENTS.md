@@ -1,5 +1,25 @@
 # AGENTS.md
 
+> >>> READ THIS FIRST — PREVIEW BYPASS FOR AUTOMATION <<<
+>
+> To access locked Vercel previews non‑interactively, export one of these (in order):
+>
+> - `VERCEL_AUTOMATION_BYPASS_SECRET` (preferred)
+> - `PREVIEW_BYPASS_TOKEN`
+> - `BYPASS_TOKEN`
+>
+> Then run smokes with `PREVIEW_URL=<url>` and the scripts will:
+> - Send `x-vercel-protection-bypass: <token>` and `x-vercel-set-bypass-cookie: true`
+> - Preflight a GET to set the cookie
+> - Include `Cookie: vercel-protection-bypass=<token>`
+> - For POST to /api/convert, also append `x-vercel-protection-bypass=<token>` as a query param
+>
+> Optional: set `PREVIEW_SECRET` to forward `x-preview-secret`.
+>
+> Scripts updated: `scripts/preview_smoke.mjs`, `scripts/smoke_convert_preview.mjs`.
+>
+> If you see a redirect loop on POST: ensure the automation secret matches the project and branch; the scripts already preflight+cookie+query param.
+
 **Goal**
 Get a **passing Vercel Preview** build (not public). Pages must render:
 - `/`, `/tools/`, `/tools/dead-link-finder/`, `/tools/sitemap-delta/`, `/tools/wayback-fixer/`
@@ -123,10 +143,10 @@ Before considering ANY task complete, verify:
 ---
 
 ## Constraints
-- **Branch + PR only.** No DNS or Production deploys. No repository secrets. **The exception being when you are asked to push to production, in which case you will do so. Thanks.
-- **Minimal diffs.** No new dependencies unless strictly required & justified in the PR.
+- **Branch + PR only.** No DNS or Production deploys. No repository secrets. **The exception being when you are asked to push to production, in which case you will do so. Thanks.**
+- **Review PR comments:** A few minutes after a PR is opened, pause to read Claude/Codex comments; check again immediately before any prod push to catch late guidance.
 - **Static site, Framework = Other.** No build step; **Output directory = root**.
-- **`vercel.json` = headers only.** Remove any `functions`/`runtime` blocks. (Those trigger "Function Runtimes must have a valid version..." errors.)
+- **`vercel.json` = headers only.** Remove any `functions`/`runtime` blocks. (Those trigger "Function Runtimes must have a valid version..." errors.) Any relaxation of this rule must be explicitly approved by the owner before merging.
 - **ESM everywhere** for Edge functions.
   - `package.json` must include: `{ "type": "module" }`.
   - Each API file:
@@ -326,6 +346,31 @@ If code changes a tool's observable behavior and no matching log entry is found 
 
 ### CSV hardening
 - Opening CSV in Excel/Sheets does **not** execute formulas (leading `= + - @` are prefixed with `'`).
+
+---
+
+## Preview Protection — Automation Bypass (Required)
+
+When Vercel Preview deployments are protected, use the official Automation Bypass token so smokes run non‑interactively (no SSO cookie required).
+
+Environment variables (precedence)
+- `VERCEL_AUTOMATION_BYPASS_SECRET` — Preferred. Official token for “Protection Bypass for Automation”.
+- `PREVIEW_BYPASS_TOKEN` — Legacy name; used if the automation secret isn’t present.
+- `BYPASS_TOKEN` — Legacy fallback.
+- `PREVIEW_SECRET` — Optional, project‑specific secret; sent as `x-preview-secret` if provided.
+
+What our scripts send
+- Header: `x-vercel-protection-bypass: <token>`
+- Cookie: `vercel-protection-bypass=<token>`
+- Helper header: `x-vercel-set-bypass-cookie: true` (asks Vercel to set the cookie server‑side)
+
+Script support
+- `scripts/preview_smoke.mjs` reads tokens in the order above and forwards them as headers/cookie; also forwards `PREVIEW_SECRET`.
+- `scripts/smoke_convert_preview.mjs` already supports `VERCEL_AUTOMATION_BYPASS_SECRET` and fallback names.
+
+Operational notes
+- Never commit real tokens; set them in your shell or Vercel project env. Do not paste them into logs or artifacts.
+- If a preview still returns 401, verify the token belongs to the target project/branch and retry; as a last resort for manual checks, an authenticated browser cookie (`_vercel_jwt`) also works.
 
 ---
 
