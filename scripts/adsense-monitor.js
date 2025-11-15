@@ -23,7 +23,7 @@
     toast.setAttribute('role','status');
     toast.setAttribute('aria-live','polite');
     toast.innerHTML = '<div class="adblock-toast__inner">' +
-      '<strong>Heads up</strong><p>Ads seem blocked, which helps keep TinyUtils free. No pressure — thanks for visiting!</p>' +
+      '<strong>Heads up</strong><p>Ads seem blocked. TinyUtils uses small, non-intrusive ads to help cover hosting and development costs, but the tools still work if you prefer to keep blocking them.</p>' +
       '<button class="adblock-toast__dismiss" aria-label="Dismiss notice">Dismiss</button>' +
       '</div>';
     document.body.appendChild(toast);
@@ -54,4 +54,3 @@
     init();
   }
 })();
-
