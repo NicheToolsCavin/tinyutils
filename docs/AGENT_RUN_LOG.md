@@ -216,6 +216,33 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-15 18:37 CET - Manual - fix heading thresholds type
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Adjusted HEADING_SIZE_THRESHOLDS annotation in api/convert/convert_service.py to Tuple[Tuple[float,int], ...] so it matches the configured heading threshold pairs.
+  - Verified converter modules still compile; no runtime behavior change, just a clean type signature for tooling and review bots.
+- **Evidence:** artifacts/preview-smoke/20251115/review-feedback/
+- **Follow-ups:**
+
+### 2025-11-15 18:29 CET - Manual - review fixes + smokes
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Addressed code-review feedback: added pdfplumber dependency, replaced magic heading numbers with named constants, removed unused table flag, sanitized smoke_pdf_new helper, and regenerated Context-from-Repo.md as text.
+  - Preview + converter smokes PASS via automation bypass tokens; logs stored in artifacts/preview-smoke/20251115/review-feedback/, convert smoke artifacts live under artifacts/convert/20251115/preview-smoke-20251115062851/.
+- **Evidence:** artifacts/convert/20251115/preview-smoke-20251115062851/
+- **Follow-ups:**
+
+### 2025-11-15 18:21 CET - Manual - refresh agent context & rules
+- **Mode:** manual
+- **Branch:** `converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Reskimmed AGENTS.md, CHATGPT guides, SECURITY, AGENT_RUN_LOG, AGENT_TASK_CHECKLIST, tool_desc_* docs, and PDF→MD Master Plan.
+  - Captured current constraints, logging rules, converter scope, and preview/protection expectations for this branch.
+- **Evidence:** artifacts/agent-context/20251115/
+- **Follow-ups:**
+
 ### 2025-11-15 17:27 CET - Manual - headless preview fallback
 - **Mode:** manual
 - **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
