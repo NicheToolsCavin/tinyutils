@@ -582,3 +582,28 @@ Testing
 
 Commits
 • pending — UI toggle + dialects; PDF smoke case
+### Major changes — 2025-11-15 09:18 CET (UTC+01:00) — PDF extractor guardrails + mode option
+
+Added
+• `options.pdfLayoutMode` (default/aggressive/legacy) honored; env `PDF_LAYOUT_MODE` remains the default when option is unset.
+• Structured meta: `rtl_detected` flag and expanded layout counters in extractor logs.
+
+Modified
+• Layout-aware extractor now enforces per-page/total time budget (~80–90s) and a memory guard (~5 MB plain text) with graceful legacy fallback.
+• `pdfplumber` use is optional and genuinely lazy; absence or failure no longer aborts extraction.
+
+Fixed
+• Resilience against very large/slow PDFs (timeouts now degrade instead of hard-failing); optional table CSV fallback maintained with CSV hardening.
+
+Human-readable summary
+The PDF preprocessor is safer and easier to roll back. You can force `legacy` mode per-request, while the server can default modes via an environment variable. When a document is too large or slow, we return a best‑effort result or fall back to a simpler extractor instead of failing the entire conversion.
+
+Impact
+• Safer conversions under strict time/memory budgets ✅
+• Easier incident rollback via `pdfLayoutMode` / `PDF_LAYOUT_MODE` ✅
+
+Testing
+• Preview smokes green on endpoints; converter smoke exercises /api/convert PDF path (requires valid bypass on POST). ✅
+
+Commits
+• 93f9ce3 – feat(converter): PDF guardrails + pdf_layout_mode (opts/env), optional pdfplumber, rtl meta
