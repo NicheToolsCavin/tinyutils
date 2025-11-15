@@ -12,7 +12,7 @@ import time
 import zipfile
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any, Iterable, List, Optional, Sequence, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 import pdfminer.high_level
 import pdfminer.layout
@@ -102,6 +102,34 @@ def _merge_lines_and_fix_hyphen(lines: List[str]) -> str:
     return _ligature_normalize(paragraph)
 
 
+def _guess_image_extension(data: bytes) -> str:
+    if data.startswith(b"\xff\xd8"):
+        return "jpg"
+    if data.startswith(b"\x89PNG\r\n\x1a\n"):
+        return "png"
+    if data.startswith(b"GIF87a") or data.startswith(b"GIF89a"):
+        return "gif"
+    if data.startswith(b"%PDF"):
+        return "pdf"
+    return "bin"
+
+
+def _write_image_bytes(media_dir: Path, idx: int, data: bytes) -> str:
+    ext = _guess_image_extension(data)
+    filename = f"image-{idx}.{ext}"
+    path = media_dir / filename
+    path.write_bytes(data)
+    return filename
+
+
+def _indent_level(indent_stack: List[float], value: float, tolerance: float = 5.0) -> int:
+    while indent_stack and value + tolerance < indent_stack[-1]:
+        indent_stack.pop()
+    if not indent_stack or value > indent_stack[-1] + tolerance:
+        indent_stack.append(value)
+    return len(indent_stack)
+
+
 def _classify_heading(font_sizes: List[float]) -> Optional[int]:
     if not font_sizes:
         return None
@@ -138,6 +166,7 @@ def _extract_markdown_from_pdf(
     *,
     mode: str = "default",
     extract_media: bool = False,
+    media_dir: Optional[Path] = None,
 ) -> Tuple[Path, dict]:
     """Extract Markdown from PDF using pdfminer.six with light heuristics.
 
@@ -167,6 +196,7 @@ def _extract_markdown_from_pdf(
     rtl_detected = False
 
     lines_out: List[str] = []
+    list_indent_stack: List[float] = []
 
     try:
         for page_layout in high.extract_pages(str(pdf_path), laparams=laparams):
@@ -198,15 +228,47 @@ def _extract_markdown_from_pdf(
                     if level is not None and len(block) < 120:
                         headings += 1
                         page_blocks.append("#" * level + " " + block)
+                        list_indent_stack.clear()
                     elif marker is not None:
                         lists += 1
-                        page_blocks.append(f"{marker} {block.lstrip('-•* ').lstrip()}")
+                        indent = getattr(element, "x0", 0.0)
+                        level = _indent_level(list_indent_stack, indent)
+                        indent_prefix = "  " * max(level - 1, 0)
+                        stripped = re.sub(r"^([-•*]|\d+\.)\s*", "", block.lstrip())
+                        page_blocks.append(f"{indent_prefix}{marker} {stripped}")
                     else:
+                        list_indent_stack.clear()
                         page_blocks.append(block)
-                # Very light image placeholder handling
+                # Image placeholders / optional media
                 elif name in ("LTImage", "LTFigure"):
-                    images += 1
-                    page_blocks.append(f"[IMAGE {images}]")
+                    imgs: List[Any] = []
+                    if name == "LTImage":
+                        imgs = [element]
+                    else:
+                        imgs = [obj for obj in getattr(element, "_objs", []) if obj.__class__.__name__ == "LTImage"]
+                    for img in imgs:
+                        images += 1
+                        filename: Optional[str] = None
+                        if extract_media and media_dir is not None:
+                            stream = getattr(img, "stream", None)
+                            if stream is not None:
+                                raw = None
+                                try:
+                                    raw = stream.get_rawdata()
+                                except AttributeError:
+                                    try:
+                                        raw = stream.get_data()
+                                    except AttributeError:
+                                        raw = None
+                                if raw:
+                                    try:
+                                        filename = _write_image_bytes(media_dir, images, raw)
+                                    except Exception:
+                                        filename = None
+                        if filename:
+                            page_blocks.append(f"![Image {images}]({filename})")
+                        else:
+                            page_blocks.append(f"[IMAGE {images}]")
                 else:
                     continue
             # Attempt table detection via pdfplumber lazily
@@ -234,7 +296,6 @@ def _extract_markdown_from_pdf(
                                 page_blocks.append("\n" + "\n".join(md_rows) + "\n")
                             else:
                                 tables_csv += 1
-                                # CSV fallback fenced block
                                 csv_lines: List[str] = []
                                 for r in data:
                                     row = []
@@ -244,11 +305,16 @@ def _extract_markdown_from_pdf(
                                             cell = "'" + cell
                                         row.append('"' + cell.replace('"', '""') + '"')
                                     csv_lines.append(",".join(row))
-                                page_blocks.append(
-                                    "> Table (low confidence; CSV fallback)\n```csv\n"
-                                    + "\n".join(csv_lines)
-                                    + "\n```\n"
-                                )
+                                csv_text = "\n".join(csv_lines)
+                                csv_filename: Optional[str] = None
+                                if extract_media and media_dir is not None:
+                                    csv_filename = f"table-{tables_csv}.csv"
+                                    (media_dir / csv_filename).write_text(csv_text, "utf-8")
+                                note = f"> Table {tables_csv} (low confidence; CSV fallback)"
+                                if csv_filename:
+                                    note += f" — see [{csv_filename}]({csv_filename})"
+                                page_blocks.append(note)
+                                page_blocks.append("```csv\n" + csv_text + "\n```\n")
             except Exception:
                 # If pdfplumber not available or errors, ignore silently
                 pass
@@ -290,6 +356,7 @@ def _extract_markdown_from_pdf(
             meta["degraded_reason"] = (
                 "timeout" if timed_out else "too_short_or_single_line"
             )
+            meta["fallback_used"] = True
         return md_path, meta
     except Exception as exc:  # pragma: no cover - pass to fallback
         raise RuntimeError(f"pdfminer_failed: {exc}")
@@ -346,6 +413,7 @@ def convert_one(
         cached.logs.append("cache=hit")
         return cached
     logs: List[str] = [f"targets={','.join(normalized_targets)}"]
+    result_meta: Dict[str, Any] = {}
 
     try:
         pandoc_runner.ensure_pandoc()
@@ -379,6 +447,8 @@ def convert_one(
             cleaned_md = workspace / "cleaned.md"
             media_dir = workspace / "media"
             extract_dir: Optional[Path] = media_dir if opts.extract_media else None
+            if extract_dir:
+                extract_dir.mkdir(parents=True, exist_ok=True)
 
             # Use the adjusted_from for the actual conversion (post-detection)
             if adjusted_from != from_format:
@@ -392,9 +462,14 @@ def convert_one(
                 sel_mode = (opts.pdf_layout_mode or os.getenv("PDF_LAYOUT_MODE", "default") or "default").lower()
                 if sel_mode not in ("default", "aggressive", "legacy"):
                     sel_mode = "default"
+                logs.append(f"pdf_layout_mode={sel_mode}")
                 try:
                     md_path, meta = _extract_markdown_from_pdf(
-                        input_path, workspace, mode=sel_mode, extract_media=bool(extract_dir)
+                        input_path,
+                        workspace,
+                        mode=sel_mode,
+                        extract_media=bool(extract_dir),
+                        media_dir=extract_dir,
                     )
                     logs.append("pdf_engine=pdfminer_six")
                     logs.append(f"pdf_mode={meta.get('mode_used')}")
@@ -415,6 +490,11 @@ def convert_one(
                     logs.append("pdf_extraction_strategy=layout_aware")
                 except Exception:
                     logs.append("pdf_extraction_strategy=fallback_legacy")
+                    result_meta = {
+                        "engine": "pypdf_fallback",
+                        "mode_requested": sel_mode,
+                        "fallback_used": True,
+                    }
                     source_for_pandoc = _extract_text_from_pdf_legacy(input_path, workspace)
                     from_format = "markdown"
 

@@ -607,3 +607,31 @@ Testing
 
 Commits
 • 93f9ce3 – feat(converter): PDF guardrails + pdf_layout_mode (opts/env), optional pdfplumber, rtl meta
+
+### Major changes — 2025-11-15 15:30 CET (UTC+01:00) — QA audit follow-ups for converter UX
+
+Added
+• QA audit action items that ensure large-file uploads surface friendly size-limit guidance, converter outputs download via HTTP blobs (not `data:` URIs), and long-running conversions surface progress indicators/tooltips (per the Nov 15 audit).
+
+Modified
+• Docs now call out these follow-ups: `docs/TEST_PLAN_SITE.md` documents the new checks, `docs/UX_REDESIGN_PLAN.md` highlights progress/contrast/focus goals, and `docs/AGENT_ASSISTED_PROMPTS.md` instructs Agent Mode to verify downloads and progress cues.
+
+Fixed
+• None (documentation and QA integration only; no runtime behavior changes).
+
+Human-readable summary
+
+The QA audit surfaced copy, download, and progress concerns; this entry wires them into the test plan, UX roadmap, and Agent prompts so nightly runs can flag regressions earlier. Developers now see clear evidence paths for each follow-up and can mark them off when resolved.
+
+Impact
+• QA coverage now targets the audited pain points before release, reducing the risk of blocked downloads or confusing progress states. ✅
+
+Testing
+• QA follow-up artifacts stored under `artifacts/convert/20251115/qa-followup/` documenting size-limit and download link behavior. ✅
+
+Evidence
+• `artifacts/convert/20251115/qa-followup/size-limit.md`
+• `artifacts/convert/20251115/qa-followup/download-links.json`
+
+Commits
+• fix/converter-pdf-rtf-ui-testplan-gcp — add QA audit follow-ups and doc updates

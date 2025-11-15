@@ -3,6 +3,7 @@
 ## Agent Mode — Visual QA
 Open each page and capture annotated screenshots: `/`, `/tools/`, `/tools/dead-link-finder/`, `/tools/sitemap-delta/`, `/tools/wayback-fixer/`, `/tools/text-converter/`.
 Check: sticky thead inside `.tableWrap`, focus outlines, AA contrast, spacing between sections, overflow clipping, share-state restore. Add short bullets per page for issues. Save images to `artifacts/agent-mode/YYYYMMDD/`.
+Also verify conversion downloads use HTTP blobs (no `data:` URIs) and long-running operations show progress indicators; capture annotations when those conditions are missing.
 
 ## Deep Research — Policies & Protocols
 Validate TinyUtils assumptions with primary sources: robots.txt semantics, HSTS and mixed-content rules, public-sector TLD sensitivities (.gov/.mil/.bank/.edu) for crawling, sitemap index and `.xml.gz` handling, Pandoc markdown dialects and flags. Provide citations and a 1-paragraph summary per topic. Save notes to `docs/research/YYYYMMDD/summary.md`.
