@@ -216,6 +216,33 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-15 16:51 CET - Manual - install deps for PR A
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Prepared venv and installed runtime deps for converter tests
+- **Follow-ups:**
+
+### 2025-11-15 16:46 CET - Manual - Capture QA audit follow-ups
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Documented QA findings from TinyUtils QA audit (size limits, downloads, progress).
+  - Updated TEST_PLAN_SITE, UX_REDESIGN_PLAN, and AGENT_ASSISTED_PROMPTS to include explicit checks and UX goals.
+- **Evidence:** docs/TEST_PLAN_SITE.md
+- **Follow-ups:**
+  - Address the audit follow-ups during PR A work.
+
+### 2025-11-15 16:32 CET - Manual - Update AGENTS constraints
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Clarified AGENTS constraints: vercel json relax only with owner approval, removed blanket dependency rule, added PR comment check cadence.
+  - Ensured preview bypass guidance remains and documented review cadence before prod pushes.
+- **Evidence:** AGENTS.md
+- **Follow-ups:**
+  - Review extractor wiring
+
 ### 2025-11-15 14:38 CET - Manual - Supported Formats page + ODT target + UI/link
 - **Mode:** manual
 - **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
