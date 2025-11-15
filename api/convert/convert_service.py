@@ -40,12 +40,13 @@ from .convert_types import (
 )
 
 
-TARGET_EXTENSIONS = {"md": "md", "html": "html", "txt": "txt", "docx": "docx", "pdf": "pdf", "rtf": "rtf"}
+TARGET_EXTENSIONS = {"md": "md", "html": "html", "txt": "txt", "docx": "docx", "odt": "odt", "pdf": "pdf", "rtf": "rtf"}
 TARGET_CONTENT_TYPES = {
     "md": "text/markdown; charset=utf-8",
     "html": "text/html; charset=utf-8",
     "txt": "text/plain; charset=utf-8",
     "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "odt": "application/vnd.oasis.opendocument.text",
     "pdf": "application/pdf",
     "rtf": "application/rtf",
 }
@@ -719,6 +720,17 @@ def _render_markdown_target(cleaned_path: Path, target: str, *, logs: Optional[L
         pypandoc.convert_file(
             str(cleaned_path),
             to="docx",
+            format="gfm",
+            outputfile=str(output_path),
+            extra_args=["--wrap=none"],
+        )
+        return output_path.read_bytes()
+    elif target == "odt":
+        # ODT output via pandoc
+        output_path = cleaned_path.parent / f"{cleaned_path.stem}.odt"
+        pypandoc.convert_file(
+            str(cleaned_path),
+            to="odt",
             format="gfm",
             outputfile=str(output_path),
             extra_args=["--wrap=none"],

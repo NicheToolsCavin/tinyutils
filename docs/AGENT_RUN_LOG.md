@@ -216,6 +216,40 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-15 14:36 CET - Manual - add ODT output + supported formats + loud preview note
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Converter: added ODT output target (pandoc); UI: ODT in targets; formats section added before overview
+  - AGENTS.md: high-visibility preview bypass callout at top
+- **Evidence:** tools/text-converter/index.html
+- **Follow-ups:**
+
+### 2025-11-15 11:47 CET - Manual - converter smoke PASS (automation preflight)
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Added preflight GET + query-param bypass; converter smoke completed with artifacts
+- **Evidence:** artifacts/preview-green/20251115/automation_convert_smoke.preflight.log
+- **Follow-ups:**
+
+### 2025-11-15 10:24 CET - Manual - converter smoke (automation+JWT retry)
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Preview smoke PASS via automation bypass; converter smoke redirect loop persists even with _vercel_jwt cookie
+- **Evidence:** artifacts/preview-green/20251115/automation_convert_smoke.jwt.log
+- **Follow-ups:**
+  - Pending: project-side preview POST policy for /api/convert; code + smokes ready
+
+### 2025-11-15 10:19 CET - Manual - automation smoke run (no prompts)
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Preview smoke PASS via VERCEL_AUTOMATION_BYPASS_SECRET; convert smoke POST loop (redirect count exceeded)
+- **Evidence:** artifacts/preview-green/20251115/automation_convert_smoke.log
+- **Follow-ups:**
+
 ### 2025-11-15 10:13 CET - Manual - /code Phase 3 UI+smokes
 - **Mode:** manual
 - **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
