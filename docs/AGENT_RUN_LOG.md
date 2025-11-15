@@ -216,6 +216,16 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-15 08:18 CET - Manual - Preview JWT smoke (PR #33)
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - SSO cookie (_vercel_jwt) probe: pages 200; APIs 200
+  - Pages: /=200 /tools/=200 dlf=200 sd=200 wbf=200
+  - APIs: check=200 metafetch=200 sitemap-delta=200 wayback-fixer=200
+- **Evidence:** tinyutils/artifacts/preview-green/20251115/manual/api-wbf.json
+- **Follow-ups:**
+
 ### 2025-11-15 08:17 CET - Manual - Preview smoke (PR #33)
 - **Mode:** manual
 - **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
