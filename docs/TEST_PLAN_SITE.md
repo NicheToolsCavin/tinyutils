@@ -49,6 +49,7 @@ Smoke
 - Tool pages — header/footer consistent; sticky table headers present where applicable.
 - Consent banner — visible first visit; choosing any option updates CMP + Consent Mode; no analytics before consent.
 - Ads — Auto Ads top/bottom only; no Anchors/Vignettes.
+- /cookies.html — Cookie & privacy settings page loads; header/footer link is present; CMP re-open button or clear fallback text is visible; copy explains cookies/ads in plain language.
 
 Deep
 - Keyboard: Tab order logical; visible focus; shortcuts (Cmd/Ctrl+Enter for converter; F/E/J on DLF) do not hijack typing in inputs.

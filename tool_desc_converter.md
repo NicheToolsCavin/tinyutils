@@ -683,3 +683,32 @@ Testing
 
 Commits
 • (this branch) — fix HEADING_SIZE_THRESHOLDS type annotation
+
+### Major changes — 2025-11-15 19:11 CET (UTC+01:00) — Converter PR B Phase 2 UI refinements
+
+Added
+• Single-target default "Convert to" selector in tools/text-converter/index.html, with an advanced "+ Add another format" mode that reveals extra formats and still sends a unified `to[]` array to /api/convert.
+• LocalStorage-backed preferences for primary target, advanced multi-export mode, and Markdown dialect so power users keep their workflows between visits.
+• PDF-specific progress summaries that parse pdf_* logs/meta (pages, headings, lists, tables, images, degraded flags) and surface a concise "Parsed: …" line after successful PDF conversions.
+
+Removed
+• None.
+
+Modified
+• Markdown dialect selector now only exposes backend-supported dialects (gfm, commonmark, commonmark_x, markdown_strict) plus an "Auto (backend default — GFM)" option, with clearer labels.
+• Option availability logic (Extract Media, Accept Tracked Changes, Markdown dialect) updated to react to both input and target choices while preserving existing a11y/ARIA patterns and keyboard shortcuts (Cmd/Ctrl+Enter).
+
+Human-readable summary
+
+The converter UI now behaves more like a focused one-to-one tool by default: you pick a single target format from a dropdown, and only if you click "+ Add another format" do you see extra checkboxes for multi-export. The markdown dialect control has been cleaned up to match what the backend actually supports, and PDF conversions now report what was parsed (pages, headings, lists, tables, images) instead of just saying "done"—all without changing the existing /api/convert contract.
+
+Impact
+• Simpler default UX for everyday conversions, with a clear path to multi-export for power users. ✅
+• Less confusion around Markdown dialects and better alignment with backend validation/cache behavior. ✅
+• More reassuring PDF progress feedback for users working with complex documents, with no change to server semantics. ✅
+
+Testing
+• Local/preview smoke via scripts/preview_smoke.mjs and scripts/smoke_convert_preview.mjs; converter requests continue to succeed with single and multi-target payloads, and PDF progress summaries appear as expected. ✅
+
+Commits
+• (this branch) — ui(converter): PR B single-target + multi-export, dialect cleanup, PDF progress summaries

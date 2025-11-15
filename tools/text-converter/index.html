@@ -45,6 +45,7 @@
       <a class="brand" href="/">TinyUtils</a>
       <nav class="nav">
         <a class="active" href="/tools/">Tools</a>
+        <a href="/cookies.html">Cookie &amp; privacy settings</a>
         <a href="/privacy.html">Privacy</a>
         <a href="/terms.html">Terms</a>
       </nav>
@@ -132,15 +133,13 @@
         </div>
 
         <div class="format-options" aria-label="Markdown dialect" id="mdDialectRow">
-          <label for="mdDialect"><strong>Markdown dialect:</strong></label>
+          <label for="mdDialect"><strong>Markdown dialect (advanced):</strong></label>
           <select id="mdDialect" name="mdDialect">
-            <option value="gfm" selected>GitHub Flavored (GFM)</option>
-            <option value="commonmark_x">CommonMark (extended)</option>
-            <option value="commonmark">CommonMark</option>
-            <option value="markdown">Markdown (Standard)</option>
-            <option value="markdown_mmd">Markdown (MultiMarkdown)</option>
-            <option value="markdown_strict">Markdown (Strict)</option>
-            <option value="markdown_phpextra">Markdown (PHP Extra)</option>
+            <option value="">Auto (backend default — GFM)</option>
+            <option value="gfm" selected>GitHub Flavored Markdown (GFM)</option>
+            <option value="commonmark_x">CommonMark extended (commonmark_x)</option>
+            <option value="commonmark">CommonMark (spec)</option>
+            <option value="markdown_strict">Markdown (strict)</option>
           </select>
         </div>
 
@@ -271,7 +270,7 @@
         optExtractMedia.checked = false;
       }
 
-      // Markdown dialect selector availability
+      // Markdown dialect selector availability (only meaningful when any MD output is selected)
       const mdOn = (toSingle.value === 'md') || !!toMd.checked;
       mdDialectSel.disabled = !mdOn;
       mdDialectRow.style.opacity = mdOn ? '1' : '0.5';
@@ -415,6 +414,56 @@
       return 'markdown';
     }
 
+    function isPdfInputActive() {
+      const hasFile = !!currentFile && extOf(currentFile.name) === 'pdf';
+      const fromVal = fromSelect.value;
+      return hasFile || fromVal === 'pdf';
+    }
+
+    function summarizePdfMeta(data) {
+      if (!data || !Array.isArray(data.logs)) return '';
+      const metrics = {
+        pages: null,
+        headings: null,
+        lists: null,
+        tablesMd: null,
+        tablesCsv: null,
+        images: null,
+        degraded: null,
+      };
+      data.logs.forEach((log) => {
+        if (typeof log !== 'string') return;
+        let m;
+        if ((m = log.match(/^pdf_pages=(\d+)/))) metrics.pages = Number(m[1]);
+        else if ((m = log.match(/^pdf_headings=(\d+)/))) metrics.headings = Number(m[1]);
+        else if ((m = log.match(/^pdf_lists=(\d+)/))) metrics.lists = Number(m[1]);
+        else if ((m = log.match(/^pdf_tables_md=(\d+)/))) metrics.tablesMd = Number(m[1]);
+        else if ((m = log.match(/^pdf_tables_csv=(\d+)/))) metrics.tablesCsv = Number(m[1]);
+        else if ((m = log.match(/^pdf_images_placeholders=(\d+)/))) metrics.images = Number(m[1]);
+        else if ((m = log.match(/^pdf_degraded=(.+)$/))) metrics.degraded = m[1].trim();
+      });
+
+      const parts = [];
+      if (metrics.pages != null) parts.push(`${metrics.pages} page${metrics.pages === 1 ? '' : 's'}`);
+      if (metrics.headings != null) parts.push(`${metrics.headings} heading${metrics.headings === 1 ? '' : 's'}`);
+      if (metrics.lists != null) parts.push(`${metrics.lists} list${metrics.lists === 1 ? '' : 's'}`);
+      if (metrics.tablesMd != null || metrics.tablesCsv != null) {
+        const md = metrics.tablesMd || 0;
+        const csv = metrics.tablesCsv || 0;
+        parts.push(`${md} table${md === 1 ? '' : 's'} (Markdown)${csv ? `, ${csv} as CSV` : ''}`);
+      }
+      if (metrics.images != null) parts.push(`${metrics.images} image placeholder${metrics.images === 1 ? '' : 's'}`);
+
+      let summary = '';
+      if (parts.length) {
+        summary = ` Parsed: ${parts.join(', ')}.`;
+      }
+      if (metrics.degraded) {
+        summary += ` Note: extractor marked this PDF as degraded (${metrics.degraded}); a simpler fallback may have been used.`;
+      }
+      return summary;
+    }
+
     async function runConvert({ previewOnly = false } = {}) {
       const content = textInput.value.trim();
       if (!content && !currentFile) {
@@ -444,7 +493,7 @@
       convertBtn.disabled = true;
       previewBtn.disabled = true;
       // Progress copy; for PDFs show layout-aware message
-      const isPdfInput = (currentFile && extOf(currentFile.name) === 'pdf') || fromSelect.value === 'pdf';
+      const isPdfInput = isPdfInputActive();
       progressEl.textContent = previewOnly
         ? (isPdfInput ? 'Parsing PDF (layout-aware) — generating preview…' : 'Generating preview…')
         : (isPdfInput ? 'Parsing PDF (layout-aware)…' : 'Converting…');
@@ -473,6 +522,9 @@
           ? await createDataUrlFromFile(currentFile)
           : await createDataUrl(content, filename);
 
+        const hasMd = selectedFormats.includes('md');
+        const dialectValue = mdDialectSel.value || null;
+
         const payload = {
           inputs: [input],
           from: fromFormat,
@@ -481,7 +533,7 @@
             acceptTrackedChanges: !!optAcceptTracked.checked,
             extractMedia: !!optExtractMedia.checked,
             removeZeroWidth: !!optRemoveZW.checked,
-            mdDialect: toMd.checked ? mdDialectSel.value : undefined
+            mdDialect: hasMd && dialectValue ? dialectValue : undefined
           },
           preview: previewOnly ? true : undefined
         };
@@ -578,7 +630,11 @@
           resultsBody.appendChild(tr);
         });
 
-        progressEl.textContent = previewOnly ? `Preview generated.` : `Conversion complete! ${data.outputs.length} file(s) ready.`;
+        let baseMsg = previewOnly ? 'Preview generated.' : `Conversion complete! ${data.outputs.length} file(s) ready.`;
+        if (!previewOnly && isPdfInput) {
+          baseMsg += summarizePdfMeta(data);
+        }
+        progressEl.textContent = baseMsg;
       } catch (err) {
         progressEl.textContent = 'Error: ' + (err.message || 'Conversion failed');
         console.error('Conversion error:', err);
