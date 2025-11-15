@@ -13,6 +13,8 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 ## Active Tasks (Newest First)
 
 | Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
+| /plan — PR #33 unified preview plan | manual-2025-11-15 CET | Completed | ✅ Synthesized multi-agent plan. Evidence: artifacts/plan/20251115/final_plan.md |
+| PR33 preview monitor + status comment | manual-2025-11-15 CET | Open | ✅ Comment posted; polling for preview URL via scripts/poll_preview_url.sh. Evidence: docs/AGENT_RUN_LOG.md. |
 | Vercel preview pass: enforce headers-only vercel.json | manual-2025-11-15 CET | Completed | ✅ Removed rewrites block from vercel.json. Evidence: tinyutils/artifacts/convert/20251115/vercel_before.json, vercel_after.json |
 | Author comprehensive site test plan + GCP cost safety checklist | manual-2025-11-14 CET | Completed | ✅ Added docs/TEST_PLAN_SITE.md and docs/GCP_COST_SAFETY.md; added scripts/gcp_cost_guard.sh (read-only audit). Evidence: artifacts listed in AGENT_RUN_LOG.md. |
 | Expose PDF in Converter UI; fix RTF 400 | manual-2025-11-14 CET | Completed | ✅ UI adds PDF checkbox; backend now supports RTF target. Evidence: tinyutils/artifacts/text-converter/20251114/patch_pdf_rtf_ui_backend.diff; smoke payloads saved. Branch: fix/converter-pdf-rtf-ui-testplan-gcp |
