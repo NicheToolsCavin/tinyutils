@@ -3,6 +3,11 @@
 Goal
 - After critical bugs and converter quality issues are resolved, redesign the interface for a modern, cohesive look while preserving performance and accessibility.
 
+Additional focus (QA audit findings)
+- Highlight conversions' progress/await times with clear indicators to reassure users when large files or crawls are running.
+- Improve focus/hover states and responsive behavior (tables, forms) to address the noted contrast/focus issues.
+- Ensure download actions use real HTTP blobs rather than `data:` URIs so outputs work across browsers.
+
 Principles
 - Performance first (static where possible, minimal JS, small CSS).
 - A11y AA+ (visible focus, color contrast, keyboard flows, aria‑live updates).

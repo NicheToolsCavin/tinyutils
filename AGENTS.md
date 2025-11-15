@@ -143,10 +143,10 @@ Before considering ANY task complete, verify:
 ---
 
 ## Constraints
-- **Branch + PR only.** No DNS or Production deploys. No repository secrets. **The exception being when you are asked to push to production, in which case you will do so. Thanks.
-- **Minimal diffs.** No new dependencies unless strictly required & justified in the PR.
+- **Branch + PR only.** No DNS or Production deploys. No repository secrets. **The exception being when you are asked to push to production, in which case you will do so. Thanks.**
+- **Review PR comments:** A few minutes after a PR is opened, pause to read Claude/Codex comments; check again immediately before any prod push to catch late guidance.
 - **Static site, Framework = Other.** No build step; **Output directory = root**.
-- **`vercel.json` = headers only.** Remove any `functions`/`runtime` blocks. (Those trigger "Function Runtimes must have a valid version..." errors.)
+- **`vercel.json` = headers only.** Remove any `functions`/`runtime` blocks. (Those trigger "Function Runtimes must have a valid version..." errors.) Any relaxation of this rule must be explicitly approved by the owner before merging.
 - **ESM everywhere** for Edge functions.
   - `package.json` must include: `{ "type": "module" }`.
   - Each API file:
