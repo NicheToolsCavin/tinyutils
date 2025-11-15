@@ -1,4 +1,16 @@
 #!/usr/bin/env node
+// =========================================
+// PREVIEW BYPASS — READ ME BEFORE RUNNING
+// - Export exactly one token (precedence below) and PREVIEW_URL
+//   1) VERCEL_AUTOMATION_BYPASS_SECRET (preferred)
+//   2) PREVIEW_BYPASS_TOKEN
+//   3) BYPASS_TOKEN
+// - This script will:
+//   • send x-vercel-protection-bypass: <token>
+//   • send x-vercel-set-bypass-cookie: true
+//   • include Cookie: vercel-protection-bypass=<token>
+// - If a route still redirects, verify the token is valid for THIS project/preview.
+// =========================================
 // Smoke test preview URLs that may require a Vercel protection bypass cookie.
 
 const BASE_URL = process.env.PREVIEW_URL;
