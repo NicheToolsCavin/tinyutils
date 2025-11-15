@@ -19,12 +19,27 @@
 > Scripts updated: `scripts/preview_smoke.mjs`, `scripts/smoke_convert_preview.mjs`.
 >
 > If you see a redirect loop on POST: ensure the automation secret matches the project and branch; the scripts already preflight+cookie+query param.
-
-**Goal**
-Get a **passing Vercel Preview** build (not public). Pages must render:
-- `/`, `/tools/`, `/tools/dead-link-finder/`, `/tools/sitemap-delta/`, `/tools/wayback-fixer/`
-Edge APIs must respond:
-- `/api/check`, `/api/sitemap-delta`, `/api/wayback-fixer`, `/api/metafetch`
+>
+> **Goal**
+> Get a **passing Vercel Preview** build (not public). Pages must render:
+>
+> - `/`, `/tools/`, `/tools/dead-link-finder/`, `/tools/sitemap-delta/`, `/tools/wayback-fixer/`
+>   Edge APIs must respond:
+> - `/api/check`, `/api/sitemap-delta`, `/api/wayback-fixer`, `/api/metafetch`
+>
+> ---
+>
+> ## Use MCP Servers and web.search
+>
+> ... to enhance your work or find things you may not know well. 
+>
+> `web.search` searches the internet
+>
+> `context7` gives access to a ton of good tech/coding info
+>
+> `sequential-thinking` helps you think better.
+>
+> 
 
 ---
 
@@ -143,7 +158,7 @@ Before considering ANY task complete, verify:
 ---
 
 ## Constraints
-- **Branch + PR only.** No DNS or Production deploys. No repository secrets. **The exception being when you are asked to push to production, in which case you will do so. Thanks.**
+- **Branch + PR only.** No DNS or Production deploys without OK from user. No repository secrets. **The exception being when you are asked to push to production, in which case you will do so. Thanks.**
 - **Review PR comments:** A few minutes after a PR is opened, pause to read Claude/Codex comments; check again immediately before any prod push to catch late guidance.
 - **Static site, Framework = Other.** No build step; **Output directory = root**.
 - **`vercel.json` = headers only.** Remove any `functions`/`runtime` blocks. (Those trigger "Function Runtimes must have a valid version..." errors.) Any relaxation of this rule must be explicitly approved by the owner before merging.
@@ -165,6 +180,9 @@ Before considering ANY task complete, verify:
   - Be explicit about environment/URL/branch/files; provide a one‑paragraph “why”.
   - If unsure or the user is confused, browse for current docs and rephrase with concrete steps (don’t repeat the same wording).
   - Save evidence to `tinyutils/artifacts/<task>/<YYYYMMDD>/` and log in `tinyutils/docs/AGENT_RUN_LOG.md`.
+  - Speak clearly -- the user is not a coder so he may need help to unerstand somethings.
+  - Don't repeat yourself in the same way every time unless it's the only way to say something. If he didn't understand it once, he won't the second and third without a change of approach.
+  - Be excited and fun -- don't be so boring, you can have fun here. 
 
 ### Security Policy (must read)
 - Follow `tinyutils/SECURITY.md` for handling secrets and logs.
