@@ -216,6 +216,26 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-15 10:13 CET - Manual - /code Phase 3 UI+smokes
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - UI: single-select target + advanced multi-export; expanded mdDialect; persisted prefs; PDF progress copy
+  - Smokes: added tiny PDF case; aligned bypass precedence; set cookie header
+- **Evidence:** tool_desc_converter.md
+- **Follow-ups:**
+  - Run preview smokes once valid automation token is confirmed
+
+### 2025-11-15 08:45 CET - Manual - pdf-md Phase 1–2 pushed + smoke attempts
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Pushed converter guardrails; preview convert smoke 401 via bypass; SSO cookie path returns 308 redirects (protection)
+  - Next: owner-provided automation token validation or run smokes post-merge
+- **Evidence:** artifacts/convert/20251115/convert_smoke.after_refactor.log
+- **Follow-ups:**
+  - Phase 3 UI picker + dialects; preview re-smoke with valid bypass
+
 ### 2025-11-15 08:44 CET - Manual - pdf-md Phase 1–2 (guardrails)
 - **Mode:** manual
 - **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`

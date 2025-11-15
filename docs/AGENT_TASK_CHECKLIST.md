@@ -13,6 +13,7 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 ## Active Tasks (Newest First)
 
 | Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
+| Phase 3 — Text Converter UI + Converter smokes | manual-2025-11-15 CET | Completed | ✅ UI single-select + advanced toggle; dialect expansion; PDF progress copy. Smokes: added tiny PDF case with bypass precedence. Evidence: tools/text-converter/index.html, scripts/smoke_convert_preview.mjs |
 | PDF→MD refactor Phase 1–2 (engine guardrails) | manual-2025-11-15 CET | Completed | ✅ Added pdf_layout_mode option, timeout/memory guard, rtl meta; optional pdfplumber. Evidence: api/convert/convert_service.py, convert_types.py |
 | PDF→MD refactor unified plan | manual-2025-11-15 CET | Completed | ✅ Plan saved at tinyutils/artifacts/pdf-md-refactor/20251115/unified_plan.md |
 | Fix preview smoke bypass handshake | manual-2025-11-15 08:29 CET | Completed | ✅ Updated scripts/preview_smoke.mjs to handshake with Vercel protection tokens, then reran the smoke test. Commits: 959faf2. Evidence: tinyutils/artifacts/preview-green/20251115/preview_smoke.after_automation.log |

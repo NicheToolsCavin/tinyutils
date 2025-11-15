@@ -61,14 +61,15 @@ if (previewSecret) {
 
 // Fallback: if no explicit PREVIEW_FENCE_HEADER provided, try env tokens.
 const bypassToken =
+  process.env.VERCEL_AUTOMATION_BYPASS_SECRET ||
   process.env.PREVIEW_BYPASS_TOKEN ||
-  process.env.BYPASS_TOKEN ||
-  process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
+  process.env.BYPASS_TOKEN;
 
 if (bypassToken) {
   if (!('x-vercel-protection-bypass' in baseHeaders)) {
     baseHeaders['x-vercel-protection-bypass'] = bypassToken;
   }
+  baseHeaders['x-vercel-set-bypass-cookie'] = 'true';
   // Only add Cookie if not already present from PREVIEW_FENCE_HEADER
   if (!('Cookie' in baseHeaders) && !('cookie' in baseHeaders)) {
     baseHeaders['Cookie'] = `vercel-protection-bypass=${bypassToken}`;
@@ -98,6 +99,18 @@ const cases = [
       from: 'markdown',
       to: ['html'],
       options: { extractMedia: false },
+    },
+  },
+  {
+    name: 'pdf_md_layout_aware',
+    body: {
+      inputs: [
+        // Minimal tiny PDF ("Hello") data URL fixture
+        { blobUrl: 'data:application/pdf;base64,JVBERi0xLjQKJcTl8uXrp/Og0MTGCjEgMCBvYmoKPDwKL1R5cGUgL1BhZ2UKL1BhcmVudCAyIDAgUgovUmVzb3VyY2VzIDw8IC9Gb250IDw8IC9GMSA0IDAgUj4+ID4+Ci9NZWRpYUJveCBbMCAwIDU5NSA4NDJdCi9Db250ZW50cyAzIDAgUgo+PgplbmRvYmoKMiAwIG9iago8PAovVHlwZSAvUGFnZXMKL0tpZHMgWzEgMCBSXQovQ291bnQgMQo+PgplbmRvYmoKMyAwIG9iago8PAovTGVuZ3RoIDQ3Cj4+CnN0cmVhbQpCBTAgMCBvYmogPDwvVHlwZSAvQ29udGVudHMgL0xlbmd0aCA0Nz4+CnN0cmVhbQpUIC9GMSAxMiBUZgovVDAgMCAwIDQwIDQwIDUwIChIZWxsbykgVGoKZW5kc3RyZWFtCmVuZG9iago0IDAgb2JqCjw8Ci9UeXBlIC9Gb250Ci9TdWJ0eXBlIC9UeXBlMQovTmFtZSAvRjEKL0Jhc2VGb250IC9IZWx2ZXRpY2EKPj4KZW5kb2JqCnhyZWYKMCA2CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDA5MCAwMDAwMCBuIAowMDAwMDAwMTY2IDAwMDAwIG4gCjAwMDAwMDAyNjUgMDAwMDAgbiAKMDAwMDAwMDQyMCAwMDAwMCBuIAowMDAwMDAwNTQ3IDAwMDAwIG4gCnRyYWlsZXIKPDwKL1Jvb3QgMiAwIFIKL1NpemUgNgovSW5mbyA8PCAvUHJvZHVjZXIgKE1pbmkpID4+Pj4Kc3RhcnR4cmVmCjY3NQolJUVPRg==', name: 'tiny.pdf' },
+      ],
+      from: 'pdf',
+      to: ['md'],
+      options: { }
     },
   },
 ];

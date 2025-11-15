@@ -90,10 +90,23 @@
         </div>
 
         <div class="format-options" aria-label="Target formats">
-          <label><strong>Convert to:</strong></label>
+          <label for="toSingle"><strong>Convert to:</strong></label>
+          <select id="toSingle" name="toSingle">
+            <option value="md" selected>Markdown (.md)</option>
+            <option value="txt">Plain Text (.txt)</option>
+            <option value="html">HTML (.html)</option>
+            <option value="docx">Word (.docx)</option>
+            <option value="rtf">RTF (.rtf)</option>
+            <option value="pdf">PDF (.pdf)</option>
+          </select>
+          <button id="advToggle" class="secondary" type="button" aria-expanded="false" aria-controls="multiTargets">+ Add another format</button>
+        </div>
+
+        <div id="multiTargets" class="format-options" aria-label="Target formats (advanced)" style="display:none">
+          <label><strong>Additional formats:</strong></label>
           <label><input type="checkbox" id="toMd" checked> Markdown</label>
-          <label><input type="checkbox" id="toTxt" checked> Plain Text</label>
-          <label><input type="checkbox" id="toHtml" checked> HTML</label>
+          <label><input type="checkbox" id="toTxt"> Plain Text</label>
+          <label><input type="checkbox" id="toHtml"> HTML</label>
           <label><input type="checkbox" id="toDocx"> Word (.docx)</label>
           <label><input type="checkbox" id="toRtf"> RTF (.rtf)</label>
           <label><input type="checkbox" id="toPdf"> PDF (.pdf)</label>
@@ -104,7 +117,11 @@
           <select id="mdDialect" name="mdDialect">
             <option value="gfm" selected>GitHub Flavored (GFM)</option>
             <option value="commonmark_x">CommonMark (extended)</option>
-            <option value="markdown_strict">Strict (markdown_strict)</option>
+            <option value="commonmark">CommonMark</option>
+            <option value="markdown">Markdown (Pandoc)</option>
+            <option value="markdown_mmd">Markdown (MultiMarkdown)</option>
+            <option value="markdown_strict">Markdown (Strict)</option>
+            <option value="markdown_phpextra">Markdown (PHP Extra)</option>
           </select>
         </div>
 
@@ -167,6 +184,9 @@
 
     const textInput = document.getElementById('textInput');
     const fileInput = document.getElementById('fileInput');
+    const toSingle = document.getElementById('toSingle');
+    const advToggle = document.getElementById('advToggle');
+    const multiTargets = document.getElementById('multiTargets');
     const toMd = document.getElementById('toMd');
     const toTxt = document.getElementById('toTxt');
     const toHtml = document.getElementById('toHtml');
@@ -209,8 +229,9 @@
       // "Extract Media" only applies to formats with embedded media
       const hasEmbeddedMedia = isWordLike || fromFormat === 'html';
 
-      // Also check if any media-capable outputs are selected
-      const hasMediaCapableOutput = toMd.checked || toHtml.checked || toDocx.checked;
+      // Also check if any media-capable outputs are selected (single or multi)
+      const singleOut = toSingle.value;
+      const hasMediaCapableOutput = (singleOut === 'md' || singleOut === 'html' || singleOut === 'docx') || toMd.checked || toHtml.checked || toDocx.checked;
 
       const extractMediaApplicable = hasEmbeddedMedia && hasMediaCapableOutput;
 
@@ -231,10 +252,58 @@
       }
 
       // Markdown dialect selector availability
-      const mdOn = !!toMd.checked;
+      const mdOn = (toSingle.value === 'md') || !!toMd.checked;
       mdDialectSel.disabled = !mdOn;
       mdDialectRow.style.opacity = mdOn ? '1' : '0.5';
     }
+
+    // Persistence helpers
+    const LS_SINGLE = 'tu_conv_single_target';
+    const LS_MULTI = 'tu_conv_multi_on';
+    const LS_DIALECT = 'tu_conv_md_dialect';
+
+    function restorePrefs() {
+      try {
+        const s = localStorage.getItem(LS_SINGLE);
+        if (s) toSingle.value = s;
+        const m = localStorage.getItem(LS_MULTI) === '1';
+        setAdvanced(m);
+        const d = localStorage.getItem(LS_DIALECT);
+        if (d) mdDialectSel.value = d;
+      } catch {}
+    }
+
+    function persistPrefs() {
+      try {
+        localStorage.setItem(LS_SINGLE, toSingle.value);
+        localStorage.setItem(LS_MULTI, multiTargets.style.display === '' ? '1' : '0');
+        localStorage.setItem(LS_DIALECT, mdDialectSel.value);
+      } catch {}
+    }
+
+    function setAdvanced(on) {
+      multiTargets.style.display = on ? '' : 'none';
+      advToggle.setAttribute('aria-expanded', on ? 'true' : 'false');
+    }
+
+    advToggle.addEventListener('click', () => {
+      const on = multiTargets.style.display === 'none';
+      setAdvanced(on);
+      // When enabling advanced, sync the single selection to a checkbox
+      if (on) {
+        toMd.checked = (toSingle.value === 'md');
+        toTxt.checked = (toSingle.value === 'txt');
+        toHtml.checked = (toSingle.value === 'html');
+        toDocx.checked = (toSingle.value === 'docx');
+        toRtf.checked = (toSingle.value === 'rtf');
+        toPdf.checked = (toSingle.value === 'pdf');
+      }
+      persistPrefs();
+      updateOptionAvailability();
+    });
+
+    toSingle.addEventListener('change', () => { persistPrefs(); updateOptionAvailability(); });
+    mdDialectSel.addEventListener('change', persistPrefs);
 
     function showToast(message) {
       const existing = document.querySelector('.toast');
@@ -334,12 +403,17 @@
       }
 
       const selectedFormats = [];
-      if (toMd.checked) selectedFormats.push('md');
-      if (toTxt.checked) selectedFormats.push('txt');
-      if (toHtml.checked) selectedFormats.push('html');
-      if (toDocx.checked) selectedFormats.push('docx');
-      if (toRtf.checked) selectedFormats.push('rtf');
-      if (toPdf.checked) selectedFormats.push('pdf');
+      const advancedOn = multiTargets.style.display === '';
+      if (advancedOn) {
+        if (toMd.checked) selectedFormats.push('md');
+        if (toTxt.checked) selectedFormats.push('txt');
+        if (toHtml.checked) selectedFormats.push('html');
+        if (toDocx.checked) selectedFormats.push('docx');
+        if (toRtf.checked) selectedFormats.push('rtf');
+        if (toPdf.checked) selectedFormats.push('pdf');
+      } else {
+        selectedFormats.push(toSingle.value);
+      }
 
       if (selectedFormats.length === 0) {
         showToast('Please select at least one output format.');
@@ -348,7 +422,11 @@
 
       convertBtn.disabled = true;
       previewBtn.disabled = true;
-      progressEl.textContent = previewOnly ? 'Generating preview…' : 'Converting…';
+      // Progress copy; for PDFs show layout-aware message
+      const isPdfInput = (currentFile && extOf(currentFile.name) === 'pdf') || fromSelect.value === 'pdf';
+      progressEl.textContent = previewOnly
+        ? (isPdfInput ? 'Parsing PDF (layout-aware) — generating preview…' : 'Generating preview…')
+        : (isPdfInput ? 'Parsing PDF (layout-aware)…' : 'Converting…');
       resultsBody.innerHTML = '';
       previewPanel.style.display = 'none';
 
@@ -503,7 +581,8 @@
     // Update option availability when format selection changes
     fromSelect.addEventListener('change', updateOptionAvailability);
 
-    // Update when output format checkboxes change (affects Extract Media availability)
+    // Update when target selection changes (affects Extract Media availability)
+    toSingle.addEventListener('change', () => { persistPrefs(); updateOptionAvailability(); });
     toMd.addEventListener('change', updateOptionAvailability);
     toTxt.addEventListener('change', updateOptionAvailability);
     toHtml.addEventListener('change', updateOptionAvailability);
@@ -512,6 +591,7 @@
     toPdf.addEventListener('change', updateOptionAvailability);
 
     // Initialize option availability on page load
+    restorePrefs();
     updateOptionAvailability();
 
     // Keyboard shortcut: Cmd/Ctrl+Enter to convert
