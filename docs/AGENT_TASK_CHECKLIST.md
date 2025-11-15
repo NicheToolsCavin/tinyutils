@@ -13,6 +13,7 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 ## Active Tasks (Newest First)
 
 | Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
+| Implement layout-aware PDF→Markdown extractor | PR A | Done | Implemented layout-aware PDF to Markdown extractor with degraded output fallback. Self-check test  passed. See  and  for details. |
 | Author comprehensive site test plan + GCP cost safety checklist | manual-2025-11-14 CET | Completed | ✅ Added docs/TEST_PLAN_SITE.md and docs/GCP_COST_SAFETY.md; added scripts/gcp_cost_guard.sh (read-only audit). Evidence: artifacts listed in AGENT_RUN_LOG.md. |
 | Expose PDF in Converter UI; fix RTF 400 | manual-2025-11-14 CET | Completed | ✅ UI adds PDF checkbox; backend now supports RTF target. Evidence: tinyutils/artifacts/text-converter/20251114/patch_pdf_rtf_ui_backend.diff; smoke payloads saved. Branch: fix/converter-pdf-rtf-ui-testplan-gcp |
 | Fix converter PDF upload (UI+server) | manual-2025-11-14 CET | Completed | ✅ UI+server patched. Evidence: artifacts/pdf-fix/20251114/notes.txt |

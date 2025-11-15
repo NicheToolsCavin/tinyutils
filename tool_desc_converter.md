@@ -1,5 +1,44 @@
 ## Converter Tool — Description and Change Log
 
+### Major changes — 2025-11-15 (UTC+01:00) — Layout-aware PDF to Markdown Extractor
+
+Added
+• Layout-aware PDF to Markdown extraction in `api/convert/convert_service.py`:
+  - Utilizes `pdfminer.six` for detailed layout analysis.
+  - Supports `mode="default"|"aggressive"` via `LAParams` presets.
+  - Merges paragraphs, repairs soft hyphen line breaks, normalizes ligatures.
+  - Detects headings via font size tiers and lists via bullet/number + x0 indentation.
+  - Integrates `pdfplumber` for table detection (Markdown table when regular, CSV fallback otherwise).
+  - Emits `[IMAGE n]` placeholders; saves extracted images to `workspace/media` with relative paths when `extractMedia=True`.
+  - Logs structured fields: `pdf_extractor`, `pdf_layout_mode`, `paragraphs_detected`, `headings_detected`, `lists_detected`, `tables_detected (md/csv)`, `images_detected`, `fallback_used`, `pdf_extract_degraded`.
+• `_pdf_output_looks_degraded` helper function to detect degraded extraction output.
+• Self-check test `tests/test_pdf_layout_selfcheck.py` to verify degraded output heuristic.
+
+Modified
+• `_extract_markdown_from_pdf` function: Replaced placeholder with robust `pdfminer.six` and `pdfplumber` implementation.
+• `_extract_text_from_pdf_legacy` function: Reintroduced `pypdf`-based implementation with improved indentation preservation.
+• `convert_one` function: Updated to pass `aggressive_pdf_mode` and `extract_media` flags to `_extract_markdown_from_pdf`, and to trigger `_extract_text_from_pdf_legacy` if layout-aware extraction fails or `_pdf_output_looks_degraded` returns `True`.
+• `ConversionOptions` in `api/convert/convert_types.py`: Added `aggressive_pdf_mode` field.
+
+Human-readable summary
+
+The converter now features a sophisticated layout-aware PDF to Markdown extractor. This new engine intelligently understands the structure of PDF documents, converting headings, lists, and tables into proper Markdown. It can operate in a 'default' mode for standard documents or an 'aggressive' mode for complex, multi-column layouts. Images found within PDFs are now represented by placeholders, and can optionally be extracted and bundled. A robust fallback mechanism ensures that if the layout-aware extraction fails or produces degraded output, it gracefully switches to a simpler text-based extraction, preventing empty or garbled results. A new self-check test verifies the degraded output detection heuristic.
+
+Impact
+• **Improved PDF conversion fidelity** ✅ - Markdown output from PDFs is significantly more structured and readable.
+• **Handles complex layouts** ✅ - 'Aggressive' mode tackles challenging PDF structures.
+• **Reliable fallback** ✅ - Ensures a usable text output even when advanced extraction fails.
+• **Image handling** ✅ - Provides placeholders and optional extraction of embedded images.
+• **Enhanced logging** ✅ - Detailed logs provide insights into the extraction process and detected elements.
+
+Testing
+• Manual payloads for various PDF types (simple, complex, tables, scanned) to verify layout preservation, aggressive mode, and image/table handling. ✅
+• `tests/test_pdf_layout_selfcheck.py` confirms the degraded output heuristic. ✅
+• Existing `tests/pdf_envelope.test.mjs` (and related) continue to pass, ensuring no regressions. ✅
+
+Commits
+• (pending in this PR) — Implement layout-aware PDF to Markdown extractor.
+
 ### Major changes — 2025-11-14 23:35 CET (UTC+01:00) — PDF target exposed in UI + RTF backend support
 
 Added

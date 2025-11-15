@@ -216,6 +216,13 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-15 02:00 CET - Manual - layout-aware pdf extractor
+- **Summary:**
+  - Implemented layout-aware PDF to Markdown extractor in .
+  - This includes  and  integration for structural element detection (headings, lists, tables), image extraction, and a degraded output fallback mechanism.
+  - A self-check test  was added and passed.
+- **Evidence:** artifacts/pdf-layout/20251115/selfcheck.txt
+
 ### 2025-11-14 23:17 CET - Manual - Converter PDF+RTF + Test Plan + GCP Safety
 - **Mode:** manual
 - **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`

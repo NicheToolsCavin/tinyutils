@@ -155,7 +155,12 @@ Failure Modes
     *   **Expected:** Empty or minimal Markdown output.
     *   **Logs:** Expect `no_content_extracted` for pages.
 
-7.  **Logging Verification:**
+7.  **Self-Check for Degraded Output Heuristic:**
+    *   Run `tests/test_pdf_layout_selfcheck.py`.
+    *   **Expected:** All tests in `test_pdf_layout_selfcheck.py` should pass, asserting that the `_pdf_output_looks_degraded` helper correctly identifies degraded output scenarios (e.g., empty content, very few paragraphs for multi-page PDFs).
+    *   **Logs:** Confirm successful test execution.
+
+8.  **Logging Verification:**
     *   Review logs for all test cases to ensure correct `pdf_extraction_strategy`, `aggressive` mode, detected elements, and fallback messages.
 
 ### Overnight Auto Mode — Run Plan
