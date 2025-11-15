@@ -14,6 +14,10 @@ from collections import OrderedDict
 from pathlib import Path
 from typing import Any, Iterable, List, Optional, Sequence
 
+import pdfminer.high_level
+import pdfminer.layout
+import pdfplumber # Lazy loaded for table extraction
+
 # Use relative imports since we're in api/convert/ directory
 from .._lib import pandoc_runner
 from .._lib.manifests import build_snippets, collect_headings, media_manifest
@@ -151,8 +155,18 @@ def convert_one(
             source_for_pandoc = input_path
             if input_path.suffix.lower() == ".pdf" or from_format == "pdf":
                 logs.append("preprocessing=pdf_text_extraction")
-                source_for_pandoc = _extract_text_from_pdf(input_path, workspace)
-                from_format = "markdown"  # Extracted text is markdown
+                try:
+                    # Attempt layout-aware extraction first
+                    source_for_pandoc = _extract_markdown_from_pdf(
+                        input_path, workspace, aggressive_mode=opts.aggressive_pdf_mode, logs=logs
+                    )
+                    from_format = "markdown"  # Extracted text is markdown
+                    logs.append("pdf_extraction_strategy=layout_aware")
+                except Exception:
+                    # Fallback to legacy text extraction if layout-aware fails
+                    logs.append("pdf_extraction_strategy=fallback_legacy")
+                    source_for_pandoc = _extract_text_from_pdf_legacy(input_path, workspace)
+                    from_format = "markdown"  # Extracted text is markdown
 
             # Check if we can do direct conversion without markdown intermediate
             # This fixes HTML→Plain Text truncation and HTML→HTML stray code issues
@@ -587,7 +601,134 @@ def _render_pdf_via_reportlab(markdown_path: Path, *, logs: Optional[List[str]] 
         raise RuntimeError(f"PDF generation failed: {str(e)}") from e
 
 
-def _extract_text_from_pdf(pdf_path: Path, workspace: Path) -> Path:
+def _extract_markdown_from_pdf(
+    pdf_path: Path, workspace: Path, aggressive_mode: bool = False, logs: Optional[List[str]] = None
+) -> Path:
+    """Extract layout-aware markdown from PDF using pdfminer.six and optionally pdfplumber.
+
+    This function attempts to preserve the document structure (headings, lists, tables)
+    when converting PDF content to Markdown.
+    """
+    if logs is None:
+        logs = []
+
+    markdown_lines: List[str] = []
+    _LOGGER.info("Starting PDF to Markdown extraction for %s (aggressive_mode=%s)", pdf_path.name, aggressive_mode)
+    logs.append(f"pdf_extract_mode=layout_aware aggressive={aggressive_mode}")
+
+    try:
+        # Use pdfminer.six for layout analysis
+        with pdfminer.high_level.extract_pages(pdf_path) as pages:
+            for page_num, page in enumerate(pages, start=1):
+                if page_num > 1:
+                    markdown_lines.append("\n\n---\n\n") # Page separator
+
+                page_content_added = False
+                # Store text elements with their properties to infer structure
+                text_elements = []
+                for element in page:
+                    if isinstance(element, pdfminer.layout.LTTextContainer):
+                        text_elements.append(element)
+                    elif isinstance(element, pdfminer.layout.LTFigure) and aggressive_mode:
+                        # Placeholder for figures/images in aggressive mode
+                        markdown_lines.append(f"\n\n![Figure on page {page_num}]\n\n")
+                        logs.append(f"page_{page_num}:figure_placeholder")
+                        page_content_added = True
+                    elif isinstance(element, pdfminer.layout.LTImage) and aggressive_mode:
+                        markdown_lines.append(f"\n\n![Image on page {page_num}]\n\n")
+                        logs.append(f"page_{page_num}:image_placeholder")
+                        page_content_added = True
+
+                # Sort text elements by their y-coordinate to process them top-down
+                text_elements.sort(key=lambda e: -e.y0)
+
+                last_font_size = 0
+                last_y = float('inf')
+                last_x = 0
+                last_line_was_list_item = False
+
+                for i, element in enumerate(text_elements):
+                    text = element.get_text().strip()
+                    if not text:
+                        continue
+
+                    current_font_size = 0
+                    # Attempt to get font size from the first text line in the element
+                    if hasattr(element, '_objs'):
+                        for obj in element._objs:
+                            if isinstance(obj, pdfminer.layout.LTTextLine):
+                                for char in obj._objs:
+                                    if isinstance(char, pdfminer.layout.LTChar):
+                                        current_font_size = char.size
+                                        break
+                            if current_font_size:
+                                break
+
+                    # Heading heuristic: larger font size, or significant vertical gap
+                    is_heading = False
+                    if current_font_size > last_font_size * 1.2 and current_font_size > 10: # Arbitrary threshold
+                        is_heading = True
+                    elif (last_y - element.y1) > (current_font_size * 2) and (last_y != float('inf')): # Large vertical gap
+                        is_heading = True
+
+                    # List heuristic: starts with bullet or number, and indented
+                    is_list_item = False
+                    if re.match(r"^(?:\*|-|\+|\d+\.)\s+", text) and element.x0 > last_x + 10: # Indented
+                        is_list_item = True
+
+                    if is_heading:
+                        markdown_lines.append(f"\n\n## {text}\n\n") # Use H2 for detected headings
+                        logs.append(f"page_{page_num}:heading_detected: {text[:50]}")
+                    elif is_list_item:
+                        if not last_line_was_list_item:
+                            markdown_lines.append("\n") # Add a newline before starting a new list
+                        markdown_lines.append(f"- {text.lstrip('*-+0123456789. ')}\n")
+                        logs.append(f"page_{page_num}:list_item_detected: {text[:50]}")
+                    else:
+                        markdown_lines.append(text + "\n")
+                    
+                    last_font_size = current_font_size
+                    last_y = element.y0
+                    last_x = element.x0
+                    last_line_was_list_item = is_list_item
+                    page_content_added = True
+
+                # Table extraction with pdfplumber if aggressive_mode is true
+                if aggressive_mode:
+                    try:
+                        with pdfplumber.open(pdf_path) as ppdf:
+                            pp_page = ppdf.pages[page_num - 1]
+                            tables = pp_page.extract_tables()
+                            for table in tables:
+                                if table:
+                                    markdown_lines.append("\n\n")
+                                    # Basic Markdown table formatting
+                                    header = table[0]
+                                    markdown_lines.append("| " + " | ".join(header) + " |\n")
+                                    markdown_lines.append("|" + "---|".join(["---"] * len(header)) + "|\n")
+                                    for row in table[1:]:
+                                        markdown_lines.append("| " + " | ".join(row) + " |\n")
+                                    markdown_lines.append("\n")
+                                    logs.append(f"page_{page_num}:table_detected")
+                                    page_content_added = True
+                    except Exception as e:
+                        _LOGGER.warning("pdfplumber table extraction failed for page %d: %s", page_num, e)
+                        logs.append(f"page_{page_num}:pdfplumber_table_error={e.__class__.__name__}")
+
+                if not page_content_added:
+                    logs.append(f"page_{page_num}:no_content_extracted")
+
+        # Save as markdown
+        md_path = workspace / f"{pdf_path.stem}_layout_extracted.md"
+        md_path.write_text("".join(markdown_lines), "utf-8")
+        logs.append(f"pdf_extract_success=true output_bytes={md_path.stat().st_size}")
+        return md_path
+
+    except Exception as e:
+        _LOGGER.error("Error during layout-aware PDF extraction for %s: %s", pdf_path.name, e, exc_info=True)
+        logs.append(f"pdf_extract_error={e.__class__.__name__}")
+        # Fallback will be handled by the caller
+        raise # Re-raise to trigger fallback
     """Extract text from PDF using pypdf and return as markdown file.
 
     This allows us to read PDFs without requiring pdftotext or poppler-utils.
