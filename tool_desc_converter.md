@@ -554,3 +554,31 @@ Testing
 
 Commits
 • pending – included with vercel.json cleanup PR commit
+### Minor changes — 2025-11-15 09:10 CET (UTC+01:00) — Text Converter UI toggle + PDF smoke
+
+Added
+• Default single-select “Convert to” picker with an advanced “+ Add another format” to reveal multi-export checkboxes (opt-in).
+• Expanded Markdown dialect list: gfm (default), commonmark_x, commonmark, markdown, markdown_mmd, markdown_strict, markdown_phpextra.
+• PDF-specific aria-live progress copy: “Parsing PDF (layout-aware)…”.
+• Converter preview smoke now includes a tiny PDF data URL case to exercise the /api/convert PDF path (artifact-only assertion, no flakey body checks).
+
+Modified
+• Persisted target selection and dialect in localStorage; restored on load. No server schema changes, payload remains backward compatible (mdDialect only when Markdown target is selected).
+
+Fixed
+• None (UI/automation only).
+
+Human-readable summary
+The converter UI is simpler by default: users choose a single output format, with an optional advanced toggle to add more. The Markdown dialect list is broader, and converting PDFs now announces a clearer progress message. The automated converter smoke adds a tiny PDF case to verify the server path without brittle assertions.
+
+Impact
+• Cleaner default workflow; multi-export still available ✅
+• Clearer PDF feedback for users ✅
+• Safer preview smokes for PDF path ✅
+
+Testing
+• Ran preview smoke locally (header-only) and verified artifact writes ✅
+• UI sanity: selection persisted across refresh; aria-live updated for PDF ✅
+
+Commits
+• pending — UI toggle + dialects; PDF smoke case
