@@ -1,5 +1,25 @@
 # AGENTS.md
 
+> >>> READ THIS FIRST — PREVIEW BYPASS FOR AUTOMATION <<<
+>
+> To access locked Vercel previews non‑interactively, export one of these (in order):
+>
+> - `VERCEL_AUTOMATION_BYPASS_SECRET` (preferred)
+> - `PREVIEW_BYPASS_TOKEN`
+> - `BYPASS_TOKEN`
+>
+> Then run smokes with `PREVIEW_URL=<url>` and the scripts will:
+> - Send `x-vercel-protection-bypass: <token>` and `x-vercel-set-bypass-cookie: true`
+> - Preflight a GET to set the cookie
+> - Include `Cookie: vercel-protection-bypass=<token>`
+> - For POST to /api/convert, also append `x-vercel-protection-bypass=<token>` as a query param
+>
+> Optional: set `PREVIEW_SECRET` to forward `x-preview-secret`.
+>
+> Scripts updated: `scripts/preview_smoke.mjs`, `scripts/smoke_convert_preview.mjs`.
+>
+> If you see a redirect loop on POST: ensure the automation secret matches the project and branch; the scripts already preflight+cookie+query param.
+
 **Goal**
 Get a **passing Vercel Preview** build (not public). Pages must render:
 - `/`, `/tools/`, `/tools/dead-link-finder/`, `/tools/sitemap-delta/`, `/tools/wayback-fixer/`
