@@ -13,6 +13,9 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 ## Active Tasks (Newest First)
 
 | Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
+| Fix heading thresholds type annotation | manual-2025-11-15 18:37 CET | Completed | ✅ Updated HEADING_SIZE_THRESHOLDS to Tuple[Tuple[float,int], ...] and confirmed converter modules compile; no behavior change. Evidence shares preview-smoke artifacts for context. |
+| Address review fixes + smokes | manual-2025-11-15 18:29 CET | Completed | ✅ Added pdfplumber requirement, cleaned heading heuristics, scrubbed smoke_pdf_new.sh, regenerated Context-from-Repo.md, and reran preview+converter smokes. Commits: pending. Evidence: artifacts/preview-smoke/20251115/review-feedback/, artifacts/convert/20251115/preview-smoke-20251115062851/ |
+| Refresh agent context & rules digest | manual-2025-11-15 CET | Completed | ✅ Re-read AGENTS.md, CHATGPT*, SECURITY, run log, checklist, converter spec, and PDF→MD refactor plan; summarized key rules for this session. Evidence: artifacts/agent-context/20251115/. |
 | Headless preview fallback | manual-2025-11-15 19:10 CET | Completed | ✅ Ran scripts/headless_preview_fallback.mjs to snapshot /, /tools/, /tools/text-converter/ when preview is gated; summary+HTML lives in artifacts/agent-mode/20251115/headless-preview/. |
 | Plan checkpoint update | manual-2025-11-15 18:55 CET | Completed | ✅ Added PR A completed checkpoint to pdf-md-refactor-plan-2025-11-14.md with artifact links and future candidates. Evidence: ../pdf-md-refactor-plan-2025-11-14.md |
 | Converter automated tests | manual-2025-11-15 18:45 CET | Completed | ✅ npm test (node --test) completes covering convert/check/metafetch/WBF; log available in artifacts/tests/20251115/npm-test.log. |
