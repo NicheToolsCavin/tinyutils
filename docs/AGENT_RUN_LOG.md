@@ -216,6 +216,35 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-15 19:11 CET - Manual - Converter PR B Phase 2 UI refinements
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Updated tools/text-converter/index.html so the primary 'Convert to' target is a single-select with an advanced '+ Add another format' block, persisted via localStorage and wired to the existing to[] array payload for /api/convert.
+  - Aligned the Markdown dialect selector with backend-supported values (gfm, commonmark, commonmark_x, markdown_strict) with clearer labels and an 'Auto (backend default)' option, and enhanced PDF-specific progress messaging using pdf_* logs/meta to summarize pages/headings/lists/tables/images after conversion.
+- **Evidence:** artifacts/converter-prb-ui/20251115/
+- **Follow-ups:**
+  - Deploy needs to pick up cookies.html for smokes to go fully green; converter UI Phase 2 is ready for visual QA (Agent Mode) and preview verification.
+
+### 2025-11-15 19:06 CET - Manual - add cookie & privacy settings page (PR B Phase 1)
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Added cookies.html using existing card layout with clear copy explaining cookies, analytics, and Google Ads usage; linked it from header/footer on /, /public/index, /tools/, and all tool pages.
+  - Integrated the page with consent.js via a window.tuConsent.reopen helper so users can re-show the banner, added gentle adblock allowlist guidance, extended preview_smoke to cover /cookies.html, and updated privacy.html + TEST_PLAN_SITE.md accordingly.
+- **Evidence:** artifacts/cookies-page/20251115/
+- **Follow-ups:**
+  - Preview/prod deployments still need to pick up cookies.html; preview_smoke currently shows 404 for /cookies.html until next deploy.
+
+### 2025-11-15 18:43 CET - Manual - prod deploy smoke (www.tinyutils.net)
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Merged PR #33 to main and ran production smoke via scripts/preview_smoke.mjs against https://www.tinyutils.net with automation bypass tokens; pages and all four APIs now return 200 JSON with request-id headers.
+  - Captured initial 504/502 blip for /api/check and /api/metafetch and a successful retry; archived logs under artifacts/prod-smoke/20251115 for future audits.
+- **Evidence:** artifacts/prod-smoke/20251115/
+- **Follow-ups:**
+
 ### 2025-11-15 18:37 CET - Manual - fix heading thresholds type
 - **Mode:** manual
 - **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
