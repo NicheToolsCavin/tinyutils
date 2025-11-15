@@ -13,6 +13,8 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 ## Active Tasks (Newest First)
 
 | Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
+| Headless preview fallback | manual-2025-11-15 19:10 CET | Completed | ✅ Ran scripts/headless_preview_fallback.mjs to snapshot /, /tools/, /tools/text-converter/ when preview is gated; summary+HTML lives in artifacts/agent-mode/20251115/headless-preview/. |
+| Plan checkpoint update | manual-2025-11-15 18:55 CET | Completed | ✅ Added PR A completed checkpoint to pdf-md-refactor-plan-2025-11-14.md with artifact links and future candidates. Evidence: ../pdf-md-refactor-plan-2025-11-14.md |
 | Converter automated tests | manual-2025-11-15 18:45 CET | Completed | ✅ npm test (node --test) completes covering convert/check/metafetch/WBF; log available in artifacts/tests/20251115/npm-test.log. |
 | Agent-assisted runbook | manual-2025-11-15 18:20 CET | Completed | ✅ Added runbook section for Agent Mode, Deep Research, Pro Reasoning + artifact logging instructions. Evidence: docs/AGENT_ASSISTED_PROMPTS.md |
 | PDF fixture validation | manual-2025-11-15 18:00 CET | Completed | ✅ Ran convert_one on table-heavy and bookdown PDFs; verified outputs, media zip, and logs/meta for pdf_engine, layout mode, tables/images counts. Evidence: artifacts/convert/test-fixtures |
