@@ -216,6 +216,16 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-15 08:25 CET - Manual - Add automation bypass support + docs
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - preview_smoke.mjs now honors VERCEL_AUTOMATION_BYPASS_SECRET with cookie persist; keeps PREVIEW_BYPASS_TOKEN/BYPASS_TOKEN fallback; forwards PREVIEW_SECRET
+  - AGENTS.md: new Preview Protection — Automation Bypass section (env names, headers, precedence)
+- **Evidence:** scripts/preview_smoke.mjs
+- **Follow-ups:**
+  - If token still yields 401/redirect, verify project-level token validity; SSO cookie works as fallback
+
 ### 2025-11-15 08:18 CET - Manual - Preview JWT smoke (PR #33)
 - **Mode:** manual
 - **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
@@ -1084,4 +1094,24 @@ Impact
 
 Follow-ups
 • None.
+### Major changes — 2025-11-15 08:24 CET (UTC+01:00)
+
+Added
+• None
+
+Removed
+• None
+
+Modified
+• Executed `scripts/preview_smoke.mjs` with the provided automation bypass tokens to capture the latest Preview run results.
+
+Human-readable summary
+The smoke run failed because every page and API fetch reported a "fetch failed" error; see `artifacts/preview-green/20251115/preview_smoke.after_automation.log` and the recorded exit code for details.
+
+Impact
+• Preview validation currently does not pass; all required pages/APIs are unreachable.<br>
+• Need to determine whether this is due to preview protection blocking requests or a networking issue inside the smoke script run environment.
+
+Follow-ups
+• Investigate the fetch failures (preview protection, headers, or timeout) before attempting another smoke run.
 

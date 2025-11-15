@@ -2,7 +2,16 @@
 // Smoke test preview URLs that may require a Vercel protection bypass cookie.
 
 const BASE_URL = process.env.PREVIEW_URL;
-const BYPASS_TOKEN = process.env.BYPASS_TOKEN || '';
+
+// Support all known ways to pass a protection-bypass token without hardcoding secrets.
+// Precedence: Automation bypass (official) > explicit preview bypass > legacy BYPASS_TOKEN.
+const BYPASS_TOKEN =
+  process.env.VERCEL_AUTOMATION_BYPASS_SECRET ||
+  process.env.PREVIEW_BYPASS_TOKEN ||
+  process.env.BYPASS_TOKEN ||
+  '';
+// Optional preview secret header (project-specific). If present, send it.
+const PREVIEW_SECRET = process.env.PREVIEW_SECRET || '';
 
 if (!BASE_URL) {
   console.error('PREVIEW_URL env var is required.');
@@ -23,12 +32,19 @@ function buildUrl(path) {
 
 const defaultHeaders = BYPASS_TOKEN
   ? {
+      // Official Vercel header for Protection Bypass for Automation
+      // Ref: https://vercel.com/docs/deployment-protection/methods-to-bypass-deployment-protection/protection-bypass-automation
       'x-vercel-protection-bypass': BYPASS_TOKEN,
-      'x-vercel-bypass-token': BYPASS_TOKEN,
-      // Some Vercel protections require a cookie; set it explicitly.
+      // Ask Vercel to set the bypass as a cookie for follow-up requests in the session
+      'x-vercel-set-bypass-cookie': 'true',
+      // Also send the cookie explicitly to support one-off requests
       'Cookie': `vercel-protection-bypass=${BYPASS_TOKEN}`,
     }
   : {};
+
+if (PREVIEW_SECRET) {
+  defaultHeaders['x-preview-secret'] = PREVIEW_SECRET;
+}
 
 async function fetchWithBypass(path, options = {}) {
   const url = buildUrl(path);
