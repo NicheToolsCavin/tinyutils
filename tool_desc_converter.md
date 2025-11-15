@@ -1,5 +1,24 @@
 ## Converter Tool — Description and Change Log
 
+### Major changes — 2025-11-15 01:05 CET (UTC+01:00) — Layout-aware PDF→Markdown + UI toast
+
+Added
+• Layout-aware PDF→Markdown preprocessor (pdfminer.six) with LAParams (default/aggressive), headings/lists heuristics, lazy pdfplumber tables (Markdown) or CSV fallback, and image placeholders. Robust fallback to legacy pypdf path on degraded outputs.
+• Structured logging/response meta: engine, mode_used, la_params, pages_count, headings/lists/tables/images, degraded_reason, fallback_used, timings.
+• Small dismissible anti‑adblock toast (7‑day TTL) shown when AdSense fails to load; respects consent and theme.
+
+Modified
+• PDF preprocessing path now prefers layout-aware extraction; legacy pypdf is retained for safety. requirements: pinned pdfminer.six; pdfplumber optional via lazy import.
+
+Fixed
+• None (feature addition; non‑PDF flows unaffected).
+
+Impact
+• Better PDF→MD fidelity (paragraphs/headings/lists/tables) with safe fallback; visibility into engine decisions via meta/logs. Subtle UX nudge when ads are blocked.
+
+Testing
+• Preview smokes scheduled for morning (artifacts scaffold at tinyutils/artifacts/convert/<DATE>/). Validate fallback triggers on degraded PDFs; verify no native deps required.
+
 ### Major changes — 2025-11-14 23:35 CET (UTC+01:00) — PDF target exposed in UI + RTF backend support
 
 Added
