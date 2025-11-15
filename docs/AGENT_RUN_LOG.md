@@ -216,6 +216,25 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-15 08:03 CET - Manual - Preview URL captured (PR #33)
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Preview: https://tinyutils-git-fix-converter-pdf-bf1657-cavins-projects-7b0e00bb.vercel.app/ (probe 401). Used BYPASS_TOKEN from local secrets (redacted).
+- **Evidence:** artifacts/convert/20251115/preview_probe_status.txt
+- **Follow-ups:**
+  - Run one-pass preview smoke with BYPASS_TOKEN
+
+### 2025-11-15 06:42 CET - Manual - preview wait notice (PR #33)
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **Summary:**
+  - Posted PR status comment; awaiting Vercel preview URL after vercel.json cleanup
+  - Will write preview URL to artifacts/convert/20251115/preview_url.txt and run single probe on arrival
+- **Evidence:** artifacts/convert/20251115/vercel_after.json
+- **Follow-ups:**
+  - Poll for preview URL; smoke on success or timeout note after 2h
+
 ### 2025-11-15 06:26 CET - Manual - remove vercel rewrites (headers-only)
 - **Mode:** manual
 - **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
