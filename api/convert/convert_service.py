@@ -12,7 +12,15 @@ import time
 import zipfile
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any, Iterable, List, Optional, Sequence
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
+
+import pdfminer.high_level
+import pdfminer.layout
+# pdfplumber is optional; import lazily/optionally
+try:  # pragma: no cover — optional dependency at runtime
+    import pdfplumber  # type: ignore
+except Exception:  # pragma: no cover
+    pdfplumber = None  # type: ignore
 
 # Use relative imports since we're in api/convert/ directory
 from .._lib import pandoc_runner
@@ -32,13 +40,15 @@ from .convert_types import (
 )
 
 
-TARGET_EXTENSIONS = {"md": "md", "html": "html", "txt": "txt", "docx": "docx", "pdf": "pdf"}
+TARGET_EXTENSIONS = {"md": "md", "html": "html", "txt": "txt", "docx": "docx", "odt": "odt", "pdf": "pdf", "rtf": "rtf"}
 TARGET_CONTENT_TYPES = {
     "md": "text/markdown; charset=utf-8",
     "html": "text/html; charset=utf-8",
     "txt": "text/plain; charset=utf-8",
     "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "odt": "application/vnd.oasis.opendocument.text",
     "pdf": "application/pdf",
+    "rtf": "application/rtf",
 }
 
 
@@ -50,10 +60,308 @@ _CACHE: "OrderedDict[str, ConversionResult]" = OrderedDict()
 
 _LOGGER = logging.getLogger(__name__)
 
+HEADING_SIZE_THRESHOLDS: Tuple[Tuple[float, int], ...] = (
+    (18.0, 1),
+    (16.0, 2),
+    (14.0, 3),
+)
+MAX_HEADING_BLOCK_LENGTH = 120
+
 
 def _is_preview_env() -> bool:
     """Check if running in Vercel preview environment."""
     return os.getenv("VERCEL_ENV") == "preview"
+
+
+# -------- Layout-aware PDF → Markdown preprocessor (pdfminer.six) --------
+
+def _try_import_pdfminer():
+    try:
+        import pdfminer.high_level as _high
+        import pdfminer.layout as _layout
+        return _high, _layout
+    except Exception as _exc:  # pragma: no cover - optional path
+        _LOGGER.warning("pdfminer_unavailable err=%s", _exc)
+        return None, None
+
+
+def _ligature_normalize(text: str) -> str:
+    return (
+        text.replace("ﬁ", "fi").replace("ﬂ", "fl").replace("ﬀ", "ff")
+        .replace("ﬃ", "ffi").replace("ﬄ", "ffl")
+    )
+
+
+def _merge_lines_and_fix_hyphen(lines: List[str]) -> str:
+    merged: List[str] = []
+    i = 0
+    while i < len(lines):
+        line = lines[i].rstrip("\n")
+        if i + 1 < len(lines):
+            nxt = lines[i + 1].lstrip()
+            # Conservative hyphen merge: line ends with '-' and next starts lowercase
+            if line.endswith("-") and (nxt[:1].islower()):
+                line = line[:-1] + nxt
+                i += 1
+        merged.append(line)
+        i += 1
+    paragraph = " ".join([l for l in merged if l.strip()])
+    return _ligature_normalize(paragraph)
+
+
+def _guess_image_extension(data: bytes) -> str:
+    if data.startswith(b"\xff\xd8"):
+        return "jpg"
+    if data.startswith(b"\x89PNG\r\n\x1a\n"):
+        return "png"
+    if data.startswith(b"GIF87a") or data.startswith(b"GIF89a"):
+        return "gif"
+    if data.startswith(b"%PDF"):
+        return "pdf"
+    return "bin"
+
+
+def _write_image_bytes(media_dir: Path, idx: int, data: bytes) -> str:
+    ext = _guess_image_extension(data)
+    filename = f"image-{idx}.{ext}"
+    path = media_dir / filename
+    path.write_bytes(data)
+    return filename
+
+
+def _indent_level(indent_stack: List[float], value: float, tolerance: float = 5.0) -> int:
+    while indent_stack and value + tolerance < indent_stack[-1]:
+        indent_stack.pop()
+    if not indent_stack or value > indent_stack[-1] + tolerance:
+        indent_stack.append(value)
+    return len(indent_stack)
+
+
+def _classify_heading(font_sizes: List[float]) -> Optional[int]:
+    if not font_sizes:
+        return None
+    # Heuristic: top size tiers → H1/H2/H3
+    mx = max(font_sizes)
+    if mx <= 0:
+        return None
+    # Map by relative thresholds
+    for threshold, level in HEADING_SIZE_THRESHOLDS:
+        if mx >= threshold:
+            return level
+    return None
+
+
+def _format_list_marker(text: str) -> Optional[str]:
+    t = text.lstrip()
+    if not t:
+        return None
+    # Bullets or numbered
+    if t.startswith(("- ", "• ", "* ")):
+        return "-"
+    # Simple numbered list like '1. '
+    if len(t) > 2 and t[0].isdigit() and t[1] == ".":
+        return "1."
+    return None
+
+
+def _extract_markdown_from_pdf(
+    pdf_path: Path,
+    workspace: Path,
+    *,
+    mode: str = "default",
+    extract_media: bool = False,
+    media_dir: Optional[Path] = None,
+) -> Tuple[Path, dict]:
+    """Extract Markdown from PDF using pdfminer.six with light heuristics.
+
+    Returns a tuple of (markdown_path, meta dict). The caller decides whether
+    to accept or fall back based on the meta/degraded flags.
+    """
+    high, layout = _try_import_pdfminer()
+    if high is None or layout is None:
+        raise RuntimeError("pdfminer_unavailable")
+
+    laparams = layout.LAParams(
+        char_margin=2.0,
+        word_margin=0.1,
+        line_margin=0.5 if mode != "aggressive" else 0.2,
+        boxes_flow=0.5 if mode != "aggressive" else -0.5,
+    )
+
+    headings = 0
+    lists = 0
+    tables_md = 0
+    tables_csv = 0
+    images = 0
+    pages = 0
+    t0 = time.time()
+    mem_chars = 0
+    timed_out = False
+    rtl_detected = False
+
+    lines_out: List[str] = []
+    list_indent_stack: List[float] = []
+
+    try:
+        for page_layout in high.extract_pages(str(pdf_path), laparams=laparams):
+            pages += 1
+            page_blocks: List[str] = []
+            # Early timeout guard (~80s)
+            if (time.time() - t0) * 1000.0 > 80_000:
+                timed_out = True
+                break
+            for element in page_layout:
+                name = element.__class__.__name__
+                # Text boxes → lines
+                if hasattr(element, "get_text"):
+                    raw = element.get_text()
+                    block = _merge_lines_and_fix_hyphen(raw.splitlines())
+                    if not rtl_detected and re.search(r"[\u0590-\u08FF]", block):
+                        rtl_detected = True
+                    # Heading inference from LTChar sizes if available
+                    sizes: List[float] = []
+                    try:
+                        for line_item in getattr(element, "_objs", []):
+                            for frag in getattr(line_item, "_objs", []):
+                                if frag.__class__.__name__ == "LTChar":
+                                    sizes.append(getattr(frag, "size", 0.0))
+                    except Exception:
+                        pass
+                    level = _classify_heading(sizes)
+                    marker = _format_list_marker(block)
+                    if level is not None and len(block) < MAX_HEADING_BLOCK_LENGTH:
+                        headings += 1
+                        page_blocks.append("#" * level + " " + block)
+                        list_indent_stack.clear()
+                    elif marker is not None:
+                        lists += 1
+                        indent = getattr(element, "x0", 0.0)
+                        level = _indent_level(list_indent_stack, indent)
+                        indent_prefix = "  " * max(level - 1, 0)
+                        stripped = re.sub(r"^([-•*]|\d+\.)\s*", "", block.lstrip())
+                        page_blocks.append(f"{indent_prefix}{marker} {stripped}")
+                    else:
+                        list_indent_stack.clear()
+                        page_blocks.append(block)
+                # Image placeholders / optional media
+                elif name in ("LTImage", "LTFigure"):
+                    imgs: List[Any] = []
+                    if name == "LTImage":
+                        imgs = [element]
+                    else:
+                        imgs = [obj for obj in getattr(element, "_objs", []) if obj.__class__.__name__ == "LTImage"]
+                    for img in imgs:
+                        images += 1
+                        filename: Optional[str] = None
+                        if extract_media and media_dir is not None:
+                            stream = getattr(img, "stream", None)
+                            if stream is not None:
+                                raw = None
+                                try:
+                                    raw = stream.get_rawdata()
+                                except AttributeError:
+                                    try:
+                                        raw = stream.get_data()
+                                    except AttributeError:
+                                        raw = None
+                                if raw:
+                                    try:
+                                        filename = _write_image_bytes(media_dir, images, raw)
+                                    except Exception:
+                                        filename = None
+                        if filename:
+                            page_blocks.append(f"![Image {images}]({filename})")
+                        else:
+                            page_blocks.append(f"[IMAGE {images}]")
+                else:
+                    continue
+            # Attempt table detection via pdfplumber lazily
+            try:
+                if pdfplumber is not None:
+                    with pdfplumber.open(str(pdf_path)) as pl:  # type: ignore
+                        if 0 <= (pages - 1) < len(pl.pages):
+                            tbls = pl.pages[pages - 1].find_tables()
+                        for idx, tbl in enumerate(tbls, start=1):
+                            data = tbl.extract() or []
+                            # Regular grid → Markdown table, else CSV fallback
+                            col_counts = {len(row) for row in data if isinstance(row, list)}
+                            if len(col_counts) == 1 and list(col_counts)[0] > 1:
+                                # Markdown table
+                                tables_md += 1
+                                cols = list(col_counts)[0]
+                                header = " | ".join([f"Col{i+1}" for i in range(cols)])
+                                sep = " | ".join(["---"] * cols)
+                                md_rows = [f"| {header} |", f"| {sep} |"]
+                                for r in data:
+                                    row = [str(c or "").replace("|", "\|") for c in r]
+                                    md_rows.append("| " + " | ".join(row) + " |")
+                                page_blocks.append("\n" + "\n".join(md_rows) + "\n")
+                            else:
+                                tables_csv += 1
+                                csv_lines: List[str] = []
+                                for r in data:
+                                    row = []
+                                    for c in (r or []):
+                                        cell = str(c or "")
+                                        if cell[:1] in ("=", "+", "-", "@"):
+                                            cell = "'" + cell
+                                        row.append('"' + cell.replace('"', '""') + '"')
+                                    csv_lines.append(",".join(row))
+                                csv_text = "\n".join(csv_lines)
+                                csv_filename: Optional[str] = None
+                                if extract_media and media_dir is not None:
+                                    csv_filename = f"table-{tables_csv}.csv"
+                                    (media_dir / csv_filename).write_text(csv_text, "utf-8")
+                                note = f"> Table {tables_csv} (low confidence; CSV fallback)"
+                                if csv_filename:
+                                    note += f" — see [{csv_filename}]({csv_filename})"
+                                page_blocks.append(note)
+                                page_blocks.append("```csv\n" + csv_text + "\n```\n")
+            except Exception:
+                # If pdfplumber not available or errors, ignore silently
+                pass
+
+            # Separate pages by thematic break
+            if page_blocks:
+                lines_out.extend(page_blocks)
+                lines_out.append("\n---\n")
+                # Memory guard (approximate)
+                mem_chars += sum(len(x) for x in page_blocks)
+                if mem_chars > 5_000_000:  # ~5 MB of plain text
+                    timed_out = True
+                    break
+
+        text = "\n".join(lines_out).strip()
+        md_path = workspace / f"{pdf_path.stem}_extracted.md"
+        md_path.write_text(text or "", "utf-8")
+        meta = {
+            "engine": "pdfminer_six",
+            "mode_used": mode,
+            "la_params": {
+                "char_margin": laparams.char_margin,
+                "word_margin": laparams.word_margin,
+                "line_margin": laparams.line_margin,
+                "boxes_flow": laparams.boxes_flow,
+            },
+            "pages_count": pages,
+            "headings_detected": headings,
+            "lists_detected": lists,
+            "tables_detected": {"markdown": tables_md, "csv_fallback": tables_csv},
+            "images_placeholders_count": images,
+            "rtl_detected": rtl_detected,
+            "timings_ms": {"total": int((time.time() - t0) * 1000)},
+        }
+
+        # Degradation guardrails
+        degraded = timed_out or (len(text) < 64) or ("\n" not in text and len(text) > 0)
+        if degraded:
+            meta["degraded_reason"] = (
+                "timeout" if timed_out else "too_short_or_single_line"
+            )
+            meta["fallback_used"] = True
+        return md_path, meta
+    except Exception as exc:  # pragma: no cover - pass to fallback
+        raise RuntimeError(f"pdfminer_failed: {exc}")
 
 
 def convert_one(
@@ -107,6 +415,7 @@ def convert_one(
         cached.logs.append("cache=hit")
         return cached
     logs: List[str] = [f"targets={','.join(normalized_targets)}"]
+    result_meta: Dict[str, Any] = {}
 
     try:
         pandoc_runner.ensure_pandoc()
@@ -140,18 +449,61 @@ def convert_one(
             cleaned_md = workspace / "cleaned.md"
             media_dir = workspace / "media"
             extract_dir: Optional[Path] = media_dir if opts.extract_media else None
+            if extract_dir:
+                extract_dir.mkdir(parents=True, exist_ok=True)
 
             # Use the adjusted_from for the actual conversion (post-detection)
             if adjusted_from != from_format:
                 logs.append("format_override=latex_detected_server")
                 from_format = adjusted_from
 
-            # Pre-process PDFs: extract text using pypdf before pandoc
+            # Pre-process PDFs: layout-aware extraction with legacy fallback
             source_for_pandoc = input_path
             if input_path.suffix.lower() == ".pdf" or from_format == "pdf":
-                logs.append("preprocessing=pdf_text_extraction")
-                source_for_pandoc = _extract_text_from_pdf(input_path, workspace)
-                from_format = "markdown"  # Extracted text is markdown
+                # Prefer explicit option over env; keep env as default for safe rollout
+                env_mode = os.getenv("PDF_LAYOUT_MODE", "default") or "default"
+                sel_mode = (
+                    opts.pdf_layout_mode
+                    or ("aggressive" if opts.aggressive_pdf_mode else None)
+                    or env_mode
+                ).lower()
+                if sel_mode not in ("default", "aggressive", "legacy"):
+                    sel_mode = "default"
+                logs.append(f"pdf_layout_mode={sel_mode}")
+                try:
+                    md_path, meta = _extract_markdown_from_pdf(
+                        input_path,
+                        workspace,
+                        mode=sel_mode,
+                        extract_media=bool(extract_dir),
+                        media_dir=extract_dir,
+                    )
+                    logs.append("pdf_engine=pdfminer_six")
+                    logs.append(f"pdf_mode={meta.get('mode_used')}")
+                    logs.append(f"pdf_pages={meta.get('pages_count')}")
+                    logs.append(f"pdf_headings={meta.get('headings_detected')}")
+                    logs.append(f"pdf_lists={meta.get('lists_detected')}")
+                    td = meta.get('tables_detected', {})
+                    logs.append(f"pdf_tables_md={td.get('markdown',0)}")
+                    logs.append(f"pdf_tables_csv={td.get('csv_fallback',0)}")
+                    logs.append(f"pdf_images_placeholders={meta.get('images_placeholders_count')}")
+                    if meta.get('rtl_detected'):
+                        logs.append("pdf_rtl_detected=1")
+                    if meta.get('degraded_reason'):
+                        logs.append(f"pdf_degraded={meta['degraded_reason']}")
+                        raise RuntimeError("degraded_output")
+                    source_for_pandoc = md_path
+                    from_format = "markdown"
+                    logs.append("pdf_extraction_strategy=layout_aware")
+                except Exception:
+                    logs.append("pdf_extraction_strategy=fallback_legacy")
+                    result_meta = {
+                        "engine": "pypdf_fallback",
+                        "mode_requested": sel_mode,
+                        "fallback_used": True,
+                    }
+                    source_for_pandoc = _extract_text_from_pdf_legacy(input_path, workspace)
+                    from_format = "markdown"
 
             # Check if we can do direct conversion without markdown intermediate
             # This fixes HTML→Plain Text truncation and HTML→HTML stray code issues
@@ -460,6 +812,17 @@ def _render_markdown_target(cleaned_path: Path, target: str, *, logs: Optional[L
             extra_args=["--wrap=none"],
         )
         return output_path.read_bytes()
+    elif target == "odt":
+        # ODT output via pandoc
+        output_path = cleaned_path.parent / f"{cleaned_path.stem}.odt"
+        pypandoc.convert_file(
+            str(cleaned_path),
+            to="odt",
+            format="gfm",
+            outputfile=str(output_path),
+            extra_args=["--wrap=none"],
+        )
+        return output_path.read_bytes()
     else:
         # Standard text-based outputs (html, txt, md)
         pandoc_target = "plain" if target == "txt" else target
@@ -586,29 +949,22 @@ def _render_pdf_via_reportlab(markdown_path: Path, *, logs: Optional[List[str]] 
         raise RuntimeError(f"PDF generation failed: {str(e)}") from e
 
 
-def _extract_text_from_pdf(pdf_path: Path, workspace: Path) -> Path:
-    """Extract text from PDF using pypdf and return as markdown file.
 
-    This allows us to read PDFs without requiring pdftotext or poppler-utils.
-    The extracted text will be formatted as simple markdown.
-    """
+
+def _extract_text_from_pdf_legacy(pdf_path: Path, workspace: Path) -> Path:
+    """Extract simple text from PDF using pypdf and return as markdown file."""
     from pypdf import PdfReader
-
     reader = PdfReader(pdf_path)
-    extracted_lines = []
-
-    # Extract text from all pages
+    lines: List[str] = []
+    multi = len(reader.pages) > 1
     for page_num, page in enumerate(reader.pages, start=1):
-        text = page.extract_text()
+        text = page.extract_text() or ""
         if text.strip():
-            # Add page marker for multi-page PDFs
-            if len(reader.pages) > 1:
-                extracted_lines.append(f"\n\n---\n\n**Page {page_num}**\n\n")
-            extracted_lines.append(text)
-
-    # Save as markdown
-    md_path = workspace / f"{pdf_path.stem}_extracted.md"
-    md_path.write_text("\n".join(extracted_lines), "utf-8")
+            if multi:
+                lines.append(f"\n\n---\n\n**Page {page_num}**\n\n")
+            lines.append(text)
+    md_path = workspace / f"{pdf_path.stem}_legacy_extracted.md"
+    md_path.write_text("\n".join(lines), "utf-8")
     return md_path
 
 

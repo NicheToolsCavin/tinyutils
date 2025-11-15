@@ -40,33 +40,5 @@
         { "key": "Cache-Control", "value": "public, max-age=600" }
       ]
     }
-  ],
-  "rewrites": [
-    {
-      "source": "/tools/:tool(keyword-density|meta-preview|sitemap-generator)/:rest*",
-      "has": [
-        { "type": "query", "key": "preview_fence_proxy", "value": "1" }
-      ],
-      "destination": "/tools/:tool/:rest*"
-    },
-    {
-      "source": "/tools/:tool(keyword-density|meta-preview|sitemap-generator).html",
-      "has": [
-        { "type": "query", "key": "preview_fence_proxy", "value": "1" }
-      ],
-      "destination": "/tools/:tool.html"
-    },
-    {
-      "source": "/tools/:tool(keyword-density|meta-preview|sitemap-generator)",
-      "destination": "/api/fence?target=/tools/:tool"
-    },
-    {
-      "source": "/tools/:tool(keyword-density|meta-preview|sitemap-generator)/:rest*",
-      "destination": "/api/fence?target=/tools/:tool/:rest*"
-    },
-    {
-      "source": "/tools/:tool(keyword-density|meta-preview|sitemap-generator).html",
-      "destination": "/api/fence?target=/tools/:tool.html"
-    }
   ]
 }

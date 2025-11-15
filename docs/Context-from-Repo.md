@@ -1,0 +1,1353 @@
+# Context from Repo
+
+TinyUtils' conversion pipeline currently treats PDFs by extracting plain
+text with **pypdf** and converting that text to Markdown for further
+processing. In `convert_service.py`, the helper `_extract_text_from_pdf`
+uses `pypdf.PdfReader` to iterate pages and calls `page.extract_text()`,
+producing a Markdown file with raw text (with page breaks). There is no
+layout or style preservation -- headings, lists, tables, and images are
+lost as simple text. The output is then fed to Pandoc plus some Lua
+filters (e.g. list normalization) for final format conversion. Our goal
+is to replace this with a more **layout-aware PDF→Markdown extraction**
+function, improving fidelity to the original document's structure
+(hierarchy, lists, tables, image placeholders) while staying within
+serverless constraints.
+
+# Library Comparison (pdfminer.six vs pdfplumber vs pypdf)
+
+  ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  **Criteria**      **pdfminer.six** (layout analyzer)                                                                                                                                                                                        **pdfplumber**   **pypdf**
+                                                                                                                                                                                                                                              (built on        (PyPDF2)
+                                                                                                                                                                                                                                              pdfminer)        
+  ----------------- ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- ---------------- ---------------
+  **Paragraph &     **Strong layout analysis:** Tunable `LAParams` to group text into lines, blocks, and paragraphs. Handles multi-column layouts well by                                                                                                      
+  Columns**         default[\[1\]](https://medium.com/khadija-mahanga/unstructured-pdf-extraction-series-a8ba04da767f#:~:text=extracting%20tables%2C%20it%20struggled%20with,not%20all%20tables%20could%20be). Removes hard line breaks based                  
+                    on spacing (configurable). Needs careful param tuning to avoid merging adjacent columns.                                                                                                                                                   
+
+  **Headings (Font  **Font metadata available:** Can extract font name/size per character[\[2\]](https://pypdf.readthedocs.io/en/stable/meta/comparisons.html#:~:text=pdfminer,capabilities%20for%20writing%20PDF%20files), allowing custom                    
+  info)**           heuristics for headings (e.g. detect largest font as H1, bold as potential headings). No automatic heading tagging -- requires custom logic.                                                                                               
+
+  **Lists &         **No built-in list detection**, but preserves text indentation and bullet characters. We can analyze leading symbols and x-coordinates to identify bullets/numbers. Indentation info available via text box coordinates.                   
+  Indentation**                                                                                                                                                                                                                                                
+
+  **Tables**        **No high-level table API:** Text in tables is extracted as part of the flow. We'd need to detect tables by geometric patterns or drawn lines. (Pdfminer does capture drawing elements like lines/rectangles which can                     
+                    hint a table grid.) Custom logic required to structure as Markdown table or CSV.                                                                                                                                                           
+
+  **Images**        **Can detect images:** Yields `LTImage` objects (with bounding box and raw bytes). No OCR. We can insert placeholders and optionally extract the image bytes. Requires Pillow or similar to decode image streams if                        
+                    needed.                                                                                                                                                                                                                                    
+
+  **Performance**   **Moderate speed, pure Python:** Slower than C/C++ libraries (≈ 35× slower than                                                                                                                                                            
+                    MuPDF)[\[3\]](https://www.reddit.com/r/learnpython/comments/11ltkqz/which_is_faster_at_extracting_text_from_a_pdf/#:~:text=%E2%80%A2%20%203y%20ago). A 1-page PDF takes \~0.1--0.2 s in                                                    
+                    tests[\[4\]](https://onlyoneaman.medium.com/i-tested-7-python-pdf-extractors-so-you-dont-have-to-2025-edition-c88013922257#:~:text=textract%20%280,capabilities%2C%20minor%20formatting%20variations), so \~2--4 s for 20                  
+                    pages (heavier if complex layout). Memory use is higher due to many Python objects (and there have been minor memory-leak                                                                                                                  
+                    reports)[\[5\]](https://github.com/pdfminer/pdfminer.six/issues/580#:~:text=Somewhere%20in%20,it%20required%20is%20not%20released)[\[6\]](https://github.com/pdfminer/pdfminer.six/issues/580#:~:text=Line%20,collect).                    
+
+  **Serverless      **✔ Pure Python:** Installs via pip wheel with no native binaries. Runs on AWS Lambda/Vercel out-of-the-box. Cold start cost is moderate (pdfminer is not tiny, but acceptable).                                                           
+  Fit**                                                                                                                                                                                                                                                        
+
+  **Maintenance**   **Active & mature:** Maintained fork of PDFMiner (latest release 2025)[\[7\]](https://github.com/pdfminer/pdfminer.six/releases#:~:text=Releases%3A%20pdfminer%2Fpdfminer,and%20signed%20with%20GitHub%27s), large                         
+                    community (6.8k★). MIT license, no unusual constraints.                                                                                                                                                                                    
+
+  **pdfplumber**    **Layout fidelity via pdfminer:** Inherits pdfminer's strengths. Provides higher-level APIs but default `extract_text` can sometimes concatenate content from adjacent columns if not                                                      
+                    tuned[\[8\]](https://onlyoneaman.medium.com/i-tested-7-python-pdf-extractors-so-you-dont-have-to-2025-edition-c88013922257#:~:text=table%20%3D%20first_page). Indentation and spacing cues are preserved, and advanced                     
+                    config (`x_tolerance`, etc.) can improve paragraph grouping.                                                                                                                                                                               
+
+  **Headings (Font  **Font info accessible:** Can return words with font size/style (using `extra_attrs`). No automatic heading detection, but easier to gather size stats per text block via its API.                                                         
+  info)**                                                                                                                                                                                                                                                      
+
+  **Lists &         **Visual cues preserved:** Recognizes indentations and spacing; developer can use word coordinates to infer list nesting. (Documentation notes that PDFPlumber "captures indentation cues to maintain structural                           
+  Indentation**     consistency"[\[9\]](https://www.pdfplumber.com/how-does-pdfplumber-handle-text-extraction-from-pdfs/#:~:text=Indentation%20Recognition%20for%20Structured%20Content).) No built-in list output -- requires custom parsing                  
+                    of extracted text.                                                                                                                                                                                                                         
+
+  **Tables**        **Built-in table detection:** Offers `page.find_tables()` and `extract_table()` to detect tables (even without grid lines)[\[10\]](https://github.com/jsvine/pdfplumber#:~:text=Extracting%20tables). Handles merged                       
+                    cells better than raw pdfminer[\[1\]](https://medium.com/khadija-mahanga/unstructured-pdf-extraction-series-a8ba04da767f#:~:text=extracting%20tables%2C%20it%20struggled%20with,not%20all%20tables%20could%20be). Can                      
+                    output each table as a list of row data. This significantly eases creating Markdown tables or CSV.                                                                                                                                         
+
+  **Images**        **Image metadata available:** Exposes image objects with position and size[\[11\]](https://github.com/jsvine/pdfplumber#:~:text=), but does not extract image content itself (relies on Pillow/ImageMagick for rendering                   
+                    if needed). We can still use positions to insert placeholders.                                                                                                                                                                             
+
+  **Performance**   **Similar to pdfminer:** Essentially the same parsing backend. Overhead for table detection and object conversion is small. In one-page tests, \~0.10                                                                                      
+                    s/page[\[12\]](https://onlyoneaman.medium.com/i-tested-7-python-pdf-extractors-so-you-dont-have-to-2025-edition-c88013922257#:~:text=pypdfium2%20%280,basic%20text%2C%20no%20structure) (about 4× slower than pypdf).                      
+                    Sufficient for tens of pages.                                                                                                                                                                                                              
+
+  **Serverless      **➖ Binary dependency:** Requires `pypdfium2` (PDFium) and `Pillow` as                                                                                                                                                                    
+  Fit**             dependencies[\[13\]](https://generalistprogrammer.com/tutorials/pdfplumber-python-package-guide#:~:text=pdfplumber%20depends%20on%20the%20following,packages). These install from wheels (no build needed), but add                        
+                    \~20--30 MB and increase cold start time. Still workable on Vercel, but heavier than pdfminer alone.                                                                                                                                       
+
+  **Maintenance**   **Active (Jeremy Singer-Vine)**: Latest 0.11.x release in 2025, used in many projects. MIT license. Strong community (3.5k★) and                                                                                                           
+                    support[\[14\]](https://pypdf.readthedocs.io/en/stable/meta/comparisons.html#:~:text=pdfminer,capabilities%20for%20writing%20PDF%20files).                                                                                                 
+
+  **pypdf**         **Basic extraction only:** Does not perform layout analysis -- it returns text in content-stream order with simple spacing heuristics. Often merges multi-column text or misorders sections because it lacks                               
+                    coordinate-based grouping. Useful for quick text access, but **low fidelity** structure (paragraphs break at original line ends, lists become plain lines, tables become jumbled text).                                                    
+
+  **Headings (Font  **No style info:** Cannot retrieve font size or styling from text extraction (pypdf is primarily for PDF manipulation, not rich text                                                                                                       
+  info)**           extraction)[\[2\]](https://pypdf.readthedocs.io/en/stable/meta/comparisons.html#:~:text=pdfminer,capabilities%20for%20writing%20PDF%20files). All text is plain.                                                                           
+
+  **Lists &         **Loses indentation:** Leading spaces or bullet symbols may appear, but pypdf doesn't distinguish list structure. It may even strip some non-printable indentation markers. No concept of nested lists.                                    
+  Indentation**                                                                                                                                                                                                                                                
+
+  **Tables**        **No table support:** Tables come out as lines of text (often one cell after another, or rows merged). Requires external parsing if needed.                                                                                                
+
+  **Images**        **No text extraction of images:** Images are not reported in text output. (pypdf can extract image streams manually, but there's no built-in flow to mark their position in text.)                                                         
+
+  **Performance**   **Fastest (pure Python):** Minimal processing -- essentially reading text objects. In tests \~0.02--0.03                                                                                                                                   
+                    s/page[\[12\]](https://onlyoneaman.medium.com/i-tested-7-python-pdf-extractors-so-you-dont-have-to-2025-edition-c88013922257#:~:text=pypdfium2%20%280,basic%20text%2C%20no%20structure). Low CPU and memory footprint.                     
+
+  **Serverless      **✔ Pure Python & lightweight:** Very small dependency, ideal for restricted                                                                                                                                                               
+  Fit**             environments[\[15\]](https://onlyoneaman.medium.com/i-tested-7-python-pdf-extractors-so-you-dont-have-to-2025-edition-c88013922257#:~:text=everywhere%2C%20no%20C%20dependencies). No external requirements.                               
+
+  **Maintenance**   **Very active (pypdf)**: Regular releases, large user base. BSD-3-Clause license. Focus is on PDF merging, encryption, etc., with text extraction improving gradually (now \~96--97% accuracy in internal                                  
+                    tests[\[16\]](https://github.com/py-pdf/pypdf/discussions/2038#:~:text=The%20text%20extracting%20quality%20metric,the%20ground%20truth%20was%20wrong)).                                                                                    
+  ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**Summary -- Trade-offs:** For maximum fidelity, **pdfminer.six** (and
+by extension pdfplumber) clearly outperform pypdf. Pdfminer yields the
+most complete and structured text (it had the lowest divergence from the
+original text in one
+study[\[17\]](https://medium.com/social-impact-analytics/comparing-4-methods-for-pdf-text-extraction-in-python-fd34531034f#:~:text=case%20were%20identical,times%20as%20long%20to%20complete)),
+at the cost of speed. **Pdfplumber** adds convenience, especially for
+table extraction and easier coordinate handling, but introduces a heavy
+PDFium binary dependency. **Pypdf** is the lightweight choice with
+excellent performance and zero external deps, but its output often
+jumbles columns and loses all hierarchy -- unacceptable for TinyUtils'
+needs beyond the current basic output. In short:
+
+- **pdfminer.six:** Best layout and text fidelity; enables detecting
+  headings/lists from font and spacing data. Pure Python, but slower.
+- **pdfplumber:** Leverages pdfminer plus table detection and simpler
+  API. Great for complex layouts with tables. Added dependency footprint
+  (PDFium) is the main downside in serverless.
+- **pypdf:** Fast and simple, but output is "flat" text. Would require
+  writing many custom heuristics from scratch to approach the fidelity
+  the others offer.
+
+# Recommended Engine & Parameters
+
+**We recommend using pdfminer.six** as the core extraction engine for
+TinyUtils Converter, possibly augmented by pdfplumber for table
+detection. Pdfminer.six gives us fine-grained control over layout
+analysis and font metadata, which is crucial for recreating structure
+(e.g. identifying headings and preserving multi-column flows). It's pure
+Python and
+well-maintained[\[7\]](https://github.com/pdfminer/pdfminer.six/releases#:~:text=Releases%3A%20pdfminer%2Fpdfminer,and%20signed%20with%20GitHub%27s),
+fitting our serverless constraints. Pdfplumber's table utilities can be
+optionally integrated without fully committing to its PDFium dependency
+-- for example, we can call `pdfplumber.open` on specific pages only if
+a table is suspected. This way, we get the **best of both**: pdfminer
+for text and overall layout, and pdfplumber's algorithms for tables
+(which are otherwise painful to implement from scratch).
+
+If we find pdfplumber's dependency overhead acceptable, an alternative
+is to use **pdfplumber for everything** (since it internally uses
+pdfminer anyway). This simplifies code (one library to parse text,
+images, and tables) at the expense of loading PDFium on each invocation.
+Given our PDF sizes (tens of pages) and 90s budget, this overhead is
+likely tolerable, but we should be mindful of cold-start times. On
+balance, our plan is to start with pdfminer and only invoke pdfplumber's
+table extraction selectively -- this keeps the common path lean.
+
+### Pdfminer.six `LAParams` Defaults
+
+We will tune pdfminer's layout analyzer parameters for our use case. Two
+modes are proposed:
+
+- `mode='default'` **(general documents):** Aim for accurate paragraph
+  grouping and natural reading order.
+- `mode='aggressive'` **(for very complex layouts):** Tweak parameters
+  to separate content into smaller blocks, useful for densely
+  multi-column or magazine-style layouts where default might merge
+  columns.
+
+For **default mode**, we'll begin with values close to pdfminer's
+defaults[\[18\]](https://pdfminersix.readthedocs.io/en/latest/reference/composable.html#:~:text=class%20pdfminer,%C2%B6)[\[19\]](https://pdfminersix.readthedocs.io/en/latest/reference/composable.html#:~:text=,the%20width%20of%20the%20character),
+which are known to work well in many cases:
+
+- `char_margin = 2.0` -- Characters within \~2x avg char width are
+  considered part of the same line. (Higher values merge characters into
+  lines more aggressively; default 2.0 is balanced.)
+- `word_margin = 0.1` -- Gap between characters \>0.1× char width
+  indicates a word break (inserts space). This small margin helps keep
+  words separate while not introducing too many artificial spaces.
+- `line_margin = 0.5` -- Lines within 0.5× line-height are merged into
+  one paragraph. This merges multiline paragraphs but keeps sufficient
+  gap before a new paragraph.
+- `boxes_flow = 0.5` -- Encourage a roughly top-to-bottom reading order
+  (pdfminer default). This mixes horizontal and vertical cues to decide
+  text box order. It tends to keep content in reading sequence, even if
+  columns exist, but can sometimes intermix columns if they're at
+  similar vertical positions.
+- `detect_vertical = False` -- (No vertical text in most docs; if needed
+  we could enable on the fly.)
+
+These defaults will generally produce paragraphs with line breaks
+removed (except where significant spacing implies a new paragraph) and
+respect the natural reading order for single-column
+pages[\[20\]](https://pdfminersix.readthedocs.io/en/latest/reference/composable.html#:~:text=,corner%20of%20the%20text%20box).
+Headings and lists will still be just lines of text at this stage, but
+with font info and indentation preserved for our post-processing.
+
+For **aggressive mode**, we adjust for edge cases like side-by-side
+columns that default mode might merge:
+
+- **Reduce** `boxes_flow` **to \~0.0 or -0.5:** This makes horizontal
+  positioning much more influential, so text in different columns (far
+  apart on the X-axis) is less likely to be grouped together. A negative
+  value biases strongly toward reading all content in the left column
+  top-to-bottom, then the right
+  column[\[20\]](https://pdfminersix.readthedocs.io/en/latest/reference/composable.html#:~:text=,corner%20of%20the%20text%20box).
+  We will test with `boxes_flow = -0.5` initially -- it should separate
+  columns while still sorting text top-down within each column (setting
+  it to None disables smart ordering entirely, which can scramble
+  content[\[21\]](https://pdfminersix.readthedocs.io/en/latest/reference/composable.html#:~:text=You%20can%20also%20pass%20None,corner%20of%20the%20text%20box)[\[22\]](https://github.com/pdfminer/pdfminer.six/issues/411#:~:text=Disabling%20boxes%20flow%20makes%20lines,as%20they%20don%27t%20get%20sorted)).
+- **Tighten** `line_margin` **(e.g. 0.2):** This prevents pdfminer from
+  merging lines that are only loosely related. In dense layouts,
+  unrelated text blocks might be close vertically; a smaller
+  `line_margin` ensures only truly continuous text lines form a
+  paragraph. This might break some paragraphs into separate chunks, but
+  that's preferable to merging distinct blocks.
+- **Keep** `char_margin` **at 2.0,** `word_margin` **at 0.1:** These
+  mainly affect word formation and line composition -- we don't change
+  them unless specific issues arise (in rare cases, high `char_margin`
+  fixes words split by wide
+  spacing[\[23\]](https://stackoverflow.com/questions/47730307/python-pdfminer-laparams-mixes-text-output#:~:text=My%20document%20apparently%20sometimes%20had,margins%20which%20caused%20the%20problems)[\[24\]](https://stackoverflow.com/questions/47730307/python-pdfminer-laparams-mixes-text-output#:~:text=Solution),
+  but this is document-specific).
+- Optionally, **disable advanced flow for extreme cases**: If even with
+  above tweaks a document's order is jumbled, we could try
+  `boxes_flow=None` (no column merging at all) and then manually sort
+  text boxes by x position. This is a last resort as it may output
+  columns strictly left-to-right, potentially losing the intended
+  reading sequence if the document interleaves content. We will log if a
+  user switches to this or if we auto-apply it after detecting issues.
+
+In summary, **default mode** aims to merge lines into coherent
+paragraphs and follow natural reading order, whereas **aggressive mode**
+prioritizes isolating columns and small text blocks to avoid unintended
+merges (at the risk of over-separating content). We will expose this
+mode internally (and possibly via an API flag if needed) but default to
+the normal settings for most conversions.
+
+### Pdfplumber usage (if any)
+
+If integrating **pdfplumber** for table extraction or as a fallback
+parser, we'd use it with analogous settings:
+
+- `pdfplumber.open(..., laparams=LAParams(...))` can accept our tuned
+  LAParams to maintain consistency if we rely on pdfminer objects via
+  pdfplumber[\[25\]](https://github.com/jsvine/pdfplumber#:~:text=If%20you%20pass%20the%20%60pdfminer.six%60,textboxhorizontal).
+- Plumber's own `extract_text` has parameters like `x_tolerance` and
+  `y_tolerance` that we would leave at default (3.0 points each) unless
+  we observe concatenation issues. In tests, basic plumber had minor
+  concatenation
+  errors[\[8\]](https://onlyoneaman.medium.com/i-tested-7-python-pdf-extractors-so-you-dont-have-to-2025-edition-c88013922257#:~:text=table%20%3D%20first_page),
+  likely from large `x_tolerance`. If needed, we can lower `x_tolerance`
+  to \~2.0 to require closer characters to be on the same line (reducing
+  chance of merging across wide gaps).
+- We will use `page.extract_table()` with its default or slightly
+  adjusted settings (it also takes `x_tolerance`, etc.) to get table
+  data.
+
+**Why not PyMuPDF or others?** Alternatives like PyMuPDF (MuPDF
+bindings) or PDFium directly (via `pypdfium2`) offer faster text
+extraction, but at a cost. PyMuPDF is extremely fast and can output text
+and XML structure, but it's a C++ library with an AGPL/commercial
+license
+requirement[\[26\]](https://pypdf.readthedocs.io/en/stable/meta/comparisons.html#:~:text=While%20both%20are%20excellent%20libraries,to%20buy%20a%20commercial%20license)
+-- problematic for TinyUtils' usage unless we obtain a commercial
+license. Maintaining a binary library in a serverless environment also
+adds deployment complexity. We prefer sticking to pure-Python or
+widely-used wheels for easier maintenance. Direct PDFium usage is
+possible (we already indirectly include it via pdfplumber), but using it
+for structured output would require significant custom logic (PDFium's
+text output is plain
+strings[\[27\]](https://onlyoneaman.medium.com/i-tested-7-python-pdf-extractors-so-you-dont-have-to-2025-edition-c88013922257#:~:text=),
+losing formatting). Advanced ML-based extractors (like LayoutLM/Marker)
+are far too heavy for our use (e.g. downloading 1GB models for perfect
+layout[\[28\]](https://onlyoneaman.medium.com/i-tested-7-python-pdf-extractors-so-you-dont-have-to-2025-edition-c88013922257#:~:text=text%2C%20_%2C%20_%20%3D%20text_from_rendered,)).
+Therefore, **pdfminer/pdfplumber is the sweet spot**: open source, no
+additional system packages, and designed for detailed PDF layout
+analysis -- the best fit for faithful PDF-to-Markdown conversion under
+our constraints.
+
+# Implementation Blueprint for `_extract_markdown_from_pdf`
+
+We will implement a new function
+`_extract_markdown_from_pdf(pdf_path, workspace, mode='default') -> Path`
+inside `convert_service.py` and invoke it for PDF inputs (replacing the
+current `_extract_text_from_pdf` call). The function will create a
+Markdown file with structured content extracted from the PDF. Below is
+the step-by-step pipeline and a pseudocode outline:
+
+1.  **Initialize & Config:** Set up pdfminer (and pdfplumber if needed)
+    with chosen parameters. Example:
+
+- from pdfminer.high_level import extract_pages
+      from pdfminer.layout import LAParams, LTTextBox, LTTextLine, LTChar, LTImage, LTFigure
+
+      params = LAParams(char_margin=2.0, line_margin=0.5, word_margin=0.1,
+                        boxes_flow=0.5 if mode=='default' else -0.5)
+
+  If `mode=='aggressive'`, substitute the tweaked values (e.g.
+  `line_margin=0.2, boxes_flow=-0.5`). We'll also prepare output
+  containers:
+
+      md_lines = []
+      image_counter = 1
+      media_dir = workspace / f"{pdf_path.stem}_media"
+      media_dir.mkdir(exist_ok=True)
+      images_info = []  # to collect (image_path, placeholder) for optional zipping
+
+  This `media_dir` will store extracted images if `extractMedia` is
+  enabled (see step 7).
+
+2.  **Iterate Pages:** Use `extract_pages(pdf_path, laparams=params)` to
+    loop through pages in the PDF. We handle one page at a time to keep
+    memory usage steady (pdfminer streams page by page). For each
+    `page_layout`:
+
+3.  Insert a page separator if the PDF has multiple pages, similar to
+    current behavior (e.g.,
+    `md_lines += ["\n---\n", f"**Page {n}**", ""]` for page 2+ to mark
+    page breaks, preserving current user experience).
+
+4.  Create a list `page_elements` to collect text blocks and image
+    placeholders in reading order.
+
+5.  **Parse Layout Elements:** For each object in `page_layout`:
+
+6.  **Text Boxes:** If `isinstance(obj, LTTextBox)`:
+
+    - Get all text in this box: `text = obj.get_text()` yields the box's
+      text with internal newlines for lines. However, we will
+      **post-process** this to fix hyphenation and line breaks. We can
+      also iterate through `obj` which yields `LTTextLine` objects if we
+      need finer control.
+    - **Hyphenation & Line Breaks:** We'll remove line breaks that are
+      purely formatting:
+    - For each `LTTextLine` in the box, check if it ends with a hyphen
+      `-` and the next line (if any) starts with a lowercase letter. If
+      so, it's likely a split word. We join the line with the next one,
+      removing the hyphen (e.g., "intro-\\nduction" -\> "introduction").
+      Only do this for alphabetic continuations and not for hyphens that
+      are truly intended (we won't merge if next line starts with an
+      uppercase or is a new paragraph, etc.). Also skip this for
+      non-Latin scripts or where we detect it might be a soft hyphen.
+    - Regardless of hyphen, replace line breaks within the same text box
+      with spaces when merging into a paragraph, **except** where an
+      empty line indicates a real paragraph break. Concretely: if
+      `line_margin` in LAParams did its job, separate paragraphs should
+      be split into different LTTextBox objects. But if not (or if a
+      blank line is present), we treat double newlines as actual
+      paragraph breaks.
+    - After merging, we have a cleaned paragraph string. **Ligatures:**
+      Normalize common ligatures like "ﬁ" to "fi", "ﬂ" to "fl\`, etc.,
+      to avoid odd characters in output. (Pdfminer might already expand
+      them, but pdfplumber explicitly notes expanding
+      ligatures[\[29\]](https://github.com/jsvine/pdfplumber#:~:text=breaking%20tokens%20at%20punctuations%20specified,will%20be%20expanded%20into%20their)
+      -- we'll ensure any lingering ones are fixed for searchability).
+    - **Heading detection:** Using the font size info in the text box:
+    - Collect stats: e.g., find the maximum font size of any `LTChar` in
+      this box. We might do:
+
+    <!-- -->
+
+    - sizes = [char.size for line in obj for seg in line for char in seg if isinstance(char, LTChar)]
+          max_size = max(sizes) if sizes else 0
+
+    <!-- -->
+
+    - Determine heading level: Compare `max_size` against document-level
+      averages or other text boxes. A simple approach is to identify the
+      distinct font sizes on the page or entire document on the first
+      pass. For example, the largest font seen in the document could be
+      H1, second-largest H2, etc., if they appear multiple times. We'll
+      likely maintain a set of encountered font sizes and sort it.
+    - If `max_size` is in the top tier (say, \>= H1_threshold), and the
+      text is short (likely a title), we format this line as a Markdown
+      heading. For instance, if we classify it as H2, prepend `##`.
+    - **Practical heuristic:** If a text box's text is mostly one line
+      or a few words in much larger font than body text, tag it as a
+      heading. We will refine thresholds by trial on sample docs.
+    - *Note:* We must be cautious not to over-tag -- e.g., a large page
+      number or a big decorative letter should perhaps not be a heading.
+      We can mitigate by ignoring isolated numbers or single characters,
+      and by requiring the text content looks like a title (maybe no
+      period at end, etc.). Initially, we keep it simple: based on font
+      size and length.
+    - **List detection:** Check if this text box (or each line in it)
+      looks like a list item:
+    - Regex for bullet or number at start (e.g., `^(\*|-|•|\d+\.)\s`).
+      Also consider Unicode bullets like •, ◦, etc., and check for at
+      least one space after or a tab.
+    - If a line matches, determine its indent level: e.g.,
+      `indent_px = obj.x0` (left X of the text box or line). We maintain
+      a stack of list indents as we iterate down the page:
+      - If a new list item's indent is larger than the current list
+        indent (with some tolerance), it's a nested list -\> increase
+        list level.
+      - If smaller, it means end of a sub-list -\> pop from indent stack
+        accordingly.
+    - We'll output Markdown list markers: use "-" for bullets and "1."
+      for numbered lists (preserve the actual numbering if it's an
+      ordered list). Indent the Markdown by 2--4 spaces per level or use
+      nested list syntax (we can just prepend spaces).
+    - Example: Original lines:
+
+    <!-- -->
+
+    - • Item one  
+             - Subitem A  
+             - Subitem B  
+          • Item two
+
+      We produce:
+          - Item one  
+            - Subitem A  
+            - Subitem B  
+          - Item two
+
+      The Lua filter `normalize_lists.lua` should clean up any minor
+      formatting issues here (it likely was handling Pandoc's list
+      quirks, but our output will already be in Markdown list form).
+
+    <!-- -->
+
+    - **Output assembly:** After handling headings and lists, we add the
+      text to `page_elements`. If it was identified as a heading, it may
+      already have `#` prefixes; if a list item, it has `-` etc.
+      Otherwise, it's a normal paragraph -- we might leave it as-is (or
+      later, we could wrap lines to a reasonable width for readability,
+      but that's cosmetic).
+
+7.  **Images:** If `isinstance(obj, LTImage)` or an `LTFigure`
+    containing images:
+
+    - Determine an image placeholder text: `[IMAGE {image_counter}]`. If
+      pdfminer provides an `obj.name` or we can number sequentially,
+      we'll use the counter.
+    - If there is metadata like an embedded caption (unlikely for pure
+      images unless there's a figcaption in PDF, which we'd only get by
+      OCR or by layout guess), we cannot reliably get it. Instead, if
+      the PDF has text under the image (like a caption), that text would
+      be another LTTextBox -- we won't tie it automatically but the
+      visual proximity will place it near the placeholder.
+    - Add the placeholder to `page_elements` at this point in the
+      reading order. The placeholder will be on its own line in
+      Markdown.
+    - **Extract image data (optional):** If `extractMedia=True` (an
+      option we might pass via function or environment), do:
+
+    <!-- -->
+
+    - stream = obj.stream
+          raw_bytes = stream.get_rawdata()  # if available
+          fmt = determine_image_type(obj, raw_bytes)  # e.g., via header or PDF color space info
+          img_filename = f"image-{image_counter}.{fmt}"
+          img_path = media_dir / img_filename
+          img_path.write_bytes(raw_bytes)
+          images_info.append(img_filename)
+
+      We'd have a helper to guess format (many PDF images are DCTEncoded
+      = JPEG, or Flate = PNG). We might use Pillow to convert if needed.
+      If Pillow is available, we could alternatively do
+      `obj.write_image(img_path)` via pdfminer's utils (pdfminer.six
+      doesn't have a high-level helper to save images, so likely raw
+      bytes).
+
+    <!-- -->
+
+    - In Markdown, if `extractMedia`, we will use an actual image link:
+      `![Image](${img_filename})`. If not, we keep the `[IMAGE n]`
+      placeholder or `[IMAGE n: description]` (no description in most
+      cases, so likely just `[IMAGE 1]`).
+
+8.  **Other Drawing Elements:** Pdfminer might yield `LTLine`, `LTRect`
+    for lines and shapes (like table cell borders or underlines). We
+    don't output these, but we **use them for table detection** next.
+
+9.  **Table Detection & Extraction:** After initial pass, attempt to
+    identify tables on the page:
+
+10. Using **pdfplumber (if included):** If the page has multiple
+    `LTLine` or `LTRect` objects forming a grid, or text in a matrix
+    form (multiple text boxes in a consistent grid), it's likely a
+    table. We can call:
+
+- import pdfplumber
+      plumber_page = plumber_pdf.pages[page_index]
+      tables = plumber_page.find_tables()
+
+  For each table found, `table.extract()` will give a 2D list (rows of
+  cells). We then decide:
+
+  - If the table has a regular structure (each row has the same number
+    of columns, and no `None` empty placeholders), we format it as a
+    Markdown table:
+
+  <!-- -->
+
+  - | Col1 | Col2 | Col3 |
+        |------|------|------|
+        | r1c1 | r1c2 | r1c3 |
+        | r2c1 | r2c2 | r2c3 |
+
+    If we don't have clear header vs data distinction, we can still
+    output the first row as header or simply repeat a separator for
+    alignment.
+
+  <!-- -->
+
+  - If the table is irregular or we suspect merged cells (plumber might
+    output some cells as empty strings or uneven row lengths), we use a
+    **CSV fallback**:
+    - Write a CSV file for this table into `media_dir` (e.g.,
+      `table-1.csv`) with all rows and columns. Mark in the Markdown:
+
+    <!-- -->
+
+    - > Table 1 (low confidence; see CSV below)
+
+      and then embed a fenced code block with CSV:
+          ```csv
+          "Cell1","Cell2","Cell3"
+          "a","b","c"
+          ...
+
+      \`\`\`
+
+    <!-- -->
+
+    - This way, the user can download the CSV if needed, and we aren't
+      misrepresenting an ambiguous structure as a sloppy Markdown table.
+      The note "low confidence" signals that we weren't sure about
+      alignment.
+  - We will ensure to remove from `page_elements` any text that was part
+    of this table to avoid duplication. (The Medium article approach did
+    this by excluding text within table bounding
+    boxes[\[30\]](https://medium.com/khadija-mahanga/unstructured-pdf-extraction-series-a8ba04da767f#:~:text=To%20extract%20both%20text%20and,and%20the%20position%20of%20tables)[\[31\]](https://medium.com/khadija-mahanga/unstructured-pdf-extraction-series-a8ba04da767f#:~:text=def%20pdf_process%28path%29%3A%20plumberObj%20%3D%20pdfplumber,page_text%20%3D%20miner_extract_page%28page_layout%2C%20tables).)
+  - If not using pdfplumber: we implement a **heuristic**:
+  - If we see a cluster of `LTTextBox` elements in a grid pattern (e.g.,
+    3 boxes on one line, and directly below them another 3 boxes with
+    similar x coordinates), assume a table. Or if `LTLine` objects form
+    a rectangle grid (many horizontal and vertical lines of similar
+    length, intersecting), that's a table structure.
+  - Compute a confidence score: e.g., the fraction of text boxes that
+    align in columns. If score ≥ 0.7, treat as table.
+  - Extract text for each cell (text boxes within the table area) row by
+    row (sorted by y, then x). Use the same Markdown table or CSV output
+    policy based on consistency.
+  - This is complex and less reliable, so initial implementation may
+    favor using pdfplumber for this part given time constraints.
+
+11. **Assemble Page Content:** Now we merge text elements and
+    placeholders in reading order:
+
+12. The `page_elements` list collected earlier contains paragraphs, list
+    items, headings, image placeholders, etc., in the sequence we
+    encountered them. We join them with appropriate newlines:
+    - Ensure that block-level elements are separated by blank lines in
+      Markdown (e.g., after a paragraph or heading, put a blank line
+      unless the next item is another list item in the same list).
+    - If two consecutive items are part of the same list (we can track
+      if we are "inside" a list), do not put a blank line between them
+      (to maintain list continuity in Markdown).
+    - Page breaks we already inserted act as separators.
+
+13. Append the page content to `md_lines`.
+
+14. **Finalize Markdown File:** After all pages:
+
+15. Write `md_lines` to `[workspace]/{pdf_name}_extracted.md`. The
+    content now includes Markdown headings (`#`, `##` etc.), list
+    syntax, table markdown or CSV blocks, and image references.
+
+16. **Metadata for preview:** Additionally, we can parse the collected
+    content to produce a short preview:
+
+    - For example, take the first heading in the document (if any) and
+      the first paragraph of body text. Or simply the first 100 words of
+      the Markdown (after filtering out image placeholders and table
+      blocks). This can be returned or logged for TinyUtils to display
+      as a preview snippet in the UI. (We might integrate this with
+      `manifests.py` or wherever document metadata is prepared.)
+
+17. **Media Bundle (Images/Tables):** If `extractMedia` option is set
+    (perhaps TinyUtils can allow the user to request extracted
+    images/tables as separate files):
+
+18. Package the `media_dir` into a zip, similar to how
+    `_build_media_artifact` works in the code. Each image file (and any
+    CSV files for tables) will be included.
+
+19. In the Markdown, image references will be direct links to the files
+    (just the filename, since TinyUtils likely knows how to serve them
+    alongside the Markdown). For example: `![Figure](media/image-2.png)`
+    instead of `[IMAGE 2]`.
+
+20. If `extractMedia` is False (default, to keep things simple/fast), we
+    leave placeholders `[IMAGE n]`. The user will at least know where
+    images were.
+
+21. **Logging & Return:** We append log entries for this process:
+
+22. `logs.append(f"pdf_extractor=pdfminer_six_{pdfminer_version}")` --
+    record which engine and version was used.
+
+23. Log stats: `paragraphs_detected={X}`, `headings_detected={Y}`,
+    `lists_detected={Z}`,
+    `tables_detected={T} (markdown={t_md}, csv={t_csv})`,
+    `images_detected={I}`. This helps future tuning and debugging.
+
+24. If mode was aggressive or any fallback triggered, log that: e.g.,
+    `logs.append("pdf_layout_mode=aggressive")` or
+    `logs.append("pdf_layout_fallback=basic")` if we revert to plain
+    extraction.
+
+25. Return the path to the markdown file.
+
+**Pseudo-code Sketch:**
+
+    def _extract_markdown_from_pdf(pdf_path: Path, workspace: Path, mode='default', extractMedia=False) -> Path:
+        # Setup
+        laparams = LAParams(... as per mode ...)
+        md_lines = []; image_counter = 1
+        media_dir = workspace / f"{pdf_path.stem}_media"
+        if extractMedia: media_dir.mkdir(exist_ok=True)
+        plumber_pdf = None
+        if use_plumber_for_tables:
+            import pdfplumber
+            plumber_pdf = pdfplumber.open(pdf_path)
+        # Process pages
+        for page_num, page_layout in enumerate(extract_pages(pdf_path, laparams=laparams), start=1):
+            if page_num > 1:
+                md_lines += ["\n---\n", f"**Page {page_num}**", ""]
+            page_elements = []
+            # Gather text and images
+            for element in page_layout:
+                if isinstance(element, LTTextBox):
+                    text = element.get_text()
+                    # Hyphenation fix and line merge
+                    lines = text.splitlines()
+                    merged_paras = []
+                    i = 0
+                    while i < len(lines):
+                        line = lines[i]
+                        if i < len(lines)-1 and line.rstrip().endswith('-'):
+                            # peek next line
+                            next_line = lines[i+1]
+                            if next_line and next_line[0].islower():
+                                # merge
+                                line = line.rstrip()[:-1] + next_line.lstrip()
+                                i += 1  # skip the next line as it's merged
+                            # else: treat hyphen as normal (e.g., end of phrase or upper-case next)
+                        merged_paras.append(line)
+                        i += 1
+                    para_text = " ".join(merged_paras).strip()
+                    if not para_text:
+                        continue
+                    # Ligature normalization
+                    para_text = normalize_ligatures(para_text)
+                    # Classify heading vs list vs normal
+                    is_heading = False; is_list = False
+                    heading_level = None
+                    if looks_like_heading(element, para_text):  # uses font size info
+                        heading_level = get_heading_level(element)
+                        para_text = "#" * heading_level + " " + para_text
+                        is_heading = True
+                    if looks_like_list(para_text):
+                        # determine indent level
+                        indent = element.x0
+                        list_marker = get_list_marker(para_text)  # "-" or "1." etc.
+                        lvl = list_nesting_level(indent)
+                        para_text = " " * (4 * (lvl-1)) + list_marker + para_text.lstrip('•*-0123456789. ') 
+                        is_list = True
+                    page_elements.append(para_text)
+                elif isinstance(element, LTImage) or isinstance(element, LTFigure):
+                    # If LTFigure, it may contain LTImage inside; find all images in it
+                    imgs = []
+                    if isinstance(element, LTImage):
+                        imgs = [element]
+                    else:
+                        imgs = [obj for obj in element if isinstance(obj, LTImage)]
+                    for img in imgs:
+                        placeholder = f"[IMAGE {image_counter}]"
+                        if extractMedia:
+                            fmt = get_image_format(img)
+                            img_filename = f"image-{image_counter}.{fmt}"
+                            img_path = media_dir / img_filename
+                            save_image_data(img, img_path)  # custom function using Pillow or raw bytes
+                            placeholder = f"![Image {image_counter}]({img_filename})"
+                        page_elements.append(placeholder)
+                        image_counter += 1
+                # ignore LTLine/LTRect here
+            # Table handling using plumber if enabled
+            if plumber_pdf:
+                tables = plumber_pdf.pages[page_num-1].find_tables()
+                for t_idx, table in enumerate(tables, start=1):
+                    table_data = table.extract()
+                    table_markdown = format_table_to_markdown(table_data)
+                    if table_markdown is None:
+                        # fallback to CSV
+                        csv_path = media_dir / f"table-{t_idx}.csv"
+                        write_csv(table_data, csv_path)
+                        note = f"> Table {t_idx} (low confidence; CSV fallback below)"
+                        csv_block = "```csv\n" + csv_path.read_text() + "\n```"
+                        page_elements.append(note); page_elements.append(csv_block)
+                    else:
+                        page_elements.append(table_markdown)
+                    # Remove any text elements from page_elements that lie within table bbox to avoid duplication.
+                    remove_table_text_from_page_elements(page_elements, table.bbox)
+            # Append page content to md_lines
+            md_lines += join_page_elements(page_elements)
+        # Write output file
+        md_path = workspace / f"{pdf_path.stem}_extracted.md"
+        md_path.write_text("\n".join(md_lines), encoding="utf-8")
+        return md_path
+
+(*Note:* The above is a high-level sketch; the actual implementation
+will handle edge cases and integrate with TinyUtils logging and error
+handling. For example, `looks_like_heading` will use the font size logic
+described, and `list_nesting_level` will manage a global indent stack
+for consistency across items on the page.)
+
+We will insert the call to `_extract_markdown_from_pdf` in `app.py` or
+`convert_service.py` where PDF input is detected. Specifically, in
+`convert_service.py` around line 150, where currently
+`_extract_text_from_pdf` is invoked, we'll instead do:
+
+    if input_path.suffix.lower() == ".pdf" or from_format == "pdf":
+        logs.append("preprocessing=pdf_layout_extraction")
+        source_for_pandoc = _extract_markdown_from_pdf(input_path, workspace, mode='default')
+
+(This replaces the old plain text extraction. We'll keep
+`_extract_text_from_pdf` code for fallback use.)
+
+**Fallback logic:** If anything goes wrong -- e.g., pdfminer throws an
+exception on a malformed PDF, or the output seems too poor -- we will
+revert to the old method: - The function `_extract_markdown_from_pdf`
+will be wrapped in a try/except. On exception, log
+`pdf_extraction_error=<...>` and call `_extract_text_from_pdf` as a safe
+fallback, so the user at least gets basic text. - We also define
+**quality fallback**: After extraction, we can quickly assess output
+quality. Criteria to trigger fallback to pypdf output could be: - **Too
+little text:** If the output Markdown has significantly fewer characters
+than the PDF file size might suggest, or fewer than (say) 20 characters
+total, it's likely a failure -- maybe pdfminer couldn't extract
+(encrypted PDF or unsupported encoding). Then use pypdf. - **Dominated
+by gibberish:** e.g., if non-printable characters or extremely long
+lines with no spaces (could indicate encoding issues). We can detect if
+output has \>30% control/special chars and no spaces -- then fallback. -
+**No newlines at all:** If our output ended up one giant line
+(indicative of something gone wrong in our merging logic), better to
+fallback to a safer output than give a giant unbroken string. - We will
+*not* fallback just because structure detection might be imperfect --
+only if it's clearly worse than the plain extraction. In most normal
+cases, our output should be richer. This "never worse than today"
+guarantee means the user won't lose content. - If a fallback happens, we
+log `pdf_extraction_fallback=basic_text` for observability.
+
+# Validation Plan
+
+We will validate the new PDF extraction with a variety of documents to
+ensure it indeed preserves structure better than the current approach:
+
+**Test Cases:**
+
+1.  **Single-column narrative report** -- e.g. a whitepaper or essay
+    with headings and paragraphs. *Expect:* Headings detected (H1/H2
+    Markdown), no spurious line breaks within paragraphs, lists
+    formatted if any, overall text flow matches the original reading
+    order. *Metric:* Manual inspection that paragraphs aren't broken
+    every line (current pypdf output would have every line separate; new
+    output should have wrapped paragraphs). Also check that the
+    top-level heading is preceded by "#".
+
+2.  **Two-column academic article or brochure** -- text flows in two
+    columns on a page. *Expect:* The content from the left column is
+    grouped and then the right column, with minimal intermixing. In
+    default mode, pdfminer may already handle it, but we might use
+    aggressive mode to compare. *Metric:* Search the output for
+    instances where a sentence clearly from column 1 is immediately
+    followed by one from column 2 on the same page (that would indicate
+    a merge error). We aim to minimize such occurrences. Also verify
+    that reading order is maintained (the text from column 2 of page N
+    should come *before* the text of column 1 of page N+1 in output,
+    etc.).
+
+3.  **Document with bullet and numbered lists** -- a procedures list
+    with multiple levels:
+
+4.  *Expect:* Markdown `-` and `1.` list markers present, properly
+    indented for sub-levels. No stray list markers in separate
+    paragraphs.
+
+5.  *Metric:* Count of list items `-` in output vs. bullets in PDF
+    visually. We expect \>90% of bullet points become actual list items
+    in MD (some might not if unusual symbols, but any bullet recognized
+    should be an MD list).
+
+6.  Also check that nested lists in the PDF appear as nested Markdown
+    (we can create a sample with two-level lists to confirm).
+
+7.  **Simple table and complex table**:
+
+8.  A PDF page with a basic table (e.g. 3x4 grid, clear borders) --
+    *Expect:* a Markdown table in output with correct rows and columns.
+
+9.  A PDF with a complex table (irregular columns or cell spanning
+    multiple columns) -- *Expect:* we output a CSV fallback block with a
+    note.
+
+10. *Metric:* Ensure no table content is lost: the text in the table
+    appears either in the MD table or in the CSV. Also verify alignment:
+    e.g., in a simple table, each row in MD has the same number of `|`
+    separators.
+
+11. If using plumber, compare our table output vs plumber's direct
+    extract to verify correctness.
+
+12. **Document with code blocks or indented text** -- e.g. a PDF of a
+    presentation or an email with indented quoted text or code.
+    *Expect:* We preserve the spacing in code (perhaps as a blockquote
+    or code block if it's obviously code). If the PDF uses a monospaced
+    font for a whole block, we might wrap it in \`\`\` (we can detect by
+    font name like Courier). At minimum, ensure we don't mangle text
+    alignment important for code.
+
+13. *Metric:* If a line has many consecutive spaces (like code
+    indentation), verify they are retained. Also ensure that we didn't
+    erroneously treat it as a list due to indentation (we might refine
+    list detection to avoid false positives on multi-space indents that
+    are not bullets).
+
+14. **Long hyperlinks and footnotes** -- A PDF with long URLs or
+    footnote references. *Expect:* URLs remain intact (our merging
+    shouldn't break them at line breaks -- pdfminer often splits long
+    links char-by-char, but our algorithm will merge lines, so it should
+    reassemble them). Footnote numbers in superscript should just appear
+    inline (we're not doing special footnote handling, which is fine).
+
+15. *Metric:* Check that a long URL (e.g., split across lines in PDF)
+    appears as one continuous URL in output. Also ensure that footnote
+    markers like "\[1\]" don't turn into Markdown links inadvertently.
+
+**Success criteria:**
+
+- **Hard line breaks eliminated:** Compare the count of newline
+  characters in current vs new output for a given single-column text:
+  expect a reduction by \>50% (i.e., paragraphs are now flowing). For
+  example, in a 300-word page that had \~20 newlines (one per line), we
+  should see maybe 2--3 (paragraph breaks only) in our output.
+- **Heading retention:** If original PDF had clear section headings
+  (larger bold text), at least the top one or two levels are recognized
+  as `#`/`##` in Markdown. We target \>80% of obvious headings to be
+  correctly marked. (We will manually verify on a few known documents.)
+- **Lists:** Nested list structures appear as nested Markdown lists. We
+  expect nearly 100% of bullet lists to be captured (bullets are easy to
+  detect[\[8\]](https://onlyoneaman.medium.com/i-tested-7-python-pdf-extractors-so-you-dont-have-to-2025-edition-c88013922257#:~:text=table%20%3D%20first_page))
+  and a high percentage of numbered lists too (taking care to include
+  the period and not confuse with sentence numbers).
+- **Tables:** When tables are present, output is either a valid Markdown
+  table or a clear fallback. We want to avoid the current scenario where
+  table text is just dumped with spaces -- instead, either properly
+  delineated by `|` or placed in a CSV block with a note. This is
+  qualitative, but on our test, we'll mark it a success if the table is
+  easily recognizable in the output (rows on separate lines, columns
+  separated). Low confidence cases should produce a CSV that opens
+  correctly in Excel/Google Sheets.
+- **Images:** Ensure the correct count of image placeholders. If a PDF
+  page had 3 images and some text, our output should have 3 `[IMAGE n]`
+  tags in roughly the correct places. We will cross-verify by counting
+  images via pypdf or PDF inspection. If `extractMedia` is on, check
+  that the zip contains exactly those 3 images and the Markdown has\
+  links pointing to them.
+
+**Usability check:** We'll open the Markdown output in a viewer or IDE
+to see that it's readable and preserves structure. It should be
+significantly closer to the PDF's formatting than the old method (which
+was plain text). We also run the full TinyUtils conversion (PDF-\>target
+format) on these test files to see end-to-end results. For example,
+PDF-\>DOCX via our Markdown should yield a DOCX with proper headings and
+lists now (Pandoc will interpret our MD markers accordingly).
+
+**Logging and Monitoring:** We will add logging as described to gather
+metrics in production. Specifically: - Count of headings, lists, tables,
+images per conversion. Over many documents, this helps identify if our
+detection is overzealous or under-triggering (e.g., if 0 headings are
+ever detected, maybe our threshold is too strict). - A flag if fallback
+was used. If we start seeing fallback=basic_text often in logs, that
+signals issues to fix. - A quick content-length ratio between input PDF
+and output text length (as a proxy for completeness). We expect output
+text length to be roughly in line with what a copy-paste of the PDF text
+would be. If we see, say, a 10-page PDF with 0 output length (in logs),
+we know something failed.
+
+We will also do a **side-by-side comparison** on a couple of documents:
+run both old and new extraction and diff the Markdown. We should see
+that new one has fewer "\\n" within paragraphs, and added symbols like
+"- " or "# " where appropriate. This visual diff is a strong indicator
+of improvement.
+
+# Risks & Mitigations
+
+  -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  **Risk**                                                                                                                                               **Impact**        **Likelihood**   **Mitigation /
+                                                                                                                                                                                            Fallback**
+  ------------------------------------------------------------------------------------------------------------------------------------------------------ ----------------- ---------------- -------------------
+  **Processing time on large PDFs** -- Pdfminer is slower than pypdf (e.g. \~35x slower than                                                             High (timeout)    Moderate for     **Mitigation:**
+  MuPDF)[\[3\]](https://www.reddit.com/r/learnpython/comments/11ltkqz/which_is_faster_at_extracting_text_from_a_pdf/#:~:text=%E2%80%A2%20%203y%20ago). A                   very large files Stream processing
+  50-page graphics-heavy PDF could approach our 90s limit.                                                                                                                                  page by page (no
+                                                                                                                                                                                            huge memory
+                                                                                                                                                                                            build-up). If a PDF
+                                                                                                                                                                                            has extreme pages,
+                                                                                                                                                                                            consider limiting
+                                                                                                                                                                                            pages (e.g., cap at
+                                                                                                                                                                                            50 pages with
+                                                                                                                                                                                            warning). Use
+                                                                                                                                                                                            `mode='default'` by
+                                                                                                                                                                                            default; only use
+                                                                                                                                                                                            `aggressive`
+                                                                                                                                                                                            (slower if it needs
+                                                                                                                                                                                            reordering) when
+                                                                                                                                                                                            necessary or
+                                                                                                                                                                                            explicitly
+                                                                                                                                                                                            requested. Profile
+                                                                                                                                                                                            on worst-case docs
+                                                                                                                                                                                            and optimize (e.g.,
+                                                                                                                                                                                            skip table
+                                                                                                                                                                                            detection if not
+                                                                                                                                                                                            needed).
+
+  **Cold start memory/cpu overhead** -- Loading pdfminer (and pdfplumber/PDFium) increases cold start time and memory usage. Serverless functions might  Medium (slower    Likely for every **Mitigation:** Use
+  be evicted faster or scaled down.                                                                                                                      first request)    cold start       pdfminer (pure
+                                                                                                                                                                                            Python) primarily,
+                                                                                                                                                                                            and delay importing
+                                                                                                                                                                                            pdfplumber/Pillow
+                                                                                                                                                                                            until we actually
+                                                                                                                                                                                            detect a table
+                                                                                                                                                                                            (lazy import inside
+                                                                                                                                                                                            the function when
+                                                                                                                                                                                            needed). This way
+                                                                                                                                                                                            simple PDFs don't
+                                                                                                                                                                                            pay the PDFium
+                                                                                                                                                                                            cost. Monitor
+                                                                                                                                                                                            memory; if too
+                                                                                                                                                                                            high, we might
+                                                                                                                                                                                            remove pdfplumber
+                                                                                                                                                                                            and implement
+                                                                                                                                                                                            simpler table logic
+                                                                                                                                                                                            to drop PDFium.
+
+  **Incorrect structure inference** -- False positives: e.g., a line in a large font that isn't a title gets tagged as heading, or an indented block     Medium (format    Possible on      **Mitigation:**
+  mistaken for a list. This could alter meaning (adding a `#` or `-` incorrectly).                                                                       noise)            certain layouts  Make heuristics
+                                                                                                                                                                                            conservative: e.g.,
+                                                                                                                                                                                            only tag a heading
+                                                                                                                                                                                            if font size is
+                                                                                                                                                                                            significantly
+                                                                                                                                                                                            larger than body
+                                                                                                                                                                                            and the text is
+                                                                                                                                                                                            short. Only treat
+                                                                                                                                                                                            indents as lists if
+                                                                                                                                                                                            a bullet/number
+                                                                                                                                                                                            character is
+                                                                                                                                                                                            present. We can
+                                                                                                                                                                                            also run a quick
+                                                                                                                                                                                            post-process: if a
+                                                                                                                                                                                            "heading" ends with
+                                                                                                                                                                                            punctuation like
+                                                                                                                                                                                            ".", it might
+                                                                                                                                                                                            actually be a
+                                                                                                                                                                                            normal sentence in
+                                                                                                                                                                                            a larger font -- we
+                                                                                                                                                                                            could remove the
+                                                                                                                                                                                            `#`. In any case,
+                                                                                                                                                                                            if such an error
+                                                                                                                                                                                            slips through, it's
+                                                                                                                                                                                            cosmetic (the
+                                                                                                                                                                                            content is still
+                                                                                                                                                                                            there). Users can
+                                                                                                                                                                                            remove a stray `#`
+                                                                                                                                                                                            in the output if
+                                                                                                                                                                                            needed, which is
+                                                                                                                                                                                            easier than
+                                                                                                                                                                                            manually adding
+                                                                                                                                                                                            structure that
+                                                                                                                                                                                            wasn't there.
+
+  **Missing or jumbled content** -- In worst cases, our algorithm could fail (e.g., a text box is dropped, or multi-column text intermixes). This would  High (data loss   Low with         **Mitigation:**
+  be a regression from the current plain extraction (which, while ugly, at least included everything in some order).                                     or confusion)     pdfminer (it's   Robust fallback: If
+                                                                                                                                                                           reliable for     after extraction we
+                                                                                                                                                                           extraction)      detect an anomaly
+                                                                                                                                                                                            (very low text
+                                                                                                                                                                                            yield or empty
+                                                                                                                                                                                            output), we log
+                                                                                                                                                                                            error and use the
+                                                                                                                                                                                            old pypdf
+                                                                                                                                                                                            extraction to
+                                                                                                                                                                                            ensure the user
+                                                                                                                                                                                            gets something.
+                                                                                                                                                                                            Also, extensive
+                                                                                                                                                                                            testing on diverse
+                                                                                                                                                                                            PDFs will refine
+                                                                                                                                                                                            our parameters to
+                                                                                                                                                                                            avoid jumbled
+                                                                                                                                                                                            output. For
+                                                                                                                                                                                            multi-column
+                                                                                                                                                                                            mixing, our
+                                                                                                                                                                                            aggressive mode can
+                                                                                                                                                                                            be used -- possibly
+                                                                                                                                                                                            auto-trigger it if
+                                                                                                                                                                                            we detect
+                                                                                                                                                                                            overlapping text
+                                                                                                                                                                                            coordinates in one
+                                                                                                                                                                                            text box (a sign of
+                                                                                                                                                                                            merged columns).
+
+  **Multi-language and encoding issues** -- PDFs with non-Latin scripts, RTL languages, or special encodings might not be handled well by our            Medium (some      Possible for     **Mitigation:** Our
+  hyphenation or list logic (e.g., merging lines in Chinese text where periods and capitalization differ, or bullets in RTL context).                    languages not     certain user     rules are mostly
+                                                                                                                                                         well-formatted)   PDFs             geometry-based, so
+                                                                                                                                                                                            language shouldn't
+                                                                                                                                                                                            heavily affect
+                                                                                                                                                                                            them. We
+                                                                                                                                                                                            specifically avoid
+                                                                                                                                                                                            language-specific
+                                                                                                                                                                                            assumptions (e.g.,
+                                                                                                                                                                                            only merge hyphen
+                                                                                                                                                                                            if next char is
+                                                                                                                                                                                            lowercase **and**
+                                                                                                                                                                                            we are in a
+                                                                                                                                                                                            language that
+                                                                                                                                                                                            hyphenates -- for
+                                                                                                                                                                                            CJK or Arabic, we
+                                                                                                                                                                                            won't merge on
+                                                                                                                                                                                            hyphen at all
+                                                                                                                                                                                            unless we detect
+                                                                                                                                                                                            something like a
+                                                                                                                                                                                            soft-hyphen
+                                                                                                                                                                                            marker). We'll test
+                                                                                                                                                                                            on a non-English
+                                                                                                                                                                                            PDF (e.g., a
+                                                                                                                                                                                            Spanish or French
+                                                                                                                                                                                            doc with hyphens, a
+                                                                                                                                                                                            Chinese PDF to
+                                                                                                                                                                                            ensure we don't
+                                                                                                                                                                                            mess spacing).
+                                                                                                                                                                                            Additionally,
+                                                                                                                                                                                            pdfminer handles
+                                                                                                                                                                                            Unicode; we just
+                                                                                                                                                                                            need to ensure we
+                                                                                                                                                                                            don't drop
+                                                                                                                                                                                            characters. We'll
+                                                                                                                                                                                            also normalize the
+                                                                                                                                                                                            Unicode output (NFC
+                                                                                                                                                                                            form) to avoid
+                                                                                                                                                                                            weird combinations.
+                                                                                                                                                                                            If RTL text
+                                                                                                                                                                                            ordering is wrong,
+                                                                                                                                                                                            that is a known
+                                                                                                                                                                                            challenge (pdfminer
+                                                                                                                                                                                            might output in
+                                                                                                                                                                                            logical order or
+                                                                                                                                                                                            not); that might be
+                                                                                                                                                                                            out-of-scope for
+                                                                                                                                                                                            now but we will
+                                                                                                                                                                                            document it as a
+                                                                                                                                                                                            limitation if
+                                                                                                                                                                                            encountered.
+  -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# "Do Next" Checklist for PR A
+
+1.  **Add Dependencies:** Update `api/convert/requirements.txt` to
+    include `pdfminer.six` (and possibly `pdfplumber>=0.11` and `Pillow`
+    if table extraction with plumber is planned). Since `pypdf` is
+    already there, ensure no conflict. Run `pip install` locally to
+    freeze exact versions (pdfminer.six 2025xxxx, pdfplumber 0.11.x).
+    Verify that pdfminer.six is the active fork (not the old pdfminer
+    package).
+2.  **Implement** `_extract_markdown_from_pdf`**:** Create this function
+    in `convert_service.py` as outlined. Include sub-functions or inline
+    logic for hyphen repair, list detection (you might implement a
+    simple state machine for list indent levels), and heading detection
+    (maybe gather font sizes in a first pass across the document to
+    decide thresholds). Keep code readable with comments referencing
+    this design doc for clarity.
+3.  **Integrate into pipeline:** In `convert_service.py`, replace the
+    call to `_extract_text_from_pdf` with `_extract_markdown_from_pdf`
+    for PDF inputs. Pass in the `workspace` temp dir and handle the
+    returned Markdown path as `source_for_pandoc`. Remove or adapt any
+    downstream steps that assumed plain text (for example, previously
+    they added page headers "**Page n**" -- we'll still do that, so
+    Pandoc will treat them as content). The pandoc conversion to other
+    formats (DOCX, HTML, etc.) should now automatically pick up our
+    Markdown structure (e.g., headings to DOCX headings).
+4.  **Adapt Lua filters if needed:** Review the filters in `filters/` --
+    e.g., `normalize_lists.lua` might assume that list markers are in
+    text; it might conflict or complement our approach. If our output
+    already has proper lists, that filter might be redundant or could
+    even alter them incorrectly. Do a quick test: run our new markdown
+    through the existing filters (the `convert_service` applies them via
+    Pandoc's `--lua-filter` options) to ensure nothing weird happens
+    (like double bullets). Adjust or remove filters like
+    `softbreak_to_space.lua` if our markdown no longer has soft line
+    breaks (that one was likely to fix wrapped lines from Pandoc; we
+    might not need it now). Update `AGENTS.md` if any prompt-based agent
+    flow expects a different output format.
+5.  **Write tests:** Create unit tests or integration tests for
+    `_extract_markdown_from_pdf`. Use some sample PDFs (we can include a
+    small one in `docs/` or as a data file) to ensure the function runs
+    and produces expected Markdown. At least include: a bullet list
+    page, a heading page, and a table page. Ensure the Markdown output
+    contains the expected markers (`#`, `-`, `| ... |`).
+6.  **Manual QA with TinyUtils site:** Run the TinyUtils Converter
+    locally (as per `TEST_PLAN_SITE.md`). Upload a few PDF samples
+    through the UI (the text-converter tool) and verify the output
+    Markdown looks correct in the preview and in the downloadable files.
+    Check that images and tables are handled as decided. Also test
+    conversion to other formats: e.g., PDF-\>DOCX now should yield a
+    DOCX with real headings (open in Word to confirm they show up in the
+    navigation pane as headings) and lists (check bullet alignment in
+    Word).
+7.  **Performance check:** Simulate a worst-case scenario by using a
+    \~50 page PDF (if available) and measure processing time. Log how
+    long `_extract_markdown_from_pdf` took. Ensure it's well below 90s
+    (should be, likely a few seconds for text-heavy, maybe tens of
+    seconds if very complex). If it's borderline, consider optimizations
+    (like turning off image extraction by default, or not using plumber
+    on every page unless needed).
+8.  **Logging & Monitoring:** Ensure that our added `logs.append(...)`
+    entries are being recorded and visible (they typically propagate in
+    the API response for debugging). After deployment, monitor the logs
+    for any `pdf_extraction_error` or `fallback` occurrences to catch
+    issues early. Also monitor memory usage on Vercel -- if functions
+    start to run OOM or cold start times increase significantly, we
+    might need to adjust dependencies (e.g., drop pdfplumber usage or
+    find a lighter alternative).
+9.  **Documentation:** Update any relevant documentation: Perhaps add a
+    note in `README` or `docs/AGENT_ASSISTED_PROMPTS.md` that PDF
+    conversion now preserves structure. Also, if there's user-facing
+    info (maybe on the site describing conversion quality), we can
+    highlight improved PDF support. If any new option (like "aggressive
+    mode" or "extract images") is exposed, document that for users or
+    internal team.
+10. **Feature flag (if needed):** If we're unsure about immediate
+    deployment, consider guarding the new functionality behind a feature
+    flag or environment variable so it can be toggled. Given confidence,
+    likely we'll fully replace the old method, but keeping
+    `_extract_text_from_pdf` intact means we have an easy toggle: e.g.,
+    an env var `PDF_STRUCTURED=0` could force using the old method in
+    case of emergency rollback. Implement such a switch if deemed
+    necessary.
+
+# Assumptions & Open Questions
+
+- **Assumed PDF complexity:** Typical inputs are "business" PDFs --
+  reports, academic papers, user manuals -- not extreme vector graphics
+  or purely scanned documents. We explicitly assume **no OCR**
+  requirement (per constraints). If a user uploads a scanned PDF (no
+  extractable text), our method will produce essentially nothing (same
+  as current, since pypdf can't OCR either). We won't address OCR in
+  this scope.
+- **Page count limits:** We assume PDFs are at most a few dozen pages
+  given our time limits. If much larger documents are possible, we might
+  need to implement streaming to the client or an asynchronous job --
+  outside our current scope. We'll set an upper bound (maybe 100 pages)
+  and document it. TinyUtils can clarify typical usage sizes.
+- **Font size heuristic validation:** We assume headings can be detected
+  by font size differences. This works in many cases, but not all (some
+  PDFs don't vary font size for headings, using just bold or all caps).
+  We rely on size primarily because pdfminer doesn't directly tell us
+  bold/italic (it gives font names, which might contain "Bold"). We may
+  incorporate font weight by checking font name substrings like "Bold"
+  or "Heavy" to boost confidence that a line is a heading if it's bold
+  and slightly larger than body text. **Open question:** Do we want to
+  use font weight? Possibly yes -- to distinguish a bold sentence from a
+  heading, size is still key. We'll start with size, and we can refine
+  by weight and positioning (centered titles vs justified text) later.
+- **List detection edge cases:** Assumed that list items always start at
+  the beginning of a text line in the PDF. If a paragraph has an inline
+  "1. First item -- text continues on same line", our logic might not
+  catch that because we look at line starts. But such cases are rare
+  (lists usually break lines). We accept that limitation. Also,
+  roman-numeral or lettered lists (A., B., i., ii.) are not explicitly
+  in our regex yet -- we should include common patterns.
+- **Images output:** We assume that storing images and tables in a media
+  ZIP is acceptable (TinyUtils already packages media for other
+  converters). We'll confirm that the front-end can handle showing
+  `[IMAGE]` placeholders or linked images appropriately in the preview.
+  Possibly the preview might not show the actual images if we don't
+  implement that; that's fine, a placeholder is still informative. An
+  open question is whether to offer an option for the user to get images
+  out; but since our design includes it, we'll implement it quietly and
+  it can be exposed in UI later.
+- **Pandoc conversion with our Markdown:** We assume Pandoc will handle
+  our Markdown correctly. Specifically, Pandoc should pass through our
+  tables (it supports GitHub-style tables and will convert them to, say,
+  DOCX tables). It should also retain list structures. We might need to
+  ensure our Markdown is Pandoc-friendly (e.g., Pandoc might be picky
+  about list indentation or requiring a blank line before a list -- our
+  join logic should ensure that).
+- **Spacing and styling nuances:** We won't aim to preserve exact
+  spacing or alignment beyond semantic structure. E.g., if the PDF had
+  centered text, our Markdown won't reflect "center"; that's acceptable.
+  We focus on content and hierarchy, not visual alignment. TinyUtils is
+  okay with that trade-off (since Markdown is not WYSIWYG).
+- **Future aggressive detection:** We wonder if we should automatically
+  decide mode=\'aggressive\' for certain pages. Perhaps, if on a page we
+  find two distinct clusters of text boxes far apart in X coordinate
+  (suggesting two columns), we could switch mode for that page or
+  re-process it. This might be too complex right now. We assume for now
+  it's a manual mode or possibly we always use one mode for the whole
+  doc. We leave open the idea: *Open question:* should we auto-detect
+  multi-column layout? Possibly yes in future -- e.g., if pdfminer's
+  output for page 1 has a text box that covers less than half page width
+  and another separate box on same page, that implies two columns. We
+  could then re-run that page with aggressive settings or at least sort
+  by x-coordinate. For now, we won't implement re-processing; we'll
+  choose one approach and document that users can retry with aggressive
+  mode if needed.
+- **Licensing:** All chosen libraries (pdfminer.six, pdfplumber) are
+  permissively licensed (MIT). We assume this is fine for TinyUtils'
+  commercial usage (which it is). If we ended up using PyMuPDF or
+  similar, we'd have had to consider AGPL -- but we avoided those.
+- **Deployment environment:** We assume Vercel Edge Functions can handle
+  the added package size (pdfminer + pdfplumber \~ maybe 15-20 MB plus a
+  \~5 MB PDFium binary). It should, but we're near the edge. If there's
+  an issue, we might trim dependencies (e.g., if we only use pdfminer,
+  we can avoid pdfplumber/pdfium altogether and cut size).
+- **Beta period:** It might be wise to run this new extractor in beta
+  first -- perhaps parse PDFs both ways in parallel and compare results
+  invisibly. But given time, we likely will just deploy and closely
+  monitor feedback/logs. TinyUtils team should be ready to roll back if
+  needed via feature flag.
+
+# Citations
+
+- PDFPlumber built on pdfminer.six, preserving layout (including
+  indentation for
+  structure)[\[9\]](https://www.pdfplumber.com/how-does-pdfplumber-handle-text-extraction-from-pdfs/#:~:text=Indentation%20Recognition%20for%20Structured%20Content)[\[14\]](https://pypdf.readthedocs.io/en/stable/meta/comparisons.html#:~:text=pdfminer,capabilities%20for%20writing%20PDF%20files).
+- Pdfminer.six LAParams defaults and meaning (character, word, line
+  margins,
+  boxes_flow)[\[32\]](https://pdfminersix.readthedocs.io/en/latest/reference/composable.html#:~:text=class%20pdfminer,%C2%B6)[\[20\]](https://pdfminersix.readthedocs.io/en/latest/reference/composable.html#:~:text=,corner%20of%20the%20text%20box).
+- Reddit comment on performance: PyMuPDF \~35x faster than pdfminer for
+  text extraction (pdfminer is
+  slower)[\[3\]](https://www.reddit.com/r/learnpython/comments/11ltkqz/which_is_faster_at_extracting_text_from_a_pdf/#:~:text=%E2%80%A2%20%203y%20ago).
+- Medium benchmark: pdfminer had best text fidelity (lowest Levenshtein
+  distance) but slower than
+  PyMuPDF[\[17\]](https://medium.com/social-impact-analytics/comparing-4-methods-for-pdf-text-extraction-in-python-fd34531034f#:~:text=case%20were%20identical,times%20as%20long%20to%20complete).
+- Medium benchmark of 7 PDF extractors (Aman Kumar, 2025): pypdf output
+  vs pdfplumber vs pdfium
+  speeds[\[12\]](https://onlyoneaman.medium.com/i-tested-7-python-pdf-extractors-so-you-dont-have-to-2025-edition-c88013922257#:~:text=pypdfium2%20%280,basic%20text%2C%20no%20structure)[\[8\]](https://onlyoneaman.medium.com/i-tested-7-python-pdf-extractors-so-you-dont-have-to-2025-edition-c88013922257#:~:text=table%20%3D%20first_page).
+- pypdf vs pdfminer vs pdfplumber: pypdf is pure Python, fast but basic
+  (spacing
+  quirks)[\[15\]](https://onlyoneaman.medium.com/i-tested-7-python-pdf-extractors-so-you-dont-have-to-2025-edition-c88013922257#:~:text=everywhere%2C%20no%20C%20dependencies),
+  pdfplumber needs tuning for text but great for
+  tables[\[8\]](https://onlyoneaman.medium.com/i-tested-7-python-pdf-extractors-so-you-dont-have-to-2025-edition-c88013922257#:~:text=table%20%3D%20first_page).
+- pypdfium2 usage yields raw text (no structure) extremely
+  fast[\[27\]](https://onlyoneaman.medium.com/i-tested-7-python-pdf-extractors-so-you-dont-have-to-2025-edition-c88013922257#:~:text=)
+  -- we prioritize structure over raw speed.
+- pdfplumber table extraction approach (finding lines and
+  intersections)[\[10\]](https://github.com/jsvine/pdfplumber#:~:text=Extracting%20tables).
+- Pdfplumber image support note: provides image position/metrics but no
+  content
+  extraction[\[11\]](https://github.com/jsvine/pdfplumber#:~:text=).
+- Memory concerns: pdfminer.six might not free all memory immediately
+  (issue noted by pdfplumber
+  author)[\[5\]](https://github.com/pdfminer/pdfminer.six/issues/580#:~:text=Somewhere%20in%20,it%20required%20is%20not%20released)
+  (not critical for short-lived serverless, but noted).
+- Current pipeline reference from repo (page markers in output, etc.).
+
+------------------------------------------------------------------------
+
+[\[1\]](https://medium.com/khadija-mahanga/unstructured-pdf-extraction-series-a8ba04da767f#:~:text=extracting%20tables%2C%20it%20struggled%20with,not%20all%20tables%20could%20be)
+[\[30\]](https://medium.com/khadija-mahanga/unstructured-pdf-extraction-series-a8ba04da767f#:~:text=To%20extract%20both%20text%20and,and%20the%20position%20of%20tables)
+[\[31\]](https://medium.com/khadija-mahanga/unstructured-pdf-extraction-series-a8ba04da767f#:~:text=def%20pdf_process%28path%29%3A%20plumberObj%20%3D%20pdfplumber,page_text%20%3D%20miner_extract_page%28page_layout%2C%20tables)
+Unstructured PDF Text Extraction. Have you ever encountered a
+daunting... \| by Khadija Mahanga \| Khadija Mahanga \| Medium
+
+<https://medium.com/khadija-mahanga/unstructured-pdf-extraction-series-a8ba04da767f>
+
+[\[2\]](https://pypdf.readthedocs.io/en/stable/meta/comparisons.html#:~:text=pdfminer,capabilities%20for%20writing%20PDF%20files)
+[\[14\]](https://pypdf.readthedocs.io/en/stable/meta/comparisons.html#:~:text=pdfminer,capabilities%20for%20writing%20PDF%20files)
+[\[26\]](https://pypdf.readthedocs.io/en/stable/meta/comparisons.html#:~:text=While%20both%20are%20excellent%20libraries,to%20buy%20a%20commercial%20license)
+pypdf vs X --- pypdf 6.2.0 documentation
+
+<https://pypdf.readthedocs.io/en/stable/meta/comparisons.html>
+
+[\[3\]](https://www.reddit.com/r/learnpython/comments/11ltkqz/which_is_faster_at_extracting_text_from_a_pdf/#:~:text=%E2%80%A2%20%203y%20ago)
+Which is faster at extracting text from a PDF: PyMuPDF or PyPDF2? :
+r/learnpython
+
+<https://www.reddit.com/r/learnpython/comments/11ltkqz/which_is_faster_at_extracting_text_from_a_pdf/>
+
+[\[4\]](https://onlyoneaman.medium.com/i-tested-7-python-pdf-extractors-so-you-dont-have-to-2025-edition-c88013922257#:~:text=textract%20%280,capabilities%2C%20minor%20formatting%20variations)
+[\[8\]](https://onlyoneaman.medium.com/i-tested-7-python-pdf-extractors-so-you-dont-have-to-2025-edition-c88013922257#:~:text=table%20%3D%20first_page)
+[\[12\]](https://onlyoneaman.medium.com/i-tested-7-python-pdf-extractors-so-you-dont-have-to-2025-edition-c88013922257#:~:text=pypdfium2%20%280,basic%20text%2C%20no%20structure)
+[\[15\]](https://onlyoneaman.medium.com/i-tested-7-python-pdf-extractors-so-you-dont-have-to-2025-edition-c88013922257#:~:text=everywhere%2C%20no%20C%20dependencies)
+[\[27\]](https://onlyoneaman.medium.com/i-tested-7-python-pdf-extractors-so-you-dont-have-to-2025-edition-c88013922257#:~:text=)
+[\[28\]](https://onlyoneaman.medium.com/i-tested-7-python-pdf-extractors-so-you-dont-have-to-2025-edition-c88013922257#:~:text=text%2C%20_%2C%20_%20%3D%20text_from_rendered,)
+I Tested 7 Python PDF Extractors So You Don't Have To (2025 Edition) \|
+by Aman Kumar \| Medium
+
+<https://onlyoneaman.medium.com/i-tested-7-python-pdf-extractors-so-you-dont-have-to-2025-edition-c88013922257>
+
+[\[5\]](https://github.com/pdfminer/pdfminer.six/issues/580#:~:text=Somewhere%20in%20,it%20required%20is%20not%20released)
+[\[6\]](https://github.com/pdfminer/pdfminer.six/issues/580#:~:text=Line%20,collect)
+Memory leak? · Issue #580 · pdfminer/pdfminer.six · GitHub
+
+<https://github.com/pdfminer/pdfminer.six/issues/580>
+
+[\[7\]](https://github.com/pdfminer/pdfminer.six/releases#:~:text=Releases%3A%20pdfminer%2Fpdfminer,and%20signed%20with%20GitHub%27s)
+Releases · pdfminer/pdfminer.six - GitHub
+
+<https://github.com/pdfminer/pdfminer.six/releases>
+
+[\[9\]](https://www.pdfplumber.com/how-does-pdfplumber-handle-text-extraction-from-pdfs/#:~:text=Indentation%20Recognition%20for%20Structured%20Content)
+How does PDFPlumber handle text extraction from PDFs? - PDFPlumber
+
+<https://www.pdfplumber.com/how-does-pdfplumber-handle-text-extraction-from-pdfs/>
+
+[\[10\]](https://github.com/jsvine/pdfplumber#:~:text=Extracting%20tables)
+[\[11\]](https://github.com/jsvine/pdfplumber#:~:text=)
+[\[25\]](https://github.com/jsvine/pdfplumber#:~:text=If%20you%20pass%20the%20%60pdfminer.six%60,textboxhorizontal)
+[\[29\]](https://github.com/jsvine/pdfplumber#:~:text=breaking%20tokens%20at%20punctuations%20specified,will%20be%20expanded%20into%20their)
+GitHub - jsvine/pdfplumber: Plumb a PDF for detailed information about
+each char, rectangle, line, et cetera --- and easily extract text and
+tables.
+
+<https://github.com/jsvine/pdfplumber>
+
+[\[13\]](https://generalistprogrammer.com/tutorials/pdfplumber-python-package-guide#:~:text=pdfplumber%20depends%20on%20the%20following,packages)
+pdfplumber Guide: Complete Python Package Documentation \[2025\]
+
+<https://generalistprogrammer.com/tutorials/pdfplumber-python-package-guide>
+
+[\[16\]](https://github.com/py-pdf/pypdf/discussions/2038#:~:text=The%20text%20extracting%20quality%20metric,the%20ground%20truth%20was%20wrong)
+Text Extraction Improvements · py-pdf pypdf · Discussion #2038
+
+<https://github.com/py-pdf/pypdf/discussions/2038>
+
+[\[17\]](https://medium.com/social-impact-analytics/comparing-4-methods-for-pdf-text-extraction-in-python-fd34531034f#:~:text=case%20were%20identical,times%20as%20long%20to%20complete)
+Comparing 4 methods for pdf text extraction in python \| by Jeanna
+Schoonmaker \| Social Impact Analytics \| Medium
+
+<https://medium.com/social-impact-analytics/comparing-4-methods-for-pdf-text-extraction-in-python-fd34531034f>
+
+[\[18\]](https://pdfminersix.readthedocs.io/en/latest/reference/composable.html#:~:text=class%20pdfminer,%C2%B6)
+[\[19\]](https://pdfminersix.readthedocs.io/en/latest/reference/composable.html#:~:text=,the%20width%20of%20the%20character)
+[\[20\]](https://pdfminersix.readthedocs.io/en/latest/reference/composable.html#:~:text=,corner%20of%20the%20text%20box)
+[\[21\]](https://pdfminersix.readthedocs.io/en/latest/reference/composable.html#:~:text=You%20can%20also%20pass%20None,corner%20of%20the%20text%20box)
+[\[32\]](https://pdfminersix.readthedocs.io/en/latest/reference/composable.html#:~:text=class%20pdfminer,%C2%B6)
+Composable API --- pdfminer.six 20251108.dev4+g7407ef8bb documentation
+
+<https://pdfminersix.readthedocs.io/en/latest/reference/composable.html>
+
+[\[22\]](https://github.com/pdfminer/pdfminer.six/issues/411#:~:text=Disabling%20boxes%20flow%20makes%20lines,as%20they%20don%27t%20get%20sorted)
+Disabling boxes flow makes lines be in wrong order within text boxes
+
+<https://github.com/pdfminer/pdfminer.six/issues/411>
+
+[\[23\]](https://stackoverflow.com/questions/47730307/python-pdfminer-laparams-mixes-text-output#:~:text=My%20document%20apparently%20sometimes%20had,margins%20which%20caused%20the%20problems)
+[\[24\]](https://stackoverflow.com/questions/47730307/python-pdfminer-laparams-mixes-text-output#:~:text=Solution)
+Python pdfminer LAParams mixes text output - Stack Overflow
+
+<https://stackoverflow.com/questions/47730307/python-pdfminer-laparams-mixes-text-output>
