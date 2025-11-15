@@ -37,6 +37,9 @@
     .toast { position: fixed; right: 16px; bottom: 16px; background: #0b1224; color: #e6edf7; border: 1px solid rgba(255,255,255,0.12); padding: 10px 14px; border-radius: 10px; z-index: 9999; box-shadow: 0 12px 30px rgba(0,0,0,0.35); }
     .badge { color: var(--muted, #97a3c2); font-size: 0.85rem; }
     kbd { background: rgba(255,255,255,0.1); padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-size: 0.85rem; }
+    .formats-card summary { list-style: none; cursor: pointer; display: flex; flex-direction: column; gap: 0.25rem; }
+    .formats-card summary::-webkit-details-marker { display: none; }
+    .formats-body { margin-top: 0.5rem; }
   </style>
 </head>
 <body>
@@ -54,23 +57,6 @@
 
   <main>
     <div class="container tool-intro">
-      <section class="card" role="region" aria-labelledby="formatsHeading">
-        <h2 id="formatsHeading">Supported formats</h2>
-        <p>We support over 100 formats. Common inputs include:</p>
-        <ul>
-          <li><strong>Markdown:</strong> .md, .markdown</li>
-          <li><strong>Plain text:</strong> .txt</li>
-          <li><strong>HTML:</strong> .html, .htm</li>
-          <li><strong>LaTeX:</strong> .tex</li>
-          <li><strong>Word:</strong> .docx</li>
-          <li><strong>OpenDocument:</strong> .odt</li>
-          <li><strong>Rich Text:</strong> .rtf</li>
-          <li><strong>PDF:</strong> .pdf (text‑based; scanned PDFs work best after OCR)</li>
-          <li><strong>EPUB/ZIP bundles:</strong> .epub, .zip</li>
-        </ul>
-        <p class="help" style="color: var(--muted, #97a3c2)">Outputs include: Markdown, Plain Text, HTML, Word (.docx), OpenDocument (.odt), PDF, and RTF. See the full list on our <a href="/tools/formats/">Supported Formats</a> page.</p>
-      </section>
-
       <h1>📝 Document Converter</h1>
       <p>Convert between 100+ formats: Markdown, PDF, DOCX, HTML, RTF, ODT, LaTeX, and more. Paste your content or upload a file.</p>
       <p><a class="cta" href="/tools/">See all tools →</a></p>
@@ -187,6 +173,27 @@
           </table>
         </div>
       </section>
+
+      <details class="card formats-card" role="region" aria-labelledby="formatsHeading">
+        <summary>
+          <h2 id="formatsHeading">Supported formats</h2>
+          <p style="color: var(--muted, #97a3c2); margin: 0;">We support over 100 formats. Common inputs include:</p>
+        </summary>
+        <div class="formats-body">
+          <ul>
+            <li><strong>Markdown:</strong> .md, .markdown</li>
+            <li><strong>Plain text:</strong> .txt</li>
+            <li><strong>HTML:</strong> .html, .htm</li>
+            <li><strong>LaTeX:</strong> .tex</li>
+            <li><strong>Word:</strong> .docx</li>
+            <li><strong>OpenDocument:</strong> .odt</li>
+            <li><strong>Rich Text:</strong> .rtf</li>
+            <li><strong>PDF:</strong> .pdf (text‑based; scanned PDFs work best after OCR)</li>
+            <li><strong>EPUB/ZIP bundles:</strong> .epub, .zip</li>
+          </ul>
+          <p class="help" style="color: var(--muted, #97a3c2)">Outputs include: Markdown, Plain Text, HTML, Word (.docx), OpenDocument (.odt), PDF, and RTF. See the full list on our <a href="/tools/formats/">Supported Formats</a> page.</p>
+        </div>
+      </details>
     </div>
   </main>
 

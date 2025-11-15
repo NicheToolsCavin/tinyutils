@@ -712,3 +712,33 @@ Testing
 
 Commits
 • (this branch) — ui(converter): PR B single-target + multi-export, dialect cleanup, PDF progress summaries
+
+### Minor changes — 2025-11-15 23:08 CEST (UTC+02:00) — Converter formats card & ad toast copy
+
+Added
+• None
+
+Modified
+• Converter page now shows the long "Supported formats" list in a collapsible card placed below the main Input/Results sections instead of as a large box at the top of the tool.
+• Anti-adblock toast copy in scripts/adsense-monitor.js now explains that TinyUtils uses small, non-intrusive ads to help cover hosting and development costs, while explicitly stating that the tools still work if users prefer to keep blocking ads.
+
+Fixed
+• None (UX-only adjustment; no change to converter API, options, or output formats).
+
+Human-readable summary
+
+The converter screen is now a little calmer when you first land on it. Instead of a big "Supported formats" box pushing the actual converter down, that information lives in a collapsible card beneath the main tool. Users who care about the full list can expand it; everyone else sees the input and results right away.
+
+At the same time, the small "ads seem blocked" toast was reworded to avoid implying that blocking ads helps the site. The new copy makes it clear that ads are lightweight and help with hosting and development, but that the tools continue to work if you keep your blocker on.
+
+Impact
+• Cleaner first impression for the converter: key controls (input, target formats, buttons, results) are visible without scrolling past a large formats box. ✅
+• More policy-aligned ad messaging that thanks users without pressuring them, and avoids confusing phrasing about how ads support TinyUtils. ✅
+
+Testing
+• Manual UI check on /tools/text-converter/ to confirm the formats card collapses/expands, keyboard navigation still works, and results table behavior is unchanged. ✅
+• Spot-check of adblock toast behavior on tinyutils.net / preview domain to confirm only copy changed and dismissal/TTL logic still work. ✅
+
+Commits
+• (this branch) — chore(converter): move formats card below and make it collapsible
+• (this branch) — chore(ads): soften adblock toast copy for TinyUtils
