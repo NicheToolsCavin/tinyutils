@@ -26,6 +26,22 @@ Milestone mapping
 - After PR B (UI), run Visual QA (Agent Mode) across all tools + homepage.
 - For DLF/Sitemap/Wayback changes, run Deep Research on protocol/TLD/HSTS rules and Pro Reasoning on concurrency/timeout/jitter.
 
+### Deep Reasoning Budget (owner runs)
+- Initial budget: 40 runs remaining (promo accounts).
+- Allocation by milestone (max caps; unused rolls forward):
+  - Converter PR A (engine): 12
+  - Converter PR B (UI): 8
+  - Edge API guards: 7
+  - DLF/Sitemap/Wayback exports: 6
+  - A11y/cross‑browser spot checks: 3
+  - Cost safety/observability: 2
+  - Buffer: 2
+- Trigger conditions to spend a run:
+  - Before merging a high‑impact PR (engine/UI/guards) OR
+  - After a failing preview smoke with unclear root cause OR
+  - When correctness depends on external policy nuance (robots/HSTS/TLD).
+- Tracking: record each use in `docs/AGENT_ASSISTED_USAGE.md` and reference artifacts/ outputs.
+
 ## 1) Pages (Render + A11y + Ads/CMP)
 Smoke
 - / — Renders, nav links clickable, no console errors.
@@ -76,6 +92,77 @@ Failure Modes
 - Large files rejected with friendly message (limit enforced by `ensure_within_limits`).
 - Bad ZIP returns 400 with message “Invalid ZIP file”.
 - Network blob download errors surface as 400 with reason.
+
+### Converter Engine Decisions (fixed requirements)
+- Images: always insert placeholders `[IMAGE n]`. If `extractMedia=true`, save assets and emit `![Image n](image-n.ext)` links; no OCR; no base64 in MD.
+- Language scope: multi‑language/RTL by default. Heuristics must be geometry‑based (font size/weight/positions). Hyphen repair conservative; normalize ligatures to ASCII where applicable; keep Unicode otherwise.
+- Tables: prefer Markdown tables when structure is regular; use CSV fallback when ambiguous. Emit note `> Table n (low confidence; CSV fallback)` and bundle `table-n.csv` when media is extracted.
+- Modes: `pdfLayoutMode=default|aggressive` with LAParams presets; aggressive for two‑column/gnarly layouts only.
+- Fallback: if extractor fails or output is clearly degraded (near‑empty, junk, giant single line), fall back to legacy pypdf text path; log `pdf_extraction_fallback=basic_text`.
+
+### PR A — PDF→Markdown Engine Implementation Checklist
+- Add `_extract_markdown_from_pdf(pdf_path, workspace, mode='default'|'aggressive', extractMedia: bool)` in `api/convert/convert_service.py`.
+- Use pdfminer.six for layout (LAParams defaults: char_margin=2.0, word_margin=0.1, line_margin=0.5, boxes_flow=0.5; aggressive: line_margin≈0.2, boxes_flow≈-0.5).
+- Headings: infer from font size tiers (optionally font name contains “Bold”).
+- Lists: detect bullets/numbers via regex + x0 indentation; indent for nesting.
+- Tables: try pdfplumber lazily for `find_tables()`; emit Markdown table when regular, otherwise CSV fallback block and bundle `table-*.csv` when `extractMedia` is true.
+- Images: add `[IMAGE n]` placeholders; when `extractMedia`, save bytes and write `![Image n](image-n.ext)`.
+- Preview/meta: collect first headings/snippets.
+- Logging: `pdf_extractor=pdfminer_six_X.Y`, `pdf_layout_mode`, `paragraphs_detected`, `headings_detected`, `lists_detected`, `tables_detected (markdown/csv)`, `images_detected`, `fallback_used`.
+- Wire‑in: replace `_extract_text_from_pdf` call with new function for PDFs; keep legacy for fallback.
+- Artifacts: produce before/after for B2 PDF under `artifacts/convert/<DATE>/`.
+
+#### PDF to Markdown Conversion Test Cases
+
+**Objective:** Verify the new layout-aware PDF to Markdown conversion, aggressive mode, and fallback mechanism.
+
+**Test Files (to be placed in `artifacts/pdf-b2-test/`):**
+*   `simple_document.pdf`: A PDF with basic paragraphs, a few headings, and a simple bullet list.
+*   `complex_layout.pdf`: A PDF with multiple columns, varying font sizes, and potentially some images.
+*   `table_document.pdf`: A PDF containing one or more structured tables.
+*   `scanned_image.pdf`: A PDF that is primarily an image (to test graceful degradation/fallback).
+*   `empty_pdf.pdf`: An empty PDF.
+
+**Test Steps:**
+
+1.  **Basic Conversion (Default Mode):**
+    *   Convert `simple_document.pdf` to Markdown (default `aggressive_pdf_mode=False`).
+    *   **Expected:** Markdown output should preserve headings (H2), lists, and paragraphs. No hard-wrap garbage.
+    *   **Logs:** Expect `pdf_extraction_strategy=layout_aware`, `headings_detected`, `lists_detected`.
+
+2.  **Aggressive Mode Conversion:**
+    *   Convert `complex_layout.pdf` to Markdown with `aggressive_pdf_mode=True`.
+    *   **Expected:** Markdown output should attempt to preserve more complex layouts, potentially with image placeholders. Tables (if present) should be converted to Markdown tables.
+    *   **Logs:** Expect `pdf_extraction_strategy=layout_aware`, `aggressive=True`, `figure_placeholder`/`image_placeholder`, `table_detected`.
+
+3.  **Table Extraction:**
+    *   Convert `table_document.pdf` to Markdown with `aggressive_pdf_mode=True`.
+    *   **Expected:** Tables should be correctly identified and converted into Markdown table format.
+    *   **Logs:** Expect `table_detected`.
+
+4.  **Image Handling:**
+    *   Convert `complex_layout.pdf` (if it contains images) to Markdown with `aggressive_pdf_mode=True` and `extractMedia=True`.
+    *   **Expected:** Markdown output should contain `![Image n](image-n.ext)` links, and a `-media.zip` artifact should be generated containing the extracted images.
+    *   **Logs:** Expect `image_placeholder` and media artifact creation.
+
+5.  **Fallback Mechanism:**
+    *   Convert `scanned_image.pdf` to Markdown (both default and aggressive modes).
+    *   **Expected:** If layout-aware extraction fails, it should fall back to `_extract_text_from_pdf_legacy`. The output might be less structured but should contain any extractable text.
+    *   **Logs:** Expect `pdf_extraction_strategy=fallback_legacy` and `pdf_extract_error` (if initial attempt failed).
+
+6.  **Empty PDF:**
+    *   Convert `empty_pdf.pdf` to Markdown.
+    *   **Expected:** Empty or minimal Markdown output.
+    *   **Logs:** Expect `no_content_extracted` for pages.
+
+7.  **Logging Verification:**
+    *   Review logs for all test cases to ensure correct `pdf_extraction_strategy`, `aggressive` mode, detected elements, and fallback messages.
+
+### Overnight Auto Mode — Run Plan
+- Build preview branch with PR A changes; wait for Vercel Preview URL.
+- Run `scripts/preview_smoke.mjs` against preview (converter focus), save outputs under `artifacts/preview-smoke/<DATE>/`.
+- Agent Mode (visual): capture annotated screenshots for `/tools/text-converter/` states (paste, file upload, preview), save under `artifacts/agent-mode/<DATE>/`.
+- If any preview errors (≥400/500), halt and open fix subtask; otherwise proceed to broader tool smokes in the morning.
 
 ## 4) Tools — Dead Link Finder
 Smoke
