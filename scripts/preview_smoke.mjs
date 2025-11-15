@@ -3,15 +3,12 @@
 
 const BASE_URL = process.env.PREVIEW_URL;
 
-// Support all known ways to pass a protection-bypass token without hardcoding secrets.
-// Precedence: Automation bypass (official) > explicit preview bypass > legacy BYPASS_TOKEN.
-const BYPASS_TOKEN =
-  process.env.VERCEL_AUTOMATION_BYPASS_SECRET ||
-  process.env.PREVIEW_BYPASS_TOKEN ||
-  process.env.BYPASS_TOKEN ||
-  '';
-// Optional preview secret header (project-specific). If present, send it.
 const PREVIEW_SECRET = process.env.PREVIEW_SECRET || '';
+const BYPASS_CANDIDATES = [
+  process.env.VERCEL_AUTOMATION_BYPASS_SECRET,
+  process.env.PREVIEW_BYPASS_TOKEN,
+  process.env.BYPASS_TOKEN,
+].filter(Boolean);
 
 if (!BASE_URL) {
   console.error('PREVIEW_URL env var is required.');
@@ -26,34 +23,74 @@ const apis = [
   { path: '/api/wayback-fixer', body: { list: 'https://example.com/old', verifyHead: false } }
 ];
 
-function buildUrl(path) {
-  return new URL(path, BASE_URL).toString();
+function buildUrl(path, token) {
+  const url = new URL(path, BASE_URL);
+  if (token) {
+    url.searchParams.set('x-vercel-set-bypass-cookie', 'true');
+    url.searchParams.set('x-vercel-protection-bypass', token);
+  }
+  return url.toString();
 }
 
-const defaultHeaders = BYPASS_TOKEN
-  ? {
-      // Official Vercel header for Protection Bypass for Automation
-      // Ref: https://vercel.com/docs/deployment-protection/methods-to-bypass-deployment-protection/protection-bypass-automation
-      'x-vercel-protection-bypass': BYPASS_TOKEN,
-      // Ask Vercel to set the bypass as a cookie for follow-up requests in the session
-      'x-vercel-set-bypass-cookie': 'true',
-      // Also send the cookie explicitly to support one-off requests
-      'Cookie': `vercel-protection-bypass=${BYPASS_TOKEN}`,
-    }
-  : {};
+function buildHeaders(token, extraHeaders = {}, cookies = []) {
+  const headers = { ...extraHeaders };
+  if (token) {
+    headers['x-vercel-protection-bypass'] = token;
+    headers['x-vercel-set-bypass-cookie'] = 'true';
+    headers['Cookie'] = `vercel-protection-bypass=${token}`;
+  }
+  if (cookies.length) {
+    const handshake = cookies.join('; ');
+    headers['Cookie'] = headers['Cookie']
+      ? `${headers['Cookie']}; ${handshake}`
+      : handshake;
+  }
+  if (PREVIEW_SECRET) {
+    headers['x-preview-secret'] = PREVIEW_SECRET;
+  }
+  return headers;
+}
 
-if (PREVIEW_SECRET) {
-  defaultHeaders['x-preview-secret'] = PREVIEW_SECRET;
+function parseHandshakeCookie(setCookieHeader) {
+  if (!setCookieHeader) return null;
+  const fragments = setCookieHeader.split('\n');
+  for (const fragment of fragments) {
+    const trimmed = fragment.trim();
+    if (!trimmed) continue;
+    const [cookiePair] = trimmed.split(';');
+    if (cookiePair.startsWith('_vercel_jwt=')) {
+      return cookiePair;
+    }
+  }
+  return null;
+}
+
+async function attemptFetch(url, token, options, cookies = [], tries = 0) {
+  const headers = buildHeaders(token, options.headers, cookies);
+  const response = await fetch(url, { ...options, headers, redirect: 'manual' });
+  const isRedirect = [301, 302, 303, 307, 308].includes(response.status);
+  if (isRedirect && token && tries === 0) {
+    const handshakeCookie = parseHandshakeCookie(response.headers.get('set-cookie'));
+    if (handshakeCookie) {
+      return attemptFetch(url, token, options, [...cookies, handshakeCookie], tries + 1);
+    }
+  }
+  return response;
 }
 
 async function fetchWithBypass(path, options = {}) {
-  const url = buildUrl(path);
-  const init = { ...options };
-  init.headers = {
-    ...(options.headers || {}),
-    ...defaultHeaders
-  };
-  return fetch(url, init);
+  const tokens = BYPASS_CANDIDATES.length ? BYPASS_CANDIDATES : [null];
+  let lastError = null;
+  for (const token of tokens) {
+    const url = buildUrl(path, token);
+    try {
+      const response = await attemptFetch(url, token, options);
+      return response;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError || new Error('fetch failed');
 }
 
 async function testPages() {

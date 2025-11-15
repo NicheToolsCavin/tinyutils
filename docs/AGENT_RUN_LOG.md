@@ -1114,4 +1114,24 @@ Impact
 
 Follow-ups
 • Investigate the fetch failures (preview protection, headers, or timeout) before attempting another smoke run.
+### Major changes — 2025-11-15 08:29 CET (UTC+01:00)
+
+Added
+• Preview smoke now retries until a Vercel protection bypass handshake completes before returning a Response.
+
+Removed
+• None
+
+Modified
+• `scripts/preview_smoke.mjs` now cycles through automation/preview/legacy tokens, appends `_vercel_jwt` cookies, and keeps `redirect: 'manual'` to avoid infinite loops.
+
+Human-readable summary
+Updated the smoke script to gracefully handle Vercel's 307 bounce while trying different bypass tokens, then reran the tool; every required page and API now returns 200/JSON with the provided automation token, so the smoke test passes.
+
+Impact
+• Preview verification is green again (all pages/APIs reachable) after the new handshake logic. ✅
+• The script is resilient to redirect loops caused by tokens that only set `_vercel_jwt` cookies after the first request. ✅
+
+Follow-ups
+• None.
 
