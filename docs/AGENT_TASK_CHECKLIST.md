@@ -13,6 +13,7 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 ## Active Tasks (Newest First)
 
 | Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
+| PDF fixture validation | manual-2025-11-15 18:00 CET | Completed | ✅ Ran convert_one on table-heavy and bookdown PDFs; verified outputs, media zip, and logs/meta for pdf_engine, layout mode, tables/images counts. Evidence: artifacts/convert/test-fixtures |
 | QA audit follow-ups (size limits, downloads, progress guidance) | manual-2025-11-15 17:15 CET | Completed | ✅ Verified size limit messaging, HTTP downloads, and progress indicators for converter. Evidence: artifacts/convert/20251115/qa-followup/ |
 | QA audit follow-ups (size limits, downloads, progress guidance) | manual-2025-11-15 16:25 CET | Open | 🔎 Add explicit size-limit messaging, enforce HTTP downloads for converter outputs, and capture progress/tooltip feedback per the Nov 15 audit. Evidence: docs/TEST_PLAN_SITE.md, docs/UX_REDESIGN_PLAN.md, docs/AGENT_ASSISTED_PROMPTS.md |
 | Clarify AGENTS constraints | manual-2025-11-15 15:45 CET | Completed | ✅ Updated AGENTS.md: vercel header rule now owner-approved for relaxations, removed rigid dependency restriction, added PR comment review cadence. Evidence: AGENTS.md |

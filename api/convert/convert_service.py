@@ -459,7 +459,12 @@ def convert_one(
             source_for_pandoc = input_path
             if input_path.suffix.lower() == ".pdf" or from_format == "pdf":
                 # Prefer explicit option over env; keep env as default for safe rollout
-                sel_mode = (opts.pdf_layout_mode or os.getenv("PDF_LAYOUT_MODE", "default") or "default").lower()
+                env_mode = os.getenv("PDF_LAYOUT_MODE", "default") or "default"
+                sel_mode = (
+                    opts.pdf_layout_mode
+                    or ("aggressive" if opts.aggressive_pdf_mode else None)
+                    or env_mode
+                ).lower()
                 if sel_mode not in ("default", "aggressive", "legacy"):
                     sel_mode = "default"
                 logs.append(f"pdf_layout_mode={sel_mode}")
