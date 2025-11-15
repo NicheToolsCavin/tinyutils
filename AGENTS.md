@@ -329,6 +329,31 @@ If code changes a tool's observable behavior and no matching log entry is found 
 
 ---
 
+## Preview Protection — Automation Bypass (Required)
+
+When Vercel Preview deployments are protected, use the official Automation Bypass token so smokes run non‑interactively (no SSO cookie required).
+
+Environment variables (precedence)
+- `VERCEL_AUTOMATION_BYPASS_SECRET` — Preferred. Official token for “Protection Bypass for Automation”.
+- `PREVIEW_BYPASS_TOKEN` — Legacy name; used if the automation secret isn’t present.
+- `BYPASS_TOKEN` — Legacy fallback.
+- `PREVIEW_SECRET` — Optional, project‑specific secret; sent as `x-preview-secret` if provided.
+
+What our scripts send
+- Header: `x-vercel-protection-bypass: <token>`
+- Cookie: `vercel-protection-bypass=<token>`
+- Helper header: `x-vercel-set-bypass-cookie: true` (asks Vercel to set the cookie server‑side)
+
+Script support
+- `scripts/preview_smoke.mjs` reads tokens in the order above and forwards them as headers/cookie; also forwards `PREVIEW_SECRET`.
+- `scripts/smoke_convert_preview.mjs` already supports `VERCEL_AUTOMATION_BYPASS_SECRET` and fallback names.
+
+Operational notes
+- Never commit real tokens; set them in your shell or Vercel project env. Do not paste them into logs or artifacts.
+- If a preview still returns 401, verify the token belongs to the target project/branch and retry; as a last resort for manual checks, an authenticated browser cookie (`_vercel_jwt`) also works.
+
+---
+
 ### Automation
 - `python scripts/log_run_entry.py --title "Manual - <task>" --summary "<what changed>" --evidence <artifact_dir>` keeps `docs/AGENT_RUN_LOG.md` current.
 - `python scripts/add_task_checklist_entry.py --task "<name>" --status <Open|Completed>` manages the shared checklist in `docs/AGENT_TASK_CHECKLIST.md`.
