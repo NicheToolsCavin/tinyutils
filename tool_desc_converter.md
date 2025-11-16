@@ -636,6 +636,71 @@ Evidence
 Commits
 • fix/converter-pdf-rtf-ui-testplan-gcp — add QA audit follow-ups and doc updates
 
+### Major changes — 2025-11-16 04:39 CET (UTC+01:00) — Converter UI PR B (targets, dialects, smokes)
+
+Added
+• Single-target "Primary download format" control with an optional advanced multi-export section that reuses the existing format checkboxes; users can now pick one primary output and then optionally add more formats in the same run.
+• Visible Markdown dialect options in the UI that match the backend allowlist: Auto (backend default — GFM), gfm, commonmark_x, commonmark, markdown (Pandoc), markdown_mmd, markdown_strict, markdown_phpextra.
+• Additional `/api/convert` preview smoke cases that exercise a non-default mdDialect and an advanced-style multi-export payload, plus the existing layout-aware PDF→Markdown smoke.
+
+Removed
+• None.
+
+Modified
+• Converter UI copy for the targets row now highlights the primary target ("Primary download format") and clarifies that extra formats are optional ("Add more formats (optional)").
+• Internally, the UI now builds the `to: [...]` array from either the single-target select or the advanced checkbox block, but the request body shape and field names sent to `/api/convert` are unchanged.
+
+Fixed
+• None (behavioral change is limited to UI/UX and smokes; backend contracts, timeouts, and hardening remain the same).
+
+Human-readable summary
+
+**Problem: Too many knobs for one-off converts**
+
+Previously the converter treated every output format as a separate checkbox. That was powerful but a bit overwhelming when you just wanted "one format now, maybe extras later"—and it wasnt obvious which target was the "main" one. At the same time, the Markdown dialect feature was mostly hidden, and our smokes didnt cover the richer dialect/target combinations we now support.
+
+**The fix: A clear primary target, advanced extras, and better coverage**
+
+The UI now has a single "Primary download format" selector that matches what most people expect: pick one main output first. If you need more, an "Add more formats (optional)" toggle reveals the familiar checkboxes so you can request extra formats in the same run. Under the hood we still send the same `to: ['md','txt',...]` array to `/api/convert`—only the UI has been reorganized.
+
+We also surfaced all supported Markdown dialects in the dropdown (GFM, CommonMark variants, Pandoc markdown, MultiMarkdown, strict, PHP Extra) and added new smoke cases that exercise a non-default dialect and a multi-export payload, alongside the existing layout-aware PDF→Markdown smoke. This gives better confidence that the dialect feature and advanced export combinations behave as expected, without changing timeouts or security.
+
+Impact
+• Simpler "pick one format" flow for common conversions, with an optional advanced multi-export panel for power users. ✅
+• Clearer visibility into which Markdown dialects are supported, keeping the UI and backend in sync. ✅
+• Stronger `/api/convert` smoke coverage for mdDialect and multi-export without touching contracts, timeouts, or hardening rules. ✅
+
+Testing
+• Local verification of converter UI behavior (single-target vs advanced multi-export, dialect dropdown, PDF-aware progress copy) in tools/text-converter/index.html. ✅
+• Extended `scripts/smoke_convert_preview.mjs` with new mdDialect and multi-export cases while preserving the existing layout-aware PDF smoke. ✅
+
+Commits
+• (pending on fix/pr-b-cookie-converter-ui) — converter UI PR B (primary target + advanced multi, expanded dialects, updated smokes)
+
+### Minor changes — 2025-11-16 11:15 CET (UTC+01:00) — Context dump ingestion (no behavior change)
+
+Added
+• None
+
+Removed
+• None
+
+Modified
+• Updated active mental model for Converter-adjacent UX and logging constraints by reading CGPT_TU_CONTEXTDUMP_20251116T034004.md; no converter APIs, options, or runtime behavior were changed.
+
+Human-readable summary
+
+This change log heartbeat simply records that the latest TinyUtils context dump (including CMP/consent behavior, UX redesign phases, and logging expectations) has been ingested. The converter continues to behave exactly as before; this is internal bookkeeping so future agents know this context has already been applied.
+
+Impact
+• No user-visible changes; helps future agents avoid re-deriving the same context and keeps the converter log aligned with ongoing planning. ✅
+
+Testing
+• Not applicable (no code or behavior changes).
+
+Commits
+• (this branch) — add converter heartbeat for 2025-11-16 context dump
+
 ### Minor changes — 2025-11-15 20:10 CET (UTC+01:00) — Agent context refresh (no behavior change)
 
 Added
