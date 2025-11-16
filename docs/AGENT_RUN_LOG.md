@@ -216,34 +216,33 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
-### 2025-11-16 06:09 CET - Manual - PR1 preview smokes with bypass
+### 2025-11-16 04:39 CET - Manual - Converter PR1 UI + smokes
 - **Mode:** manual
 - **Branch:** `fix/pr-b-cookie-converter-ui`
 - **Summary:**
-  - Re-ran scripts/preview_smoke.mjs + scripts/smoke_convert_preview.mjs against PR #39 with VERCEL_AUTOMATION_BYPASS_SECRET/PREVIEW_BYPASS_TOKEN/BYPASS_TOKEN from .vercel/.env.preview.local.
-  - All pages and APIs returned 200 OK; converter API smokes succeeded, and artifacts are stored under artifacts/convert-pr1-ui/20251116/.
+  - Implemented Converter PR B UI on tools/text-converter/index.html: primary download select + advanced multi-export, expanded Markdown dialect list, and refined PDF-aware progress copy while preserving /api/convert contracts and timeouts.
+  - Extended scripts/smoke_convert_preview.mjs with mdDialect and multi-export smoke cases that mirror the updated UI, keeping bypass logic and security hardening unchanged.
 - **Evidence:** artifacts/convert-pr1-ui/20251116/
 - **Follow-ups:**
+  - Open PR1, run preview smokes, and capture artifacts once Vercel preview URL is available.
 
-### 2025-11-16 05:40 CET - Manual - PR3 trust surfaces implemented
+### 2025-11-16 04:19 CET - Manual - synthesize TinyUtils Phase1 /plan
 - **Mode:** manual
-- **Branch:** `feat/phase1-trust-pages`
+- **Branch:** `main`
 - **Summary:**
-  - Added static about.html and contact.html using existing TinyUtils header/footer/card layout and current a11y patterns (main landmark), with simple, trustworthy copy about what TinyUtils is and how to get in touch.
-  - Wired About/Contact links into header/footer nav across the main shells and primary tool pages (home, tools index, DLF, Sitemap Delta, Wayback Fixer, Converter, Supported Formats) and added both URLs to sitemap.xml.
-  - Confirmed CMP/consent.js, adsense-monitor.js, vercel.json, and all APIs remain untouched; this PR is static HTML/CSS-only trust scaffolding.
-- **Evidence:** artifacts/phase1-trust-pages/20251116/
+  - Attempted multi-agent /plan batch (10 agents) for converter PR B UI + UX Phase 1; cancelled mini agent per instructions and used existing context docs as primary planning source.
+  - Produced a consolidated, auto-ready implementation plan that assigns work to free vs heavy agents (vision, ThomasR, think, SonicTornado, main, kwaipilot, qwen-3-coder, code-gpt-5.1-codex) while respecting AGENTS/SECURITY constraints.
+- **Evidence:** artifacts/plan/20251116/
 - **Follow-ups:**
 
-### 2025-11-16 05:38 CET - Manual - start PR3 trust surfaces
+### 2025-11-16 03:54 CET - Manual - load CGPT context dump
 - **Mode:** manual
-- **Branch:** `feat/phase1-trust-pages`
+- **Branch:** `pr-b-cookie-converter-ui`
 - **Summary:**
-  - Started Phase 1 PR3 to add static About and Contact pages plus nav/footer links and sitemap entries, building on existing a11y scaffolding (tokens + skip links).
-  - Guardrails: no changes to CMP/consent.js, adsense-monitor.js, vercel.json, or any APIs; PR3 is static HTML/CSS only.
-- **Evidence:** artifacts/phase1-trust-pages/20251116/
+  - Read and ingested CGPT_TU_CONTEXTDUMP_20251116T034004.md from Context and Compact/ as the canonical TinyUtils context.
+  - Captured consolidated constraints around CMP/Funding Choices, consent helper scope, adblock toast behavior, UX redesign phases, and do-not-break zones.
+- **Evidence:** artifacts/agent-context/20251116/
 - **Follow-ups:**
-  - Implement about.html/contact.html, nav wiring, sitemap.xml updates, then open PR.
 
 ### 2025-11-16 01:51 CET - Manual - CMP script on cookies page
 - **Mode:** manual
@@ -1482,4 +1481,3 @@ Impact
 
 Follow-ups
 • None.
-
