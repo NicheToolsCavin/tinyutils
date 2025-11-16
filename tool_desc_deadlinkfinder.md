@@ -112,3 +112,38 @@ When Dead Link Finder returns an error, the request ID is now right on the root 
 
 **Impact**
 • Monitoring/clients that only looked at `meta.requestId` can keep doing so, but they now have a shortcut via `payload.requestId` for correlating errors.
+
+### Major changes — 2025-11-16 06:42 CET (UTC+01:00) — Try example + progress indicator
+
+Added
+• Added a Try example action that preloads a safe `example.com` crawl plus a multi-URL list so first-time visitors can see real output without crafting their own query.
+• Rebuilt the progress area into a `role=status`/`aria-live` block with a compact progress meter that reflects running, success, error, retry, and demo states.
+
+Modified
+• Run, clear, and demo flows now reset and update the new progress block so the meter and text stay in sync even when the UI reuses cached data.
+
+Fixed
+• **Problem:** there was no descriptive progress pane, so users (and screen readers) couldn’t tell whether the check was running, completed, or timed out.
+  - **Root cause:** the progress div was just bare text with no semantic `role=status`, no incremental meter, and no explicit demo messaging.
+  - **Fix:** Every run/demo scenario now updates the accessible progress block, including a Try example preload that announces the next step.
+  - **Evidence:** artifacts/pr4-tool-ux/20251116/manual-notes.txt
+
+Human-readable summary
+
+**Problem 1: Can I tell if the crawler is doing anything?**
+Dead Link Finder only rewrote a text string, so it looked “finished” even while the spinner kept blinking—screen readers heard nothing.
+
+**Problem 2: Getting started without sample data was awkward.**
+Users had to guess valid inputs and copy/paste lists before seeing any output.
+
+**The fix:** Add a Try example button that populates the form with a safe sample crawl while announcing progress updates through an expanded `role=status` section and progress meter. Users now hear when the run is queued, running, retried, or done.
+
+Impact
+• First-time visitors can click Try example and instantly see the tool in action without typing URLs, which lowers friction for onboarding. ✅
+• Screen reader & keyboard users now hear every state change because the status section gained `role=status` + `aria-live` plus smooth progress updates. ✅
+
+Testing
+• Manual DOM/logic review of the Try example flow and progress-state updates (visual inspection). ✅
+
+Commits
+• TBD - feat: add Try Example UX for PR4

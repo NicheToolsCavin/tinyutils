@@ -125,3 +125,38 @@ Wayback Fixer no longer hijacks typing—keyboard shortcuts only trigger with Cm
 **Impact**
 • Spreadsheet-style shortcuts work without breaking text entry, improving UX for long URL lists.
 • Assistive tech users hear progress updates, and exports always reflect the newest crawl output.
+
+### Major changes — 2025-11-16 06:42 CET (UTC+01:00) — Try example + progress indicator
+
+Added
+• The status banner became a `role=status`/`aria-live` component with a miniature progress meter so running, success, error, and demo states are announced to assistive tech.
+• The Try a demo button explicitly updates that banner with “Demo loaded — press Run” text and zeroed progress, bringing the status line in sync with the sample data load.
+
+Modified
+• Run, demo, and error flows now call a shared `setStatus` helper, resetting exports and sharing the same meter text before and after every fetch to avoid stale state or conflicting progress text.
+
+Fixed
+• **Problem:** previous status updates only replaced static text, making it impossible for screen readers to know when a job was running, stalled, or done.
+  - **Root cause:** the `status` element lacked `role=status`, had no progress indicator, and didn’t account for demo loads or retry messages.
+  - **Fix:** Rebuilt the status banner with semantic markup, a progress meter, and consistent updates for run/demo/error/timeout paths. The demo button now reports the “next step” state instead of leaving the status stuck on “Ready.”
+  - **Evidence:** artifacts/pr4-tool-ux/20251116/manual-notes.txt
+
+Human-readable summary
+
+**Problem 1: Should I wait or click again?**
+Status text never changed meaningfully, so users (especially non-visual or keyboard customers) couldn’t tell whether the Wayback fetch was still running, done, or timed out.
+
+**Problem 2: Demo data didn’t verbalize the next step.**
+The demo button filled URLs but left the status stuck on “Ready,” so the only way forward was guesswork.
+
+**The fix:** Add an accessible status block with `role=status`, `aria-live`, and a progress meter that every event updates: run, demo preload, retry, timeout, and error. The Try example method now sets the banner to “Demo loaded — press Run” so the UI explains what to do next.
+
+Impact
+• Screen reader & keyboard users get clear progress cues (running, retry, done) instead of watching static text, improving accessibility. ✅
+• Demo flows now describe the next action, so QA knows when to trigger a comparison before running the actual fetch. ✅
+
+Testing
+• Manual DOM/logic review of the Try example + status update helper (visual inspection). ✅
+
+Commits
+• TBD - feat: add Try Example UX for PR4
