@@ -216,6 +216,64 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-16 05:17 CET - Manual - PR2 a11y tokens + skip links
+- **Mode:** manual
+- **Branch:** `feat/phase1-a11y-tokens`
+- **Summary:**
+  - Introduced shared color/focus CSS variables in styles/site.css and public/styles.css (bg/panel/text/muted/border/brand/focus-ring) to improve AA-ish contrast while keeping the existing TinyUtils look.
+  - Added global skip links and main landmarks (id="main") across core shells and tools (home, tools index, cookies, privacy/terms/support, sitemap-delta, wayback-fixer, converter, formats, and legacy tools like keyword density/meta preview/sitemap generator) plus consistent :focus-visible outlines for links/buttons/inputs.
+  - Confirmed no changes to CMP/consent scripts, adsense-monitor, vercel.json, or API behavior; this PR is purely a11y/UX scaffolding.
+- **Evidence:** artifacts/phase1-a11y/20251116/
+- **Follow-ups:**
+
+### 2025-11-16 04:57 CET - Manual - start PR2 a11y tokens
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Preparing to branch from main for Phase 1 PR2 (a11y/design-token baseline) after completing Converter PR1 on fix/pr-b-cookie-converter-ui.
+  - Plan: add CSS design tokens for colors/focus, improve AA-ish contrast, and wire skip link + visible focus outlines across core shells and tools without altering API contracts.
+- **Evidence:** artifacts/phase1-a11y/20251116/
+- **Follow-ups:**
+  - Implement PR2 on new branch (a11y tokens + contrast) and update docs/tool_desc as needed.
+
+### 2025-11-16 04:44 CET - Manual - PR1 preview smokes (401 due to protection)
+- **Mode:** manual
+- **Branch:** `fix/pr-b-cookie-converter-ui`
+- **Summary:**
+  - Opened PR #39 for Converter PR B UI + smokes and ran scripts/preview_smoke.mjs + scripts/smoke_convert_preview.mjs against the Vercel preview; all checks returned 401 due to preview protection (no automation bypass token present in this environment).
+  - Confirmed that failures are auth-related only; converter endpoints and pages are reachable behind Vercel preview protection and will pass once the official automation bypass token is available.
+- **Evidence:** artifacts/convert-pr1-ui/20251116/
+- **Follow-ups:**
+  - Re-run preview_smoke.mjs and smoke_convert_preview.mjs with VERCEL_AUTOMATION_BYPASS_SECRET/PREVIEW_BYPASS_TOKEN configured.
+
+### 2025-11-16 04:39 CET - Manual - Converter PR1 UI + smokes
+- **Mode:** manual
+- **Branch:** `fix/pr-b-cookie-converter-ui`
+- **Summary:**
+  - Implemented Converter PR B UI on tools/text-converter/index.html: primary download select + advanced multi-export, expanded Markdown dialect list, and refined PDF-aware progress copy while preserving /api/convert contracts and timeouts.
+  - Extended scripts/smoke_convert_preview.mjs with mdDialect and multi-export smoke cases that mirror the updated UI, keeping bypass logic and security hardening unchanged.
+- **Evidence:** artifacts/convert-pr1-ui/20251116/
+- **Follow-ups:**
+  - Open PR1, run preview smokes, and capture artifacts once Vercel preview URL is available.
+
+### 2025-11-16 04:19 CET - Manual - synthesize TinyUtils Phase1 /plan
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Attempted multi-agent /plan batch (10 agents) for converter PR B UI + UX Phase 1; cancelled mini agent per instructions and used existing context docs as primary planning source.
+  - Produced a consolidated, auto-ready implementation plan that assigns work to free vs heavy agents (vision, ThomasR, think, SonicTornado, main, kwaipilot, qwen-3-coder, code-gpt-5.1-codex) while respecting AGENTS/SECURITY constraints.
+- **Evidence:** artifacts/plan/20251116/
+- **Follow-ups:**
+
+### 2025-11-16 03:54 CET - Manual - load CGPT context dump
+- **Mode:** manual
+- **Branch:** `pr-b-cookie-converter-ui`
+- **Summary:**
+  - Read and ingested CGPT_TU_CONTEXTDUMP_20251116T034004.md from Context and Compact/ as the canonical TinyUtils context.
+  - Captured consolidated constraints around CMP/Funding Choices, consent helper scope, adblock toast behavior, UX redesign phases, and do-not-break zones.
+- **Evidence:** artifacts/agent-context/20251116/
+- **Follow-ups:**
+
 ### 2025-11-16 01:51 CET - Manual - CMP script on cookies page
 - **Mode:** manual
 - **Branch:** `fix/pr-b-cookie-converter-ui`
@@ -1453,4 +1511,3 @@ Impact
 
 Follow-ups
 • None.
-
