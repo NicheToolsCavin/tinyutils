@@ -216,25 +216,33 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
-### 2025-11-16 06:52 CET - Manual - PR5 smokes
+### 2025-11-16 04:39 CET - Manual - Converter PR1 UI + smokes
 - **Mode:** manual
-- **Branch:** `feature/pr4-tool-ux`
+- **Branch:** `fix/pr-b-cookie-converter-ui`
 - **Summary:**
-  - Ran preview_smoke.mjs + smoke_convert_preview.mjs against the PR4 preview with bypass tokens.
-  - API/page checks and converter cases all returned 200/JSON and artifacts stored under artifacts/pr5-final-smokes/20251116/.
-- **Evidence:** artifacts/pr5-final-smokes/20251116/
+  - Implemented Converter PR B UI on tools/text-converter/index.html: primary download select + advanced multi-export, expanded Markdown dialect list, and refined PDF-aware progress copy while preserving /api/convert contracts and timeouts.
+  - Extended scripts/smoke_convert_preview.mjs with mdDialect and multi-export smoke cases that mirror the updated UI, keeping bypass logic and security hardening unchanged.
+- **Evidence:** artifacts/convert-pr1-ui/20251116/
 - **Follow-ups:**
-  - Share smoke results + merge PR once reviewers approve.
+  - Open PR1, run preview smokes, and capture artifacts once Vercel preview URL is available.
 
-### 2025-11-16 06:45 CET - Manual - PR4 tool progress
+### 2025-11-16 04:19 CET - Manual - synthesize TinyUtils Phase1 /plan
 - **Mode:** manual
-- **Branch:** `feature/pr4-tool-ux`
+- **Branch:** `main`
 - **Summary:**
-  - Added Try example flows + accessible progress indicators for DLF, Sitemap Delta, Wayback Fixer, and Converter.
-  - Improved aria-live status + helper logic while keeping API/CMP/ads guardrails untouched.
-- **Evidence:** artifacts/pr4-tool-ux/20251116/
+  - Attempted multi-agent /plan batch (10 agents) for converter PR B UI + UX Phase 1; cancelled mini agent per instructions and used existing context docs as primary planning source.
+  - Produced a consolidated, auto-ready implementation plan that assigns work to free vs heavy agents (vision, ThomasR, think, SonicTornado, main, kwaipilot, qwen-3-coder, code-gpt-5.1-codex) while respecting AGENTS/SECURITY constraints.
+- **Evidence:** artifacts/plan/20251116/
 - **Follow-ups:**
-  - Preview smokes + documentation for PR5
+
+### 2025-11-16 03:54 CET - Manual - load CGPT context dump
+- **Mode:** manual
+- **Branch:** `pr-b-cookie-converter-ui`
+- **Summary:**
+  - Read and ingested CGPT_TU_CONTEXTDUMP_20251116T034004.md from Context and Compact/ as the canonical TinyUtils context.
+  - Captured consolidated constraints around CMP/Funding Choices, consent helper scope, adblock toast behavior, UX redesign phases, and do-not-break zones.
+- **Evidence:** artifacts/agent-context/20251116/
+- **Follow-ups:**
 
 ### 2025-11-16 01:51 CET - Manual - CMP script on cookies page
 - **Mode:** manual
@@ -1473,4 +1481,3 @@ Impact
 
 Follow-ups
 • None.
-
