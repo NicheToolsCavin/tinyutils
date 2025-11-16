@@ -216,6 +216,16 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-16 21:44 CET - Manual - Phase 2 PR8 CLS-safe progress bar
+- **Mode:** manual
+- **Branch:** `feat/phase2-progress-bar`
+- **Summary:**
+  - Centralized status/progress bar styling in styles/site.css for Dead Link Finder, Sitemap Delta, Wayback Fixer, and Converter, adding a reserved-height block under each role=status region to avoid layout shift.
+  - Reused existing statusMessage/progressMeter logic per tool; no /api/*, CMP/consent, adsense-monitor.js, or vercel.json changes.
+- **Evidence:** tinyutils/artifacts/ux-phase2-progress-bar/20251116/
+- **Follow-ups:**
+  - Run preview_smoke.mjs and smoke_convert_preview.mjs once a Vercel preview for feat/phase2-progress-bar is available.
+
 ### 2025-11-16 04:39 CET - Manual - Converter PR1 UI + smokes
 - **Mode:** manual
 - **Branch:** `fix/pr-b-cookie-converter-ui`

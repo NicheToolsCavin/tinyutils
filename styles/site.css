@@ -56,6 +56,38 @@ tbody tr:nth-child(odd){background:#10131a}
 
 .site-footer{border-top:1px solid var(--border);padding:16px 0;margin-top:24px;color:var(--muted)}
 
+/* Shared status/progress block used by tools */
+#progress,
+.status{
+  margin-top:1rem;
+  min-height:1.5rem;
+  display:flex;
+  flex-direction:column;
+  gap:0.3rem;
+}
+#progressMessage,
+#statusMessage{
+  font-weight:500;
+}
+#progressMeter,
+#statusMeter{
+  width:100%;
+  height:6px;
+  border-radius:999px;
+  background:rgba(255,255,255,0.12);
+  border:none;
+}
+#progressMeter::-webkit-progress-bar,
+#statusMeter::-webkit-progress-bar{
+  background:rgba(255,255,255,0.12);
+  border-radius:999px;
+}
+#progressMeter::-webkit-progress-value,
+#statusMeter::-webkit-progress-value{
+  background:var(--brand,#3b82f6);
+  border-radius:999px;
+}
+
 /* Skip link for keyboard users */
 .skip-link{
   position:absolute;
@@ -100,3 +132,10 @@ textarea:focus-visible{
 .adblock-toast p{margin:0 0 8px 0;color:var(--muted);font-size:.9rem}
 .adblock-toast__dismiss{background:transparent;color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer}
 .adblock-toast__dismiss:focus{outline:2px solid var(--brand);outline-offset:2px}
+
+@media (prefers-reduced-motion: reduce){
+  #progressMeter,
+  #statusMeter{
+    transition:none;
+  }
+}
