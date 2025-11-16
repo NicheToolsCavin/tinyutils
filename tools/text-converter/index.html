@@ -98,7 +98,7 @@
         </div>
 
         <div class="format-options" aria-label="Target formats">
-          <label for="toSingle"><strong>Convert to:</strong></label>
+          <label for="toSingle"><strong>Primary download format:</strong></label>
           <select id="toSingle" name="toSingle">
             <option value="md" selected>Markdown (.md)</option>
             <option value="txt">Plain Text (.txt)</option>
@@ -108,7 +108,7 @@
             <option value="rtf">RTF (.rtf)</option>
             <option value="pdf">PDF (.pdf)</option>
           </select>
-          <button id="advToggle" class="secondary" type="button" aria-expanded="false" aria-controls="multiTargets">+ Add another format</button>
+          <button id="advToggle" class="secondary" type="button" aria-expanded="false" aria-controls="multiTargets">+ Add more formats (optional)</button>
         </div>
 
         <div id="multiTargets" class="format-options" aria-label="Target formats (advanced)" style="display:none">
@@ -129,7 +129,10 @@
             <option value="gfm" selected>GitHub Flavored Markdown (GFM)</option>
             <option value="commonmark_x">CommonMark extended (commonmark_x)</option>
             <option value="commonmark">CommonMark (spec)</option>
+            <option value="markdown">Markdown (Pandoc)</option>
+            <option value="markdown_mmd">MultiMarkdown (markdown_mmd)</option>
             <option value="markdown_strict">Markdown (strict)</option>
+            <option value="markdown_phpextra">PHP Extra Markdown (markdown_phpextra)</option>
           </select>
         </div>
 

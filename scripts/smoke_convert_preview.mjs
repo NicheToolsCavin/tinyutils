@@ -100,6 +100,7 @@ async function preflightBypassCookie() {
 }
 
 const cases = [
+  // Basic markdown → md+txt (multi-export, default dialect)
   {
     name: 'md_md_txt',
     body: {
@@ -111,6 +112,7 @@ const cases = [
       options: { extractMedia: false },
     },
   },
+  // Basic markdown → html (single-target)
   {
     name: 'md_html',
     body: {
@@ -122,6 +124,31 @@ const cases = [
       options: { extractMedia: false },
     },
   },
+  // Single-target markdown with a non-default dialect (e.g., commonmark_x)
+  {
+    name: 'md_md_commonmark_x',
+    body: {
+      inputs: [
+        { blobUrl: 'data:text/plain;base64,SGVsbG8gVGlueVV0aWxzIQ==', name: 'hello.md' },
+      ],
+      from: 'markdown',
+      to: ['md'],
+      options: { extractMedia: false, mdDialect: 'commonmark_x' },
+    },
+  },
+  // Advanced multi-export style run: markdown → md + txt + html (mdDialect still allowed)
+  {
+    name: 'md_multi_export_md_txt_html',
+    body: {
+      inputs: [
+        { blobUrl: 'data:text/plain;base64,SGVsbG8gVGlueVV0aWxzIQ==', name: 'hello.md' },
+      ],
+      from: 'markdown',
+      to: ['md', 'txt', 'html'],
+      options: { extractMedia: false, mdDialect: 'gfm' },
+    },
+  },
+  // Layout-aware PDF → Markdown smoke (kept intact)
   {
     name: 'pdf_md_layout_aware',
     body: {
