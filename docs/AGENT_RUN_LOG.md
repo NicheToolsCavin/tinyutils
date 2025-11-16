@@ -216,6 +216,16 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-16 06:45 CET - Manual - PR4 tool progress
+- **Mode:** manual
+- **Branch:** `feature/pr4-tool-ux`
+- **Summary:**
+  - Added Try example flows + accessible progress indicators for DLF, Sitemap Delta, Wayback Fixer, and Converter.
+  - Improved aria-live status + helper logic while keeping API/CMP/ads guardrails untouched.
+- **Evidence:** artifacts/pr4-tool-ux/20251116/
+- **Follow-ups:**
+  - Preview smokes + documentation for PR5
+
 ### 2025-11-16 01:51 CET - Manual - CMP script on cookies page
 - **Mode:** manual
 - **Branch:** `fix/pr-b-cookie-converter-ui`
