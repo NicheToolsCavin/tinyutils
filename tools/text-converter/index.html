@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,6 +14,7 @@
   <meta property="og:image" content="/public/og.png">
   <meta name="twitter:card" content="summary_large_image">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3079281180008443" crossorigin="anonymous"></script>
+  <script src="/scripts/theme-toggle.js"></script>
   <link rel="stylesheet" href="/public/styles.css">
   <link rel="stylesheet" href="/styles/site.css">
   <script defer src="/scripts/consent.js"></script>
@@ -39,7 +40,7 @@
     .tableWrap { margin-top: 1rem; max-height: 70vh; overflow: auto; border: 1px solid #eee; border-radius: 8px; }
     #results thead th { position: sticky; top: 0; z-index: 2; background: #fff; color: #111827; box-shadow: 0 1px 0 rgba(0,0,0,0.05); }
     .download-link { color: var(--brand, #3b82f6); text-decoration: underline; cursor: pointer; }
-    .toast { position: fixed; right: 16px; bottom: 16px; background: #0b1224; color: #e6edf7; border: 1px solid rgba(255,255,255,0.12); padding: 10px 14px; border-radius: 10px; z-index: 9999; box-shadow: 0 12px 30px rgba(0,0,0,0.35); }
+    .toast { position: fixed; right: 16px; bottom: 16px; background: var(--panel); color: var(--text); border: 1px solid var(--border); padding: 10px 14px; border-radius: 10px; z-index: 9999; box-shadow: 0 12px 30px rgba(0,0,0,0.35); }
     .badge { color: var(--muted, #97a3c2); font-size: 0.85rem; }
     kbd { background: rgba(255,255,255,0.1); padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-size: 0.85rem; }
     .formats-card summary { list-style: none; cursor: pointer; display: flex; flex-direction: column; gap: 0.25rem; position: relative; padding-left: 1.2rem; }
@@ -54,14 +55,17 @@
   <header class="site-header">
     <div class="container row between center">
       <a class="brand" href="/">TinyUtils</a>
-      <nav class="nav">
-        <a class="active" href="/tools/">Tools</a>
-        <a href="/about.html">About</a>
-        <a href="/contact.html">Contact</a>
-        <a href="/cookies.html">Cookie &amp; privacy settings</a>
-        <a href="/privacy.html">Privacy</a>
-        <a href="/terms.html">Terms</a>
-      </nav>
+      <div class="row center">
+        <nav class="nav">
+          <a class="active" href="/tools/">Tools</a>
+          <a href="/about.html">About</a>
+          <a href="/contact.html">Contact</a>
+          <a href="/cookies.html">Cookie &amp; privacy settings</a>
+          <a href="/privacy.html">Privacy</a>
+          <a href="/terms.html">Terms</a>
+        </nav>
+        <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false">Theme</button>
+      </div>
     </div>
   </header>
 
