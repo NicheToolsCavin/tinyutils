@@ -33,6 +33,9 @@
 </script>
 
 <style>.toast{position:fixed;right:12px;bottom:12px;background:#0b1224;color:#e6edf7;border:1px solid rgba(255,255,255,.1);padding:8px 12px;border-radius:10px;z-index:9999;box-shadow:0 6px 20px rgba(0,0,0,.25)}  .cell-url, td.url, .urlCell { word-break: break-all; }
+.status progress{width:100%;height:6px;border-radius:999px;margin-top:0.35rem;background:rgba(255,255,255,0.12);border:none}
+.status progress::-webkit-progress-bar{background:rgba(255,255,255,0.12);border-radius:999px}
+.status progress::-webkit-progress-value{background:var(--brand,#3b82f6);border-radius:999px}
 </style>
 </head>
 <body>
@@ -94,7 +97,10 @@
       </div>
     </section>
 
-    <section id="status" class="status" aria-live="polite">Ready.</section>
+    <section id="status" class="status" aria-live="polite" role="status">
+      <span id="statusMessage">Ready.</span>
+      <progress id="statusMeter" max="100" value="0" hidden></progress>
+    </section>
     <section id="summary" class="summary hidden"></section>
 
     <section class="actions hidden" id="actions">
@@ -161,6 +167,8 @@
 
   <script>
   const statusEl = document.getElementById('status');
+  const statusMessageEl = document.getElementById('statusMessage');
+  const statusMeter = document.getElementById('statusMeter');
   const runBtn = document.getElementById('runBtn');
   const verifyEl = document.getElementById('verify');
   const timeoutEl = document.getElementById('timeout');
@@ -223,6 +231,7 @@
     });
   }
   setExportsEnabled(false);
+  setStatus('Ready.', null);
 
   async function withRequestIdEcho(res) {
     try {
@@ -323,6 +332,18 @@
     fileInputB.addEventListener('change', async () => {
       smBText.value = await fileToText(fileInputB.files[0]);
     });
+  }
+
+  function setStatus(message, progress) {
+    if (statusMessageEl) statusMessageEl.textContent = message;
+    if (statusMeter) {
+      if (progress == null) {
+        statusMeter.hidden = true;
+      } else {
+        statusMeter.hidden = false;
+        statusMeter.value = Math.max(0, Math.min(100, progress));
+      }
+    }
   }
 
   confChips.addEventListener('click', (e) => {
@@ -443,11 +464,11 @@
 
     if (!(body.sitemapAUrl || body.sitemapAText) || !(body.sitemapBUrl || body.sitemapBText)) {
       showToast('Provide sitemap URLs or XML for both sides.');
-      statusEl.textContent = 'Waiting for input.';
+      setStatus('Waiting for input.', null);
       return;
     }
 
-    statusEl.textContent = 'Working…';
+    setStatus('Working…', 15);
     summaryEl.classList.add('hidden');
     actionsEl.classList.add('hidden');
     tablesEl.classList.add('hidden');
@@ -465,12 +486,12 @@
       if (!res.ok) throw new Error(data?.meta?.note || data?.error || `HTTP ${res.status}`);
       lastResults = data;
       renderTables();
-      statusEl.textContent = 'Done.';
+      setStatus('Done.', 100);
       history.replaceState(null, '', paramsToHash());
     } catch (error) {
       console.error('[sitemap-delta]', error);
       if (hadResults && lastResults) setExportsEnabled(true);
-      statusEl.textContent = 'Error: ' + (error.message || String(error));
+      setStatus('Error: ' + (error.message || String(error)), null);
     }
   });
 
@@ -591,18 +612,18 @@
 
   if (demoBtn) {
     demoBtn.addEventListener('click', async () => {
-      statusEl.textContent = 'Loading demo…';
+      setStatus('Loading demo…', 10);
       try {
         const [beforeXml, afterXml] = await Promise.all([
           fetchDemoAsset(DEMO_SITEMAPS.before),
           fetchDemoAsset(DEMO_SITEMAPS.after)
         ]);
         applyDemoXml(beforeXml, afterXml);
-        statusEl.textContent = 'Demo loaded — press Compare';
+        setStatus('Demo loaded — press Compare', 0);
       } catch (error) {
         console.warn('Demo fetch failed; falling back to inline sample', error);
         applyDemoXml(DEMO_FALLBACK.before, DEMO_FALLBACK.after);
-        statusEl.textContent = 'Demo fallback loaded — press Compare';
+        setStatus('Demo fallback loaded — press Compare', 0);
       }
     });
   }

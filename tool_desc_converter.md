@@ -807,3 +807,38 @@ Testing
 Commits
 • (this branch) — chore(converter): move formats card below and make it collapsible
 • (this branch) — chore(ads): soften adblock toast copy for TinyUtils
+
+### Major changes — 2025-11-16 06:42 CET (UTC+01:00) — Try example + progress indicator
+
+Added
+• Added a Try example button that loads a demo document, resets the form, and explains that the user can press Convert to see outputs without supplying real files.
+• Replaced the bare progress text with a `role=status`/`aria-live` block plus a compact meter that reflects converting, previewing, timeout retries, success, or errors.
+
+Modified
+• Run/preview/clear flows now update the shared `updateProgressState` helper so the meter, message, and button states stay in sync for both single and multi-target conversions.
+
+Fixed
+• **Problem:** there was no accessible progress indicator, so users, especially those with screen readers, couldn’t tell when a conversion was running versus done.
+  - **Root cause:** the UI only rewrote a plain `<div>` text with no `role=status` or semantic cues and ignored demo loads and retry notifications.
+  - **Fix:** Introduced an accessible progress block with `aria-live`, a progress meter, and Try example messaging, ensuring every step (run, preview, retry, error, demo load) updates it.
+  - **Evidence:** artifacts/pr4-tool-ux/20251116/manual-notes.txt
+
+Human-readable summary
+
+**Problem 1: Is anything happening?**
+Without an accessible status region, conversions looked frozen even while `/api/convert` was busy, and preview/demos showed the same text as the active convert run.
+
+**Problem 2: Demo content didn’t explain itself.**
+You could fix a sample, but nothing told you to click Convert next or what state the tool was in.
+
+**The fix:** Add a demo button that populates a sample document and updates the new `role=status` banner with “Demo loaded — press Convert,” and wire every run/preview/timeout/error path through a shared `updateProgressState` helper that also drives a little progress meter.
+
+Impact
+• Screen reader & keyboard users now hear converting/previewing/completion states, improving accessibility while keeping shortcuts intact. ✅
+• Try example flows give a concrete example document and next step instruction, smoothing onboarding on PR4. ✅
+
+Testing
+• Manual DOM/logic review of the demo flow and progress-state helper (visual inspection). ✅
+
+Commits
+• TBD - feat: add Try Example UX for PR4
