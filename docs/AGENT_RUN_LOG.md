@@ -216,6 +216,15 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-16 01:51 CET - Manual - CMP script on cookies page
+- **Mode:** manual
+- **Branch:** `fix/pr-b-cookie-converter-ui`
+- **Summary:**
+  - Added the official Google AdSense tag (ca-pub-3079281180008443) to cookies.html so the Google CMP / Funding Choices code is present on the Cookie & privacy settings page, allowing googlefc.showRevocationMessage() to work there.
+- **Evidence:** artifacts/pr-c-consent/20251116/
+- **Follow-ups:**
+  - Let Vercel deploy main, then quickly re-run preview_smoke.mjs against https://www.tinyutils.net to confirm /cookies.html still passes and that the CMP revocation button now works when Funding Choices is active.
+
 ### 2025-11-16 01:28 CET - Manual - soften adblock detection
 - **Mode:** manual
 - **Branch:** `fix/pr-b-cookie-converter-ui`
