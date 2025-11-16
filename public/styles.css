@@ -1,15 +1,15 @@
-body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Ubuntu,sans-serif;background:#0a0f1f;color:#e6edf7;margin:0;line-height:1.6}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Ubuntu,sans-serif;background:var(--bg,#0a0f1f);color:var(--text,#e6edf7);margin:0;line-height:1.6}
 .container{max-width:960px;margin:0 auto;padding:1rem}
 .cell-url{word-break:break-all}
 /* Sticky header & zebra (unified with site.css) */
-.tableWrap{max-height:70vh;overflow:auto;border:1px solid #1e2230;border-radius:12px}
+.tableWrap{max-height:70vh;overflow:auto;border:1px solid var(--border,#1e2230);border-radius:12px}
 table{width:100%;border-collapse:separate;border-spacing:0}
-thead th{position:sticky;top:0;background:#0b1224;z-index:2}
+thead th{position:sticky;top:0;background:var(--panel,#0b1224);z-index:2}
 tbody tr:nth-child(odd){background:rgba(255,255,255,.02)}
 tbody tr:hover{background:rgba(255,255,255,.04)}
-th,td{padding:10px;border-bottom:1px solid #1e2230;vertical-align:top}
+th,td{padding:10px;border-bottom:1px solid var(--border,#1e2230);vertical-align:top}
 /* Focus visibility */
-:focus-visible{outline:2px solid #2b6ef6;outline-offset:2px;border-radius:6px}
+:focus-visible{outline:2px solid var(--focus-ring,#facc15);outline-offset:2px;border-radius:6px}
 /* Badges/chips */
 .badge.warn{background:#4c3b07;color:#ffd873}
 .badge.error{background:#4a1b1b;color:#ffb3b3}
