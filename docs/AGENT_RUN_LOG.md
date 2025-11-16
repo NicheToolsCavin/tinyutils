@@ -216,36 +216,6 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
-### 2025-11-16 05:17 CET - Manual - PR2 a11y tokens + skip links
-- **Mode:** manual
-- **Branch:** `feat/phase1-a11y-tokens`
-- **Summary:**
-  - Introduced shared color/focus CSS variables in styles/site.css and public/styles.css (bg/panel/text/muted/border/brand/focus-ring) to improve AA-ish contrast while keeping the existing TinyUtils look.
-  - Added global skip links and main landmarks (id="main") across core shells and tools (home, tools index, cookies, privacy/terms/support, sitemap-delta, wayback-fixer, converter, formats, and legacy tools like keyword density/meta preview/sitemap generator) plus consistent :focus-visible outlines for links/buttons/inputs.
-  - Confirmed no changes to CMP/consent scripts, adsense-monitor, vercel.json, or API behavior; this PR is purely a11y/UX scaffolding.
-- **Evidence:** artifacts/phase1-a11y/20251116/
-- **Follow-ups:**
-
-### 2025-11-16 04:57 CET - Manual - start PR2 a11y tokens
-- **Mode:** manual
-- **Branch:** `main`
-- **Summary:**
-  - Preparing to branch from main for Phase 1 PR2 (a11y/design-token baseline) after completing Converter PR1 on fix/pr-b-cookie-converter-ui.
-  - Plan: add CSS design tokens for colors/focus, improve AA-ish contrast, and wire skip link + visible focus outlines across core shells and tools without altering API contracts.
-- **Evidence:** artifacts/phase1-a11y/20251116/
-- **Follow-ups:**
-  - Implement PR2 on new branch (a11y tokens + contrast) and update docs/tool_desc as needed.
-
-### 2025-11-16 04:44 CET - Manual - PR1 preview smokes (401 due to protection)
-- **Mode:** manual
-- **Branch:** `fix/pr-b-cookie-converter-ui`
-- **Summary:**
-  - Opened PR #39 for Converter PR B UI + smokes and ran scripts/preview_smoke.mjs + scripts/smoke_convert_preview.mjs against the Vercel preview; all checks returned 401 due to preview protection (no automation bypass token present in this environment).
-  - Confirmed that failures are auth-related only; converter endpoints and pages are reachable behind Vercel preview protection and will pass once the official automation bypass token is available.
-- **Evidence:** artifacts/convert-pr1-ui/20251116/
-- **Follow-ups:**
-  - Re-run preview_smoke.mjs and smoke_convert_preview.mjs with VERCEL_AUTOMATION_BYPASS_SECRET/PREVIEW_BYPASS_TOKEN configured.
-
 ### 2025-11-16 04:39 CET - Manual - Converter PR1 UI + smokes
 - **Mode:** manual
 - **Branch:** `fix/pr-b-cookie-converter-ui`
