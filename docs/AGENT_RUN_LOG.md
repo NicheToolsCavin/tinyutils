@@ -216,6 +216,26 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-16 05:40 CET - Manual - PR3 trust surfaces implemented
+- **Mode:** manual
+- **Branch:** `feat/phase1-trust-pages`
+- **Summary:**
+  - Added static about.html and contact.html using existing TinyUtils header/footer/card layout and current a11y patterns (main landmark), with simple, trustworthy copy about what TinyUtils is and how to get in touch.
+  - Wired About/Contact links into header/footer nav across the main shells and primary tool pages (home, tools index, DLF, Sitemap Delta, Wayback Fixer, Converter, Supported Formats) and added both URLs to sitemap.xml.
+  - Confirmed CMP/consent.js, adsense-monitor.js, vercel.json, and all APIs remain untouched; this PR is static HTML/CSS-only trust scaffolding.
+- **Evidence:** artifacts/phase1-trust-pages/20251116/
+- **Follow-ups:**
+
+### 2025-11-16 05:38 CET - Manual - start PR3 trust surfaces
+- **Mode:** manual
+- **Branch:** `feat/phase1-trust-pages`
+- **Summary:**
+  - Started Phase 1 PR3 to add static About and Contact pages plus nav/footer links and sitemap entries, building on existing a11y scaffolding (tokens + skip links).
+  - Guardrails: no changes to CMP/consent.js, adsense-monitor.js, vercel.json, or any APIs; PR3 is static HTML/CSS only.
+- **Evidence:** artifacts/phase1-trust-pages/20251116/
+- **Follow-ups:**
+  - Implement about.html/contact.html, nav wiring, sitemap.xml updates, then open PR.
+
 ### 2025-11-16 01:51 CET - Manual - CMP script on cookies page
 - **Mode:** manual
 - **Branch:** `fix/pr-b-cookie-converter-ui`
