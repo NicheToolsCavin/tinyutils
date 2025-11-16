@@ -216,6 +216,28 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-16 01:13 CET - Manual - Google CMP reopen + cookies page
+- **Mode:** manual
+- **Branch:** `fix/pr-b-cookie-converter-ui`
+- **Summary:**
+  - Updated scripts/consent.js to drop the custom tuConsent helper and avoid any homegrown CMP logic, leaving Google Funding Choices as the sole consent surface.
+  - Rewrote cookies.html so the "Review" button uses googlefc.callbackQueue and showRevocationMessage per Google\'s Privacy & Messaging JS API, with clear fallback messaging when the CMP is not available.
+  - Adjusted scripts/adsense-monitor.js so the adblock toast no longer depends on a local tu-consent flag, avoiding conflicts with Google\'s consent state.
+- **Evidence:** artifacts/pr-c-consent/20251116/
+- **Follow-ups:**
+  - Run preview_smoke.mjs and smoke_convert_preview.mjs against the PR preview and production once Vercel finishes deploying this branch.
+
+### 2025-11-16 00:31 CET - Manual - switch to Google Funding Choices CMP banner
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Replaced the homegrown EU heuristics + custom consent banner with a minimal helper and the official Google Funding Choices CMP script (pub-3079281180008443) on core pages (/, /tools/, DLF, Sitemap Delta, Wayback Fixer, Converter).
+  - scripts/consent.js now only manages the local 'hide ads' toggle and exposes tuConsent.reopen(), which calls window.googlefc.showDialog() when available, so /cookies.html can re-open the Google three-option banner instead of a custom box.
+  - Re-ran scripts/preview_smoke.mjs and scripts/smoke_convert_preview.mjs against the PR preview; all pages/APIs 200/JSON and converter flows PASS with Funding Choices CMP present. PR #35 merged to main so the new CMP wiring can roll out via the normal production deploy.
+- **Evidence:** artifacts/pr-c-consent/20251115/
+- **Follow-ups:**
+  - After main deploy completes, re-run preview_smoke.mjs and smoke_convert_preview.mjs against https://www.tinyutils.net to confirm CMP + tools behave as expected in production.
+
 ### 2025-11-15 23:22 CET - Manual - converter formats card + ad toast copy
 - **Mode:** manual
 - **Branch:** `fix/pr-b-cookie-converter-ui`
