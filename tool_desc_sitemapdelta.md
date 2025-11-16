@@ -133,3 +133,38 @@ Sitemap Delta no longer steals keypresses while you paste URLs—the export shor
 **Impact**
 • Users can paste/edit sitemap URLs without surprise CSV downloads, and accessibility tools get live progress updates.
 • HEAD verification respects politeness limits, reducing the risk of overloading target hosts while still reporting retries/timeouts via metadata.
+
+### Major changes — 2025-11-16 06:42 CET (UTC+01:00) — Try example + progress indicator
+
+Added
+• The status area became a `role=status`/`aria-live` block with a compact progress meter so running, done, error, and demo states are announced to assistive tech.
+• Try example now loads the demo XML fixtures and explicitly updates the status block so the preview would-be run shows a “Demo loaded — press Compare” message and a zeroed meter.
+
+Modified
+• The demo button keeps the share-state hash fresh, toggles the `setStatus` helper, and keeps the export buttons disabled until the sample run completes so the UI mirrors a real comparison.
+
+Fixed
+• **Problem:** the status text just said “Ready.” or “Working…” so screen readers and keyboard users lacked context when the API was still processing.
+  - **Root cause:** no semantic hints or progress meter existed, so runs looked static even when the fetch was pending or had failed.
+  - **Fix:** Rebuilt the status banner to include `role=status`, `aria-live`, and a small progress meter, and wired the demo + run flows to update that state for every step.
+  - **Evidence:** artifacts/pr4-tool-ux/20251116/manual-notes.txt
+
+Human-readable summary
+
+**Problem 1: Did my sitemap comparison actually run?**
+The interface only replaced static text, so assistive tech had no idea when comparators were running, done, or erroring.
+
+**Problem 2: The demo button didn’t explain what to do next.**
+It filled the XML but the status stayed “Ready,” leaving the user wondering whether to click “Compare.”
+
+**The fix:** Add a status block with `role=status` + `aria-live` + a progress meter, and update it every time the demo button, run button, or error handler fires. The Try example load now toggles the meter/text so users know to press “Compare.”
+
+Impact
+• Assistive tech customers hear explicit progress updates (Working → Done → Error) instead of static text, improving accessibility compliance. ✅
+• Demo flows now describe the next action, so preview smoke logs show a consistent “Demo loaded — press Compare” state before the actual run. ✅
+
+Testing
+• Manual DOM/logic review of the Try example and status update logic (visual inspection). ✅
+
+Commits
+• TBD - feat: add Try Example UX for PR4
