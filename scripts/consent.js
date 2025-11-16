@@ -3,8 +3,6 @@
   // Responsibilities:
   // - Manage the local "hide ads" toggle (tu-ads-hidden) so users can reduce
   //   visual noise without changing how Google serves ads.
-  // - Provide a helper to re-open the official Google Funding Choices dialog
-  //   when it is available (three-option Google CMP banner).
 
   const ADS_KEY = 'tu-ads-hidden';
 
@@ -41,22 +39,4 @@
     init();
   }
 
-  // Expose a minimal helper so pages like /cookies.html can politely request
-  // that the official Google Funding Choices dialog be shown again, when present.
-  try {
-    window.tuConsent = window.tuConsent || {};
-    window.tuConsent.reopen = function () {
-      try {
-        if (window.googlefc && typeof window.googlefc.showDialog === 'function') {
-          window.googlefc.showDialog();
-          return;
-        }
-      } catch (e) {}
-      // Fallback: if Funding Choices is not available, do nothing here;
-      // we avoid showing any custom banner that could conflict with Google CMP.
-    };
-  } catch (e) {
-    // If the global cannot be set (very old browsers), we simply skip the helper.
-  }
 })();
-
