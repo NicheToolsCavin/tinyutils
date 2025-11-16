@@ -7,12 +7,9 @@
   function save(k,v){ try { localStorage.setItem(k,v); } catch {} }
 
   function shouldShow(){
-    // respect 7‑day dismissal
+    // respect 7-day dismissal
     const ts = parseInt(read(DISMISS_KEY)||'0',10)||0;
     if (ts && (now() - ts) < TTL_MS) return false;
-    // respect consent: only show if user allowed ads
-    const consent = read('tu-consent');
-    if (consent && consent !== 'granted') return false;
     return true;
   }
 
@@ -34,7 +31,7 @@
   }
 
   function detectFailure(){
-    // show only if AdSense didn’t initialize after 3s
+    // show only if AdSense didn't initialize after 3s
     const ok = (window.adsbygoogle && Array.isArray(window.adsbygoogle));
     if (!ok) makeToast();
   }
@@ -54,3 +51,4 @@
     init();
   }
 })();
+
