@@ -31,7 +31,11 @@
     .actions-row button.primary { background: var(--brand, #3b82f6); color: #fff; border: none; padding: 0.65rem 1.4rem; border-radius: 0.75rem; cursor: pointer; }
     .actions-row button.primary[disabled] { opacity: 0.6; cursor: not-allowed; }
     .actions-row button.secondary { background: transparent; color: inherit; border: 1px solid rgba(255,255,255,0.2); border-radius: 0.75rem; padding: 0.55rem 1.25rem; cursor: pointer; }
-    #progress { min-height: 1.5rem; display: flex; align-items: center; gap: 0.5rem; margin-top: 1rem; }
+    #progress { min-height: 1.5rem; display: flex; flex-direction: column; gap: 0.3rem; margin-top: 1rem; }
+    #progressMessage { font-weight: 500; }
+    #progressMeter { width: 100%; height: 6px; border-radius: 999px; background: rgba(255,255,255,0.12); border: none; }
+    #progressMeter::-webkit-progress-bar { background: rgba(255,255,255,0.12); border-radius: 999px; }
+    #progressMeter::-webkit-progress-value { background: var(--brand, #3b82f6); border-radius: 999px; }
     .tableWrap { margin-top: 1rem; max-height: 70vh; overflow: auto; border: 1px solid #eee; border-radius: 8px; }
     #results thead th { position: sticky; top: 0; z-index: 2; background: #fff; color: #111827; box-shadow: 0 1px 0 rgba(0,0,0,0.05); }
     .download-link { color: var(--brand, #3b82f6); text-decoration: underline; cursor: pointer; }
@@ -143,9 +147,13 @@
           <button id="previewBtn" class="secondary" type="button">Preview</button>
           <button id="convertBtn" class="primary" type="button">Convert</button>
           <button id="clearBtn" class="secondary" type="button">Clear</button>
+          <button id="demoBtn" class="secondary" type="button">Try example</button>
           <span class="badge">Shortcut: <kbd>Ctrl/Cmd + Enter</kbd> to convert</span>
         </div>
-        <div id="progress" aria-live="polite"></div>
+        <div id="progress" aria-live="polite" role="status">
+          <span id="progressMessage">Ready.</span>
+          <progress id="progressMeter" max="100" value="0" hidden></progress>
+        </div>
       </section>
 
       <section class="card" role="region" aria-labelledby="resultsHeading">
@@ -235,11 +243,54 @@
     const previewPanel = document.getElementById('previewPanel');
     const convertBtn = document.getElementById('convertBtn');
     const clearBtn = document.getElementById('clearBtn');
-    const progressEl = document.getElementById('progress');
+    const demoBtn = document.getElementById('demoBtn');
+    const progressMessageEl = document.getElementById('progressMessage');
+    const progressMeter = document.getElementById('progressMeter');
     const resultsBody = document.querySelector('#results tbody');
 
     let currentFile = null;
     let requestCounter = 0; // Track conversion requests to prevent race conditions
+    const DEMO_SNIPPET = [
+      '# TinyUtils Demo Document',
+      'This demo shows headings, links, inline code, and lists so you can preview conversions.',
+      '## Sample content',
+      '- Bullet lists stay clean.',
+      '- Headings become outline anchors.',
+      '- `Inline code` appears everywhere.',
+      '```js',
+      'const message = "Hello from TinyUtils";',
+      'console.log(message);',
+      '```',
+      '## More context',
+      'The converter keeps formatting, tables, and metadata intact.',
+      '[TinyUtils tools hub](/tools/) leads back to the whole suite.'
+    ].join('\n\n');
+
+    function updateProgressState(message, value) {
+      if (progressMessageEl) progressMessageEl.textContent = message;
+      if (progressMeter) {
+        if (value == null) {
+          progressMeter.hidden = true;
+        } else {
+          progressMeter.hidden = false;
+          progressMeter.value = Math.max(0, Math.min(100, value));
+        }
+      }
+    }
+
+    function loadTryExample() {
+      textInput.value = DEMO_SNIPPET;
+      fileInput.value = '';
+      currentFile = null;
+      fromSelect.value = 'markdown';
+      toSingle.value = 'html';
+      setAdvanced(false);
+      updateOptionAvailability();
+      previewPanel.style.display = 'none';
+      resultsBody.innerHTML = '';
+      updateProgressState('Demo content loaded — press Convert to see outputs.', 0);
+      showToast('Try example content loaded.');
+    }
 
     // Update option availability based on selected input format
     function updateOptionAvailability() {
@@ -504,9 +555,10 @@
       previewBtn.disabled = true;
       // Progress copy; for PDFs show layout-aware message
       const isPdfInput = isPdfInputActive();
-      progressEl.textContent = previewOnly
+      const initialMessage = previewOnly
         ? (isPdfInput ? 'Parsing PDF (layout-aware) — generating preview…' : 'Generating preview…')
         : (isPdfInput ? 'Parsing PDF (layout-aware)…' : 'Converting…');
+      updateProgressState(initialMessage, previewOnly ? 40 : 20);
       resultsBody.innerHTML = '';
       previewPanel.style.display = 'none';
 
@@ -568,7 +620,7 @@
           response = await sendOnce();
         } catch (err) {
           if (err && err.name === 'AbortError') {
-            progressEl.textContent = 'Timed out, retrying…';
+            updateProgressState('Timed out, retrying…', 45);
             await new Promise(r => setTimeout(r, 50 + Math.random()*100));
             response = await sendOnce();
           } else {
@@ -644,9 +696,9 @@
         if (!previewOnly && isPdfInput) {
           baseMsg += summarizePdfMeta(data);
         }
-        progressEl.textContent = baseMsg;
+        updateProgressState(baseMsg, 100);
       } catch (err) {
-        progressEl.textContent = 'Error: ' + (err.message || 'Conversion failed');
+        updateProgressState('Error: ' + (err.message || 'Conversion failed'), null);
         console.error('Conversion error:', err);
       } finally {
         convertBtn.disabled = false;
@@ -662,8 +714,10 @@
       fileInput.value = '';
       currentFile = null;
       resultsBody.innerHTML = '';
-      progressEl.textContent = '';
+      updateProgressState('Ready.', null);
     });
+
+    demoBtn?.addEventListener('click', loadTryExample);
 
     // Update option availability when format selection changes
     fromSelect.addEventListener('change', updateOptionAvailability);
@@ -681,6 +735,7 @@
     // Initialize option availability on page load
     restorePrefs();
     updateOptionAvailability();
+    updateProgressState('Ready.', null);
 
     // Keyboard shortcut: Cmd/Ctrl+Enter to convert
     document.addEventListener('keydown', (e) => {
