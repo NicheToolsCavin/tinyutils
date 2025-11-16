@@ -216,6 +216,15 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-16 06:09 CET - Manual - PR1 preview smokes with bypass
+- **Mode:** manual
+- **Branch:** `fix/pr-b-cookie-converter-ui`
+- **Summary:**
+  - Re-ran scripts/preview_smoke.mjs + scripts/smoke_convert_preview.mjs against PR #39 with VERCEL_AUTOMATION_BYPASS_SECRET/PREVIEW_BYPASS_TOKEN/BYPASS_TOKEN from .vercel/.env.preview.local.
+  - All pages and APIs returned 200 OK; converter API smokes succeeded, and artifacts are stored under artifacts/convert-pr1-ui/20251116/.
+- **Evidence:** artifacts/convert-pr1-ui/20251116/
+- **Follow-ups:**
+
 ### 2025-11-16 05:40 CET - Manual - PR3 trust surfaces implemented
 - **Mode:** manual
 - **Branch:** `feat/phase1-trust-pages`
