@@ -216,6 +216,16 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-16 06:52 CET - Manual - PR5 smokes
+- **Mode:** manual
+- **Branch:** `feature/pr4-tool-ux`
+- **Summary:**
+  - Ran preview_smoke.mjs + smoke_convert_preview.mjs against the PR4 preview with bypass tokens.
+  - API/page checks and converter cases all returned 200/JSON and artifacts stored under artifacts/pr5-final-smokes/20251116/.
+- **Evidence:** artifacts/pr5-final-smokes/20251116/
+- **Follow-ups:**
+  - Share smoke results + merge PR once reviewers approve.
+
 ### 2025-11-16 06:45 CET - Manual - PR4 tool progress
 - **Mode:** manual
 - **Branch:** `feature/pr4-tool-ux`
