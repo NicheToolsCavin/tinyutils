@@ -31,8 +31,13 @@
   }
 
   function detectFailure(){
-    // show only if AdSense didn't initialize after 3s
-    const ok = (window.adsbygoogle && Array.isArray(window.adsbygoogle));
+    // Show only if AdSense never initialized after a short delay.
+    // We intentionally use a very loose check here: if the AdSense
+    // script has created *any* window.adsbygoogle value, we assume
+    // it is working and skip the toast. This avoids falsely telling
+    // users that "ads seem blocked" when Google is simply choosing
+    // not to render an ad or is using a different internal shape.
+    const ok = !!window.adsbygoogle;
     if (!ok) makeToast();
   }
 
@@ -51,4 +56,3 @@
     init();
   }
 })();
-
