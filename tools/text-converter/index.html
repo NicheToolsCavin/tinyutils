@@ -189,6 +189,14 @@
             <tbody></tbody>
           </table>
         </div>
+        <section id="nextSteps" class="next-steps" aria-labelledby="nextStepsHeading" hidden>
+          <h3 id="nextStepsHeading">Next steps</h3>
+          <ul>
+            <li>After generating clean Markdown or HTML, update your site and then run <a href="/tools/dead-link-finder/">Dead Link Finder</a> to catch new broken links.</li>
+            <li>When large content moves are involved, refresh your XML sitemaps and compare them with <a href="/tools/sitemap-delta/">Sitemap Delta + Redirect Mapper</a>.</li>
+            <li>If old URLs disappear in the process, use <a href="/tools/wayback-fixer/">Wayback Fixer</a> to salvage snapshots or generate 410s.</li>
+          </ul>
+        </section>
       </section>
 
       <details class="card formats-card" role="region" aria-labelledby="formatsHeading">
@@ -252,6 +260,7 @@
     const demoBtn = document.getElementById('demoBtn');
     const progressMessageEl = document.getElementById('progressMessage');
     const progressMeter = document.getElementById('progressMeter');
+    const nextStepsEl = document.getElementById('nextSteps');
     const resultsBody = document.querySelector('#results tbody');
 
     let currentFile = null;
@@ -281,6 +290,9 @@
           progressMeter.hidden = false;
           progressMeter.value = Math.max(0, Math.min(100, value));
         }
+      }
+      if (nextStepsEl && typeof value === 'number' && value >= 100) {
+        nextStepsEl.hidden = false;
       }
     }
 

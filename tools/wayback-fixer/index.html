@@ -152,6 +152,15 @@ https://example.com/moved"></textarea>
       </table>
     </section>
 
+    <section id="nextSteps" class="next-steps" aria-labelledby="nextStepsHeading" hidden>
+      <h3 id="nextStepsHeading">Next steps</h3>
+      <ul>
+        <li>Feed your replacement map into your redirect configuration so visitors see archived content instead of 404s.</li>
+        <li>Re-crawl key pages with <a href="/tools/dead-link-finder/">Dead Link Finder</a> to confirm that dead links are fixed.</li>
+        <li>When migrations are involved, compare old vs new sitemaps with <a href="/tools/sitemap-delta/">Sitemap Delta</a> to double-check coverage.</li>
+      </ul>
+    </section>
+
     <footer class="foot">
       <a href="/tools/">← All tools</a>
     </footer>
@@ -178,6 +187,7 @@ https://example.com/moved"></textarea>
   const exportButtons = exportBtnIds.map(id => document.getElementById(id)).filter(Boolean);
   const LINE_BREAK = '\\r\\n';
   let last = null, filt = 'all';
+  const nextStepsEl = document.getElementById('nextSteps');
 
   function setStatus(message, progress) {
     if (statusMessageEl) statusMessageEl.textContent = message;
@@ -379,6 +389,9 @@ https://example.com/moved"></textarea>
     setStatus(`${meta.totalChecked ?? rows.length} checked · ${meta.archived ?? 0} archived · ${meta.noSnapshot ?? 0} no snapshot · SPN ${meta.spnQueued ?? 0}`, 100);
     document.dispatchEvent(new CustomEvent('tinyutils:results-updated', { detail: { total: rows.length, meta } }));
     setExportsEnabled(Boolean(data?.results?.length));
+    if (nextStepsEl) {
+      nextStepsEl.hidden = !(data?.results && data.results.length);
+    }
   }
 
   runBtn.addEventListener('click', async ()=>{

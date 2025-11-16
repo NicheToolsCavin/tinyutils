@@ -216,6 +216,16 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-16 21:53 CET - Manual - Phase 2 PR9 cross-tool Next steps + workflows
+- **Mode:** manual
+- **Branch:** `feat/phase2-next-steps`
+- **Summary:**
+  - Added small Next steps sections after results on Dead Link Finder, Sitemap Delta, Wayback Fixer, and Document Converter, guiding users toward complementary tools for redirects, archives, and content clean-up.
+  - Introduced a Workflows panel on /tools/ that links the four core tools into common sequences (fix broken links, migrations, content refactors) using only HTML/CSS/light JS; no /api/*, CMP/consent, adsense-monitor.js, or vercel.json changes.
+- **Evidence:** tinyutils/artifacts/ux-phase2-next-steps/20251116/
+- **Follow-ups:**
+  - Optional: run preview_smoke.mjs and smoke_convert_preview.mjs on the PR preview to visually verify flows and capture screenshots.
+
 ### 2025-11-16 04:39 CET - Manual - Converter PR1 UI + smokes
 - **Mode:** manual
 - **Branch:** `fix/pr-b-cookie-converter-ui`

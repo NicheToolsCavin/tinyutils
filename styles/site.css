@@ -39,6 +39,11 @@ a:hover{color:var(--brand-2)}
 .card h2{margin:0 0 6px;font-size:18px}
 .card p{margin:0 0 12px;color:var(--muted)}
 
+.next-steps{margin-top:16px;padding-top:12px;border-top:1px solid var(--border);font-size:.9rem}
+.next-steps h3{margin:0 0 4px;font-size:1rem}
+.next-steps ul{margin:0;padding-left:1.1rem}
+.next-steps li+li{margin-top:4px}
+
 .tu-consent{position:fixed;right:16px;bottom:16px;max-width:340px;background:#0e1530;color:#e8ecf3;border:1px solid #263464;border-radius:12px;padding:12px 12px 10px;box-shadow:0 12px 30px rgba(0,0,0,.35);z-index:9999}
 .tu-consent h4{margin:0 0 6px;font-size:14px}
 .tu-consent p{margin:0 0 8px;font-size:13px;opacity:.9}

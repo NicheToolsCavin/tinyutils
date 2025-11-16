@@ -134,6 +134,15 @@
       </div>
     </section>
 
+    <section id="nextSteps" class="next-steps" aria-labelledby="nextStepsHeading" hidden>
+      <h3 id="nextStepsHeading">Next steps</h3>
+      <ul>
+        <li>Use <a href="/tools/dead-link-finder/">Dead Link Finder</a> to crawl key pages from the updated sitemap and catch broken links.</li>
+        <li>If many legacy URLs are gone, pass removed URLs into <a href="/tools/wayback-fixer/">Wayback Fixer</a> to rescue content or generate 410s.</li>
+        <li>When redirect rules look good, keep a copy of your 301/410 exports alongside your deployment notes.</li>
+      </ul>
+    </section>
+
     <section class="card" style="margin-top:14px">
       <details>
         <summary>🔧 Suggested rewrite rules (nginx & Apache)</summary>
@@ -222,6 +231,7 @@
 
   let lastResults = null;
   let confThreshold = 0;
+  const nextStepsEl = document.getElementById('nextSteps');
 
   function setExportsEnabled(enabled) {
     exportButtons.forEach(btn => {
@@ -446,6 +456,9 @@
     }
 
     const totalRows = filtered.pairs.length + filtered.unmapped.length + filtered.added.length;
+    if (nextStepsEl) {
+      nextStepsEl.hidden = totalRows === 0;
+    }
     document.dispatchEvent(new CustomEvent('tinyutils:results-updated', { detail: { total: totalRows, meta } }));
     setExportsEnabled(totalRows > 0);
   }

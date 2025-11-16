@@ -187,6 +187,13 @@
             <tbody></tbody>
           </table>
         </div>
+        <section id="nextSteps" class="next-steps" aria-labelledby="nextStepsHeading" hidden>
+          <h3 id="nextStepsHeading">Next steps</h3>
+          <ul>
+            <li>Use <a href="/tools/wayback-fixer/">Wayback Fixer</a> to turn dead URLs into archived replacements and a 410 list.</li>
+            <li>After cleaning up links, run <a href="/tools/sitemap-delta/">Sitemap Delta</a> to compare old vs new sitemaps and plan redirects.</li>
+          </ul>
+        </section>
       </section>
     </div>
   </main>
@@ -413,6 +420,8 @@
       resetDebug();
     }
 
+    const nextStepsEl = document.getElementById('nextSteps');
+
     document.getElementById('year').textContent = new Date().getFullYear();
 
     function setExportState(enabled) {
@@ -503,6 +512,9 @@
       });
 
       applyFilters();
+      if (nextStepsEl) {
+        nextStepsEl.hidden = rows.length === 0;
+      }
     }
 
     function applyFilters() {
@@ -995,6 +1007,7 @@
       meta = null;
       lastRequestPayload = null;
       setExportState(false);
+      if (nextStepsEl) nextStepsEl.hidden = true;
     });
 
     document.addEventListener('keydown', (e) => {
