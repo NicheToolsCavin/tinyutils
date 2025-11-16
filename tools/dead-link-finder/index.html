@@ -35,7 +35,11 @@
     .advanced-grid { display: grid; gap: 0.5rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-top: 0.75rem; }
     label span.help { color: var(--muted, #97a3c2); font-size: 0.8rem; display: block; margin-top: 0.2rem; }
     textarea { min-height: 160px; }
-    #progress { min-height: 1.5rem; display: flex; align-items: center; gap: 0.5rem; }
+    #progress { min-height: 1.5rem; display: flex; flex-direction: column; gap: 0.3rem; margin-top: 1rem; }
+    #progressMessage { font-weight: 500; }
+    #progressMeter { width: 100%; height: 6px; border-radius: 999px; background: rgba(255,255,255,0.12); border: none; }
+    #progressMeter::-webkit-progress-bar { background: rgba(255,255,255,0.12); border-radius: 999px; }
+    #progressMeter::-webkit-progress-value { background: var(--brand, #3b82f6); border-radius: 999px; }
     .status-bar { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
     .filter-group { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
     .export-group { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
@@ -125,9 +129,13 @@
         <div class="actions-row">
           <button id="runBtn" class="primary" type="button">Run check</button>
           <button id="clearBtn" class="secondary" type="button">Clear</button>
+          <button id="demoBtn" class="secondary" type="button">Try example</button>
           <span class="badge">Shortcuts: <kbd>Ctrl/Cmd + Enter</kbd> run · <kbd>Ctrl/Cmd + E</kbd> export CSV · <kbd>Ctrl/Cmd + Shift + C</kbd> copy CSV</span>
         </div>
-        <div id="progress" aria-live="polite"></div>
+        <div id="progress" aria-live="polite" role="status">
+          <span id="progressMessage">Ready.</span>
+          <progress id="progressMeter" max="100" value="0" hidden></progress>
+        </div>
       </section>
 
       <section class="card" role="region" aria-labelledby="resultsHeading">
@@ -337,7 +345,8 @@
     const includeArchiveEl = document.getElementById('includeArchive');
     const runBtn = document.getElementById('runBtn');
     const clearBtn = document.getElementById('clearBtn');
-    const progressEl = document.getElementById('progress');
+    const progressMessageEl = document.getElementById('progressMessage');
+    const progressMeter = document.getElementById('progressMeter');
     const summaryEl = document.getElementById('summary');
     const metaLineEl = document.getElementById('metaLine');
     const resultsBody = document.querySelector('#results tbody');
@@ -350,6 +359,7 @@
     const searchEl = document.getElementById('search');
     const onlyBrokenEl = document.getElementById('onlyBroken');
     const statusFilters = document.querySelectorAll('.statusFilter');
+    const demoBtn = document.getElementById('demoBtn');
 
     const debugMode = new URLSearchParams(location.search).get('debug') === '1';
     let debugDetails = null;
@@ -419,6 +429,39 @@
     let lastResults = [];
     let meta = null;
     let lastRequestPayload = null;
+
+    const DEMO_TARGETS = [
+      'https://example.com/',
+      'https://example.com/blog/old-article',
+      'https://example.com/docs/broken-image.png',
+      'https://example.com/missing',
+      'https://example.com/404'
+    ].join('\n');
+
+    function updateProgressState(message, value) {
+      if (progressMessageEl) progressMessageEl.textContent = message;
+      if (progressMeter) {
+        if (value == null) {
+          progressMeter.hidden = true;
+        } else {
+          progressMeter.hidden = false;
+          progressMeter.value = Math.max(0, Math.min(100, value));
+        }
+      }
+    }
+
+    function loadTryExampleInputs() {
+      if (pageUrlEl) pageUrlEl.value = 'https://example.com/legacy';
+      if (targetsInputEl) targetsInputEl.value = DEMO_TARGETS;
+      if (scopeEl) scopeEl.value = 'all';
+      if (includeAssetsEl) includeAssetsEl.checked = true;
+      if (respectRobotsEl) respectRobotsEl.checked = true;
+      if (timeoutEl) timeoutEl.value = 12000;
+      if (concurrencyEl) concurrencyEl.value = 6;
+      if (advancedDetailsEl) advancedDetailsEl.open = true;
+      updateProgressState('Example inputs loaded — press Run to simulate a crawl.', 0);
+      showToast('Try example inputs ready.');
+    }
 
     function renderRows(rows) {
       resultsBody.innerHTML = '';
@@ -605,6 +648,8 @@
       }
     });
 
+    demoBtn?.addEventListener('click', loadTryExampleInputs);
+
     exportCsvBtn.addEventListener('click', () => {
       if (!lastResults.length) return;
       const csv = toCSV(lastResults, meta);
@@ -696,10 +741,10 @@
       if (includeArchiveEl) includeArchiveEl.checked = !!state.includeArchive;
       if (timeoutEl) timeoutEl.value = clamp(state.timeout, 1000, 30000, 10000);
       if (concurrencyEl) concurrencyEl.value = clamp(state.concurrency, 1, 10, 10);
-      if (advancedDetailsEl) {
-        const shouldOpen = !!(targetsInputEl && targetsInputEl.value && targetsInputEl.value.trim());
-        advancedDetailsEl.open = shouldOpen;
-      }
+    if (advancedDetailsEl) {
+      const shouldOpen = !!(targetsInputEl && targetsInputEl.value && targetsInputEl.value.trim());
+      advancedDetailsEl.open = shouldOpen;
+    }
     }
 
     const defaultState = {
@@ -818,7 +863,6 @@
 
     runBtn?.addEventListener('click', async (event) => {
       event.preventDefault();
-      progressEl.textContent = '';
       if (metaLineEl) metaLineEl.textContent = '';
       syncStatusCopyAvailability();
       runBtn.disabled = true;
@@ -829,7 +873,7 @@
         lastRequestPayload = null;
         const payload = await buildPayload();
         lastRequestPayload = payload;
-        progressEl.textContent = 'Running…';
+        updateProgressState('Running…', 20);
         setExportState(false);
         resultsBody.innerHTML = '';
         summaryEl.textContent = '';
@@ -916,13 +960,13 @@
         }
         syncStatusCopyAvailability();
         const stageLabel = meta.stage && meta.stage !== 'done' ? ` (stage: ${meta.stage})` : '';
-        progressEl.textContent = `Done${stageLabel}`;
+        updateProgressState(`Done${stageLabel}`, 100);
       } catch (err) {
         const message = err?.message || 'Run failed';
         const stageHint = err?.stage ? ` [stage: ${err.stage}]` : '';
         const needsReqId = err?.requestId && !(message.includes('ReqID') || message.includes('reqid'));
         const rid = needsReqId ? ` (ReqID: ${err.requestId})` : '';
-        progressEl.textContent = `Error: ${message}${rid}${stageHint}`;
+        updateProgressState(`Error: ${message}${rid}${stageHint}`, null);
         if (metaLineEl) metaLineEl.textContent = '';
         syncStatusCopyAvailability();
         lastResults = [];
@@ -941,7 +985,7 @@
       if (advancedDetailsEl) advancedDetailsEl.open = false;
       resultsBody.innerHTML = '';
       summaryEl.textContent = '';
-      progressEl.textContent = '';
+      updateProgressState('Ready.', null);
       if (metaLineEl) metaLineEl.textContent = '';
       syncStatusCopyAvailability();
       lastResults = [];
@@ -979,6 +1023,7 @@
     } else {
       resetState();
     }
+    updateProgressState('Ready.', null);
   </script>
 
 </body>

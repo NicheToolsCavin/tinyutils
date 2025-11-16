@@ -29,6 +29,9 @@
     textarea,input,select{background:#0e1730;color:#e6edf7;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px;width:100%}
     label{font-size:14px}
     .status{margin-top:6px;opacity:.8}
+    .status progress{width:100%;height:6px;border-radius:999px;margin-top:0.35rem;background:rgba(255,255,255,.12);border:none}
+    .status progress::-webkit-progress-bar{background:rgba(255,255,255,.12);border-radius:999px}
+    .status progress::-webkit-progress-value{background:var(--brand,#3b82f6);border-radius:999px}
     .chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
     .chip{border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:4px 8px;font-size:12px}
     .chip.active{border-color:#3b82f6;color:#cfe1ff}
@@ -100,7 +103,10 @@ https://example.com/moved"></textarea>
           <label>Max concurrent <input id="conc" type="number" min="1" max="6" value="6"></label>
           <div>
             <button id="run" class="btn">Find Wayback Replacements</button>
-            <span id="status" class="status" aria-live="polite">Ready.</span>
+            <div id="status" class="status" aria-live="polite" role="status">
+              <span id="statusMessage">Ready.</span>
+              <progress id="statusMeter" max="100" value="0" hidden></progress>
+            </div>
           </div>
           <div style="display:flex; gap:8px; flex-wrap:wrap">
             <button id="dlCsv" class="btn secondary">Export CSV</button>
@@ -158,6 +164,8 @@ https://example.com/moved"></textarea>
   const timeoutEl = document.getElementById('timeout');
   const concEl = document.getElementById('conc');
   const statusEl = document.getElementById('status');
+  const statusMessageEl = document.getElementById('statusMessage');
+  const statusMeter = document.getElementById('statusMeter');
   const runBtn = document.getElementById('run');
   const chips = document.getElementById('filterChips');
   const tblBody = document.querySelector('#tbl tbody');
@@ -167,6 +175,19 @@ https://example.com/moved"></textarea>
   const exportButtons = exportBtnIds.map(id => document.getElementById(id)).filter(Boolean);
   const LINE_BREAK = '\\r\\n';
   let last = null, filt = 'all';
+
+  function setStatus(message, progress) {
+    if (statusMessageEl) statusMessageEl.textContent = message;
+    if (statusMeter) {
+      if (progress == null) {
+        statusMeter.hidden = true;
+      } else {
+        statusMeter.hidden = false;
+        statusMeter.value = Math.max(0, Math.min(100, progress));
+      }
+    }
+  }
+  setStatus('Ready.', null);
 
   function protectCSVCell(value){
     const s = String(value ?? '');
@@ -267,16 +288,16 @@ https://example.com/moved"></textarea>
 
   if (demoBtn) {
     demoBtn.addEventListener('click', async ()=>{
-      statusEl.textContent = 'Loading demo…';
+      setStatus('Loading demo…', 15);
       try{
         const res = await fetch('/tools/wayback-fixer/demo/demo-urls.txt', { cache: 'no-store' });
         const txt = await res.text();
         if (!res.ok) throw new Error('demo fetch failed');
         listEl.value = txt.trim();
-        statusEl.textContent = 'Demo loaded — press Run.';
+        setStatus('Demo loaded — press Run.', 0);
       }catch{
         listEl.value = `https://example.com/old\nhttps://example.com/missing\nhttps://example.com/2011/post`;
-        statusEl.textContent = 'Demo failed — fallback inserted.';
+        setStatus('Demo failed — fallback inserted.', 0);
       }
     });
   }
@@ -352,7 +373,7 @@ https://example.com/moved"></textarea>
       tblBody.appendChild(tr);
     });
     const meta = data.meta || {};
-    statusEl.textContent = `${meta.totalChecked ?? rows.length} checked · ${meta.archived ?? 0} archived · ${meta.noSnapshot ?? 0} no snapshot · SPN ${meta.spnQueued ?? 0}`;
+    setStatus(`${meta.totalChecked ?? rows.length} checked · ${meta.archived ?? 0} archived · ${meta.noSnapshot ?? 0} no snapshot · SPN ${meta.spnQueued ?? 0}`, 100);
     document.dispatchEvent(new CustomEvent('tinyutils:results-updated', { detail: { total: rows.length, meta } }));
     setExportsEnabled(Boolean(data?.results?.length));
   }
@@ -366,7 +387,7 @@ https://example.com/moved"></textarea>
       timeout: Math.min(30000, Math.max(1000, Number(timeoutEl.value)||10000)),
       concurrency: Math.max(1, Math.min(6, Number(concEl.value)||6))
     };
-    statusEl.textContent = 'Working…';
+    setStatus('Working…', 25);
     runBtn.disabled = true;
     const hadResults = !!last;
     setExportsEnabled(false);
