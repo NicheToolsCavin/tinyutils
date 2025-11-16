@@ -25,7 +25,11 @@ a:hover{color:var(--brand-2)}
 .btn{display:inline-block;border:1px solid var(--border);padding:10px 14px;border-radius:999px;color:var(--text);background:var(--panel)}
 .btn.primary{background:var(--brand);border-color:transparent;color:white}
 .btn.primary:hover{background:var(--brand-2)}
-.meta{color:var(--muted);display:block;margin-top:8px}
+.page-title{font-size:28px;margin:32px 0 16px}
+@media (max-width:640px){
+  .page-title{font-size:24px;margin-top:24px}
+}
+.meta{color:var(--muted);display:block;margin-top:8px;font-size:.875rem;line-height:1.4}
 
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin:28px 0 40px}
 .card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:18px}

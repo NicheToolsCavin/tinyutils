@@ -216,6 +216,25 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-16 21:33 CET - Manual - Phase 2 PR7 type & spacing polish
+- **Mode:** manual
+- **Branch:** `feature/pr4-tool-ux`
+- **Summary:**
+  - Introduced a shared .page-title style in styles/site.css and applied it to home, tools hub, and all four tool pages for consistent H1 sizing and vertical rhythm.
+  - Left per-tool layouts and APIs untouched; changes are limited to typography and spacing using existing tokens.
+- **Evidence:** tinyutils/artifacts/ux-phase2-type-spacing/20251116/
+- **Follow-ups:**
+  - None for PR7; proceed with PR8 progress bar next.
+
+### 2025-11-16 15:36 CET - Manual - PR6 converter RTF fix preview smokes
+- **Mode:** manual
+- **Branch:** `feat/pr6-converter-rtf`
+- **Summary:**
+  - Ran preview_smoke.mjs and smoke_convert_preview.mjs against PR #43 preview with automation bypass envs to validate MD→RTF and other converter flows.
+  - Confirmed TinyUtils demo MD→RTF path now produces a full \rtf1 document via /api/convert on preview; no /api/convert contract, CMP/consent, or vercel.json changes.
+- **Evidence:** artifacts/converter-rtf-fix/20251116/smoke_convert_preview_pr6.log
+- **Follow-ups:**
+
 ### 2025-11-16 15:17 CET - Manual - PR6 converter RTF output correctness
 - **Mode:** manual
 - **Branch:** `feature/pr4-tool-ux`

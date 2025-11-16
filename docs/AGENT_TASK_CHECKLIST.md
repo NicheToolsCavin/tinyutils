@@ -13,6 +13,8 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 ## Active Tasks (Newest First)
 
 | Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
+| Phase 2 PR7 – Type & spacing polish | manual-2025-11-16 CET | Completed | ✅ Added .page-title typography + meta sizing in styles/site.css and wired it into /tools/ and all four tool pages; no API/CMP/ads/vercel.json changes. Evidence: tinyutils/artifacts/ux-phase2-type-spacing/20251116/. |
+| Phase 2 PR6 – Converter RTF output correctness | manual-2025-11-16 CET | Completed | ✅ RTF path now uses pandoc --standalone so MD→RTF emits a full \rtf1 document; demo snippet verified via textutil and Vercel preview smokes for PR #43. Evidence: artifacts/converter-rtf-fix/20251116/demo-output-after-fix.rtf, preview_smoke_pr6.log, smoke_convert_preview_pr6.log. |
 | Phase 2 PR6 – Converter RTF output correctness | manual-2025-11-16 CET | Completed | ✅ Added pandoc --standalone for RTF in api/convert/convert_service.py so MD→RTF emits a single \rtf1 document; validated via pypandoc.convert_text header check. Evidence: artifacts/converter-rtf-fix/20251116/. |
 | PR5 preview smokes | manual-2025-11-16 06:52 CET | Completed | ✅ Preview + converter smokes pass. Commits: 3914a5f. Evidence: artifacts/pr5-final-smokes/20251116/preview_smoke.log |
 | PR4 tool progress + Try example | manual-2025-11-16 06:45 CET | Completed | ✅ Added Try example flows + progress indicators for DLF/Sitemap/Wayback/Converter. Commits: a2ace21. Evidence: artifacts/pr4-tool-ux/20251116/manual-notes.txt |
