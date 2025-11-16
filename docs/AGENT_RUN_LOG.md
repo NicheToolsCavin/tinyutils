@@ -216,6 +216,15 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-16 01:28 CET - Manual - soften adblock detection
+- **Mode:** manual
+- **Branch:** `fix/pr-b-cookie-converter-ui`
+- **Summary:**
+  - Relaxed scripts/adsense-monitor.js so the 'ads seem blocked' toast only appears when window.adsbygoogle is completely missing after a delay, reducing false positives when AdSense is loaded and ads are showing.
+- **Evidence:** artifacts/pr-c-consent/20251116/
+- **Follow-ups:**
+  - Re-run preview_smoke.mjs against preview and prod once convenient to confirm no regressions.
+
 ### 2025-11-16 01:13 CET - Manual - Google CMP reopen + cookies page
 - **Mode:** manual
 - **Branch:** `fix/pr-b-cookie-converter-ui`
