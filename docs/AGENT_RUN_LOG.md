@@ -1481,4 +1481,3 @@ Impact
 
 Follow-ups
 • None.
-
