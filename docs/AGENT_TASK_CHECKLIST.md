@@ -13,6 +13,7 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 ## Active Tasks (Newest First)
 
 | Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
+| PR1 - run preview smokes with bypass | manual-2025-11-16 CET | Completed | ✅ Preview smoke + converter smoke now pass with VERCEL_AUTOMATION_BYPASS_SECRET/PREVIEW_BYPASS_TOKEN/BYPASS_TOKEN exported; artifacts: artifacts/convert-pr1-ui/20251116/. |
 | PR3 - Trust surfaces (About & Contact) | manual-2025-11-16 CET | Completed | ✅ Added about.html/contact.html trust pages plus About/Contact nav/footer links and sitemap.xml entries, with no changes to CMP/consent, adsense-monitor.js, vercel.json, or APIs. Evidence: artifacts/phase1-trust-pages/20251116/. |
 | PR3 - Trust surfaces (About & Contact) | manual-2025-11-16 CET | Open | 🔎 Plan: add about.html/contact.html with simple copy, wire About/Contact into header/footer across core shells/tools, and add sitemap entries without touching CMP/consent, adsense-monitor, vercel.json, or APIs. Evidence: artifacts/phase1-trust-pages/20251116/. |
 | CMP script on cookies page | manual-2025-11-16 CET | Completed | ✅ Added the standard Google AdSense tag to cookies.html so Funding Choices / CMP code is loaded on the Cookie & privacy settings page as well, making the 'Review Google analytics & ads choices' button able to call googlefc.showRevocationMessage() when the CMP is active. Evidence: artifacts/pr-c-consent/20251116/. |
