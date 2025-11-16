@@ -422,10 +422,7 @@ Operational notes
   * Before starting new work, skim the most recent entries in both `docs/AGENT_RUN_LOG.md` and `docs/AGENT_TASK_CHECKLIST.md` so you pick up hand-offs and avoid repeating completed steps.
   * Store evidence artifacts under `artifacts/<task>/YYYYMMDD/` (curl outputs, screenshots, HAR files, etc.) and reference those paths in your log and checklist updates.
 
-## Preview Status — 2025-11-04
-- **Completed:** Sitemap Delta/Wayback UI hardening, Edge API request-id + JSON headers, sitemap.xml trim, tools index cleanup, new demo fixtures, `scripts/preview_smoke.mjs` for instant smoke.
-- **Pending:** Vercel preview remains 401-protected; awaiting protection-bypass token.
-- **Next steps:** Run `PREVIEW_URL=<preview_url> BYPASS_TOKEN=<token> node scripts/preview_smoke.mjs` immediately after a token is provided.
+- 
 
 ## Agent Orchestration — Sources, Priority, and Benches (2025-11-14 17:00 CET)
 
@@ -444,3 +441,23 @@ How to change
 
 Reasoning
 - This alignment prevents the external TOML from silently disabling agents the roster/TUI tries to use, ensuring custom ChatGPT accounts are prioritized while temporarily excluding models on cooldown.
+
+
+
+# AVOIDING INFINITE LOOPS
+
+Sometimes you go into an infinite loop, especially when your name is Codex or ChatGPT and you're working in the `just-every/code` CLI utility. You can use the following custom C-coded ntoification utility to ensure that you get pinged every x seconds so that if something  infinite looping, you can stop yourself.
+
+
+
+simply enter:
+
+```fish
+idle-notifier
+```
+
+which is located in:
+
+```~/.opt/bin` 
+
+which should be in the path.
