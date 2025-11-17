@@ -13,6 +13,7 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 ## Active Tasks (Newest First)
 
 | Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
+| Phase 3 PR14 - ad-block toast verification | manual-2025-11-17 CET | Completed | ✅ Verified existing scripts/adsense-monitor.js .adblock-toast behavior (polite copy-only toast, 7-day localStorage TTL, theme-aware via CSS tokens, no CMP/ads/API/vercel.json changes). Conceptual ad-block ON/OFF sanity pass across home/tools/tool pages; preview_smoke.mjs attempted against expected preview URL but failed due to fetch/network in this environment. Evidence: tinyutils/artifacts/phase3-pr14-adblock-toast/20251117/. |
 | PR1 - Converter UI PR B + smokes | manual-2025-11-16 CET | Completed | ✅ Converter UI PR B implemented (primary target + advanced multi-export, expanded Markdown dialects) and converter preview smokes updated to cover mdDialect + multi-export. Evidence: artifacts/convert-pr1-ui/20251116/. |
 | TinyUtils Phase1 /plan (converter PR B + UX Phase 1) | manual-2025-11-16 CET | Completed | ✅ Consolidated high-level PR B + UX Phase 1 docs into an executable /auto plan with agent allocation. Evidence: artifacts/plan/20251116/. |
 | Load CGPT context dump (2025-11-16) | manual-2025-11-16 CET | Completed | ✅ Ingested CGPT_TU_CONTEXTDUMP_20251116T034004.md; updated working mental model for CMP, consent.js, adsense-monitor.js, UX phases, and automation/smokes. Evidence: artifacts/agent-context/20251116/. |

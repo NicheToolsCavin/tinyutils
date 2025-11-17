@@ -216,6 +216,16 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-17 01:59 CET - Manual - Phase 3 PR14 ad-block toast verification
+- **Mode:** manual
+- **Branch:** `phase3/pr14-adblock-toast`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Verified existing .adblock-toast implementation in scripts/adsense-monitor.js: polite, copy-only ad-block toast, 7-day localStorage TTL, theme-aware via CSS tokens, and non-interfering with CMP/consent or /api/*.
+  - Ran conceptual sanity pass for ad-block ON/OFF across home/tools/tool pages in both themes (code-based review) and attempted preview_smoke.mjs against guessed preview URL (network failure expected in this environment); artifacts in tinyutils/artifacts/phase3-pr14-adblock-toast/20251117/.
+- **Evidence:** tinyutils/artifacts/phase3-pr14-adblock-toast/20251117/
+- **Follow-ups:**
+
 ### 2025-11-16 04:39 CET - Manual - Converter PR1 UI + smokes
 - **Mode:** manual
 - **Branch:** `fix/pr-b-cookie-converter-ui`
