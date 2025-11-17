@@ -216,6 +216,16 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-18 00:30 CET - Manual - PR conflict status check (26/28/29/47)
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Verified PR26 and PR29 are closed, PR28 is merged into main, and PR47 (phase3/pr15-dlf-csv-refactor) is up to date with main and reported MERGEABLE.
+  - No code changes made; only PR/branch status inspection and mergeability verification, preserving headers-only vercel.json and current converter behavior.
+- **Evidence:** artifacts/pr-conflict-check/20251117/status.txt
+- **Follow-ups:**
+  - Owner to merge PR47 when ready; old ci/text-converter-page/preview-boot branches can be cleaned up or mined later if desired.
+
 ### 2025-11-16 04:39 CET - Manual - Converter PR1 UI + smokes
 - **Mode:** manual
 - **Branch:** `fix/pr-b-cookie-converter-ui`
