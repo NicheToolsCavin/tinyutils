@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -13,36 +13,37 @@
   <meta property="og:image" content="/public/og.png">
   <meta name="twitter:card" content="summary_large_image">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3079281180008443" crossorigin="anonymous"></script>
+  <script src="/scripts/theme-toggle.js"></script>
   <link rel="stylesheet" href="/styles/site.css">
   <script defer src="/scripts/consent.js"></script>
   <script defer src="/scripts/adsense-monitor.js"></script>
   <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Ubuntu,sans-serif;background:#0a0f1f;color:#e6edf7;margin:0}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Ubuntu,sans-serif;background:var(--bg);color:var(--text);margin:0}
     .wrap{max-width:980px;margin:0 auto;padding:24px}
     header h1{margin:0 0 8px 0;font-size:28px}
     .grid{display:grid;gap:12px}
     .two{grid-template-columns:1fr 1fr}
-    .card{background:#0b1224;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px}
-    .btn{background:#3b82f6;border:none;border-radius:10px;color:#fff;padding:10px 14px;cursor:pointer}
-    .btn.secondary{background:#111a33;border:1px solid rgba(255,255,255,.12)}
+    .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:12px}
+    .btn{background:var(--brand);border:none;border-radius:10px;color:#fff;padding:10px 14px;cursor:pointer}
+    .btn.secondary{background:var(--panel);border:1px solid var(--border)}
     .btn:disabled{opacity:.6;cursor:not-allowed}
-    textarea,input,select{background:#0e1730;color:#e6edf7;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px;width:100%}
+    textarea,input,select{background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px;width:100%}
     label{font-size:14px}
     .status{margin-top:6px;opacity:.8}
     .status progress{width:100%;height:6px;border-radius:999px;margin-top:0.35rem;background:rgba(255,255,255,.12);border:none}
     .status progress::-webkit-progress-bar{background:rgba(255,255,255,.12);border-radius:999px}
     .status progress::-webkit-progress-value{background:var(--brand,#3b82f6);border-radius:999px}
     .chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
-    .chip{border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:4px 8px;font-size:12px}
-    .chip.active{border-color:#3b82f6;color:#cfe1ff}
-    .tableWrap{max-height:60vh;overflow:auto;border:1px solid rgba(255,255,255,.08);border-radius:10px}
+    .chip{border:1px solid var(--border);border-radius:999px;padding:4px 8px;font-size:12px}
+    .chip.active{border-color:var(--brand);color:var(--text)}
+    .tableWrap{max-height:60vh;overflow:auto;border:1px solid var(--border);border-radius:10px}
     table{width:100%;border-collapse:separate;border-spacing:0}
-    thead th{position:sticky;top:0;background:#0b1224;z-index:2}
-    th,td{padding:8px;border-bottom:1px solid rgba(255,255,255,.06);text-align:left;font-size:14px;vertical-align:top}
+    thead th{position:sticky;top:0;background:var(--panel);z-index:2}
+    th,td{padding:8px;border-bottom:1px solid var(--border);text-align:left;font-size:14px;vertical-align:top}
     .note{font-size:12px;opacity:.9}
-    .toast{position:fixed;right:12px;bottom:12px;background:#0b1224;color:#e6edf7;border:1px solid rgba(255,255,255,.1);padding:8px 12px;border-radius:10px;z-index:9999;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+    .toast{position:fixed;right:12px;bottom:12px;background:var(--panel);color:var(--text);border:1px solid var(--border);padding:8px 12px;border-radius:10px;z-index:9999;box-shadow:0 6px 20px rgba(0,0,0,.25)}
     .foot{opacity:.7;margin-top:18px;font-size:13px}
-    a{color:#9ec5ff}
+    a{color:var(--brand)}
     .cell-url, td.url, .urlCell { word-break: break-all; }
 </style>
   <script type="application/ld+json">
@@ -62,14 +63,17 @@
 <header class="site-header">
   <div class="container row between center">
     <a class="brand" href="/">TinyUtils</a>
-    <nav class="nav">
-      <a class="active" href="/tools/">Tools</a>
-      <a href="/about.html">About</a>
-      <a href="/contact.html">Contact</a>
-      <a href="/cookies.html">Cookie &amp; privacy settings</a>
-      <a href="/privacy.html">Privacy</a>
-      <a href="/terms.html">Terms</a>
-    </nav>
+    <div class="row center">
+      <nav class="nav">
+        <a class="active" href="/tools/">Tools</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
+        <a href="/cookies.html">Cookie &amp; privacy settings</a>
+        <a href="/privacy.html">Privacy</a>
+        <a href="/terms.html">Terms</a>
+      </nav>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false">Theme</button>
+    </div>
   </div>
 </header>
 
