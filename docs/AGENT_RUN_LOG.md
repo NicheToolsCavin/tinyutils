@@ -216,6 +216,27 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-17 00:16 CET - Manual - Phase 3 PR11 theme toggle
+- **Mode:** manual
+- **Branch:** `phase3/pr11-theme-toggle`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Implemented global light/dark theme toggle via CSS tokens and header button on home/tools/tool pages (client-side only).
+  - Added scripts/theme-toggle.js to read localStorage/prefers-color-scheme, set <html data-theme>, and update accessible header toggle state.
+  - Ran preview_smoke.mjs and smoke_convert_preview.mjs against protected Vercel preview (401s expected); artifacts under tinyutils/artifacts/phase3-pr11-theme-toggle/20251116/.
+- **Evidence:** tinyutils/artifacts/phase3-pr11-theme-toggle/20251116/
+- **Follow-ups:**
+
+### 2025-11-17 00:16 CET - Manual - Preview URL captured
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Preview: https://tinyutils-git-phase3-pr11-theme-toggle-cavins-projects-7b0e00bb.vercel.app (probe 401). Artifacts recorded under artifacts/convert/20251116.
+- **Evidence:** artifacts/convert/20251116/preview_url.txt
+- **Follow-ups:**
+  - Run smokes in morning; attach B2 before/after + meta.
+
 ### 2025-11-16 04:39 CET - Manual - Converter PR1 UI + smokes
 - **Mode:** manual
 - **Branch:** `fix/pr-b-cookie-converter-ui`
