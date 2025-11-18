@@ -216,6 +216,15 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-18 01:16 CET - Manual - confirm PR44 theme toggle merged
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Confirmed PR44 (phase3/pr11-theme-toggle) is already merged into main at commit 3da95da, with global light/dark theme toggle wiring present on / and all tools and healthy preview_smoke.mjs results under automation bypass.
+  - No additional code changes were required in this run; only branch sync, preview_smoke verification against the PR44 preview, and a sanity check that theme-toggle.js and header buttons are wired consistently across shells.
+- **Evidence:** tinyutils/artifacts/phase3-pr11-theme-toggle/20251116/
+- **Follow-ups:**
+
 ### 2025-11-18 01:09 CET - Manual - merge PR47 DLF CSV refactor
 - **Mode:** manual
 - **Branch:** `main`
