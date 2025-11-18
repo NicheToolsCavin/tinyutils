@@ -227,24 +227,102 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
   - Capture after-fix RTF artifact and UI-based MD→RTF run via /tools/text-converter once automation allows writing artifacts from code.
 
 ### 2025-11-16 06:52 CET - Manual - PR5 smokes
+### 2025-11-18 01:43 CET - Manual - merge PR45 per-tool preferences
 - **Mode:** manual
-- **Branch:** `feature/pr4-tool-ux`
+- **Branch:** `main`
 - **Summary:**
-  - Ran preview_smoke.mjs + smoke_convert_preview.mjs against the PR4 preview with bypass tokens.
-  - API/page checks and converter cases all returned 200/JSON and artifacts stored under artifacts/pr5-final-smokes/20251116/.
-- **Evidence:** artifacts/pr5-final-smokes/20251116/
+  - Rebased PR45 (phase3/pr12-tool-preferences) on top of current main, reduced diffs to TinyUtilsStorage helper + DLF/Converter prefs wiring, verified preview_smoke.mjs PASS against its Vercel preview under automation bypass, and merged PR45 into main (commit 0b03ede).
+  - Per-tool prefs now persist Dead Link Finder options (scope/assets/robots/headFirst/retryHttp/includeArchive/timeout/concurrency) and Converter options (primary target, advanced toggle, Markdown dialect, from-format, Accept Tracked Changes, Extract Media, Remove zero-width) via TinyUtilsStorage without regressing theme toggle, DLF CSV, or smoke harness behavior.
+- **Evidence:** tinyutils/artifacts/convert/20251116
 - **Follow-ups:**
-  - Share smoke results + merge PR once reviewers approve.
 
-### 2025-11-16 06:45 CET - Manual - PR4 tool progress
+### 2025-11-18 01:16 CET - Manual - confirm PR44 theme toggle merged
 - **Mode:** manual
-- **Branch:** `feature/pr4-tool-ux`
+- **Branch:** `main`
 - **Summary:**
-  - Added Try example flows + accessible progress indicators for DLF, Sitemap Delta, Wayback Fixer, and Converter.
-  - Improved aria-live status + helper logic while keeping API/CMP/ads guardrails untouched.
-- **Evidence:** artifacts/pr4-tool-ux/20251116/
+  - Confirmed PR44 (phase3/pr11-theme-toggle) is already merged into main at commit 3da95da, with global light/dark theme toggle wiring present on / and all tools and healthy preview_smoke.mjs results under automation bypass.
+  - No additional code changes were required in this run; only branch sync, preview_smoke verification against the PR44 preview, and a sanity check that theme-toggle.js and header buttons are wired consistently across shells.
+- **Evidence:** tinyutils/artifacts/phase3-pr11-theme-toggle/20251116/
 - **Follow-ups:**
-  - Preview smokes + documentation for PR5
+
+### 2025-11-18 01:09 CET - Manual - merge PR47 DLF CSV refactor
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Merged PR47 (phase3/pr15-dlf-csv-refactor) into main after reconciling with latest main, updating the DLF CSV preview smoke to use the same Vercel automation-bypass strategy as preview_smoke.mjs, and confirming preview smokes returned 200 JSON for all pages/APIs.
+  - Validated /api/check still returns the expected JSON envelope and that DLF CSV export preserves legacy Full CSV shape while enabling CSV_VARIANTS and the client-side csvVariant selector; evidence includes DLF preview smoke logs under tinyutils/artifacts/dlf-csv/20251118/preview_smoke_dlf.log.
+- **Evidence:** tinyutils/artifacts/dlf-csv/20251118/preview_smoke_dlf.log
+- **Follow-ups:**
+  - Consider expanding smoke_dlf_preview.mjs to materialize full/errors_only CSV artifacts in a follow-up PR.
+
+### 2025-11-18 00:30 CET - Manual - PR conflict status check (26/28/29/47)
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Verified PR26 and PR29 are closed, PR28 is merged into main, and PR47 (phase3/pr15-dlf-csv-refactor) is up to date with main and reported MERGEABLE.
+  - No code changes made; only PR/branch status inspection and mergeability verification, preserving headers-only vercel.json and current converter behavior.
+- **Evidence:** artifacts/pr-conflict-check/20251117/status.txt
+- **Follow-ups:**
+  - Owner to merge PR47 when ready; old ci/text-converter-page/preview-boot branches can be cleaned up or mined later if desired.
+
+### 2025-11-17 02:51 CET - Manual - Preview URL captured
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Preview: https://tinyutils-git-phase3-pr15-dlf-c-26d61d-cavins-projects-7b0e00bb.vercel.app (probe 401). Artifacts recorded under artifacts/convert/20251117.
+- **Evidence:** artifacts/convert/20251117/preview_url.txt
+- **Follow-ups:**
+  - Run smokes in morning; attach B2 before/after + meta.
+
+### 2025-11-17 00:16 CET - Manual - Phase 3 PR11 theme toggle
+- **Mode:** manual
+- **Branch:** `phase3/pr11-theme-toggle`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Implemented global light/dark theme toggle via CSS tokens and header button on home/tools/tool pages (client-side only).
+  - Added scripts-theme-toggle.js to read localStorage/prefers-color-scheme, set <html data-theme>, and update accessible header toggle state.
+  - Ran preview_smoke.mjs and smoke_convert_preview.mjs against protected Vercel preview (401s expected); artifacts under tinyutils/artifacts/phase3-pr11-theme-toggle/20251116/.
+- **Evidence:** tinyutils/artifacts/phase3-pr11-theme-toggle/20251116/
+- **Follow-ups:**
+
+### 2025-11-17 00:16 CET - Manual - Preview URL captured
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Preview: https://tinyutils-git-phase3-pr11-theme-toggle-cavins-projects-7b0e00bb.vercel.app (probe 401). Artifacts recorded under artifacts/convert/20251116.
+- **Evidence:** artifacts/convert/20251116/preview_url.txt
+- **Follow-ups:**
+  - Run smokes in morning; attach B2 before/after + meta.
+
+### 2025-11-16 04:39 CET - Manual - Converter PR1 UI + smokes
+- **Mode:** manual
+- **Branch:** `fix/pr-b-cookie-converter-ui`
+- **Summary:**
+  - Implemented Converter PR B UI on tools/text-converter/index.html: primary download select + advanced multi-export, expanded Markdown dialect list, and refined PDF-aware progress copy while preserving /api/convert contracts and timeouts.
+  - Extended scripts/smoke_convert_preview.mjs with mdDialect and multi-export smoke cases that mirror the updated UI, keeping bypass logic and security hardening unchanged.
+- **Evidence:** artifacts/convert-pr1-ui/20251116/
+- **Follow-ups:**
+  - Open PR1, run preview smokes, and capture artifacts once Vercel preview URL is available.
+
+### 2025-11-16 04:19 CET - Manual - synthesize TinyUtils Phase1 /plan
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Attempted multi-agent /plan batch (10 agents) for converter PR B UI + UX Phase 1; cancelled mini agent per instructions and used existing context docs as primary planning source.
+  - Produced a consolidated, auto-ready implementation plan that assigns work to free vs heavy agents (vision, ThomasR, think, SonicTornado, main, kwaipilot, qwen-3-coder, code-gpt-5.1-codex) while respecting AGENTS/SECURITY constraints.
+- **Evidence:** artifacts/plan/20251116/
+- **Follow-ups:**
+
+### 2025-11-16 03:54 CET - Manual - load CGPT context dump
+- **Mode:** manual
+- **Branch:** `pr-b-cookie-converter-ui`
+- **Summary:**
+  - Read and ingested CGPT_TU_CONTEXTDUMP_20251116T034004.md from Context and Compact/ as the canonical TinyUtils context.
+  - Captured consolidated constraints around CMP/Funding Choices, consent helper scope, adblock toast behavior, UX redesign phases, and do-not-break zones.
+- **Evidence:** artifacts/agent-context/20251116/
+- **Follow-ups:**
 
 ### 2025-11-16 01:51 CET - Manual - CMP script on cookies page
 - **Mode:** manual
@@ -1483,4 +1561,3 @@ Impact
 
 Follow-ups
 • None.
-

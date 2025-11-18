@@ -1,6 +1,6 @@
 <!doctype html>
-<html lang="en">
-<head>
+<html lang="en" data-theme="dark">
+  <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Document Converter — TinyUtils</title>
@@ -14,6 +14,8 @@
   <meta property="og:image" content="/public/og.png">
   <meta name="twitter:card" content="summary_large_image">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3079281180008443" crossorigin="anonymous"></script>
+  <script src="/scripts/storage-utils.js"></script>
+  <script src="/scripts/theme-toggle.js"></script>
   <link rel="stylesheet" href="/public/styles.css">
   <link rel="stylesheet" href="/styles/site.css">
   <script defer src="/scripts/consent.js"></script>
@@ -39,7 +41,7 @@
     .tableWrap { margin-top: 1rem; max-height: 70vh; overflow: auto; border: 1px solid #eee; border-radius: 8px; }
     #results thead th { position: sticky; top: 0; z-index: 2; background: #fff; color: #111827; box-shadow: 0 1px 0 rgba(0,0,0,0.05); }
     .download-link { color: var(--brand, #3b82f6); text-decoration: underline; cursor: pointer; }
-    .toast { position: fixed; right: 16px; bottom: 16px; background: #0b1224; color: #e6edf7; border: 1px solid rgba(255,255,255,0.12); padding: 10px 14px; border-radius: 10px; z-index: 9999; box-shadow: 0 12px 30px rgba(0,0,0,0.35); }
+    .toast { position: fixed; right: 16px; bottom: 16px; background: var(--panel); color: var(--text); border: 1px solid var(--border); padding: 10px 14px; border-radius: 10px; z-index: 9999; box-shadow: 0 12px 30px rgba(0,0,0,0.35); }
     .badge { color: var(--muted, #97a3c2); font-size: 0.85rem; }
     kbd { background: rgba(255,255,255,0.1); padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-size: 0.85rem; }
     .formats-card summary { list-style: none; cursor: pointer; display: flex; flex-direction: column; gap: 0.25rem; position: relative; padding-left: 1.2rem; }
@@ -50,19 +52,25 @@
   </style>
 </head>
 <body>
+  <a href="#main" class="skip-link">Skip to main content</a>
   <header class="site-header">
     <div class="container row between center">
       <a class="brand" href="/">TinyUtils</a>
-      <nav class="nav">
-        <a class="active" href="/tools/">Tools</a>
-        <a href="/cookies.html">Cookie &amp; privacy settings</a>
-        <a href="/privacy.html">Privacy</a>
-        <a href="/terms.html">Terms</a>
-      </nav>
+      <div class="row center">
+        <nav class="nav">
+          <a class="active" href="/tools/">Tools</a>
+          <a href="/about.html">About</a>
+          <a href="/contact.html">Contact</a>
+          <a href="/cookies.html">Cookie &amp; privacy settings</a>
+          <a href="/privacy.html">Privacy</a>
+          <a href="/terms.html">Terms</a>
+        </nav>
+        <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false">Theme</button>
+      </div>
     </div>
   </header>
 
-  <main>
+  <main id="main">
     <div class="container tool-intro">
       <h1>📝 Document Converter</h1>
       <p>Convert between popular document formats: Markdown, PDF, DOCX, HTML, RTF, ODT, LaTeX, and more. Paste your content or upload a file.</p>
@@ -101,7 +109,7 @@
         </div>
 
         <div class="format-options" aria-label="Target formats">
-          <label for="toSingle"><strong>Convert to:</strong></label>
+          <label for="toSingle"><strong>Primary download format:</strong></label>
           <select id="toSingle" name="toSingle">
             <option value="md" selected>Markdown (.md)</option>
             <option value="txt">Plain Text (.txt)</option>
@@ -111,7 +119,7 @@
             <option value="rtf">RTF (.rtf)</option>
             <option value="pdf">PDF (.pdf)</option>
           </select>
-          <button id="advToggle" class="secondary" type="button" aria-expanded="false" aria-controls="multiTargets">+ Add another format</button>
+          <button id="advToggle" class="secondary" type="button" aria-expanded="false" aria-controls="multiTargets">+ Add more formats (optional)</button>
         </div>
 
         <div id="multiTargets" class="format-options" aria-label="Target formats (advanced)" style="display:none">
@@ -132,7 +140,10 @@
             <option value="gfm" selected>GitHub Flavored Markdown (GFM)</option>
             <option value="commonmark_x">CommonMark extended (commonmark_x)</option>
             <option value="commonmark">CommonMark (spec)</option>
+            <option value="markdown">Markdown (Pandoc)</option>
+            <option value="markdown_mmd">MultiMarkdown (markdown_mmd)</option>
             <option value="markdown_strict">Markdown (strict)</option>
+            <option value="markdown_phpextra">PHP Extra Markdown (markdown_phpextra)</option>
           </select>
         </div>
 
@@ -337,28 +348,32 @@
       mdDialectRow.style.opacity = mdOn ? '1' : '0.5';
     }
 
-    // Persistence helpers
-    const LS_SINGLE = 'tu_conv_single_target';
-    const LS_MULTI = 'tu_conv_multi_on';
-    const LS_DIALECT = 'tu_conv_md_dialect';
-
+    // Persistence helpers (per-tool prefs via TinyUtilsStorage)
     function restorePrefs() {
-      try {
-        const s = localStorage.getItem(LS_SINGLE);
-        if (s) toSingle.value = s;
-        const m = localStorage.getItem(LS_MULTI) === '1';
-        setAdvanced(m);
-        const d = localStorage.getItem(LS_DIALECT);
-        if (d) mdDialectSel.value = d;
-      } catch {}
+      if (!window.TinyUtilsStorage) return;
+      const prefs = window.TinyUtilsStorage.loadPrefs('converter');
+      if (!prefs || typeof prefs !== 'object') return;
+      if (prefs.toSingle && toSingle) toSingle.value = prefs.toSingle;
+      if (typeof prefs.advanced === 'boolean') setAdvanced(prefs.advanced);
+      if (prefs.mdDialect && mdDialectSel) mdDialectSel.value = prefs.mdDialect;
+      if (typeof prefs.fromFormat === 'string' && fromSelect) fromSelect.value = prefs.fromFormat;
+      if (typeof prefs.optAcceptTracked === 'boolean' && optAcceptTracked) optAcceptTracked.checked = prefs.optAcceptTracked;
+      if (typeof prefs.optExtractMedia === 'boolean' && optExtractMedia) optExtractMedia.checked = prefs.optExtractMedia;
+      if (typeof prefs.optRemoveZW === 'boolean' && optRemoveZW) optRemoveZW.checked = prefs.optRemoveZW;
     }
 
     function persistPrefs() {
-      try {
-        localStorage.setItem(LS_SINGLE, toSingle.value);
-        localStorage.setItem(LS_MULTI, multiTargets.style.display === '' ? '1' : '0');
-        localStorage.setItem(LS_DIALECT, mdDialectSel.value);
-      } catch {}
+      if (!window.TinyUtilsStorage) return;
+      const prefs = {
+        toSingle: toSingle ? toSingle.value : 'md',
+        advanced: multiTargets ? multiTargets.style.display === '' : false,
+        mdDialect: mdDialectSel ? mdDialectSel.value : '',
+        fromFormat: fromSelect ? fromSelect.value : 'auto',
+        optAcceptTracked: optAcceptTracked ? !!optAcceptTracked.checked : true,
+        optExtractMedia: optExtractMedia ? !!optExtractMedia.checked : false,
+        optRemoveZW: optRemoveZW ? !!optRemoveZW.checked : true
+      };
+      window.TinyUtilsStorage.savePrefs('converter', prefs);
     }
 
     function setAdvanced(on) {
