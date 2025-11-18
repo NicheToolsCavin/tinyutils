@@ -527,33 +527,44 @@
     if (onlyBrokenEl) onlyBrokenEl.addEventListener('change', applyFilters);
     searchEl.addEventListener('input', applyFilters);
 
-    function toCSV(rows, metaInfo) {
-      const header = ['url', 'status', 'ok', 'finalUrl', 'archiveUrl', 'note', 'chain'];
-      const escapeCell = (value) => `"${protectCSVCell(String(value ?? '')).replace(/"/g, '""')}"`;
-      const lines = [header.join(',')];
-      rows.forEach((row) => {
-        lines.push([
-          row.url,
-          row.status ?? '',
-          row.ok ? 'true' : 'false',
-          row.finalUrl ?? '',
-          row.archive && row.archive.url ? row.archive.url : '',
-          row.note ?? '',
-          row.chain ?? 0
-        ].map(escapeCell).join(','));
-      });
-      if (metaInfo && typeof metaInfo === 'object') {
-        lines.push('');
-        lines.push(['meta_key', 'meta_value'].map(escapeCell).join(','));
-        Object.entries(metaInfo)
-          .filter(([, value]) => value !== undefined)
-          .forEach(([key, value]) => {
-            const serialized = typeof value === 'string' ? value : JSON.stringify(value);
-            lines.push([key, serialized].map(escapeCell).join(','));
-          });
+    const CSV_VARIANTS = {
+      full: function buildFullCsv(rows, metaInfo) {
+        const header = ['url', 'status', 'ok', 'finalUrl', 'archiveUrl', 'note', 'chain'];
+        const escapeCell = (value) => `"${protectCSVCell(String(value ?? '')).replace(/"/g, '""')}"`;
+        const lines = [header.join(',')];
+        rows.forEach((row) => {
+          lines.push([
+            row.url,
+            row.status ?? '',
+            row.ok ? 'true' : 'false',
+            row.finalUrl ?? '',
+            row.archive && row.archive.url ? row.archive.url : '',
+            row.note ?? '',
+            row.chain ?? 0
+          ].map(escapeCell).join(','));
+        });
+        if (metaInfo && typeof metaInfo === 'object') {
+          lines.push('');
+          lines.push(['meta_key', 'meta_value'].map(escapeCell).join(','));
+          Object.entries(metaInfo)
+            .filter(([, value]) => value !== undefined)
+            .forEach(([key, value]) => {
+              const serialized = typeof value === 'string' ? value : JSON.stringify(value);
+              lines.push([key, serialized].map(escapeCell).join(','));
+            });
+        }
+        const csv = lines.join('\n');
+        return `\ufeff${csv}`;
       }
-      const csv = lines.join('\n');
-      return `\ufeff${csv}`;
+    };
+
+    function buildCSV(variantKey, rows, metaInfo) {
+      const key = variantKey && CSV_VARIANTS[variantKey] ? variantKey : 'full';
+      return CSV_VARIANTS[key](rows, metaInfo);
+    }
+
+    function toCSV(rows, metaInfo) {
+      return buildCSV('full', rows, metaInfo);
     }
 
     function toJSONPayload(rows, metaInfo, settings) {

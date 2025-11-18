@@ -216,13 +216,33 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-18 00:30 CET - Manual - PR conflict status check (26/28/29/47)
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Verified PR26 and PR29 are closed, PR28 is merged into main, and PR47 (phase3/pr15-dlf-csv-refactor) is up to date with main and reported MERGEABLE.
+  - No code changes made; only PR/branch status inspection and mergeability verification, preserving headers-only vercel.json and current converter behavior.
+- **Evidence:** artifacts/pr-conflict-check/20251117/status.txt
+- **Follow-ups:**
+  - Owner to merge PR47 when ready; old ci/text-converter-page/preview-boot branches can be cleaned up or mined later if desired.
+
+### 2025-11-17 02:51 CET - Manual - Preview URL captured
+- **Mode:** manual
+- **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Preview: https://tinyutils-git-phase3-pr15-dlf-c-26d61d-cavins-projects-7b0e00bb.vercel.app (probe 401). Artifacts recorded under artifacts/convert/20251117.
+- **Evidence:** artifacts/convert/20251117/preview_url.txt
+- **Follow-ups:**
+  - Run smokes in morning; attach B2 before/after + meta.
+
 ### 2025-11-17 00:16 CET - Manual - Phase 3 PR11 theme toggle
 - **Mode:** manual
 - **Branch:** `phase3/pr11-theme-toggle`
 - **CWD:** /Users/cav/dev/TinyUtils/tinyutils
 - **Summary:**
   - Implemented global light/dark theme toggle via CSS tokens and header button on home/tools/tool pages (client-side only).
-  - Added scripts/theme-toggle.js to read localStorage/prefers-color-scheme, set <html data-theme>, and update accessible header toggle state.
+  - Added scripts-theme-toggle.js to read localStorage/prefers-color-scheme, set <html data-theme>, and update accessible header toggle state.
   - Ran preview_smoke.mjs and smoke_convert_preview.mjs against protected Vercel preview (401s expected); artifacts under tinyutils/artifacts/phase3-pr11-theme-toggle/20251116/.
 - **Evidence:** tinyutils/artifacts/phase3-pr11-theme-toggle/20251116/
 - **Follow-ups:**
