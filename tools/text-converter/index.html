@@ -863,12 +863,18 @@
         }
         updateProgressState(baseMsg, 100);
       } catch (err) {
-        updateProgressState('Error: ' + (err.message || 'Conversion failed'), null);
+        // Only surface errors for the latest in-flight request
+        if (thisRequest === requestCounter) {
+          updateProgressState('Error: ' + (err.message || 'Conversion failed'), null);
+        }
         console.error('Conversion error:', err);
       } finally {
-        convertBtn.disabled = false;
-        previewBtn.disabled = false;
-        isBusy = false;
+        // Avoid resetting UI state for stale responses
+        if (thisRequest === requestCounter) {
+          convertBtn.disabled = false;
+          previewBtn.disabled = false;
+          isBusy = false;
+        }
       }
     }
 
