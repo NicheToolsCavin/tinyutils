@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <title>TinyUtils — Useful web tools for SEOs & builders</title>
@@ -13,24 +13,31 @@
   <meta property="og:image" content="/public/og.png">
   <meta name="twitter:card" content="summary_large_image">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3079281180008443" crossorigin="anonymous"></script>
+  <script src="/scripts/theme-toggle.js"></script>
   <link rel="stylesheet" href="/styles/site.css">
   <script defer src="/scripts/consent.js"></script>
   <script defer src="/scripts/adsense-monitor.js"></script>
 </head>
 <body>
+<a href="#main" class="skip-link">Skip to main content</a>
 <header class="site-header">
   <div class="container row between center">
     <a class="brand" href="/">TinyUtils</a>
-    <nav class="nav">
-      <a href="/tools/">Tools</a>
-      <a href="/cookies.html">Cookie &amp; privacy settings</a>
-      <a href="/privacy.html">Privacy</a>
-      <a href="/terms.html">Terms</a>
-    </nav>
+    <div class="row center">
+      <nav class="nav">
+        <a href="/tools/">Tools</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
+        <a href="/cookies.html">Cookie &amp; privacy settings</a>
+        <a href="/privacy.html">Privacy</a>
+        <a href="/terms.html">Terms</a>
+      </nav>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false">Theme</button>
+    </div>
   </div>
 </header>
 
-<main class="container">
+<main id="main" class="container">
   <section class="hero">
     <h1>Useful web tools for SEOs & builders</h1>
     <p class="sub">Fast, polite, privacy-friendly. No sign-up.</p>
@@ -74,7 +81,7 @@
 <footer class="site-footer">
   <div class="container row between wrap">
     <span>© <span id="y"></span> TinyUtils</span>
-    <span><a href="/cookies.html">Cookie &amp; privacy settings</a> · <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a></span>
+    <span><a href="/about.html">About</a> · <a href="/contact.html">Contact</a> · <a href="/cookies.html">Cookie &amp; privacy settings</a> · <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a></span>
   </div>
 </footer>
 <script>document.getElementById('y').textContent = new Date().getFullYear();</script>

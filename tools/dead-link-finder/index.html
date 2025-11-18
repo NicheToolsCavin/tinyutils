@@ -1,6 +1,6 @@
 <!doctype html>
-<html lang="en">
-<head>
+<html lang="en" data-theme="dark">
+  <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Dead Link Finder — TinyUtils</title>
@@ -14,6 +14,8 @@
   <meta property="og:image" content="/public/og.png">
   <meta name="twitter:card" content="summary_large_image">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3079281180008443" crossorigin="anonymous"></script>
+  <script src="/scripts/storage-utils.js"></script>
+  <script src="/scripts/theme-toggle.js"></script>
   <link rel="stylesheet" href="/public/styles.css">
   <link rel="stylesheet" href="/styles/site.css">
   <script defer src="/scripts/consent.js"></script>
@@ -56,7 +58,7 @@
     .debug-list dd { margin: 0 0 0.5rem 0; word-break: break-all; }
     .debug-meta { margin: 0; padding: 0.5rem; background: rgba(12,19,32,0.5); border-radius: 0.5rem; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; font-size: 0.85rem; max-height: 240px; overflow: auto; }
     .debug-scheduler { margin: 0 0 0.5rem 0; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; font-size: 0.85rem; }
-    .toast { position: fixed; right: 16px; bottom: 16px; background: #0b1224; color: #e6edf7; border: 1px solid rgba(255,255,255,0.12); padding: 10px 14px; border-radius: 10px; z-index: 9999; box-shadow: 0 12px 30px rgba(0,0,0,0.35); }
+    .toast { position: fixed; right: 16px; bottom: 16px; background: var(--panel); color: var(--text); border: 1px solid var(--border); padding: 10px 14px; border-radius: 10px; z-index: 9999; box-shadow: 0 12px 30px rgba(0,0,0,0.35); }
     .tableWrap { margin-top: 1rem; max-height: 70vh; overflow: auto; border: 1px solid #eee; border-radius: 8px; }
     #results thead th { position: sticky; top: 0; z-index: 2; background: #fff; color: #111827; box-shadow: 0 1px 0 rgba(0,0,0,0.05); }
     td .url-text { word-break: break-all; display: inline-block; max-width: 420px; }
@@ -65,19 +67,25 @@
   </style>
 </head>
 <body>
+  <a href="#main" class="skip-link">Skip to main content</a>
   <header class="site-header">
     <div class="container row between center">
       <a class="brand" href="/">TinyUtils</a>
-      <nav class="nav">
-        <a class="active" href="/tools/">Tools</a>
-        <a href="/cookies.html">Cookie &amp; privacy settings</a>
-        <a href="/privacy.html">Privacy</a>
-        <a href="/terms.html">Terms</a>
-      </nav>
+      <div class="row center">
+        <nav class="nav">
+          <a class="active" href="/tools/">Tools</a>
+          <a href="/about.html">About</a>
+          <a href="/contact.html">Contact</a>
+          <a href="/cookies.html">Cookie &amp; privacy settings</a>
+          <a href="/privacy.html">Privacy</a>
+          <a href="/terms.html">Terms</a>
+        </nav>
+        <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false">Theme</button>
+      </div>
     </div>
   </header>
 
-  <main>
+  <main id="main">
     <div class="container tool-intro">
       <h1>🔍 Dead Link Finder</h1>
       <p>Crawl a page or paste a list. Check response codes, respect robots, and export results with Wayback helpers.</p>
@@ -520,33 +528,44 @@
     if (onlyBrokenEl) onlyBrokenEl.addEventListener('change', applyFilters);
     searchEl.addEventListener('input', applyFilters);
 
-    function toCSV(rows, metaInfo) {
-      const header = ['url', 'status', 'ok', 'finalUrl', 'archiveUrl', 'note', 'chain'];
-      const escapeCell = (value) => `"${protectCSVCell(String(value ?? '')).replace(/"/g, '""')}"`;
-      const lines = [header.join(',')];
-      rows.forEach((row) => {
-        lines.push([
-          row.url,
-          row.status ?? '',
-          row.ok ? 'true' : 'false',
-          row.finalUrl ?? '',
-          row.archive && row.archive.url ? row.archive.url : '',
-          row.note ?? '',
-          row.chain ?? 0
-        ].map(escapeCell).join(','));
-      });
-      if (metaInfo && typeof metaInfo === 'object') {
-        lines.push('');
-        lines.push(['meta_key', 'meta_value'].map(escapeCell).join(','));
-        Object.entries(metaInfo)
-          .filter(([, value]) => value !== undefined)
-          .forEach(([key, value]) => {
-            const serialized = typeof value === 'string' ? value : JSON.stringify(value);
-            lines.push([key, serialized].map(escapeCell).join(','));
-          });
+    const CSV_VARIANTS = {
+      full: function buildFullCsv(rows, metaInfo) {
+        const header = ['url', 'status', 'ok', 'finalUrl', 'archiveUrl', 'note', 'chain'];
+        const escapeCell = (value) => `"${protectCSVCell(String(value ?? '')).replace(/"/g, '""')}"`;
+        const lines = [header.join(',')];
+        rows.forEach((row) => {
+          lines.push([
+            row.url,
+            row.status ?? '',
+            row.ok ? 'true' : 'false',
+            row.finalUrl ?? '',
+            row.archive && row.archive.url ? row.archive.url : '',
+            row.note ?? '',
+            row.chain ?? 0
+          ].map(escapeCell).join(','));
+        });
+        if (metaInfo && typeof metaInfo === 'object') {
+          lines.push('');
+          lines.push(['meta_key', 'meta_value'].map(escapeCell).join(','));
+          Object.entries(metaInfo)
+            .filter(([, value]) => value !== undefined)
+            .forEach(([key, value]) => {
+              const serialized = typeof value === 'string' ? value : JSON.stringify(value);
+              lines.push([key, serialized].map(escapeCell).join(','));
+            });
+        }
+        const csv = lines.join('\n');
+        return `\ufeff${csv}`;
       }
-      const csv = lines.join('\n');
-      return `\ufeff${csv}`;
+    };
+
+    function buildCSV(variantKey, rows, metaInfo) {
+      const key = variantKey && CSV_VARIANTS[variantKey] ? variantKey : 'full';
+      return CSV_VARIANTS[key](rows, metaInfo);
+    }
+
+    function toCSV(rows, metaInfo) {
+      return buildCSV('full', rows, metaInfo);
     }
 
     function toJSONPayload(rows, metaInfo, settings) {
@@ -762,7 +781,37 @@
       concurrency: 10
     };
 
+    function loadPrefsFromStorage(){
+      if (!window.TinyUtilsStorage) return;
+      const prefs = window.TinyUtilsStorage.loadPrefs('dead-link-finder');
+      if (!prefs) return;
+      if (typeof prefs.scope === 'string') defaultState.scope = prefs.scope === 'all' ? 'all' : 'internal';
+      if (typeof prefs.includeAssets === 'boolean') defaultState.includeAssets = prefs.includeAssets;
+      if (typeof prefs.respectRobots === 'boolean') defaultState.respectRobots = prefs.respectRobots;
+      if (typeof prefs.headFirst === 'boolean') defaultState.headFirst = prefs.headFirst;
+      if (typeof prefs.retryHttp === 'boolean') defaultState.retryHttp = prefs.retryHttp;
+      if (typeof prefs.includeArchive === 'boolean') defaultState.includeArchive = prefs.includeArchive;
+      if (typeof prefs.timeout === 'number') defaultState.timeout = clamp(prefs.timeout, 1000, 30000, 10000);
+      if (typeof prefs.concurrency === 'number') defaultState.concurrency = clamp(prefs.concurrency, 1, 10, 10);
+    }
+
+    function persistPrefsToStorage(){
+      if (!window.TinyUtilsStorage) return;
+      const prefs = {
+        scope: scopeEl ? scopeEl.value : defaultState.scope,
+        includeAssets: includeAssetsEl ? !!includeAssetsEl.checked : defaultState.includeAssets,
+        respectRobots: respectRobotsEl ? !!respectRobotsEl.checked : defaultState.respectRobots,
+        headFirst: headFirstEl ? !!headFirstEl.checked : defaultState.headFirst,
+        retryHttp: retryHttpEl ? !!retryHttpEl.checked : defaultState.retryHttp,
+        includeArchive: includeArchiveEl ? !!includeArchiveEl.checked : defaultState.includeArchive,
+        timeout: timeoutEl ? clamp(timeoutEl.value, 1000, 30000, 10000) : defaultState.timeout,
+        concurrency: concurrencyEl ? clamp(concurrencyEl.value, 1, 10, 10) : defaultState.concurrency
+      };
+      window.TinyUtilsStorage.savePrefs('dead-link-finder', prefs);
+    }
+
     function resetState() {
+      loadPrefsFromStorage();
       applyState(defaultState);
     }
 
@@ -778,6 +827,12 @@
         prompt('Copy this link', url);
       }
     });
+
+    [scopeEl, includeAssetsEl, respectRobotsEl, headFirstEl, retryHttpEl, includeArchiveEl, timeoutEl, concurrencyEl]
+      .filter(Boolean)
+      .forEach((el) => {
+        el.addEventListener('change', persistPrefsToStorage);
+      });
 
     function ensureMeta(payload, data) {
       const base = data && data.meta ? { ...data.meta } : {};

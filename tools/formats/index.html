@@ -16,11 +16,14 @@
   <script defer src="/scripts/adsense-monitor.js"></script>
 </head>
 <body>
+  <a href="#main" class="skip-link">Skip to main content</a>
 <header class="site-header">
   <div class="container row between center">
     <a class="brand" href="/">TinyUtils</a>
     <nav class="nav">
       <a href="/tools/">Tools</a>
+      <a href="/about.html">About</a>
+      <a href="/contact.html">Contact</a>
       <a class="active" href="/tools/formats/">Supported Formats</a>
       <a href="/privacy.html">Privacy</a>
       <a href="/terms.html">Terms</a>
@@ -28,7 +31,7 @@
   </div>
   </header>
 
-  <main class="container">
+  <main id="main" class="container">
     <h1 class="mt-xl">Supported Formats</h1>
     <p>Our Document Converter can handle over 100 formats. Below are the most commonly used ones. If you need a format not listed here, contact us — we likely support it or can add it quickly.</p>
 
@@ -68,10 +71,9 @@
   <footer class="site-footer">
     <div class="container row between wrap">
       <span>© <span id="year"></span> TinyUtils</span>
-      <span><a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a></span>
+      <span><a href="/about.html">About</a> · <a href="/contact.html">Contact</a> · <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a></span>
     </div>
   </footer>
   <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
 </body>
 </html>
-
