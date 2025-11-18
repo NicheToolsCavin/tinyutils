@@ -51,6 +51,41 @@ Testing
 Commits
 • (pending in this PR) — expose PDF in UI; add RTF backend support.
 
+### Major changes — 2025-11-16 14:30 CET (UTC+01:00) — RTF output emits full document
+
+Added
+• None
+
+Modified
+• RTF target rendering now calls pandoc with `--standalone` so the output is a complete `\\rtf1` document instead of a body-only fragment.
+
+Fixed
+• RTF exports only showing the headline in macOS TextEdit
+  - **Problem:** Converting the TinyUtils demo snippet to RTF via the converter produced a file that, when opened in TextEdit, displayed only the document title while the rest of the content (intro, bullets, code block, “More context”, link) was effectively hidden.
+  - **Root cause:** The RTF path used pandoc without `--standalone`, which yields a sequence of `{\\pard ... \\par}` body fragments without an enclosing `\\rtf1` root document group. Many RTF viewers treat that as a partial document and only surface the first block.
+  - **Fix:** For `target == "rtf"` in `_render_markdown_target` (api/convert/convert_service.py), add `--standalone` to the pandoc `extra_args` so the converter emits a single well-formed `\\rtf1` document while keeping the `/api/convert` JSON contract unchanged.
+  - **Evidence:** Local pypandoc checks show the first line of the RTF output now starts with `{\\rtf1\\ansi...}` and contains the full TinyUtils demo text; a sample after-fix RTF is stored at `artifacts/converter-rtf-fix/20251116/demo-output-after-fix.rtf`.
+
+Human-readable summary
+
+**Problem: RTF files that look fine on disk but show almost nothing in TextEdit**
+
+The converter could happily generate an `.rtf` file and let you download it, but opening that file on a Mac made it look like your document had been eaten—only the big title showed up, while the bullets, code sample, and “More context” section were missing. Under the hood the file contained those bits as separate paragraphs, but without the “I am a whole RTF document” wrapper, TextEdit didn’t treat them as part of the main content.
+
+**The fix:**
+We kept the same `/api/convert` JSON response shape and simply asked pandoc to emit a full RTF document instead of a body snippet by adding the `--standalone` flag for the RTF target. That wraps all the existing paragraphs and styling in a proper `\\rtf1` root group, so TextEdit/Word now see the file as a complete document and render every heading, bullet, code block, and link as expected.
+
+Impact
+• Mac users opening RTF exports now see the entire TinyUtils demo snippet (title, intro, bullets, code, “More context”, link) instead of just the heading. ✅
+• The converter’s `/api/convert` contract stays exactly the same; only the internal RTF rendering path gained `--standalone`. ✅
+
+Testing
+• Compared pypandoc RTF output with and without `--standalone` to confirm the presence of the `\\rtf1` header and full demo text in the fixed variant. ✅
+• Sample after-fix RTF artifact recorded under `artifacts/converter-rtf-fix/20251116/demo-output-after-fix.rtf`. ✅
+
+Commits
+• (local) api/convert/convert_service.py — add `--standalone` for RTF target in `_render_markdown_target`.
+
 ### Major changes — 2025-11-14 (CET) — PR#28 code review fixes
 
 Added
