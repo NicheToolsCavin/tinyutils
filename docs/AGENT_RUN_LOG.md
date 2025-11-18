@@ -216,6 +216,15 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-18 01:43 CET - Manual - merge PR45 per-tool preferences
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Rebased PR45 (phase3/pr12-tool-preferences) on top of current main, reduced diffs to TinyUtilsStorage helper + DLF/Converter prefs wiring, verified preview_smoke.mjs PASS against its Vercel preview under automation bypass, and merged PR45 into main (commit 0b03ede).
+  - Per-tool prefs now persist Dead Link Finder options (scope/assets/robots/headFirst/retryHttp/includeArchive/timeout/concurrency) and Converter options (primary target, advanced toggle, Markdown dialect, from-format, Accept Tracked Changes, Extract Media, Remove zero-width) via TinyUtilsStorage without regressing theme toggle, DLF CSV, or smoke harness behavior.
+- **Evidence:** tinyutils/artifacts/convert/20251116
+- **Follow-ups:**
+
 ### 2025-11-18 01:16 CET - Manual - confirm PR44 theme toggle merged
 - **Mode:** manual
 - **Branch:** `main`
