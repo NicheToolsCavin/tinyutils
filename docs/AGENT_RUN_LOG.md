@@ -217,6 +217,26 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-18 23:03 CET - Manual - wire TinyUtils global AdSense slot
+- **Mode:** manual
+- **Branch:** `fix/converter-race-progress`
+- **Summary:**
+  - Replaced placeholder AdSense client/slot values with ca-pub-3079281180008443 and slot 3664281983 across live shells (/index.html, /tools/, Dead Link Finder, Sitemap Delta, Wayback Fixer, Text Converter).
+  - Updated legacy keyword-density, meta-preview, and public index landers to use the same publisher ID and slot, keeping Funding Choices + adsense-monitor wiring unchanged.
+  - Left ADSENSE_SETUP.md examples and *-old.html snapshots as documentation-only placeholders; runtime behavior now points all manual .ad-slot placements at tinyutils_global_responsive_display.
+- **Evidence:** artifacts/ads-config/20251118/
+- **Follow-ups:**
+
+### 2025-11-18 21:45 CET - Manual - converter race guard + progress theme
+- **Mode:** manual
+- **Branch:** `feat/phase2-ads-light`
+- **Summary:**
+  - Hardened /tools/text-converter/ front-end so only the latest request (requestCounter) can surface errors or reset isBusy/buttons, preventing stale responses from overriding newer runs.
+  - Introduced a theme-aware --progress-bg token in styles/site.css and wired the shared .progress-banner progress styles to use it, improving progress bar visibility in light mode.
+  - Updated tool_desc_converter.md with a 2025-11-18 entry describing the converter race fix and theme-aware progress bar behavior.
+- **Evidence:** artifacts/converter-race-guard/20251118/
+- **Follow-ups:**
+
 ### 2025-11-18 21:18 CET - Manual - UX Transformation Phase Complete + AdSense Setup
 - **Mode:** manual
 - **Branch:** `feat/phase2-ads-light`
