@@ -23,13 +23,13 @@ html[data-theme="dark"]{
 }
 
 html[data-theme="light"]{
-  --bg:#f9fafb;
-  --panel:#ffffff;
-  --muted:#6b7280;
-  --text:#111827;
-  --brand:#2563eb;
-  --brand-2:#1d4ed8;
-  --border:#e5e7eb;
+  --bg:#f3f4f6;      /* soft gray background for reduced glare */
+  --panel:#ffffff;   /* white cards/panels on gray canvas */
+  --muted:#4b5563;   /* slightly darker muted text for contrast */
+  --text:#111827;    /* near-black body text */
+  --brand:#2563eb;   /* primary accent (buttons/links) */
+  --brand-2:#1d4ed8; /* hover/active accent */
+  --border:#d1d5db;  /* clearer separation between panel and bg */
   --focus-ring:#2563eb;
 }
 *{box-sizing:border-box}
@@ -126,3 +126,51 @@ textarea:focus-visible{
 .adblock-toast p{margin:0 0 8px 0;color:var(--muted);font-size:.9rem}
 .adblock-toast__dismiss{background:transparent;color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer}
 .adblock-toast__dismiss:focus{outline:2px solid var(--brand);outline-offset:2px}
+
+/* Ad slots (theme-aware, low CLS) */
+.ad-slot{
+  margin:16px 0 0;
+  padding:10px 12px;
+  border-radius:var(--radius);
+  border:1px solid var(--border);
+  background:var(--panel);
+  min-height:120px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.ad-slot .adsbygoogle{
+  display:block;
+  width:100%;
+  min-height:90px;
+}
+html.ads-hidden .ad-slot{
+  display:none !important;
+}
+
+/* Shared progress / working banner */
+.progress-banner{
+  min-height:1.5rem;
+  display:flex;
+  flex-direction:column;
+  gap:0.3rem;
+  margin-top:1rem;
+}
+.progress-banner .progress-text{
+  font-weight:500;
+}
+.progress-banner progress{
+  width:100%;
+  height:6px;
+  border-radius:999px;
+  background:rgba(255,255,255,0.12);
+  border:none;
+}
+.progress-banner progress::-webkit-progress-bar{
+  background:rgba(255,255,255,0.12);
+  border-radius:999px;
+}
+.progress-banner progress::-webkit-progress-value{
+  background:var(--brand);
+  border-radius:999px;
+}
