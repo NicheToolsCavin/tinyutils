@@ -98,12 +98,12 @@
     .tool-card-enhanced::before {
       content: '';
       position: absolute;
-      top: 0;
+      top: var(--space-3);
       left: 0;
-      bottom: 0;
+      bottom: var(--space-3);
       width: 4px;
       background: var(--gradient-brand);
-      border-radius: var(--radius-2xl) 0 0 var(--radius-2xl);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
       opacity: 0;
       transition: opacity var(--transition-base);
     }
