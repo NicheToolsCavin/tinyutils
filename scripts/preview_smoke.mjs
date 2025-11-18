@@ -135,7 +135,7 @@ async function testPages() {
       const needsAdSlot = !!expectations.adSlot;
       const needsProgress = !!expectations.progressBanner;
 
-      const hasAdSlotMarker = !needsAdSlot || (html && html.includes('class="ad-slot"'));
+      const hasAdSlotMarker = !needsAdSlot || (html && /class="[^"]*\bad-slot\b[^"]*"/.test(html));
       const hasProgressMarker = !needsProgress || (html && html.includes('progress-banner'));
 
       const ok = okStatus && hasAdSlotMarker && hasProgressMarker;
