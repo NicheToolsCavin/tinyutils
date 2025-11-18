@@ -17,83 +17,282 @@
   <link rel="stylesheet" href="/styles/site.css">
   <script defer src="/scripts/consent.js"></script>
   <script defer src="/scripts/adsense-monitor.js"></script>
+  <style>
+    /* Enhanced homepage styles */
+    .hero-enhanced {
+      text-align: center;
+      padding: var(--space-24) var(--space-4) var(--space-16);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-enhanced::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(
+        circle at 50% 50%,
+        rgba(59, 130, 246, 0.1) 0%,
+        transparent 50%
+      );
+      animation: pulse 8s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .hero-title {
+      font-size: var(--text-5xl);
+      font-weight: var(--font-bold);
+      line-height: var(--leading-tight);
+      margin: 0 0 var(--space-6);
+      background: var(--gradient-brand);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      position: relative;
+    }
+
+    .hero-subtitle {
+      font-size: var(--text-xl);
+      color: var(--text-secondary);
+      margin: 0 0 var(--space-8);
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: var(--space-4);
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .tool-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: var(--space-6);
+      margin: var(--space-12) 0;
+    }
+
+    .tool-card {
+      background: var(--surface-base);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-2xl);
+      padding: var(--space-8);
+      transition: all var(--transition-base);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tool-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--gradient-brand);
+      opacity: 0;
+      transition: opacity var(--transition-base);
+    }
+
+    .tool-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-xl);
+      border-color: var(--border-strong);
+    }
+
+    .tool-card:hover::before {
+      opacity: 1;
+    }
+
+    .tool-icon {
+      font-size: var(--text-4xl);
+      margin-bottom: var(--space-4);
+      display: block;
+    }
+
+    .tool-title {
+      font-size: var(--text-2xl);
+      font-weight: var(--font-semibold);
+      margin: 0 0 var(--space-3);
+      color: var(--text-primary);
+    }
+
+    .tool-description {
+      color: var(--text-secondary);
+      line-height: var(--leading-relaxed);
+      margin: 0 0 var(--space-6);
+    }
+
+    .tool-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      margin-top: var(--space-4);
+    }
+
+    .feature-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      padding: var(--space-1) var(--space-2);
+      font-size: var(--text-xs);
+      font-weight: var(--font-medium);
+      border-radius: var(--radius-full);
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--brand-500);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    /* Fade-in animations */
+    .fade-in-up {
+      opacity: 0;
+      animation: fadeInUp 0.6s ease-out forwards;
+    }
+
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
 </head>
 <body>
 <a href="#main" class="skip-link">Skip to main content</a>
-<header class="site-header">
+
+<header class="site-header glass-effect">
   <div class="container row between center">
-    <a class="brand" href="/">TinyUtils</a>
+    <a class="brand gradient-text" href="/" style="font-size: var(--text-2xl); font-weight: var(--font-bold);">TinyUtils</a>
     <div class="row center">
       <nav class="nav">
         <a href="/tools/">Tools</a>
         <a href="/about.html">About</a>
         <a href="/contact.html">Contact</a>
-        <a href="/cookies.html">Cookie &amp; privacy settings</a>
+        <a href="/cookies.html">Cookie & privacy settings</a>
         <a href="/privacy.html">Privacy</a>
         <a href="/terms.html">Terms</a>
       </nav>
-      <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false">Theme</button>
+      <button class="theme-toggle btn ghost sm" type="button" data-theme-toggle aria-pressed="false">
+        <span>🌙</span> Theme
+      </button>
     </div>
   </div>
 </header>
 
-<main id="main" class="container">
-  <section class="hero">
-    <h1>Useful web tools for SEOs & builders</h1>
-    <p class="sub">Fast, polite, privacy-friendly. No sign-up.</p>
-    <div class="cta-row">
-      <a class="btn primary" href="/tools/">Browse tools</a>
-      <a class="btn" href="/tools/wayback-fixer/">Try Wayback Fixer</a>
+<main id="main">
+  <section class="hero-enhanced">
+    <h1 class="hero-title fade-in-up">Useful web tools for SEOs & builders</h1>
+    <p class="hero-subtitle fade-in-up delay-1">Fast, polite, privacy-friendly. No sign-up required.</p>
+    <div class="hero-cta fade-in-up delay-2">
+      <a class="btn primary lg" href="/tools/">
+        Browse all tools →
+      </a>
+      <a class="btn secondary lg" href="/tools/wayback-fixer/">
+        Try Wayback Fixer
+      </a>
     </div>
   </section>
 
-  <section class="ad-slot" aria-label="Sponsored">
-    <ins class="adsbygoogle"
-         style="display:block"
-         data-ad-client="ca-pub-3079281180008443"
-         data-ad-slot="1234567890"
-         data-ad-format="auto"
-         data-full-width-responsive="true"></ins>
-    <script>try{(adsbygoogle = window.adsbygoogle || []).push({});}catch(e){}</script>
-  </section>
+  <div class="container">
+    <section class="ad-slot" aria-label="Sponsored" style="margin: var(--space-12) 0;">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-3079281180008443"
+           data-ad-slot="1234567890"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>try{(adsbygoogle = window.adsbygoogle || []).push({});}catch(e){}</script>
+    </section>
 
-  <section class="cards">
-    <article class="card">
-      <h2>Dead Link Finder</h2>
-      <p>Scan a page, list, or sitemap. Robots-aware. Redirect chains, notes, CSV/JSON exports.</p>
-      <a class="btn primary" href="/tools/dead-link-finder/">Open</a>
-      <small class="meta">robots-aware · HSTS guard · Wayback links</small>
-    </article>
+    <section class="tool-cards">
+      <article class="tool-card fade-in-up delay-1">
+        <span class="tool-icon">🔍</span>
+        <h2 class="tool-title">Dead Link Finder</h2>
+        <p class="tool-description">
+          Scan a page, list, or sitemap for broken links. Robots-aware with redirect chain detection and comprehensive CSV/JSON exports.
+        </p>
+        <a class="btn primary" href="/tools/dead-link-finder/">Open tool →</a>
+        <div class="tool-meta">
+          <span class="feature-badge">Robots-aware</span>
+          <span class="feature-badge">HSTS guard</span>
+          <span class="feature-badge">Wayback links</span>
+        </div>
+      </article>
 
-    <article class="card">
-      <h2>Sitemap Delta + Redirect Mapper</h2>
-      <p>Compare two sitemaps. See Added/Removed and get a confidence-scored 301 plan + 410s.</p>
-      <a class="btn primary" href="/tools/sitemap-delta/">Open</a>
-      <small class="meta">.xml.gz & sitemap index support · exports</small>
-    </article>
+      <article class="tool-card fade-in-up delay-2">
+        <span class="tool-icon">🗺️</span>
+        <h2 class="tool-title">Sitemap Delta</h2>
+        <p class="tool-description">
+          Compare two sitemaps to identify added and removed URLs. Get a confidence-scored 301 redirect plan with automatic mapping suggestions.
+        </p>
+        <a class="btn primary" href="/tools/sitemap-delta/">Open tool →</a>
+        <div class="tool-meta">
+          <span class="feature-badge">.xml.gz support</span>
+          <span class="feature-badge">Redirect mapper</span>
+          <span class="feature-badge">410 lists</span>
+        </div>
+      </article>
 
-    <article class="card">
-      <h2>Wayback Fixer</h2>
-      <p>Paste dead URLs → get Wayback snapshots and a replacement map (plus 410 list).</p>
-      <a class="btn primary" href="/tools/wayback-fixer/">Open</a>
-      <small class="meta">verify (HEAD) · SavePageNow (opt-in)</small>
-    </article>
+      <article class="tool-card fade-in-up delay-3">
+        <span class="tool-icon">⏪</span>
+        <h2 class="tool-title">Wayback Fixer</h2>
+        <p class="tool-description">
+          Find Internet Archive snapshots for dead URLs. Get a complete replacement map with optional HEAD verification and SavePageNow queuing.
+        </p>
+        <a class="btn primary" href="/tools/wayback-fixer/">Open tool →</a>
+        <div class="tool-meta">
+          <span class="feature-badge">HEAD verify</span>
+          <span class="feature-badge">SavePageNow</span>
+          <span class="feature-badge">Best match</span>
+        </div>
+      </article>
 
-    <article class="card">
-      <h2>Document Converter</h2>
-      <p>Convert between popular document formats: Markdown, PDF, DOCX, HTML, RTF, ODT, and more. High-quality PDF rendering.</p>
-      <a class="btn primary" href="/tools/text-converter/">Open</a>
-      <small class="meta">Chromium PDF · Pandoc · multiple formats</small>
-    </article>
-  </section>
+      <article class="tool-card fade-in-up delay-4">
+        <span class="tool-icon">📄</span>
+        <h2 class="tool-title">Document Converter</h2>
+        <p class="tool-description">
+          Convert between 100+ document formats including Markdown, PDF, DOCX, HTML, RTF, and ODT. High-quality PDF rendering with Chromium.
+        </p>
+        <a class="btn primary" href="/tools/text-converter/">Open tool →</a>
+        <div class="tool-meta">
+          <span class="feature-badge">Chromium PDF</span>
+          <span class="feature-badge">Pandoc engine</span>
+          <span class="feature-badge">100+ formats</span>
+        </div>
+      </article>
+    </section>
+  </div>
 </main>
 
 <footer class="site-footer">
-  <div class="container row between wrap">
+  <div class="container row between wrap" style="padding: var(--space-8) var(--space-4); color: var(--text-tertiary);">
     <span>© <span id="y"></span> TinyUtils</span>
-    <span><a href="/about.html">About</a> · <a href="/contact.html">Contact</a> · <a href="/cookies.html">Cookie &amp; privacy settings</a> · <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a></span>
+    <span>
+      <a href="/about.html" style="color: var(--text-tertiary)">About</a> ·
+      <a href="/contact.html" style="color: var(--text-tertiary)">Contact</a> ·
+      <a href="/cookies.html" style="color: var(--text-tertiary)">Cookie & privacy settings</a> ·
+      <a href="/privacy.html" style="color: var(--text-tertiary)">Privacy</a> ·
+      <a href="/terms.html" style="color: var(--text-tertiary)">Terms</a>
+    </span>
   </div>
 </footer>
-<script>document.getElementById('y').textContent = new Date().getFullYear();</script>
+
+<script>
+  document.getElementById('y').textContent = new Date().getFullYear();
+</script>
 </body>
 </html>
