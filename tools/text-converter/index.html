@@ -147,7 +147,7 @@
         <ins class="adsbygoogle"
              style="display:block"
              data-ad-client="ca-pub-3079281180008443"
-             data-ad-slot="1234567890"
+             data-ad-slot="3664281983"
              data-ad-format="auto"
              data-full-width-responsive="true"></ins>
         <script>try{(adsbygoogle = window.adsbygoogle || []).push({});}catch(e){}</script>
@@ -863,12 +863,18 @@
         }
         updateProgressState(baseMsg, 100);
       } catch (err) {
-        updateProgressState('Error: ' + (err.message || 'Conversion failed'), null);
+        // Only surface errors for the latest in-flight request
+        if (thisRequest === requestCounter) {
+          updateProgressState('Error: ' + (err.message || 'Conversion failed'), null);
+        }
         console.error('Conversion error:', err);
       } finally {
-        convertBtn.disabled = false;
-        previewBtn.disabled = false;
-        isBusy = false;
+        // Avoid resetting UI state for stale responses
+        if (thisRequest === requestCounter) {
+          convertBtn.disabled = false;
+          previewBtn.disabled = false;
+          isBusy = false;
+        }
       }
     }
 
