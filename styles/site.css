@@ -1,14 +1,25 @@
+/* ============================================
+   DESIGN SYSTEM IMPORTS
+   ============================================ */
+@import url('./design-tokens.css');
+@import url('./components.css');
+@import url('./animations.css');
+
+/* ============================================
+   LEGACY TOKEN MAPPINGS (for backward compatibility)
+   These map old var names to new design tokens
+   ============================================ */
 :root{
-  /* Dark theme (default) */
-  --bg:#0a0f1f;
-  --panel:#0b1224;
-  --muted:#9ca8cf;
-  --text:#f2f5ff;
-  --brand:#3b82f6;
-  --brand-2:#2563eb;
-  --border:#1e2230;
-  --radius:14px;
-  --focus-ring:#facc15;
+  /* Legacy token aliases - gradually migrate away from these */
+  --bg: var(--bg-primary);
+  --panel: var(--surface-base);
+  --muted: var(--text-tertiary);
+  --text: var(--text-primary);
+  --brand: var(--brand-500);
+  --brand-2: var(--brand-600);
+  --border: var(--border-default);
+  --radius: var(--radius-xl);
+  --focus-ring: var(--focus-ring);
 }
 
 html[data-theme="dark"]{
