@@ -100,18 +100,21 @@
       position: absolute;
       top: 0;
       left: 0;
-      right: 0;
-      height: 4px;
+      bottom: 0;
+      width: 4px;
       background: var(--gradient-brand);
-      border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+      border-radius: var(--radius-2xl) 0 0 var(--radius-2xl);
       opacity: 0;
       transition: opacity var(--transition-base);
     }
 
     .tool-card-enhanced:hover {
       transform: translateY(-8px);
-      box-shadow: var(--shadow-xl);
-      border-color: var(--border-strong);
+      box-shadow:
+        var(--shadow-xl),
+        0 0 0 1px rgba(59, 130, 246, 0.3),
+        0 0 24px -4px rgba(59, 130, 246, 0.4);
+      border-color: rgba(59, 130, 246, 0.4);
     }
 
     .tool-card-enhanced:hover::before {
