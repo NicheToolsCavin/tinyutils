@@ -29,12 +29,231 @@
     ]
   }
   </script>
+  <style>
+    /* Tools Hub Hero Section */
+    .tools-hero {
+      text-align: center;
+      padding: var(--space-16) var(--space-4) var(--space-12);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tools-hero::before {
+      content: '';
+      position: absolute;
+      top: -30%;
+      left: -30%;
+      width: 160%;
+      height: 160%;
+      background: radial-gradient(
+        circle at 50% 50%,
+        rgba(59, 130, 246, 0.08) 0%,
+        transparent 50%
+      );
+      animation: pulse 10s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .tools-hero-title {
+      position: relative;
+      font-size: var(--text-4xl);
+      font-weight: var(--font-bold);
+      background: var(--gradient-brand);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: var(--space-3);
+    }
+
+    .tools-hero-subtitle {
+      position: relative;
+      font-size: var(--text-lg);
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* Enhanced Tool Cards */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: var(--space-6);
+      margin-top: var(--space-12);
+      margin-bottom: var(--space-12);
+    }
+
+    .tool-card-enhanced {
+      position: relative;
+      background: var(--surface-base);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-2xl);
+      padding: var(--space-8);
+      transition: all var(--transition-base);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+
+    .tool-card-enhanced::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--gradient-brand);
+      border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+      opacity: 0;
+      transition: opacity var(--transition-base);
+    }
+
+    .tool-card-enhanced:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-xl);
+      border-color: var(--border-strong);
+    }
+
+    .tool-card-enhanced:hover::before {
+      opacity: 1;
+    }
+
+    .tool-card-icon {
+      font-size: 3rem;
+      line-height: 1;
+      margin-bottom: var(--space-2);
+      display: block;
+    }
+
+    .tool-card-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      margin-bottom: var(--space-2);
+    }
+
+    .tool-card-title {
+      font-size: var(--text-xl);
+      font-weight: var(--font-semibold);
+      color: var(--text-primary);
+      margin: 0;
+      flex: 1;
+    }
+
+    .tool-status-badge {
+      display: inline-block;
+      padding: var(--space-1) var(--space-3);
+      border-radius: var(--radius-full);
+      font-size: var(--text-xs);
+      font-weight: var(--font-medium);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .tool-status-badge.stable {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--success-400);
+      border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+
+    .tool-status-badge.pro {
+      background: rgba(168, 85, 247, 0.1);
+      color: var(--accent-purple-400);
+      border: 1px solid rgba(168, 85, 247, 0.2);
+    }
+
+    .tool-card-description {
+      color: var(--text-secondary);
+      line-height: 1.6;
+      flex: 1;
+      margin: 0;
+    }
+
+    .tool-features {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      margin-top: var(--space-2);
+    }
+
+    .feature-badge-small {
+      display: inline-block;
+      padding: var(--space-1) var(--space-2);
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: var(--radius-md);
+      font-size: var(--text-xs);
+      color: var(--brand-400);
+      white-space: nowrap;
+    }
+
+    .tool-card-action {
+      margin-top: var(--space-4);
+    }
+
+    /* Staggered animations */
+    .fade-in-up {
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    .delay-1 { animation-delay: 0.1s; opacity: 0; animation-fill-mode: forwards; }
+    .delay-2 { animation-delay: 0.2s; opacity: 0; animation-fill-mode: forwards; }
+    .delay-3 { animation-delay: 0.3s; opacity: 0; animation-fill-mode: forwards; }
+    .delay-4 { animation-delay: 0.4s; opacity: 0; animation-fill-mode: forwards; }
+    .delay-5 { animation-delay: 0.5s; opacity: 0; animation-fill-mode: forwards; }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+      }
+    }
+
+    /* Accessibility: Respect reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      .fade-in-up,
+      .tool-card-enhanced,
+      .tools-hero::before {
+        animation: none !important;
+        transition: none !important;
+      }
+      .delay-1, .delay-2, .delay-3, .delay-4, .delay-5 {
+        opacity: 1 !important;
+      }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .tools-hero-title {
+        font-size: var(--text-3xl);
+      }
+
+      .tools-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 <body>
 <a href="#main" class="skip-link">Skip to main content</a>
 <header class="site-header">
   <div class="container row between center">
-    <a class="brand" href="/">TinyUtils</a>
+    <a class="brand gradient-text" href="/">TinyUtils</a>
     <div class="row center">
       <nav class="nav">
         <a class="active" href="/tools/">Tools</a>
@@ -50,7 +269,14 @@
 </header>
 
 <main id="main" class="container">
-  <h1 class="mt-xl">Tools</h1>
+  <section class="tools-hero">
+    <h1 class="tools-hero-title fade-in-up">Powerful Tools for Web Professionals</h1>
+    <p class="tools-hero-subtitle fade-in-up delay-1">
+      Fast, privacy-focused utilities for SEO, content management, and document conversion.
+      No sign-up required. Built with care.
+    </p>
+  </section>
+
   <section class="ad-slot" aria-label="Sponsored">
     <ins class="adsbygoogle"
          style="display:block"
@@ -60,35 +286,104 @@
          data-full-width-responsive="true"></ins>
     <script>try{(adsbygoogle = window.adsbygoogle || []).push({});}catch(e){}</script>
   </section>
-  <section class="cards">
-    <article class="card">
-      <h2>Dead Link Finder</h2>
-      <p>Scan a page, list, or sitemap. Robots-aware. Redirect chains, notes, CSV/JSON.</p>
-      <a class="btn primary" href="/tools/dead-link-finder/">Open</a>
+
+  <section class="tools-grid">
+    <article class="tool-card-enhanced fade-in-up delay-1">
+      <span class="tool-card-icon" aria-hidden="true">🔍</span>
+      <div class="tool-card-header">
+        <h2 class="tool-card-title">Dead Link Finder</h2>
+        <span class="tool-status-badge stable">Stable</span>
+      </div>
+      <p class="tool-card-description">
+        Scan any page, list, or sitemap for broken links. Get detailed status codes,
+        redirect chains, and instant CSV/JSON exports. Respects robots.txt and handles HSTS.
+      </p>
+      <div class="tool-features">
+        <span class="feature-badge-small">Robots-aware</span>
+        <span class="feature-badge-small">Redirect chains</span>
+        <span class="feature-badge-small">HSTS guard</span>
+        <span class="feature-badge-small">Wayback links</span>
+      </div>
+      <div class="tool-card-action">
+        <a class="btn primary" href="/tools/dead-link-finder/">Open tool →</a>
+      </div>
     </article>
 
-    <article class="card">
-      <h2>Sitemap Delta + Redirect Mapper</h2>
-      <p>Compare two sitemaps and export a 301 plan + 410s.</p>
-      <a class="btn primary" href="/tools/sitemap-delta/">Open</a>
+    <article class="tool-card-enhanced fade-in-up delay-2">
+      <span class="tool-card-icon" aria-hidden="true">🗺️</span>
+      <div class="tool-card-header">
+        <h2 class="tool-card-title">Sitemap Delta + Redirect Mapper</h2>
+        <span class="tool-status-badge stable">Stable</span>
+      </div>
+      <p class="tool-card-description">
+        Compare two sitemaps to identify added, removed, and changed URLs.
+        Export nginx/Apache rewrite rules and 410 Gone lists for migrations.
+      </p>
+      <div class="tool-features">
+        <span class="feature-badge-small">Smart mapping</span>
+        <span class="feature-badge-small">Confidence scores</span>
+        <span class="feature-badge-small">Rewrite exports</span>
+        <span class="feature-badge-small">410 CSV</span>
+      </div>
+      <div class="tool-card-action">
+        <a class="btn primary" href="/tools/sitemap-delta/">Open tool →</a>
+      </div>
     </article>
 
-    <article class="card">
-      <h2>Wayback Fixer</h2>
-      <p>Bulk archive replacement map + 410 CSV.</p>
-      <a class="btn primary" href="/tools/wayback-fixer/">Open</a>
+    <article class="tool-card-enhanced fade-in-up delay-3">
+      <span class="tool-card-icon" aria-hidden="true">⏪</span>
+      <div class="tool-card-header">
+        <h2 class="tool-card-title">Wayback Fixer</h2>
+        <span class="tool-status-badge stable">Stable</span>
+      </div>
+      <p class="tool-card-description">
+        Bulk-map broken URLs to Internet Archive snapshots. Configurable time windows,
+        optional HEAD verification, and Save Page Now integration.
+      </p>
+      <div class="tool-features">
+        <span class="feature-badge-small">Bulk mapping</span>
+        <span class="feature-badge-small">Time windows</span>
+        <span class="feature-badge-small">HEAD verify</span>
+        <span class="feature-badge-small">SPN queue</span>
+      </div>
+      <div class="tool-card-action">
+        <a class="btn primary" href="/tools/wayback-fixer/">Open tool →</a>
+      </div>
     </article>
 
-    <article class="card">
-      <h2>Document Converter</h2>
-      <p>Convert between 100+ formats: Markdown, PDF, DOCX, HTML, RTF, ODT, LaTeX, and more.</p>
-      <a class="btn primary" href="/tools/text-converter/">Open</a>
+    <article class="tool-card-enhanced fade-in-up delay-4">
+      <span class="tool-card-icon" aria-hidden="true">📄</span>
+      <div class="tool-card-header">
+        <h2 class="tool-card-title">Document Converter</h2>
+        <span class="tool-status-badge pro">Pro</span>
+      </div>
+      <p class="tool-card-description">
+        Convert between 100+ document formats powered by Pandoc.
+        Supports Markdown, PDF, DOCX, HTML, RTF, ODT, LaTeX, and more. Track changes, extract media.
+      </p>
+      <div class="tool-features">
+        <span class="feature-badge-small">100+ formats</span>
+        <span class="feature-badge-small">Track changes</span>
+        <span class="feature-badge-small">Media extract</span>
+        <span class="feature-badge-small">Batch convert</span>
+      </div>
+      <div class="tool-card-action">
+        <a class="btn primary" href="/tools/text-converter/">Open tool →</a>
+      </div>
     </article>
 
-    <article class="card">
-      <h2>Supported Formats</h2>
-      <p>See the most common input and output formats our converter supports.</p>
-      <a class="btn secondary" href="/tools/formats/">View list</a>
+    <article class="tool-card-enhanced fade-in-up delay-5">
+      <span class="tool-card-icon" aria-hidden="true">📚</span>
+      <div class="tool-card-header">
+        <h2 class="tool-card-title">Supported Formats</h2>
+      </div>
+      <p class="tool-card-description">
+        Explore the complete list of input and output formats supported by our document converter.
+        From plain text to complex presentations.
+      </p>
+      <div class="tool-card-action">
+        <a class="btn secondary" href="/tools/formats/">View format list →</a>
+      </div>
     </article>
   </section>
 </main>
