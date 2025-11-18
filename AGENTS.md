@@ -43,13 +43,13 @@
 
 ---
 
-## ⚠️ MANDATORY DOCUMENTATION REQUIREMENTS ⚠️
+## ⚠️ DOCUMENTATION REQUIREMENTS — Only When Changes Occur ⚠️
 
-**🚨 EVERY TASK MUST BE DOCUMENTED USING THE PYTHON SCRIPTS 🚨**
+Document material changes using the Python scripts. Do not log for purely exploratory turns (reading/searching/understanding context) when no repo content or external state changed.
 
-When you complete ANY work (bug fix, feature, docs update, etc.), you MUST:
+Material changes include: code/HTML/CSS/JS edits, docs edits, asset updates, config changes, adding evidence artifacts, opening/merging a PR, or any change to tool behavior/specs.
 
-### 1. Log to AGENT_RUN_LOG.md (REQUIRED for every session)
+### 1. Log to AGENT_RUN_LOG.md (REQUIRED when material changes occurred)
 ```bash
 python scripts/log_run_entry.py \
   --title "Manual - <brief task title>" \
@@ -75,7 +75,7 @@ python scripts/log_run_entry.py \
   --followup NONE
 ```
 
-### 2. Update AGENT_TASK_CHECKLIST.md (REQUIRED for all tasks)
+### 2. Update AGENT_TASK_CHECKLIST.md (REQUIRED when a task produced changes)
 ```bash
 python scripts/add_task_checklist_entry.py \
   --task "<descriptive task name>" \
@@ -144,7 +144,7 @@ Commits
 
 ### 📋 Documentation Checklist
 
-Before considering ANY task complete, verify:
+Before considering a change complete, verify (only when changes occurred):
 
 - [ ] Ran `python scripts/log_run_entry.py` with all required fields
 - [ ] Ran `python scripts/add_task_checklist_entry.py` with status="Completed"
@@ -153,7 +153,12 @@ Before considering ANY task complete, verify:
 - [ ] Committed all documentation changes
 - [ ] Pushed to remote
 
-**⚠️ NO EXCEPTIONS: If you skip documentation, other agents cannot see what you did and will duplicate/undo your work! ⚠️**
+If you skip documentation for material changes, other agents may duplicate/undo your work.
+
+### Quick decision checklist
+- Log required: you committed files; edited docs; changed assets/config; opened/updated a PR; generated evidence artifacts; changed tool behavior/specs.
+- No log: you only read code, searched/browsed docs, planned next steps, or discussed approach with no repo or external state change.
+- Batch small edits: if you make several tiny commits in one short session, a single consolidated log is fine.
 
 ---
 
@@ -266,11 +271,19 @@ Add new tool files at the repository root using the naming pattern `tool_desc_<k
   - `/Users/cav/dev/TinyUtils/tinyutils/.vercel/.env.preview.local`
   These files are read directly by preview-smoke scripts; if they disappear from your `PATH`, just cat the file to re-export the secrets for the current terminal.
 
-### Logging Every Turn (Mandatory)
-- On every agent turn, append an entry to `docs/AGENT_RUN_LOG.md` capturing: timestamp (Europe/Madrid), branch, CWD, summary, evidence paths, and follow-ups — even for documentation-only updates.
-- While the Converter is in active scope, also append a same-day entry to `tool_desc_converter.md` (use a short “Minor changes — …” heartbeat if behavior is unchanged). This guarantees a per-turn audit trail for the converter.
-- If nothing user-visible changed, explicitly state “No behavior change” under the entry and list any docs/evidence added.
-- Store any screenshots, curl outputs, or ancillary artifacts under `artifacts/<task>/<YYYYMMDD>/` and reference the path in both files.
+### Logging Policy — Only When Changes Occur
+- Do not log every turn. Skip logging for read-only exploration, repo scans, or context gathering when nothing changed.
+- Log when you make a material change (code/docs/assets/config), open/update a PR, or add artifacts worth keeping (e.g., smoke test outputs used as evidence).
+- Update `tool_desc_*.md` only when behavior changes. No heartbeat entries are required if nothing user-visible changed.
+- When you do log, store screenshots, curl outputs, or artifacts under `artifacts/<task>/<YYYYMMDD>/` and reference that path in your log.
+
+Examples — No log needed
+- Read files to get up to speed; searched the codebase; drafted a plan; answered questions without changing files.
+
+Examples — Log required
+- Edited `/api/*.js`, `/tools/*/index.html`, or updated `vercel.json` or `package.json`.
+- Wrote or changed `docs/*`, `tool_desc_*.md`, or `AGENTS.md`.
+- Opened a PR or added artifacts from preview smokes you want preserved and referenced.
 
 
 **Format for entries:**

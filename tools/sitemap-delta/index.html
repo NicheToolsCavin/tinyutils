@@ -15,6 +15,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3079281180008443" crossorigin="anonymous"></script>
   <script src="/scripts/theme-toggle.js"></script>
+  <script src="/scripts/download-utils.js"></script>
   <link rel="stylesheet" href="/public/styles.css">
   <link rel="stylesheet" href="/styles/site.css">
   <script defer src="/scripts/consent.js"></script>
@@ -64,6 +65,16 @@
     <p class="sub">Compare two sitemaps (or paste XML), detect <b>added / removed</b> URLs, and auto-suggest <b>301</b> mappings. Export CSV/JSON.</p>
   </section>
 
+  <section class="container ad-slot" aria-label="Sponsored">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-3079281180008443"
+         data-ad-slot="1234567890"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>try{(adsbygoogle = window.adsbygoogle || []).push({});}catch(e){}</script>
+  </section>
+
   <section class="container card">
     <section class="grid">
       <div>
@@ -101,7 +112,7 @@
       </div>
     </section>
 
-    <section id="status" class="status" aria-live="polite" role="status">
+    <section id="status" class="status progress-banner" aria-live="polite" role="status">
       <span id="statusMessage">Ready.</span>
       <progress id="statusMeter" max="100" value="0" hidden></progress>
     </section>
@@ -226,6 +237,8 @@
 
   let lastResults = null;
   let confThreshold = 0;
+  let isBusy = false;
+  let isBusy = false;
 
   function setExportsEnabled(enabled) {
     exportButtons.forEach(btn => {
@@ -283,12 +296,21 @@
   }
 
   function downloadFile(name, type, data) {
+    if (window.tuDownloadBlob) {
+      window.tuDownloadBlob({ filename: name, mimeType: type, content: data });
+      return;
+    }
     const blob = new Blob([data], { type });
+    const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
+    a.href = url;
     a.download = name;
+    document.body.appendChild(a);
     a.click();
-    URL.revokeObjectURL(a.href);
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 0);
   }
 
   function buildHashPayload() {
@@ -367,6 +389,7 @@
     const tag = (e.target && e.target.tagName) || '';
     const inField = /^(INPUT|TEXTAREA|SELECT)$/.test(tag) || !!(e.target && e.target.isContentEditable);
     if (inField) return;
+    if (isBusy) return;
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); runBtn.click(); }
     else if ((e.metaKey || e.ctrlKey) && (e.key === 'e' || e.key === 'E')) { e.preventDefault(); document.getElementById('dlCsv').click(); }
     else if ((e.metaKey || e.ctrlKey) && (e.key === 'j' || e.key === 'J')) { e.preventDefault(); document.getElementById('dlJson').click(); }
@@ -478,6 +501,7 @@
     tablesEl.classList.add('hidden');
     const hadResults = !!lastResults;
     setExportsEnabled(false);
+    isBusy = true;
 
     try {
       const res = await fetch('/api/sitemap-delta', {
@@ -496,6 +520,8 @@
       console.error('[sitemap-delta]', error);
       if (hadResults && lastResults) setExportsEnabled(true);
       setStatus('Error: ' + (error.message || String(error)), null);
+    } finally {
+      isBusy = false;
     }
   });
 

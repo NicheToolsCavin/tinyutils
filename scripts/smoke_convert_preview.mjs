@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
+import { Buffer } from 'node:buffer';
 import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -34,6 +35,7 @@ const madridTs = fmt('Europe/Madrid', {
 const artifactDir = process.env.CONVERT_SMOKE_ARTIFACTS
   ? resolve(process.env.CONVERT_SMOKE_ARTIFACTS)
   : resolve(root, 'artifacts', 'convert', utcDate, `preview-smoke-${madridTs}`);
+const rtfArtifactDir = resolve(root, 'artifacts', 'converter-rtf-fix', utcDate);
 
 const fenceHeader = process.env.PREVIEW_FENCE_HEADER;
 const previewSecret = process.env.PREVIEW_SECRET;
@@ -161,6 +163,22 @@ const cases = [
       options: { }
     },
   },
+  // Markdown → RTF (exercise RTF path and save an actual .rtf artifact)
+  {
+    name: 'md_rtf',
+    body: {
+      inputs: [
+        {
+          blobUrl:
+            'data:text/plain;base64,IyBUaW55VXRpbHMgUlRGCgpfKiBUaGlzIGlzIGEgc21hbGwgZGVtbyBkb2N1bWVudCB1c2VkIHRvIHNtb2tlIHRoZSBNRC0+UlRGIHBhdGguICovCgpIZWFkaW5nIDEKCi0gQnVsbGV0cyBhbmQgbGlzdHMKLSBDb2RlIGJsb2NrcwoKIyMgTW9yZQoKVGhpcyB2ZXJpZmllcyB0aGF0IHRoZSBjb252ZXJ0ZXIgY2FuIHByb2R1Y2UgYSBjb21wbGV0ZSBSVEYgcGFnZSAobm90IGp1c3QgYSBoZWFkbGluZSkuCg==',
+          name: 'tinyutils-demo.md',
+        },
+      ],
+      from: 'markdown',
+      to: ['rtf'],
+      options: { extractMedia: false, mdDialect: 'gfm' },
+    },
+  },
 ];
 
 // If we have a bypass token, also append it as a query param to the endpoint to avoid auth redirects during POST.
@@ -176,6 +194,47 @@ const ensureArtifacts = async () => {
   return artifactDir;
 };
 
+const ensureRtfArtifacts = async () => {
+  await mkdir(rtfArtifactDir, { recursive: true });
+  return rtfArtifactDir;
+};
+
+async function saveRtfArtifact(output) {
+  if (!output) return;
+  const href = output.blobUrl || output.url;
+  if (!href || typeof href !== 'string') return;
+  await ensureRtfArtifacts();
+  const rawName = output.name || output.filename || 'md-to-rtf-output.rtf';
+  const fileName = rawName.toLowerCase().endsWith('.rtf') ? rawName : `${rawName}.rtf`;
+  const destPath = join(rtfArtifactDir, fileName);
+
+  try {
+    if (href.startsWith('data:')) {
+      const firstComma = href.indexOf(',');
+      if (firstComma === -1) return;
+      const meta = href.slice(5, firstComma);
+      const dataPart = href.slice(firstComma + 1);
+      const isBase64 = /;base64$/i.test(meta);
+      const buf = isBase64
+        ? Buffer.from(dataPart, 'base64')
+        : Buffer.from(decodeURIComponent(dataPart.replace(/\+/g, '%20')), 'utf8');
+      await writeFile(destPath, buf);
+      return;
+    }
+
+    const res = await fetch(href, { headers: buildHeaders() });
+    if (!res.ok) {
+      console.error(`smoke_convert_preview: md_rtf artifact fetch failed with ${res.status}`);
+      return;
+    }
+    const arrayBuf = await res.arrayBuffer();
+    const buf = Buffer.from(arrayBuf);
+    await writeFile(destPath, buf);
+  } catch (err) {
+    console.error('smoke_convert_preview: failed to save md_rtf artifact', err);
+  }
+}
+
 const runCase = async ({ name, body }) => {
   // Preflight once to try to set a bypass cookie for POST
   await preflightBypassCookie();
@@ -188,6 +247,22 @@ const runCase = async ({ name, body }) => {
   const payload = await response.text();
   const outputPath = join(artifactDir, `resp_${name}.json`);
   await writeFile(outputPath, payload);
+
+   if (name === 'md_rtf') {
+    try {
+      const parsed = JSON.parse(payload);
+      const firstOutput = Array.isArray(parsed.outputs) ? parsed.outputs[0] : null;
+      if (firstOutput) {
+        await saveRtfArtifact(firstOutput);
+      } else {
+        console.error('smoke_convert_preview: md_rtf case returned no outputs');
+        process.exitCode = 1;
+      }
+    } catch (err) {
+      console.error('smoke_convert_preview: failed to process md_rtf response JSON', err);
+      process.exitCode = 1;
+    }
+  }
 
   if (!response.ok) {
     console.error(`smoke_convert_preview: ${name} failed with ${response.status}`);

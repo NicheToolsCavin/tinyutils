@@ -28,6 +28,18 @@ if (!BASE_URL) {
 }
 
 const pages = ['/', '/tools/', '/tools/dead-link-finder/', '/tools/sitemap-delta/', '/tools/wayback-fixer/', '/cookies.html'];
+
+// Lightweight expectations per page for invariant markup. These are kept
+// deliberately loose to avoid brittleness: we only check for marker classes
+// or attributes that should remain stable across visual tweaks.
+const pageExpectations = {
+  '/': { adSlot: true },
+  '/tools/': { adSlot: true },
+  '/tools/dead-link-finder/': { adSlot: true, progressBanner: true },
+  '/tools/sitemap-delta/': { adSlot: true, progressBanner: true },
+  '/tools/wayback-fixer/': { adSlot: true },
+  '/cookies.html': {},
+};
 const apis = [
   { path: '/api/check', body: { pageUrl: 'https://example.com/' } },
   { path: '/api/metafetch', body: { url: 'https://example.com/' } },
@@ -110,8 +122,34 @@ async function testPages() {
   for (const path of pages) {
     try {
       const res = await fetchWithBypass(path, { method: 'GET' });
-      const ok = res.status === 200;
-      results.push({ path, status: res.status, ok });
+      const status = res.status;
+      const okStatus = status === 200;
+      let html = '';
+      try {
+        html = await res.text();
+      } catch {
+        // If we cannot read the body, fall back to status-only.
+      }
+
+      const expectations = pageExpectations[path] || {};
+      const needsAdSlot = !!expectations.adSlot;
+      const needsProgress = !!expectations.progressBanner;
+
+      const hasAdSlotMarker = !needsAdSlot || (html && html.includes('class="ad-slot"'));
+      const hasProgressMarker = !needsProgress || (html && html.includes('progress-banner'));
+
+      const ok = okStatus && hasAdSlotMarker && hasProgressMarker;
+
+      results.push({
+        path,
+        status,
+        ok,
+        okStatus,
+        needsAdSlot,
+        hasAdSlotMarker,
+        needsProgress,
+        hasProgressMarker,
+      });
     } catch (error) {
       results.push({ path, status: 'error', ok: false, error: error.message });
     }
@@ -153,8 +191,16 @@ async function testApis() {
   const apiResults = await testApis();
 
   console.log('Page checks:');
-  pageResults.forEach(({ path, status, ok, error }) => {
-    console.log(`  ${path} -> ${status}${error ? ` (${error})` : ''} ${ok ? 'OK' : 'FAIL'}`);
+  pageResults.forEach(({ path, status, ok, error, needsAdSlot, hasAdSlotMarker, needsProgress, hasProgressMarker }) => {
+    if (typeof status === 'string') {
+      console.log(`  ${path} -> ${status}${error ? ` (${error})` : ''} ${ok ? 'OK' : 'FAIL'}`);
+      return;
+    }
+    const markers = [];
+    if (needsAdSlot) markers.push(`ad-slot:${hasAdSlotMarker ? 'yes' : 'no'}`);
+    if (needsProgress) markers.push(`progress:${hasProgressMarker ? 'yes' : 'no'}`);
+    const markerText = markers.length ? ` [${markers.join(', ')}]` : '';
+    console.log(`  ${path} -> ${status}${markerText} ${ok ? 'OK' : 'FAIL'}`);
   });
   console.log();
 

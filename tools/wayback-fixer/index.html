@@ -14,6 +14,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3079281180008443" crossorigin="anonymous"></script>
   <script src="/scripts/theme-toggle.js"></script>
+  <script src="/scripts/download-utils.js"></script>
   <link rel="stylesheet" href="/styles/site.css">
   <script defer src="/scripts/consent.js"></script>
   <script defer src="/scripts/adsense-monitor.js"></script>
@@ -84,6 +85,16 @@
       <p class="sub">Paste dead URLs → get the best Wayback snapshot for each, export replacements & 410s. <span title="Polite by default — honors robots.txt and rate‑limits requests.">❓</span></p>
     </header>
 
+    <section class="ad-slot" aria-label="Sponsored">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-3079281180008443"
+           data-ad-slot="1234567890"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>try{(adsbygoogle = window.adsbygoogle || []).push({});}catch(e){}</script>
+    </section>
+
     <section class="grid two">
       <div class="card">
         <label for="list">Paste URLs (one per line)</label>
@@ -110,7 +121,7 @@ https://example.com/moved"></textarea>
           <label>Max concurrent <input id="conc" type="number" min="1" max="6" value="6"></label>
           <div>
             <button id="run" class="btn">Find Wayback Replacements</button>
-            <div id="status" class="status" aria-live="polite" role="status">
+            <div id="status" class="status progress-banner" aria-live="polite" role="status">
               <span id="statusMessage">Ready.</span>
               <progress id="statusMeter" max="100" value="0" hidden></progress>
             </div>
@@ -182,6 +193,7 @@ https://example.com/moved"></textarea>
   const exportButtons = exportBtnIds.map(id => document.getElementById(id)).filter(Boolean);
   const LINE_BREAK = '\\r\\n';
   let last = null, filt = 'all';
+  let isBusy = false;
 
   function setStatus(message, progress) {
     if (statusMessageEl) statusMessageEl.textContent = message;
@@ -396,6 +408,7 @@ https://example.com/moved"></textarea>
     };
     setStatus('Working…', 25);
     runBtn.disabled = true;
+    isBusy = true;
     const hadResults = !!last;
     setExportsEnabled(false);
     try{
@@ -408,12 +421,14 @@ https://example.com/moved"></textarea>
       if (hadResults && last) setExportsEnabled(true);
     }finally{
       runBtn.disabled = false;
+      isBusy = false;
     }
   });
   document.addEventListener('keydown', (e)=>{
     const tag = (e.target && e.target.tagName) || '';
     const inField = /^(INPUT|TEXTAREA|SELECT)$/.test(tag) || !!(e.target && e.target.isContentEditable);
     if (inField) return;
+    if (isBusy) return;
     if ((e.metaKey||e.ctrlKey) && e.key==='Enter'){ e.preventDefault(); runBtn.click(); }
     else if ((e.metaKey||e.ctrlKey) && (e.key==='e'||e.key==='E')){ e.preventDefault(); document.getElementById('dlCsv').click(); }
     else if ((e.metaKey||e.ctrlKey) && (e.key==='j'||e.key==='J')){ e.preventDefault(); document.getElementById('dlJson').click(); }
@@ -446,13 +461,27 @@ https://example.com/moved"></textarea>
   }
   document.getElementById('dlCsv').addEventListener('click', ()=>{
     if (!last) return; const txt = toCSV(last.results||[]);
-    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt],{type:'text/csv'})); a.download='wayback-replacements.csv'; a.click();
+    if (window.tuDownloadBlob) {
+      window.tuDownloadBlob({ filename: 'wayback-replacements.csv', mimeType: 'text/csv', content: txt });
+    } else {
+      const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt],{type:'text/csv'})); a.download='wayback-replacements.csv'; a.click();
+    }
   });
   document.getElementById('dlJson').addEventListener('click', ()=>{
-    if (!last) return; const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(last,null,2)],{type:'application/json'})); a.download='wayback-results.json'; a.click();
+    if (!last) return; const json = JSON.stringify(last,null,2);
+    if (window.tuDownloadBlob) {
+      window.tuDownloadBlob({ filename: 'wayback-results.json', mimeType: 'application/json', content: json });
+    } else {
+      const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([json],{type:'application/json'})); a.download='wayback-results.json'; a.click();
+    }
   });
   document.getElementById('dl410').addEventListener('click', ()=>{
-    if (!last) return; const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([to410(last.results||[])],{type:'text/csv'})); a.download='wayback-410.csv'; a.click();
+    if (!last) return; const csv = to410(last.results||[]);
+    if (window.tuDownloadBlob) {
+      window.tuDownloadBlob({ filename: 'wayback-410.csv', mimeType: 'text/csv', content: csv });
+    } else {
+      const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='wayback-410.csv'; a.click();
+    }
   });
   document.getElementById('copyRepl').addEventListener('click', ()=>{
     if (!last) return; const txt = toCSV(last.results||[]); copyText(txt);

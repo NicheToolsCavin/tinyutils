@@ -518,9 +518,72 @@ Impact
 
 Notes / follow-ups
 • Wire extended Options (normalizeLists, normalizeUnicode, etc.) to pandoc_runner extra_args in convert batch logic.
-• Enable preview-first mode in backend conversion flow (check request.preview flag).
-• Batch ZIP input/output handling remains future work.
-• Test preview smoke and prod smoke workflows.
+
+### Minor changes — 2025-11-18 23:30 CET (UTC+01:00) — Phase 2 nightly status checkpoint
+
+Added
+• Documentation heartbeat noting the Phase 2 status update in `docs/PHASE2_AUTO_STATUS.md`.
+
+Modified
+• None. Converter runtime behavior, API contract, and UI remain unchanged in this session.
+
+Removed
+• None.
+
+Human-readable summary
+
+No behavior change. This is a small bookkeeping entry to say that today’s work focused on updating the Phase 2 Auto status file, capturing that Track 1 (progress UX) is complete, Track 2 (downloads + MD→RTF) is partially done, and Tracks 3–5 (ads/CMP, light mode, extra smokes/docs) are still pending. The converter’s RTF and other conversion behaviors stay exactly as described in prior entries.
+
+Impact
+• None for end users; the converter continues to behave exactly as before. ✅
+• Improves auditability and hand-offs by keeping the converter change log in sync with the Phase 2 status board. ✅
+
+### Major changes — 2025-11-18 23:50 CET (UTC+01:00) — Converter downloads hardened + MD→RTF smoke
+
+Added
+• Client-side normalization for converter result downloads: a small `handleDataUrlDownload` helper intercepts `data:` URLs in the results table and decodes them into Blob-based downloads, delegating to `window.tuDownloadBlob` when available.
+• New `md_rtf` case in `scripts/smoke_convert_preview.mjs` that posts a tiny Markdown demo to `/api/convert` with `to:['rtf']` and, when `PREVIEW_URL` is configured, writes a real `.rtf` artifact under `artifacts/converter-rtf-fix/<YYYYMMDD>/` using the same preview-bypass headers as other smokes.
+
+Modified
+• Result table download links on `/tools/text-converter/` still render as `<a class="download-link">Download</a>`, but clicks on `data:` URLs are now handled via Blob-based downloads instead of relying on the browser’s `data:` URL handling.
+• `scripts/smoke_convert_preview.mjs` now reuses the existing artifact directory and preview-protection bypass logic while also saving a standalone RTF file alongside the JSON response for the `md_rtf` case.
+
+Fixed
+• Soft-hardening of converter downloads
+  - **Problem:** The converter UI trusted whatever `blobUrl`/`url` the API returned, which could be a `data:` URL; while this worked, it meant user-facing downloads sometimes relied on `data:` URL semantics instead of the Blob-based flow we use everywhere else.
+  - **Root cause:** The results table simply bound `output.blobUrl || output.url` to an `<a href>` with `download`, without a normalization layer.
+  - **Fix:** Added a small client-side helper that detects `data:` URLs, decodes them (base64 or URL-encoded), and funnels them through `window.tuDownloadBlob` (or a local Blob+`URL.createObjectURL` fallback), so converter downloads follow the same Blob-based pattern as other tools without changing the visible UX.
+  - **Evidence:** DOM/logic review of `tools/text-converter/index.html`; status entry in `docs/PHASE2_AUTO_STATUS.md` under Track 2; updated converter preview smoke in `scripts/smoke_convert_preview.mjs`.
+
+Human-readable summary
+
+Previously, the converter’s downloads did whatever the backend told them: if `/api/convert` returned a `data:` URL, the UI simply stuck that into the link and let the browser handle it. That worked, but it made the converter the odd one out compared to the other tools, which all use a consistent "make a Blob, then download it" flow.
+
+We taught the converter a small new trick. When you click a Download link, if the underlying URL is a `data:` URL, the UI quietly decodes it in JavaScript and hands the bytes to the same Blob-based helper we use everywhere else. For you, the link still just says "Download" and saves the file; under the hood it’s a bit more robust and easier to reason about.
+
+At the same time, the converter’s preview smoke grew a new scenario that converts a tiny Markdown demo into RTF and saves the resulting `.rtf` file as an artifact, so we can quickly re-open it in TextEdit/Word and confirm the "full document" RTF fix keeps working over time.
+
+Impact
+• Converter downloads now follow the same Blob-based pattern as other tools even when the backend responds with `data:` URLs, while the visible UI and API contract stay the same. ✅
+• The MD→RTF path is exercised by a dedicated smoke that can materialize real `.rtf` artifacts under `artifacts/converter-rtf-fix/<date>/` for easy spot-checks in desktop editors. ✅
+
+### Minor changes — 2025-11-18 23:58 CET (UTC+01:00) — Light-mode token tuning (global)
+
+Added
+• None.
+
+Modified
+• Global light-theme design tokens in `styles/site.css` were retuned so `html[data-theme="light"]` uses a soft gray background, white panels, slightly darker muted text, and clearer borders; the converter page inherits these tokens for its cards, progress banner, and `.ad-slot` frame.
+
+Removed
+• None.
+
+Human-readable summary
+
+No converter-specific logic changed, but the overall light theme now looks closer to a deliberate design instead of a flipped dark palette. When you switch to light mode, the converter’s cards and status areas sit on a pale gray canvas with white panels and more readable muted text, while still using the same brand blue accents.
+
+Impact
+• Converter UI in light mode should feel more consistent and readable without affecting the behavior of `/api/convert` or any tool options. ✅
 
 ### Major changes — 2025-11-12 CET (UTC+01:00)
 
