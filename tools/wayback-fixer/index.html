@@ -194,6 +194,7 @@ https://example.com/moved"></textarea>
   const LINE_BREAK = '\\r\\n';
   let last = null, filt = 'all';
   let isBusy = false;
+  let requestCounter = 0;
 
   function setStatus(message, progress) {
     if (statusMessageEl) statusMessageEl.textContent = message;
@@ -409,11 +410,19 @@ https://example.com/moved"></textarea>
     setStatus('Working…', 25);
     runBtn.disabled = true;
     isBusy = true;
+    const thisRequest = ++requestCounter;
     const hadResults = !!last;
     setExportsEnabled(false);
     try{
       const res = await fetch('/api/wayback-fixer', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify(body) });
       const data = await res.json();
+
+      // Ignore stale responses if user clicked Run again
+      if (thisRequest !== requestCounter) {
+        console.log('Ignoring stale Wayback Fixer response');
+        return;
+      }
+
       render(data);
       await withRequestIdEcho(res);
     }catch(e){

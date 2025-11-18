@@ -238,7 +238,7 @@
   let lastResults = null;
   let confThreshold = 0;
   let isBusy = false;
-  let isBusy = false;
+  let requestCounter = 0;
 
   function setExportsEnabled(enabled) {
     exportButtons.forEach(btn => {
@@ -502,6 +502,7 @@
     const hadResults = !!lastResults;
     setExportsEnabled(false);
     isBusy = true;
+    const thisRequest = ++requestCounter;
 
     try {
       const res = await fetch('/api/sitemap-delta', {
@@ -512,6 +513,13 @@
       await withRequestIdEcho(res);
       const data = await res.json();
       if (!res.ok) throw new Error(data?.meta?.note || data?.error || `HTTP ${res.status}`);
+
+      // Ignore stale responses if user clicked Compare again
+      if (thisRequest !== requestCounter) {
+        console.log('Ignoring stale Sitemap Delta response');
+        return;
+      }
+
       lastResults = data;
       renderTables();
       setStatus('Done.', 100);

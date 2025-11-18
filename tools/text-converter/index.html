@@ -699,7 +699,23 @@
             const meta = href.slice(5, firstComma); // strip leading "data:"
             const dataPart = href.slice(firstComma + 1);
             const isBase64 = /;base64$/i.test(meta);
-            const mimeType = (meta.replace(/;base64$/i, '') || fallbackMime || 'application/octet-stream');
+            let mimeType = (meta.replace(/;base64$/i, '') || fallbackMime || 'application/octet-stream');
+
+            // MIME type validation: only allow known document formats
+            const ALLOWED_MIMES = [
+              'text/plain', 'text/html', 'text/markdown', 'text/rtf', 'text/csv',
+              'application/pdf', 'application/rtf',
+              'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+              'application/vnd.oasis.opendocument.text',
+              'application/vnd.oasis.opendocument.presentation',
+              'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+              'application/octet-stream'
+            ];
+            const isAllowed = ALLOWED_MIMES.some(allowed => mimeType.startsWith(allowed));
+            if (!isAllowed) {
+              console.warn('converter: unexpected MIME type in data URL:', mimeType);
+              mimeType = 'application/octet-stream';
+            }
             let content;
             if (isBase64) {
               const binary = atob(dataPart);
