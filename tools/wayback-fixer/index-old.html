@@ -21,50 +21,6 @@
   <style>
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Ubuntu,sans-serif;background:var(--bg);color:var(--text);margin:0}
     .wrap{max-width:980px;margin:0 auto;padding:24px}
-
-    /* Enhanced Tool Hero */
-    .tool-hero {
-      text-align: center;
-      padding: var(--space-12) 0 var(--space-8);
-      max-width: 750px;
-      margin: 0 auto;
-    }
-
-    .tool-hero-icon {
-      font-size: 4rem;
-      display: block;
-      margin-bottom: var(--space-4);
-      animation: fadeIn 0.6s ease-out;
-    }
-
-    .tool-hero h1 {
-      font-size: var(--text-4xl);
-      font-weight: var(--font-bold);
-      background: var(--gradient-brand);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin: 0 0 var(--space-3) 0;
-      animation: fadeIn 0.6s ease-out 0.1s backwards;
-    }
-
-    .tool-hero .sub {
-      font-size: var(--text-lg);
-      color: var(--text-secondary);
-      margin: 0;
-      line-height: 1.6;
-      animation: fadeIn 0.6s ease-out 0.2s backwards;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .tool-hero-icon, .tool-hero h1, .tool-hero .sub { animation: none !important; }
-    }
-
     header h1{margin:0 0 8px 0;font-size:28px}
     .grid{display:grid;gap:12px}
     .two{grid-template-columns:1fr 1fr}
@@ -124,8 +80,7 @@
 
 <main id="main">
   <div class="wrap">
-    <header class="tool-hero">
-      <span class="tool-hero-icon" aria-hidden="true">⏪</span>
+    <header>
       <h1>Wayback Fixer</h1>
       <p class="sub">Paste dead URLs → get the best Wayback snapshot for each, export replacements & 410s. <span title="Polite by default — honors robots.txt and rate‑limits requests.">❓</span></p>
     </header>
