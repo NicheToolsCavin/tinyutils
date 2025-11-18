@@ -205,6 +205,7 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
   - Client→Blob upload for large files.
 
 ## How to Record Entries
+- Policy (updated 2025-11-18): Log only when material changes occur (code/docs/assets/config edits, opening/updating a PR, or adding preserved evidence artifacts, or tool behavior/spec changes). Skip logging for exploration-only turns (reading/searching/planning) unless you produced artifacts you want to keep. See AGENTS.md for the quick decision checklist.
 - **Append-only:** Add new information at the top of the Sessions list (newest first).
 - **Timezone:** Headings must use Europe/Madrid timestamps (e.g., `2025-11-04 14:15 CET`).
 - **Granularity:** Log each meaningful task as soon as it finishes (single-agent or multi-agent), then add a session wrap-up when the run completes.
@@ -215,6 +216,149 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 - **Helper script:** Use `python scripts/log_run_entry.py --help` to append entries without manual editing.
 
 ## Sessions
+
+### 2025-11-18 13:50 CET - Manual - Phase2 consolidation + PR notes
+- **Mode:** manual
+- **Branch:** `feat/phase2-ads-light`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Cross-checked Phase 2 track states between docs/PHASE2_AUTO_STATUS.md and docs/AGENT_TASK_CHECKLIST.md (Tracks 1–5 + Workstream A) and confirmed statuses/next actions are aligned, with separate tasks tracking preview smokes and visual QA.
+  - Created docs/PHASE2_PR_NOTES.md as a PR-ready summary of what feat/phase2-ads-light implements across progress UX, Blob downloads + MD→RTF, ads/CMP, light-mode tokens, and smokes/docs, including remaining preview/QA steps before merge.
+- **Evidence:** docs/PHASE2_PR_NOTES.md
+- **Follow-ups:**
+  - When opening the PR, paste or adapt docs/PHASE2_PR_NOTES.md into the PR description and run the preview smokes/visual QA steps listed there.
+
+### 2025-11-18 13:44 CET - Manual - Phase2 local visual QA stub
+- **Mode:** manual
+- **Branch:** `feat/phase2-ads-light`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Started a local static server and confirmed that /, /tools/, and the four core tools all serve successfully (HTTP 200) for a quick visual QA pass of Phase 2 changes.
+  - No obvious layout or contrast issues were detected from code/CSS inspection for the new .ad-slot placements, progress banners, or tuned light-mode tokens, so no additional CSS changes were applied in this pass.
+- **Evidence:** tools/text-converter/index.html
+- **Follow-ups:**
+  - On a real browser preview, do a quick dark/light theme flip on the same pages to visually confirm contrast and spacing; only then decide if any further token tweaks are necessary.
+
+### 2025-11-18 13:30 CET - Manual - Phase2 Workstream A preview smokes check
+- **Mode:** manual
+- **Branch:** `feat/phase2-ads-light`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Checked preview env for Phase 2 smokes: PREVIEW_URL and bypass tokens are not set in this shell, so scripts/preview_smoke.mjs exits with a PREVIEW_URL-required error and scripts/smoke_convert_preview.mjs logs that it is skipping.
+  - Confirmed both smokes no-op safely when PREVIEW_URL is missing and updated docs/PHASE2_AUTO_STATUS.md to record that Track 5 is code-complete but still awaiting a real preview run.
+- **Evidence:** docs/PHASE2_AUTO_STATUS.md
+- **Follow-ups:**
+  - Run preview_smoke.mjs and smoke_convert_preview.mjs again once PREVIEW_URL and bypass envs are configured for this branch's Vercel preview, then mark Phase 2 Track 2/5 as fully validated.
+
+### 2025-11-18 06:03 CET - Manual - Phase2 Track 5 smokes + docs
+- **Mode:** manual
+- **Branch:** `feat/phase2-ads-light`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Extended scripts/preview_smoke.mjs so page checks now also assert that key pages return 200 and still contain invariant markers (a single .ad-slot on home/tools/tool shells and .progress-banner on Dead Link Finder + Sitemap Delta), while reusing existing preview-bypass headers.
+  - Updated docs/PHASE2_AUTO_STATUS.md Track 5 entry to describe the new smoke coverage (MD→RTF case in smoke_convert_preview.mjs and lightweight ad/progress markers in preview_smoke.mjs) and how future smokes/manual QA should validate them.
+- **Evidence:** docs/PHASE2_AUTO_STATUS.md
+- **Follow-ups:**
+  - Run preview smokes with PREVIEW_URL set to confirm the new checks pass on the current preview deployment; if any invariant markers fail (missing .ad-slot or .progress-banner), adjust the markup or expectations accordingly.
+
+### 2025-11-18 05:55 CET - Manual - Phase2 Track 4 light-mode tokens
+- **Mode:** manual
+- **Branch:** `feat/phase2-ads-light`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Retuned html[data-theme="light"] tokens in styles/site.css (bg, panel, muted, text, border) so light mode uses a soft gray canvas, white cards, darker muted text, and clearer borders while preserving the existing visual language.
+  - Updated docs/PHASE2_AUTO_STATUS.md Track 4 notes to describe the new light-mode token set and call out that future validation should flip the theme on key pages to spot-check contrast on cards, tool shells, .ad-slot, and progress banners.
+- **Evidence:** docs/PHASE2_AUTO_STATUS.md
+- **Follow-ups:**
+  - Run a quick visual QA pass in a preview to confirm light mode meets contrast expectations on /, /tools/, and the four core tools; add a dark-only fallback in theme-toggle if light mode still feels unacceptable after tuning.
+
+### 2025-11-18 05:42 CET - Manual - Phase2 Track 3 ad docs + polish
+- **Mode:** manual
+- **Branch:** `feat/phase2-ads-light`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Documented Phase 2 .ad-slot placements and behavior in ADSENSE_SETUP.md (pages, markup, interaction with Funding Choices, adsense-monitor.js, and html.ads-hidden).
+  - Updated docs/PHASE2_AUTO_STATUS.md Track 3 notes to describe the new ad slots and call out what future smokes/manual QA should check (CMP flow, hide-ads toggle, CLS, themes).
+  - Kept .ad-slot styling minimal and theme-aware in styles/site.css, relying on existing tokens and a reserved min-height to reduce CLS without adding new JS.
+- **Evidence:** styles/site.css
+- **Follow-ups:**
+  - Run preview/prod smokes and a quick visual QA pass on the six pages to confirm ad behavior matches the documented expectations (CMP, hide-ads, CLS, themes).
+
+### 2025-11-18 05:23 CET - Manual - Phase2 Track 3 ad slots (initial wiring)
+- **Mode:** manual
+- **Branch:** `feat/phase2-ads-light`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Added a single unobtrusive, theme-aware ad slot (.ad-slot) to index.html, tools/index.html, and the four core tool shells (DLF, Sitemap Delta, Wayback Fixer, Converter), each wrapping one responsive AdSense unit.
+  - Styled .ad-slot in styles/site.css using existing tokens (panel, border, text) with a reserved min-height to reduce CLS and hide slots when html.ads-hidden is set via the tu-ads-hidden toggle.
+  - Slots rely on the existing Funding Choices CMP + adsense-monitor.js and the already-present AdSense script tags; each slot calls adsbygoogle.push({}) inside a try/catch so ads only render when allowed.
+- **Evidence:** styles/site.css
+- **Follow-ups:**
+  - Preview and prod smokes should visually verify ad-slot placement, CMP behavior, and that toggling tu-ads-hidden hides .ad-slot without impacting tool UX.
+
+### 2025-11-18 05:11 CET - Manual - Phase2 Track 2 downloads + RTF smoke wiring
+- **Mode:** manual
+- **Branch:** `feat/phase2-ads-light`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Normalized converter result downloads so any remaining data: URLs are decoded client-side and downloaded via Blob-based flow using window.tuDownloadBlob.
+  - Extended scripts/smoke_convert_preview.mjs with an md_rtf case that exercises the standalone RTF path and writes .rtf artifacts under artifacts/converter-rtf-fix/<YYYYMMDD>/ when PREVIEW_URL is set.
+  - Attempted to run the converter smoke, but PREVIEW_URL is not configured in this shell so the script skipped API calls (code paths are still validated).
+- **Evidence:** docs/PHASE2_AUTO_STATUS.md
+- **Follow-ups:**
+  - Run scripts/smoke_convert_preview.mjs with PREVIEW_URL set for this branch to materialize fresh md_rtf artifacts under artifacts/converter-rtf-fix/<date>/ and spot-check the RTF in TextEdit/Word.
+
+### 2025-11-18 04:59 CET - Manual - Phase2 nightly status checkpoint
+- **Mode:** manual
+- **Branch:** `feat/phase2-ads-light`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Updated docs/PHASE2_AUTO_STATUS.md with Track 1 completion and partial Track 2 (downloads + MD→RTF) status.
+  - Recorded which core tool files have been touched so far in Phase 2 to make future pickups easier.
+- **Evidence:** docs/PHASE2_AUTO_STATUS.md
+- **Follow-ups:**
+  - Continue Track 2: normalize converter downloads + add MD→RTF smoke, then proceed to ads/light-mode/smokes tracks.
+
+### 2025-11-18 04:24 CET - Manual - Phase2 progress UX track
+- **Mode:** manual
+- **Branch:** `feat/phase2-ads-light`
+- **Summary:**
+  - Added shared .progress-banner styles in styles/site.css and wired consistent progress/status areas with role=status and aria-live=polite across Dead Link Finder, Sitemap Delta, Wayback Fixer, and Converter.
+  - Introduced per-tool isBusy flags and updated keyboard shortcuts so Cmd/Ctrl+Enter and export keys do not fire while inputs/selects are focused or while a tool is running.
+- **Evidence:** docs/PHASE2_AUTO_STATUS.md
+- **Follow-ups:**
+  - Proceed to Track 2 (Blob-based downloads + MD→RTF smoke) on feat/phase2-ads-light.
+
+### 2025-11-18 04:15 CET - Manual - Phase2 Auto status checkpoint
+- **Mode:** manual
+- **Branch:** `feat/phase2-ads-light`
+- **Summary:**
+  - Created docs/PHASE2_AUTO_STATUS.md as a lightweight Phase 2 Auto status file summarizing tracks (progress UX, Blob downloads, ads/light, smokes/docs) and current snapshot.
+  - This checkpoint file will be updated as Phase 2 tracks land so agents can quickly see what is implemented, in progress, and still planned.
+- **Evidence:** docs/PHASE2_AUTO_STATUS.md
+- **Follow-ups:**
+  - Update PHASE2_AUTO_STATUS.md as Phase 2 work (progress UX, downloads, ads/light, smokes/docs) lands on feature branches.
+
+### 2025-11-18 04:05 CET - Manual - refine logging policy
+- **Mode:** manual
+- **Branch:** `main`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - AGENTS.md: switch to 'log only on material changes'; remove per-turn requirement; add decision checklist and examples
+  - No code behavior changes; docs-only policy clarification to reduce log spam
+- **Evidence:** artifacts/policy/20251118/AGENTS_md_change.txt
+- **Follow-ups:**
+  - Align other docs that still suggest per-run logging (AGENT_ASSISTED_PROMPTS.md:25; historical mention in AGENT_RUN_LOG.md).
+
+### 2025-11-18 03:57 CET - Manual - merge PR6 converter RTF fix
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Merged PR #43 (PR6: Fix converter RTF output) into main at 4e0ae04, adding pandoc --standalone for RTF in _render_markdown_target so MD→RTF emits a full \rtf1 document.
+  - Pulled the updated AGENT_RUN_LOG, AGENT_TASK_CHECKLIST, and tool_desc_converter.md entries from PR6 so docs and change log match the new RTF behavior.
+- **Evidence:** artifacts/pr6-merge/20251118/summary.txt
+- **Follow-ups:**
+  - Run converter MD→RTF smokes from /tools/text-converter and attach fresh RTF artifacts under artifacts/converter-rtf-fix/.
 
 ### 2025-11-16 15:17 CET - Manual - PR6 converter RTF output correctness
 - **Mode:** manual
