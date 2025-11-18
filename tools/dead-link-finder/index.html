@@ -445,6 +445,7 @@
     let meta = null;
     let lastRequestPayload = null;
     let isBusy = false;
+    let requestCounter = 0;
 
     const DEMO_TARGETS = [
       'https://example.com/',
@@ -934,6 +935,7 @@
       syncStatusCopyAvailability();
       runBtn.disabled = true;
       isBusy = true;
+      const thisRequest = ++requestCounter;
       let timeoutId = null;
       let controller = null;
       try {
@@ -1003,6 +1005,12 @@
             clearTimeout(timeoutId);
             timeoutId = null;
           }
+        }
+
+        // Ignore stale responses if user clicked Run again
+        if (thisRequest !== requestCounter) {
+          console.log('Ignoring stale DLF response');
+          return;
         }
 
         lastResults = Array.isArray(data.rows) ? data.rows : [];
