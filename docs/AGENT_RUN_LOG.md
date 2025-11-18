@@ -216,6 +216,17 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-16 15:17 CET - Manual - PR6 converter RTF output correctness
+- **Mode:** manual
+- **Branch:** `feature/pr4-tool-ux`
+- **Summary:**
+  - Added pandoc --standalone for RTF in _render_markdown_target so MD→RTF emits a full \rtf1 document instead of paragraph fragments.
+  - Validated pypandoc rtf output with and without --standalone to confirm header and full TinyUtils demo text are present.
+- **Evidence:** artifacts/converter-rtf-fix/20251116/
+- **Follow-ups:**
+  - Capture after-fix RTF artifact and UI-based MD→RTF run via /tools/text-converter once automation allows writing artifacts from code.
+
+### 2025-11-16 06:52 CET - Manual - PR5 smokes
 ### 2025-11-18 01:43 CET - Manual - merge PR45 per-tool preferences
 - **Mode:** manual
 - **Branch:** `main`

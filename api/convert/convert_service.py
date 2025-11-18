@@ -831,6 +831,8 @@ def _render_markdown_target(cleaned_path: Path, target: str, *, logs: Optional[L
         if target == "txt":
             # For plain text, preserve structure better
             extra_args.extend(["--columns=1000"])
+        if target == "rtf":
+            extra_args.append("--standalone")
 
         rendered = pypandoc.convert_file(
             str(cleaned_path),
