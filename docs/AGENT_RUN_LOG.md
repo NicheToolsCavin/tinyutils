@@ -216,6 +216,25 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-18 01:16 CET - Manual - confirm PR44 theme toggle merged
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Confirmed PR44 (phase3/pr11-theme-toggle) is already merged into main at commit 3da95da, with global light/dark theme toggle wiring present on / and all tools and healthy preview_smoke.mjs results under automation bypass.
+  - No additional code changes were required in this run; only branch sync, preview_smoke verification against the PR44 preview, and a sanity check that theme-toggle.js and header buttons are wired consistently across shells.
+- **Evidence:** tinyutils/artifacts/phase3-pr11-theme-toggle/20251116/
+- **Follow-ups:**
+
+### 2025-11-18 01:09 CET - Manual - merge PR47 DLF CSV refactor
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Merged PR47 (phase3/pr15-dlf-csv-refactor) into main after reconciling with latest main, updating the DLF CSV preview smoke to use the same Vercel automation-bypass strategy as preview_smoke.mjs, and confirming preview smokes returned 200 JSON for all pages/APIs.
+  - Validated /api/check still returns the expected JSON envelope and that DLF CSV export preserves legacy Full CSV shape while enabling CSV_VARIANTS and the client-side csvVariant selector; evidence includes DLF preview smoke logs under tinyutils/artifacts/dlf-csv/20251118/preview_smoke_dlf.log.
+- **Evidence:** tinyutils/artifacts/dlf-csv/20251118/preview_smoke_dlf.log
+- **Follow-ups:**
+  - Consider expanding smoke_dlf_preview.mjs to materialize full/errors_only CSV artifacts in a follow-up PR.
+
 ### 2025-11-18 00:30 CET - Manual - PR conflict status check (26/28/29/47)
 - **Mode:** manual
 - **Branch:** `main`
