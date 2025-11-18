@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en" data-theme="dark">
-<head>
+  <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Document Converter — TinyUtils</title>
@@ -14,6 +14,7 @@
   <meta property="og:image" content="/public/og.png">
   <meta name="twitter:card" content="summary_large_image">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3079281180008443" crossorigin="anonymous"></script>
+  <script src="/scripts/storage-utils.js"></script>
   <script src="/scripts/theme-toggle.js"></script>
   <link rel="stylesheet" href="/public/styles.css">
   <link rel="stylesheet" href="/styles/site.css">
@@ -347,28 +348,32 @@
       mdDialectRow.style.opacity = mdOn ? '1' : '0.5';
     }
 
-    // Persistence helpers
-    const LS_SINGLE = 'tu_conv_single_target';
-    const LS_MULTI = 'tu_conv_multi_on';
-    const LS_DIALECT = 'tu_conv_md_dialect';
-
+    // Persistence helpers (per-tool prefs via TinyUtilsStorage)
     function restorePrefs() {
-      try {
-        const s = localStorage.getItem(LS_SINGLE);
-        if (s) toSingle.value = s;
-        const m = localStorage.getItem(LS_MULTI) === '1';
-        setAdvanced(m);
-        const d = localStorage.getItem(LS_DIALECT);
-        if (d) mdDialectSel.value = d;
-      } catch {}
+      if (!window.TinyUtilsStorage) return;
+      const prefs = window.TinyUtilsStorage.loadPrefs('converter');
+      if (!prefs || typeof prefs !== 'object') return;
+      if (prefs.toSingle && toSingle) toSingle.value = prefs.toSingle;
+      if (typeof prefs.advanced === 'boolean') setAdvanced(prefs.advanced);
+      if (prefs.mdDialect && mdDialectSel) mdDialectSel.value = prefs.mdDialect;
+      if (typeof prefs.fromFormat === 'string' && fromSelect) fromSelect.value = prefs.fromFormat;
+      if (typeof prefs.optAcceptTracked === 'boolean' && optAcceptTracked) optAcceptTracked.checked = prefs.optAcceptTracked;
+      if (typeof prefs.optExtractMedia === 'boolean' && optExtractMedia) optExtractMedia.checked = prefs.optExtractMedia;
+      if (typeof prefs.optRemoveZW === 'boolean' && optRemoveZW) optRemoveZW.checked = prefs.optRemoveZW;
     }
 
     function persistPrefs() {
-      try {
-        localStorage.setItem(LS_SINGLE, toSingle.value);
-        localStorage.setItem(LS_MULTI, multiTargets.style.display === '' ? '1' : '0');
-        localStorage.setItem(LS_DIALECT, mdDialectSel.value);
-      } catch {}
+      if (!window.TinyUtilsStorage) return;
+      const prefs = {
+        toSingle: toSingle ? toSingle.value : 'md',
+        advanced: multiTargets ? multiTargets.style.display === '' : false,
+        mdDialect: mdDialectSel ? mdDialectSel.value : '',
+        fromFormat: fromSelect ? fromSelect.value : 'auto',
+        optAcceptTracked: optAcceptTracked ? !!optAcceptTracked.checked : true,
+        optExtractMedia: optExtractMedia ? !!optExtractMedia.checked : false,
+        optRemoveZW: optRemoveZW ? !!optRemoveZW.checked : true
+      };
+      window.TinyUtilsStorage.savePrefs('converter', prefs);
     }
 
     function setAdvanced(on) {
