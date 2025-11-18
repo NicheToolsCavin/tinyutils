@@ -217,6 +217,16 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-18 21:45 CET - Manual - converter race guard + progress theme
+- **Mode:** manual
+- **Branch:** `feat/phase2-ads-light`
+- **Summary:**
+  - Hardened /tools/text-converter/ front-end so only the latest request (requestCounter) can surface errors or reset isBusy/buttons, preventing stale responses from overriding newer runs.
+  - Introduced a theme-aware --progress-bg token in styles/site.css and wired the shared .progress-banner progress styles to use it, improving progress bar visibility in light mode.
+  - Updated tool_desc_converter.md with a 2025-11-18 entry describing the converter race fix and theme-aware progress bar behavior.
+- **Evidence:** artifacts/converter-race-guard/20251118/
+- **Follow-ups:**
+
 ### 2025-11-18 21:18 CET - Manual - UX Transformation Phase Complete + AdSense Setup
 - **Mode:** manual
 - **Branch:** `feat/phase2-ads-light`
