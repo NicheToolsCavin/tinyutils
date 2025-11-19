@@ -24,6 +24,7 @@ except Exception:  # pragma: no cover
 
 # Use relative imports since we're in api/convert/ directory
 from .._lib import pandoc_runner
+from .._lib.html_utils import sanitize_html_for_pandoc
 from .._lib.manifests import build_snippets, collect_headings, media_manifest
 from .._lib.text_clean import normalise_markdown
 from .._lib.utils import ensure_within_limits, generate_job_id, job_workspace
@@ -60,8 +61,6 @@ _CACHE: "OrderedDict[str, ConversionResult]" = OrderedDict()
 
 _LOGGER = logging.getLogger(__name__)
 
-_DATA_URL_RE = re.compile(r'src="data:([^" ]+)"')
-
 HEADING_SIZE_THRESHOLDS: Tuple[Tuple[float, int], ...] = (
     (18.0, 1),
     (16.0, 2),
@@ -73,25 +72,6 @@ MAX_HEADING_BLOCK_LENGTH = 120
 def _is_preview_env() -> bool:
     """Check if running in Vercel preview environment."""
     return os.getenv("VERCEL_ENV") == "preview"
-
-
-def _sanitize_html_for_pandoc(html_text: str) -> str:
-    """Best-effort sanitisation for HTML before pandoc.
-
-    Valid data: URLs are left as-is. Obviously malformed data URLs have their
-    src cleared and a marker attribute added so they do not cause pandoc
-    parse errors while still leaving useful context in the document.
-    """
-
-    def _replace(match: re.Match[str]) -> str:
-        value = match.group(1)
-        # Consider it valid only if it looks like a data URL with base64
-        # payload. This is intentionally strict.
-        if ";base64," in value:
-            return f'src="data:{value}"'
-        return 'src="" data-url-removed="invalid-data-url"'
-
-    return _DATA_URL_RE.sub(_replace, html_text)
 
 
 # -------- Layout-aware PDF → Markdown preprocessor (pdfminer.six) --------
@@ -567,7 +547,7 @@ def convert_one(
                     except Exception:
                         html_text = ""
                     if html_text:
-                        html_text = _sanitize_html_for_pandoc(html_text)
+                        html_text = sanitize_html_for_pandoc(html_text)
                         source_for_pandoc.write_text(html_text, "utf-8")
 
                 pandoc_runner.convert_to_markdown(
