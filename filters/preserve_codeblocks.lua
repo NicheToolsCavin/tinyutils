@@ -45,17 +45,24 @@ function Para(el)
     table.insert(classes, start_fence)
   end
 
-  return pandoc.CodeBlock(body, {class = classes[1]})
+  -- Guard against empty classes array
+  local class_attr = #classes > 0 and classes[1] or nil
+  return pandoc.CodeBlock(body, {class = class_attr})
 end
 
 function CodeBlock(el)
   -- Always emit fenced blocks so roundtrips keep a stable representation,
   -- regardless of how the writer would normally render CodeBlock nodes.
+
+  -- Guard against nil or empty classes array
   local info = ""
-  if el.classes and #el.classes > 0 then
+  if el.classes and type(el.classes) == "table" and #el.classes > 0 then
     info = el.classes[1]
   end
+
+  -- Guard against nil text
+  local text = el.text or ""
   local fence = "```" .. info
-  local fenced = fence .. "\n" .. el.text .. "\n```\n"
+  local fenced = fence .. "\n" .. text .. "\n```\n"
   return pandoc.RawBlock("markdown", fenced)
 end

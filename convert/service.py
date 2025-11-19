@@ -16,6 +16,7 @@ from typing import Any, Iterable, List, Optional, Sequence
 
 # Import from api._lib (sys.path fixed in convert/__init__.py to make this work)
 from api._lib import pandoc_runner
+from api._lib.html_utils import sanitize_html_for_pandoc
 from api._lib.manifests import build_snippets, collect_headings, media_manifest
 from api._lib.text_clean import normalise_markdown
 from api._lib.utils import ensure_within_limits, generate_job_id, job_workspace
@@ -47,28 +48,6 @@ _CACHE_LOCK = threading.Lock()
 _CACHE: "OrderedDict[str, ConversionResult]" = OrderedDict()
 
 _LOGGER = logging.getLogger(__name__)
-
-
-_DATA_URL_RE = re.compile(r'src="data:([^" ]+)"')
-
-
-def _sanitize_html_for_pandoc(html_text: str) -> str:
-    """Best-effort sanitisation for HTML before pandoc.
-
-    Valid data: URLs are left as-is. Obviously malformed data URLs have their
-    src cleared and a marker attribute added so they do not cause pandoc
-    parse errors while still leaving useful context in the document.
-    """
-
-    def _replace(match: re.Match[str]) -> str:
-        value = match.group(1)
-        # Consider it valid only if it looks like a data URL with base64
-        # payload. This is intentionally strict.
-        if ";base64," in value:
-            return f'src="data:{value}"'
-        return 'src="" data-url-removed="invalid-data-url"'
-
-    return _DATA_URL_RE.sub(_replace, html_text)
 
 
 def convert_one(
@@ -150,7 +129,7 @@ def convert_one(
                 except Exception:
                     text = ""
                 if text:
-                    text = _sanitize_html_for_pandoc(text)
+                    text = sanitize_html_for_pandoc(text)
                     input_path.write_text(text, "utf-8")
 
             pandoc_runner.convert_to_markdown(

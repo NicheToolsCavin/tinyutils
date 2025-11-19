@@ -61,6 +61,12 @@ test('converter fidelity – tech_doc.docx metrics stable', async () => {
 
   const golden = loadGoldenMetrics('tech_doc_docx.metrics.json');
   assert.deepStrictEqual(summary.metrics, golden);
+
+  // Spot-check: verify structure through metrics (not just counts)
+  assert.ok(summary.metrics.codeBlocks.total > 0, 'should have code blocks');
+  assert.ok(summary.metrics.lists.ordered > 0, 'should have ordered lists');
+  assert.ok(summary.metrics.lists.bullet > 0 || summary.metrics.lists.ordered > 1,
+            'should have multiple list structures');
 });
 
 test('converter fidelity – lists.docx metrics stable', async () => {
@@ -72,6 +78,13 @@ test('converter fidelity – lists.docx metrics stable', async () => {
 
   const golden = loadGoldenMetrics('lists_docx.metrics.json');
   assert.deepStrictEqual(summary.metrics, golden);
+
+  // Spot-check: verify nested list structure through depth metrics
+  assert.ok(summary.metrics.lists.maxDepth >= 2, 'should have nested lists (depth >= 2)');
+  assert.ok(summary.metrics.lists.ordered > 0, 'should have ordered lists');
+  assert.ok(summary.metrics.lists.bullet > 0, 'should have bullet lists');
+  assert.ok(summary.metrics.lists.ordered + summary.metrics.lists.bullet >= 3,
+            'should have multiple list structures');
 });
 
 test('converter fidelity – images.docx metrics stable', async () => {
@@ -83,6 +96,10 @@ test('converter fidelity – images.docx metrics stable', async () => {
 
   const golden = loadGoldenMetrics('images_docx.metrics.json');
   assert.deepStrictEqual(summary.metrics, golden);
+
+  // Spot-check: verify image metrics structure exists (extraction may or may not find images)
+  assert.ok(typeof summary.metrics.images === 'object', 'should have images metrics object');
+  assert.ok(typeof summary.metrics.images.total === 'number', 'should have numeric image count');
 });
 
 test('converter fidelity – html_input.html metrics stable', async () => {
@@ -94,4 +111,11 @@ test('converter fidelity – html_input.html metrics stable', async () => {
 
   const golden = loadGoldenMetrics('html_input.metrics.json');
   assert.deepStrictEqual(summary.metrics, golden);
+
+  // Spot-check: verify HTML conversion preserved structures
+  assert.ok(summary.metrics.codeBlocks.total > 0, 'should preserve code blocks from <pre><code>');
+  assert.ok(summary.metrics.lists.ordered > 0 || summary.metrics.lists.bullet > 0,
+            'should preserve lists from HTML');
+  // Verify data URL sanitization didn't crash conversion (no error field)
+  assert.ok(!summary.error, 'should not have conversion errors from data URLs');
 });
