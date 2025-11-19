@@ -6,6 +6,7 @@ import html
 import json
 import logging
 import os
+import re
 import threading
 import time
 import zipfile
@@ -46,6 +47,28 @@ _CACHE_LOCK = threading.Lock()
 _CACHE: "OrderedDict[str, ConversionResult]" = OrderedDict()
 
 _LOGGER = logging.getLogger(__name__)
+
+
+_DATA_URL_RE = re.compile(r'src="data:([^" ]+)"')
+
+
+def _sanitize_html_for_pandoc(html_text: str) -> str:
+    """Best-effort sanitisation for HTML before pandoc.
+
+    Valid data: URLs are left as-is. Obviously malformed data URLs have their
+    src cleared and a marker attribute added so they do not cause pandoc
+    parse errors while still leaving useful context in the document.
+    """
+
+    def _replace(match: re.Match[str]) -> str:
+        value = match.group(1)
+        # Consider it valid only if it looks like a data URL with base64
+        # payload. This is intentionally strict.
+        if ";base64," in value:
+            return f'src="data:{value}"'
+        return 'src="" data-url-removed="invalid-data-url"'
+
+    return _DATA_URL_RE.sub(_replace, html_text)
 
 
 def convert_one(
@@ -109,7 +132,26 @@ def convert_one(
             filtered_md = workspace / "filtered.md"
             cleaned_md = workspace / "cleaned.md"
             media_dir = workspace / "media"
-            extract_dir: Optional[Path] = media_dir if opts.extract_media else None
+            # For DOCX/ODT inputs we always extract media so downstream
+            # consumers can access embedded images, even when the caller did
+            # not explicitly request it.
+            extract_dir: Optional[Path]
+            if opts.extract_media or (from_format in {"docx", "odt"}):
+                extract_dir = media_dir
+            else:
+                extract_dir = None
+
+            # Light HTML sanitisation to avoid malformed data: URLs causing
+            # pandoc errors. This is deliberately conservative and only
+            # rewrites obviously invalid data URLs.
+            if from_format == "html":
+                try:
+                    text = input_path.read_text("utf-8")
+                except Exception:
+                    text = ""
+                if text:
+                    text = _sanitize_html_for_pandoc(text)
+                    input_path.write_text(text, "utf-8")
 
             pandoc_runner.convert_to_markdown(
                 source=input_path,
