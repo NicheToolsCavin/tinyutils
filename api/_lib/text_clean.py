@@ -6,7 +6,9 @@ import unicodedata
 from dataclasses import dataclass
 
 ZERO_WIDTH_RE = re.compile("[\u200B\u200C\u200D\uFEFF]")
-MULTI_BLANK_RE = re.compile(r"\n{3,}")
+# Be conservative when collapsing blank lines so we do not accidentally
+# disturb list or code-block structure. Only trim very long runs.
+MULTI_BLANK_RE = re.compile(r"\n{4,}")
 
 
 @dataclass

@@ -60,6 +60,8 @@ _CACHE: "OrderedDict[str, ConversionResult]" = OrderedDict()
 
 _LOGGER = logging.getLogger(__name__)
 
+_DATA_URL_RE = re.compile(r'src="data:([^" ]+)"')
+
 HEADING_SIZE_THRESHOLDS: Tuple[Tuple[float, int], ...] = (
     (18.0, 1),
     (16.0, 2),
@@ -71,6 +73,25 @@ MAX_HEADING_BLOCK_LENGTH = 120
 def _is_preview_env() -> bool:
     """Check if running in Vercel preview environment."""
     return os.getenv("VERCEL_ENV") == "preview"
+
+
+def _sanitize_html_for_pandoc(html_text: str) -> str:
+    """Best-effort sanitisation for HTML before pandoc.
+
+    Valid data: URLs are left as-is. Obviously malformed data URLs have their
+    src cleared and a marker attribute added so they do not cause pandoc
+    parse errors while still leaving useful context in the document.
+    """
+
+    def _replace(match: re.Match[str]) -> str:
+        value = match.group(1)
+        # Consider it valid only if it looks like a data URL with base64
+        # payload. This is intentionally strict.
+        if ";base64," in value:
+            return f'src="data:{value}"'
+        return 'src="" data-url-removed="invalid-data-url"'
+
+    return _DATA_URL_RE.sub(_replace, html_text)
 
 
 # -------- Layout-aware PDF → Markdown preprocessor (pdfminer.six) --------
@@ -448,9 +469,15 @@ def convert_one(
             filtered_md = workspace / "filtered.md"
             cleaned_md = workspace / "cleaned.md"
             media_dir = workspace / "media"
-            extract_dir: Optional[Path] = media_dir if opts.extract_media else None
-            if extract_dir:
+            # For DOCX/ODT inputs we always extract media so downstream
+            # consumers can access embedded images, even when the caller did
+            # not explicitly request it.
+            extract_dir: Optional[Path]
+            if opts.extract_media or (from_format in {"docx", "odt"}):
+                extract_dir = media_dir
                 extract_dir.mkdir(parents=True, exist_ok=True)
+            else:
+                extract_dir = None
 
             # Use the adjusted_from for the actual conversion (post-detection)
             if adjusted_from != from_format:
@@ -532,6 +559,16 @@ def convert_one(
                 # HTML conversion uses specialized Lua filters to convert semantic elements
                 if from_format == "html":
                     logs.append("html_semantic_filter=enabled")
+                    # Light HTML sanitisation to avoid malformed data: URLs
+                    # causing pandoc errors. This mirrors the library
+                    # converter behavior and is deliberately conservative.
+                    try:
+                        html_text = source_for_pandoc.read_text("utf-8")
+                    except Exception:
+                        html_text = ""
+                    if html_text:
+                        html_text = _sanitize_html_for_pandoc(html_text)
+                        source_for_pandoc.write_text(html_text, "utf-8")
 
                 pandoc_runner.convert_to_markdown(
                     source=source_for_pandoc,
