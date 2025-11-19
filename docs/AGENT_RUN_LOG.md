@@ -217,6 +217,18 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-19 22:24 CET - Manual - ads/robots checks + minor hardening
+- **Mode:** manual
+- **Branch:** `feat/phase2-ads-light`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Verified ads.txt and robots.txt exist and are clean; cannot run network due to sandbox
+  - robots.txt: switch sitemap to absolute https URL
+  - vercel.json: add explicit headers for /ads.txt and /robots.txt (text/plain + caching)
+- **Evidence:** artifacts/ads-robots/20251119/checklist.txt
+- **Follow-ups:**
+  - Run provided curl checks for tinyutils.net and www.tinyutils.net over HTTP/HTTPS; report any mismatches
+
 ### 2025-11-18 21:18 CET - Manual - UX Transformation Phase Complete + AdSense Setup
 - **Mode:** manual
 - **Branch:** `feat/phase2-ads-light`
