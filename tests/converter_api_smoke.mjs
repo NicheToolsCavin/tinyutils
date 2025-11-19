@@ -11,6 +11,19 @@ const __dirname = dirname(__filename);
 // effectively skipped to avoid breaking environments without a running API.
 const API_BASE = process.env.CONVERTER_API_BASE_URL;
 
+// Vercel bypass token for preview environments
+const BYPASS_TOKEN = process.env.VERCEL_AUTOMATION_BYPASS_SECRET || process.env.PREVIEW_SECRET;
+
+function buildHeaders() {
+  const headers = { 'content-type': 'application/json' };
+  if (BYPASS_TOKEN) {
+    headers['x-vercel-protection-bypass'] = BYPASS_TOKEN;
+    headers['x-vercel-set-bypass-cookie'] = 'true';
+    headers['Cookie'] = `vercel-protection-bypass=${BYPASS_TOKEN}`;
+  }
+  return headers;
+}
+
 function makeTextPayloadFromFixture(name, ext, fromFormat) {
   const fixturePath = join(__dirname, 'fixtures', 'converter', `${name}.${ext}`);
   const text = readFileSync(fixturePath, 'utf8');
@@ -39,7 +52,7 @@ test('api/convert smoke – tech_doc markdown', async (t) => {
 
   const res = await fetch(url, {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: buildHeaders(),
     body: JSON.stringify(payload),
   });
   assert.strictEqual(res.headers.get('content-type')?.startsWith('application/json'), true);
@@ -67,7 +80,7 @@ test('api/convert smoke – html_input.html', async (t) => {
 
   const res = await fetch(url, {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: buildHeaders(),
     body: JSON.stringify(payload),
   });
 
