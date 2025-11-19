@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>HTML Input Fidelity Test</title>
+  </head>
+  <body>
+    <h1>HTML Input Fidelity Test</h1>
+
+    <h2>Lists</h2>
+    <p><strong>Ordered:</strong></p>
+    <ol>
+      <li>First item</li>
+      <li>Second item with <strong>bold</strong></li>
+      <li>Third item with <em>italic</em></li>
+    </ol>
+
+    <p><strong>Unordered:</strong></p>
+    <ul>
+      <li>Bullet one</li>
+      <li>Bullet two
+        <ul>
+          <li>Nested bullet</li>
+          <li>Another nested</li>
+        </ul>
+      </li>
+      <li>Bullet three</li>
+    </ul>
+
+    <h2>Code blocks</h2>
+    <pre><code class="language-js">function hello() {
+  console.log('hello from HTML input');
+}
+</code></pre>
+
+    <pre><code>plain code block without language</code></pre>
+
+    <h2>Images and data URLs</h2>
+    <p>Valid data URL image (small transparent PNG):</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHwAHggJ/PchI7wAAAABJRU5ErkJggg==" alt="valid data url" />
+
+    <p>Intentionally malformed data URL image:</p>
+    <img src="data:image/png,this-is-not-base64" alt="invalid data url" />
+
+  </body>
+</html>
+

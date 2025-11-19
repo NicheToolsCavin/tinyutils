@@ -66,6 +66,7 @@ FILTERS = (
     "softbreak_to_space.lua",
     "strip_empty_spans.lua",
     "normalize_lists.lua",
+    "preserve_codeblocks.lua",
 )
 # HTML-specific filters for semantic element conversion
 HTML_FILTERS = (
