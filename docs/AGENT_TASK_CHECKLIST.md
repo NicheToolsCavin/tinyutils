@@ -13,7 +13,8 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 ## Active Tasks (Newest First)
 
 | Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
-| Verify ads.txt/robots.txt over HTTP+HTTPS and harden headers | manual-2025-11-19 CET | Completed | robots.txt sitemap now absolute; headers for ads/robots set. Evidence: artifacts/ads-robots/20251119/checklist.txt |
+| Wire TinyUtils global AdSense slot into manual .ad-slot placements | manual-2025-11-18 CET | Completed | ✅ Pointed all live .ad-slot placements (home, tools hub, DLF, Sitemap Delta, Wayback Fixer, Text Converter, keyword-density, meta-preview, public index) at data-ad-client=ca-pub-3079281180008443 and data-ad-slot=3664281983 while leaving ADSENSE_SETUP.md examples and *-old.html snapshots as docs. Evidence: artifacts/ads-config/20251118/. |
+| PR #48 follow-ups — converter race guard + theme-aware progress | manual-2025-11-18 CET | Completed | ✅ Addressed remaining PR #48 review items around converter race handling and light-mode progress visibility by gating UI updates on requestCounter and adding a theme-aware --progress-bg token. Commits: not yet created (local changes in styles/site.css and tools/text-converter/index.html). Evidence: artifacts/converter-race-guard/20251118/. |
 | Phase 2 UX Transformation - All pages + AdSense complete | manual-2025-11-18 Evening CET | Completed | ✅ Transformed all 6 major pages with stunning design (homepage, tools hub, Dead Link Finder, Sitemap Delta, Wayback Fixer, Document Converter). Implemented triple-threat card accent system, 4rem emoji icons, gradient titles, staggered animations. Complete AdSense setup (ads.txt + meta tags + scripts on all pages). Hid Contact page from navigation. Updated sitemap to production domain (tinyutils.net). Commits: f1639ff, c452ab5, 626604a, 9557d05, 8f3c949. Evidence: All smoke tests passing, zero breaking changes. |
 | Phase2 PR notes + consolidation | manual-2025-11-18 CET | Completed | ✅ Verified that Phase 2 track states in docs/PHASE2_AUTO_STATUS.md match the corresponding entries in docs/AGENT_TASK_CHECKLIST.md (Tracks 1–5 and Workstream A), and added docs/PHASE2_PR_NOTES.md as a concise, PR-ready summary of progress UX, Blob downloads + MD→RTF, ads/CMP, light-mode tokens, and smokes/docs, plus remaining preview/QA steps. Evidence: docs/PHASE2_AUTO_STATUS.md, docs/AGENT_TASK_CHECKLIST.md, docs/PHASE2_PR_NOTES.md. |
 | Phase2 local visual QA – dark/light themes | manual-2025-11-18 CET | In Progress | ✅ Local static server confirms that /, /tools/, and the four core tools serve correctly after Phase 2 changes. No obvious layout/contrast issues were identified from code/CSS review for .ad-slot placement, progress banners, or light-mode tokens; remaining work is a quick real-browser dark/light theme check on a preview to validate these visually. Evidence: styles/site.css, index.html, tools/*.html. |
@@ -107,7 +108,6 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 | _None recorded yet_ |  |  |
 
 ## Plan Updates
-- 2025-11-19 22:24 CET - Pending live verification due to sandbox; owner to run curl handoff and confirm.
 - 2025-11-18 04:05 CET - Logging policy clarified: log only when material changes occur; skip read-only exploration.
 - 2025-11-14 21:09 CET - Set workspace to write; benched teams-personal/teacher; reassigned agents; applied minimal diffs.
 - 2025-11-04 13:47 CET - Preview fence commit omitted deployment evidence; tracked under "Preview fence evidence + smoke".

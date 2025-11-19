@@ -585,6 +585,33 @@ No converter-specific logic changed, but the overall light theme now looks close
 Impact
 • Converter UI in light mode should feel more consistent and readable without affecting the behavior of `/api/convert` or any tool options. ✅
 
+### Major changes — 2025-11-18 23:59 CET (UTC+01:00) — Converter race guard + theme-aware progress
+
+Added
+• Theme-aware progress background token `--progress-bg` in `styles/site.css`, with dark-mode and light-mode values, used by the shared `.progress-banner progress` styles on converter and other tools.
+
+Modified
+• `/tools/text-converter/index.html` now treats the `requestCounter` as the single source of truth for the active conversion request: error messages and UI reset (buttons/`isBusy`) only apply when `thisRequest === requestCounter` so stale responses cannot override a newer run.
+• Progress bar CSS now uses `var(--progress-bg)` instead of a hard-coded `rgba(255,255,255,0.12)` so the bar remains visible and balanced in both dark and light themes.
+
+Fixed
+• Converter race condition and stale UI updates
+  - **Problem:** If a user clicked Convert twice quickly, the older request could still clear the busy state and update the message after a newer request had started, because cleanup and error handling did not check whether the response belonged to the latest run.
+  - **Root cause:** The `requestCounter` guard was only used to skip success-path rendering; `finally` always reset `isBusy` and buttons, and errors were surfaced unconditionally.
+  - **Fix:** Gate both error messaging and cleanup on `thisRequest === requestCounter`, so only the newest in-flight request is allowed to update the progress text or reset the UI.
+  - **Evidence:** Code inspection of the `runConvert` flow in `tools/text-converter/index.html` and manual reasoning through overlapping request scenarios; no API contract changes.
+
+Human-readable summary
+
+Previously, the converter kept track of how many times you clicked Convert, but it still let an older request "win" the race when finishing. If you fired off two conversions back-to-back, the first one could finish second and still reset the buttons and status message, even though you were really waiting on the second run.
+
+We tightened the guard rails so that only the most recent request is allowed to touch the UI: if an older request finally comes back, it quietly exits without changing the status or toggling the buttons. At the same time, the shared progress bar now uses a theme-aware background color token so it looks intentional and readable in both dark and light mode.
+
+Impact
+• Converter results and error messages now always correspond to the most recent Convert/Preview click, even if earlier requests finish later. ✅
+• The shared progress bar remains visible and aesthetically consistent in light mode as well as dark mode. ✅
+• No changes to `/api/convert` request/response shape; this is a client-side robustness and UX improvement only. ✅
+
 ### Major changes — 2025-11-12 CET (UTC+01:00)
 
 Added
