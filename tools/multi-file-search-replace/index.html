@@ -1,0 +1,1105 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-adsense-account" content="ca-pub-3079281180008443">
+  <title>Multi-file Search &amp; Replace — TinyUtils</title>
+  <script async src="https://fundingchoicesmessages.google.com/i/pub-3079281180008443?ers=1"></script>
+  <meta name="description" content="Bulk find and replace text or regex patterns across multiple files. Upload documents, preview diff-style changes, and download updated Markdown or plain text files.">
+  <link rel="canonical" href="/tools/multi-file-search-replace/">
+  <link rel="icon" href="/public/favicon.ico">
+  <meta property="og:title" content="Multi-file Search &amp; Replace — TinyUtils">
+  <meta property="og:description" content="Search and replace across many documents at once, with regex support and safe diff previews.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="/public/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3079281180008443" crossorigin="anonymous"></script>
+  <script src="/scripts/storage-utils.js"></script>
+  <script src="/scripts/download-utils.js"></script>
+  <script src="/scripts/theme-toggle.js"></script>
+  <link rel="stylesheet" href="/public/styles.css">
+  <link rel="stylesheet" href="/styles/site.css">
+  <script defer src="/scripts/consent.js"></script>
+  <script defer src="/scripts/adsense-monitor.js"></script>
+  <style>
+    main { padding-bottom: 48px; }
+
+    .tool-intro { position: relative; }
+
+    .tool-hero {
+      text-align: center;
+      padding: var(--space-12, 3rem) 0 var(--space-8, 2rem);
+      position: relative;
+    }
+
+    .tool-hero-icon {
+      font-size: 3.5rem;
+      display: block;
+      margin-bottom: var(--space-4, 1rem);
+    }
+
+    .tool-hero h1 {
+      font-size: var(--text-4xl, 2.5rem);
+      margin-bottom: var(--space-3, 0.75rem);
+    }
+
+    .tool-hero-subtitle {
+      max-width: 46rem;
+      margin: 0 auto var(--space-4, 1rem);
+      font-size: var(--text-lg, 1.05rem);
+      color: var(--muted, #97a3c2);
+    }
+
+    .cta {
+      font-size: 0.95rem;
+    }
+
+    .ad-slot {
+      margin: 0 auto var(--space-8, 2rem);
+      padding: var(--space-3, 0.75rem) 0;
+      border-top: 1px dashed var(--border-subtle, rgba(148, 163, 184, 0.5));
+      border-bottom: 1px dashed var(--border-subtle, rgba(148, 163, 184, 0.5));
+      text-align: center;
+    }
+
+    .ad-slot .ad-disclaimer {
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+      color: var(--muted, #97a3c2);
+    }
+
+    .tool-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+      gap: var(--space-6, 1.5rem);
+      margin-bottom: var(--space-8, 2rem);
+      align-items: flex-start;
+    }
+
+    @media (max-width: 900px) {
+      .tool-layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .card {
+      animation: fadeInUp 0.35s ease-out;
+    }
+
+    .card h2 {
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+    }
+
+    .card .help {
+      margin-top: 0;
+      margin-bottom: 0.75rem;
+      font-size: 0.9rem;
+      color: var(--muted, #97a3c2);
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      margin-top: 0.75rem;
+    }
+
+    .field-group label span.help-inline {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--muted, #97a3c2);
+    }
+
+    .field-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .field-row label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.9rem;
+    }
+
+    .field-row .pill {
+      padding: 0.15rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.5));
+      font-size: 0.8rem;
+    }
+
+    .actions-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+      margin-top: 1rem;
+    }
+
+    .actions-row button.primary {
+      background: var(--brand-500, #3b82f6);
+      color: #fff;
+      border: none;
+      padding: 0.6rem 1.25rem;
+      border-radius: 999px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .actions-row button.secondary {
+      background: transparent;
+      border-radius: 999px;
+      border: 1px solid var(--border-default, rgba(148, 163, 184, 0.7));
+      padding: 0.55rem 1.1rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .actions-row button[disabled] {
+      opacity: 0.6;
+      cursor: default;
+    }
+
+    .actions-row .hint {
+      font-size: 0.8rem;
+      color: var(--muted, #97a3c2);
+    }
+
+    .status-banner {
+      margin-top: 0.5rem;
+      min-height: 1.25rem;
+      font-size: 0.9rem;
+      color: var(--muted, #97a3c2);
+    }
+
+    .status-banner.error {
+      color: #f97373;
+    }
+
+    #errorBox[hidden] {
+      display: none;
+    }
+
+    .file-list {
+      margin-top: 0.75rem;
+      border-radius: var(--radius-lg, 0.75rem);
+      border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.5));
+      max-height: 260px;
+      overflow: auto;
+    }
+
+    .file-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.75rem;
+      align-items: center;
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.4));
+    }
+
+    .file-row:last-child {
+      border-bottom: none;
+    }
+
+    .file-row-main {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      min-width: 0;
+    }
+
+    .file-name {
+      font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);
+      font-size: 0.9rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .file-meta {
+      font-size: 0.8rem;
+      color: var(--muted, #97a3c2);
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      padding: 0.1rem 0.5rem;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.5));
+    }
+
+    .badge-muted {
+      color: var(--muted, #97a3c2);
+    }
+
+    .file-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .include-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.8rem;
+      white-space: nowrap;
+    }
+
+    .include-toggle input {
+      margin: 0;
+    }
+
+    .link-button {
+      background: none;
+      border: none;
+      padding: 0.15rem 0.35rem;
+      font-size: 0.85rem;
+      color: var(--brand-500, #3b82f6);
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .link-button:disabled {
+      opacity: 0.6;
+      cursor: default;
+      text-decoration: none;
+    }
+
+    .results-summary {
+      margin-top: 0.75rem;
+      font-size: 0.9rem;
+      color: var(--muted, #97a3c2);
+    }
+
+    .results-summary.hidden,
+    .empty-state.hidden,
+    .diff-pane.hidden {
+      display: none;
+    }
+
+    .diff-pane {
+      margin-top: 0.75rem;
+      border-radius: var(--radius-lg, 0.75rem);
+      border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.5));
+      background: var(--surface-subtle, rgba(15, 23, 42, 0.6));
+      max-height: 380px;
+      overflow: auto;
+      font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);
+      font-size: 0.85rem;
+    }
+
+    .diff-header {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.4rem 0.75rem;
+      border-bottom: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.5));
+      background: var(--surface-base, #0b1020);
+    }
+
+    .diff-title {
+      font-weight: 500;
+    }
+
+    .diff-meta {
+      font-size: 0.8rem;
+      color: var(--muted, #97a3c2);
+    }
+
+    .diff-body {
+      padding: 0.4rem 0.75rem 0.5rem;
+    }
+
+    .diff-line {
+      white-space: pre;
+      display: block;
+      padding: 0.05rem 0.25rem;
+    }
+
+    .diff-line-add {
+      background: rgba(34, 197, 94, 0.08);
+      color: #4ade80;
+    }
+
+    .diff-line-remove {
+      background: rgba(239, 68, 68, 0.1);
+      color: #fca5a5;
+    }
+
+    .diff-line-context {
+      color: var(--muted, #97a3c2);
+    }
+
+    .diff-lineno {
+      display: inline-block;
+      width: 7ch;
+      margin-right: 0.5rem;
+      opacity: 0.7;
+    }
+
+    .faq,
+    .how-to,
+    .use-cases {
+      margin: var(--space-8, 2rem) auto;
+      padding: 0 var(--space-4, 1rem);
+    }
+
+    .faq h2,
+    .how-to h2,
+    .use-cases h2 {
+      margin-top: 0;
+    }
+
+    .faq dt {
+      font-weight: 600;
+      margin-top: 0.75rem;
+    }
+
+    .faq dd {
+      margin: 0.25rem 0 0.5rem 0;
+      color: var(--muted, #97a3c2);
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .card,
+      .tool-hero-icon,
+      .tool-hero h1,
+      .tool-hero-subtitle {
+        animation: none !important;
+      }
+    }
+  </style>
+  </head>
+  <body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+  <header class="site-header">
+    <div class="container row between center">
+      <a class="brand" href="/">TinyUtils</a>
+      <div class="row center">
+        <nav class="nav">
+          <a class="active" href="/tools/">Tools</a>
+          <a href="/about.html">About</a>
+          <a href="/cookies.html">Cookie &amp; privacy settings</a>
+          <a href="/privacy.html">Privacy</a>
+          <a href="/terms.html">Terms</a>
+        </nav>
+        <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false">Theme</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="container tool-intro">
+      <div class="tool-hero">
+        <span class="tool-hero-icon" aria-hidden="true">🪄</span>
+        <h1>Multi-file Search &amp; Replace</h1>
+        <p class="tool-hero-subtitle">
+          Bulk find and replace across Markdown, Word, PDF, and more. Upload files or zips, preview safe diff-style changes, then download updated documents.
+        </p>
+        <p><a class="cta" href="/tools/">← Back to all tools</a></p>
+      </div>
+
+      <section class="ad-slot" aria-label="Sponsored">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-3079281180008443"
+             data-ad-slot="3664281983"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>try{(adsbygoogle = window.adsbygoogle || []).push({});}catch(e){}</script>
+        <p class="ad-disclaimer">Ads help keep TinyUtils fast and free. Tools continue to work even if ads are hidden.</p>
+      </section>
+
+      <section class="tool-layout" aria-label="Multi-file search and replace tool">
+        <section class="card" aria-labelledby="inputHeading">
+          <h2 id="inputHeading">Files &amp; search pattern</h2>
+          <p class="help">
+            Upload one or more files (or zipped folders), then choose a text or regular expression to search for and an optional replacement.
+          </p>
+
+          <div class="field-group">
+            <label for="fileInput">Upload files
+              <span class="help-inline">You can select multiple documents and ZIP archives. Most common formats are supported via the converter.</span>
+            </label>
+            <input id="fileInput" type="file" multiple>
+          </div>
+
+          <div class="field-group">
+            <label for="searchInput">Search pattern
+              <span class="help-inline">Required. This is the text or regex pattern to look for across all converted files.</span>
+            </label>
+            <input id="searchInput" class="input" type="text" placeholder="e.g. Acme Inc or foo\\d+">
+          </div>
+
+          <div class="field-group">
+            <label for="replaceInput">Replacement text
+              <span class="help-inline">Optional. Leave blank if you want to just count or highlight matches without changing files.</span>
+            </label>
+            <textarea id="replaceInput" class="texta" rows="3" placeholder="e.g. Acme Co."></textarea>
+          </div>
+
+          <div class="field-group" aria-labelledby="modeLegend">
+            <div id="modeLegend" class="field-row">
+              <strong>Mode</strong>
+              <span class="pill">Plain text or regex</span>
+            </div>
+            <div class="field-row">
+              <label>
+                <input type="radio" name="mode" value="text" id="modeText" checked>
+                Plain text
+              </label>
+              <label>
+                <input type="radio" name="mode" value="regex" id="modeRegex">
+                Regular expression
+              </label>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <div class="field-row">
+              <label>
+                <input type="checkbox" id="caseSensitive">
+                Case-sensitive
+              </label>
+              <label>
+                <input type="checkbox" id="globalFlag" checked>
+                Replace all matches (global)
+              </label>
+              <label>
+                <input type="checkbox" id="multilineFlag">
+                Multiline (^ and $ match line boundaries)
+              </label>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <div class="field-row" aria-labelledby="exportLegend">
+              <strong id="exportLegend">Export format</strong>
+            </div>
+            <div class="field-row">
+              <label>
+                <input type="radio" name="exportFormat" value="md" id="exportMd" checked>
+                Markdown (.md)
+              </label>
+              <label>
+                <input type="radio" name="exportFormat" value="txt" id="exportTxt">
+                Plain text (.txt)
+              </label>
+            </div>
+          </div>
+
+          <div class="actions-row">
+            <button type="button" class="primary" id="previewButton">Preview changes</button>
+            <button type="button" class="secondary" id="downloadButton">Download updated files</button>
+            <span class="hint">Shortcut: <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>Enter</kbd> to preview.</span>
+          </div>
+
+          <div id="status" class="status-banner" aria-live="polite">
+            Ready — upload files and enter a search pattern.
+          </div>
+          <div id="errorBox" class="status-banner error" role="alert" hidden>
+            <span id="errorMessage"></span>
+          </div>
+        </section>
+
+        <section class="card" aria-labelledby="resultsHeading">
+          <h2 id="resultsHeading">Results &amp; diff viewer</h2>
+          <p class="help">
+            After you run a preview, you&apos;ll see which files changed and a unified diff for each one. Use the checkboxes to choose which changed files to include in the download.
+          </p>
+
+          <p id="resultsSummary" class="results-summary hidden"></p>
+          <p id="resultsEmpty" class="empty-state">
+            No results yet — choose files and click <strong>Preview changes</strong> to see matches.
+          </p>
+
+          <div id="fileList" class="file-list" aria-label="Per-file search results"></div>
+
+          <div id="diffPane" class="diff-pane hidden" aria-label="Selected file diff">
+            <div class="diff-header">
+              <div class="diff-title" id="diffTitle">Diff</div>
+              <div class="diff-meta" id="diffMeta"></div>
+            </div>
+            <div class="diff-body" id="diffBody"></div>
+          </div>
+        </section>
+      </section>
+    </div>
+
+    <section class="how-to" aria-labelledby="howToHeading">
+      <div class="container">
+        <h2 id="howToHeading">How to use this multi-file search &amp; replace tool</h2>
+        <ol>
+          <li>Click <strong>Upload files</strong> and select the documents or ZIP archives you want to scan.</li>
+          <li>Enter the text or regular expression you want to find, plus an optional replacement value.</li>
+          <li>Choose <strong>Plain text</strong> or <strong>Regular expression</strong> mode and adjust flags like case-sensitivity or multiline.</li>
+          <li>Hit <strong>Preview changes</strong> to run a safe dry‑run and inspect the per‑file diffs.</li>
+          <li>Tick <strong>Include in download</strong> for the files you want to export, then click <strong>Download updated files</strong> to grab a ZIP.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="use-cases" aria-labelledby="useCasesHeading">
+      <div class="container">
+        <h2 id="useCasesHeading">Common use cases</h2>
+        <ul>
+          <li>Renaming a product, company, or variable name across dozens of docs in one pass.</li>
+          <li>Cleaning up legacy formatting tags or boilerplate text in exported Markdown.</li>
+          <li>Fixing typos in knowledge bases, help centers, or static site content.</li>
+          <li>Running grep-style regex checks to find suspicious patterns before a release.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="faq" aria-labelledby="faqHeading">
+      <div class="container">
+        <h2 id="faqHeading">FAQ</h2>
+        <dl>
+          <dt>What kinds of files can I upload?</dt>
+          <dd>Anything the TinyUtils converter can handle: Markdown, plain text, Word, PDF (text‑based), HTML, and more. ZIPs with supported documents are unpacked and processed.</dd>
+
+          <dt>Does this tool edit my original files?</dt>
+          <dd>No. It generates new converted copies and bundles them into a ZIP; your original uploads are never modified in place.</dd>
+
+          <dt>How does regex mode work?</dt>
+          <dd>Regex mode uses JavaScript regular expressions. You can toggle global, case-sensitive, and multiline flags to control how patterns like <code>foo\\d+</code> or <code>^Title</code> behave.</dd>
+
+          <dt>Can I just preview without downloading?</dt>
+          <dd>Yes. Use <strong>Preview changes</strong> to inspect diffs and match counts. You only need to download when you&apos;re happy with the results.</dd>
+
+          <dt>Is it safe to use with sensitive documents?</dt>
+          <dd>This tool is designed for convenience, not as a secure document vault. For highly sensitive data, consider running TinyUtils locally or using a redacted excerpt instead of full documents.</dd>
+        </dl>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container row between wrap">
+      <span>© <span id="year"></span> TinyUtils</span>
+      <span><a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a></span>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      'use strict';
+
+      var yearEl = document.getElementById('year');
+      if (yearEl) {
+        yearEl.textContent = new Date().getFullYear();
+      }
+
+      var fileInput = document.getElementById('fileInput');
+      var searchInput = document.getElementById('searchInput');
+      var replaceInput = document.getElementById('replaceInput');
+      var modeText = document.getElementById('modeText');
+      var modeRegex = document.getElementById('modeRegex');
+      var caseSensitive = document.getElementById('caseSensitive');
+      var globalFlag = document.getElementById('globalFlag');
+      var multilineFlag = document.getElementById('multilineFlag');
+      var exportMd = document.getElementById('exportMd');
+      var exportTxt = document.getElementById('exportTxt');
+      var previewButton = document.getElementById('previewButton');
+      var downloadButton = document.getElementById('downloadButton');
+      var statusEl = document.getElementById('status');
+      var errorBox = document.getElementById('errorBox');
+      var errorMessageEl = document.getElementById('errorMessage');
+      var resultsSummaryEl = document.getElementById('resultsSummary');
+      var resultsEmptyEl = document.getElementById('resultsEmpty');
+      var fileListEl = document.getElementById('fileList');
+      var diffPaneEl = document.getElementById('diffPane');
+      var diffTitleEl = document.getElementById('diffTitle');
+      var diffMetaEl = document.getElementById('diffMeta');
+      var diffBodyEl = document.getElementById('diffBody');
+
+      var uploadedFiles = [];
+      var lastResult = null;
+      var lastSelectedIndex = -1;
+      var isRunning = false;
+      var NONE_SENTINEL = '::tinyutils-mfsr-none-selected::';
+
+      function setStatus(message, isError) {
+        if (!statusEl) return;
+        statusEl.textContent = message;
+        statusEl.classList.toggle('error', !!isError);
+      }
+
+      function showError(message, note) {
+        if (!errorBox || !errorMessageEl) return;
+        var full = message || 'Something went wrong.';
+        if (note) {
+          full += ' (' + note + ')';
+        }
+        errorMessageEl.textContent = full;
+        errorBox.hidden = false;
+      }
+
+      function clearError() {
+        if (!errorBox || !errorMessageEl) return;
+        errorMessageEl.textContent = '';
+        errorBox.hidden = true;
+      }
+
+      function toggleButtons(disabled) {
+        if (previewButton) previewButton.disabled = disabled;
+        if (downloadButton) downloadButton.disabled = disabled;
+      }
+
+      function readFileAsDataUrl(file) {
+        return new Promise(function (resolve, reject) {
+          var reader = new FileReader();
+          reader.onload = function (event) {
+            resolve(String((event.target && event.target.result) || ''));
+          };
+          reader.onerror = function () {
+            reject(new Error('file_read_failed'));
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      if (fileInput) {
+        fileInput.addEventListener('change', function (event) {
+          var files = Array.prototype.slice.call(event.target.files || []);
+          if (!files.length) {
+            uploadedFiles = [];
+            setStatus('Ready — upload files and enter a search pattern.', false);
+            return;
+          }
+
+          clearError();
+          setStatus('Reading ' + files.length + ' file' + (files.length === 1 ? '' : 's') + '…', false);
+          toggleButtons(true);
+
+          Promise.all(files.map(function (file) {
+            return readFileAsDataUrl(file).then(function (dataUrl) {
+              return { name: file.name || 'document', blobUrl: dataUrl };
+            });
+          })).then(function (items) {
+            uploadedFiles = items;
+            setStatus(
+              'Loaded ' + uploadedFiles.length + ' file' +
+              (uploadedFiles.length === 1 ? '' : 's') +
+              '. Click “Preview changes” to scan.',
+              false
+            );
+          }).catch(function () {
+            uploadedFiles = [];
+            showError('Could not read one or more files.');
+            setStatus('Failed to read files. Please try again.', true);
+          }).finally(function () {
+            toggleButtons(false);
+          });
+        });
+      }
+
+      function getMode() {
+        if (modeRegex && modeRegex.checked) return 'regex';
+        return 'text';
+      }
+
+      function getExportFormat() {
+        if (exportTxt && exportTxt.checked) return 'txt';
+        return 'md';
+      }
+
+      function buildFlags() {
+        var globalChecked = !globalFlag || globalFlag.checked;
+        return {
+          caseSensitive: !!(caseSensitive && caseSensitive.checked),
+          global: !!globalChecked,
+          multiline: !!(multilineFlag && multilineFlag.checked)
+        };
+      }
+
+      function collectIncludeState() {
+        var state = { names: [], changedCount: 0 };
+        if (!fileListEl) return state;
+        var checkboxes = fileListEl.querySelectorAll('input[data-include-name]');
+        checkboxes.forEach(function (checkbox) {
+          var name = String(checkbox.getAttribute('data-include-name') || '');
+          if (!name) return;
+          if (checkbox.disabled) return;
+          state.changedCount += 1;
+          if (checkbox.checked) {
+            state.names.push(name);
+          }
+        });
+        return state;
+      }
+
+      function renderResults(result) {
+        lastResult = result || null;
+        lastSelectedIndex = -1;
+
+        if (!fileListEl || !resultsSummaryEl || !resultsEmptyEl || !diffPaneEl || !diffBodyEl) {
+          return;
+        }
+
+        var files = Array.isArray(result && result.files) ? result.files : [];
+
+        fileListEl.innerHTML = '';
+        diffBodyEl.innerHTML = '';
+        diffPaneEl.classList.add('hidden');
+
+        if (!files.length) {
+          resultsSummaryEl.classList.add('hidden');
+          resultsEmptyEl.classList.remove('hidden');
+          return;
+        }
+
+        resultsEmptyEl.classList.add('hidden');
+
+        var meta = result && result.meta ? result.meta : {};
+        var totalFiles = typeof meta.totalFiles === 'number' ? meta.totalFiles : files.length;
+        var changedFiles = typeof meta.changedFiles === 'number'
+          ? meta.changedFiles
+          : files.filter(function (f) { return f && f.changed; }).length;
+
+        var totalMatches = files.reduce(function (sum, file) {
+          var m = file && typeof file.matches === 'number' ? file.matches : 0;
+          return sum + m;
+        }, 0);
+
+        var modeLabel = getMode() === 'regex' ? 'regex' : 'plain text';
+        var exportLabel = getExportFormat() === 'txt' ? 'plain text' : 'Markdown';
+
+        resultsSummaryEl.textContent =
+          totalFiles + ' file' + (totalFiles === 1 ? '' : 's') + ' processed — ' +
+          changedFiles + ' with changes, ' +
+          totalMatches + ' match' + (totalMatches === 1 ? '' : 'es') +
+          ' (' + modeLabel + ' search, ' + exportLabel + ' export).';
+
+        resultsSummaryEl.classList.remove('hidden');
+
+        files.forEach(function (file, index) {
+          var row = document.createElement('div');
+          row.className = 'file-row';
+          row.setAttribute('data-index', String(index));
+
+          var main = document.createElement('div');
+          main.className = 'file-row-main';
+
+          var nameEl = document.createElement('div');
+          nameEl.className = 'file-name';
+          nameEl.textContent = file && file.name ? file.name : 'File ' + (index + 1);
+
+          var metaEl = document.createElement('div');
+          metaEl.className = 'file-meta';
+          var matches = typeof file.matches === 'number' ? file.matches : 0;
+          var changed = !!file.changed;
+          var parts = [];
+          parts.push(matches + ' match' + (matches === 1 ? '' : 'es'));
+          parts.push(changed ? 'changed' : 'no changes');
+          metaEl.textContent = parts.join(' · ');
+
+          main.appendChild(nameEl);
+          main.appendChild(metaEl);
+
+          var actions = document.createElement('div');
+          actions.className = 'file-actions';
+
+          var includeLabel = document.createElement('label');
+          includeLabel.className = 'include-toggle';
+
+          var includeCheckbox = document.createElement('input');
+          includeCheckbox.type = 'checkbox';
+          includeCheckbox.className = 'file-include-checkbox';
+          includeCheckbox.setAttribute('data-include-name', file && file.name ? file.name : '');
+          includeCheckbox.checked = !!(file && file.changed);
+          if (!file || !file.changed) {
+            includeCheckbox.disabled = true;
+          }
+
+          var includeText = document.createElement('span');
+          includeText.textContent = 'Include in download';
+
+          includeLabel.appendChild(includeCheckbox);
+          includeLabel.appendChild(includeText);
+
+          var badge = document.createElement('span');
+          badge.className = 'badge badge-muted';
+          badge.textContent = file && file.changed ? 'Changed' : 'No changes';
+
+          var viewButton = document.createElement('button');
+          viewButton.type = 'button';
+          viewButton.className = 'link-button';
+          viewButton.textContent = 'View diff';
+          viewButton.setAttribute('data-view-diff', '1');
+          viewButton.setAttribute('data-index', String(index));
+          if (!file || !file.diff || !Array.isArray(file.diff.lines) || !file.diff.lines.length) {
+            viewButton.disabled = true;
+          }
+
+          actions.appendChild(includeLabel);
+          actions.appendChild(badge);
+          actions.appendChild(viewButton);
+
+          row.appendChild(main);
+          row.appendChild(actions);
+          fileListEl.appendChild(row);
+        });
+      }
+
+      function renderDiffForIndex(index) {
+        if (!lastResult || !Array.isArray(lastResult.files)) return;
+        var file = lastResult.files[index];
+        if (!file) return;
+
+        lastSelectedIndex = index;
+
+        if (!diffPaneEl || !diffTitleEl || !diffMetaEl || !diffBodyEl) return;
+
+        diffPaneEl.classList.remove('hidden');
+        diffBodyEl.innerHTML = '';
+
+        var fileName = file.name || ('File ' + (index + 1));
+        diffTitleEl.textContent = fileName;
+
+        var matches = typeof file.matches === 'number' ? file.matches : 0;
+        var changed = !!file.changed;
+        var metaParts = [];
+        metaParts.push(matches + ' match' + (matches === 1 ? '' : 'es'));
+        metaParts.push(changed ? 'changed' : 'no changes');
+        if (file.diff && file.diff.truncated) {
+          metaParts.push('diff truncated for large file');
+        }
+        diffMetaEl.textContent = metaParts.join(' · ');
+
+        var diff = file.diff || {};
+        var lines = Array.isArray(diff.lines) ? diff.lines : [];
+
+        if (!lines.length && !diff.truncated) {
+          var emptyLine = document.createElement('div');
+          emptyLine.className = 'diff-line diff-line-context';
+          emptyLine.textContent = 'No visible differences.';
+          diffBodyEl.appendChild(emptyLine);
+          return;
+        }
+
+        lines.forEach(function (line) {
+          var type = line && line.type ? line.type : 'context';
+          var text = line && typeof line.text === 'string' ? line.text : '';
+          var oldLine = typeof line.oldLine === 'number' ? line.oldLine : null;
+          var newLine = typeof line.newLine === 'number' ? line.newLine : null;
+
+          var row = document.createElement('div');
+          row.className = 'diff-line';
+
+          if (type === 'add') {
+            row.className += ' diff-line-add';
+          } else if (type === 'remove') {
+            row.className += ' diff-line-remove';
+          } else {
+            row.className += ' diff-line-context';
+          }
+
+          var linenoSpan = document.createElement('span');
+          linenoSpan.className = 'diff-lineno';
+          var oldText = oldLine != null ? String(oldLine) : '';
+          var newText = newLine != null ? String(newLine) : '';
+          linenoSpan.textContent = (oldText || '').padStart(3) + ' | ' + (newText || '').padStart(3);
+
+          var contentSpan = document.createElement('span');
+          var prefix = type === 'add' ? '+' : (type === 'remove' ? '−' : ' ');
+          contentSpan.textContent = prefix + text;
+
+          row.appendChild(linenoSpan);
+          row.appendChild(contentSpan);
+          diffBodyEl.appendChild(row);
+        });
+      }
+
+      if (fileListEl) {
+        fileListEl.addEventListener('click', function (event) {
+          var btn = event.target.closest('button[data-view-diff]');
+          if (!btn) return;
+          var index = parseInt(btn.getAttribute('data-index') || '0', 10);
+          if (!Number.isNaN(index)) {
+            renderDiffForIndex(index);
+          }
+        });
+      }
+
+      function buildPayload(previewOnly) {
+        var searchValue = (searchInput && searchInput.value || '').trim();
+        var replaceValue = replaceInput ? (replaceInput.value || '') : '';
+
+        if (!uploadedFiles.length) {
+          throw new Error('no_files');
+        }
+        if (!searchValue) {
+          throw new Error('missing_search');
+        }
+
+        var payload = {
+          files: uploadedFiles.slice(),
+          mode: getMode(),
+          flags: buildFlags(),
+          search: searchValue,
+          replace: replaceValue,
+          exportFormat: getExportFormat(),
+          previewOnly: !!previewOnly
+        };
+
+        if (!previewOnly) {
+          var state = collectIncludeState();
+          var includeNames;
+
+          if (state.changedCount === 0) {
+            includeNames = undefined;
+          } else if (state.names.length === 0) {
+            includeNames = [NONE_SENTINEL];
+          } else if (state.names.length === state.changedCount) {
+            includeNames = undefined;
+          } else {
+            includeNames = state.names;
+          }
+
+          if (includeNames && includeNames.length) {
+            payload.includeNames = includeNames;
+          }
+        }
+
+        return payload;
+      }
+
+      function run(previewOnly) {
+        if (isRunning) return;
+        clearError();
+
+        var payload;
+        try {
+          payload = buildPayload(previewOnly);
+        } catch (err) {
+          if (err && err.message === 'no_files') {
+            setStatus('Please upload at least one file first.', true);
+          } else if (err && err.message === 'missing_search') {
+            setStatus('Please enter a search pattern.', true);
+          } else {
+            setStatus('Missing required input.', true);
+          }
+          return;
+        }
+
+        isRunning = true;
+        toggleButtons(true);
+        setStatus(previewOnly ? 'Preparing preview…' : 'Preparing download…', false);
+
+        fetch('/api/multi-file-search-replace', {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        }).then(function (response) {
+          return response.json().then(function (data) {
+            return { response: response, data: data };
+          }).catch(function () {
+            return { response: response, data: null };
+          });
+        }).then(function (result) {
+          var response = result.response;
+          var data = result.data;
+
+          if (!response.ok || !data) {
+            showError('Server error while processing documents.');
+            setStatus('Server error — please try again.', true);
+            return;
+          }
+
+          if (!data.ok) {
+            var meta = data.meta || {};
+            showError(meta.error || 'Request failed.', meta.note || null);
+            setStatus(meta.error || 'Request failed.', true);
+            return;
+          }
+
+          renderResults(data);
+          setStatus(
+            previewOnly
+              ? 'Preview updated — click a file to see its diff.'
+              : 'Download ready — your ZIP should start shortly.',
+            false
+          );
+
+          var zip = data.meta && data.meta.zip;
+          if (!previewOnly && zip && zip.blobUrl) {
+            if (window.tuDownloadBlob) {
+              fetch(zip.blobUrl).then(function (res) {
+                return res.blob();
+              }).then(function (blob) {
+                window.tuDownloadBlob({
+                  filename: zip.name || 'tinyutils-multi-file-replace.zip',
+                  mimeType: zip.contentType || 'application/zip',
+                  content: blob
+                });
+              }).catch(function () {
+                showError('Download failed. Please try again.');
+              });
+            } else {
+              var link = document.createElement('a');
+              link.href = zip.blobUrl;
+              link.download = zip.name || 'tinyutils-multi-file-replace.zip';
+              document.body.appendChild(link);
+              link.click();
+              setTimeout(function () {
+                document.body.removeChild(link);
+              }, 0);
+            }
+          }
+        }).catch(function () {
+          showError('Network error. Please check your connection and try again.');
+          setStatus('Network error — please try again.', true);
+        }).finally(function () {
+          isRunning = false;
+          toggleButtons(false);
+        });
+      }
+
+      if (previewButton) {
+        previewButton.addEventListener('click', function () {
+          run(true);
+        });
+      }
+
+      if (downloadButton) {
+        downloadButton.addEventListener('click', function () {
+          run(false);
+        });
+      }
+
+      document.addEventListener('keydown', function (event) {
+        var isMeta = event.metaKey || event.ctrlKey;
+        if (!isMeta) return;
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          run(true);
+        }
+      });
+    })();
+  </script>
+  </body>
+</html>
+
