@@ -138,7 +138,7 @@
         <span class="tool-hero-icon" aria-hidden="true">📄</span>
         <h1>Document Converter</h1>
         <p class="tool-hero-subtitle">
-          Convert between 100+ document formats: Markdown, PDF, DOCX, HTML, RTF, ODT, LaTeX, and more. Paste your content or upload a file.
+          Convert between 100+ document formats: Markdown, PDF, DOCX, HTML, RTF, ODT, LaTeX, and more. Paste content or upload a file, choose your format, then download.
         </p>
         <p><a class="cta" href="/tools/">← Back to all tools</a></p>
       </div>
@@ -151,10 +151,16 @@
              data-ad-format="auto"
              data-full-width-responsive="true"></ins>
         <script>try{(adsbygoogle = window.adsbygoogle || []).push({});}catch(e){}</script>
+        <p class="help" style="color: var(--muted, #97a3c2); font-size: 0.8rem; margin-top: 0.5rem; text-align: center;">
+          Ads help keep TinyUtils fast and free for everyone. Tools continue to work even if ads are hidden.
+        </p>
       </section>
 
       <section class="card" role="region" aria-labelledby="inputHeading">
         <h2 id="inputHeading">Input</h2>
+        <p class="help" style="color: var(--muted, #97a3c2); margin-top: 0.25rem; max-width: 46rem;">
+          Start here: paste your content or upload a file, pick your output format, then click <strong>Convert</strong>.
+        </p>
         <div class="input-section">
           <label for="textInput">Paste your document content
             <span class="help" style="color: var(--muted, #97a3c2); font-size: 0.85rem; display: block; margin-top: 0.2rem;">
@@ -211,7 +217,12 @@
         </div>
 
         <div class="format-options" aria-label="Markdown dialect" id="mdDialectRow">
-          <label for="mdDialect"><strong>Markdown dialect (advanced):</strong></label>
+          <label for="mdDialect">
+            <strong>Markdown dialect (advanced):</strong>
+            <span class="help" style="color: var(--muted, #97a3c2); font-size: 0.85rem; margin-left: 0.35rem;">
+              Most users can leave this on the default.
+            </span>
+          </label>
           <select id="mdDialect" name="mdDialect">
             <option value="">Auto (backend default — GFM)</option>
             <option value="gfm" selected>GitHub Flavored Markdown (GFM)</option>
@@ -225,7 +236,12 @@
         </div>
 
         <div class="format-options" aria-label="Options">
-          <label><strong>Options:</strong></label>
+          <label>
+            <strong>Options:</strong>
+            <span class="help" style="color: var(--muted, #97a3c2); font-size: 0.85rem; margin-left: 0.35rem;">
+              These defaults are safe; tweak only if you know you need to.
+            </span>
+          </label>
           <label title="Accept tracked changes in Word docs"><input type="checkbox" id="optAcceptTracked" checked> Accept tracked changes</label>
           <label title="Extract embedded images/media when available"><input type="checkbox" id="optExtractMedia"> Extract media</label>
           <label title="Remove zero-width characters"><input type="checkbox" id="optRemoveZW" checked> Remove zero-width</label>
@@ -235,11 +251,11 @@
           <button id="previewBtn" class="secondary" type="button">Preview</button>
           <button id="convertBtn" class="primary" type="button">Convert</button>
           <button id="clearBtn" class="secondary" type="button">Clear</button>
-          <button id="demoBtn" class="secondary" type="button">Try example</button>
+          <button id="demoBtn" class="secondary" type="button" title="Load a small example document to see how conversion works.">Try example</button>
           <span class="badge">Shortcut: <kbd>Ctrl/Cmd + Enter</kbd> to convert</span>
         </div>
         <div id="progress" class="progress-banner" aria-live="polite" role="status">
-          <span id="progressMessage" class="progress-text">Ready.</span>
+          <span id="progressMessage" class="progress-text">Ready — paste content or upload a file, then click <strong>Convert</strong>.</span>
           <progress id="progressMeter" max="100" value="0" hidden></progress>
         </div>
       </section>
@@ -268,7 +284,13 @@
                 <th scope="col">Download</th>
               </tr>
             </thead>
-            <tbody></tbody>
+            <tbody>
+              <tr id="resultsEmptyRow">
+                <td colspan="4" style="color: var(--muted, #97a3c2); text-align: center; padding: 0.75rem 0;">
+                  No files yet — your converted files will appear here after you click <strong>Convert</strong>.
+                </td>
+              </tr>
+            </tbody>
           </table>
         </div>
       </section>
@@ -885,8 +907,8 @@
       textInput.value = '';
       fileInput.value = '';
       currentFile = null;
-      resultsBody.innerHTML = '';
-      updateProgressState('Ready.', null);
+      resultsBody.innerHTML = '<tr id="resultsEmptyRow"><td colspan="4" style="color: var(--muted, #97a3c2); text-align: center; padding: 0.75rem 0;">No files yet — your converted files will appear here after you click <strong>Convert</strong>.</td></tr>';
+      updateProgressState('Ready — paste content or upload a file, then click <strong>Convert</strong>.', null);
     });
 
     demoBtn?.addEventListener('click', loadTryExample);
