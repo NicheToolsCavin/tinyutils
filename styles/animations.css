@@ -102,6 +102,53 @@
   box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
 }
 
+/* Unified hover animation for cards & CTA panels */
+:is(.card-hoverable,
+    .card,
+    .cta-box,
+    .blog-card,
+    .tool-card,
+    .tool-card-enhanced) {
+  transition: transform var(--transition-base),
+              border-color var(--transition-base),
+              box-shadow var(--transition-base);
+  will-change: transform, box-shadow;
+}
+
+:is(.card-hoverable,
+    .card,
+    .cta-box,
+    .blog-card,
+    .tool-card,
+    .tool-card-enhanced):hover,
+:is(.card-hoverable,
+    .card,
+    .cta-box,
+    .blog-card,
+    .tool-card,
+    .tool-card-enhanced):focus-within {
+  transform: translateY(-4px);
+  border-color: var(--hover-accent);
+  box-shadow: 0 12px 40px var(--hover-shadow-color);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(.card-hoverable,
+      .card,
+      .cta-box,
+      .blog-card,
+      .tool-card,
+      .tool-card-enhanced):hover,
+  :is(.card-hoverable,
+      .card,
+      .cta-box,
+      .blog-card,
+      .tool-card,
+      .tool-card-enhanced):focus-within {
+    transform: none;
+  }
+}
+
 /* ============================================
    LOADING ANIMATIONS
    ============================================ */

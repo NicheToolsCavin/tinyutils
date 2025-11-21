@@ -10,6 +10,23 @@ tbody tr:hover{background:rgba(255,255,255,.04)}
 th,td{padding:10px;border-bottom:1px solid var(--border,#1e2230);vertical-align:top}
 /* Focus visibility */
 :focus-visible{outline:2px solid var(--focus-ring,#facc15);outline-offset:2px;border-radius:6px}
+/* Hover animation for cards & CTA boxes */
+:is(.card,.cta-box,.blog-card,.tool-card,.tool-card-enhanced){
+  transition:transform 200ms cubic-bezier(0.4,0,0.2,1),border-color 200ms cubic-bezier(0.4,0,0.2,1),box-shadow 200ms cubic-bezier(0.4,0,0.2,1);
+  will-change:transform,box-shadow;
+}
+:is(.card,.cta-box,.blog-card,.tool-card,.tool-card-enhanced):hover,
+:is(.card,.cta-box,.blog-card,.tool-card,.tool-card-enhanced):focus-within{
+  transform:translateY(-4px);
+  border-color:var(--hover-accent,#3b82f6);
+  box-shadow:0 12px 40px var(--hover-shadow-color,rgba(59,130,246,.15));
+}
+@media (prefers-reduced-motion:reduce){
+  :is(.card,.cta-box,.blog-card,.tool-card,.tool-card-enhanced):hover,
+  :is(.card,.cta-box,.blog-card,.tool-card,.tool-card-enhanced):focus-within{
+    transform:none;
+  }
+}
 /* Badges/chips */
 .badge.warn{background:#4c3b07;color:#ffd873}
 .badge.error{background:#4a1b1b;color:#ffb3b3}
