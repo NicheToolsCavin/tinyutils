@@ -5,7 +5,7 @@ set -euo pipefail
 ART="${DLF_SMOKE_ARTIFACTS:-artifacts/dlf_extras/$(date -u +%Y%m%d)/run-$(date -u +%H%M%S)}"
 mkdir -p "$ART"
 
-BASE="${TINYUTILS_BASE:-https://tinyutils-eight.vercel.app}"
+BASE="${TINYUTILS_BASE:-https://tinyutils.net}"
 API="$BASE/api/check"
 
 jq --version >/dev/null 2>&1 || { echo "jq required"; exit 2; }
