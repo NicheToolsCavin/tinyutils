@@ -194,24 +194,24 @@ html[data-theme="dark"] {
 html[data-theme="light"] {
   color-scheme: light;
 
-  /* Background layers - Woodland inspired warm tones */
-  --bg-primary: #f5f3ee;        /* Warm cream canvas */
-  --bg-secondary: #faf8f4;      /* Soft ivory sections */
-  --bg-elevated: #faf8f4;       /* Elevated surfaces */
-  --bg-overlay: rgba(44, 36, 22, 0.5);
+  /* Background layers - Oak sunlight honey tones */
+  --bg-primary: #f7f3e9;        /* Honey-cream canvas */
+  --bg-secondary: #fefbf3;      /* Warm ivory sections */
+  --bg-elevated: #fefbf3;       /* Elevated surfaces */
+  --bg-overlay: rgba(61, 46, 26, 0.5);
 
   /* Surface colors */
-  --surface-base: #faf8f4;      /* Soft ivory cards */
-  --surface-raised: #f5f3ee;    /* Cream hover state */
-  --surface-hover: #f0ede6;     /* Slightly darker hover */
-  --surface-overlay: #faf8f4;   /* Modals */
+  --surface-base: #fefbf3;      /* Warm ivory cards with golden glow */
+  --surface-raised: #f7f3e9;    /* Honey-cream hover state */
+  --surface-hover: #f2ede0;     /* Warmer golden hover */
+  --surface-overlay: #fefbf3;   /* Modals */
 
-  /* Text colors - Warm browns */
-  --text-primary: #2c2416;      /* Dark brown */
-  --text-secondary: #4a3f2f;    /* Medium-dark brown */
-  --text-tertiary: #6b5d4f;     /* Medium brown */
-  --text-muted: #8f8270;        /* Light brown */
-  --text-inverse: #faf8f4;      /* Ivory text on dark backgrounds */
+  /* Text colors - Walnut and oak browns */
+  --text-primary: #3d2e1a;      /* Dark walnut brown */
+  --text-secondary: #5a4728;    /* Medium oak brown */
+  --text-tertiary: #6b5638;     /* Light oak brown */
+  --text-muted: #8f7d5f;        /* Honey-toned muted */
+  --text-inverse: #fefbf3;      /* Warm ivory text on dark backgrounds */
 
   /* Brand colors (warmer blue tones) */
   --brand-500: #3b82f6;
@@ -231,10 +231,10 @@ html[data-theme="light"] {
   --color-danger: #dc2626;
   --color-info: #3b82f6;
 
-  /* Border colors - Warm tan tones */
-  --border-subtle: rgba(107, 93, 79, 0.08);
-  --border-default: rgba(107, 93, 79, 0.15);
-  --border-strong: rgba(107, 93, 79, 0.25);
+  /* Border colors - Golden oak tones */
+  --border-subtle: rgba(107, 86, 56, 0.1);
+  --border-default: rgba(107, 86, 56, 0.18);
+  --border-strong: rgba(107, 86, 56, 0.3);
   --border-brand: rgba(59, 130, 246, 0.5);
 
   /* Focus ring - Warm amber for accessibility */
