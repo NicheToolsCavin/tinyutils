@@ -217,6 +217,15 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-21 04:25 CET - Manual - favicon propagation
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Applied per-theme icon links to core pages (home/tools/pages/blog/articles/tools shells) to eliminate legacy favicon usage
+- **Evidence:** artifacts/hover-animation/20251121/
+- **Follow-ups:**
+  - If any page still shows legacy icon, add the same snippet there
+
 ### 2025-11-21 04:21 CET - Manual - idle-notifier policy
 - **Mode:** manual
 - **Branch:** `main`
