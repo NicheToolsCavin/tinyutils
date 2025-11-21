@@ -181,6 +181,10 @@ html[data-theme="dark"] {
   --focus-ring: #facc15;        /* Bright yellow for accessibility */
   --focus-ring-offset: 2px;
 
+  /* Hover colors */
+  --hover-accent: #3b82f6;      /* Blue accent for hovers */
+  --hover-shadow-color: rgba(59, 130, 246, 0.15);
+
   /* Gradients */
   --gradient-brand: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   --gradient-brand-subtle: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.1) 100%);
@@ -240,6 +244,10 @@ html[data-theme="light"] {
   /* Focus ring - Darker amber for accessibility */
   --focus-ring: #d97706;
   --focus-ring-offset: 2px;
+
+  /* Hover colors - Warm browns instead of blue */
+  --hover-accent: #a0826d;      /* Rich oak brown for hovers */
+  --hover-shadow-color: rgba(139, 111, 71, 0.2);
 
   /* Gradients */
   --gradient-brand: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
