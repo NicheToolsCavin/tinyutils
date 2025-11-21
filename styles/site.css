@@ -57,10 +57,10 @@ a:hover{color:var(--brand-2)}
 .wrap{flex-wrap:wrap}
 .mt-xl{margin-top:48px}
 
-.site-header{border-bottom:1px solid var(--border);background:rgba(18,20,26,0.7);backdrop-filter: blur(6px);position:sticky;top:0;z-index:10}
-.site-header .brand{font-weight:700;font-size:20px}
-.nav a{padding:12px 10px;border-radius:10px;color:var(--muted)}
-.nav a.active,.nav a:hover{background:var(--panel);color:var(--text)}
+.site-header{border-bottom:1px solid var(--border);background:var(--bg-elevated);backdrop-filter: blur(6px);position:sticky;top:0;z-index:10}
+.site-header .brand{font-weight:700;font-size:20px;color:var(--text-primary)}
+.nav a{padding:12px 10px;border-radius:10px;color:var(--text-secondary);text-decoration:none;transition:all var(--transition-base)}
+.nav a.active,.nav a:hover{background:var(--surface-raised);color:var(--text-primary)}
 
 .theme-toggle{margin-left:10px;border-radius:999px;border:1px solid var(--border);background:var(--panel);color:var(--muted);padding:6px 10px;font-size:.85rem;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
 .theme-toggle span{font-size:.8rem}
