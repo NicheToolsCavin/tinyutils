@@ -47,15 +47,16 @@
     .nav-dropdown a {
       display: block;
       padding: var(--space-2) var(--space-3);
-      color: var(--text-secondary);
+      color: var(--text-primary);
       text-decoration: none;
       border-radius: var(--radius-md);
       transition: all var(--transition-base);
+      font-size: var(--text-sm);
     }
 
     .nav-dropdown a:hover {
-      background: var(--surface-hover);
-      color: var(--text-primary);
+      background: var(--surface-raised);
+      color: var(--brand-500);
     }
 
     /* Enhanced homepage styles */
@@ -200,9 +201,9 @@
 <body>
 <a href="#main" class="skip-link">Skip to main content</a>
 
-<header class="site-header glass-effect">
+<header class="site-header">
   <div class="container row between center">
-    <a class="brand gradient-text" href="/" style="font-size: var(--text-2xl); font-weight: var(--font-bold);">TinyUtils</a>
+    <a class="brand" href="/">TinyUtils</a>
     <div class="row center">
       <nav class="nav">
         <a href="/tools/">Tools</a>
