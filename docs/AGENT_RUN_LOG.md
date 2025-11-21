@@ -217,6 +217,17 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-21 03:11 CET - Manual - ad placement/tone + encoding doc light
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Moved homepage ad below tools grid; moved tools hub ad below first section; shrank ad-slot padding/height
+  - Softened ad copy (no 'still works hidden'); tightened ad slot on MFSR/Text Converter; Encoding Doctor cards use theme tokens
+  - Theme icons expanded and per-page links already in place
+- **Evidence:** artifacts/hover-animation/20251121/
+- **Follow-ups:**
+  - Verify Safari private/ghostery now hides slots; visual QA Encoding Doctor light
+
 ### 2025-11-21 03:07 CET - Manual - safari private fixes
 - **Mode:** manual
 - **Branch:** `main`
