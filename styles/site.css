@@ -36,15 +36,15 @@ html[data-theme="dark"]{
 }
 
 html[data-theme="light"]{
-  --bg:#f7f3e9;      /* honey-cream background - oak sunlight */
-  --panel:#fefbf3;   /* warm ivory with golden glow */
-  --muted:#6b5638;   /* oak brown muted text */
-  --text:#3d2e1a;    /* dark walnut brown body text */
+  --bg:#e8ded0;      /* aged parchment - subdued tan */
+  --panel:#f0e8da;   /* muted cream - barely lighter */
+  --muted:#5d4a35;   /* medium brown muted text */
+  --text:#2d1f0f;    /* very dark brown - high contrast */
   --brand:#3b82f6;   /* warm blue accent (buttons/links) */
   --brand-2:#2563eb; /* deeper blue hover/active */
-  --border:#e8dcc8;  /* light oak/sand with golden undertone */
-  --focus-ring:#f59e0b;  /* warm amber focus ring */
-  --progress-bg:rgba(107,86,56,0.1);  /* golden brown progress bg */
+  --border:#d5c4af;  /* muted tan border */
+  --focus-ring:#d97706;  /* darker amber focus ring */
+  --progress-bg:rgba(93,74,53,0.12);  /* subdued brown progress bg */
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Helvetica Neue",Arial}

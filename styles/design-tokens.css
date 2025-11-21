@@ -194,24 +194,24 @@ html[data-theme="dark"] {
 html[data-theme="light"] {
   color-scheme: light;
 
-  /* Background layers - Oak sunlight honey tones */
-  --bg-primary: #f7f3e9;        /* Honey-cream canvas */
-  --bg-secondary: #fefbf3;      /* Warm ivory sections */
-  --bg-elevated: #fefbf3;       /* Elevated surfaces */
-  --bg-overlay: rgba(61, 46, 26, 0.5);
+  /* Background layers - Aged parchment subdued tones */
+  --bg-primary: #e8ded0;        /* Aged parchment - subdued tan */
+  --bg-secondary: #f0e8da;      /* Muted cream sections */
+  --bg-elevated: #f0e8da;       /* Elevated surfaces */
+  --bg-overlay: rgba(45, 31, 15, 0.6);
 
   /* Surface colors */
-  --surface-base: #fefbf3;      /* Warm ivory cards with golden glow */
-  --surface-raised: #f7f3e9;    /* Honey-cream hover state */
-  --surface-hover: #f2ede0;     /* Warmer golden hover */
-  --surface-overlay: #fefbf3;   /* Modals */
+  --surface-base: #f0e8da;      /* Muted cream cards */
+  --surface-raised: #e8ded0;    /* Parchment hover state */
+  --surface-hover: #e0d5c5;     /* Darker subdued hover */
+  --surface-overlay: #f0e8da;   /* Modals */
 
-  /* Text colors - Walnut and oak browns */
-  --text-primary: #3d2e1a;      /* Dark walnut brown */
-  --text-secondary: #5a4728;    /* Medium oak brown */
-  --text-tertiary: #6b5638;     /* Light oak brown */
-  --text-muted: #8f7d5f;        /* Honey-toned muted */
-  --text-inverse: #fefbf3;      /* Warm ivory text on dark backgrounds */
+  /* Text colors - Deep browns for contrast */
+  --text-primary: #2d1f0f;      /* Very dark brown */
+  --text-secondary: #4a3520;    /* Dark brown */
+  --text-tertiary: #5d4a35;     /* Medium brown */
+  --text-muted: #7a6750;        /* Muted brown */
+  --text-inverse: #f0e8da;      /* Muted cream text on dark backgrounds */
 
   /* Brand colors (warmer blue tones) */
   --brand-500: #3b82f6;
@@ -231,14 +231,14 @@ html[data-theme="light"] {
   --color-danger: #dc2626;
   --color-info: #3b82f6;
 
-  /* Border colors - Golden oak tones */
-  --border-subtle: rgba(107, 86, 56, 0.1);
-  --border-default: rgba(107, 86, 56, 0.18);
-  --border-strong: rgba(107, 86, 56, 0.3);
+  /* Border colors - Subdued browns */
+  --border-subtle: rgba(93, 74, 53, 0.15);
+  --border-default: rgba(93, 74, 53, 0.25);
+  --border-strong: rgba(93, 74, 53, 0.4);
   --border-brand: rgba(59, 130, 246, 0.5);
 
-  /* Focus ring - Warm amber for accessibility */
-  --focus-ring: #f59e0b;
+  /* Focus ring - Darker amber for accessibility */
+  --focus-ring: #d97706;
   --focus-ring-offset: 2px;
 
   /* Gradients */
