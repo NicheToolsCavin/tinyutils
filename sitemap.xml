@@ -2,6 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://tinyutils.net/</loc></url>
   <url><loc>https://tinyutils.net/tools/</loc></url>
+  <url><loc>https://tinyutils.net/blog/</loc></url>
   <url><loc>https://tinyutils.net/about.html</loc></url>
   <url><loc>https://tinyutils.net/tools/dead-link-finder/</loc></url>
   <url><loc>https://tinyutils.net/tools/sitemap-delta/</loc></url>
@@ -10,6 +11,16 @@
   <url><loc>https://tinyutils.net/tools/multi-file-search-replace/</loc></url>
   <url><loc>https://tinyutils.net/tools/encoding-doctor/</loc></url>
   <url><loc>https://tinyutils.net/tools/formats/</loc></url>
+  <url><loc>https://tinyutils.net/blog/best-broken-link-checkers/</loc></url>
+  <url><loc>https://tinyutils.net/blog/broken-link-checker-alternatives/</loc></url>
+  <url><loc>https://tinyutils.net/blog/find-fix-broken-links-seo/</loc></url>
+  <url><loc>https://tinyutils.net/blog/online-vs-offline-converters/</loc></url>
+  <url><loc>https://tinyutils.net/blog/recover-deleted-webpage/</loc></url>
+  <url><loc>https://tinyutils.net/blog/redirect-rules-generator/</loc></url>
+  <url><loc>https://tinyutils.net/blog/wayback-machine-api-guide/</loc></url>
+  <url><loc>https://tinyutils.net/blog/wayback-recover-case-study/</loc></url>
+  <url><loc>https://tinyutils.net/blog/website-migration-redirects/</loc></url>
+  <url><loc>https://tinyutils.net/blog/wp-broken-link-plugin-vs-tool/</loc></url>
   <url><loc>https://tinyutils.net/docx-to-markdown/</loc></url>
   <url><loc>https://tinyutils.net/rtf-to-markdown/</loc></url>
   <url><loc>https://tinyutils.net/html-to-markdown/</loc></url>
