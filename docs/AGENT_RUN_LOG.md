@@ -217,6 +217,14 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-21 04:29 CET - Manual - purge defunct vercel links
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Replaced tinyutils-eight.vercel.app with tinyutils.net across sitemap/robots/UA strings/tests/docs
+- **Evidence:** artifacts/hover-animation/20251121/
+- **Follow-ups:**
+
 ### 2025-11-21 04:25 CET - Manual - favicon propagation
 - **Mode:** manual
 - **Branch:** `main`
