@@ -38,7 +38,10 @@
     // users that "ads seem blocked" when Google is simply choosing
     // not to render an ad or is using a different internal shape.
     const ok = !!window.adsbygoogle;
-    if (!ok) makeToast();
+    if (!ok) {
+      document.documentElement.classList.add('ads-hidden');
+      makeToast();
+    }
   }
 
   function init(){

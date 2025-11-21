@@ -217,6 +217,17 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-21 03:07 CET - Manual - safari private fixes
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Hide ad slots on AdSense failure (adsense-monitor adds ads-hidden) to avoid blank banners
+  - Expanded theme icons (16/32/64/192/512 + shortcut + apple) and per-page favicon links for Encoding Doctor
+  - Encoding Doctor cards now use theme tokens for light mode
+- **Evidence:** artifacts/hover-animation/20251121/
+- **Follow-ups:**
+  - Validate Safari private mode with Funding Choices/ads and recheck Encoding Doctor light styling
+
 ### 2025-11-21 03:02 CET - Manual - push hover/icon updates
 - **Mode:** manual
 - **Branch:** `main`
