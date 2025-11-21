@@ -217,6 +217,32 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-21 02:59 CET - Manual - default theme from system prefs
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Theme now defaults to prefers-color-scheme when no stored choice; still respects saved theme
+- **Evidence:** artifacts/hover-animation/20251121/
+- **Follow-ups:**
+
+### 2025-11-21 02:58 CET - Manual - hover anim + theme favicons
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Unified hover lift/shadow across cards/CTAs via styles/animations.css and public/styles.css
+  - Extracted light/dark icon pack to public/icons and made theme-toggle.js swap favicons per theme (16/32/64 + apple-touch)
+- **Evidence:** artifacts/hover-animation/20251121/
+- **Follow-ups:**
+
+### 2025-11-21 02:51 CET - Manual - unify card hover animation
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Added shared hover lift/shadow rule for cards, CTA boxes, blog/tool cards in styles/animations.css
+  - Mirrored hover treatment in public/styles.css for legacy shells with reduced-motion guard
+- **Evidence:** artifacts/hover-animation/20251121/
+- **Follow-ups:**
+
 ### 2025-11-21 01:15 CET - Manual - Preview URL captured
 - **Mode:** manual
 - **Branch:** `fix/converter-pdf-rtf-ui-testplan-gcp`
