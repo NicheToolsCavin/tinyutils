@@ -54,6 +54,9 @@
         upsertIcon('icon', '16x16', 'tu-favicon-16', base + '16.png');
         upsertIcon('icon', '32x32', 'tu-favicon-32', base + '32.png');
         upsertIcon('icon', '64x64', 'tu-favicon-64', base + '64.png');
+        upsertIcon('icon', '192x192', 'tu-favicon-192', base + '192.png');
+        upsertIcon('icon', '512x512', 'tu-favicon-512', base + '512.png');
+        upsertIcon('shortcut icon', null, 'tu-shortcut-icon', base + '32.png');
         upsertIcon('apple-touch-icon', '180x180', 'tu-apple-icon', base + '180.png');
       }
     }catch(e){}

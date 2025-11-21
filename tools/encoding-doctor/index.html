@@ -8,7 +8,10 @@
   <script async src="https://fundingchoicesmessages.google.com/i/pub-3079281180008443?ers=1"></script>
   <meta name="description" content="Encoding Doctor repairs mojibake and encoding errors like FranÃ§ois dâ€™Arcy â€” résumé. Paste text or upload files to fix Ã© → é, smart quotes, dashes, and Unicode normalization.">
   <link rel="canonical" href="/tools/encoding-doctor/">
-  <link rel="icon" href="/public/favicon.ico">
+  <link rel="icon" href="/public/icons/tinyutils-icon-dark-32.png" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="/public/icons/tinyutils-icon-light-32.png" media="(prefers-color-scheme: light)">
+  <link rel="apple-touch-icon" sizes="180x180" href="/public/icons/tinyutils-icon-light-180.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/public/icons/tinyutils-icon-dark-32.png">
   <meta property="og:title" content="Encoding Doctor — Fix mojibake &amp; encoding errors — TinyUtils">
   <meta property="og:description" content="Fix mojibake, broken accents, and smart punctuation glitches. Paste text or upload documents and download clean, normalized text.">
   <meta property="og:type" content="website">
@@ -69,11 +72,11 @@
     }
 
     .card {
-      background: var(--surface, #050816);
+      background: var(--surface-base);
       border-radius: 1rem;
       padding: 1.25rem 1.5rem;
-      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.55);
-      border: 1px solid rgba(148, 163, 184, 0.15);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-default);
     }
 
     .card h2 {
