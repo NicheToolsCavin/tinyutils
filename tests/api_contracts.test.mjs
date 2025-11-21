@@ -16,7 +16,7 @@ function makeRequest(url, payload, extraHeaders = {}) {
   });
 }
 
-const BASE = 'https://tinyutils-eight.vercel.app';
+const BASE = 'https://tinyutils.net';
 
 test.before(() => {
   installFetchStub();

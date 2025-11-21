@@ -71,7 +71,7 @@ async function testSitemapDelta() {
     maxCompare: 10
   };
 
-  const req = createRequest('https://tinyutils-eight.vercel.app/api/sitemap-delta', payload);
+  const req = createRequest('https://tinyutils.net/api/sitemap-delta', payload);
   const res = await sitemapDelta(req);
   const data = await res.json();
 
@@ -98,7 +98,7 @@ async function testWaybackFixer() {
     concurrency: 2
   };
 
-  const req = createRequest('https://tinyutils-eight.vercel.app/api/wayback-fixer', payload);
+  const req = createRequest('https://tinyutils.net/api/wayback-fixer', payload);
   const res = await waybackFixer(req);
   const data = await res.json();
 
@@ -117,7 +117,7 @@ async function testWaybackFixer() {
 
 async function testMetafetch() {
   const payload = { url: 'https://example.com/' };
-  const req = createRequest('https://tinyutils-eight.vercel.app/api/metafetch', payload);
+  const req = createRequest('https://tinyutils.net/api/metafetch', payload);
   const res = await metafetch(req);
   const data = await res.json();
 
@@ -139,7 +139,7 @@ async function testCheck() {
     pageUrl: 'https://example.com/',
     mode: 'page'
   };
-  const req = createRequest('https://tinyutils-eight.vercel.app/api/check', payload);
+  const req = createRequest('https://tinyutils.net/api/check', payload);
   const res = await checkHandler(req);
   const data = await res.json();
 

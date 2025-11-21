@@ -1,6 +1,6 @@
 # TinyUtils — ChatGPT Conversation Log (2025-10-28)
 
-Preview URL: https://tinyutils-eight.vercel.app/
+Preview URL: https://tinyutils.net/
 Repo: ~/dev/TinyUtils/tinyutils
 
 This file captures the key Q&A, prompts, decisions, and steps from our session so you can pick up later without losing context.
@@ -27,10 +27,10 @@ This file captures the key Q&A, prompts, decisions, and steps from our session s
 # If installed globally or via npx
 npx tiny-reactive serve --host 127.0.0.1 --port 5566 --headless --debug
 ```
-- Run against Preview URL (defaults to https://tinyutils-eight.vercel.app):
+- Run against Preview URL (defaults to https://tinyutils.net):
 ```
-TINYUTILS_BASE=https://tinyutils-eight.vercel.app node scripts/ui_smoke_sitemap.mjs
-TINYUTILS_BASE=https://tinyutils-eight.vercel.app node scripts/ui_smoke_wayback.mjs
+TINYUTILS_BASE=https://tinyutils.net node scripts/ui_smoke_sitemap.mjs
+TINYUTILS_BASE=https://tinyutils.net node scripts/ui_smoke_wayback.mjs
 ```
 - Outputs:
   - .debug/sitemap-delta-ui.png
