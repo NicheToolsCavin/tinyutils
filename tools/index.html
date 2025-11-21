@@ -115,10 +115,24 @@
       line-height: 1.6;
     }
 
+    /* Two-column section layout */
+    .tools-sections-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-8);
+      margin-top: var(--space-8);
+    }
+
+    @media (max-width: 900px) {
+      .tools-sections-wrapper {
+        grid-template-columns: 1fr;
+      }
+    }
+
     /* Tool Section Headers */
     .tools-section {
-      margin-top: var(--space-8);
-      margin-bottom: var(--space-6);
+      margin-top: 0;
+      margin-bottom: 0;
     }
 
     .tools-section-header {
@@ -299,7 +313,7 @@
           </div>
         </span>
       </nav>
-      <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false">Theme</button>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false">Dark</button>
     </div>
   </div>
 </header>
@@ -322,6 +336,7 @@
     <script>try{(adsbygoogle = window.adsbygoogle || []).push({});}catch(e){}</script>
   </section>
 
+  <div class="tools-sections-wrapper">
   <!-- SEO & Site Management Tools -->
   <section class="tools-section">
     <header class="tools-section-header">
@@ -463,6 +478,7 @@
     </article>
     </div>
   </section>
+  </div>
 </main>
 
 <footer class="site-footer">
