@@ -23,11 +23,21 @@ const BYPASS_CANDIDATES = [
 ].filter(Boolean);
 
 if (!BASE_URL) {
-  console.error('PREVIEW_URL env var is required.');
-  process.exit(1);
+  console.log('⚠️  PREVIEW_URL not set - skipping preview smoke tests.');
+  console.log('   Set PREVIEW_URL to run smoke tests against a preview deployment.');
+  process.exit(0); // Exit gracefully with success code
 }
 
-const pages = ['/', '/tools/', '/tools/dead-link-finder/', '/tools/sitemap-delta/', '/tools/wayback-fixer/', '/cookies.html'];
+const pages = [
+  '/',
+  '/tools/',
+  '/tools/dead-link-finder/',
+  '/tools/sitemap-delta/',
+  '/tools/wayback-fixer/',
+  '/tools/text-converter/',
+  '/tools/multi-file-search-replace/',
+  '/cookies.html'
+];
 
 // Lightweight expectations per page for invariant markup. These are kept
 // deliberately loose to avoid brittleness: we only check for marker classes
@@ -37,14 +47,17 @@ const pageExpectations = {
   '/tools/': { adSlot: true },
   '/tools/dead-link-finder/': { adSlot: true, progressBanner: true },
   '/tools/sitemap-delta/': { adSlot: true, progressBanner: true },
-  '/tools/wayback-fixer/': { adSlot: true },
+  '/tools/wayback-fixer/': { adSlot: true, progressBanner: true },
+  '/tools/text-converter/': { adSlot: true, progressBanner: true },
+  '/tools/multi-file-search-replace/': { adSlot: true, progressBanner: true },
   '/cookies.html': {},
 };
 const apis = [
   { path: '/api/check', body: { pageUrl: 'https://example.com/' } },
   { path: '/api/metafetch', body: { url: 'https://example.com/' } },
   { path: '/api/sitemap-delta', body: { sitemapAText: '<urlset></urlset>', sitemapBText: '<urlset></urlset>' } },
-  { path: '/api/wayback-fixer', body: { list: 'https://example.com/old', verifyHead: false } }
+  { path: '/api/wayback-fixer', body: { list: 'https://example.com/old', verifyHead: false } },
+  { path: '/api/multi-file-search-replace', body: { files: [{ name: 'one.md', blobUrl: 'data:text/markdown;base64,IyB0ZXN0CmZvbwo=' }], search: 'foo', replace: 'bar', previewOnly: true } }
 ];
 
 function buildUrl(path, token) {
