@@ -217,6 +217,14 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-21 04:19 CET - Manual - favicon corrections
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Per-page themed favicons on home/tools; root favicon synced; theme-toggle removes legacy links and injects correct light/dark set
+- **Evidence:** artifacts/hover-animation/20251121/
+- **Follow-ups:**
+
 ### 2025-11-21 03:31 CET - Manual - favicon fallback refresh
 - **Mode:** manual
 - **Branch:** `main`
