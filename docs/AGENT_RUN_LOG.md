@@ -217,6 +217,14 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-21 03:02 CET - Manual - push hover/icon updates
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Pushed hover animation unify + theme-aware icon swap and prefers-color-scheme default
+- **Evidence:** artifacts/hover-animation/20251121/
+- **Follow-ups:**
+
 ### 2025-11-21 02:59 CET - Manual - default theme from system prefs
 - **Mode:** manual
 - **Branch:** `main`
