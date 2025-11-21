@@ -1,4 +1,4 @@
-<!doctype html><html lang='en'><head>
+<!doctype html><html lang='en' data-theme='dark'><head>
 <meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
 <title>Cookie & privacy settings — TinyUtils</title>
 <meta name='description' content='Manage how TinyUtils uses cookies and local storage for analytics and ads, and learn how ads help keep the site free.'>
@@ -6,11 +6,78 @@
 <link rel='icon' href='/public/favicon.ico' sizes='any'>
 <!-- Google AdSense tag (also used by Google CMP / Privacy & messaging) -->
 <script async src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3079281180008443' crossorigin='anonymous'></script>
+<script src='/scripts/theme-toggle.js'></script>
 <link rel='stylesheet' href='/styles/site.css'><link rel='stylesheet' href='/public/styles.css'>
 <script defer src='/scripts/consent.js'></script>
 <script defer src='/scripts/adsense-monitor.js'></script>
+<style>
+  /* Dropdown menu styles */
+  .nav-item {
+    position: relative;
+    display: inline-block;
+  }
+
+  .nav-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--surface-base);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: var(--space-2);
+    margin-top: var(--space-3);
+    min-width: 200px;
+    box-shadow: var(--shadow-xl);
+    z-index: 1000;
+  }
+
+  .nav-item:hover .nav-dropdown {
+    display: block;
+  }
+
+  .nav-dropdown a {
+    display: block;
+    padding: var(--space-2) var(--space-3);
+    color: var(--text-primary);
+    text-decoration: none;
+    border-radius: var(--radius-md);
+    transition: all var(--transition-base);
+    font-size: var(--text-sm);
+  }
+
+  .nav-dropdown a:hover {
+    background: var(--surface-raised);
+    color: var(--brand-500);
+  }
+</style>
 </head>
-<body><a href='#main' class='skip-link'>Skip to main content</a><div id='main' class='container'><div class='card'>
+<body>
+<a href='#main' class='skip-link'>Skip to main content</a>
+
+<header class="site-header">
+  <div class="container row between center">
+    <a class="brand" href="/">TinyUtils</a>
+    <div class="row center">
+      <nav class="nav">
+        <a href="/tools/">Tools</a>
+        <a href="/blog/">Blog</a>
+        <a href="/about.html">About</a>
+        <span class="nav-item">
+          <a class="active" href="/privacy.html">Privacy</a>
+          <div class="nav-dropdown">
+            <a href="/cookies.html">Cookie settings</a>
+            <a href="/privacy.html">Privacy policy</a>
+            <a href="/terms.html">Terms of service</a>
+          </div>
+        </span>
+      </nav>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false">Dark</button>
+    </div>
+  </div>
+</header>
+
+<main id='main'><div class='container'><div class='card'>
 <h2>Cookie &amp; privacy settings</h2>
 
 <p>TinyUtils keeps things simple: we don't run user accounts and we don't sell your personal data. We do rely on a small amount of technology from Google and our own local storage to keep the site running, understand which tools are useful, and, where enabled, show non-intrusive ads that help keep TinyUtils free.</p>
@@ -46,7 +113,22 @@
 <p>For more detail about logs, data retention, and how URLs are processed, see our <a href='/privacy.html'>Privacy</a> page.</p>
 
 </div></div>
+</main>
 
+<footer class="site-footer">
+  <div class="container row between wrap">
+    <span>© <span id="y"></span> TinyUtils</span>
+    <span>
+      <a href="/about.html">About</a> ·
+      <a href="/blog/">Blog</a> ·
+      <a href="/cookies.html">Cookie &amp; privacy settings</a> ·
+      <a href="/privacy.html">Privacy</a> ·
+      <a href="/terms.html">Terms</a>
+    </span>
+  </div>
+</footer>
+
+<script>document.getElementById('y').textContent = new Date().getFullYear();</script>
 <script>
 (function(){
   var btn = document.getElementById('tu-reopen-consent');

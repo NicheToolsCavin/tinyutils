@@ -1,28 +1,81 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>About — TinyUtils</title>
-  <meta name="description" content="Learn what TinyUtils is, who it’s for, and how we think about privacy and reliability.">
+  <meta name="description" content="Learn what TinyUtils is, who it's for, and how we think about privacy and reliability.">
   <link rel="canonical" href="/about.html">
   <link rel="icon" href="/public/favicon.ico" sizes="any">
+  <script src="/scripts/theme-toggle.js"></script>
   <link rel="stylesheet" href="/styles/site.css">
   <link rel="stylesheet" href="/public/styles.css">
   <script defer src="/scripts/consent.js"></script>
   <script defer src="/scripts/adsense-monitor.js"></script>
+  <style>
+    /* Dropdown menu styles */
+    .nav-item {
+      position: relative;
+      display: inline-block;
+    }
+
+    .nav-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: var(--surface-base);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-lg);
+      padding: var(--space-2);
+      margin-top: var(--space-3);
+      min-width: 200px;
+      box-shadow: var(--shadow-xl);
+      z-index: 1000;
+    }
+
+    .nav-item:hover .nav-dropdown {
+      display: block;
+    }
+
+    .nav-dropdown a {
+      display: block;
+      padding: var(--space-2) var(--space-3);
+      color: var(--text-primary);
+      text-decoration: none;
+      border-radius: var(--radius-md);
+      transition: all var(--transition-base);
+      font-size: var(--text-sm);
+    }
+
+    .nav-dropdown a:hover {
+      background: var(--surface-raised);
+      color: var(--brand-500);
+    }
+  </style>
 </head>
 <body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+
   <header class="site-header">
     <div class="container row between center">
       <a class="brand" href="/">TinyUtils</a>
-      <nav class="nav">
-        <a href="/tools/">Tools</a>
-        <a class="active" href="/about.html">About</a>
-        <a href="/cookies.html">Cookie &amp; privacy settings</a>
-        <a href="/privacy.html">Privacy</a>
-        <a href="/terms.html">Terms</a>
-      </nav>
+      <div class="row center">
+        <nav class="nav">
+          <a href="/tools/">Tools</a>
+          <a href="/blog/">Blog</a>
+          <a class="active" href="/about.html">About</a>
+          <span class="nav-item">
+            <a href="/privacy.html">Privacy</a>
+            <div class="nav-dropdown">
+              <a href="/cookies.html">Cookie settings</a>
+              <a href="/privacy.html">Privacy policy</a>
+              <a href="/terms.html">Terms of service</a>
+            </div>
+          </span>
+        </nav>
+        <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false">Dark</button>
+      </div>
     </div>
   </header>
 
@@ -47,16 +100,17 @@
 
   <footer class="site-footer">
     <div class="container row between wrap">
-      <span>© <span id="year"></span> TinyUtils</span>
+      <span>© <span id="y"></span> TinyUtils</span>
       <span>
         <a href="/about.html">About</a> ·
+        <a href="/blog/">Blog</a> ·
         <a href="/cookies.html">Cookie &amp; privacy settings</a> ·
         <a href="/privacy.html">Privacy</a> ·
         <a href="/terms.html">Terms</a>
       </span>
     </div>
   </footer>
-  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+  <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
 </body>
 </html>
 
