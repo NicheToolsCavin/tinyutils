@@ -13,6 +13,7 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 ## Active Tasks (Newest First)
 
 | Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
+| Align tool cards | manual-2025-11-21 CET | Completed | ✅ Grid stretch + card height 100% + action auto-bottom on tools page. Evidence artifacts/hover-animation/20251121/. |
 | Purge old vercel links | manual-2025-11-21 CET | Completed | ✅ tinyutils-eight.vercel.app replaced with tinyutils.net across code/docs/tests/sitemap/robots. Evidence: artifacts/hover-animation/20251121/. |
 | Favicon propagation | manual-2025-11-21 CET | Completed | ✅ Per-theme favicons added to about/privacy/terms/contact/support/feedback/faq + key tools + blog pages; residual pages can reuse snippet if needed. Evidence: artifacts/hover-animation/20251121/. |
 | Idle-notifier policy | manual-2025-11-21 CET | Completed | ✅ Added idle-notifier guidance/requirement to AGENTS.md with default flags; evidence artifacts/hover-animation/20251121/. |
