@@ -13,6 +13,7 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 ## Active Tasks (Newest First)
 
 | Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
+| Tools grid alignment | manual-2025-11-21 CET | Completed | ✅ Two-col grid locked; spacer forces Supported Formats to right column; smooth see-more scroll. Evidence: artifacts/hover-animation/20251121/. |
 | Reshape tools layout | manual-2025-11-21 CET | Completed | ✅ Two top cards, see-more anchor, horizontal ad, 2-col bottom grid. Evidence artifacts/hover-animation/20251121/. Follow-up: visual QA themes. |
 | Align tool cards | manual-2025-11-21 CET | Completed | ✅ Grid stretch + card height 100% + action auto-bottom on tools page. Evidence artifacts/hover-animation/20251121/. |
 | Purge old vercel links | manual-2025-11-21 CET | Completed | ✅ tinyutils-eight.vercel.app replaced with tinyutils.net across code/docs/tests/sitemap/robots. Evidence: artifacts/hover-animation/20251121/. |
