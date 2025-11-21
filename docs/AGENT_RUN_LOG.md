@@ -217,6 +217,65 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-21 00:50 CET - Manual - MF S&R preview smoke attempt (blocked)
+- **Mode:** manual
+- **Branch:** `feat/phase2-ads-light`
+- **Summary:**
+  - Fetched preview URL tinyutils-git-feat-phase2-ads-light-cavins-projects-7b0e00bb.vercel.app; ran preview_smoke with bypass+secret -> MF S&R page/API 404 because preview missing latest build.
+  - Attempted new preview deploy via `vercel --scope cavins-projects-7b0e00bb` but Vercel failed: Serverless Function exceeded 250 MB unzipped size; preview not created.
+  - Preview smoke remains blocked until a new preview deploy succeeds; existing artifacts at artifacts/mfsr/20251121/preview_smoke.log record 404 and 401 runs.
+- **Evidence:** artifacts/mfsr/20251121
+- **Follow-ups:**
+  - Deploy branch safely (address 250MB lambda size) then rerun preview_smoke to verify MF S&R page/API.
+
+### 2025-11-21 00:45 CET - Manual - MF S&R preview smoke pending
+- **Mode:** manual
+- **Branch:** `feat/phase2-ads-light`
+- **Summary:**
+  - Attempted to run preview_smoke.mjs for Multi-file S&R but PREVIEW_URL not set in env or repo env files; bypass tokens not used.
+  - Smoke not executed; ready to rerun once PREVIEW_URL is provided for this branch.
+- **Follow-ups:**
+  - Provide PREVIEW_URL and rerun node scripts/preview_smoke.mjs to capture evidence for /tools/multi-file-search-replace/ and /api/multi-file-search-replace
+
+### 2025-11-21 00:41 CET - Manual - MF S&R preview bypass + hardening tests
+- **Mode:** manual
+- **Branch:** `feat/phase2-ads-light`
+- **Summary:**
+  - Aligned MF S&R UI/API preview-bypass: API forwards x-vercel-protection-bypass/x-preview-secret; UI sends bypass cookie header; extended preview_smoke to cover /tools/multi-file-search-replace/ and /api/multi-file-search-replace.
+  - Added hardening tests for private hosts, unsupported schemes, pattern length cap, and total byte cap in tests/multi-file-search-replace.test.mjs (all passing).
+- **Evidence:** artifacts/mfsr/20251121
+- **Follow-ups:**
+
+### 2025-11-21 00:31 CET - Manual - add multi-file search and replace
+- **Mode:** manual
+- **Branch:** `feat/phase2-ads-light`
+- **Summary:**
+  - Added hardened Edge API /api/multi-file-search-replace with host guards, timeouts+retry, size caps, JSON envelopes, and bypass header forwarding.
+  - Added UI /tools/multi-file-search-replace/ with aria-live status, sticky diff pane, guarded shortcuts, preview-bypass headers; wired into tools hub and sitemap.
+  - Imported tests/multi-file-search-replace.test.mjs, ran npm test, and documented tool in tool_desc_multi-file-search-replace.md.
+- **Evidence:** artifacts/mfsr/20251121
+- **Follow-ups:**
+
+### 2025-11-20 00:32 CET - Manual - add og:url to converter landing pages
+- **Mode:** manual
+- **Branch:** `phase2-ads-light`
+- **Summary:**
+  - Added explicit <meta property=og:url> tags to all 15 text-converter landing pages so each one exposes a canonical absolute URL for social/SEO without changing existing titles, descriptions, or content structure.
+  - Clarified that the pages already include a skip link to #main and proper <main> landmarks and that H2/FAQ sections are present; earlier automated checks over-reported missing H2/FAQ/skip-link issues.
+- **Evidence:** tinyutils/artifacts/converter-landing-smoke/20251120/og-url-update.txt
+- **Follow-ups:**
+  - Optionally tune meta title/description lengths and extend content on shorter pages to consistently hit the 700–850 word target across all converter landings.
+
+### 2025-11-20 00:25 CET - Manual - smoke test converter landing pages
+- **Mode:** manual
+- **Branch:** `phase2-ads-light`
+- **Summary:**
+  - Ran automated SEO/AdSense/accessibility smoke checks on 15 text-converter landing pages using a Python helper script (word counts, ads, meta tags, headings, sections, CTA links).
+  - Identified common issues: slightly short meta descriptions on some pages, missing og:url, missing explicit FAQ sections, missing skip links, and minor HTML tidy warnings about a single invalid character code.
+- **Evidence:** tinyutils/artifacts/converter-landing-smoke/20251120/notes.txt
+- **Follow-ups:**
+  - Review and fix repeated SEO/accessibility issues across all converter landing pages (meta description lengths, og:url, FAQ section, skip link/main landmark, tidy warnings).
+
 ### 2025-11-18 23:03 CET - Manual - wire TinyUtils global AdSense slot
 - **Mode:** manual
 - **Branch:** `fix/converter-race-progress`
