@@ -171,12 +171,23 @@
       margin: var(--space-4) auto 0;
     }
 
+    .tools-top-layout {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: var(--space-6);
+      margin-top: var(--space-6);
+    }
+
     /* Enhanced Tool Cards */
     .tools-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: var(--space-6);
       align-items: stretch;
+    }
+
+    .two-col-bottom {
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     }
 
     .tool-card-enhanced {
@@ -241,6 +252,17 @@
     .tool-card-action {
       margin-top: auto;
       padding-top: var(--space-3);
+    }
+
+    .see-more {
+      text-align: center;
+      margin: var(--space-6) 0 var(--space-2);
+    }
+
+    .ad-slot-wide {
+      width: 100%;
+      max-width: 1100px;
+      margin: var(--space-6) auto;
     }
 
     /* Staggered animations */
@@ -373,74 +395,69 @@
     </p>
   </section>
 
-  <div class="tools-sections-wrapper">
-  <!-- SEO & Site Management Tools -->
-  <section class="tools-section">
-    <header class="tools-section-header">
-      <h2 class="tools-section-title">SEO & Site Management</h2>
-      <p class="tools-section-description">
-        Find broken links, compare sitemaps, and map URLs to archive snapshots.
-      </p>
-    </header>
+  <div class="tools-top-layout">
+    <section class="tools-section">
+      <header class="tools-section-header">
+        <h2 class="tools-section-title">SEO &amp; Site Management</h2>
+        <p class="tools-section-description">
+          Find broken links, compare sitemaps, and map URLs to archive snapshots.
+        </p>
+      </header>
+      <div class="tools-grid">
+        <article class="tool-card-enhanced fade-in-up delay-1">
+          <span class="tool-card-icon" aria-hidden="true">🔍</span>
+          <h3 class="tool-card-title">Dead Link Finder</h3>
+          <p class="tool-card-description">
+            Scan any page, list, or sitemap for broken links. Get detailed status codes,
+            redirect chains, and instant CSV/JSON exports. Respects robots.txt and handles HSTS.
+          </p>
+          <div class="tool-features">
+            <span class="feature-badge-small">Robots-aware</span>
+            <span class="feature-badge-small">Redirect chains</span>
+            <span class="feature-badge-small">HSTS guard</span>
+            <span class="feature-badge-small">Wayback links</span>
+          </div>
+          <div class="tool-card-action">
+            <a class="btn primary" href="/tools/dead-link-finder/">Open tool →</a>
+          </div>
+        </article>
+      </div>
+    </section>
 
-    <div class="tools-grid">
-    <article class="tool-card-enhanced fade-in-up delay-1">
-      <span class="tool-card-icon" aria-hidden="true">🔍</span>
-      <h3 class="tool-card-title">Dead Link Finder</h3>
-      <p class="tool-card-description">
-        Scan any page, list, or sitemap for broken links. Get detailed status codes,
-        redirect chains, and instant CSV/JSON exports. Respects robots.txt and handles HSTS.
-      </p>
-      <div class="tool-features">
-        <span class="feature-badge-small">Robots-aware</span>
-        <span class="feature-badge-small">Redirect chains</span>
-        <span class="feature-badge-small">HSTS guard</span>
-        <span class="feature-badge-small">Wayback links</span>
+    <section class="tools-section">
+      <header class="tools-section-header">
+        <h2 class="tools-section-title">Document Tools</h2>
+        <p class="tools-section-description">
+          Convert between 100+ formats with our Pandoc-powered engine.
+        </p>
+      </header>
+      <div class="tools-grid">
+        <article class="tool-card-enhanced fade-in-up delay-1">
+          <span class="tool-card-icon" aria-hidden="true">📄</span>
+          <h3 class="tool-card-title">Document Converter</h3>
+          <p class="tool-card-description">
+            Convert between 100+ document formats powered by Pandoc.
+            Supports Markdown, PDF, DOCX, HTML, RTF, ODT, LaTeX, and more. Track changes, extract media.
+          </p>
+          <div class="tool-features">
+            <span class="feature-badge-small">100+ formats</span>
+            <span class="feature-badge-small">Track changes</span>
+            <span class="feature-badge-small">Media extract</span>
+            <span class="feature-badge-small">Batch convert</span>
+          </div>
+          <div class="tool-card-action">
+            <a class="btn primary" href="/tools/text-converter/">Open tool →</a>
+          </div>
+        </article>
       </div>
-      <div class="tool-card-action">
-        <a class="btn primary" href="/tools/dead-link-finder/">Open tool →</a>
-      </div>
-    </article>
+    </section>
+  </div>
 
-    <article class="tool-card-enhanced fade-in-up delay-2">
-      <span class="tool-card-icon" aria-hidden="true">🗺️</span>
-      <h3 class="tool-card-title">Sitemap Delta + Redirect Mapper</h3>
-      <p class="tool-card-description">
-        Compare two sitemaps to identify added, removed, and changed URLs.
-        Export nginx/Apache rewrite rules and 410 Gone lists for migrations.
-      </p>
-      <div class="tool-features">
-        <span class="feature-badge-small">Smart mapping</span>
-        <span class="feature-badge-small">Confidence scores</span>
-        <span class="feature-badge-small">Rewrite exports</span>
-        <span class="feature-badge-small">410 CSV</span>
-      </div>
-      <div class="tool-card-action">
-        <a class="btn primary" href="/tools/sitemap-delta/">Open tool →</a>
-      </div>
-    </article>
+  <div class="see-more">
+    <a class="btn secondary" href="#more-tools">See more tools ↓</a>
+  </div>
 
-    <article class="tool-card-enhanced fade-in-up delay-3">
-      <span class="tool-card-icon" aria-hidden="true">⏪</span>
-      <h3 class="tool-card-title">Wayback Fixer</h3>
-      <p class="tool-card-description">
-        Bulk-map broken URLs to Internet Archive snapshots. Configurable time windows,
-        optional HEAD verification, and Save Page Now integration.
-      </p>
-      <div class="tool-features">
-        <span class="feature-badge-small">Bulk mapping</span>
-        <span class="feature-badge-small">Time windows</span>
-        <span class="feature-badge-small">HEAD verify</span>
-        <span class="feature-badge-small">SPN queue</span>
-      </div>
-      <div class="tool-card-action">
-        <a class="btn primary" href="/tools/wayback-fixer/">Open tool →</a>
-      </div>
-    </article>
-    </div>
-  </section>
-
-  <section class="ad-slot" aria-label="Sponsored">
+  <section class="ad-slot ad-slot-wide" aria-label="Sponsored">
     <ins class="adsbygoogle"
          style="display:block"
          data-ad-client="ca-pub-3079281180008443"
@@ -450,81 +467,90 @@
     <script>try{(adsbygoogle = window.adsbygoogle || []).push({});}catch(e){}</script>
   </section>
 
-  <!-- Document Tools -->
-  <section class="tools-section">
-    <header class="tools-section-header">
-      <h2 class="tools-section-title">Document Tools</h2>
-      <p class="tools-section-description">
-        Convert between 100+ formats with Pandoc-powered conversion engine.
-      </p>
-    </header>
+  <div class="tools-sections-wrapper" id="more-tools">
+    <div class="tools-grid two-col-bottom">
+      <article class="tool-card-enhanced fade-in-up delay-2">
+        <span class="tool-card-icon" aria-hidden="true">🗺️</span>
+        <h3 class="tool-card-title">Sitemap Delta + Redirect Mapper</h3>
+        <p class="tool-card-description">
+          Compare two sitemaps to identify added, removed, and changed URLs.
+          Export nginx/Apache rewrite rules and 410 Gone lists for migrations.
+        </p>
+        <div class="tool-features">
+          <span class="feature-badge-small">Smart mapping</span>
+          <span class="feature-badge-small">Confidence scores</span>
+          <span class="feature-badge-small">Rewrite exports</span>
+          <span class="feature-badge-small">410 CSV</span>
+        </div>
+        <div class="tool-card-action">
+          <a class="btn primary" href="/tools/sitemap-delta/">Open tool →</a>
+        </div>
+      </article>
 
-    <div class="tools-grid">
-    <article class="tool-card-enhanced fade-in-up delay-4">
-      <span class="tool-card-icon" aria-hidden="true">📄</span>
-      <h3 class="tool-card-title">Document Converter</h3>
-      <p class="tool-card-description">
-        Convert between 100+ document formats powered by Pandoc.
-        Supports Markdown, PDF, DOCX, HTML, RTF, ODT, LaTeX, and more. Track changes, extract media.
-      </p>
-      <div class="tool-features">
-        <span class="feature-badge-small">100+ formats</span>
-        <span class="feature-badge-small">Track changes</span>
-        <span class="feature-badge-small">Media extract</span>
-        <span class="feature-badge-small">Batch convert</span>
-      </div>
-      <div class="tool-card-action">
-        <a class="btn primary" href="/tools/text-converter/">Open tool →</a>
-      </div>
-    </article>
+      <article class="tool-card-enhanced fade-in-up delay-3">
+        <span class="tool-card-icon" aria-hidden="true">🧭</span>
+        <h3 class="tool-card-title">Multi-file Search &amp; Replace</h3>
+        <p class="tool-card-description">
+          Bulk find and replace text or regex patterns across many documents with safe diff previews and selective download.
+        </p>
+        <div class="tool-features">
+          <span class="feature-badge-small">Regex support</span>
+          <span class="feature-badge-small">Diff preview</span>
+          <span class="feature-badge-small">ZIP download</span>
+        </div>
+        <div class="tool-card-action">
+          <a class="btn primary" href="/tools/multi-file-search-replace/">Open tool →</a>
+        </div>
+      </article>
 
-    <article class="tool-card-enhanced fade-in-up delay-5">
-      <span class="tool-card-icon" aria-hidden="true">🧭</span>
-      <h3 class="tool-card-title">Multi-file Search &amp; Replace</h3>
-      <p class="tool-card-description">
-        Bulk find and replace text or regex patterns across many documents with safe diff previews and selective download.
-      </p>
-      <div class="tool-features">
-        <span class="feature-badge-small">Regex support</span>
-        <span class="feature-badge-small">Diff preview</span>
-        <span class="feature-badge-small">ZIP download</span>
-      </div>
-      <div class="tool-card-action">
-        <a class="btn primary" href="/tools/multi-file-search-replace/">Open tool →</a>
-      </div>
-    </article>
+      <article class="tool-card-enhanced fade-in-up delay-4">
+        <span class="tool-card-icon" aria-hidden="true">⏪</span>
+        <h3 class="tool-card-title">Wayback Fixer</h3>
+        <p class="tool-card-description">
+          Bulk-map broken URLs to Internet Archive snapshots. Configurable time windows,
+          optional HEAD verification, and Save Page Now integration.
+        </p>
+        <div class="tool-features">
+          <span class="feature-badge-small">Bulk mapping</span>
+          <span class="feature-badge-small">Time windows</span>
+          <span class="feature-badge-small">HEAD verify</span>
+          <span class="feature-badge-small">SPN queue</span>
+        </div>
+        <div class="tool-card-action">
+          <a class="btn primary" href="/tools/wayback-fixer/">Open tool →</a>
+        </div>
+      </article>
 
-    <article class="tool-card-enhanced fade-in-up delay-6">
-      <span class="tool-card-icon" aria-hidden="true">🩺</span>
-      <h3 class="tool-card-title">Encoding Doctor</h3>
-      <p class="tool-card-description">
-        Fix mojibake and encoding errors like "FranÃ§ois dâ€™Arcy" → "François d'Arcy". Repair broken accents, smart quotes, and Unicode normalization issues.
-      </p>
-      <div class="tool-features">
-        <span class="feature-badge-small">UTF-8 repair</span>
-        <span class="feature-badge-small">Smart quotes</span>
-        <span class="feature-badge-small">Mojibake fix</span>
-      </div>
-      <div class="tool-card-action">
-        <a class="btn primary" href="/tools/encoding-doctor/">Open tool →</a>
-      </div>
-    </article>
+      <article class="tool-card-enhanced fade-in-up delay-5">
+        <span class="tool-card-icon" aria-hidden="true">🩺</span>
+        <h3 class="tool-card-title">Encoding Doctor</h3>
+        <p class="tool-card-description">
+          Fix mojibake and encoding errors like "FranÃ§ois dâ€™Arcy" → "François d'Arcy". Repair broken accents, smart quotes, and Unicode normalization issues.
+        </p>
+        <div class="tool-features">
+          <span class="feature-badge-small">UTF-8 repair</span>
+          <span class="feature-badge-small">Smart quotes</span>
+          <span class="feature-badge-small">Mojibake fix</span>
+        </div>
+        <div class="tool-card-action">
+          <a class="btn primary" href="/tools/encoding-doctor/">Open tool →</a>
+        </div>
+      </article>
 
-    <article class="tool-card-enhanced fade-in-up delay-7">
-      <span class="tool-card-icon" aria-hidden="true">📚</span>
-      <div class="tool-card-header">
-        <h3 class="tool-card-title">Supported Formats</h3>
-      </div>
-      <p class="tool-card-description">
-        Explore the complete list of input and output formats supported by our document converter.
-        From plain text to complex presentations.
-      </p>
-      <div class="tool-card-action">
-        <a class="btn secondary" href="/tools/formats/">View format list →</a>
-      </div>
-    </article>
+      <article class="tool-card-enhanced fade-in-up delay-6">
+        <span class="tool-card-icon" aria-hidden="true">📚</span>
+        <div class="tool-card-header">
+          <h3 class="tool-card-title">Supported Formats</h3>
+        </div>
+        <p class="tool-card-description">
+          Explore the complete list of input and output formats supported by our document converter.
+          From plain text to complex presentations.
+        </p>
+        <div class="tool-card-action">
+          <a class="btn secondary" href="/tools/formats/">View format list →</a>
+        </div>
+      </article>
     </div>
-  </section>
   </div>
 </main>
 
