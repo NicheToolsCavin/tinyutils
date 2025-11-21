@@ -13,6 +13,7 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 ## Active Tasks (Newest First)
 
 | Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
+| Push hover/icon updates | manual-2025-11-21 CET | Completed | ✅ Pushed main with hover unify + theme-aware icons + system default theme. Evidence: artifacts/hover-animation/20251121/ |
 | Add theme-aware favicons | manual-2025-11-21 CET | Completed | ✅ Light/dark icon pack extracted to public/icons; theme-toggle.js swaps favicons per theme (16/32/64 + apple-touch). Evidence: artifacts/hover-animation/20251121/ |
 | Unify card hover animation across tool boxes | manual-2025-11-21 CET | Completed | ✅ Shared hover lift/shadow applied to card/CTA/blog/tool cards via styles/animations.css + fallback in public/styles.css. Evidence: artifacts/hover-animation/20251121/ |
 | Run preview smoke for MF S&R | manual-2025-11-21 CET | Blocked | Preview deploy via vercel failed (Serverless Function exceeded 250 MB). Existing preview missing latest MF S&R (404). Need successful preview deployment before rerunning preview_smoke with bypass/secret. Evidence: artifacts/mfsr/20251121/preview_smoke.log, vercel deploy error. |
