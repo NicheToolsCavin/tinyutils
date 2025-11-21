@@ -38,6 +38,10 @@
         var palette = theme === 'light' ? 'light' : 'dark';
         var base = '/public/icons/tinyutils-icon-' + palette + '-';
 
+        // remove legacy icons so browsers don't pick stale ones
+        var legacy = head.querySelectorAll('link[rel~="icon"]:not([id^="tu-"]), link[rel="apple-touch-icon"]:not([id^="tu-"])');
+        legacy.forEach(function(node){ head.removeChild(node); });
+
         function upsertIcon(rel, sizes, id, href){
           var link = document.getElementById(id);
           if(!link){

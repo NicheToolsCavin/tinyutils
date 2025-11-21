@@ -217,6 +217,15 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-21 03:18 CET - Manual - favicon theme fix
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - theme-toggle now removes legacy favicons and injects theme-specific icon set on load to fix wrong icon in light mode
+- **Evidence:** artifacts/hover-animation/20251121/
+- **Follow-ups:**
+  - Verify Safari/light shows matching icon on tools and other pages
+
 ### 2025-11-21 03:11 CET - Manual - ad placement/tone + encoding doc light
 - **Mode:** manual
 - **Branch:** `main`
