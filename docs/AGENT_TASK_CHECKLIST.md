@@ -13,6 +13,7 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 ## Active Tasks (Newest First)
 
 | Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
+| Favicon propagation | manual-2025-11-21 CET | Completed | ✅ Per-theme favicons added to about/privacy/terms/contact/support/feedback/faq + key tools + blog pages; residual pages can reuse snippet if needed. Evidence: artifacts/hover-animation/20251121/. |
 | Idle-notifier policy | manual-2025-11-21 CET | Completed | ✅ Added idle-notifier guidance/requirement to AGENTS.md with default flags; evidence artifacts/hover-animation/20251121/. |
 | Favicon corrections | manual-2025-11-21 CET | Completed | ✅ Home/tools pages declare theme-specific icons; root favicon updated; theme-toggle purges legacy icons and injects correct set. Evidence: artifacts/hover-animation/20251121/. |
 | Refresh root favicon | manual-2025-11-21 CET | Completed | ✅ Root public/favicon.ico replaced with icon-pack version to align default load with theme icons. Evidence: artifacts/hover-animation/20251121/. Follow-up: verify initial paint favicon on dark/light. |
