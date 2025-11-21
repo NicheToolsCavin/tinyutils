@@ -217,6 +217,15 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-21 03:31 CET - Manual - favicon fallback refresh
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Replaced root public/favicon.ico with new icon pack version so default favicon matches themed set
+- **Evidence:** artifacts/hover-animation/20251121/
+- **Follow-ups:**
+  - Verify dark/light favicons now consistent on first paint
+
 ### 2025-11-21 03:18 CET - Manual - favicon theme fix
 - **Mode:** manual
 - **Branch:** `main`
