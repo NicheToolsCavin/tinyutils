@@ -217,6 +217,15 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-22 00:35 CET - Manual - tools grid fix + smooth scroll
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Locked bottom tools grid to 2 cols, added spacer so Supported Formats lands right column, smooth scroll for see-more
+- **Evidence:** artifacts/hover-animation/20251121/
+- **Follow-ups:**
+  - Visual check (no adblock) to confirm grid alignment + ad horizontal
+
 ### 2025-11-22 00:28 CET - Manual - tools layout reshape
 - **Mode:** manual
 - **Branch:** `main`
