@@ -118,18 +118,8 @@
       line-height: 1.6;
     }
 
-    /* Two-column section layout - always 2 columns */
     .tools-sections-wrapper {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: var(--space-8);
       margin-top: var(--space-8);
-    }
-
-    @media (max-width: 768px) {
-      .tools-sections-wrapper {
-        gap: var(--space-4);
-      }
     }
 
     /* Tool Section Headers */
@@ -186,8 +176,12 @@
       align-items: stretch;
     }
 
+    .tools-top-layout .tools-grid {
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    }
+
     .two-col-bottom {
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
     }
 
     .tool-card-enhanced {
@@ -229,6 +223,10 @@
       line-height: 1.6;
       flex: 1;
       margin: 0;
+    }
+
+    .tools-top-layout .tool-card-description {
+      min-height: 4.8rem;
     }
 
     .tool-features {
