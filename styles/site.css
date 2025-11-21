@@ -79,6 +79,15 @@ a:hover{color:var(--brand-2)}
 .card h2{margin:0 0 6px;font-size:18px}
 .card p{margin:0 0 12px;color:var(--muted)}
 
+/* Unified card hover effect */
+.blog-card:hover,
+.tool-card:hover,
+.tool-card-enhanced:hover {
+  transform: translateY(-4px);
+  border-color: var(--hover-accent);
+  box-shadow: 0 12px 40px var(--hover-shadow-color);
+}
+
 .tu-consent{position:fixed;right:16px;bottom:16px;max-width:340px;background:#0e1530;color:#e8ecf3;border:1px solid #263464;border-radius:12px;padding:12px 12px 10px;box-shadow:0 12px 30px rgba(0,0,0,.35);z-index:9999}
 .tu-consent h4{margin:0 0 6px;font-size:14px}
 .tu-consent p{margin:0 0 8px;font-size:13px;opacity:.9}

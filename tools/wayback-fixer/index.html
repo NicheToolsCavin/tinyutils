@@ -19,79 +19,7 @@
   <link rel="stylesheet" href="/styles/site.css">
   <script defer src="/scripts/consent.js"></script>
   <script defer src="/scripts/adsense-monitor.js"></script>
-  <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Ubuntu,sans-serif;background:var(--bg);color:var(--text);margin:0}
-    .wrap{max-width:980px;margin:0 auto;padding:24px}
 
-    /* Enhanced Tool Hero */
-    .tool-hero {
-      text-align: center;
-      padding: var(--space-12) 0 var(--space-8);
-      max-width: 750px;
-      margin: 0 auto;
-    }
-
-    .tool-hero-icon {
-      font-size: 4rem;
-      display: block;
-      margin-bottom: var(--space-4);
-      animation: fadeIn 0.6s ease-out;
-    }
-
-    .tool-hero h1 {
-      font-size: var(--text-4xl);
-      font-weight: var(--font-bold);
-      background: var(--gradient-brand);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin: 0 0 var(--space-3) 0;
-      animation: fadeIn 0.6s ease-out 0.1s backwards;
-    }
-
-    .tool-hero .sub {
-      font-size: var(--text-lg);
-      color: var(--text-secondary);
-      margin: 0;
-      line-height: 1.6;
-      animation: fadeIn 0.6s ease-out 0.2s backwards;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .tool-hero-icon, .tool-hero h1, .tool-hero .sub { animation: none !important; }
-    }
-
-    header h1{margin:0 0 8px 0;font-size:28px}
-    .grid{display:grid;gap:12px}
-    .two{grid-template-columns:1fr 1fr}
-    .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:12px}
-    .btn{background:var(--brand);border:none;border-radius:10px;color:#fff;padding:10px 14px;cursor:pointer}
-    .btn.secondary{background:var(--panel);border:1px solid var(--border)}
-    .btn:disabled{opacity:.6;cursor:not-allowed}
-    textarea,input,select{background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px;width:100%}
-    label{font-size:14px}
-    .status{margin-top:6px;opacity:.8}
-    .status progress{width:100%;height:6px;border-radius:999px;margin-top:0.35rem;background:rgba(255,255,255,.12);border:none}
-    .status progress::-webkit-progress-bar{background:rgba(255,255,255,.12);border-radius:999px}
-    .status progress::-webkit-progress-value{background:var(--brand,#3b82f6);border-radius:999px}
-    .chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
-    .chip{border:1px solid var(--border);border-radius:999px;padding:4px 8px;font-size:12px}
-    .chip.active{border-color:var(--brand);color:var(--text)}
-    .tableWrap{max-height:60vh;overflow:auto;border:1px solid var(--border);border-radius:10px}
-    table{width:100%;border-collapse:separate;border-spacing:0}
-    thead th{position:sticky;top:0;background:var(--panel);z-index:2}
-    th,td{padding:8px;border-bottom:1px solid var(--border);text-align:left;font-size:14px;vertical-align:top}
-    .note{font-size:12px;opacity:.9}
-    .toast{position:fixed;right:12px;bottom:12px;background:var(--panel);color:var(--text);border:1px solid var(--border);padding:8px 12px;border-radius:10px;z-index:9999;box-shadow:0 6px 20px rgba(0,0,0,.25)}
-    .foot{opacity:.7;margin-top:18px;font-size:13px}
-    a{color:var(--brand)}
-    .cell-url, td.url, .urlCell { word-break: break-all; }
-</style>
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
