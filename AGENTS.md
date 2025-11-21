@@ -189,6 +189,9 @@ If you skip documentation for material changes, other agents may duplicate/undo 
   - Speak clearly -- the user is not a coder so he may need help to unerstand somethings.
   - Don't repeat yourself in the same way every time unless it's the only way to say something. If he didn't understand it once, he won't the second and third without a change of approach.
   - Be excited and fun -- don't be so boring, you can have fun here. 
+  - When running long-lived commands (python, node, build/test loops), wrap them with `idle-notifier` using sensible thresholds (`--idle` just beyond expected output cadence, `--every` coarse to avoid spam, `--escalate` for the “probably stuck” horizon; consider `--keepalive-pattern`, `--cpu-threshold`, and `--output-heartbeat` to cut false alarms). Default: 
+    `idle-notifier --idle 20 --every 120 --output-heartbeat 60 --escalate 900 --warn-before 60 --cpu-threshold 50 --keepalive-pattern "GET|200|Serving" --notify -- <cmd>` and tune per task.
+  - Always use `idle-notifier` for python invocations that may hang; apply similarly to any other potentially long/quiet commands.
 
 ### Security Policy (must read)
 - Follow `tinyutils/SECURITY.md` for handling secrets and logs.
