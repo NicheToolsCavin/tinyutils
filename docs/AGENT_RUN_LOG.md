@@ -217,6 +217,15 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-22 00:28 CET - Manual - tools layout reshape
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Restructured tools page: two top cards (DLF + Converter), see-more anchor, horizontal ad slot, lower 2-col grid for remaining tools
+- **Evidence:** artifacts/hover-animation/20251121/
+- **Follow-ups:**
+  - Visual QA in both themes; ensure ad stays horizontal
+
 ### 2025-11-22 00:14 CET - Manual - tools card alignment
 - **Mode:** manual
 - **Branch:** `main`
