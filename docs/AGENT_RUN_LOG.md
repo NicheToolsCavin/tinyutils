@@ -217,6 +217,14 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-21 04:21 CET - Manual - idle-notifier policy
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Documented idle-notifier requirement for long/quiet commands (default profile provided) in AGENTS.md
+- **Evidence:** artifacts/hover-animation/20251121/
+- **Follow-ups:**
+
 ### 2025-11-21 04:19 CET - Manual - favicon corrections
 - **Mode:** manual
 - **Branch:** `main`
