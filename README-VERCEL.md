@@ -29,9 +29,9 @@ This guide gets a private preview online so you can run the 7‑step smoke befor
   - Public GA tools (Dead Link Finder, Sitemap Delta, Wayback Fixer) stay open.
 - Evidence lives under `tinyutils/artifacts/pr3-fence/<YYYYMMDD>/` (smoke.txt, 401/200 curl captures).
 - Quick verification (CET timestamps):
-  1. `curl -I https://tinyutils-eight.vercel.app/tools/keyword-density` → `401 preview_required`
-  2. `curl -c cookies.txt "https://tinyutils-eight.vercel.app/api/fence?preview_secret=$PREVIEW_SECRET&target=/tools/keyword-density"`
-  3. `curl -b cookies.txt -I https://tinyutils-eight.vercel.app/tools/keyword-density` → `200 OK`
+  1. `curl -I https://tinyutils.net/tools/keyword-density` → `401 preview_required`
+  2. `curl -c cookies.txt "https://tinyutils.net/api/fence?preview_secret=$PREVIEW_SECRET&target=/tools/keyword-density"`
+  3. `curl -b cookies.txt -I https://tinyutils.net/tools/keyword-density` → `200 OK`
 
 ## Release validation rundown (PR1–PR4)
 
@@ -42,7 +42,7 @@ This guide gets a private preview online so you can run the 7‑step smoke befor
     for path in / "/public/styles.css" /api/check; do \
       slug=$(printf '%s' "$path" | tr '/:' '-') \
       slug=${slug:-root} \
-      curl -sS -D "$ART/headers${slug}.txt" -o /dev/null "https://tinyutils-eight.vercel.app${path}"; \
+      curl -sS -D "$ART/headers${slug}.txt" -o /dev/null "https://tinyutils.net${path}"; \
     done
     ```
   - Expect `content-security-policy` + HSTS on `/`, cache-control on `/public`, and JSON security headers on `/api/check`.

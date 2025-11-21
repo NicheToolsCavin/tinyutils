@@ -24,7 +24,7 @@ function jerr(status, message, note, requestId) {
   }, requestId);
 }
 
-const UA = 'TinyUtils-WaybackFixer/1.0 (+https://tinyutils-eight.vercel.app; hello@tinyutils.net)';
+const UA = 'TinyUtils-WaybackFixer/1.0 (+https://tinyutils.net; hello@tinyutils.net)';
 const HARD_CAP = 200;
 const GLOBAL_FETCH_CAP = 10;
 const PER_ORIGIN_FETCH_CAP = 2;

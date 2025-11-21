@@ -5,7 +5,7 @@ import { Buffer } from 'node:buffer';
 import encodingDoctor from '../api/encoding-doctor.js';
 import { installFetchStub, restoreFetchStub } from './helpers/fetchStub.mjs';
 
-const BASE = 'https://tinyutils-eight.vercel.app';
+const BASE = 'https://tinyutils.net';
 
 function makeRequest(payload, extraHeaders = {}) {
   return new Request(`${BASE}/api/encoding-doctor`, {

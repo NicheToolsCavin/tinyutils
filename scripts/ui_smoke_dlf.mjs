@@ -40,7 +40,7 @@ async function maybeClick(selector) {
 }
 
 async function run() {
-  const base = process.env.TINYUTILS_BASE || 'https://tinyutils-eight.vercel.app';
+  const base = process.env.TINYUTILS_BASE || 'https://tinyutils.net';
   const toolUrl = `${base}/tools/dead-link-finder/?debug=1`;
 
   await cmd({
