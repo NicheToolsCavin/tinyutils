@@ -6,8 +6,9 @@ const PREVIEW_URL = process.env.PREVIEW_URL;
 const BYPASS_TOKEN =
   process.env.BYPASS_TOKEN || process.env.PREVIEW_BYPASS_TOKEN || process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
 if (!PREVIEW_URL) {
-  console.error('PREVIEW_URL env var is required.');
-  process.exit(1);
+  console.log('⚠️  PREVIEW_URL not set - skipping headless preview fallback.');
+  console.log('   Set PREVIEW_URL to capture preview screenshots.');
+  process.exit(0); // Exit gracefully with success code
 }
 if (!BYPASS_TOKEN) {
   console.error('Bypass token is required (set BYPASS_TOKEN, PREVIEW_BYPASS_TOKEN, or VERCEL_AUTOMATION_BYPASS_SECRET).');
