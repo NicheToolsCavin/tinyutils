@@ -181,7 +181,13 @@
     }
 
     .two-col-bottom {
-      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    @media (max-width: 820px) {
+      .two-col-bottom {
+        grid-template-columns: 1fr;
+      }
     }
 
     .tool-card-enhanced {
@@ -227,6 +233,10 @@
 
     .tools-top-layout .tool-card-description {
       min-height: 4.8rem;
+    }
+
+    .tool-card-spacer {
+      visibility: hidden;
     }
 
     .tool-features {
@@ -452,7 +462,7 @@
   </div>
 
   <div class="see-more">
-    <a class="btn secondary" href="#more-tools">See more tools ↓</a>
+    <a class="btn secondary" href="#more-tools" id="see-more">See more tools ↓</a>
   </div>
 
   <section class="ad-slot ad-slot-wide" aria-label="Sponsored">
@@ -519,6 +529,8 @@
         </div>
       </article>
 
+      <div class="tool-card-spacer" aria-hidden="true"></div>
+
       <article class="tool-card-enhanced fade-in-up delay-5">
         <span class="tool-card-icon" aria-hidden="true">🩺</span>
         <h3 class="tool-card-title">Encoding Doctor</h3>
@@ -559,5 +571,17 @@
   </div>
 </footer>
 <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
+<script>
+  (function(){
+    var link = document.getElementById('see-more');
+    var target = document.getElementById('more-tools');
+    if(link && target){
+      link.addEventListener('click', function(e){
+        e.preventDefault();
+        target.scrollIntoView({behavior:'smooth', block:'start'});
+      });
+    }
+  })();
+</script>
 </body>
 </html>
