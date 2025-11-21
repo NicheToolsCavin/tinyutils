@@ -159,6 +159,7 @@ If you skip documentation for material changes, other agents may duplicate/undo 
 - Log required: you committed files; edited docs; changed assets/config; opened/updated a PR; generated evidence artifacts; changed tool behavior/specs.
 - No log: you only read code, searched/browsed docs, planned next steps, or discussed approach with no repo or external state change.
 - Batch small edits: if you make several tiny commits in one short session, a single consolidated log is fine.
+- Agent runs: within a single assistant message/turn, you can run `log_run_entry.py` and `add_task_checklist_entry.py` **once at the end** to summarize all material changes from that turn; you do not need a separate log entry for every micro-task.
 
 ---
 
