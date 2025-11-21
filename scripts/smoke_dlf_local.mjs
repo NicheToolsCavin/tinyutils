@@ -85,7 +85,7 @@ const CASES = [
 (async () => {
   for (const testCase of CASES) {
     try {
-      const request = new Request('https://tinyutils-eight.vercel.app/api/check', {
+      const request = new Request('https://tinyutils.net/api/check', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(testCase.payload)

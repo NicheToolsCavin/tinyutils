@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import handler from '../api/check.js';
 
 test('DLF API responds with JSON error envelopes', async () => {
-  const request = new Request('https://tinyutils-eight.vercel.app/api/check', {
+  const request = new Request('https://tinyutils.net/api/check', {
     method: 'GET'
   });
 

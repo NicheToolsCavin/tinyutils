@@ -1280,7 +1280,7 @@ https://tinyutils-git-fix-converter-pdf-bf1657-cavins-projects-7b0e00bb.vercel.a
 - **CWD:** /Users/cav/dev/TinyUtils/tinyutils
 - **Summary:**
   - Added CSP header and /public cache rule to vercel.json; validated JSON structure.
-  - Captured prod headers at https://tinyutils-eight.vercel.app for /, /public/styles.css, /api/check; stored under tinyutils/artifacts/pr1-security-cache/20251105/.
+  - Captured prod headers at https://tinyutils.net for /, /public/styles.css, /api/check; stored under tinyutils/artifacts/pr1-security-cache/20251105/.
 - **Evidence:** tinyutils/artifacts/pr1-security-cache/20251105/
 - **Follow-ups:**
 

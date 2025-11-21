@@ -23,7 +23,7 @@ export TZ=Europe/Madrid
 TODAY=$(date +%Y%m%d)
 ART=tinyutils/artifacts/pr3-fence/$TODAY
 mkdir -p "$ART"
-PREVIEW_URL=${PREVIEW_URL:-https://tinyutils-eight.vercel.app}
+PREVIEW_URL=${PREVIEW_URL:-https://tinyutils.net}
 node scripts/preview_smoke.mjs | tee "$ART/smoke.txt"
 ```
 
