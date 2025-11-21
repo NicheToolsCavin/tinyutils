@@ -13,6 +13,7 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 ## Active Tasks (Newest First)
 
 | Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
+| Favicon corrections | manual-2025-11-21 CET | Completed | ✅ Home/tools pages declare theme-specific icons; root favicon updated; theme-toggle purges legacy icons and injects correct set. Evidence: artifacts/hover-animation/20251121/. |
 | Refresh root favicon | manual-2025-11-21 CET | Completed | ✅ Root public/favicon.ico replaced with icon-pack version to align default load with theme icons. Evidence: artifacts/hover-animation/20251121/. Follow-up: verify initial paint favicon on dark/light. |
 | Fix favicons by theme | manual-2025-11-21 CET | Completed | ✅ theme-toggle removes legacy link rel=favicon and injects per-theme icon set at load. Evidence: artifacts/hover-animation/20251121/. Follow-up: Safari/light verification. |
 | Ad placement/tone refinement | manual-2025-11-21 CET | Completed | ✅ Home ad now below tools; tools hub ad after first section; ad slots slimmer; ad copy trimmed. Evidence artifacts/hover-animation/20251121/. Follow-up: Safari private/ghostery visual check + Encoding Doctor light. |
