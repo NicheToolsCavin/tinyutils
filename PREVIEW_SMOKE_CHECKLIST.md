@@ -38,6 +38,6 @@ Run these on your **Preview URL** (not public).
 
 **Preview fence evidence (PR3)** — 2025-11-05 CET
 - `node scripts/preview_smoke.mjs` PASS (see `tinyutils/artifacts/pr3-fence/20251105/smoke.txt`).
-- `curl -I https://tinyutils-eight.vercel.app/tools/keyword-density` → 401 `preview_required` (stored in `keyword-density-401-*`).
-- `curl -c cookies.txt "https://tinyutils-eight.vercel.app/api/fence?preview_secret=$PREVIEW_SECRET&target=/tools/keyword-density"` sets `tu_preview_secret`.
-- `curl -b cookies.txt -I https://tinyutils-eight.vercel.app/tools/keyword-density` → 200 OK (stored in `keyword-density-200-*`).
+- `curl -I https://tinyutils.net/tools/keyword-density` → 401 `preview_required` (stored in `keyword-density-401-*`).
+- `curl -c cookies.txt "https://tinyutils.net/api/fence?preview_secret=$PREVIEW_SECRET&target=/tools/keyword-density"` sets `tu_preview_secret`.
+- `curl -b cookies.txt -I https://tinyutils.net/tools/keyword-density` → 200 OK (stored in `keyword-density-200-*`).

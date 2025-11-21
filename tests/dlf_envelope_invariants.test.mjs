@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import checkHandler from '../api/check.js';
 import { installFetchStub, restoreFetchStub } from './helpers/fetchStub.mjs';
 
-const BASE = 'https://tinyutils-eight.vercel.app';
+const BASE = 'https://tinyutils.net';
 
 test.before(() => {
   installFetchStub();

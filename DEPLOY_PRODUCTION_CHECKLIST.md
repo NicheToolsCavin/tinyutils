@@ -20,7 +20,7 @@ Vercel → **Deployments** → click the last GREEN preview → **Promote to Pro
 
 ## PR1: Security Headers & Caching Evidence (CET 2025-11-04)
 
-- Treat `https://tinyutils-eight.vercel.app` as the production domain until the custom apex is attached.
+- Treat `https://tinyutils.net` as the production domain until the custom apex is attached.
 - Archived headers live in `tinyutils/artifacts/pr1-security-cache/20251104/`:
   - `prod-vercel-root-20251104T231729+0100.headers`
   - `prod-vercel-public-20251104T231729+0100.headers`

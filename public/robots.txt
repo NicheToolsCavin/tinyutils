@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://tinyutils-eight.vercel.app/sitemap.xml
+Sitemap: https://tinyutils.net/sitemap.xml

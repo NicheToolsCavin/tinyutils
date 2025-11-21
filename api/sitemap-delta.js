@@ -1,6 +1,6 @@
 export const config = { runtime: 'edge' };
 
-const UA = 'TinyUtils-SitemapDelta/1.0 (+https://tinyutils-eight.vercel.app)';
+const UA = 'TinyUtils-SitemapDelta/1.0 (+https://tinyutils.net)';
 const HARD_CAP = 200;
 const CHILD_SITEMAPS_LIMIT = 50;
 const VERIFY_CONCURRENCY = 6;
