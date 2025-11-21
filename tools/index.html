@@ -115,7 +115,7 @@
       line-height: 1.6;
     }
 
-    /* Two-column section layout */
+    /* Two-column section layout - always 2 columns */
     .tools-sections-wrapper {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -123,9 +123,9 @@
       margin-top: var(--space-8);
     }
 
-    @media (max-width: 900px) {
+    @media (max-width: 768px) {
       .tools-sections-wrapper {
-        grid-template-columns: 1fr;
+        gap: var(--space-4);
       }
     }
 
@@ -285,12 +285,53 @@
 
     /* Responsive adjustments */
     @media (max-width: 768px) {
-      .tools-hero-title {
-        font-size: var(--text-3xl);
+      .tools-hero {
+        padding: var(--space-8) var(--space-4) var(--space-6);
       }
 
-      .tools-grid {
-        grid-template-columns: 1fr;
+      .tools-hero-title {
+        font-size: var(--text-2xl);
+      }
+
+      .tools-hero-subtitle {
+        font-size: var(--text-base);
+      }
+
+      .tools-section-title {
+        font-size: var(--text-lg);
+      }
+
+      .tools-section-description {
+        font-size: var(--text-sm);
+      }
+
+      .tool-card-enhanced {
+        padding: var(--space-3);
+        gap: var(--space-1);
+      }
+
+      .tool-card-icon {
+        font-size: 2rem;
+        margin-bottom: var(--space-1);
+      }
+
+      .tool-card-title {
+        font-size: var(--text-base);
+      }
+
+      .tool-card-description {
+        font-size: var(--text-xs);
+        line-height: 1.5;
+      }
+
+      .feature-badge-small {
+        font-size: 0.65rem;
+        padding: 2px 6px;
+      }
+
+      .btn {
+        font-size: var(--text-sm);
+        padding: 8px 12px;
       }
     }
   </style>
