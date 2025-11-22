@@ -217,6 +217,15 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-22 15:13 CET - Manual - analytics snippet everywhere
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Injected analytics.js loader into all remaining legacy/public/tool/blog pages; added @vercel/analytics dep and package-lock
+- **Evidence:** artifacts/hover-animation/20251122/
+- **Follow-ups:**
+  - Confirm analytics events in dashboard post-deploy; ensure package-lock accepted
+
 ### 2025-11-22 14:52 CET - Manual - add Vercel analytics
 - **Mode:** manual
 - **Branch:** `main`
