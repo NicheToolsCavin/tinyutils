@@ -13,6 +13,7 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 ## Active Tasks (Newest First)
 
 | Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
+| Analytics snippet propagation | manual-2025-11-22 CET | Completed | ✅ Added analytics.js tag to legacy/public/blog/tool pages; @vercel/analytics dependency + lockfile. Evidence: artifacts/hover-animation/20251122/. Follow-up: verify dashboard events. |
 | Add Vercel analytics | manual-2025-11-22 CET | Completed | ✅ Added analytics bootstrap script and wired into major pages. Evidence: artifacts/hover-animation/20251122/. Follow-up: confirm events appear in Vercel dashboard post-deploy. |
 | Tools grid alignment | manual-2025-11-21 CET | Completed | ✅ Two-col grid locked; spacer forces Supported Formats to right column; smooth see-more scroll. Evidence: artifacts/hover-animation/20251121/. |
 | Reshape tools layout | manual-2025-11-21 CET | Completed | ✅ Two top cards, see-more anchor, horizontal ad, 2-col bottom grid. Evidence artifacts/hover-animation/20251121/. Follow-up: visual QA themes. |
