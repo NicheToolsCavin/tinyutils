@@ -217,6 +217,15 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-22 14:52 CET - Manual - add Vercel analytics
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Added scripts/analytics.js (VA bootstrap) and injected across core pages (home, tools, blog, legal)
+- **Evidence:** artifacts/hover-animation/20251122/
+- **Follow-ups:**
+  - Validate analytics events in Vercel dashboard after deploy
+
 ### 2025-11-22 00:35 CET - Manual - tools grid fix + smooth scroll
 - **Mode:** manual
 - **Branch:** `main`
