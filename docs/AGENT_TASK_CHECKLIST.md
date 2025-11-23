@@ -13,6 +13,7 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 ## Active Tasks (Newest First)
 
 | Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
+| Preview smoke after dependency & size fixes | manual-2025-11-23 CET | Completed | ✅ Preview smoke passed on tinyutils-co98whjhb-cavins-projects-7b0e00bb.vercel.app after adding progress banner + preview-only fast path and reducing convert bundle size. Evidence: artifacts/vercel-build/20251123/preview-smoke-3.log |
 | Add CI to validate Python requirements | manual-2025-11-23 CET | Completed | ✅ New workflow .github/workflows/python-requirements-check.yml dry-runs + installs requirements.txt on Python 3.12 and smoke-imports core deps. |
 | Address PR52 comments (pdfminer note) | manual-2025-11-23 CET | Completed | ✅ Added tested-version note for pdfminer.six (20251107 on Python 3.12) in api/convert/requirements.txt per review. Evidence: artifacts/vercel-build/20251123/vercel-build-success-2.log |
 | Consolidate python deps and verify Vercel build | manual-2025-11-23 CET | Completed | ✅ Root requirements now delegates to api/convert/requirements.txt (which holds all deps incl. fastapi/pydantic/pdf stack with pdfminer.six>=20231228,<20300000). Local `vercel build` passes. Evidence: artifacts/vercel-build/20251123/vercel-build-success-2.log |
