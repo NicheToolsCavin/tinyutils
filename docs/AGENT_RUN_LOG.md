@@ -652,6 +652,65 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 - **Evidence:** tinyutils/artifacts/converter-landing-smoke/20251120/notes.txt
 - **Follow-ups:**
   - Review and fix repeated SEO/accessibility issues across all converter landing pages (meta description lengths, og:url, FAQ section, skip link/main landmark, tidy warnings).
+### 2025-11-19 07:28 CET - Manual - converter fidelity list filter
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Extended filters/normalize_lists.lua with a conservative Para-level transform that reconstructs flattened list patterns (e.g. '1. Foo 2. Bar') into proper OrderedList/BulletList blocks while leaving existing fixtures' structure unchanged.
+  - Verified converter_fidelity.mjs metrics remain stable against goldens for tech_doc.docx, lists.docx, images.docx, and html_input.html.
+- **Evidence:** artifacts/converter-fidelity/20251119/baseline/
+- **Follow-ups:**
+  - Consider expanding list reconstruction heuristics if real-world docs exhibit other flattening patterns.
+
+### 2025-11-19 07:00 CET - Manual - converter fidelity api parity
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Mirrored DOCX/ODT media extraction defaults and HTML data: URL sanitisation into api/convert/convert_service.py so Edge /api/convert matches library converter behavior.
+  - Extended tests/converter_api_smoke.mjs to send real tech_doc.md and html_input.html payloads to /api/convert and assert on the JSON envelope and preview headings when CONVERTER_API_BASE_URL is set.
+- **Evidence:** artifacts/converter-fidelity/20251119/baseline/
+- **Follow-ups:**
+  - Run converter_api_smoke against a preview/prod URL and, if needed, tighten structural assertions using preview/meta fields.
+
+### 2025-11-19 03:38 CET - Manual - converter fidelity test scaffolding
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Added docs/converter_fidelity_tests.md plus initial fixture_runner.py helper and Node test skeletons for converter fidelity and api/convert smokes.
+  - Fixture runner currently calls convert.service.convert_one and Node tests ensure fixtures run without crashing; structural AST/golden assertions will follow in a later phase.
+- **Evidence:** artifacts/converter-fidelity/20251119/baseline/
+- **Follow-ups:**
+  - Implement AST-based metrics, goldens, and real assertions in converter_fidelity.mjs and converter_api_smoke.mjs.
+
+### 2025-11-19 03:28 CET - Manual - converter fidelity Phase 2 lists+code+media
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Added preserve_codeblocks Lua filter, extended pandoc filter list, and relaxed blank-line collapsing to stabilise lists and fenced code blocks across MD↔DOCX/HTML.
+  - Updated convert.service to always extract media for DOCX/ODT inputs and to sanitise malformed HTML data: URLs before pandoc, improving DOCX→MD images and HTML→MD robustness.
+- **Evidence:** artifacts/converter-fidelity/20251119/baseline/
+- **Follow-ups:**
+  - Implement dedicated converter fidelity tests (AST + goldens) and mirror HTML sanitisation in api/convert/convert_service.py.
+
+### 2025-11-19 02:52 CET - Manual - converter fidelity baselines
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Generated docx fixtures (lists, images, tech_doc) via pandoc and html_input.html fixture for converter fidelity.
+  - Added run_converter_baseline.py harness and captured baseline outputs under artifacts/converter-fidelity/20251119/baseline/.
+- **Evidence:** artifacts/converter-fidelity/20251119/baseline/
+- **Follow-ups:**
+  - Use baselines to drive Pandoc/Lua fixes for lists, code blocks, images, and HTML→MD in next phase.
+
+### 2025-11-19 02:45 CET - Manual - converter fidelity Phase 1
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Documented converter pipeline and created FAILURE_MATRIX for known fidelity issues.
+  - Scaffolded converter fixtures (tech_doc.md) for future baseline conversions.
+- **Evidence:** artifacts/converter-fidelity/20251119/
+- **Follow-ups:**
+  - Add baseline conversion runs and converter-specific tests in Phase 2.
 
 ### 2025-11-18 23:03 CET - Manual - wire TinyUtils global AdSense slot
 - **Mode:** manual
