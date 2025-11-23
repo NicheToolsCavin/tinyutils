@@ -1,8 +1,4 @@
-# Vercel ignore file - exclude from deployment
+# Trim deployment size; exclude local artifacts and agent logs
+.code/
 artifacts/
-docker/
-tinyutils/
-.debug/
-.env.gcloud
-*.zip
-node_modules/
+.DS_Store

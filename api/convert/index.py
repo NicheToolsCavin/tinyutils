@@ -7,7 +7,7 @@ from typing import Any, Awaitable, Callable
 
 
 try:
-    from .app import (  # pragma: no cover - Vercel entrypoint
+    from convert_backend.app import (  # pragma: no cover - Vercel entrypoint
         ConvertRequest,
         InputItem,
         Options,
