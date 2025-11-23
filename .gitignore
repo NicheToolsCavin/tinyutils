@@ -20,8 +20,26 @@ __pycache__/
 *.so
 *.egg-info/
 
+# Python virtual environments
+.venv/
+.venv-*/
+venv/
+**/.venv/
+**/.venv-*/
+**/venv/
+.pytest_cache/
+**/.pytest_cache/
+
+# SvelteKit build artifacts
+.svelte-kit/
+**/.svelte-kit/
+build/
+**/build/
+
 # Debug and temporary files
 .debug/
 **/*.bak
 *.tmp
 .env.vercel.local
+CLAUDE.md
+AGENTS.md
