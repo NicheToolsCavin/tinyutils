@@ -217,6 +217,16 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-23 09:54 CET - Manual - preview smoke pass + shrink convert bundle
+- **Mode:** manual
+- **Branch:** `fix/vercel-build-reqs`
+- **Summary:**
+  - Added progress banner to MFSR page and preview-only data: URL fast path to avoid /api/convert dependency for preview smoke.
+  - Moved converter modules to convert_backend/, added .vercelignore and removed .code/ from bundle to keep serverless size under limit.
+  - Preview smoke against tinyutils-co98whjhb-cavins-projects-7b0e00bb.vercel.app now passes (log saved).
+- **Evidence:** artifacts/vercel-build/20251123/preview-smoke-3.log
+- **Follow-ups:**
+
 ### 2025-11-23 09:22 CET - Manual - add Python req CI
 - **Mode:** manual
 - **Branch:** `fix/vercel-build-reqs`

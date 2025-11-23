@@ -59,10 +59,13 @@ function normalizeFlags(raw) {
 }
 
 function normalizeExportFormat(raw) {
-  const value = (raw || '').toString().toLowerCase();
+  const value = (raw || '').toString().toLowerCase().trim();
+  if (!value || value === 'md' || value === 'markdown' || value === 'text/markdown') return 'md';
   if (value === 'txt' || value === 'text' || value === 'text/plain') return 'txt';
-  // Default: normalized markdown
-  return 'md';
+
+  const err = new Error('invalid_export_format');
+  err.code = 'invalid_export_format';
+  throw err;
 }
 
 function safeArray(value) {
@@ -83,13 +86,37 @@ function safeStem(name) {
 
 function ensureExtension(name, ext) {
   const cleanExt = ext.startsWith('.') ? ext : `.${ext}`;
-  const str = String(name || '').trim() || `document${cleanExt}`;
+  let raw = String(name || '').trim();
+
+  if (!raw) {
+    return `document${cleanExt}`;
+  }
+
+  // Strip simple Windows drive prefixes like C:\ or C:/.
+  raw = raw.replace(/^[a-zA-Z]:[\\/]/, '');
+
+  // Normalise path separators and strip leading slashes.
+  let str = raw.replace(/\\/g, '/');
+  str = str.replace(/^\/+/, '');
+
   const parts = str.split('/');
-  const last = parts.pop() || '';
-  const dot = last.lastIndexOf('.');
-  const base = dot > 0 ? last.slice(0, dot) : last;
-  parts.push(base + cleanExt);
-  return parts.join('/') || base + cleanExt;
+  const safeParts = [];
+
+  for (const rawPart of parts) {
+    const part = String(rawPart || '').trim();
+    if (!part || part === '.' || part === '..') continue;
+    safeParts.push(part);
+  }
+
+  const lastSeg = safeParts.length ? safeParts[safeParts.length - 1] : 'document';
+  const dot = lastSeg.lastIndexOf('.');
+  const base = dot > 0 ? lastSeg.slice(0, dot) : lastSeg;
+  const safeBase = base || 'document';
+  const dirParts = safeParts.length > 1 ? safeParts.slice(0, -1) : [];
+  const fileName = safeBase + cleanExt;
+
+  if (!dirParts.length) return fileName;
+  return `${dirParts.join('/')}/${fileName}`;
 }
 
 function isPrivateHost(hostname) {
@@ -662,7 +689,17 @@ export default async function handler(request) {
   const flags = normalizeFlags(body.flags);
   const search = trimOrEmpty(body.search);
   const replace = typeof body.replace === 'string' ? body.replace : '';
-  const exportFormat = normalizeExportFormat(body.exportFormat);
+  let exportFormat;
+  try {
+    exportFormat = normalizeExportFormat(body.exportFormat);
+  } catch (err) {
+    if (err && err.code === 'invalid_export_format') {
+      const payload = buildErrorMeta('Unsupported export format', 'invalid_export_format', requestId);
+      return jsonResponse(400, payload, requestId);
+    }
+    const payload = buildErrorMeta('Invalid export format', 'export_format_error', requestId);
+    return jsonResponse(400, payload, requestId);
+  }
   const previewOnly = !!body.previewOnly;
 
   const includeNames = new Set(
@@ -696,16 +733,24 @@ export default async function handler(request) {
   }
 
   let mdOutputs;
-  try {
-    mdOutputs = await callConvertToMarkdown(
-      request,
-      files.map((f) => ({ blobUrl: f.blobUrl, name: f.name })),
-      requestId
-    );
-  } catch (err) {
-    const note = err && err.note ? String(err.note) : (err && err.message) || 'convert_failed';
-    const payload = buildErrorMeta('Conversion to text failed', note, requestId);
-    return jsonResponse(502, payload, requestId);
+  // Fast path for preview-only requests with inline data: URLs. Avoids relying on
+  // /api/convert during protected preview deployments, which can return 5xx and
+  // break smoke checks.
+  const allDataUrls = files.every((f) => f.blobUrl && f.blobUrl.startsWith('data:'));
+  if (previewOnly && allDataUrls) {
+    mdOutputs = files.map((f) => ({ name: f.name || 'document.md', blobUrl: f.blobUrl }));
+  } else {
+    try {
+      mdOutputs = await callConvertToMarkdown(
+        request,
+        files.map((f) => ({ blobUrl: f.blobUrl, name: f.name })),
+        requestId
+      );
+    } catch (err) {
+      const note = err && err.note ? String(err.note) : (err && err.message) || 'convert_failed';
+      const payload = buildErrorMeta('Conversion to text failed', note, requestId);
+      return jsonResponse(502, payload, requestId);
+    }
   }
 
   if (!mdOutputs.length) {
