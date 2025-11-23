@@ -24,6 +24,7 @@
   <link rel="stylesheet" href="/public/styles.css">
   <link rel="stylesheet" href="/styles/site.css">
   <script defer src="/scripts/consent.js"></script>
+  <script defer src="/scripts/googlefc-consent-adapter.js"></script>
   <script defer src="/scripts/adsense-monitor.js"></script>
   <style>
     /* Enhanced Tool Page Styles */
@@ -229,7 +230,7 @@
 
       <section class="card" role="region" aria-labelledby="resultsHeading">
         <div class="status-bar">
-          <h2 id="resultsHeading" style="margin:0">Results</h2>
+          <h2 id="resultsHeading" style="margin:0" tabindex="-1">Results</h2>
           <div class="filter-group">
             <label><input type="checkbox" class="statusFilter" data-group="2" checked> 2xx</label>
             <label><input type="checkbox" class="statusFilter" data-group="3" checked> 3xx</label>
@@ -591,6 +592,11 @@
       });
 
       applyFilters();
+
+      const heading = document.getElementById('resultsHeading');
+      if (heading && typeof heading.focus === 'function') {
+        heading.focus();
+      }
     }
 
     function applyFilters() {
@@ -1105,6 +1111,12 @@
           robotsPart,
           `req ${reqLabel}`
         ];
+        if (typeof meta.robotsSkipped === 'number' && meta.robotsSkipped > 0) {
+          statusParts.push(`robots skipped ${meta.robotsSkipped}`);
+        }
+        if (typeof meta.robotsCrawlDelaySeconds === 'number' && meta.robotsCrawlDelaySeconds > 0) {
+          statusParts.push(`crawl-delay ~${meta.robotsCrawlDelaySeconds}s`);
+        }
         if (metaLineEl) {
           metaLineEl.textContent = statusParts.join(' · ');
         }

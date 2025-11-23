@@ -5,6 +5,8 @@ const MAX_MD_OUTPUTS = 256;
 const CONVERT_TIMEOUT_MS = 120000;
 const BLOB_TIMEOUT_MS = 60000;
 const TEXT_PREVIEW_MAX_CHARS = 600;
+const MAX_TEXT_CHARS = 250000; // hard cap for pasted text
+const MAX_BLOB_BYTES = 2 * 1024 * 1024; // per-blob cap (~2MB) for decoded content
 
 function rid() {
   return Math.random().toString(16).slice(2, 10);
@@ -107,8 +109,64 @@ function decodeDataUrlToBytes(url) {
 
 function decodeDataUrlToText(url) {
   const bytes = decodeDataUrlToBytes(url);
+  if (bytes.length > MAX_BLOB_BYTES) {
+    const err = new Error('blob_payload_too_large');
+    err.code = 'blob_payload_too_large';
+    throw err;
+  }
   const dec = new TextDecoder('utf-8', { fatal: false });
   return dec.decode(bytes);
+}
+
+function isPrivateHost(hostname) {
+  if (!hostname) return true;
+  const host = hostname.toLowerCase();
+  return (
+    host === 'localhost' ||
+    host === '127.0.0.1' ||
+    host === '0.0.0.0' ||
+    host.endsWith('.local') ||
+    host.startsWith('10.') ||
+    host.startsWith('192.168.') ||
+    /^172\.(1[6-9]|2\d|3[0-1])\./.test(host)
+  );
+}
+
+function assertSafeBlobHttpUrl(urlString) {
+  let url;
+  try {
+    url = new URL(urlString);
+  } catch {
+    const err = new Error('invalid_blob_url');
+    err.code = 'invalid_blob_url';
+    throw err;
+  }
+
+  const protocol = url.protocol.toLowerCase();
+  if (protocol !== 'http:' && protocol !== 'https:') {
+    const err = new Error('unsupported_blob_scheme');
+    err.code = 'unsupported_blob_scheme';
+    throw err;
+  }
+
+  const host = url.hostname.toLowerCase();
+  if (isPrivateHost(host)) {
+    const err = new Error('disallowed_blob_host');
+    err.code = 'disallowed_blob_host';
+    throw err;
+  }
+
+  const allowed =
+    host === 'tinyutils.net' ||
+    host === 'www.tinyutils.net' ||
+    host.endsWith('.tinyutils.net') ||
+    host.endsWith('.vercel.app');
+
+  if (!allowed) {
+    const err = new Error('disallowed_blob_host');
+    err.code = 'disallowed_blob_host';
+    throw err;
+  }
 }
 
 async function loadTextFromBlobUrl(url, timeoutMs = BLOB_TIMEOUT_MS) {
@@ -119,12 +177,25 @@ async function loadTextFromBlobUrl(url, timeoutMs = BLOB_TIMEOUT_MS) {
     return decodeDataUrlToText(value);
   }
 
+  assertSafeBlobHttpUrl(value);
+
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const res = await fetch(value, { signal: controller.signal });
     if (!res.ok) throw new Error(`blob_fetch_${res.status}`);
+    const contentLength = Number(res.headers.get('content-length') || '0');
+    if (Number.isFinite(contentLength) && contentLength > MAX_BLOB_BYTES) {
+      const err = new Error('blob_payload_too_large');
+      err.code = 'blob_payload_too_large';
+      throw err;
+    }
     const buf = await res.arrayBuffer();
+    if (buf.byteLength > MAX_BLOB_BYTES) {
+      const err = new Error('blob_payload_too_large');
+      err.code = 'blob_payload_too_large';
+      throw err;
+    }
     const dec = new TextDecoder('utf-8', { fatal: false });
     return dec.decode(buf);
   } finally {
@@ -322,10 +393,21 @@ function repairText(input, options) {
     quotesFixed: 0,
     dashesFixed: 0,
     whitespaceNormalized: 0,
-    normalizationApplied: false
+    normalizationApplied: false,
+    latin1FallbackApplied: false
   };
 
   let text = String(input || '');
+
+   // Optional latin1->UTF-8 fallback when strong mojibake signals are present.
+  if (options.autoRepair) {
+    const original = text;
+    const maybeDecoded = maybeDecodeLatin1ToUtf8(original);
+    if (maybeDecoded !== original) {
+      text = maybeDecoded;
+      stats.latin1FallbackApplied = true;
+    }
+  }
 
   // 1) Mojibake repair (letters + punctuation).
   if (options.autoRepair) {
@@ -383,6 +465,47 @@ function repairText(input, options) {
   return { text, stats };
 }
 
+function countMojibakeSignals(value) {
+  const source = String(value || '');
+  if (!source) return 0;
+  let count = 0;
+  for (const bad of Object.keys(MOJIBAKE_LETTERS)) {
+    if (source.includes(bad)) {
+      count += 1;
+      if (count >= 4) break;
+    }
+  }
+  return count;
+}
+
+function maybeDecodeLatin1ToUtf8(value) {
+  const source = String(value || '');
+  if (!source) return source;
+
+  const signals = countMojibakeSignals(source);
+  if (signals < 4) return source;
+
+  const bytes = new Uint8Array(source.length);
+  for (let i = 0; i < source.length; i += 1) {
+    bytes[i] = source.charCodeAt(i) & 0xff;
+  }
+
+  let decoded;
+  try {
+    const dec = new TextDecoder('utf-8', { fatal: false });
+    decoded = dec.decode(bytes);
+  } catch {
+    return source;
+  }
+
+  const beforeSignals = countMojibakeSignals(source);
+  const afterSignals = countMojibakeSignals(decoded);
+  if (afterSignals < beforeSignals) {
+    return decoded;
+  }
+  return source;
+}
+
 function buildSummary(stats, options) {
   const parts = [];
   const s = stats || {};
@@ -413,6 +536,10 @@ function buildSummary(stats, options) {
 
   if (options.normalizeForm && s.normalizationApplied) {
     parts.push(`applied ${options.normalizeForm} normalization`);
+  }
+
+  if (s.latin1FallbackApplied) {
+    parts.push('redecoded text from Latin-1/Windows-1252');
   }
 
   if (!parts.length) {
@@ -533,6 +660,15 @@ export default async function handler(request) {
     return jsonResponse(400, payload, requestId);
   }
 
+  if (hasText && rawText.length > MAX_TEXT_CHARS) {
+    const payload = buildErrorMeta(
+      `Text input is too large. Maximum supported length is ${MAX_TEXT_CHARS} characters.`,
+      'text_too_large',
+      requestId
+    );
+    return jsonResponse(413, payload, requestId);
+  }
+
   if (files.length > MAX_INPUT_FILES) {
     const payload = buildErrorMeta(
       `Too many files. Maximum supported is ${MAX_INPUT_FILES}.`,
@@ -589,6 +725,27 @@ export default async function handler(request) {
       try {
         originalText = await loadTextFromBlobUrl(out.blobUrl);
       } catch (err) {
+        const code = err && err.code;
+        if (code === 'blob_payload_too_large') {
+          const payload = buildErrorMeta(
+            `Converted text for ${displayName} is too large to process safely.`,
+            'blob_payload_too_large',
+            requestId
+          );
+          return jsonResponse(413, payload, requestId);
+        }
+        if (
+          code === 'invalid_blob_url' ||
+          code === 'unsupported_blob_scheme' ||
+          code === 'disallowed_blob_host'
+        ) {
+          const payload = buildErrorMeta(
+            `Invalid or disallowed blobUrl for ${displayName}.`,
+            code,
+            requestId
+          );
+          return jsonResponse(400, payload, requestId);
+        }
         const payload = buildErrorMeta(
           `Failed to download converted text for ${displayName}`,
           (err && err.message) || 'blob_download_failed',

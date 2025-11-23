@@ -24,6 +24,7 @@
   <link rel="stylesheet" href="/public/styles.css">
   <link rel="stylesheet" href="/styles/site.css">
   <script defer src="/scripts/consent.js"></script>
+  <script defer src="/scripts/googlefc-consent-adapter.js"></script>
   <script defer src="/scripts/adsense-monitor.js"></script>
   <style>
     main { padding-bottom: 48px; }
@@ -445,15 +446,21 @@
           <div id="textResults" hidden>
             <div class="results-columns" aria-label="Pasted text before and after repair">
               <div>
-                <label for="outputOriginal" style="font-size: 0.85rem; display: block; margin-bottom: 0.2rem;">Original (preview)</label>
+                <div class="row between center" style="align-items:flex-end; gap:0.5rem;">
+                  <label for="outputOriginal" style="font-size: 0.85rem; display: block; margin-bottom: 0.2rem;">Original (preview)</label>
+                  <button id="copyOriginal" class="secondary" type="button" style="font-size:0.8rem;">Copy original</button>
+                </div>
                 <textarea id="outputOriginal" readonly></textarea>
               </div>
               <div>
-                <label for="outputFixed" style="font-size: 0.85rem; display: block; margin-bottom: 0.2rem;">Fixed text</label>
+                <div class="row between center" style="align-items:flex-end; gap:0.5rem;">
+                  <label for="outputFixed" style="font-size: 0.85rem; display: block; margin-bottom: 0.2rem;">Fixed text</label>
+                  <button id="copyFixed" class="primary" type="button" style="font-size:0.8rem;">Copy fixed</button>
+                </div>
                 <textarea id="outputFixed" readonly></textarea>
               </div>
             </div>
-            <p id="textSummary" class="results-summary"></p>
+            <p id="textSummary" class="results-summary" role="status" aria-live="polite"></p>
           </div>
 
           <div id="fileResults" class="file-results" hidden>
@@ -877,6 +884,17 @@
         }
       }
 
+      async function copyText(txt){
+        if (!txt) return;
+        try {
+          await navigator.clipboard.writeText(String(txt));
+          setStatus('Copied to clipboard.');
+        } catch (e) {
+          console.warn('encoding-doctor: copy failed', e);
+          setStatus('Copy failed.');
+        }
+      }
+
       function handleReset() {
         if (inputText) inputText.value = '';
         if (fileInput) fileInput.value = '';
@@ -895,15 +913,26 @@
         resetButton.addEventListener('click', handleReset);
       }
 
+      if (copyOriginal && outputOriginal) {
+        copyOriginal.addEventListener('click', function () {
+          copyText(outputOriginal.value || '');
+        });
+      }
+      if (copyFixed && outputFixed) {
+        copyFixed.addEventListener('click', function () {
+          copyText(outputFixed.value || '');
+        });
+      }
+
       document.addEventListener('keydown', function (e) {
         var tag = (e.target && e.target.tagName) || '';
         var inField = /^(INPUT|TEXTAREA|SELECT)$/.test(tag) || !!(e.target && e.target.isContentEditable);
-        if (inField) return;
         if (!(e.metaKey || e.ctrlKey)) return;
         if (isBusy) return;
         if (e.key === 'Enter') {
           e.preventDefault();
           if (runButton) runButton.click();
+          if (outputFixed) outputFixed.focus();
         }
       });
     })();

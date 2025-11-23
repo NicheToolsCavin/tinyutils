@@ -147,3 +147,37 @@ Testing
 
 Commits
 • TBD - feat: add Try Example UX for PR4
+
+### Major changes — 2025-11-22 16:40 CET (UTC+01:00) — Robots crawl-delay & scheduler meta
+
+Added
+• Edge handler now parses `Crawl-delay` from relevant `robots.txt` groups (for TinyUtils UA, TinyUtils fallbacks, or `*`) and captures the per-origin delay in robots metadata.
+• Response `meta` block gained `robotsSkipped` and `robotsCrawlDelaySeconds` so operators can see how many URLs were skipped due to robots and the most conservative crawl-delay observed.
+
+Modified
+• `/api/check` caches robots responses per origin with an attached `crawlDelaySeconds` hint and exposes this in `meta.scheduler` and the top-level meta, without changing existing concurrency caps.
+• The Dead Link Finder UI status line now appends `robots skipped N` and `crawl-delay ~Xs` when applicable so users understand why some URLs weren’t checked.
+
+Fixed
+• Lack of visibility into robots-driven skips and crawl-delay recommendations.
+  - **Problem:** The backend already respected robots rules but the UI/meta only showed a coarse `robotsStatus`, making it hard to know when disallowed paths or crawl-delay hints influenced behavior.
+  - **Root cause:** Robots parsing ignored `Crawl-delay` and never counted disallowed URLs, so those decisions were invisible to operators.
+  - **Fix:** Parse `Crawl-delay` alongside Allow/Disallow, track `robotsSkipped` whenever a URL is rejected by robots, and surface both values in the `meta` block and UI status summary.
+  - **Evidence:** `node --test` (including `tests/api_contracts.test.mjs` DLF contract) with updated meta expectations.
+
+Human-readable summary
+
+**Problem: Robots.txt rules were quietly shaping results.**
+Dead Link Finder already skipped URLs disallowed by robots, but neither the UI nor the metadata clearly told you when that happened or whether a crawl-delay hint existed.
+
+**The fix:** The API now counts how many URLs were skipped by robots and records any crawl-delay hints it sees. The status line shows these numbers, so if some links aren’t checked—or things look slower—you can immediately see that robots is the reason.
+
+Impact
+• SEOs and operators can tell at a glance when robots rules or crawl-delay are limiting checks instead of assuming a bug or network issue. ✅
+• Future tuning of scheduler behavior can rely on the new `robotsSkipped`/`robotsCrawlDelaySeconds` metadata without changing the existing API shape. ✅
+
+Testing
+• `node --test` (DLF envelope + contracts) to ensure meta stays stable and JSON envelopes remain consistent. ✅
+
+Commits
+• TBD — feat(dlf): expose robots crawl-delay and skipped counts in meta/UI

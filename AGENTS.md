@@ -376,8 +376,11 @@ If code changes a tool's observable behavior and no matching log entry is found 
 - Safari / Firefox / Edge: sticky thead, overflow containment, share-state restore, consent gating.
 
 ### Consent / Analytics / Ads
-- Consent banner shows; after accept, Plausible loads.
-- Ads only render if `localStorage.setItem('ads','on')` is set (prod-gated).
+- Google Funding Choices CMP is the **canonical** consent source for analytics and ads.
+- `scripts/consent.js` exposes a tiny `window.TinyUtilsConsent` adapter and manages only the local "hide ads" UI (it is not an independent consent UX).
+- `scripts/googlefc-consent-adapter.js` listens to Funding Choices / Consent Mode signals and maps them into `TinyUtilsConsent.hasAnalyticsConsent()` / `hasAdsConsent()`.
+- `scripts/analytics.js` must consult `TinyUtilsConsent.hasAnalyticsConsent()` before loading analytics; do not add separate consent keys.
+- `scripts/adsense-monitor.js` shows adblock toasts only when on prod/preview hosts, the user has opted into ads via `localStorage.ads === 'on'`, **and** `TinyUtilsConsent.hasAdsConsent()` is true.
 
 ### CSV hardening
 - Opening CSV in Excel/Sheets does **not** execute formulas (leading `= + - @` are prefixed with `'`).

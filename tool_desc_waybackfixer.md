@@ -160,3 +160,37 @@ Testing
 
 Commits
 • TBD - feat: add Try Example UX for PR4
+
+### Major changes — 2025-11-22 16:50 CET (UTC+01:00) — SPN caps and metadata surfacing
+
+Added
+• `/api/wayback-fixer` now tracks Save Page Now attempts vs actual enqueues and exposes a structured `meta.spn = { limit, attempted, enqueued, capped }` alongside the existing `spnLimit`/`spnQueued` fields.
+• Rows that could not be enqueued because the SPN cap was reached carry a new `note: spn_skipped_cap`, making per-URL behavior explicit.
+
+Modified
+• The Wayback Fixer UI status line now reads `SPN N` and appends `(limit reached)` whenever `meta.spn.capped` is true so users immediately see that only some URLs were queued.
+• `noteNice()` gained a human-readable mapping for `spn_skipped_cap` (“SavePageNow skipped (limit reached)”), keeping on-screen notes aligned with CSV/JSON exports.
+
+Fixed
+• Ambiguous SPN behavior when more than 10 URLs lacked snapshots.
+  - **Problem:** The backend enforced an internal SPN cap (≤10) but the UI/meta only showed a simple `spnQueued` count, making it unclear whether remaining `no_snapshot` URLs had been queued or silently skipped.
+  - **Root cause:** SPN enqueue attempts weren’t counted separately from successes, and `note` lacked a dedicated tag when the cap prevented queuing.
+  - **Fix:** Track `spnAttempted` vs `spnQueued`, emit a `meta.spn` object with a `capped` flag, and introduce an explicit `spn_skipped_cap` note on capped rows; the UI reads this meta to clarify when the limit was hit.
+  - **Evidence:** Updated `tests/api_contracts.test.mjs` wayback contract asserting the new `meta.spn` shape plus full `node --test` run.
+
+Human-readable summary
+
+**Problem: “SPN 10” didn’t tell the whole story.**
+Wayback Fixer quietly capped Save Page Now calls at ten per run, but if you pasted twenty dead URLs you couldn’t see which ones were actually queued or whether the cap had been reached.
+
+**The fix:** The API now distinguishes between “we tried to queue this URL” and “we actually enqueued it,” and the UI tells you when the SPN limit was reached. Rows that were skipped because of the cap are clearly labeled, and the status line explains that only some URLs were queued.
+
+Impact
+• Operators can safely run larger lists knowing exactly how many URLs were queued and which ones were skipped, avoiding false assumptions about full coverage. ✅
+• CSV/JSON exports remain aligned with the documented headers while carrying clearer SPN-related `note` values for downstream tooling. ✅
+
+Testing
+• `node --test` (including updated API contract tests) to verify the new `meta.spn` structure and that existing flows remain intact. ✅
+
+Commits
+• TBD — feat(wayback): expose SPN cap metadata and notes in API/UI

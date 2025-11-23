@@ -23,6 +23,7 @@
   <link rel="stylesheet" href="/public/styles.css">
   <link rel="stylesheet" href="/styles/site.css">
   <script defer src="/scripts/consent.js"></script>
+  <script defer src="/scripts/googlefc-consent-adapter.js"></script>
   <script defer src="/scripts/adsense-monitor.js"></script>
 
 <script type="application/ld+json">
@@ -443,8 +444,22 @@
     else if ((e.metaKey || e.ctrlKey) && (e.key === 'j' || e.key === 'J')) { e.preventDefault(); document.getElementById('dlJson').click(); }
   });
 
+  const MULTI_PART_PUBLIC_SUFFIXES = ['co.uk', 'ac.uk', 'gov.uk', 'org.uk', 'co.nz', 'com.au'];
+
   function registrable(host) {
-    const parts = (host || '').toLowerCase().split('.');
+    const h = (host || '').toLowerCase();
+    const parts = h.split('.').filter(Boolean);
+    if (parts.length <= 1) return h;
+
+    const suffix = MULTI_PART_PUBLIC_SUFFIXES.find((suf) => h === suf || h.endsWith(`.${suf}`));
+    if (suffix) {
+      const suffixParts = suffix.split('.');
+      const labelsBefore = parts.slice(0, parts.length - suffixParts.length);
+      const sld = labelsBefore.pop();
+      if (!sld) return suffix;
+      return `${sld}.${suffix}`;
+    }
+
     return parts.slice(-2).join('.');
   }
 
