@@ -217,6 +217,14 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-23 10:43 CET - Manual - CI workflow path fix
+- **Mode:** manual
+- **Branch:** `fix/vercel-build-reqs`
+- **Summary:**
+  - Removed bad working-directory in python-requirements-check.yml and added pdfminer version assertion.
+- **Evidence:** .github/workflows/python-requirements-check.yml
+- **Follow-ups:**
+
 ### 2025-11-23 09:54 CET - Manual - preview smoke pass + shrink convert bundle
 - **Mode:** manual
 - **Branch:** `fix/vercel-build-reqs`
