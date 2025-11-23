@@ -217,6 +217,15 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-23 09:22 CET - Manual - add Python req CI
+- **Mode:** manual
+- **Branch:** `fix/vercel-build-reqs`
+- **Summary:**
+  - Added GH workflow python-requirements-check.yml to dry-run + install requirements.txt on Python 3.12 and smoke-import core deps.
+  - Covers fastapi/pydantic/requests/pypandoc/pypdf/pdfminer.six/pdfplumber to guard future bumps.
+- **Evidence:** .github/workflows/python-requirements-check.yml
+- **Follow-ups:**
+
 ### 2025-11-23 09:20 CET - Manual - PR52 review tweaks
 - **Mode:** manual
 - **Branch:** `fix/vercel-build-reqs`
