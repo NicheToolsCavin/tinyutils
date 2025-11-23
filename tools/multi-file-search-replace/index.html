@@ -24,6 +24,7 @@
   <link rel="stylesheet" href="/public/styles.css">
   <link rel="stylesheet" href="/styles/site.css">
   <script defer src="/scripts/consent.js"></script>
+  <script defer src="/scripts/googlefc-consent-adapter.js"></script>
   <script defer src="/scripts/adsense-monitor.js"></script>
   <style>
     main { padding-bottom: 48px; }
@@ -516,6 +517,11 @@
             <span class="hint">Shortcut: <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>Enter</kbd> to preview.</span>
           </div>
 
+          <div id="progress" class="progress-banner" aria-live="polite" role="status">
+            <span id="progressMessage" class="progress-text">Ready — upload files and click <strong>Preview changes</strong>.</span>
+            <progress id="progressMeter" max="100" value="0" hidden></progress>
+          </div>
+
           <div id="status" class="status-banner" aria-live="polite">
             Ready — upload files and enter a search pattern.
           </div>
@@ -640,6 +646,8 @@
       var lastSelectedIndex = -1;
       var isRunning = false;
       var NONE_SENTINEL = '::tinyutils-mfsr-none-selected::';
+      var lastPreviewConfig = null;
+      var LARGE_MATCH_THRESHOLD = 1000;
 
       function buildBypassHeaders() {
         var headers = {};
@@ -765,6 +773,18 @@
         return state;
       }
 
+      function captureCurrentConfig(payload) {
+        return {
+          search: payload && typeof payload.search === 'string' ? payload.search : (searchInput && searchInput.value) || '',
+          replace: payload && typeof payload.replace === 'string' ? payload.replace : (replaceInput && replaceInput.value) || '',
+          mode: payload && payload.mode ? payload.mode : getMode(),
+          flags: payload && payload.flags ? payload.flags : buildFlags(),
+          fileNames: (uploadedFiles || []).map(function (f) {
+            return f && f.name ? f.name : 'document';
+          })
+        };
+      }
+
       function renderResults(result) {
         lastResult = result || null;
         lastSelectedIndex = -1;
@@ -798,14 +818,10 @@
           return sum + m;
         }, 0);
 
-        var modeLabel = getMode() === 'regex' ? 'regex' : 'plain text';
-        var exportLabel = getExportFormat() === 'txt' ? 'plain text' : 'Markdown';
-
         resultsSummaryEl.textContent =
-          totalFiles + ' file' + (totalFiles === 1 ? '' : 's') + ' processed — ' +
-          changedFiles + ' with changes, ' +
+          totalFiles + ' file' + (totalFiles === 1 ? '' : 's') + ', ' +
           totalMatches + ' match' + (totalMatches === 1 ? '' : 'es') +
-          ' (' + modeLabel + ' search, ' + exportLabel + ' export).';
+          ' (' + changedFiles + ' file' + (changedFiles === 1 ? '' : 's') + ' with changes).';
 
         resultsSummaryEl.classList.remove('hidden');
 
@@ -1009,6 +1025,108 @@
         return payload;
       }
 
+      function configsMatchPreview(payload) {
+        if (!lastPreviewConfig) return false;
+        if (!payload) return false;
+
+        var prev = lastPreviewConfig;
+        if ((payload.search || '') !== (prev.search || '')) return false;
+        if ((payload.replace || '') !== (prev.replace || '')) return false;
+        if ((payload.mode || '') !== (prev.mode || '')) return false;
+
+        var flags = payload.flags || {};
+        var prevFlags = prev.flags || {};
+        if (!!flags.caseSensitive !== !!prevFlags.caseSensitive) return false;
+        if (!!flags.global !== !!prevFlags.global) return false;
+        if (!!flags.multiline !== !!prevFlags.multiline) return false;
+
+        var currentNames = (uploadedFiles || []).map(function (f) {
+          return f && f.name ? f.name : 'document';
+        });
+        var prevNames = Array.isArray(prev.fileNames) ? prev.fileNames : [];
+
+        if (currentNames.length !== prevNames.length) return false;
+        for (var i = 0; i < currentNames.length; i += 1) {
+          if (currentNames[i] !== prevNames[i]) return false;
+        }
+
+        return true;
+      }
+
+      function computePreviewMatchStats() {
+        if (!lastResult || !Array.isArray(lastResult.files)) return null;
+        var files = lastResult.files;
+        var totalFiles = files.length;
+        var changedFiles = 0;
+        var totalMatches = 0;
+
+        files.forEach(function (file) {
+          var matches = file && typeof file.matches === 'number' ? file.matches : 0;
+          var changed = !!(file && file.changed);
+          totalMatches += matches;
+          if (changed) changedFiles += 1;
+        });
+
+        return {
+          totalFiles: totalFiles,
+          changedFiles: changedFiles,
+          totalMatches: totalMatches
+        };
+      }
+
+      function shouldConfirmDestructive(payload) {
+        if (!payload) return false;
+
+        var flags = payload.flags || buildFlags();
+        var replacement = typeof payload.replace === 'string' ? payload.replace : '';
+        var isGlobal = !!flags.global;
+        var isEmptyReplacement = !replacement;
+
+        var stats = null;
+        var previewMatchesLarge = false;
+
+        if (configsMatchPreview(payload)) {
+          stats = computePreviewMatchStats();
+          if (stats && typeof stats.totalMatches === 'number') {
+            previewMatchesLarge = stats.totalMatches >= LARGE_MATCH_THRESHOLD;
+          }
+        }
+
+        if (!isGlobal && !previewMatchesLarge) {
+          return false;
+        }
+
+        return (isGlobal && isEmptyReplacement) || previewMatchesLarge;
+      }
+
+      function buildDestructiveConfirmMessage(payload) {
+        var flags = payload && payload.flags ? payload.flags : buildFlags();
+        var replacement = typeof payload.replace === 'string' ? payload.replace : '';
+        var parts = [];
+
+        var summary = null;
+        if (configsMatchPreview(payload)) {
+          summary = computePreviewMatchStats();
+        }
+
+        if (summary) {
+          parts.push(
+            'You are about to apply changes based on the last preview: ' +
+              summary.changedFiles + ' file' + (summary.changedFiles === 1 ? '' : 's') +
+              ' with ' + summary.totalMatches + ' total match' + (summary.totalMatches === 1 ? '' : 'es') + '.'
+          );
+        } else {
+          parts.push('You are about to apply search and replace across multiple files.');
+        }
+
+        if (flags.global && !replacement) {
+          parts.push('The replacement is empty and global, so matching text will be removed wherever it appears.');
+        }
+
+        parts.push('This action cannot be undone. Continue?');
+        return parts.join(' ');
+      }
+
       function run(previewOnly) {
         if (isRunning) return;
         clearError();
@@ -1025,6 +1143,13 @@
             setStatus('Missing required input.', true);
           }
           return;
+        }
+
+        if (!previewOnly && shouldConfirmDestructive(payload)) {
+          var message = buildDestructiveConfirmMessage(payload);
+          if (!window.confirm(message)) {
+            return;
+          }
         }
 
         isRunning = true;
@@ -1061,6 +1186,9 @@
           }
 
           renderResults(data);
+          if (previewOnly && data.ok) {
+            lastPreviewConfig = captureCurrentConfig(payload);
+          }
           setStatus(
             previewOnly
               ? 'Preview updated — click a file to see its diff.'
