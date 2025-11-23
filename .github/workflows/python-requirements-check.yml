@@ -1,0 +1,47 @@
+name: Python requirements check
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pip-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
+
+      - name: Dry-run dependency resolution
+        run: python -m pip install --disable-pip-version-check --no-cache-dir --dry-run -r requirements.txt
+
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check --no-cache-dir -r requirements.txt
+
+      - name: Smoke import core libs
+        run: |
+          python - <<'PY'
+          import fastapi
+          import pydantic
+          import requests
+          import pypandoc
+          import pypdf
+          import pdfminer
+          import pdfplumber
+          from importlib.metadata import version
+          v = version("pdfminer.six")
+          print(f"pdfminer.six version: {v}")
+          assert int(v.replace('.','').split()[0]) >= 20231228, "pdfminer.six too old"
+          print("imports_ok")
+          PY
