@@ -217,6 +217,14 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-23 09:20 CET - Manual - PR52 review tweaks
+- **Mode:** manual
+- **Branch:** `fix/vercel-build-reqs`
+- **Summary:**
+  - Annotated pdfminer.six constraint with tested version (20251107 on Python 3.12) per PR review.
+- **Evidence:** artifacts/vercel-build/20251123/vercel-build-success-2.log
+- **Follow-ups:**
+
 ### 2025-11-23 04:14 CET - Manual - consolidate python deps + verify build
 - **Mode:** manual
 - **Branch:** `fix/vercel-build-reqs`
