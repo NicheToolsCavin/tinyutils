@@ -1,5 +1,76 @@
 ## Converter Tool — Description and Change Log
 
+### Major changes — 2025-11-19 02:30 CET (UTC+01:00) — Converter fidelity baselines, filters, and tests
+
+Added
+• Pipeline overview for the converter in `docs/converter_pipeline.md`, documenting the flow from `/api/convert` → `convert.service.convert_batch/convert_one` → `pandoc_runner` → Lua filters → `normalise_markdown` → target artifacts.
+• Converter fidelity fixtures under `tests/fixtures/converter/` (`tech_doc.md`/`.docx`, `lists.docx`, `images.docx`, `html_input.html`, `test_image.png`) plus a small README describing their roles.
+• Baseline harness `scripts/run_converter_baseline.py` that runs the library converter over the fixtures and stores outputs in `artifacts/converter-fidelity/20251119/baseline/` with a README.
+• `docs/converter_fidelity_tests.md` and scaffolding for regression tests:
+  - Python helper `tests/converter/fixture_runner.py` to call `convert.service.convert_one` and compute lightweight structural metrics via `pandoc --to=json`.
+  - Node tests `tests/converter_fidelity.mjs` that compare metrics for fixtures against goldens in `tests/golden/converter/*.metrics.json`.
+  - Node smokes `tests/converter_api_smoke.mjs` that exercise `/api/convert` with tech_doc/html fixtures when `CONVERTER_API_BASE_URL` is set.
+
+Modified
+• Pandoc runner filter chain (`api/_lib/pandoc_runner.py`) now includes a new Lua filter `filters/preserve_codeblocks.lua` alongside `softbreak_to_space.lua`, `strip_empty_spans.lua`, and `normalize_lists.lua` so fenced code blocks are rendered consistently as ``` fences (with language tags when present).
+• List handling in `filters/normalize_lists.lua`:
+  - Still normalizes ordered list numbering for deterministic output.
+  - Adds a conservative `Para`-level transform that reconstructs flattened list patterns (e.g. `1. Foo 2. Bar` or `- One - Two`) into proper `OrderedList` / `BulletList` blocks when at least two markers are present, preserving inline formatting.
+• Markdown cleanup in `api/_lib/text_clean.py` is less aggressive:
+  - `MULTI_BLANK_RE` now collapses only runs of 4+ blank lines, reducing the risk of damaging list/code layout while still trimming pathological whitespace.
+• Library converter (`convert/service.py`) and Edge converter (`api/convert/convert_service.py`):
+  - Default DOCX/ODT → Markdown conversions now enable Pandoc's `--extract-media` for embedded images by default (even when the caller does not explicitly request `extract_media`), so `preview.images` and media ZIPs are populated reliably.
+  - HTML inputs (`from="html"`) are pre-sanitised via `_sanitize_html_for_pandoc()` before Pandoc sees them, using a strict regex to leave valid `data:*;base64,...` URLs intact and downgrade malformed `data:` URLs to `src="" data-url-removed="invalid-data-url"`.
+
+Fixed
+• Flattened lists in roundtrip flows and some HTML paths:
+  - **Problem:** MD→DOCX→MD and some MD→HTML/HTML→MD paths produced paragraphs like `**Ordered:** 1. First item 2. Second item ...` instead of proper `<ol>/<ul>` in HTML or Markdown `1.`/`-` list structures.
+  - **Root cause:** Pandoc and subsequent cleanup could collapse multiple list items into a single paragraph, and the converter had no post-pass to reconstruct them.
+  - **Fix:** Extended `normalize_lists.lua` with a conservative `Para` transform that looks for multiple `"1."`/`"2."`/`-` list markers in a single paragraph and splits them into real `OrderedList`/`BulletList` blocks while preserving inline formatting; blank-line collapsing in `normalise_markdown()` was also relaxed.
+  - **Evidence:** Updated baselines in `artifacts/converter-fidelity/20251119/baseline/` and metrics in `tests/golden/converter/*.metrics.json` show stable list counts/depths for `tech_doc.docx` and `lists.docx` fixtures, enforced by `tests/converter_fidelity.mjs`.
+• Fenced code blocks lost or degraded on DOCX/HTML roundtrips:
+  - **Problem:** Technical documents with fenced code blocks (```js / ```python) sometimes returned as indented blocks or inline text containing literal backticks after DOCX/HTML roundtrips.
+  - **Root cause:** Pandoc's default writers could emit indented code for `CodeBlock` nodes, and some intermediate flows collapsed fences into plain paragraphs.
+  - **Fix:** Introduced `filters/preserve_codeblocks.lua` to:
+    - Promote simple inline-fence paragraphs into `CodeBlock` nodes when they clearly look like flattened ```lang ... ``` patterns.
+    - Emit all `CodeBlock` nodes back to markdown as fenced blocks with the first class (language) in the fence info string.
+  - **Evidence:** `tech_doc_md_docx_md_roundtrip_md_tech_doc.md` now contains fenced code blocks instead of indented code; `tests/converter_fidelity.mjs` asserts that code-block counts remain stable across runs.
+• DOCX→MD embedded images difficult to consume from clients:
+  - **Problem:** Embedded images in DOCX/ODT sources were extracted only when callers set `extract_media`, making it easy to forget and leading to missing media in previews/UI when using default options.
+  - **Root cause:** `extract_media_dir` was only enabled when `options.extract_media` was true.
+  - **Fix:** For DOCX/ODT → Markdown conversions, both the library converter and `/api/convert` now always enable `--extract-media` into a per-job `media/` directory, wiring the resulting files into `preview.images` via `media_manifest()` and into the media ZIP artifact.
+  - **Evidence:** `images.docx` and `tech_doc.docx` fixtures now surface image metadata through the same code paths, and regression metrics for `images_docx` remain stable.
+• HTML→Markdown failures on malformed `data:` URLs:
+  - **Problem:** When converting HTML fixtures with malformed `data:` URLs, Pandoc could raise a `RuntimeError` leading to 400/500 responses or failed conversions.
+  - **Root cause:** The converter passed the raw HTML directly to Pandoc without validating `src="data:..."` attributes.
+  - **Fix:** Added `_sanitize_html_for_pandoc()` in both converter implementations to rewrite only obviously invalid `data:` URLs to `src="" data-url-removed="invalid-data-url"`, leaving valid `;base64` URLs unchanged; this happens before the Pandoc call and keeps the rest of the HTML intact.
+  - **Evidence:** The `html_input.html` fixture now converts successfully to Markdown (`html_input_to_md_html_input.md`), preserves valid data URLs, and shows sanitized invalid ones; `tests/converter_fidelity.mjs` and `tests/converter_api_smoke.mjs` (when pointed at a live `/api/convert`) exercise this path.
+
+Human-readable summary
+
+We gave the converter a "fidelity mode" upgrade without changing its public API.
+
+Behind the scenes, there is now a clear pipeline doc and a small suite of canonical fixtures (tech_doc, lists, images, html_input) that we run through both the library converter and the Edge `/api/convert` path. Those runs produce baseline outputs and structural metrics (how many lists, code blocks, images), and we treat those metrics as goldens.
+
+On the behavior side, lists and code blocks are much more stable when you roundtrip documents through DOCX or HTML: multi-item paragraphs like `1. Foo 2. Bar` get turned back into real lists, and code samples come back as fenced blocks instead of weird inline backtick soup. DOCX/ODT inputs always extract embedded images into a media bundle, so previews and downloads have the assets they need. HTML inputs are more robust too: valid `data:` images make it through, while obviously broken `data:` URLs no longer crash the converter and are clearly marked in the output.
+
+All of this is guarded by a new converter-fidelity test scaffold that runs during `node --test`: if future changes break list shapes, code-block counts, or image handling for the fixtures, the tests will flag it before it ever hits production.
+
+Impact
+• Better list fidelity on DOCX/HTML roundtrips for common patterns (flattened ordered/bullet lists reconstructed where safe). ✅
+• Stable fenced code blocks (with language tags when present) across MD↔DOCX/HTML, reducing surprises for technical documentation. ✅
+• Embedded DOCX/ODT images reliably extracted and exposed via preview/media artifacts, even when callers use default options. ✅
+• HTML→MD is resilient to malformed `data:` URLs; valid data URLs are preserved and broken ones no longer crash conversions. ✅
+• Converter behavior for the four canonical fixtures is now tracked via metrics and goldens, making regressions much easier to catch. ✅
+
+Testing
+• Library baselines refreshed via `python scripts/run_converter_baseline.py`, storing outputs in `artifacts/converter-fidelity/20251119/baseline/`.
+• Service-level regression metrics verified by `node --test tests/converter_fidelity.mjs` using `tests/golden/converter/*.metrics.json` for `tech_doc.docx`, `lists.docx`, `images.docx`, and `html_input.html`. ✅
+• `/api/convert` smokes scaffolded in `tests/converter_api_smoke.mjs`, asserting on the JSON envelope and preview headings for markdown and HTML fixtures when `CONVERTER_API_BASE_URL` points at a running Edge deployment. ✅ (local runs skip when the env var is unset).
+
+Commits
+• (local workspace) — pandoc_runner filter chain + Lua filters + text_clean + converter fidelity harness/tests; see run log entries on 2025-11-19 in `docs/AGENT_RUN_LOG.md` for details and future commit hashes.
+
 ### Major changes — 2025-11-15 01:05 CET (UTC+01:00) — Layout-aware PDF→Markdown + UI toast
 
 Added

@@ -22,12 +22,14 @@ try:  # pragma: no cover — optional dependency at runtime
 except Exception:  # pragma: no cover
     pdfplumber = None  # type: ignore
 
-from api._lib import pandoc_runner
-from api._lib.manifests import build_snippets, collect_headings, media_manifest
-from api._lib.text_clean import normalise_markdown
-from api._lib.utils import ensure_within_limits, generate_job_id, job_workspace
+# Use relative imports since we're in api/convert/ directory
+from .._lib import pandoc_runner
+from .._lib.html_utils import sanitize_html_for_pandoc
+from .._lib.manifests import build_snippets, collect_headings, media_manifest
+from .._lib.text_clean import normalise_markdown
+from .._lib.utils import ensure_within_limits, generate_job_id, job_workspace
 
-from convert_backend.convert_types import (
+from .convert_types import (
     BatchResult,
     ConversionError,
     ConversionOptions,
@@ -354,10 +356,10 @@ def _extract_markdown_from_pdf(
         # Degradation guardrails
         degraded = timed_out or (len(text) < 64) or ("\n" not in text and len(text) > 0)
         if degraded:
-            meta["degraded"] = True
             meta["degraded_reason"] = (
                 "timeout" if timed_out else "too_short_or_single_line"
             )
+            meta["fallback_used"] = True
         return md_path, meta
     except Exception as exc:  # pragma: no cover - pass to fallback
         raise RuntimeError(f"pdfminer_failed: {exc}")
@@ -447,9 +449,15 @@ def convert_one(
             filtered_md = workspace / "filtered.md"
             cleaned_md = workspace / "cleaned.md"
             media_dir = workspace / "media"
-            extract_dir: Optional[Path] = media_dir if opts.extract_media else None
-            if extract_dir:
+            # For DOCX/ODT inputs we always extract media so downstream
+            # consumers can access embedded images, even when the caller did
+            # not explicitly request it.
+            extract_dir: Optional[Path]
+            if opts.extract_media or (from_format in {"docx", "odt"}):
+                extract_dir = media_dir
                 extract_dir.mkdir(parents=True, exist_ok=True)
+            else:
+                extract_dir = None
 
             # Use the adjusted_from for the actual conversion (post-detection)
             if adjusted_from != from_format:
@@ -488,37 +496,12 @@ def convert_one(
                     logs.append(f"pdf_images_placeholders={meta.get('images_placeholders_count')}")
                     if meta.get('rtl_detected'):
                         logs.append("pdf_rtl_detected=1")
-
-                    degraded_reason = meta.get('degraded_reason')
-                    if degraded_reason:
-                        logs.append(f"pdf_degraded={degraded_reason}")
-
-                    # Decide strategy based on degraded_reason
-                    if degraded_reason == "timeout":
-                        # Timeout is considered severely degraded – fall back to legacy text
-                        logs.append("pdf_extraction_strategy=fallback_legacy_due_to_timeout")
-                        result_meta = {
-                            "engine": "pypdf_fallback",
-                            "mode_requested": sel_mode,
-                            "fallback_used": True,
-                            "degraded_reason": degraded_reason,
-                        }
-                        source_for_pandoc = _extract_text_from_pdf_legacy(input_path, workspace)
-                        from_format = "markdown"
-                    else:
-                        # Either not degraded or mildly degraded (e.g. very short text)
-                        if degraded_reason:
-                            result_meta = {
-                                "engine": "pdfminer_six",
-                                "mode_requested": sel_mode,
-                                "fallback_used": False,
-                                "degraded_reason": degraded_reason,
-                            }
-                            logs.append("pdf_extraction_strategy=layout_aware_degraded")
-                        else:
-                            logs.append("pdf_extraction_strategy=layout_aware")
-                        source_for_pandoc = md_path
-                        from_format = "markdown"
+                    if meta.get('degraded_reason'):
+                        logs.append(f"pdf_degraded={meta['degraded_reason']}")
+                        raise RuntimeError("degraded_output")
+                    source_for_pandoc = md_path
+                    from_format = "markdown"
+                    logs.append("pdf_extraction_strategy=layout_aware")
                 except Exception:
                     logs.append("pdf_extraction_strategy=fallback_legacy")
                     result_meta = {
@@ -556,6 +539,16 @@ def convert_one(
                 # HTML conversion uses specialized Lua filters to convert semantic elements
                 if from_format == "html":
                     logs.append("html_semantic_filter=enabled")
+                    # Light HTML sanitisation to avoid malformed data: URLs
+                    # causing pandoc errors. This mirrors the library
+                    # converter behavior and is deliberately conservative.
+                    try:
+                        html_text = source_for_pandoc.read_text("utf-8")
+                    except Exception:
+                        html_text = ""
+                    if html_text:
+                        html_text = sanitize_html_for_pandoc(html_text)
+                        source_for_pandoc.write_text(html_text, "utf-8")
 
                 pandoc_runner.convert_to_markdown(
                     source=source_for_pandoc,
