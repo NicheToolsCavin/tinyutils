@@ -25,7 +25,7 @@ def _ensure_pydantic_core() -> None:
     # First, add vendored dir to sys.path if present
     try:
         from pathlib import Path
-        vendor_base = Path(__file__).resolve().parents[1] / "_vendor"
+        vendor_base = Path(__file__).resolve().parents[1] / "api" / "_vendor"
         # Ensure parent of the package is on sys.path so `import pydantic_core` resolves
         if vendor_base.exists() and str(vendor_base) not in sys.path:
             sys.path.insert(0, str(vendor_base))
@@ -103,8 +103,8 @@ if TYPE_CHECKING:  # pragma: no cover - type checking only
     )
     from tinyutils.convert.types import BatchResult as _BatchResult
 
-from .._lib import blob
-from .._lib.utils import DownloadMetadata, ensure_within_limits, job_workspace
+from api._lib import blob
+from api._lib.utils import DownloadMetadata, ensure_within_limits, job_workspace
 
 
 logging.basicConfig(level=os.getenv("TINYUTILS_LOG_LEVEL", "INFO"))
@@ -127,12 +127,12 @@ def _ensure_convert_imports() -> None:
     if ConverterOptions is not None:
         return
     # Import from local copies in api/convert/ directory (no cross-package imports needed)
-    from .convert_service import (  # type: ignore
+    from convert_backend.convert_service import (  # type: ignore
         ConversionOptions as _ConverterOptions,
         InputPayload as _InputPayload,
         convert_batch as _convert_batch,
     )
-    from .convert_types import BatchResult as _BatchResult  # type: ignore
+    from convert_backend.convert_types import BatchResult as _BatchResult  # type: ignore
 
     ConverterOptions = _ConverterOptions
     InputPayload = _InputPayload
@@ -519,6 +519,7 @@ def convert(
         # Extract PDF engine info from logs if available
         pdf_engine = None
         pdf_engine_version = None
+        pdf_degraded_reason = None
         for log in batch.logs:
             # Parse "pdf_engine=<value>" format
             if log.startswith("pdf_engine="):
@@ -526,6 +527,9 @@ def convert(
             # Parse "pdf_engine_version=<value>" format
             elif log.startswith("pdf_engine_version="):
                 pdf_engine_version = log.split("=", 1)[1].strip()
+            # Parse "pdf_degraded=<value>" format
+            elif log.startswith("pdf_degraded=") and pdf_degraded_reason is None:
+                pdf_degraded_reason = log.split("=", 1)[1].strip()
 
         response_payload = {
             "ok": True,
@@ -534,6 +538,7 @@ def convert(
                 "pdfEngine": pdf_engine,
                 "pdfEngineVersion": pdf_engine_version,
                 "pdfExternalAvailable": bool(os.getenv("PDF_RENDERER_URL")),
+                "pdfDegradedReason": pdf_degraded_reason,
             },
             "jobId": batch.job_id,
             "toolVersions": {"pandoc": runner.get_pandoc_version()},
