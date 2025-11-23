@@ -1,3 +1,5 @@
+import { isPrivateHost, normalizePublicHttpUrl, safeFetch, makeRequestId, jsonResponse as sharedJsonResponse } from './_lib/edge_helpers.js';
+
 export const config = { runtime: 'edge' };
 
 const UA = 'TinyUtils-SitemapDelta/1.0 (+https://tinyutils.net)';
@@ -12,20 +14,11 @@ function rid() {
 }
 
 function jsonResponse(status, payload, requestId) {
-  const headers = new Headers({
-    'content-type': 'application/json; charset=utf-8',
-    'cache-control': 'no-store'
-  });
-  if (requestId) headers.set('x-request-id', requestId);
-  return new Response(JSON.stringify(payload), { status, headers });
+  return sharedJsonResponse(status, payload, requestId);
 }
 
 function requestIdFrom(req) {
-  try {
-    const incoming = req.headers.get('x-request-id');
-    if (incoming) return incoming.trim().slice(0, 64);
-  } catch {}
-  return rid();
+  return makeRequestId(req);
 }
 
 function readUrlModeInput(value) {
@@ -38,42 +31,10 @@ function readUrlModeInput(value) {
   return typeof candidate === 'string' ? candidate.trim() : '';
 }
 
-function isPrivateHost(hostname) {
-  const host = (hostname || '').toLowerCase();
-  if (!host) return true;
-  if (host === 'localhost' || host.endsWith('.local')) return true;
-  if (host === '0.0.0.0') return true;
-  if (host.startsWith('127.')) return true;
-  if (host.startsWith('10.')) return true;
-  if (host.startsWith('192.168.')) return true;
-  if (host.startsWith('169.254.')) return true;
-  const parts = host.split('.').map(p => Number.parseInt(p, 10));
-  if (parts.length === 4 && parts.every(n => Number.isInteger(n) && n >= 0 && n <= 255)) {
-    if (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) return true;
-  }
-  if (host.includes(':')) {
-    const compact = host.split('%')[0];
-    if (compact === '::1') return true;
-    if (compact.startsWith('fc') || compact.startsWith('fd')) return true;
-    if (compact.startsWith('fe80')) return true;
-  }
-  return false;
-}
-
 function normUrl(u) {
-  try {
-    const url = new URL(u);
-    if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
-    if (isPrivateHost(url.hostname)) return null;
-    url.hash = '';
-    url.hostname = url.hostname.toLowerCase();
-    if (!url.pathname) url.pathname = '/';
-    if (url.port === '80' && url.protocol === 'http:') url.port = '';
-    if (url.port === '443' && url.protocol === 'https:') url.port = '';
-    return url.toString();
-  } catch {
-    return null;
-  }
+  const normalized = normalizePublicHttpUrl(u);
+  if (!normalized.ok) return null;
+  return normalized.url;
 }
 
 function delay(ms) {
@@ -89,25 +50,19 @@ function safeOrigin(url) {
 }
 
 async function fetchWithRetry(url, timeoutMs, options = {}) {
-  const attempt = () => fetch(url, { ...options, signal: AbortSignal.timeout(timeoutMs) });
   let retried = false;
-  try {
-    let res = await attempt();
-    if (res.status === 429 || res.status >= 500) {
+  const res = await safeFetch(url, {
+    timeoutMs,
+    maxRetries: 1,
+    retryJitterMs: 150,
+    validateUrl: false,
+    onRetry: () => {
       retried = true;
-      await delay(50 + Math.random() * 150);
-      res = await attempt();
-    }
-    res.__retried = retried;
-    return res;
-  } catch (error) {
-    if (retried) throw error;
-    retried = true;
-    await delay(50 + Math.random() * 150);
-    const res = await attempt();
-    res.__retried = true;
-    return res;
-  }
+    },
+    ...options
+  });
+  res.__retried = retried;
+  return res;
 }
 
 async function fetchMaybeGzip(url, timeoutMs, notes) {
@@ -134,22 +89,98 @@ async function fetchMaybeGzip(url, timeoutMs, notes) {
   return res.text();
 }
 
+function decodeXmlEntities(value) {
+  if (typeof value !== 'string' || !value) return value;
+  const named = {
+    amp: '&',
+    lt: '<',
+    gt: '>',
+    quot: '"',
+    apos: "'"
+  };
+  return value.replace(/&(#x[0-9a-f]+|#[0-9]+|[a-z]+);/gi, (full, entity) => {
+    if (!entity) return full;
+    if (entity.startsWith('#')) {
+      const hex = entity[1] === 'x' || entity[1] === 'X';
+      const codePoint = Number.parseInt(entity.slice(hex ? 2 : 1), hex ? 16 : 10);
+      if (!Number.isFinite(codePoint)) return full;
+      try {
+        return String.fromCodePoint(codePoint);
+      } catch {
+        return full;
+      }
+    }
+    const replacement = named[entity.toLowerCase()];
+    return replacement !== undefined ? replacement : full;
+  });
+}
+
+function findTagBounds(xml, tagName, fromIndex) {
+  const source = String(xml || '');
+  const lower = source.toLowerCase();
+  const open = `<${tagName.toLowerCase()}`;
+  const close = `</${tagName.toLowerCase()}>`;
+  const start = lower.indexOf(open, fromIndex);
+  if (start === -1) return null;
+  const openEnd = lower.indexOf('>', start);
+  if (openEnd === -1) return null;
+  const innerStart = openEnd + 1;
+  const closeIndex = lower.indexOf(close, innerStart);
+  if (closeIndex === -1) return null;
+  const innerEnd = closeIndex;
+  const nextPos = closeIndex + close.length;
+  return { innerStart, innerEnd, nextPos };
+}
+
+function extractLocsSafe(xml, limit = HARD_CAP) {
+  const source = String(xml || '');
+  const lower = source.toLowerCase();
+  const hasUrl = lower.includes('<url');
+  const hasSitemap = lower.includes('<sitemap');
+  const isIndex = hasSitemap && !hasUrl;
+  const tagName = isIndex ? 'sitemap' : 'url';
+  const items = [];
+  let pos = 0;
+  const maxItems = isIndex ? CHILD_SITEMAPS_LIMIT : limit;
+
+  while (items.length < maxItems) {
+    const bounds = findTagBounds(source, tagName, pos);
+    if (!bounds) break;
+    const locBounds = findTagBounds(source, 'loc', bounds.innerStart);
+    if (locBounds && locBounds.innerStart >= bounds.innerStart && locBounds.innerEnd <= bounds.innerEnd) {
+      let raw = source.slice(locBounds.innerStart, locBounds.innerEnd);
+      raw = raw.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/gi, '$1').trim();
+      if (raw) {
+        const decoded = decodeXmlEntities(raw).trim();
+        if (decoded) items.push(decoded);
+      }
+    }
+    pos = bounds.nextPos;
+  }
+
+  return { isIndex, items };
+}
+
 function extractLocs(xml, limit = HARD_CAP) {
-  const locs = [];
-  const urlRe = /<url>\s*<loc>([^<]+)<\/loc>[\s\S]*?<\/url>/gi;
-  let m;
-  while ((m = urlRe.exec(xml))) {
-    locs.push(m[1].trim());
-    if (locs.length >= limit) break;
+  try {
+    return extractLocsSafe(xml, limit);
+  } catch {
+    const locs = [];
+    const urlRe = /<url>\s*<loc>([^<]+)<\/loc>[\s\S]*?<\/url>/gi;
+    let match;
+    while ((match = urlRe.exec(xml))) {
+      locs.push(match[1].trim());
+      if (locs.length >= limit) break;
+    }
+    if (locs.length) return { isIndex: false, items: locs };
+    const sm = [];
+    const idxRe = /<sitemap>\s*<loc>([^<]+)<\/loc>[\s\S]*?<\/sitemap>/gi;
+    while ((match = idxRe.exec(xml))) {
+      sm.push(match[1].trim());
+      if (sm.length >= CHILD_SITEMAPS_LIMIT) break;
+    }
+    return { isIndex: true, items: sm };
   }
-  if (locs.length) return { isIndex: false, items: locs };
-  const sm = [];
-  const idxRe = /<sitemap>\s*<loc>([^<]+)<\/loc>[\s\S]*?<\/sitemap>/gi;
-  while ((m = idxRe.exec(xml))) {
-    sm.push(m[1].trim());
-    if (sm.length >= CHILD_SITEMAPS_LIMIT) break;
-  }
-  return { isIndex: true, items: sm };
 }
 
 async function runFetchQueue(urls, worker) {
