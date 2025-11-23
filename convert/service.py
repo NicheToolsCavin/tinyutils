@@ -6,6 +6,7 @@ import html
 import json
 import logging
 import os
+import re
 import threading
 import time
 import zipfile
@@ -15,6 +16,7 @@ from typing import Any, Iterable, List, Optional, Sequence
 
 # Import from api._lib (sys.path fixed in convert/__init__.py to make this work)
 from api._lib import pandoc_runner
+from api._lib.html_utils import sanitize_html_for_pandoc
 from api._lib.manifests import build_snippets, collect_headings, media_manifest
 from api._lib.text_clean import normalise_markdown
 from api._lib.utils import ensure_within_limits, generate_job_id, job_workspace
@@ -109,7 +111,26 @@ def convert_one(
             filtered_md = workspace / "filtered.md"
             cleaned_md = workspace / "cleaned.md"
             media_dir = workspace / "media"
-            extract_dir: Optional[Path] = media_dir if opts.extract_media else None
+            # For DOCX/ODT inputs we always extract media so downstream
+            # consumers can access embedded images, even when the caller did
+            # not explicitly request it.
+            extract_dir: Optional[Path]
+            if opts.extract_media or (from_format in {"docx", "odt"}):
+                extract_dir = media_dir
+            else:
+                extract_dir = None
+
+            # Light HTML sanitisation to avoid malformed data: URLs causing
+            # pandoc errors. This is deliberately conservative and only
+            # rewrites obviously invalid data URLs.
+            if from_format == "html":
+                try:
+                    text = input_path.read_text("utf-8")
+                except Exception:
+                    text = ""
+                if text:
+                    text = sanitize_html_for_pandoc(text)
+                    input_path.write_text(text, "utf-8")
 
             pandoc_runner.convert_to_markdown(
                 source=input_path,

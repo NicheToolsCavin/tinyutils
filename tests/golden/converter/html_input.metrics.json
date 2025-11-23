@@ -1,0 +1,17 @@
+{
+  "lists": {
+    "bullet": 2,
+    "ordered": 1,
+    "maxDepth": 2
+  },
+  "codeBlocks": {
+    "total": 2,
+    "languages": [
+      "js"
+    ]
+  },
+  "images": {
+    "total": 1
+  }
+}
+
