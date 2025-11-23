@@ -217,6 +217,168 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-23 04:14 CET - Manual - consolidate python deps + verify build
+- **Mode:** manual
+- **Branch:** `fix/vercel-build-reqs`
+- **Summary:**
+  - Moved all Python deps into api/convert/requirements.txt and made root requirements.txt a thin include to dedupe installs.
+  - Kept pdfminer.six floor at 20231228 with high upper bound <20300000 for Py3.12 wheels.
+  - Reran vercel build; success log stored at artifacts/vercel-build/20251123/vercel-build-success-2.log.
+- **Evidence:** artifacts/vercel-build/20251123/vercel-build-success-2.log
+- **Follow-ups:**
+  - Open PR with these requirement fixes.
+
+### 2025-11-23 03:57 CET - Manual - unblock Vercel build (pdfminer bound)
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Raised pdfminer.six upper bound to <20300000 so Python 3.12 can install latest wheels; kept lower bound at 20231228 for stability.
+  - Re-ran vercel build locally; it now succeeds. Log saved to artifacts/vercel-build/20251123/vercel-build-success.log.
+  - Root requirements still include -r api/convert/requirements.txt so converter deps deploy correctly.
+- **Evidence:** artifacts/vercel-build/20251123/vercel-build-success.log
+- **Follow-ups:**
+
+### 2025-11-23 03:48 CET - Manual - fix Vercel build requirements
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Added '-r api/convert/requirements.txt' include so Vercel installs converter deps without duplicating entries.
+  - Stored diff evidence for requirements change.
+- **Evidence:** artifacts/vercel-build/20251123/requirements-diff.txt
+- **Follow-ups:**
+
+### 2025-11-23 01:52 CET - "Manual - WS5b API envelopes doc correction"
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - "Refined the new API envelopes section in docs/ARCHITECTURE_AND_GUARDRAILS.md to accurately distinguish between v2-style ok/meta/error/note envelopes (Encoding Doctor, Multi-file S&R, etc.), v1-style contracts (Dead Link Finder, Sitemap Delta, Wayback Fixer, Metafetch), and the FastAPI-based /api/convert responses."
+  - "Reconfirmed that tool_desc_deadlinkfinder.md, tool_desc_sitemapdelta.md, tool_desc_waybackfixer.md, tool_desc_encoding-doctor.md, tool_desc_multi-file-search-replace.md, and tool_desc_converter.md already describe their meta/error behavior in a way that matches the actual handlers, so no wording changes were required."
+- **Evidence:** docs/ARCHITECTURE_AND_GUARDRAILS.md
+- **Follow-ups:**
+
+### 2025-11-23 01:50 CET - "Manual - WS5b API envelopes + docs alignment"
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - "Added an API envelopes/meta section to docs/ARCHITECTURE_AND_GUARDRAILS.md describing the common JSON shape (ok/meta/requestId/error/note) and key per-API meta fields for /api/check, /api/sitemap-delta, /api/wayback-fixer, /api/encoding-doctor, /api/multi-file-search-replace, and /api/convert."
+  - "Reviewed existing tool_desc_*.md entries and confirmed their descriptions of meta fields and error notes already match the implemented contracts; no behavioural changes were needed, just cross-checks."
+  - "Used a gemini-2.5-flash helper agent to draft the initial API envelope section, then integrated and adapted it to the actual TinyUtils contracts (removing fields that do not exist and aligning terminology)."
+- **Evidence:** docs/ARCHITECTURE_AND_GUARDRAILS.md
+- **Follow-ups:**
+  - "OPTIONAL: in a later WS5 pass, add small JSON schema snippets or example envelopes per API to docs/ARCHITECTURE_AND_GUARDRAILS.md or tool_desc_*.md for even quicker onboarding."
+
+### 2025-11-23 01:42 CET - "Manual - WS5a tests & error UX polish"
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - "Added one focused regression test for Encoding Doctor clean-text summary in tests/encoding-doctor.test.mjs"
+  - "Added one focused regression test for Multi-file Search & Replace missing_search envelope in tests/multi-file-search-replace.test.mjs"
+  - "Ran node --test and captured TAP output under artifacts/ws5a-tests/20251123/node-test.tap"
+  - "Reviewed Converter test options; deferred converter-specific WS5a test to a later pass to avoid introducing a new JS or Python test harness"
+- **Evidence:** artifacts/ws5a-tests/20251123/node-test.tap
+- **Follow-ups:**
+  - "OPTIONAL: add a small converter regression test (error mapping / no-convertible-files) in a future WS5b/WS6 once a suitable JS or Python harness is in place"
+
+### 2025-11-23 00:43 CET - Manual - WS3 Text Converter refinements
+- **Mode:** manual
+- **Branch:** `ws3-converter-refinements`
+- **Summary:**
+  - Improved PDF degraded handling (pdfminer vs legacy fallback) and exposed pdfDegradedReason in /api/convert meta
+  - Mapped common converter backend errors (ZIP issues, size limits, pandoc failures) to clearer UI messages in tools/text-converter
+  - Ran full Node test suite; stored log under artifacts/ws3-converter/20251123/node-test-all.log
+- **Evidence:** artifacts/ws3-converter/20251123/node-test-all.log
+- **Follow-ups:**
+  - Optional: add targeted Python unit tests for PDF degraded paths and ZIP error handling
+
+### 2025-11-23 00:05 CET - Manual - WS3 Multi-file Search & Replace risk reduction
+- **Mode:** manual
+- **Branch:** `ws3-mfsr-risk-reduction`
+- **Summary:**
+  - Hardened multi-file search & replace backend export handling (exportFormat allowlist, ZIP entry name sanitization)
+  - Added UI confirmation for destructive replaces and clearer post-preview match summary
+  - Extended tests for invalid exportFormat and ZIP entry path sanitisation
+- **Evidence:** artifacts/ws3-mfsr/20251123/node-test-mfsr.log
+- **Follow-ups:**
+  - Optional: broader UI copy around destructive patterns and a small preview smoke on a Vercel preview
+
+### 2025-11-22 22:17 CET - Manual - WS3 Encoding Doctor safety + UX
+- **Mode:** manual
+- **Branch:** `ws3-encoding-doctor`
+- **Summary:**
+  - Added hard caps for pasted text length and decoded blobUrl bytes in api/encoding-doctor.js, returning clear 4xx envelopes (text_too_large, blob_payload_too_large) while preserving JSON contracts.
+  - Hardened loadTextFromBlobUrl with scheme/host allowlists (data:, tinyutils.net, *.tinyutils.net, *.vercel.app) and per-download byte ceilings to reduce SSRF/abuse risk for Encoding Doctor file flows.
+  - Introduced a latin1→UTF-8 fallback in repairText that triggers only on strong mojibake signals, plus new tests for size limits and the fallback; added copy buttons and improved aria-live summary + keyboard shortcuts in tools/encoding-doctor/index.html.
+- **Evidence:** artifacts/ws3-encoding-doctor/20251122/node-test.log
+- **Follow-ups:**
+  - Consider a future pass to visualize diffs for file previews and refine mojibake heuristics for non-Latin scripts once these guardrails have baked in.
+
+### 2025-11-22 17:15 CET - Manual - WS3 deeper pass DLF/SitemapDelta/Wayback
+- **Mode:** manual
+- **Branch:** `ws3-deeper-dlf-sitemap-wayback`
+- **Summary:**
+  - Refined /api/check robots/scheduler behavior by parsing Crawl-delay from robots.txt, tracking robotsSkipped counts, and surfacing robotsCrawlDelaySeconds and robotsSkipped in the Dead Link Finder meta + UI status line.
+  - Replaced api/sitemap-delta.js extractLocs with a safer, token-based XML parser that decodes entities and handles CDATA, plus added tests/sitemap_delta_parsing.test.mjs to exercise urlset, entity decoding, and mildly malformed XML flows.
+  - Tightened /api/wayback-fixer metadata by tracking SPN attempted vs enqueued, emitting a structured meta.spn object, and updating the Wayback Fixer UI to show when the SPN limit is reached and to label spn_skipped_cap notes.
+- **Evidence:** artifacts/ws3-deeper-pass-dlf-sd-wbf/20251122/node-test.log
+- **Follow-ups:**
+  - Consider a future CDX-based snapshot ranking pass and more detailed DLF robots/crawl-delay enforcement once these incremental changes bake in.
+
+### 2025-11-22 17:01 CET - Manual - WS4 Google Funding Choices CMP bridge
+- **Mode:** manual
+- **Branch:** `ws4-consent-cmp-bridge`
+- **Summary:**
+  - Wired scripts/googlefc-consent-adapter.js into all pages that load the Funding Choices script (home, tools hub, core tools, multi-file search/replace, and legacy -old pages) so TinyUtilsConsent can be populated wherever analytics/ads may run.
+  - Updated ADSENSE_SETUP.md to document Funding Choices as the canonical consent source and explain how googlefc-consent-adapter.js feeds TinyUtilsConsent.hasAnalyticsConsent/hasAdsConsent for analytics.js and adsense-monitor.js gating.
+  - Refined AGENTS.md Consent / Analytics / Ads section to state explicitly that CMP is canonical and that analytics/ads scripts must consult TinyUtilsConsent rather than their own consent keys.
+- **Evidence:** artifacts/ws4-consent-cmp-bridge/20251122/node-test.log
+- **Follow-ups:**
+
+### 2025-11-22 16:48 CET - Manual - WS4 consent adapter to Funding Choices CMP
+- **Mode:** manual
+- **Branch:** `feat/ws1-ws2-edge-hardening`
+- **Summary:**
+  - Reworked scripts/analytics.js to consult a TinyUtilsConsent adapter (hasAnalyticsConsent) instead of a local tu-consent-analytics key, so analytics gating can derive from Google Funding Choices CMP.
+  - Simplified scripts/consent.js to keep only the local 'hide ads' UI toggle and to expose a TinyUtilsConsent adapter with default hasAnalyticsConsent/hasAdsConsent hooks that CMP wiring can override, avoiding any independent consent UX.
+  - Updated scripts/adsense-monitor.js so the adblock toast and UI behavior require both local ads opt-in (localStorage.ads='on') and adapter-level hasAdsConsent(), aligning ads UX with CMP as the canonical consent source while preserving the hide-ads preference.
+- **Evidence:** artifacts/ws4-consent-adapter/20251122/
+- **Follow-ups:**
+  - Wire TinyUtilsConsent to actual Funding Choices CMP signals in a future WS4 pass once the CMP implementation details are available.
+
+### 2025-11-22 16:34 CET - Manual - WS4 initial cross-tool UX/a11y + consent
+- **Mode:** manual
+- **Branch:** `feat/ws1-ws2-edge-hardening`
+- **Summary:**
+  - Wayback Fixer: made the filter shortcut use Alt+F instead of bare 'f' to avoid hijacking typing, while keeping Cmd/Ctrl+Enter/E/J behavior consistent with other tools.
+  - Cross-tool: confirmed theme-toggle buttons are wired through theme-toggle.js with aria-label/aria-pressed updates; kept markup consistent on home, tools hub, and main tools.
+  - Consent/analytics/ads: changed scripts/analytics.js to load Vercel analytics only after tu-consent-analytics='accepted', extended scripts/consent.js with a simple consent banner hook and separate tu-ads-hidden toggle, and updated scripts/adsense-monitor.js to only show adblock toast when ads opt-in (localStorage.ads='on') is set in production.
+- **Evidence:** artifacts/ws4-cross-tool-ux/20251122/
+- **Follow-ups:**
+  - Implement a reusable consent banner snippet in shared layout, and adjust cookies/privacy copy to document the updated analytics + ads behavior in a later WS4 pass.
+
+### 2025-11-22 16:26 CET - Manual - WS3 initial DLF/Sitemap/Wayback improvements
+- **Mode:** manual
+- **Branch:** `feat/ws1-ws2-edge-hardening`
+- **Summary:**
+  - Dead Link Finder: improved accessibility by focusing the Results heading after runs and making it programmatically focusable while preserving existing a11y structure.
+  - Sitemap Delta: tightened same-domain guard by teaching registrable() about common multi-part public suffixes (e.g., co.uk, com.au), reducing false negatives when same-domain filter is ON.
+  - Wayback Fixer: treated private_host notes as blocked_private_host in the UI and error filter, and taught the textarea to ignore comment lines starting with # or // when building the URL list.
+  - Added tests for api/_lib/edge_helpers.csvSafeCell and isPrivateHost, and fixed the CSV hardening unit test harness so it exercises the real toCSV implementation from Dead Link Finder.
+- **Evidence:** artifacts/ws3-dlf-sitemap-wayback/20251122/
+- **Follow-ups:**
+  - Extend WS3 to deeper logic and UX passes (e.g., robots Crawl-delay, richer Wayback meta, more sitemap-parsing robustness) in subsequent workstreams.
+
+### 2025-11-22 16:11 CET - Manual - WS1-2 Edge API hardening (helpers + first batch)
+- **Mode:** manual
+- **Branch:** `feat/ws1-ws2-edge-hardening`
+- **Summary:**
+  - Captured architecture and guardrails summary in docs/ARCHITECTURE_AND_GUARDRAILS.md for agents and future refactors.
+  - Introduced shared Edge helper api/_lib/edge_helpers.js providing network safety (public http(s) only), polite timeout/retry with concurrency caps, JSON response helper, and CSV hardening helpers.
+  - Refactored api/metafetch.js, api/sitemap-delta.js, api/wayback-fixer.js, and api/check.js to use shared helpers for JSON responses, request-id handling, URL validation, and safeFetch-based outbound calls where appropriate.
+  - Validated updated handlers with node --test tests/api_contracts.test.mjs and scripts/test_edge_handlers.mjs; logs stored as artifacts.
+- **Evidence:** artifacts/edge-hardening-ws1-ws2/20251122/
+- **Follow-ups:**
+  - Extend safeFetch/JSON helpers to remaining Edge APIs (encoding-doctor, multi-file search/replace, convert) and wire CSV hardening into front-end CSV exports in later workstreams.
+
 ### 2025-11-22 15:13 CET - Manual - analytics snippet everywhere
 - **Mode:** manual
 - **Branch:** `main`
