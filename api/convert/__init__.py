@@ -1,1 +1,1 @@
-"""Universal converter FastAPI endpoint."""
+# Package marker for /api/convert route
