@@ -24,6 +24,7 @@
   <link rel="stylesheet" href="/public/styles.css">
   <link rel="stylesheet" href="/styles/site.css">
   <script defer src="/scripts/consent.js"></script>
+  <script defer src="/scripts/googlefc-consent-adapter.js"></script>
   <script defer src="/scripts/adsense-monitor.js"></script>
   <style>
     /* Enhanced Tool Page Styles */
@@ -759,14 +760,81 @@
           throw new Error(text || `Non-JSON response (${response.status})`);
         }
 
-        if (!response.ok) {
-          const errorMsg = data?.errorMessage || data?.message || `Conversion failed (${response.status})`;
-          const errorType = data?.errorType || 'Unknown error';
-          throw new Error(`${errorType}: ${errorMsg}`);
+        function mapConvertErrorFromResponse(status, dataObj) {
+          if (!dataObj || typeof dataObj !== 'object') {
+            return { type: 'Conversion error', message: `Conversion failed (${status})` };
+          }
+
+          const detail = dataObj.detail || dataObj.errorMessage || dataObj.message || '';
+          const lowerDetail = String(detail).toLowerCase();
+
+          if (lowerDetail.includes('no supported files found in zip archive')) {
+            return {
+              type: 'No convertible files in ZIP',
+              message: 'We could not find any supported documents in that ZIP. Add DOCX, ODT, RTF, Markdown, TXT, or HTML files and try again.'
+            };
+          }
+          if (lowerDetail.includes('invalid zip file')) {
+            return {
+              type: 'Invalid ZIP file',
+              message: 'That ZIP file looks invalid or corrupted. Please recreate it and upload a fresh copy.'
+            };
+          }
+          if (lowerDetail.includes('zip extraction failed')) {
+            return {
+              type: 'ZIP extraction error',
+              message: 'We could not unpack that ZIP. Check that it is a valid archive and try again.'
+            };
+          }
+          if (lowerDetail.includes('file exceeds max_file_mb')) {
+            return {
+              type: 'File too large',
+              message: 'This file is too large for the online converter. Try a smaller document or split it into parts.'
+            };
+          }
+
+          const errorsArr = Array.isArray(dataObj.errors) ? dataObj.errors : [];
+          if (errorsArr.length) {
+            const primary = errorsArr[0] || {};
+            const kind = String(primary.kind || '').toLowerCase();
+            const msg = String(primary.message || 'Conversion failed');
+
+            if (kind === 'jobtoolargeerror' || msg.toLowerCase().includes('file exceeds max_file_mb')) {
+              return {
+                type: 'File too large',
+                message: 'This file is too large for the online converter. Try a smaller excerpt or compress the content.'
+              };
+            }
+            if (kind === 'pandocerror' || msg.toLowerCase().includes('pandoc')) {
+              return {
+                type: 'Document format issue',
+                message: 'We had trouble reading this document. Try opening it in Word/LibreOffice and re-saving, then upload the new copy.'
+              };
+            }
+            return {
+              type: primary.kind || 'Conversion error',
+              message: primary.message || 'Conversion failed.'
+            };
+          }
+
+          if (detail) {
+            return { type: 'Conversion error', message: detail };
+          }
+          return { type: 'Conversion error', message: `Conversion failed (${status})` };
         }
 
+        if (!response.ok) {
+          const mapped = mapConvertErrorFromResponse(response.status, data);
+          throw new Error(`${mapped.type}: ${mapped.message}`);
+        }
+
+        const errorsArr = Array.isArray(data.errors) ? data.errors : [];
         if (!data.outputs || data.outputs.length === 0) {
-          throw new Error(data?.errorMessage || 'No outputs returned from conversion.');
+          if (errorsArr.length) {
+            const mapped = mapConvertErrorFromResponse(response.status, data);
+            throw new Error(mapped.message);
+          }
+          throw new Error('The converter did not produce any outputs. Make sure the file contains supported text or documents.');
         }
 
         // Ignore stale responses (user started a new conversion while this one was in flight)

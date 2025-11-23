@@ -21,6 +21,7 @@
   <script src="/scripts/download-utils.js"></script>
   <link rel="stylesheet" href="/styles/site.css">
   <script defer src="/scripts/consent.js"></script>
+  <script defer src="/scripts/googlefc-consent-adapter.js"></script>
   <script defer src="/scripts/adsense-monitor.js"></script>
   <style>
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Ubuntu,sans-serif;background:var(--bg);color:var(--text);margin:0}
@@ -241,6 +242,13 @@ https://example.com/moved"></textarea>
   const exportBtnIds = ['dlCsv','dlJson','dl410','copyRepl','copy410'];
   const exportButtons = exportBtnIds.map(id => document.getElementById(id)).filter(Boolean);
   const LINE_BREAK = '\\r\\n';
+
+  function stripInlineComments(line) {
+    return String(line || '')
+      .replace(/\s+#.*$/, '')
+      .replace(/\s+\/\/.*$/, '')
+      .trim();
+  }
   let last = null, filt = 'all';
   let isBusy = false;
   let requestCounter = 0;
@@ -327,10 +335,12 @@ https://example.com/moved"></textarea>
       'archived':'Archived',
       'no_snapshot':'No snapshot',
       'spn_queued':'SavePageNow queued',
+      'spn_skipped_cap':'SavePageNow skipped (limit reached)',
       'timeout':'Timed out',
       'network_error':'Network error',
       'unsupported_scheme':'Unsupported scheme',
       'blocked_private_host':'Private host blocked',
+      'private_host':'Private host blocked',
       'invalid_url':'Invalid URL',
       'retry_1':'Retried'
     };
@@ -427,7 +437,12 @@ https://example.com/moved"></textarea>
     if (filt==='no_snapshot') return rows.filter(r=> (r.note||'').includes('no_snapshot'));
     if (filt==='error') return rows.filter(r=> {
       const n = r.note||'';
-      return n.includes('invalid_url') || n.includes('unsupported_scheme') || n.includes('blocked_private_host') || n.includes('network_error') || n.includes('timeout');
+      return n.includes('invalid_url') ||
+             n.includes('unsupported_scheme') ||
+             n.includes('blocked_private_host') ||
+             n.includes('private_host') ||
+             n.includes('network_error') ||
+             n.includes('timeout');
     });
     return rows;
   }
@@ -442,14 +457,23 @@ https://example.com/moved"></textarea>
       tblBody.appendChild(tr);
     });
     const meta = data.meta || {};
-    setStatus(`${meta.totalChecked ?? rows.length} checked · ${meta.archived ?? 0} archived · ${meta.noSnapshot ?? 0} no snapshot · SPN ${meta.spnQueued ?? 0}`, 100);
+    const spnMeta = meta.spn || {};
+    const spnPart = spnMeta && typeof spnMeta.enqueued === 'number'
+      ? `SPN ${spnMeta.enqueued}${spnMeta.capped ? ' (limit reached)' : ''}`
+      : `SPN ${meta.spnQueued ?? 0}`;
+    setStatus(`${meta.totalChecked ?? rows.length} checked · ${meta.archived ?? 0} archived · ${meta.noSnapshot ?? 0} no snapshot · ${spnPart}`, 100);
     document.dispatchEvent(new CustomEvent('tinyutils:results-updated', { detail: { total: rows.length, meta } }));
     setExportsEnabled(Boolean(data?.results?.length));
   }
 
   runBtn.addEventListener('click', async ()=>{
+    const rawList = listEl.value || '';
+    const cleanedLines = rawList
+      .split(/\r?\n/)
+      .map(stripInlineComments)
+      .filter(Boolean);
     const body = {
-      list: listEl.value||'',
+      list: cleanedLines.join('\n'),
       verifyHead: verifyEl.checked,
       trySavePageNow: spnEl.checked,
       prefWindow: prefEl.value,
@@ -490,7 +514,7 @@ https://example.com/moved"></textarea>
     if ((e.metaKey||e.ctrlKey) && e.key==='Enter'){ e.preventDefault(); runBtn.click(); }
     else if ((e.metaKey||e.ctrlKey) && (e.key==='e'||e.key==='E')){ e.preventDefault(); document.getElementById('dlCsv').click(); }
     else if ((e.metaKey||e.ctrlKey) && (e.key==='j'||e.key==='J')){ e.preventDefault(); document.getElementById('dlJson').click(); }
-    else if (!e.metaKey && !e.ctrlKey && (e.key==='f'||e.key==='F')){ chips?.querySelector('[data-f="all"]')?.focus?.(); }
+    else if (e.altKey && !e.metaKey && !e.ctrlKey && (e.key==='f'||e.key==='F')){ e.preventDefault(); chips?.querySelector('[data-f="all"]')?.focus?.(); }
   });
 
   function toCSV(rows){

@@ -13,6 +13,8 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 ## Active Tasks (Newest First)
 
 | Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
+| Repair SvelteKit demo install/build | manual-2025-11-23 CET | Completed | ✅ Bumped demo deps (kit 2.49/adapter-vercel 5.10/vite 6.3/svelte-check 4), added src/app.html and adapter runtime nodejs22.x; npm install and npm run build now succeed. |
+| Add SvelteKit demo sandbox | manual-2025-11-23 CET | Completed | ✅ Created isolated SvelteKit demo in New ideas/sveltekit-demo (adapter-vercel, prerender, sample +page). No installs run. |
 | Fix CI workflow path per review | manual-2025-11-23 CET | Completed | ✅ Removed working-directory override and asserted pdfminer.six version in python-requirements-check.yml. |
 | Preview smoke after dependency & size fixes | manual-2025-11-23 CET | Completed | ✅ Preview smoke passed on tinyutils-co98whjhb-cavins-projects-7b0e00bb.vercel.app after adding progress banner + preview-only fast path and reducing convert bundle size. Evidence: artifacts/vercel-build/20251123/preview-smoke-3.log |
 | Add CI to validate Python requirements | manual-2025-11-23 CET | Completed | ✅ New workflow .github/workflows/python-requirements-check.yml dry-runs + installs requirements.txt on Python 3.12 and smoke-imports core deps. |

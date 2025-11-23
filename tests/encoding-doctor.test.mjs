@@ -163,6 +163,79 @@ test('file-based workflow repairs mojibake and returns data URLs', async () => {
   assert.match(file.blobUrl || '', /^data:/);
 });
 
+test('text input over hard cap is rejected with 413 and text_too_large', async () => {
+  const big = 'x'.repeat(300000);
+  const payload = { text: big, options: {} };
+  const req = makeRequest(payload, { 'x-request-id': 'encoding-text-too-large' });
+  const res = await encodingDoctor(req);
+  assert.strictEqual(res.status, 413);
+  const body = await parsePayload(res);
+  assert.strictEqual(body.ok, false);
+  assert.strictEqual(body.meta.note, 'text_too_large');
+});
+
+test('blob payload too large is surfaced as 413 with blob_payload_too_large', async () => {
+  // Build a data URL whose decoded size exceeds MAX_BLOB_BYTES (2MB in the handler).
+  const big = 'y'.repeat(2 * 1024 * 1024 + 10);
+  const dataUrl = makeDataUrl(big, 'text/markdown');
+  const payload = {
+    files: [{ name: 'huge.md', blobUrl: dataUrl }],
+    options: {}
+  };
+
+  const req = makeRequest(payload, { 'x-request-id': 'encoding-blob-too-large' });
+  const res = await encodingDoctor(req);
+  assert.strictEqual(res.status, 413);
+  const body = await parsePayload(res);
+  assert.strictEqual(body.ok, false);
+  assert.strictEqual(body.meta.note, 'blob_payload_too_large');
+});
+
+test('latin1->UTF-8 fallback reduces mojibake signals when enabled', async () => {
+  // Construct a string that strongly looks like UTF-8 decoded as Latin-1.
+  const payload = {
+    text: 'FranÃ§ois Ã©tait trÃ¨s content — FranÃ§ois',
+    options: {
+      autoRepair: true,
+      normalizeForm: 'NONE',
+      smartPunctuation: false
+    }
+  };
+
+  const req = makeRequest(payload, { 'x-request-id': 'encoding-latin1-fallback' });
+  const res = await encodingDoctor(req);
+  assert.strictEqual(res.status, 200);
+
+  const body = await parsePayload(res);
+  assert.strictEqual(body.ok, true);
+  assert.ok(body.text && typeof body.text.fixed === 'string');
+  // Heuristic test: fixed text should contain far fewer "FranÃ§" fragments than the input.
+  assert.ok(!/FranÃ§/.test(body.text.fixed));
+});
+
+test('clean ASCII text produces "no issues" summary', async () => {
+  const payload = {
+    text: 'Plain ASCII text with no obvious encoding issues.',
+    options: {
+      autoRepair: true,
+      normalizeForm: 'NFC',
+      smartPunctuation: true
+    }
+  };
+
+  const req = makeRequest(payload, { 'x-request-id': 'encoding-clean-text' });
+  const res = await encodingDoctor(req);
+  assert.strictEqual(res.status, 200);
+
+  const body = await parsePayload(res);
+  assert.strictEqual(body.ok, true);
+  assert.ok(body.text);
+  assert.strictEqual(
+    body.text.summary,
+    'No obvious encoding issues were found with the current settings.'
+  );
+});
+
 test('missing input returns a 400 error with missing_input code', async () => {
   const payload = {
     text: '',

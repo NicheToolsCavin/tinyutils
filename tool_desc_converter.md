@@ -259,6 +259,41 @@ Modified
 Removed
 • 268MB `libreoffice-7.6.4.1.tar.xz` and all artifacts from git history (via `git filter-branch`)
 
+### Major changes — 2025-11-23 13:10 CET (UTC+01:00) — WS3 degraded PDF + error UX refinements
+
+Added
+• `pdfDegradedReason` field to `/api/convert` meta, derived from layout-aware PDF extraction logs (e.g. `timeout`, `too_short_or_single_line`).
+• Clearer converter UI error mapping for common backend failures: invalid/corrupt ZIP archives, ZIPs with no supported files, and size-limit violations.
+
+Modified
+• `_extract_markdown_from_pdf` now marks degraded output with a structured `degraded` flag and `degraded_reason` instead of implicitly signalling via exceptions.
+• `convert_one` in `api/convert/convert_service.py` distinguishes between severe PDF degradation (timeouts → legacy pypdf fallback) and mild degradation (very short/single-line content → keep layout-aware markdown but tag it as degraded).
+• The Text/Document Converter UI (`tools/text-converter/index.html`) now parses converter responses to show friendly, specific error messages instead of generic “Conversion failed (400)” strings.
+
+Fixed
+• Loss of context around “degraded” PDFs
+  - **Problem:** Layout-aware PDF extraction flagged some PDFs as degraded and forced a silent fallback to a simpler legacy extractor, but the API meta only exposed the engine name; the UI could only say “degraded; a simpler fallback may have been used” based on logs.
+  - **Root cause:** `_extract_markdown_from_pdf` used `degraded_reason` only as an internal trigger, and `convert_one` treated any degraded output as a hard error instead of choosing between degraded markdown, legacy fallback, or a clear signal.
+  - **Fix:** Revised the PDF path so degraded-but-usable markdown is returned (and tagged), while true timeouts fall back to the legacy extractor; added `pdfDegradedReason` to the JSON meta so clients can see why a PDF was downgraded.
+  - **Evidence:** `api/convert/convert_service.py` now logs `pdf_extraction_strategy=layout_aware_degraded` vs `fallback_legacy_due_to_timeout`, and `/api/convert` meta exposes `pdfDegradedReason`. Full Node suite: `artifacts/ws3-converter/20251123/node-test-all.log`.
+
+Human-readable summary
+
+This WS3 pass teaches the converter to be more honest and helpful about tricky documents. For PDFs, the backend no longer treats every “degraded” extraction as a silent failure: if the layout-aware path produces something usable, it keeps that markdown and marks it as degraded; only severe timeouts fall back to the simpler legacy extractor. The `/api/convert` meta now includes a `pdfDegradedReason` field so both the UI and operators can see why a PDF was downgraded.
+
+On the frontend, the Text/Document Converter no longer responds to ZIP and size-limit problems with a mysterious “Conversion failed (400)”. Instead, it recognises messages like “No supported files found in ZIP archive”, “Invalid ZIP file”, and “File exceeds MAX_FILE_MB”, and turns them into clear guidance (“ZIP had no DOCX/ODT/RTF/Markdown/TXT/HTML files”, “ZIP looks corrupt”, “File too large for the online converter”). Pandoc-level failures now surface as “Document format issue” with a suggestion to re-save the file in Word or LibreOffice.
+
+Impact
+• PDF conversions now expose when and why the layout-aware extractor considered output degraded, while still preferring the richer layout path when it’s safe to do so. ✅
+• Users uploading broken ZIPs or over-sized documents get specific, actionable error messages instead of generic HTTP status text. ✅
+• Converter API consumers can rely on `meta.pdfDegradedReason` to drive their own UX or logging without scraping logs. ✅
+
+Testing
+• `node --test` (full suite, including existing `/api/convert` envelope checks) ✅ — see `artifacts/ws3-converter/20251123/node-test-all.log`.
+
+Commits
+• (pending in this working tree) — adjust PDF degraded handling and meta; refine converter UI error mapping.
+
 Human-readable summary
 
 **Problem 7: The "invisible character" issue**
