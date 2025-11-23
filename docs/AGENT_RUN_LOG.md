@@ -217,6 +217,25 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-23 11:03 CET - Manual - fix SvelteKit demo deps/build
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Updated SvelteKit demo devDeps to kit@2.49 + adapter-vercel@5.10 + vite@6.3 + svelte-check@4 and added missing src/app.html.
+  - Set adapter runtime to nodejs22.x and removed unused export in layout; npm install (no package-lock) and npm run build now succeed locally despite host Node v25.
+- **Evidence:** New ideas/sveltekit-demo/package.json
+- **Follow-ups:**
+
+### 2025-11-23 10:58 CET - Manual - add SvelteKit demo sandbox
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Added isolated SvelteKit sandbox under 'New ideas/sveltekit-demo' with adapter-vercel, prerender, sample +page.svelte, layout, and README instructions.
+  - No installs run; sandbox lives outside current build to preview SvelteKit UX without touching Edge APIs.
+- **Evidence:** New ideas/sveltekit-demo/README.md
+- **Follow-ups:**
+  - Optional: npm install && npm run dev inside the sandbox to preview locally.
+
 ### 2025-11-23 10:43 CET - Manual - CI workflow path fix
 - **Mode:** manual
 - **Branch:** `fix/vercel-build-reqs`

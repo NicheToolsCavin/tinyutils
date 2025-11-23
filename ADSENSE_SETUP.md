@@ -57,3 +57,22 @@ When validating ads on Preview/production, spot-check the following:
 Notes:
 - Keep homepage and tools light: do not add additional slots without updating this file and AGENTS.md.
 - After changing slot IDs or adding new placements, re-run preview smokes and a quick manual QA pass to confirm CMP behavior, ad visibility, and CLS remain acceptable.
+
+## Consent and Funding Choices CMP
+
+TinyUtils uses Google Funding Choices as the **canonical source of consent** for both analytics and ads.
+
+On key pages (home, tools hub, and the main tools listed above) we include:
+- The Funding Choices CMP script (pub-3079281180008443).
+- `scripts/consent.js` — manages the local "hide ads" UI (via the `tu-ads-hidden` key and `html.ads-hidden` class) and exposes a small adapter object at `window.TinyUtilsConsent`.
+- `scripts/googlefc-consent-adapter.js` — a bridge that listens to Funding Choices / Consent Mode and maps its state into `TinyUtilsConsent.hasAnalyticsConsent()` and `TinyUtilsConsent.hasAdsConsent()`.
+- `scripts/analytics.js` — loads Vercel Web Analytics **only** when `TinyUtilsConsent.hasAnalyticsConsent()` returns `true`.
+- `scripts/adsense-monitor.js` — shows a small adblock toast **only** when:
+  - The hostname is a production/preview host,
+  - The user has opted in to ads via `localStorage.ads === 'on'`, and
+  - `TinyUtilsConsent.hasAdsConsent()` returns `true`.
+
+Important details:
+- Funding Choices is the **single source of truth** for consent. TinyUtils never tries to infer consent from its own banner or keys; local logic is just an adapter.
+- If Funding Choices or Consent Mode are blocked, `googlefc-consent-adapter.js` leaves `TinyUtilsConsent` in its default, permissive state. This avoids breaking tools when CMP fails to load, while still allowing future tightening as needed.
+- The "hide ads" toggle only affects visibility of `.ad-slot` containers in our UI (it does **not** signal consent or change Google’s serving logic).
