@@ -1,3 +1,5 @@
+import { isPrivateHost as sharedIsPrivateHost, jsonResponse as sharedJsonResponse } from './_lib/edge_helpers.js';
+
 export const config = { runtime: 'edge' };
 
 function rid() {
@@ -5,15 +7,7 @@ function rid() {
 }
 
 function json(status, body, requestId) {
-  const headers = new Headers({
-    'content-type': 'application/json; charset=utf-8',
-    'cache-control': 'no-store'
-  });
-  if (requestId) headers.set('x-request-id', requestId);
-  return new Response(JSON.stringify(body), {
-    status,
-    headers
-  });
+  return sharedJsonResponse(status, body, requestId);
 }
 
 function jerr(status, code, message, detail, stage, requestId, metaExtras) {
@@ -112,11 +106,14 @@ function parseRobots(content) {
   const groups = [];
   let currentAgents = [];
   let currentRules = [];
+  let currentCrawlDelaySeconds = null;
+
   const pushGroup = () => {
     if (!currentAgents.length) return;
-    groups.push({ agents: currentAgents, rules: currentRules });
+    groups.push({ agents: currentAgents, rules: currentRules, crawlDelaySeconds: currentCrawlDelaySeconds });
     currentAgents = [];
     currentRules = [];
+    currentCrawlDelaySeconds = null;
   };
 
   for (const rawLine of lines) {
@@ -143,10 +140,19 @@ function parseRobots(content) {
       if (rule) currentRules.push(rule);
       continue;
     }
+    if (key === 'crawl-delay') {
+      const seconds = Number.parseFloat(value.replace(/[^0-9.]/g, ''));
+      if (Number.isFinite(seconds) && seconds > 0) {
+        const clamped = Math.min(seconds, 60);
+        if (currentCrawlDelaySeconds == null || clamped < currentCrawlDelaySeconds) {
+          currentCrawlDelaySeconds = clamped;
+        }
+      }
+    }
   }
   pushGroup();
 
-  if (!groups.length) return [];
+  if (!groups.length) return { rules: [], crawlDelaySeconds: null };
 
   const ua = UA.toLowerCase();
   const fallbackAgents = ['tinyutils-deadlinkchecker', 'tinyutils'];
@@ -160,12 +166,18 @@ function parseRobots(content) {
   }
 
   const rules = [];
+  let crawlDelaySeconds = null;
   for (const group of applicable) {
     for (const rule of group.rules) {
       if (rule) rules.push(rule);
     }
+    if (group.crawlDelaySeconds != null) {
+      if (crawlDelaySeconds == null || group.crawlDelaySeconds < crawlDelaySeconds) {
+        crawlDelaySeconds = group.crawlDelaySeconds;
+      }
+    }
   }
-  return rules;
+  return { rules, crawlDelaySeconds };
 }
 
 function isAllowedByRobots(rules, url) {
@@ -194,25 +206,7 @@ function badScheme(input) {
 }
 
 function isPrivateHost(hostname) {
-  const host = (hostname || '').toLowerCase();
-  if (!host) return true;
-  if (host === 'localhost' || host.endsWith('.local')) return true;
-  if (host === '0.0.0.0') return true;
-  if (host.startsWith('127.')) return true;
-  if (host.startsWith('10.')) return true;
-  if (host.startsWith('192.168.')) return true;
-  if (host.startsWith('169.254.')) return true;
-  const parts = host.split('.').map(p => Number.parseInt(p, 10));
-  if (parts.length === 4 && parts.every(n => Number.isInteger(n) && n >= 0 && n <= 255)) {
-    if (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) return true;
-  }
-  if (host.includes(':')) {
-    const compact = host.split('%')[0];
-    if (compact === '::1') return true;
-    if (compact.startsWith('fc') || compact.startsWith('fd')) return true;
-    if (compact.startsWith('fe80')) return true;
-  }
-  return false;
+  return sharedIsPrivateHost(hostname);
 }
 
 function assertPublicHttp(raw) {
@@ -831,7 +825,7 @@ export default async function handler(req) {
 
     const getRobotsRules = async (origin) => {
       if (!respectRobots || !origin) {
-        return { status: 'ignored', rules: [] };
+        return { status: 'ignored', rules: [], crawlDelaySeconds: null };
       }
       if (robotsCache.has(origin)) {
         const cached = robotsCache.get(origin);
@@ -849,7 +843,7 @@ export default async function handler(req) {
         const res = await timedFetch(robotsUrl, { headers: { 'user-agent': UA } }, ROBOTS_TIMEOUT_MS);
         if (!res.ok) {
           markRobotsIssue('fetch_failed');
-          const value = { status: 'unavailable', reason: 'fetch_failed', rules: [], statusCode: res.status };
+          const value = { status: 'unavailable', reason: 'fetch_failed', rules: [], statusCode: res.status, crawlDelaySeconds: null };
           robotsCache.set(origin, value);
           return value;
         }
@@ -858,37 +852,38 @@ export default async function handler(req) {
           text = await res.text();
         } catch (error) {
           markRobotsIssue('fetch_failed');
-          const value = { status: 'unavailable', reason: 'fetch_failed', rules: [], error };
+          const value = { status: 'unavailable', reason: 'fetch_failed', rules: [], error, crawlDelaySeconds: null };
           robotsCache.set(origin, value);
           return value;
         }
         try {
-          const rules = parseRobots(text);
-          const value = { status: 'applied', rules };
+          const parsed = parseRobots(text);
+          const value = { status: 'applied', rules: parsed.rules || [], crawlDelaySeconds: parsed.crawlDelaySeconds ?? null };
           markRobotsApplied();
           robotsCache.set(origin, value);
           return value;
         } catch (error) {
           markRobotsIssue('parse_failed');
-          const value = { status: 'unavailable', reason: 'parse_failed', rules: [], error };
+          const value = { status: 'unavailable', reason: 'parse_failed', rules: [], error, crawlDelaySeconds: null };
           robotsCache.set(origin, value);
           return value;
         }
       } catch (error) {
         if (error?.name === 'AbortError') {
           markRobotsIssue('timeout');
-          const value = { status: 'unavailable', reason: 'timeout', rules: [] };
+          const value = { status: 'unavailable', reason: 'timeout', rules: [], crawlDelaySeconds: null };
           robotsCache.set(origin, value);
           return value;
         }
         markRobotsIssue('fetch_failed');
-        const value = { status: 'unavailable', reason: 'fetch_failed', rules: [], error };
+        const value = { status: 'unavailable', reason: 'fetch_failed', rules: [], error, crawlDelaySeconds: null };
         robotsCache.set(origin, value);
         return value;
       }
     };
 
     let fallbackUsed = false;
+    let robotsSkippedCount = 0;
 
     const processItem = async (item) => {
       if (respectRobots) {
@@ -907,6 +902,7 @@ export default async function handler(req) {
           if (robotsInfo.status === 'applied') {
             const allowed = isAllowedByRobots(robotsInfo.rules, item.url);
             if (!allowed) {
+              robotsSkippedCount += 1;
               return {
                 url: item.url,
                 status: null,
@@ -1048,6 +1044,17 @@ export default async function handler(req) {
 
     setStage('done');
 
+    let robotsCrawlDelaySeconds = null;
+    if (respectRobots && robotsCache.size) {
+      for (const info of robotsCache.values()) {
+        if (info && Number.isFinite(info.crawlDelaySeconds)) {
+          if (robotsCrawlDelaySeconds == null || info.crawlDelaySeconds < robotsCrawlDelaySeconds) {
+            robotsCrawlDelaySeconds = info.crawlDelaySeconds;
+          }
+        }
+      }
+    }
+
     const meta = {
       requestId,
       startedAtIso: startedAt.toISOString(),
@@ -1065,6 +1072,8 @@ export default async function handler(req) {
       assets: !!body.includeAssets,
       httpFallback: fallbackUsed,
       wayback: !!body.includeArchive,
+      robotsSkipped: robotsSkippedCount,
+      robotsCrawlDelaySeconds: robotsCrawlDelaySeconds ?? null,
       totalQueued: queue.length + prefilled.length,
       totalChecked: totalResults,
       truncated,

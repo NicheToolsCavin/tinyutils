@@ -168,3 +168,37 @@ Testing
 
 Commits
 • TBD - feat: add Try Example UX for PR4
+
+### Major changes — 2025-11-22 16:30 CET (UTC+01:00) — Safer sitemap XML parsing
+
+Added
+• Introduced a lightweight, token-based XML parser for `<url>` / `<loc>` and `<sitemap>` entries in `api/sitemap-delta.js` that decodes XML entities and handles CDATA without relying on brittle regular expressions.
+• Added `tests/sitemap_delta_parsing.test.mjs` to exercise simple urlset inputs, entity-heavy loc values, and mildly malformed XML while asserting stable API behavior.
+
+Modified
+• `extractLocs` now routes through the safer parser first and only falls back to the old regex implementation if the new path throws, preserving existing contracts while hardening against odd markup.
+• Sitemap expansion still respects `HARD_CAP`/`CHILD_SITEMAPS_LIMIT` but now derives URLs via the robust parser, improving resilience to whitespace, CDATA, and entity encoding quirks.
+
+Fixed
+• Fragile regex parsing that could misinterpret CDATA, `&amp;`-encoded URLs, or slightly malformed XML.
+  - **Problem:** Some real-world sitemaps with CDATA blocks or encoded query parameters either produced empty deltas or risked heavy regex backtracking.
+  - **Root cause:** A single regex-based `extractLocs` routine tried to pull `<loc>` content out of `<url>`/`<sitemap>` blocks without structural validation or entity decoding.
+  - **Fix:** Replace the core parser with a character-scanning, tag-aware routine that finds `<url>/<sitemap>` blocks, looks inside for `<loc>`, and decodes entities/CDATA before normalization; keep the old regex as a guarded fallback.
+  - **Evidence:** New unit tests under `tests/sitemap_delta_parsing.test.mjs` plus the existing API contract test now cover urlset, entity, and malformed cases.
+
+Human-readable summary
+
+**Problem: Some sitemaps are "almost XML" but still common on the web.**
+The old Sitemap Delta engine used one big regex that broke easily when publishers wrapped URLs in CDATA or encoded querystrings with `&amp;`. In awkward cases it either returned empty lists or struggled with unusual input.
+
+**The fix:** Teach Sitemap Delta to read XML more defensively—scan for `<url>` / `<sitemap>` tags, then look inside for `<loc>` and decode entities before comparing URLs. When input is truly off, it falls back to the old logic instead of crashing.
+
+Impact
+• Real-world sitemaps with CDATA and `&amp;`-encoded querystrings now parse into the expected URL lists, so Added/Removed/mapping views stay trustworthy. ✅
+• Edge cases with slightly malformed XML no longer risk 5xxs: the API either returns a clear client error or a best-effort diff instead of silently dropping everything. ✅
+
+Testing
+• `node --test` (including new `tests/sitemap_delta_parsing.test.mjs` and existing `tests/api_contracts.test.mjs`). ✅
+
+Commits
+• TBD — feat(sitemap-delta): harden sitemap XML parsing and add parser tests

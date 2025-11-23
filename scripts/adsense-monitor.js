@@ -44,11 +44,28 @@
     }
   }
 
+  function hasAdsOptIn(){
+    try { return localStorage.getItem('ads') === 'on'; } catch { return false; }
+  }
+
+  function hasAdsConsentFromAdapter(){
+    try {
+      if (window.TinyUtilsConsent && typeof window.TinyUtilsConsent.hasAdsConsent === 'function') {
+        return !!window.TinyUtilsConsent.hasAdsConsent();
+      }
+    } catch (e) {}
+    // If no adapter is wired yet, default to allowed; CMP is
+    // still the canonical source and can tighten this later.
+    return true;
+  }
+
   function init(){
     // minimal guard: do not show on local/dev unless explicitly allowed
     const h = location.hostname || '';
     const allowed = (h === 'tinyutils.net' || h === 'www.tinyutils.net' || /vercel\.app$/.test(h));
     if (!allowed) return;
+    if (!hasAdsOptIn()) return;
+    if (!hasAdsConsentFromAdapter()) return;
     // Wait a bit to let consent.js load AdSense when permitted
     setTimeout(detectFailure, 3000);
   }

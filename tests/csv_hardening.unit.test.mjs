@@ -15,10 +15,12 @@ async function loadCsvHelpers() {
   if (cachedHelpers) return cachedHelpers;
   const source = await readFile(dlfHtmlPath, 'utf8');
   const protect = extractFunction(source, 'protectCSVCell');
+  const csvVariants = extractBlock(source, 'const CSV_VARIANTS', 'function buildCSV');
+  const buildCsv = extractFunction(source, 'buildCSV');
   const toCsv = extractFunction(source, 'toCSV');
   const context = {};
   vm.createContext(context);
-  vm.runInContext(`${protect}\n${toCsv}\nthis.helpers = { protectCSVCell, toCSV };`, context);
+  vm.runInContext(`${protect}\n${csvVariants}\n${buildCsv}\n${toCsv}\nthis.helpers = { protectCSVCell, toCSV };`, context);
   cachedHelpers = context.helpers;
   return cachedHelpers;
 }
@@ -43,6 +45,18 @@ function extractFunction(source, name) {
     pos += 1;
   }
   return source.slice(start, pos);
+}
+
+function extractBlock(source, startMarker, endMarker) {
+  const start = source.indexOf(startMarker);
+  if (start === -1) {
+    throw new Error(`Unable to locate block starting with ${startMarker} in ${dlfHtmlPath}`);
+  }
+  const end = source.indexOf(endMarker, start);
+  if (end === -1) {
+    throw new Error(`Unable to locate block end marker ${endMarker} in ${dlfHtmlPath}`);
+  }
+  return source.slice(start, end);
 }
 
 test('protectCSVCell guards spreadsheet formula prefixes', async () => {

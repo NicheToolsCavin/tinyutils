@@ -1,10 +1,5 @@
-(function(){
-  // Minimal consent helper for TinyUtils.
-  // Responsibilities:
-  // - Manage the local "hide ads" toggle (tu-ads-hidden) so users can reduce
-  //   visual noise without changing how Google serves ads.
-
-  const ADS_KEY = 'tu-ads-hidden';
+;(function(){
+  const ADS_HIDDEN_KEY = 'tu-ads-hidden';
 
   function save(key, value) {
     try { localStorage.setItem(key, value); } catch (e) {}
@@ -17,20 +12,38 @@
   function initAdsToggle() {
     var el = document.getElementById('tu-ads-toggle');
     if (!el) return;
-    var stored = read(ADS_KEY);
+    var stored = read(ADS_HIDDEN_KEY);
     if (stored === '1') {
       document.documentElement.classList.add('ads-hidden');
+      el.checked = true;
     }
 
     el.addEventListener('change', function (event) {
-      var on = !!event.target.checked;
-      document.documentElement.classList.toggle('ads-hidden', on);
-      save(ADS_KEY, on ? '1' : '0');
+      var hide = !!event.target.checked;
+      document.documentElement.classList.toggle('ads-hidden', hide);
+      save(ADS_HIDDEN_KEY, hide ? '1' : '0');
     });
+  }
+
+  function initAdapter() {
+    // Expose a tiny adapter that other scripts can use to consult
+    // CMP-provided consent state. Funding Choices remains the
+    // canonical source of consent; this object is just a thin
+    // compatibility layer. In the absence of CMP wiring, it
+    // defaults to `true` to avoid surprising regressions.
+    var adapter = window.TinyUtilsConsent || {};
+    if (typeof adapter.hasAnalyticsConsent !== 'function') {
+      adapter.hasAnalyticsConsent = function () { return true; };
+    }
+    if (typeof adapter.hasAdsConsent !== 'function') {
+      adapter.hasAdsConsent = function () { return true; };
+    }
+    window.TinyUtilsConsent = adapter;
   }
 
   function init() {
     initAdsToggle();
+    initAdapter();
   }
 
   if (document.readyState === 'loading') {

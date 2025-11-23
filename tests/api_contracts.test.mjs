@@ -75,6 +75,13 @@ test('wayback fixer returns archived snapshot info with request id', async () =>
   await assertEnvelope(res, payload);
   assert.ok(Array.isArray(payload?.results));
   assert.ok(payload?.meta?.totalChecked >= 0);
+  assert.strictEqual(payload.meta?.spnLimit, 10);
+  if (payload.meta?.spn) {
+    assert.strictEqual(payload.meta.spn.limit, 10);
+    assert.ok(typeof payload.meta.spn.attempted === 'number');
+    assert.ok(typeof payload.meta.spn.enqueued === 'number');
+    assert.strictEqual(typeof payload.meta.spn.capped, 'boolean');
+  }
 });
 
 test('metafetch produces meta block even when upstream content is HTML', async () => {
@@ -97,4 +104,9 @@ test('check handler returns ok envelope and scheduler meta', async () => {
   await assertEnvelope(res, payload);
   assert.ok(payload?.meta?.scheduler);
   assert.ok(payload?.meta?.stage);
+  // When the handler succeeds, robots meta should be present for observability.
+  if (res.status === 200 && payload?.meta) {
+    assert.ok(Object.hasOwn(payload.meta, 'robotsSkipped'));
+    assert.ok(Object.hasOwn(payload.meta, 'robotsCrawlDelaySeconds'));
+  }
 });

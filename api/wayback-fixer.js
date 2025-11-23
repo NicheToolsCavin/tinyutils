@@ -1,3 +1,5 @@
+import { isPrivateHost, safeFetch, makeRequestId, jsonResponse as sharedJsonResponse } from './_lib/edge_helpers.js';
+
 export const config = { runtime: 'edge' };
 
 function rid() {
@@ -5,12 +7,7 @@ function rid() {
 }
 
 function json(status, body, requestId) {
-  const headers = new Headers({
-    'content-type': 'application/json; charset=utf-8',
-    'cache-control': 'no-store'
-  });
-  if (requestId) headers.set('x-request-id', requestId);
-  return new Response(JSON.stringify(body), { status, headers });
+  return sharedJsonResponse(status, body, requestId);
 }
 
 function jerr(status, message, note, requestId) {
@@ -43,58 +40,22 @@ function randomBetween(min, max) {
 }
 
 async function fetchWithRetry(url, init = {}, timeoutMs = 10000) {
-  const buildInit = () => {
-    const headers = new Headers(init.headers || {});
-    if (!headers.has('user-agent')) headers.set('user-agent', UA);
-    return { ...init, headers, signal: AbortSignal.timeout(timeoutMs) };
-  };
-
   let retried = false;
-  try {
-    let res = await fetch(url, buildInit());
-    if (res.status === 429 || res.status >= 500) {
+  const res = await safeFetch(url, {
+    timeoutMs,
+    maxRetries: 1,
+    retryJitterMs: randomBetween(RETRY_JITTER_MIN_MS, RETRY_JITTER_MAX_MS),
+    validateUrl: false,
+    onRetry: () => {
       retried = true;
-      await delay(randomBetween(RETRY_JITTER_MIN_MS, RETRY_JITTER_MAX_MS));
-      res = await fetch(url, buildInit());
+    },
+    ...init,
+    headers: {
+      'user-agent': UA,
+      ...(init.headers || {})
     }
-    return { res, retried };
-  } catch (error) {
-    if (retried) {
-      error.__retried = true;
-      throw error;
-    }
-    retried = true;
-    await delay(randomBetween(RETRY_JITTER_MIN_MS, RETRY_JITTER_MAX_MS));
-    try {
-      const res = await fetch(url, buildInit());
-      return { res, retried };
-    } catch (err) {
-      err.__retried = true;
-      throw err;
-    }
-  }
-}
-
-function isPrivateHost(hostname) {
-  const host = (hostname || '').toLowerCase();
-  if (!host) return true;
-  if (host === 'localhost' || host.endsWith('.local')) return true;
-  if (host === '0.0.0.0') return true;
-  if (host.startsWith('127.')) return true;
-  if (host.startsWith('10.')) return true;
-  if (host.startsWith('192.168.')) return true;
-  if (host.startsWith('169.254.')) return true;
-  const parts = host.split('.').map(p => Number.parseInt(p, 10));
-  if (parts.length === 4 && parts.every(n => Number.isInteger(n) && n >= 0 && n <= 255)) {
-    if (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) return true;
-  }
-  if (host.includes(':')) {
-    const compact = host.split('%')[0];
-    if (compact === '::1') return true;
-    if (compact.startsWith('fc') || compact.startsWith('fd')) return true;
-    if (compact.startsWith('fe80')) return true;
-  }
-  return false;
+  });
+  return { res, retried };
 }
 
 function normalizeUrl(raw) {
@@ -162,7 +123,7 @@ function toIso(timestamp) {
 }
 
 export default async function handler(req) {
-  const requestId = rid();
+  const requestId = makeRequestId(req) || rid();
 
   if (req.method !== 'POST') {
     return json(405, { ok: false, message: 'Only POST is supported' }, requestId);
@@ -228,6 +189,7 @@ export default async function handler(req) {
     }
 
     let spnQueued = 0;
+    let spnAttempted = 0;
     const globalCap = Math.min(maxConc, GLOBAL_FETCH_CAP);
     const workerCount = validUrls.length ? Math.min(globalCap, validUrls.length) : 0;
     const perOriginInFlight = new Map();
@@ -301,10 +263,15 @@ export default async function handler(req) {
               note: null
             };
           } else {
-            if (trySPN && spnQueued < SPN_CAP) {
-              spnQueued += 1;
-              fetchWithRetry(`https://web.archive.org/save/${encodeURIComponent(item.url)}`, {}, timeout).catch(() => {});
-              noteParts.push('spn_queued');
+            if (trySPN) {
+              spnAttempted += 1;
+              if (spnQueued < SPN_CAP) {
+                spnQueued += 1;
+                fetchWithRetry(`https://web.archive.org/save/${encodeURIComponent(item.url)}`, {}, timeout).catch(() => {});
+                noteParts.push('spn_queued');
+              } else {
+                noteParts.push('spn_skipped_cap');
+              }
             }
             noteParts.push('no_snapshot');
             resultEntry = { url: item.url, snapshotUrl: '', snapshotTs: '', verify: null, note: null };
@@ -370,7 +337,13 @@ export default async function handler(req) {
         timeoutMs: timeout,
         retries: retryCount
       },
-      spnLimit: SPN_CAP
+      spnLimit: SPN_CAP,
+      spn: {
+        limit: SPN_CAP,
+        attempted: spnAttempted,
+        enqueued: spnQueued,
+        capped: spnAttempted > spnQueued
+      }
     };
 
     meta.requestId = requestId;
