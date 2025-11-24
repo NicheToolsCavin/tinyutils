@@ -22,12 +22,12 @@ try:  # pragma: no cover — optional dependency at runtime
 except Exception:  # pragma: no cover
     pdfplumber = None  # type: ignore
 
-# Use relative imports since we're in api/convert/ directory
-from .._lib import pandoc_runner
-from .._lib.html_utils import sanitize_html_for_pandoc
-from .._lib.manifests import build_snippets, collect_headings, media_manifest
-from .._lib.text_clean import normalise_markdown
-from .._lib.utils import ensure_within_limits, generate_job_id, job_workspace
+# Use absolute imports so the module works both locally and inside Vercel lambdas
+from api._lib import pandoc_runner
+from api._lib.html_utils import sanitize_html_for_pandoc
+from api._lib.manifests import build_snippets, collect_headings, media_manifest
+from api._lib.text_clean import normalise_markdown
+from api._lib.utils import ensure_within_limits, generate_job_id, job_workspace
 
 from .convert_types import (
     BatchResult,
@@ -41,7 +41,17 @@ from .convert_types import (
 )
 
 
-TARGET_EXTENSIONS = {"md": "md", "html": "html", "txt": "txt", "docx": "docx", "odt": "odt", "pdf": "pdf", "rtf": "rtf"}
+TARGET_EXTENSIONS = {
+    "md": "md",
+    "html": "html",
+    "txt": "txt",
+    "docx": "docx",
+    "odt": "odt",
+    "pdf": "pdf",
+    "rtf": "rtf",
+    "epub": "epub",
+    "latex": "tex",
+}
 TARGET_CONTENT_TYPES = {
     "md": "text/markdown; charset=utf-8",
     "html": "text/html; charset=utf-8",
@@ -50,6 +60,8 @@ TARGET_CONTENT_TYPES = {
     "odt": "application/vnd.oasis.opendocument.text",
     "pdf": "application/pdf",
     "rtf": "application/rtf",
+    "epub": "application/epub+zip",
+    "latex": "text/x-tex; charset=utf-8",
 }
 
 
@@ -397,10 +409,20 @@ def convert_one(
     # Name hint
     name_lower = (name or "").lower()
     looks_tex_name = name_lower.endswith('.tex')
+    # 1) Server-side LaTeX detection so auto/md/text inputs with TeX
+    #    snippets are upgraded to the LaTeX pipeline.
     if adjusted_from in (None, "md", "markdown", "text", "auto") and (
         _looks_like_latex(sample_text) or looks_tex_name
     ):
         adjusted_from = "latex"
+
+    # 2) Plain-text → markdown auto-formatting: when callers explicitly
+    #    label input as text, treat it as markdown so the markdown
+    #    pipeline (lists/headings, cleanup, dialects) can enrich it.
+    #    This mirrors the UI's "Auto" path for pasted content, which
+    #    already sends markdown to the server.
+    if adjusted_from in ("text", "txt"):
+        adjusted_from = "markdown"
 
     cache_key = _build_cache_key(
         input_bytes=input_bytes,
@@ -461,7 +483,14 @@ def convert_one(
 
             # Use the adjusted_from for the actual conversion (post-detection)
             if adjusted_from != from_format:
-                logs.append("format_override=latex_detected_server")
+                if adjusted_from == "latex":
+                    logs.append("format_override=latex_detected_server")
+                elif (from_format in {"text", "txt"}) and adjusted_from == "markdown":
+                    logs.append("format_override=text_to_markdown_autofmt")
+                else:
+                    logs.append(
+                        f"format_override={from_format or 'auto'}->{adjusted_from}"
+                    )
                 from_format = adjusted_from
 
             # Pre-process PDFs: layout-aware extraction with legacy fallback
@@ -840,8 +869,19 @@ def _render_markdown_target(cleaned_path: Path, target: str, *, logs: Optional[L
             extra_args=["--wrap=none"],
         )
         return output_path.read_bytes()
+    elif target == "epub":
+        # EPUB output via pandoc (binary zip)
+        output_path = cleaned_path.parent / f"{cleaned_path.stem}.epub"
+        pypandoc.convert_file(
+            str(cleaned_path),
+            to="epub",
+            format="gfm",
+            outputfile=str(output_path),
+            extra_args=["--wrap=none"],
+        )
+        return output_path.read_bytes()
     else:
-        # Standard text-based outputs (html, txt, md)
+        # Standard text-based outputs (html, txt, md, latex, etc.)
         pandoc_target = "plain" if target == "txt" else target
         # Add better args for plain text to preserve structure
         extra_args = ["--wrap=none"]
@@ -861,20 +901,20 @@ def _render_markdown_target(cleaned_path: Path, target: str, *, logs: Optional[L
 
 
 def _render_pdf_via_reportlab(markdown_path: Path, *, logs: Optional[List[str]] = None) -> bytes:
-    """Convert markdown to PDF using external Chromium renderer or xhtml2pdf fallback.
+    """Convert markdown to PDF using external renderer, then a pure-Python ReportLab fallback.
 
-    Strategy: Convert markdown → HTML (via pandoc) → PDF (via Chromium or xhtml2pdf).
-    Prefers external Chromium renderer (PDF_RENDERER_URL) for higher fidelity.
-    Falls back to local xhtml2pdf when external renderer is not configured.
+    Strategy: Convert markdown → HTML (via pandoc) → PDF (via external renderer if available).
+    If the external renderer is absent or fails, fall back to a minimal ReportLab paragraph
+    renderer that avoids native dependencies (no cairo/pycairo), keeping preview builds slim.
     """
     try:
         # First, convert markdown to HTML using pandoc (which we know works)
         pypandoc = _get_pypandoc()
         html_content = pypandoc.convert_file(
             str(markdown_path),
-            to='html5',
-            format='gfm',
-            extra_args=['--standalone', '--self-contained']
+            to="html5",
+            format="gfm",
+            extra_args=["--standalone", "--self-contained"],
         )
 
         # Add basic CSS for better formatting
@@ -882,7 +922,7 @@ def _render_pdf_via_reportlab(markdown_path: Path, *, logs: Optional[List[str]] 
         <!DOCTYPE html>
         <html>
         <head>
-            <meta charset="utf-8">
+            <meta charset=\"utf-8\">
             <style>
                 body {{ font-family: Arial, sans-serif; margin: 40px; }}
                 h1 {{ font-size: 24px; margin-top: 20px; }}
@@ -905,20 +945,21 @@ def _render_pdf_via_reportlab(markdown_path: Path, *, logs: Optional[List[str]] 
             from ._pdf_external import render_html_to_pdf_via_external, RemotePdfError
             try:
                 import uuid
+
                 request_id = uuid.uuid4().hex
                 pdf_bytes, meta = render_html_to_pdf_via_external(
                     html_with_style,
                     f"{markdown_path.stem or 'output'}.pdf",
-                    request_id
+                    request_id,
                 )
                 _LOGGER.info(
                     "PDF rendered via external Chromium: engine=%s version=%s",
-                    meta.get('pdfEngine'),
-                    meta.get('pdfEngineVersion')
+                    meta.get("pdfEngine"),
+                    meta.get("pdfEngineVersion"),
                 )
                 if logs is not None:
-                    engine = meta.get('pdfEngine') or 'external'
-                    version = meta.get('pdfEngineVersion') or 'unknown'
+                    engine = meta.get("pdfEngine") or "external"
+                    version = meta.get("pdfEngineVersion") or "unknown"
                     # Use format that app.py can parse: "pdf_engine=<value> pdf_engine_version=<value>"
                     logs.append(f"pdf_engine={engine}")
                     if version:
@@ -927,41 +968,51 @@ def _render_pdf_via_reportlab(markdown_path: Path, *, logs: Optional[List[str]] 
             except RemotePdfError as exc:
                 # External renderer failed - log warning and fall back to local renderer
                 _LOGGER.warning(
-                    "External PDF renderer failed (code=%s message=%s), falling back to xhtml2pdf",
+                    "External PDF renderer failed (code=%s message=%s), falling back to reportlab",
                     exc.code,
-                    exc.message
+                    exc.message,
                 )
                 if logs is not None:
                     logs.append(f"pdf_external_fallback={exc.code}:{exc.message}")
-                # Fall through to xhtml2pdf fallback below
+                # Fall through to ReportLab fallback below
 
-        # Local reportlab fallback (pure Python, no system dependencies)
-        from reportlab.lib.pagesizes import letter
-        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-        from reportlab.lib.styles import getSampleStyleSheet
-        from reportlab.lib.units import inch
-        import io
+        # ReportLab fallback (pure Python, no native cairo deps)
+        try:
+            import io
 
-        pdf_buffer = io.BytesIO()
-        doc = SimpleDocTemplate(pdf_buffer, pagesize=letter)
-        styles = getSampleStyleSheet()
-        story = []
+            from reportlab.lib.pagesizes import LETTER
+            from reportlab.lib.styles import getSampleStyleSheet
+            from reportlab.lib.units import inch
+            from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
 
-        # Simple HTML to paragraphs conversion
-        # Remove HTML tags for basic text rendering
-        import re
-        clean_text = re.sub('<[^<]+?>', '', html_with_style)
-        lines = clean_text.strip().split('\n')
+            pdf_buffer = io.BytesIO()
+            doc = SimpleDocTemplate(pdf_buffer, pagesize=LETTER)
+            styles = getSampleStyleSheet()
+            body = markdown_path.read_text(encoding="utf-8", errors="ignore")
 
-        for line in lines:
-            if line.strip():
-                story.append(Paragraph(line, styles['Normal']))
-                story.append(Spacer(1, 0.2*inch))
+            story = []
+            for chunk in body.split("\n\n"):
+                stripped = chunk.strip()
+                if not stripped:
+                    continue
+                story.append(Paragraph(stripped.replace("\n", "<br/>"), styles["Normal"]))
+                story.append(Spacer(1, 0.15 * inch))
+            if not story:
+                story.append(Paragraph("(empty document)", styles["Normal"]))
 
-        doc.build(story)
-        if logs is not None:
-            logs.append("pdf_engine=reportlab")
-        return pdf_buffer.getvalue()
+            doc.build(story)
+            if logs is not None:
+                logs.append("pdf_engine=reportlab")
+            return pdf_buffer.getvalue()
+        except Exception as rl_exc:
+            _LOGGER.error("reportlab fallback failed: %s", rl_exc)
+            if logs is not None:
+                logs.append(
+                    f"pdf_engine_fallback_error=reportlab:{rl_exc.__class__.__name__}"
+                )
+            raise RuntimeError(
+                f"PDF generation failed with reportlab fallback: {rl_exc}"
+            ) from rl_exc
 
     except Exception as e:
         # If PDF generation fails completely, raise a more informative error
