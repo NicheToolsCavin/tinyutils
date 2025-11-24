@@ -1,2 +1,0 @@
-origin	https://github.com/NicheToolsCavin/tinyutils (fetch)
-origin	https://github.com/NicheToolsCavin/tinyutils (push)

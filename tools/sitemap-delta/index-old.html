@@ -685,36 +685,6 @@
   renderTables();
   </script>
 
-
-<script>
-(function(){
-  const PROD = /tinyutils\.net$/.test(location.hostname);
-  // minimal consent bar (bottom-right)
-  const needsConsent = PROD && !localStorage.getItem('consent');
-  if (needsConsent){
-    const bar = document.createElement('div');
-    bar.style.cssText='position:fixed;right:12px;bottom:12px;background:var(--panel);color:var(--text);border:1px solid var(--border);padding:10px 12px;border-radius:10px;z-index:9999;font:14px system-ui';
-    bar.innerHTML = 'Analytics & ads help keep this free. <button id="c-yes" style="margin-left:8px">OK</button> <button id="c-no" style="margin-left:4px">No</button>';
-    document.body.appendChild(bar);
-    bar.querySelector('#c-yes').onclick=function(){ localStorage.setItem('consent','yes'); bar.remove(); loadProd(); };
-    bar.querySelector('#c-no').onclick=function(){ localStorage.setItem('consent','no'); bar.remove(); };
-  } else if (PROD && localStorage.getItem('consent')==='yes'){ loadProd(); }
-
-  function loadProd(){
-    // Plausible (privacy-first)
-    var s=document.createElement('script'); s.defer=true; s.setAttribute('data-domain','tinyutils.net');
-    s.src='https://plausible.io/js/script.js'; document.head.appendChild(s);
-    // AdSense (auto ads) — only if explicitly allowed and non-EU in your prod config.
-    if (localStorage.getItem('ads')==='on'){
-      var ads=document.createElement('script');
-      ads.async=true; ads.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX';
-      ads.crossOrigin='anonymous'; document.head.appendChild(ads);
-    }
-  }
-})();
-
-</script>
-
 <footer class="site-footer">
   <div class="container row between wrap">
     <span>© <span id="y"></span> TinyUtils</span>
