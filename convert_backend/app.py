@@ -158,7 +158,7 @@ def _get_pandoc_runner():
         return _pandoc_runner
     except Exception:
         class _StubRunner:  # minimal surface used by this module
-            VENDORED_PANDOC_PATH = str(Path(__file__).resolve().parents[1] / "_vendor" / "pandoc" / "pandoc.xz")
+            VENDORED_PANDOC_PATH = str(Path(__file__).resolve().parents[1] / "_vendor" / "pandoc" / "pandoc")
 
             @staticmethod
             def get_configured_pandoc_path() -> Optional[str]:
@@ -196,6 +196,31 @@ def _log_unexpected_trace(request_id: str, exc: BaseException) -> None:
     print(f"CONVERT ERROR [{request_id}]: {exc.__class__.__name__}", file=sys.stderr, flush=True)
     print(trace, file=sys.stderr, flush=True)
     print(f"{'='*80}\n", file=sys.stderr, flush=True)
+
+
+@app.exception_handler(Exception)
+async def _catch_all_exceptions(request: Request, exc: Exception):
+    """Return structured JSON (with traceback in preview) for unexpected errors."""
+
+    _log_unexpected_trace(getattr(request.state, "request_id", "unknown"), exc)
+
+    if _is_preview_env():
+        trace = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+        return JSONResponse(
+            status_code=500,
+            content={
+                "ok": False,
+                "error": {
+                    "kind": exc.__class__.__name__,
+                    "message": "Internal server error",
+                    "detail": str(exc),
+                    "traceback": trace,
+                },
+            },
+        )
+
+    # Fall back to FastAPI's default handler in non-preview environments
+    raise exc
 
 
 @app.on_event("startup")
@@ -506,9 +531,20 @@ def convert(
         except Exception as exc:
             _log_unexpected_trace(resolved_request_id, exc)
             _log_failure(resolved_request_id, exc.__class__.__name__, str(exc), start_time)
+
+            # Preserve the historical 500 error shape expected by the
+            # text-converter frontend: `detail` should be a simple
+            # string so mapConvertErrorFromResponse() can surface a
+            # user-friendly message instead of "[object Object]".
+            message = "Internal server error during conversion"
+            if _is_preview_env():
+                # Include a short hint for preview diagnostics while
+                # keeping the main message compact for users.
+                message = f"{message}: {exc.__class__.__name__}: {str(exc)}"
+
             raise HTTPException(
                 status_code=500,
-                detail="Internal server error during conversion",
+                detail=message,
                 headers=_response_headers(resolved_request_id),
             ) from exc
 

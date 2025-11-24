@@ -169,6 +169,17 @@ Testing
 Commits
 • TBD - feat: add Try Example UX for PR4
 
+### Major changes — 2025-11-23 23:xx CET — Svelte share-link parity
+
+Added
+• Reintroduced hash-based share links in the Svelte Sitemap Delta UI (`src/routes/tools/sitemap-delta/+page.svelte`) so the "Copy shareable link" button embeds core inputs/options (sitemap URLs, verify toggle, timeout, maxCompare) into `location.hash` and copies the full URL.
+
+Modified
+• On successful runs, the Svelte route now updates `history.replaceState` with the latest share hash and restores settings on load / hashchange, mirroring the legacy HTML tool’s `paramsToHash`/`restoreFromHash` behavior while keeping the new layout and exports intact.
+
+Human-readable summary
+Sitemap Delta’s Svelte version once again generates share links that faithfully reproduce the comparison setup when opened in a new tab, matching the legacy tool’s share-state behavior without changing the diff or export logic.
+
 ### Major changes — 2025-11-22 16:30 CET (UTC+01:00) — Safer sitemap XML parsing
 
 Added

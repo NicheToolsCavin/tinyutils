@@ -1,5 +1,34 @@
 ## Converter Tool — Description and Change Log
 
+### Major changes — 2025-11-24 02:45 CET (UTC+01:00) — Plain-text → Markdown auto-formatting
+
+Added
+• Server-side plain-text → markdown promotion for `/api/convert` so inputs explicitly labelled as `from="text"` are treated as markdown sources, flowing through the same list/heading/cleanup pipeline as existing Markdown conversions.
+
+Modified
+• `convert_backend/convert_service.py:convert_one()` now post-processes the requested `from_format`:
+  - Keeps the existing LaTeX detection (auto/md/text → `latex` when content/filename looks like TeX).
+  - When `from_format` resolves to `"text"`/`"txt"`, upgrades it to `"markdown"` before calling `pandoc_runner.convert_to_markdown()`, and logs `format_override=text_to_markdown_autofmt` for observability.
+• Cache keys now incorporate the upgraded `from_format` so plain-text→Markdown runs are cached separately from legacy text passthroughs.
+
+Fixed
+• None (behavioral change is additive and scoped to inputs that explicitly choose `Plain Text (.txt)` as the source format; auto-detect and existing Markdown/HTML/PDF flows are unchanged).
+
+Human-readable summary
+
+Previously, uploading a `.txt` file and asking for Markdown would treat the input as generic plain text inside Pandoc, which meant Markdown-style structures (like `# Heading` or `- Bullet`) were not interpreted and downstream formatting stayed very flat. With this change, any conversion that declares `from="text"` is internally promoted to `from="markdown"` before running through the GitHub Flavored Markdown pipeline and cleanup filters. In practice, that means simple headings and list markers in text files are now respected when producing Markdown (and derived formats like DOCX/HTML), while pasted content in the UI continues to use the existing auto-detect path.
+
+Impact
+• `.txt` → Markdown (and `.txt` → DOCX/HTML via Markdown) now benefit from the same structural handling as native Markdown inputs, without changing the public API shape. ✅
+• Existing HTML/PDF/Word/OpenDocument conversions remain untouched; only explicit `Plain Text` source selections are upgraded. ✅
+
+Testing
+• `python -m py_compile convert_backend/convert_service.py` to validate syntax. ✅
+• `pnpm test` (Node test suite) and `pnpm build` (SvelteKit + adapter-vercel) on branch `feat/sveltekit-phase2-tools`; both complete successfully under Node 25.x with the existing engine warning. ✅
+
+Commits
+• Local branch `feat/sveltekit-phase2-tools` — converter backend plain-text→markdown auto-formatting (see `docs/AGENT_RUN_LOG.md` entry "Manual - Sitemap Delta Svelte share-link parity" and subsequent converter notes for this session).
+
 ### Major changes — 2025-11-19 02:30 CET (UTC+01:00) — Converter fidelity baselines, filters, and tests
 
 Added
