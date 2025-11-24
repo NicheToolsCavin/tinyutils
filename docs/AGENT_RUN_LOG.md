@@ -217,6 +217,113 @@ Running log for agent-led work so freezes or mid-run swaps never erase context.
 
 ## Sessions
 
+### 2025-11-24 03:48 CET - Manual - final preview smokes + prod deploy
+- **Mode:** manual
+- **Branch:** `feat/sveltekit-phase2-tools`
+- **Summary:**
+  - Ran final preview smokes against tinyutils-7nqe7qudq.vercel.app: scripts/preview_smoke.mjs and scripts/smoke_convert_preview.mjs both PASS (all core pages/APIs 200 with expected markers; converter smokes green).
+  - Deployed current branch code to production via vercel --prod, new production deployment at tinyutils-72ksejbmx-cavins-projects-7b0e00bb.vercel.app backing www.tinyutils.net.
+- **Evidence:** artifacts/convert/20251124/preview-smoke-20251124034717
+- **Follow-ups:**
+
+### 2025-11-24 03:40 CET - Manual - revert glowup styling
+- **Mode:** manual
+- **Branch:** `feat/sveltekit-phase2-tools`
+- **Summary:**
+  - Reverted home/tools heroes and cards to simpler neutral styling
+  - Removed aurora/glow variants on tool pages; restored chip-less metas
+- **Evidence:** preview-home-fixed.png, preview-tools-fixed.png
+- **Follow-ups:**
+
+### 2025-11-24 03:32 CET - Manual - UI glowup with Magic MCP
+- **Mode:** manual
+- **Branch:** `feat/sveltekit-phase2-tools`
+- **Summary:**
+  - Refreshed home hero and tool cards with aurora gradient + chip highlights
+  - Restyled tools hub cards/hero and added Pro/Free pills
+  - Added glow hero strips for Dead Link Finder, Sitemap Delta, Wayback Fixer
+- **Evidence:** NONE
+- **Follow-ups:**
+  - Preview smoke + merge with parallel branch
+
+### 2025-11-24 02:41 CET - Manual - preview helper script docs
+- **Mode:** manual
+- **Branch:** `feat/sveltekit-phase2-tools`
+- **Summary:**
+  - Documented a one-shot helper script in PREVIEW.md that deploys a Vercel preview via vercel deploy --prebuilt --yes, extracts the Preview URL, and runs scripts/preview_smoke.mjs + scripts/smoke_convert_preview.mjs with logs under artifacts/preview-smokes/YYYYMMDD/.
+  - This makes it easier for agents and humans to spin up a fresh preview and run both smoke suites without re-deriving the commands each time.
+- **Evidence:** artifacts/preview-smokes/
+- **Follow-ups:**
+
+### 2025-11-24 02:35 CET - Manual - converter plain-text→markdown autofmt + preview smokes
+- **Mode:** manual
+- **Branch:** `feat/sveltekit-phase2-tools`
+- **Summary:**
+  - Upgraded convert_backend.convert_one() to promote from_format='text' inputs to 'markdown' so .txt → Markdown (and downstream DOCX/HTML) flows pass through the full GFM/Lua/cleanup pipeline instead of Pandoc's plain-text reader.
+  - Ran pnpm test and pnpm build successfully on the branch, then deployed a new Vercel preview and executed scripts/preview_smoke.mjs + scripts/smoke_convert_preview.mjs; smokes currently FAIL because the preview lacks live /api/* routes (404s/308s), so no prod deploy was attempted.
+- **Evidence:** artifacts/convert/20251124/preview-smoke-20251124023456
+- **Follow-ups:**
+  - Preview smokes: investigate why the SvelteKit preview URL serves 308/404 for /tools/* and /api/* and fix Vercel config before running vercel --prod.
+
+### 2025-11-24 00:58 CET - Manual - Sitemap Delta Svelte share-link parity
+- **Mode:** manual
+- **Branch:** `feat/sveltekit-phase2-tools`
+- **Summary:**
+  - Updated src/routes/tools/sitemap-delta/+page.svelte to encode sitemap inputs/options into a JSON hash, mirror legacy paramsToHash/restoreFromHash behavior, and wire shareLink() + successful runs to keep location.hash in sync.
+  - Added restoreFromHash() + hashchange listener so opening a copied Sitemap Delta link restores the comparison state in the Svelte UI, matching the old static tool.
+- **Evidence:** artifacts/ws3-dlf-sitemap-wayback/20251122/node-test.log
+- **Follow-ups:**
+
+### 2025-11-24 00:41 CET - Manual - Wayback inline comment parity
+- **Mode:** manual
+- **Branch:** `feat/sveltekit-phase2-tools`
+- **Summary:**
+  - Restored inline # and // comment stripping in Wayback Fixer Svelte UI normalizeList() to match legacy tools/wayback-fixer behavior and avoid malformed URLs.
+  - Updated src/routes/tools/wayback-fixer/+page.svelte normalizeList() to route each token through stripInlineComments while preserving existing newline/comma/semicolon splitting.
+- **Evidence:** artifacts/ws3-dlf-sitemap-wayback/20251122/node-test.log
+- **Follow-ups:**
+
+### 2025-11-23 23:26 CET - Manual - clean sitemap consent + ad empty-state
+- **Mode:** manual
+- **Branch:** `feat/sveltekit-phase2-tools`
+- **Summary:**
+  - Removed legacy bottom-right 'Analytics & ads help keep this free' consent bar from sitemap-delta HTML variants in favor of Google Funding Choices + shared consent.js.
+  - Tweaked .ad-slot styling and adsense-monitor.js to hide ad UI when AdSense loads but never fills any slots, avoiding broken-image placeholders while still showing an adblock toast when the script is blocked entirely.
+  - Added spacing between Inputs/Outputs cards on /tools/formats for clearer layout.
+- **Evidence:** artifacts/ui-ads-consent/20251123/
+- **Follow-ups:**
+
+### 2025-11-23 22:41 CET - Manual - converter preview smokes green
+- **Mode:** manual
+- **Branch:** `feat/sveltekit-phase2-tools`
+- **Summary:**
+  - Replaced xhtml2pdf fallback with reportlab-only PDF path and absolute imports in convert_backend to fix lambda ImportError.
+  - Added preview JSON traceback handler; redeployed preview tinyutils-dvt29enof...; preview_smoke and smoke_convert_preview now pass.
+- **Evidence:** artifacts/convert/20251123/preview-smoke-20251123103956/
+- **Follow-ups:**
+
+### 2025-11-23 15:44 CET - Manual - finish sveltekit static pages & assets
+- **Mode:** manual
+- **Branch:** `feat/sveltekit-phase2-tools`
+- **Summary:**
+  - Reorganized static assets to SvelteKit default static/, updated icons/styles/scripts paths, removed kit.files.assets warning
+  - Ported legal/privacy/terms/cookies/contact/support/faq and blog index/posts into src/routes with canonical .html URLs
+  - Added text-converter placeholder route and Pro CTA blocks on home/tools hub; build/test now clean
+- **Evidence:** artifacts/sveltekit/20251123/build-test-summary.txt
+- **Follow-ups:**
+  - Review converter UI migration later if required
+
+### 2025-11-23 15:04 CET - Manual - SvelteKit Phase2 tools slice
+- **Mode:** manual
+- **Branch:** `feat/sveltekit-phase2-tools`
+- **Summary:**
+  - Added SvelteKit shell, tools hub, DLF, sitemap-delta, wayback-fixer pages plus shared download/CSV utils; preserved URLs/classes/scripts; left /api and vercel.json untouched.
+  - Implemented DLF client utils + unit test; pnpm test -- tests/dead-link-finder-utils.test.mjs green; full pnpm test passes after clearing stale .vercel/output.
+  - pnpm build succeeds; warnings remain about kit.files.assets deprecation and vite-plugin-svelte@3 with Svelte 5 (not upgraded).
+- **Evidence:** artifacts/sveltekit-phase2/20251123/
+- **Follow-ups:**
+  - Optional: bump vite-plugin-svelte to ^4.0.0-next.6 to silence build warnings; run preview_smoke when ready.
+
 ### 2025-11-23 11:03 CET - Manual - fix SvelteKit demo deps/build
 - **Mode:** manual
 - **Branch:** `main`
