@@ -1,0 +1,190 @@
+/* ============================================
+   DESIGN SYSTEM IMPORTS
+   ============================================ */
+@import url('./design-tokens.css');
+@import url('./components.css');
+@import url('./animations.css');
+
+/* ============================================
+   LEGACY TOKEN MAPPINGS (for backward compatibility)
+   These map old var names to new design tokens
+   ============================================ */
+:root{
+  /* Legacy token aliases - gradually migrate away from these */
+  --bg: var(--bg-primary);
+  --panel: var(--surface-base);
+  --muted: var(--text-tertiary);
+  --text: var(--text-primary);
+  --brand: var(--brand-500);
+  --brand-2: var(--brand-600);
+  --border: var(--border-default);
+  --radius: var(--radius-xl);
+  --focus-ring: var(--focus-ring);
+  --progress-bg: rgba(255,255,255,0.12);
+}
+
+html[data-theme="dark"]{
+  --bg:#0a0f1f;
+  --panel:#0b1224;
+  --muted:#9ca8cf;
+  --text:#f2f5ff;
+  --brand:#3b82f6;
+  --brand-2:#2563eb;
+  --border:#1e2230;
+  --focus-ring:#facc15;
+  --progress-bg:rgba(255,255,255,0.12);
+}
+
+html[data-theme="light"]{
+  --bg:#e8ded0;      /* aged parchment - subdued tan */
+  --panel:#f0e8da;   /* muted cream - barely lighter */
+  --muted:#5d4a35;   /* medium brown muted text */
+  --text:#2d1f0f;    /* very dark brown - high contrast */
+  --brand:#3b82f6;   /* warm blue accent (buttons/links) */
+  --brand-2:#2563eb; /* deeper blue hover/active */
+  --border:#d5c4af;  /* muted tan border */
+  --focus-ring:#d97706;  /* darker amber focus ring */
+  --progress-bg:rgba(93,74,53,0.12);  /* subdued brown progress bg */
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Helvetica Neue",Arial}
+a{color:var(--brand);text-decoration:none}
+a:hover{color:var(--brand-2)}
+.container{max-width:960px;padding:1rem;margin:0 auto}
+.row{display:flex;gap:12px}
+.between{justify-content:space-between}
+.center{align-items:center}
+.wrap{flex-wrap:wrap}
+.mt-xl{margin-top:48px}
+
+.site-header{border-bottom:1px solid var(--border);background:var(--bg-elevated);backdrop-filter: blur(6px);position:sticky;top:0;z-index:10}
+.site-header .brand{font-weight:700;font-size:20px;color:var(--text-primary)}
+.nav a{padding:12px 10px;border-radius:10px;color:var(--text-secondary);text-decoration:none;transition:all var(--transition-base)}
+.nav a.active,.nav a:hover{background:var(--surface-raised);color:var(--text-primary)}
+
+.theme-toggle{margin-left:10px;border-radius:999px;border:1px solid var(--border);background:var(--panel);color:var(--muted);padding:6px 10px;font-size:.85rem;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.theme-toggle span{font-size:.8rem}
+
+.hero{padding:48px 0 12px}
+.hero h1{font-size:36px;margin:0 0 8px}
+.hero .sub{color:var(--muted);margin:0 0 18px}
+.cta-row{display:flex;gap:12px}
+.btn{display:inline-block;border:1px solid var(--border);padding:10px 14px;border-radius:999px;color:var(--text);background:var(--panel)}
+.btn.primary{background:var(--brand);border-color:transparent;color:white}
+.btn.primary:hover{background:var(--brand-2)}
+.meta{color:var(--muted);display:block;margin-top:8px}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin:28px 0 40px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
+.card h2{margin:0 0 6px;font-size:18px}
+.card p{margin:0 0 12px;color:var(--muted)}
+
+.tu-consent{position:fixed;right:16px;bottom:16px;max-width:340px;background:#0e1530;color:#e8ecf3;border:1px solid #263464;border-radius:12px;padding:12px 12px 10px;box-shadow:0 12px 30px rgba(0,0,0,.35);z-index:9999}
+.tu-consent h4{margin:0 0 6px;font-size:14px}
+.tu-consent p{margin:0 0 8px;font-size:13px;opacity:.9}
+.tu-consent .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
+.tu-consent button{padding:8px 12px;border-radius:10px;border:1px solid #2b6ef6;background:#0e1530;color:#cfe0ff;cursor:pointer}
+.tu-consent button.primary{background:#2b6ef6;color:#fff;border:none}
+.tu-consent button.secondary{background:transparent;color:#cfe0ff}
+.tu-consent .link{font-size:12px;opacity:.85}
+
+.tableWrap{overflow:auto;max-height:70vh}
+table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+thead th{position:sticky;top:0;background:var(--panel);z-index:2;border-bottom:1px solid var(--border);text-align:left;padding:10px}
+tbody td{padding:10px;border-bottom:1px solid var(--border)}
+tbody tr:nth-child(odd){background:rgba(255,255,255,0.02)}
+
+.site-footer{border-top:1px solid var(--border);padding:16px 0;margin-top:24px;color:var(--muted)}
+
+/* Skip link for keyboard users */
+.skip-link{
+  position:absolute;
+  left:-9999px;
+  top:auto;
+  width:1px;
+  height:1px;
+  overflow:hidden;
+  clip:rect(0 0 0 0);
+  white-space:nowrap;
+}
+.skip-link:focus-visible{
+  position:fixed;
+  left:16px;
+  top:12px;
+  width:auto;
+  height:auto;
+  padding:8px 14px;
+  background:var(--panel);
+  color:var(--text);
+  border-radius:999px;
+  outline:2px solid var(--focus-ring);
+  outline-offset:2px;
+  z-index:100;
+}
+
+/* Consistent, visible focus styles */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible{
+  outline:2px solid var(--focus-ring);
+  outline-offset:2px;
+  border-radius:6px;
+}
+
+/* Anti‑adblock toast */
+.adblock-toast{position:fixed;right:16px;bottom:16px;z-index:2147483000;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.35);max-width:320px}
+.adblock-toast__inner{padding:12px 14px}
+.adblock-toast strong{display:block;font-weight:600;margin-bottom:4px}
+.adblock-toast p{margin:0 0 8px 0;color:var(--muted);font-size:.9rem}
+.adblock-toast__dismiss{background:transparent;color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer}
+.adblock-toast__dismiss:focus{outline:2px solid var(--brand);outline-offset:2px}
+
+/* Ad slots (theme-aware, low CLS) */
+.ad-slot{
+  margin:12px 0 0;
+  padding:8px 10px;
+  border-radius:var(--radius);
+  border:1px solid var(--border);
+  background:var(--panel);
+  min-height:72px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.ad-slot .adsbygoogle{
+  display:block;
+  width:100%;
+  min-height:60px;
+}
+html.ads-hidden .ad-slot{
+  display:none !important;
+}
+
+/* Shared progress / working banner */
+.progress-banner{
+  min-height:1.5rem;
+  display:flex;
+  flex-direction:column;
+  gap:0.3rem;
+  margin-top:1rem;
+}
+.progress-banner .progress-text{
+  font-weight:500;
+}
+.progress-banner progress{
+  width:100%;
+  height:6px;
+  border-radius:999px;
+  background:var(--progress-bg);
+  border:none;
+}
+.progress-banner progress::-webkit-progress-bar{
+  background:var(--progress-bg);
+  border-radius:999px;
+}
+.progress-banner progress::-webkit-progress-value{
+  background:var(--brand);
+  border-radius:999px;
+}
