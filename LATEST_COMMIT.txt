@@ -1,6 +1,0 @@
-Commit: a1b8d8eee1994cadd3575ccedd6ff4457e64b2e5
-Author: NicheToolsCavin <233439074+NicheToolsCavin@users.noreply.github.com>
-Date: Sun Nov 23 10:44:42 2025 +0100
-Message: Merge pull request #52 from NicheToolsCavin/fix/vercel-build-reqs
-
-Fix converter Python deps for Vercel build

@@ -261,6 +261,37 @@
     .tool-card-action {
       margin-top: auto;
       padding-top: var(--space-3);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .tool-card-subbox {
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: radial-gradient(circle at top left, rgba(148, 163, 184, 0.12), rgba(15, 23, 42, 0.9));
+      padding: 0.6rem 0.8rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .tool-card-subbox span {
+      opacity: 0.9;
+    }
+
+    .tool-card-subbox a {
+      color: var(--brand-300, #7dd3fc);
+      font-weight: var(--font-medium);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .tool-card-subbox a:hover {
+      text-decoration: underline;
     }
 
     .see-more {
@@ -457,6 +488,10 @@
           </div>
           <div class="tool-card-action">
             <a class="btn primary" href="/tools/text-converter/">Open tool →</a>
+            <div class="tool-card-subbox">
+              <span>Need details on inputs and outputs?</span>
+              <a href="/tools/formats/">View supported formats →</a>
+            </div>
           </div>
         </article>
       </div>
@@ -549,19 +584,6 @@
         </div>
       </article>
 
-      <article class="tool-card-enhanced fade-in-up delay-6">
-        <span class="tool-card-icon" aria-hidden="true">📚</span>
-        <div class="tool-card-header">
-          <h3 class="tool-card-title">Supported Formats</h3>
-        </div>
-        <p class="tool-card-description">
-          Explore the complete list of input and output formats supported by our document converter.
-          From plain text to complex presentations.
-        </p>
-        <div class="tool-card-action">
-          <a class="btn secondary" href="/tools/formats/">View format list →</a>
-        </div>
-      </article>
     </div>
   </div>
 </main>
