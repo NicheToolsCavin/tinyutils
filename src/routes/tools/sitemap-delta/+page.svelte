@@ -605,7 +605,7 @@
 
     <div class="actions-row">
       <button
-        class="btn btn-primary"
+        class="btn primary"
         type="button"
         on:click={runCompare}
         disabled={isBusy}
@@ -616,10 +616,10 @@
           Run diff
         {/if}
       </button>
-      <button class="btn btn-ghost" type="button" on:click={loadDemo} disabled={isBusy}>
+      <button class="btn ghost" type="button" on:click={loadDemo} disabled={isBusy}>
         Load demo
       </button>
-      <button class="btn btn-ghost" type="button" on:click={shareLink}>
+      <button class="btn ghost" type="button" on:click={shareLink}>
         Copy shareable link
       </button>
 
@@ -685,7 +685,7 @@
 
     <div class="export-row">
       <button
-        class="btn btn-secondary"
+        class="btn secondary"
         type="button"
         on:click={downloadRedirectCsv}
         disabled={!lastResults}
@@ -693,7 +693,7 @@
         Download CSV
       </button>
       <button
-        class="btn btn-secondary"
+        class="btn secondary"
         type="button"
         on:click={downloadResultsJson}
         disabled={!lastResults}
@@ -701,7 +701,7 @@
         Download JSON
       </button>
       <button
-        class="btn btn-secondary"
+        class="btn secondary"
         type="button"
         on:click={download410Csv}
         disabled={!lastResults}
@@ -709,7 +709,7 @@
         410 CSV
       </button>
       <button
-        class="btn btn-secondary"
+        class="btn secondary"
         type="button"
         on:click={downloadNginxRules}
         disabled={!lastResults}
@@ -717,7 +717,7 @@
         Nginx rules
       </button>
       <button
-        class="btn btn-secondary"
+        class="btn secondary"
         type="button"
         on:click={downloadApacheRules}
         disabled={!lastResults}
@@ -725,7 +725,7 @@
         Apache rules
       </button>
       <button
-        class="btn btn-ghost"
+        class="btn ghost"
         type="button"
         on:click={copySummary}
         disabled={!lastResults}
@@ -733,7 +733,7 @@
         Copy summary
       </button>
       <button
-        class="btn btn-ghost"
+        class="btn ghost"
         type="button"
         on:click={copyRulesText}
         disabled={!lastResults}
@@ -815,61 +815,61 @@
   .tool-page {
     display: flex;
     flex-direction: column;
-    gap: var(--space-6, 1.5rem);
+    gap: var(--space-6);
   }
 
   .tool-hero {
     text-align: center;
-    padding: var(--space-10, 2.5rem) 0 var(--space-6, 1.5rem);
+    padding: var(--space-10) 0 var(--space-6);
   }
 
   .tool-hero-icon {
     font-size: 3rem;
     display: block;
-    margin-bottom: var(--space-3, 0.75rem);
+    margin-bottom: var(--space-3);
   }
 
   .tool-hero-subtitle {
     max-width: 720px;
     margin: 0 auto;
-    color: var(--text-secondary, #cfd2e0);
+    color: var(--text-secondary);
   }
 
   .card {
-    border-radius: var(--radius-2xl, 18px);
-    border: 1px solid var(--border-default, #25273a);
-    background: var(--surface-base, #05060a);
-    padding: var(--space-5, 1.25rem) var(--space-5, 1.25rem) var(--space-6, 1.5rem);
-    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.55);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--border-default);
+    background: var(--surface-base);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-sm);
   }
 
   .tool-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: var(--space-5, 1.25rem);
+    gap: var(--space-5);
   }
 
   .field {
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
-    margin-bottom: var(--space-3, 0.75rem);
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
   }
 
   .field-label {
-    font-weight: 600;
-    font-size: 0.94rem;
+    font-weight: var(--font-semibold);
+    font-size: var(--text-sm);
   }
 
   .input,
   .textarea {
     width: 100%;
-    border-radius: var(--radius-lg, 10px);
-    border: 1px solid var(--border-default, #25273a);
-    background: var(--surface-elevated, rgba(15, 23, 42, 0.9));
-    padding: 0.55rem 0.75rem;
-    color: var(--text-primary, #f9fafb);
-    font-size: 0.92rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-default);
+    background: var(--surface-base);
+    padding: var(--space-3) var(--space-4);
+    color: var(--text-primary);
+    font-size: var(--text-base);
   }
 
   .textarea {
@@ -879,34 +879,34 @@
   .options-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: var(--space-3, 0.75rem);
-    margin: var(--space-4, 1rem) 0;
+    gap: var(--space-3);
+    margin: var(--space-4) 0;
   }
 
   .checkbox {
     display: flex;
-    gap: 0.5rem;
+    gap: var(--space-2);
     align-items: center;
-    font-size: 0.9rem;
+    font-size: var(--text-sm);
   }
 
   .actions-row {
     display: flex;
-    gap: 0.6rem;
+    gap: var(--space-2);
     align-items: center;
     flex-wrap: wrap;
-    margin-top: var(--space-3, 0.75rem);
+    margin-top: var(--space-3);
   }
 
   .hint {
-    font-size: 0.86rem;
-    color: var(--text-muted, #9ba0b9);
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
   }
 
   .status-bar {
-    margin-top: var(--space-3, 0.75rem);
+    margin-top: var(--space-3);
     display: flex;
-    gap: 0.75rem;
+    gap: var(--space-3);
     align-items: center;
   }
 
@@ -916,96 +916,96 @@
   }
 
   .error {
-    color: var(--color-error, #fca5a5);
-    margin-top: var(--space-2, 0.5rem);
+    color: var(--color-danger);
+    margin-top: var(--space-2);
   }
 
   .card-header {
-    margin-bottom: var(--space-3, 0.75rem);
+    margin-bottom: var(--space-3);
   }
 
   .summary-line {
-    margin: 0.25rem 0 0;
-    color: var(--text-secondary, #cfd2e0);
-    font-size: 0.95rem;
+    margin: var(--space-1) 0 0;
+    color: var(--text-secondary);
+    font-size: var(--text-base);
   }
 
   .chips {
     display: flex;
-    gap: 0.4rem;
+    gap: var(--space-2);
     flex-wrap: wrap;
   }
 
   .chip {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
-    padding: 4px 10px;
-    border-radius: 999px;
-    background: var(--surface-chip, rgba(148, 163, 184, 0.12));
-    color: var(--text-muted, #9ba0b9);
-    font-size: 0.82rem;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-full);
+    background: var(--surface-raised);
+    color: var(--text-secondary);
+    font-size: var(--text-xs);
   }
 
   .chip-warn {
-    background: rgba(234, 179, 8, 0.12);
-    color: #facc15;
+    background: var(--warning-bg);
+    color: var(--warning-text);
   }
 
   .confidence-controls {
-    margin: var(--space-4, 1rem) 0;
+    margin: var(--space-4) 0;
   }
 
   .chip-button {
-    border: 1px solid var(--border-default, #25273a);
+    border: 1px solid var(--border-default);
     background: transparent;
     cursor: pointer;
   }
 
   .chip-active {
-    background: var(--brand, #4f46e5);
-    color: #fff;
-    border-color: var(--brand, #4f46e5);
+    background: var(--brand-500);
+    color: var(--text-inverse);
+    border-color: var(--brand-500);
   }
 
   .export-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: var(--space-4, 1rem);
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
   }
 
   .results-tables {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: var(--space-4, 1rem);
+    gap: var(--space-4);
   }
 
   .tableWrap {
     max-height: 320px;
     overflow: auto;
-    border: 1px solid var(--border-subtle, #171827);
-    border-radius: 12px;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
   }
 
   table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.9rem;
+    font-size: var(--text-sm);
   }
 
   thead th {
     position: sticky;
     top: 0;
-    background: var(--surface-header, #020617);
+    background: var(--surface-base);
     text-align: left;
-    padding: 0.45rem 0.6rem;
-    border-bottom: 1px solid var(--border-subtle, #111827);
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--border-default);
   }
 
   tbody td {
-    padding: 0.45rem 0.6rem;
-    border-bottom: 1px solid var(--border-subtle, #111827);
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--border-subtle);
     vertical-align: top;
     word-break: break-word;
   }
@@ -1016,7 +1016,7 @@
 
   .empty-cell {
     text-align: center;
-    color: var(--text-muted, #9ba0b9);
+    color: var(--text-tertiary);
   }
 
   @media (max-width: 900px) {
