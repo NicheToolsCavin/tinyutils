@@ -169,12 +169,28 @@
 
 <section class="tool-hero">
   <div class="container">
-    <span class="tool-hero-icon" aria-hidden="true">🕰️</span>
+    <span class="tool-hero-icon" aria-hidden="true">⏪</span>
     <h1>Wayback Fixer</h1>
     <p class="tool-hero-subtitle">
-      Turn dead URLs into recoverable redirects using the Wayback Machine and Save Page Now.
+      Paste dead URLs and get the best Wayback snapshot for each. Export replacements &amp; 410s.
     </p>
   </div>
+</section>
+
+<section class="ad-slot container" aria-label="Sponsored">
+  <ins
+    class="adsbygoogle"
+    style="display:block"
+    data-ad-client="ca-pub-3079281180008443"
+    data-ad-slot="3664281983"
+    data-ad-format="auto"
+    data-full-width-responsive="true"
+  ></ins>
+  <svelte:element this={'script'}>
+    {`
+      try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) {}
+    `}
+  </svelte:element>
 </section>
 
 <section class="card container" aria-labelledby="inputs">
