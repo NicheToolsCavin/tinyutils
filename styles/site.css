@@ -79,20 +79,20 @@ a:hover{color:var(--brand-2)}
 .card h2{margin:0 0 6px;font-size:18px}
 .card p{margin:0 0 12px;color:var(--muted)}
 
-.tu-consent{position:fixed;right:16px;bottom:16px;max-width:340px;background:#0e1530;color:#e8ecf3;border:1px solid #263464;border-radius:12px;padding:12px 12px 10px;box-shadow:0 12px 30px rgba(0,0,0,.35);z-index:9999}
-.tu-consent h4{margin:0 0 6px;font-size:14px}
-.tu-consent p{margin:0 0 8px;font-size:13px;opacity:.9}
+.tu-consent{position:fixed;right:16px;bottom:16px;max-width:340px;background:var(--surface-base);color:var(--text-primary);border:1px solid var(--border-default);border-radius:12px;padding:12px 12px 10px;box-shadow:var(--shadow-xl);z-index:9999}
+.tu-consent h4{margin:0 0 6px;font-size:14px;color:var(--text-primary)}
+.tu-consent p{margin:0 0 8px;font-size:13px;color:var(--text-secondary)}
 .tu-consent .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
-.tu-consent button{padding:8px 12px;border-radius:10px;border:1px solid #2b6ef6;background:#0e1530;color:#cfe0ff;cursor:pointer}
-.tu-consent button.primary{background:#2b6ef6;color:#fff;border:none}
-.tu-consent button.secondary{background:transparent;color:#cfe0ff}
-.tu-consent .link{font-size:12px;opacity:.85}
+.tu-consent button{padding:8px 12px;border-radius:10px;border:1px solid var(--brand-500);background:var(--surface-base);color:var(--brand-400);cursor:pointer}
+.tu-consent button.primary{background:var(--brand-500);color:#fff;border:none}
+.tu-consent button.secondary{background:transparent;color:var(--text-secondary)}
+.tu-consent .link{font-size:12px;color:var(--text-muted)}
 
 .tableWrap{overflow:auto;max-height:70vh}
 table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--border);border-radius:12px;overflow:hidden}
 thead th{position:sticky;top:0;background:var(--panel);z-index:2;border-bottom:1px solid var(--border);text-align:left;padding:10px}
 tbody td{padding:10px;border-bottom:1px solid var(--border)}
-tbody tr:nth-child(odd){background:rgba(255,255,255,0.02)}
+tbody tr:nth-child(odd){background:var(--table-row-odd, rgba(255,255,255,0.02))}
 
 .site-footer{border-top:1px solid var(--border);padding:16px 0;margin-top:24px;color:var(--muted)}
 
@@ -187,4 +187,128 @@ html.ads-hidden .ad-slot{
 .progress-banner progress::-webkit-progress-value{
   background:var(--brand);
   border-radius:999px;
+}
+
+/* ============================================
+   MOBILE RESPONSIVENESS
+   ============================================ */
+
+/* Mobile-first table improvements */
+@media (max-width: 768px) {
+  .tableWrap {
+    margin: 0 -1rem;
+    padding: 0 1rem;
+    border-radius: 0;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table {
+    font-size: 0.85rem;
+    min-width: 600px; /* Force horizontal scroll for data tables */
+  }
+
+  thead th,
+  tbody td {
+    padding: 8px 6px;
+    white-space: nowrap;
+  }
+
+  /* Better touch targets */
+  .btn {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 10px 16px;
+  }
+
+  .btn.small {
+    min-height: 36px;
+    padding: 6px 12px;
+  }
+
+  /* Stack action buttons on mobile */
+  .actions-row,
+  .results-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .actions-row .btn,
+  .results-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Card improvements */
+  .card {
+    padding: 12px;
+    border-radius: var(--radius-lg);
+  }
+
+  /* Form inputs */
+  .field-input,
+  input,
+  select,
+  textarea {
+    font-size: 16px; /* Prevents iOS zoom on focus */
+  }
+
+  /* Container padding */
+  .container {
+    padding: 0.75rem;
+  }
+
+  /* Filter chips - horizontal scroll */
+  .filter-group {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px;
+    flex-wrap: nowrap;
+  }
+
+  .filter-group label {
+    flex-shrink: 0;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .hero h1,
+  .tools-hero-title,
+  .hero-title {
+    font-size: 1.75rem;
+  }
+
+  .hero .sub,
+  .tools-hero-subtitle,
+  .hero-subtitle {
+    font-size: 0.95rem;
+  }
+
+  /* Single column for everything */
+  .tool-cards,
+  .tools-grid,
+  .cards {
+    grid-template-columns: 1fr;
+  }
+
+  /* Smaller tool icons */
+  .tool-icon,
+  .tool-card-icon {
+    font-size: 2.5rem;
+  }
+
+  /* Compact badges */
+  .feature-badge,
+  .feature-badge-small {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+  }
+}
+
+/* Landscape phones - use horizontal space */
+@media (max-width: 768px) and (orientation: landscape) {
+  .tool-cards,
+  .tools-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
