@@ -10,7 +10,8 @@ const config = {
       entries: ['*'],
       handleHttpError: 'warn'
     }
-  }
+  },
+  trailingSlash: 'always'
 };
 
 export default config;
