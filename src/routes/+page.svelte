@@ -94,8 +94,8 @@
 
     <!-- Bottom ad slot with copy -->
     <AdSlot style="margin: var(--space-10) 0;">
-      <p style="margin-top: var(--space-4); text-align: center; color: var(--text-tertiary);">
-        Ads help keep TinyUtils fast and free for everyone. Tools keep working even if you choose to hide ads.
+      <p style="margin-top: var(--space-3); text-align: center; color: var(--text-muted); font-size: var(--text-xs);">
+        Ads help keep TinyUtils fast and free for everyone.
       </p>
     </AdSlot>
 
@@ -244,23 +244,32 @@
   }
 
   .cta-box {
-    background: var(--surface-elevated, #0f172a);
-    border: 1px solid var(--border-default, #25273a);
+    background: var(--surface-base);
+    border: 1px solid var(--border-default);
     border-radius: var(--radius-2xl);
     padding: var(--space-6);
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
-    box-shadow: var(--shadow-lg, 0 18px 45px rgba(15, 23, 42, 0.45));
+    box-shadow: var(--shadow-lg);
+    transition: all var(--transition-base);
+  }
+
+  .cta-box:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-xl);
+    border-color: var(--border-strong);
   }
 
   .cta-box h3 {
     margin: 0;
+    color: var(--text-primary);
   }
 
   .cta-box p {
     color: var(--text-secondary);
     margin: 0;
+    flex: 1;
   }
 
   .btn.secondary {
