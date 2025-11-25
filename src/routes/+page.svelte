@@ -144,6 +144,10 @@
   .hero-title {
     margin: 0;
     font-size: clamp(2rem, 3vw, 2.6rem);
+    background: var(--gradient-brand);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
   .hero-subtitle {
@@ -202,8 +206,9 @@
     border-radius: 999px;
     padding: 6px 10px;
     font-size: 0.82rem;
-    background: var(--surface-chip, rgba(148, 163, 184, 0.12));
-    color: var(--text-muted, #9ba0b9);
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.3);
   }
 
   .pro-upsell {
