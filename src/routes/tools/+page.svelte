@@ -108,7 +108,7 @@
 </svelte:head>
 
 <!-- Hero section with gradient -->
-<Hero />
+<Hero subtitle="Advanced features for professionals and for passersby." />
 
 <!-- Top tools layout -->
 <div class="tools-top-layout">
