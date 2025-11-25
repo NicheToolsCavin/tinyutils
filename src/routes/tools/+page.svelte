@@ -232,8 +232,9 @@
     border-radius: 999px;
     padding: 3px 9px;
     font-size: 0.78rem;
-    background: var(--surface-chip, rgba(148, 163, 184, 0.12));
-    color: var(--text-muted, #9ba0b9);
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.3);
   }
 
   .tool-card-action {
@@ -263,23 +264,24 @@
   }
 
   .cta-box {
-    background: var(--surface-elevated, #0f172a);
-    border: 1px solid var(--border-default, #25273a);
-    border-radius: var(--radius-2xl, 18px);
-    padding: var(--space-5, 1.25rem);
-    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.55);
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: var(--radius-2xl);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-lg);
     display: flex;
     flex-direction: column;
-    gap: var(--space-3, 0.75rem);
+    gap: var(--space-3);
   }
 
   .cta-box h3 {
     margin: 0;
+    color: #f1f5f9;
   }
 
   .cta-box p {
     margin: 0;
-    color: var(--text-secondary, #cfd2e0);
+    color: #cbd5e1;
   }
 
   .btn.secondary {
