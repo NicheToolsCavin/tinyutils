@@ -195,6 +195,10 @@ html[data-theme="dark"] {
   --hover-accent: #3b82f6;      /* Blue accent for hovers */
   --hover-shadow-color: rgba(59, 130, 246, 0.15);
 
+  /* Table colors */
+  --table-row-odd: rgba(255, 255, 255, 0.02);
+  --table-header-bg: var(--surface-raised);
+
   /* Gradients */
   --gradient-brand: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   --gradient-brand-subtle: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.1) 100%);
@@ -268,6 +272,10 @@ html[data-theme="light"] {
   /* Hover colors - Warm browns instead of blue */
   --hover-accent: #a0826d;      /* Rich oak brown for hovers */
   --hover-shadow-color: rgba(139, 111, 71, 0.2);
+
+  /* Table colors */
+  --table-row-odd: rgba(93, 74, 53, 0.06);  /* Subtle brown stripe */
+  --table-header-bg: #e0d5c5;              /* Darker parchment header */
 
   /* Gradients */
   --gradient-brand: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
