@@ -231,10 +231,11 @@ html[data-theme="light"] {
   --text-muted: #7a6750;        /* Muted brown */
   --text-inverse: #f0e8da;      /* Muted cream text on dark backgrounds */
 
-  /* Brand colors (warmer blue tones) */
-  --brand-500: #3b82f6;
-  --brand-600: #2563eb;
-  --brand-700: #1d4ed8;
+  /* Brand colors (softer, warmer blues for light mode) */
+  --brand-400: #60a5fa;
+  --brand-500: #4a90e2;
+  --brand-600: #3b82f6;
+  --brand-700: #2563eb;
 
   /* Accent colors */
   --accent-cyan-500: #0891b2;
@@ -277,10 +278,10 @@ html[data-theme="light"] {
   --table-row-odd: rgba(93, 74, 53, 0.06);  /* Subtle brown stripe */
   --table-header-bg: #e0d5c5;              /* Darker parchment header */
 
-  /* Gradients */
-  --gradient-brand: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-  --gradient-brand-subtle: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(29, 78, 216, 0.05) 100%);
-  --gradient-hero: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #0891b2 100%);
+  /* Gradients (softer for light mode) */
+  --gradient-brand: linear-gradient(135deg, #4a90e2 0%, #3b82f6 100%);
+  --gradient-brand-subtle: linear-gradient(135deg, rgba(74, 144, 226, 0.08) 0%, rgba(59, 130, 246, 0.08) 100%);
+  --gradient-hero: linear-gradient(135deg, #3b82f6 0%, #4a90e2 50%, #0891b2 100%);
   --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.4) 100%);
 
   /* Shadows need to be darker in light mode */

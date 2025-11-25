@@ -93,11 +93,7 @@
     </section>
 
     <!-- Bottom ad slot with copy -->
-    <AdSlot style="margin: var(--space-10) 0;">
-      <p style="margin-top: var(--space-3); text-align: center; color: var(--text-muted); font-size: var(--text-xs);">
-        Ads help keep TinyUtils fast and free for everyone.
-      </p>
-    </AdSlot>
+    <AdSlot style="margin: var(--space-10) 0;" />
 
     <section class="pro-upsell" aria-label="Pro workflows">
       <div class="cta-box">
