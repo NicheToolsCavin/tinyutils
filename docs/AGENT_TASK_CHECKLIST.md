@@ -13,6 +13,7 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 ## Active Tasks (Newest First)
 
 | Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
+| Run SvelteKit preview_smoke.mjs on feat/sveltekit-ux-preview | manual-2025-11-25 CET | Open | Preview smokes executed with automation bypass: / and /cookies.html 200 OK; APIs all 200 JSON; /tools/ and tool routes returned 308 redirects and /tools/multi-file-search-replace/ returned 404, so script reports FAIL. Evidence: artifacts/sveltekit-ux-parity/20251125/. Follow-up needed to either treat 308 as OK or adjust routes. |
 | SvelteKit home/tools UX parity on feat/sveltekit-ux-preview | manual-2025-11-25 CET | Completed | ✅ Home + tools SvelteKit pages now mirror static index.html and tools/index-static-backup.html for hero, cards, badges, and ads; next step is preview + smokes. Evidence: artifacts/sveltekit-ux-parity/20251125/. |
 | Clarify idle-notifier usage for long shell commands | manual-2025-11-25 CET | Completed | ✅ Updated AGENTS.md to mention idle-notifier for preview smokes and big shell commands; evidence: artifacts/meta-idle-notifier/20251125/. |
 | Add UX screenshot capture script and artifacts | manual-2025-11-25 CET | Completed | ✅ Added puppeteer devDependency + scripts/capture_ux_screens.mjs and captured PNGs for /, /tools/, converter, DLF, Sitemap Delta, Wayback Fixer under artifacts/sveltekit-ux/20251125/. Follow-up: run Vercel preview smokes once PREVIEW_URL is available. |
