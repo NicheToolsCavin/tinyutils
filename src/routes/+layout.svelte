@@ -34,6 +34,7 @@
       <nav class="nav">
         <a href="/tools/">Tools</a>
         <a href="/about.html">About</a>
+        <a href="https://buymeacoffee.com/tinyutils" target="_blank" rel="noopener" class="support-link">☕ Support</a>
         <span class="nav-item">
           <a href="/privacy.html">Privacy</a>
           <div class="nav-dropdown">
@@ -64,6 +65,7 @@
     </span>
     <span>
       <a href="/about.html" style="color: var(--text-tertiary)">About</a> ·
+      <a href="https://buymeacoffee.com/tinyutils" target="_blank" rel="noopener" style="color: var(--brand-500)">☕ Support Us</a> ·
       <a href="/cookies.html" style="color: var(--text-tertiary)">Cookie &amp; privacy settings</a> ·
       <a href="/privacy.html" style="color: var(--text-tertiary)">Privacy</a> ·
       <a href="/terms.html" style="color: var(--text-tertiary)">Terms</a>
@@ -72,6 +74,20 @@
 </footer>
 
 <style>
+  :global(.support-link) {
+    background: var(--gradient-brand);
+    color: white !important;
+    padding: 6px 14px;
+    border-radius: var(--radius-full);
+    transition: all var(--transition-base);
+    font-weight: 500;
+  }
+
+  :global(.support-link:hover) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  }
+
   :global(.nav-item) {
     position: relative;
     display: inline-block;
