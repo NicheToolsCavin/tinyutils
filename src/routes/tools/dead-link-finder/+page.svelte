@@ -327,7 +327,24 @@
     <p class="tool-hero-meta">
       Robots-aware · HSTS guard · CSV/JSON export · Wayback hints
     </p>
+    <p><a class="cta" href="/tools/">← Back to all tools</a></p>
   </div>
+</section>
+
+<section class="ad-slot container" aria-label="Sponsored">
+  <ins
+    class="adsbygoogle"
+    style="display:block"
+    data-ad-client="ca-pub-3079281180008443"
+    data-ad-slot="3664281983"
+    data-ad-format="auto"
+    data-full-width-responsive="true"
+  ></ins>
+  <svelte:element this={'script'}>
+    {`
+      try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) {}
+    `}
+  </svelte:element>
 </section>
 
 <section class="tool-layout container">
