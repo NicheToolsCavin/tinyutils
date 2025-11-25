@@ -155,6 +155,16 @@ Before considering a change complete, verify (only when changes occurred):
 
 If you skip documentation for material changes, other agents may duplicate/undo your work.
 
+### 🧭 USER_CHECKLIST.md — owner-only tasks
+
+Some actions **cannot** be performed from this repo or CLI (for example, toggling Vercel project settings in the dashboard, or completing Google AdSense/Funding Choices flows). Those must be done by the human owner.
+
+- Use `USER_CHECKLIST.md` to record only tasks that:
+  - Require interacting with a third‑party web UI (Vercel, Google Cloud Console, AdSense / Funding Choices, registrar, etc.), and
+  - Cannot realistically be executed from this repo's shell, automation, or code changes.
+- Do **not** add everyday engineering work here (code edits, tests, smokes, CLI deployments, config files in the repo) — agents should just fix those directly.
+- When you discover a genuine owner‑only task (like "flip TinyUtils Vercel project to SvelteKit build" or "finish AdSense approval in the Google UI"), append a short, concrete checkbox item to `USER_CHECKLIST.md` so the user has a single place to see what’s pending on their side.
+
 ### Quick decision checklist
 - Log required: you committed files; edited docs; changed assets/config; opened/updated a PR; generated evidence artifacts; changed tool behavior/specs.
 - No log: you only read code, searched/browsed docs, planned next steps, or discussed approach with no repo or external state change.
@@ -189,9 +199,9 @@ If you skip documentation for material changes, other agents may duplicate/undo 
   - Speak clearly -- the user is not a coder so he may need help to unerstand somethings.
   - Don't repeat yourself in the same way every time unless it's the only way to say something. If he didn't understand it once, he won't the second and third without a change of approach.
   - Be excited and fun -- don't be so boring, you can have fun here. 
-  - When running long-lived commands (python, node, build/test loops), wrap them with `idle-notifier` using sensible thresholds (`--idle` just beyond expected output cadence, `--every` coarse to avoid spam, `--escalate` for the “probably stuck” horizon; consider `--keepalive-pattern`, `--cpu-threshold`, and `--output-heartbeat` to cut false alarms). Default: 
+  - When running long-lived commands (python, node, build/test loops, preview smokes, or big `curl`/`sed`/`rg` dumps), wrap them with `idle-notifier` using sensible thresholds (`--idle` just beyond expected output cadence, `--every` coarse to avoid spam, `--escalate` for the “probably stuck” horizon; consider `--keepalive-pattern`, `--cpu-threshold`, and `--output-heartbeat` to cut false alarms). Default: 
     `idle-notifier --idle 20 --every 120 --output-heartbeat 60 --escalate 900 --warn-before 60 --cpu-threshold 50 --keepalive-pattern "GET|200|Serving" --notify -- <cmd>` and tune per task.
-  - Always use `idle-notifier` for python invocations that may hang; apply similarly to any other potentially long/quiet commands.
+  - Always use `idle-notifier` for python invocations that may hang; apply similarly to any other potentially long/quiet shell commands that might produce lots of output or sit silently for a while.
 
 ### Security Policy (must read)
 - Follow `tinyutils/SECURITY.md` for handling secrets and logs.
