@@ -11,7 +11,9 @@ const config = {
       handleHttpError: 'warn'
     }
   },
-  trailingSlash: 'always'
+  // Use "ignore" so both `/tools` and `/tools/` (and subpaths)
+  // resolve without internal 308 redirects during preview smokes.
+  trailingSlash: 'ignore'
 };
 
 export default config;
