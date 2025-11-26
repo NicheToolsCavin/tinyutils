@@ -32,5 +32,10 @@
     font-size: var(--text-xs);
     line-height: 1.4;
   }
-</style>
 
+  .ad-slot-wide {
+    width: 100%;
+    max-width: 1100px;
+    margin: var(--space-6) auto;
+  }
+</style>

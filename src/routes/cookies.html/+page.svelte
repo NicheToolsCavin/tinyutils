@@ -62,7 +62,7 @@
 </svelte:head>
 
 <div class="container">
-  <section class="card" aria-labelledby="cookiesHeading">
+  <section class="card card-page" aria-labelledby="cookiesHeading">
     <h2 id="cookiesHeading">Cookie &amp; privacy settings</h2>
 
     <p>
@@ -131,10 +131,21 @@
 </div>
 
 <style>
-  .card {
+  .card-page {
+    margin-top: var(--space-10);
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
+  }
+
+  .card-page h2 {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    background: var(--gradient-brand);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: var(--space-4);
   }
 
   button#tu-reopen-consent {

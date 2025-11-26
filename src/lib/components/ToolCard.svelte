@@ -50,10 +50,26 @@
     height: 100%;
   }
 
+  .tool-card-enhanced::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-base), border-color var(--transition-base);
+  }
+
   .tool-card-enhanced:hover {
     transform: translateY(-4px);
     border-color: var(--hover-accent);
-    box-shadow: 0 12px 40px var(--hover-shadow-color);
+    box-shadow: 0 18px 50px var(--hover-shadow-color);
+  }
+
+  .tool-card-enhanced:hover::before {
+    opacity: 1;
+    border-color: var(--brand-500, #3b82f6);
   }
 
   .tool-card-icon {
@@ -216,4 +232,3 @@
     }
   }
 </style>
-

@@ -54,7 +54,10 @@ export function downloadBlob(options: DownloadBlobOptions): void {
   let url: string | null = null;
   let anchor: HTMLAnchorElement | null = null;
   try {
-    const blob = content instanceof Blob ? content : new Blob([content], { type: mimeType });
+    const blob =
+      content instanceof Blob
+        ? content
+        : new Blob([content as unknown as BlobPart], { type: mimeType });
     url = URL.createObjectURL(blob);
     anchor = document.createElement('a');
     anchor.href = url;

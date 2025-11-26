@@ -31,15 +31,18 @@
 >
 > ## Use MCP Servers and web.search
 >
-> ... to enhance your work or find things you may not know well. 
+> ... to enhance your work or find things you may not know well.
 >
-> `web.search` searches the internet
+> `web.search` searches the internet.
 >
-> `context7` gives access to a ton of good tech/coding info
+> `context7` gives access to a ton of good tech/coding info (docs + code examples).
 >
-> `sequential-thinking` helps you think better.
+> `sequential-thinking` helps you think better (chain-of-thought planning when things get hairy).
 >
-> 
+> `magic` (21st.dev) is great for UI work — you can ask it for nicer components, tables, inputs, or whole panels when polishing pages.
+>
+> TL;DR: when it helps, agents **should** reach for these MCP servers instead of guessing — especially for docs-heavy work, deep reasoning, or UI/UX polish.
+
 
 ---
 
