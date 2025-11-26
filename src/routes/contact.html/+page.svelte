@@ -13,7 +13,7 @@
 </svelte:head>
 
 <div class="container">
-  <section class="card" aria-labelledby="contactHeading">
+  <section class="card card-page" aria-labelledby="contactHeading">
     <h2 id="contactHeading">Contact TinyUtils</h2>
     <p>
       TinyUtils is a small, independent project maintained alongside other work. There’s no support team or ticketing
@@ -41,3 +41,28 @@
     </p>
   </section>
 </div>
+
+<style>
+  .card-page {
+    margin-top: var(--space-10);
+  }
+
+  .card-page h2:first-child {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    background: var(--gradient-brand);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: var(--space-4);
+  }
+
+  .card-page h2:not(:first-child) {
+    margin-top: var(--space-6);
+  }
+
+  .card-page p {
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+</style>
