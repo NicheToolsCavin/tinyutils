@@ -230,47 +230,4 @@
     text-align: center;
     margin: var(--space-6) 0 var(--space-2);
   }
-
-  .ad-slot-wide {
-    width: 100%;
-    max-width: 1100px;
-    margin: var(--space-6) auto;
-  }
-
-  /* Accessibility: Respect reduced motion */
-  @media (prefers-reduced-motion: reduce) {
-    .fade-in-up,
-    .tool-card-enhanced,
-    .tools-hero::before {
-      animation: none !important;
-      transition: none !important;
-    }
-    .delay-1,
-    .delay-2,
-    .delay-3,
-    .delay-4,
-    .delay-5 {
-      opacity: 1 !important;
-    }
-  }
-
-  /* Responsive adjustments */
-  @media (max-width: 768px) {
-    .tools-hero {
-      padding: var(--space-8) var(--space-4) var(--space-6);
-    }
-
-    .tools-hero-title {
-      font-size: var(--text-2xl);
-    }
-
-    .tools-hero-subtitle {
-      font-size: var(--text-base);
-    }
-
-    .btn {
-      font-size: var(--text-sm);
-      padding: 8px 12px;
-    }
-  }
 </style>

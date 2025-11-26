@@ -7,7 +7,7 @@
 </svelte:head>
 
 <div class="container">
-  <section class="card" aria-labelledby="termsHeading">
+  <section class="card card-page" aria-labelledby="termsHeading">
     <h2 id="termsHeading">Terms of service</h2>
     <p>
       TinyUtils is provided as-is, without warranties or guarantees. Use the tools at your own risk and
@@ -20,3 +20,24 @@
     </p>
   </section>
 </div>
+
+<style>
+  .card-page {
+    margin-top: var(--space-10);
+  }
+
+  .card-page h2 {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    background: var(--gradient-brand);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: var(--space-4);
+  }
+
+  .card-page p {
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+</style>

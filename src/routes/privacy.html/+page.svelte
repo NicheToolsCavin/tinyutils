@@ -13,7 +13,7 @@
 </svelte:head>
 
 <div class="container">
-  <section class="card" aria-labelledby="privacyHeading">
+  <section class="card card-page" aria-labelledby="privacyHeading">
     <h2 id="privacyHeading">Privacy</h2>
     <p>
       No login, no user accounts, and no selling of your personal data. TinyUtils runs on Vercel's
@@ -37,3 +37,24 @@
     </p>
   </section>
 </div>
+
+<style>
+  .card-page {
+    margin-top: var(--space-10);
+  }
+
+  .card-page h2:first-child {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    background: var(--gradient-brand);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: var(--space-4);
+  }
+
+  .card-page p {
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+</style>
