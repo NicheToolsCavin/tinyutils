@@ -13,7 +13,7 @@
 </svelte:head>
 
 <div class="container">
-  <section class="card" aria-labelledby="aboutHeading">
+  <section class="card card-page" aria-labelledby="aboutHeading">
     <h2 id="aboutHeading">What is TinyUtils?</h2>
     <p>
       TinyUtils is a small collection of focused, browser-based tools for people who work with websites
@@ -48,3 +48,28 @@
     <p>If a tool saves you time, the best way to support TinyUtils is to share it with a colleague.</p>
   </section>
 </div>
+
+<style>
+  .card-page {
+    margin-top: var(--space-10);
+  }
+
+  .card-page h2:first-child {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    background: var(--gradient-brand);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: var(--space-4);
+  }
+
+  .card-page h2:not(:first-child) {
+    margin-top: var(--space-6);
+  }
+
+  .card-page p {
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+</style>

@@ -18,7 +18,7 @@
     <p class="sub">Everything you need to know about using TinyUtils tools</p>
   </section>
 
-  <section class="container card faq-content">
+  <section class="container card faq-content card-page">
     <div class="placeholder-notice">
       <h2>FAQ Content Coming Soon</h2>
       <p>
@@ -161,6 +161,10 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-6);
+  }
+
+  .card-page {
+    margin-top: var(--space-6);
   }
 
   .placeholder-notice {
