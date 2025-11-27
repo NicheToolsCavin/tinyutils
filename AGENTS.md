@@ -178,6 +178,21 @@ Some actions **cannot** be performed from this repo or CLI (for example, togglin
 
 ## Constraints
 - **Branch + PR only.** No DNS or Production deploys without OK from user. No repository secrets. **The exception being when you are asked to push to production, in which case you will do so. Thanks.**
+
+### Production Deployment Workflow
+**When the user asks you to "push to production" or "deploy to prod", use this workflow:**
+1. `git add .`
+2. `git commit -m "..."`
+3. `git push origin main`
+4. ✅ Done! Vercel automatically detects the push and deploys to production.
+
+**DO NOT use `vercel --prod`** - this repo is connected to GitHub, and Vercel auto-deploys from the main branch.
+
+**The `vercel` CLI should ONLY be used for:**
+- Local dev server: `vercel dev`
+- Manual preview deployments for testing specific branches
+- Emergency deploys when GitHub Actions is down (extremely rare)
+
 - **Review PR comments:** A few minutes after a PR is opened, pause to read Claude/Codex comments; check again immediately before any prod push to catch late guidance.
 - **Static site, Framework = Other.** No build step; **Output directory = root**.
 - **`vercel.json` = headers only.** Remove any `functions`/`runtime` blocks. (Those trigger "Function Runtimes must have a valid version..." errors.) Any relaxation of this rule must be explicitly approved by the owner before merging.
@@ -204,6 +219,24 @@ Some actions **cannot** be performed from this repo or CLI (for example, togglin
   - Be excited and fun -- don't be so boring, you can have fun here. 
   - When running long-lived commands (python, node, build/test loops, preview smokes, or big `curl`/`sed`/`rg` dumps), wrap them with `idle-notifier` using sensible thresholds (`--idle` just beyond expected output cadence, `--every` coarse to avoid spam, `--escalate` for the “probably stuck” horizon; consider `--keepalive-pattern`, `--cpu-threshold`, and `--output-heartbeat` to cut false alarms). Default: 
     `idle-notifier --idle 20 --every 120 --output-heartbeat 60 --escalate 900 --warn-before 60 --cpu-threshold 50 --keepalive-pattern "GET|200|Serving" --notify -- <cmd>` and tune per task.
+  - For **long‑lived services** like `tiny-reactive serve`, use `idle-notifier` in **notify‑only** mode so it never auto-kills the controller:
+
+    ```bash
+    idle-notifier \
+      --idle 20 \
+      --every 120 \
+      --output-heartbeat 60 \
+      --escalate 0 \   # notify-only; no auto-kill
+      --warn-before 60 \
+      --cpu-threshold 50 \
+      --keepalive-pattern "GET|200|Serving" \
+      --notify -- \
+      tiny-reactive serve --host 127.0.0.1 --port 5566 --debug
+    ```
+
+    This keeps you informed if the controller goes quiet, but leaves the decision to stop/restart it to you.
+
+  - You are allowed (and expected) to start any local services or CLIs you need from this repo’s shell — e.g. `pnpm dev`, `tiny-reactive serve`, `vercel` CLI, curl smokes, etc. Use `idle-notifier` where it helps, shut things down when you’re done, and treat “turning things on when you need them” as part of normal work.
   - Always use `idle-notifier` for python invocations that may hang; apply similarly to any other potentially long/quiet shell commands that might produce lots of output or sit silently for a while.
 
 ### Security Policy (must read)
