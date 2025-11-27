@@ -1,22 +1,17 @@
-# Trim deployment size; exclude local artifacts, agent logs, and local env caches
-.code/
-artifacts/
+node_modules
+.venv
+.venv-*
+__pycache__
+*.pyc
+.pytest_cache
+.debug
+.test-tmp
+artifacts
+.git
+.svelte-kit
 .DS_Store
-
-# Local virtualenvs and Python caches
-.venv/
-.venv-*/
-.venv-convert/
-.venv-pdf/
-.pytest_cache/
-**/.pytest_cache/
-__pycache__/
-**/__pycache__/
-
-# Node/Svelte build artifacts
-node_modules/
-.svelte-kit/
-**/.svelte-kit/
-
-# Local debug scratch
-.debug/
+*.log
+.code
+.vercel
+.cache
+docs/AGENT_RUN_LOG.md
