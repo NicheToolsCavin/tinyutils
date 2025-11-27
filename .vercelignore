@@ -14,7 +14,6 @@ artifacts
 .code
 .vercel
 .cache
-docs/AGENT_RUN_LOG.md
 
 # Exclude root-level HTML files (they're static assets or legacy files)
 about.html
