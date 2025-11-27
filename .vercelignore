@@ -15,3 +15,14 @@ artifacts
 .vercel
 .cache
 docs/AGENT_RUN_LOG.md
+
+# Exclude root-level HTML files (they're static assets or legacy files)
+about.html
+contact.html
+cookies.html
+privacy.html
+support.html
+terms.html
+feedback.html
+profile-pic.html
+index-old.html
