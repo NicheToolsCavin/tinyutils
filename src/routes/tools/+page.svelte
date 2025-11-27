@@ -46,13 +46,13 @@
       badges: ['Smart mapping', 'Confidence scores', 'Rewrite exports', '410 CSV']
     },
     {
-      icon: '🧭',
-      name: 'Multi-file Search & Replace',
+      icon: '🔍',
+      name: 'Bulk Find & Replace',
       href: '/tools/multi-file-search-replace/',
-      tier: 'beta',
+      tier: 'free',
       description:
-        'Bulk find and replace text or regex patterns across many documents with safe diff previews and selective download.',
-      badges: ['Regex support', 'Diff preview', 'ZIP download']
+        'Upload a ZIP and find/replace text across 500 files at once. Visual diff preview, regex support, CSV export. No command line required.',
+      badges: ['500 files', 'Visual diffs', 'Regex patterns', 'CSV export']
     },
     {
       icon: '⏪',
