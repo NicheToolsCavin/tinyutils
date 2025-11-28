@@ -116,7 +116,13 @@
       if (!content || !previewIframe) return;
       try {
         const formatted = JSON.stringify(JSON.parse(content), null, 2);
-        const html = `<style>pre{background:#1e1e1e;color:#d4d4d4;padding:1rem;overflow:auto;font-family:monospace}</style><pre>${escapeHtml(formatted)}</pre>`;
+        const html = `
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"><\/script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"><\/script>
+<style>pre{margin:0;border-radius:0}body{margin:0;padding:1rem;background:#1e1e1e}</style>
+<pre><code class="language-json">${escapeHtml(formatted)}</code></pre>
+<script>Prism.highlightAll();<\/script>`;
         previewIframe.srcdoc = html;
       } catch (e) {
         renderTextPreview(content);
@@ -125,11 +131,27 @@
 
     function renderMarkdownPreview(content) {
       if (!content || !previewIframe) return;
-      // Simple side-by-side view: both sides show escaped content
-      // Left side shows raw markdown syntax, right side shows it formatted as paragraphs
+      // Simple side-by-side view: left shows syntax-highlighted markdown, right shows formatted text
       const escaped = escapeHtml(content);
       const formatted = escaped.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
-      const html = `<style>.md-container{display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding:1rem}.md-src,.md-formatted{border:1px solid #ddd;padding:1rem;overflow:auto;max-height:600px}.md-src{background:#f8f8f8;font-family:monospace;white-space:pre-wrap}h1,h2,h3,h4,h5,h6{margin:0.5rem 0}code{background:#f0f0f0;padding:2px 4px;border-radius:3px}</style><div class="md-container"><div><b>Markdown Source</b><div class="md-src">${escaped}</div></div><div><b>Formatted Text</b><div class="md-formatted"><p>${formatted}</p></div></div></div>`;
+      const html = `
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"><\/script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markdown.min.js"><\/script>
+<style>
+.md-container{display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding:1rem}
+.md-src,.md-formatted{border:1px solid #ddd;padding:1rem;overflow:auto;max-height:600px}
+.md-src{background:#f5f2f0}
+.md-src pre{margin:0;background:transparent}
+.md-formatted{background:#fff}
+h1,h2,h3,h4,h5,h6{margin:0.5rem 0}
+code{background:#f0f0f0;padding:2px 4px;border-radius:3px}
+</style>
+<div class="md-container">
+  <div><b>Markdown Source</b><div class="md-src"><pre><code class="language-markdown">${escaped}</code></pre></div></div>
+  <div><b>Formatted Text</b><div class="md-formatted"><p>${formatted}</p></div></div>
+</div>
+<script>Prism.highlightAll();<\/script>`;
       previewIframe.srcdoc = html;
     }
 
@@ -143,7 +165,13 @@
 
     function renderTeXPreview(content) {
       if (!content || !previewIframe) return;
-      const html = `<style>pre{background:#1e1e1e;color:#d4d4d4;padding:1rem;overflow:auto;font-family:monospace}</style><pre>${escapeHtml(content)}</pre>`;
+      const html = `
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"><\/script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-latex.min.js"><\/script>
+<style>pre{margin:0;border-radius:0}body{margin:0;padding:1rem;background:#1e1e1e}</style>
+<pre><code class="language-latex">${escapeHtml(content)}</code></pre>
+<script>Prism.highlightAll();<\/script>`;
       previewIframe.srcdoc = html;
     }
 
