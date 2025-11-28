@@ -98,6 +98,10 @@
     // Format-specific preview renderers
 
     function parseCsvLine(line) {
+      // Minimal RFC 4180-style CSV parser for a *single* line.
+      // NOTE: we intentionally treat each line independently, so
+      // newlines inside quoted fields are not supported in the
+      // preview table (rare in practice and preview-only).
       const cells = [];
       let current = '';
       let inQuotes = false;
