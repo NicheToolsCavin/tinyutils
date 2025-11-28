@@ -25,12 +25,45 @@ function escapeHtml(value) {
 }
 
 // Renderer implementations (simplified versions for testing)
+
+function parseCsvLine(line) {
+  const cells = [];
+  let current = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i += 1) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        current += '"';
+        i += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (ch === ',' && !inQuotes) {
+      cells.push(current);
+      current = '';
+    } else {
+      current += ch;
+    }
+  }
+  cells.push(current);
+
+  return cells.map((cell) => {
+    const trimmed = cell.trim();
+    if (trimmed.length >= 2 && trimmed.startsWith('"') && trimmed.endsWith('"')) {
+      return trimmed.slice(1, -1);
+    }
+    return trimmed;
+  });
+}
+
 function renderCSVPreview(content) {
   if (!content) return '';
   const lines = content.split('\n').filter(l => l.trim()).slice(0, 100);
   let html = '<style>table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:8px;text-align:left}th{background:#f4f4f4}</style><table>';
   lines.forEach((line, idx) => {
-    const cells = line.split(',').map(c => c.trim().replace(/^"|"$/g, ''));
+    const cells = parseCsvLine(line);
     html += idx === 0 ? '<thead><tr>' : '<tr>';
     cells.forEach(cell => {
       html += idx === 0 ? `<th>${escapeHtml(cell)}</th>` : `<td>${escapeHtml(cell)}</td>`;
@@ -55,7 +88,7 @@ function renderMarkdownPreview(content) {
   if (!content) return '';
   const escaped = escapeHtml(content);
   const formatted = escaped.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
-  return `<style>.md-container{display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding:1rem}.md-src,.md-formatted{border:1px solid #ddd;padding:1rem;overflow:auto;max-height:600px}.md-src{background:#f8f8f8;font-family:monospace;white-space:pre-wrap}h1,h2,h3,h4,h5,h6{margin:0.5rem 0}code{background:#f0f0f0;padding:2px 4px;border-radius:3px}</style><div class="md-container"><div><b>Markdown Source</b><div class="md-src">${escaped}</div></div><div><b>Formatted Text</b><div class="md-formatted"><p>${formatted}</p></div></div></div>`;
+  return `<style>.md-container{display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding:1rem}.md-src,.md-formatted{border:1px solid #ddd;padding:1rem;overflow:auto;max-height:600px}.md-src{background:#f8f8f8;font-family:monospace;white-space:pre-wrap}h1,h2,h3,h4,h5,h6{margin:0.5rem 0}code{background:#f0f0f0;padding:2px 4px;border-radius:3px}</style><div class="md-container"><div><b>Markdown Source</b><div class="md-src">${escaped}</div></div><div><b>Plain Text View</b><div class="md-formatted"><p>${formatted}</p></div></div></div>`;
 }
 
 function renderTextPreview(content) {
@@ -84,6 +117,17 @@ test('CSV preview renderer', () => {
   assert.ok(!result.includes('<script>'), 'Should not have unescaped script tags');
 });
 
+test('CSV preview renderer handles quoted commas and quotes', () => {
+  const csv = 'Name,Note\n"Smith, John","Says ""hello"" in meetings"';
+  const result = renderCSVPreview(csv);
+
+  // Quoted comma should stay inside the cell
+  assert.ok(result.includes('Smith, John'), 'Should keep comma inside quoted name field');
+
+  // Escaped quotes inside the field should render as a single quote character (HTML-escaped)
+  assert.ok(result.includes('Says &quot;hello&quot; in meetings'), 'Should unescape doubled quotes inside a quoted field and escape them for HTML');
+});
+
 test('JSON preview renderer', () => {
   const json = readFileSync(join(fixturesDir, 'sample.json'), 'utf-8');
   const result = renderJSONPreview(json);
@@ -109,7 +153,7 @@ test('Markdown preview renderer', () => {
 
   assert.ok(result.includes('.md-container'), 'Should have container style');
   assert.ok(result.includes('Markdown Source'), 'Should have source label');
-  assert.ok(result.includes('Formatted Text'), 'Should have formatted label');
+  assert.ok(result.includes('Plain Text View'), 'Should have plain text label');
   assert.ok(result.includes('Fidelity Test'), 'Should contain document title');
   // Verify HTML is escaped (raw markdown should not be rendered as HTML)
   assert.ok(!result.includes('<h1>Fidelity'), 'Raw markdown H1 should not be rendered as HTML tag');
