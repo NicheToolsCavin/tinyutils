@@ -1,0 +1,37 @@
+{
+  "company": "TinyUtils Inc",
+  "employees": [
+    {
+      "id": 1,
+      "name": "John Smith",
+      "email": "john.smith@example.com",
+      "department": "Engineering",
+      "role": "Senior Developer",
+      "skills": ["Python", "JavaScript", "Go"],
+      "active": true
+    },
+    {
+      "id": 2,
+      "name": "Jane Doe",
+      "email": "jane.doe@example.com",
+      "department": "Marketing",
+      "role": "Marketing Manager",
+      "skills": ["SEO", "Content Strategy", "Analytics"],
+      "active": true
+    },
+    {
+      "id": 3,
+      "name": "Bob Johnson",
+      "email": "bob.johnson@example.com",
+      "department": "Sales",
+      "role": "Account Executive",
+      "skills": ["Negotiation", "CRM", "Lead Generation"],
+      "active": false
+    }
+  ],
+  "metadata": {
+    "version": "1.0.0",
+    "lastUpdated": "2025-11-28",
+    "totalEmployees": 3
+  }
+}
