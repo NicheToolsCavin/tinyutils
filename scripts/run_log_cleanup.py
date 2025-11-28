@@ -77,20 +77,46 @@ def main():
 
     optimized_content = [header.strip()]
     optimized_content.append("\n\n<!-- COMPRESSED HISTORY (Older than 3 days) -->\n")
-    
-    # Process Archive
+
+    # Process Archive with global de-duplication of bullets.
+    # "All items" here means all distinct change summaries; if a
+    # previous compression pass duplicated the same bullet hundreds
+    # of times across runs, we only keep one canonical copy.
     current_day = None
+    seen_bullets = set()
+    day_started = False
+
     for entry in entries:
         if entry['date'] < cutoff_date:
             day_str = entry['date'].strftime("%Y-%m-%d")
             if day_str != current_day:
-                optimized_content.append(f"\n#### {day_str}")
+                # Start a new day block; the heading is only emitted
+                # once we know there is at least one new bullet for
+                # that day.
                 current_day = day_str
-            
-            # Compress
+                day_started = False
+
+            # Compress this entry down to a single bullet line.
             clean_title = entry['title'].replace('### ', '').split('—')[-1].strip()
             compressed = compress_body(entry['body'])
-            optimized_content.append(f"* **{clean_title}**: {compressed.strip('- ')}")
+            bullet = f"* **{clean_title}**: {compressed.strip('- ')}".strip()
+
+            # Global dedupe: if an identical bullet text has already
+            # been recorded anywhere in the archive, skip it. This
+            # collapses the massive duplication caused by earlier
+            # buggy compression passes while keeping at least one
+            # instance of every distinct summary.
+            if bullet in seen_bullets:
+                continue
+            seen_bullets.add(bullet)
+
+            # First non-duplicate bullet for the day: emit the date
+            # heading before the bullet.
+            if not day_started:
+                optimized_content.append(f"\n#### {day_str}")
+                day_started = True
+
+            optimized_content.append(bullet)
 
     optimized_content.append("\n\n<!-- RECENT ACTIVITY (Full Context) -->\n")
 
