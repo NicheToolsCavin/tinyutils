@@ -33,6 +33,30 @@
       description:
         'Convert between 100+ document formats including Markdown, PDF, DOCX, HTML, RTF, and ODT. High-quality PDF rendering with Chromium.',
       badges: ['Chromium PDF', 'Pandoc engine', '100+ formats']
+    },
+    {
+      icon: '🧬',
+      title: 'Big CSV Joiner',
+      href: '/tools/csv-joiner/',
+      description:
+        'Merge two CSV/TSV files on a shared column (like Email or ID). Supports inner and left joins with automatic delimiter detection.',
+      badges: ['Auto delimiter', 'Inner/Left joins', 'Large files']
+    },
+    {
+      icon: '🥨',
+      title: 'Smart JSON ↔ CSV Converter',
+      href: '/tools/json-to-csv/',
+      description:
+        'Flatten nested JSON and JSONL logs into spreadsheet-ready CSV, or convert CSV back into JSON arrays without scripts.',
+      badges: ['JSONL support', 'Nested flattening', 'Up to 50MB']
+    },
+    {
+      icon: '📑',
+      title: 'Bulk PDF Text Extractor',
+      href: '/tools/pdf-text-extractor/',
+      description:
+        'Upload a ZIP of PDFs and get back a ZIP of plain text files. Ideal for research corpora, contracts, and AI pre-processing.',
+      badges: ['Batch PDFs', 'Plain text', 'Error report']
     }
   ];
 </script>
@@ -40,8 +64,8 @@
 <svelte:head>
   <title>TinyUtils — Useful web tools for SEOs &amp; builders</title>
   <meta
-    name="description"
-    content="Dead Link Finder, Sitemap Delta, Wayback Fixer, and a flexible document converter for many formats. Fast, polite, privacy-friendly tools for SEOs and builders."
+		name="description"
+		content="Dead Link Finder, Sitemap Delta, Wayback Fixer, a flexible document converter, and new data tools like CSV Joiner, JSON↔CSV, and Bulk PDF extractor. Fast, polite, privacy-friendly tools for SEOs and builders."
   />
   <link rel="canonical" href="/" />
   <meta property="og:title" content="TinyUtils — Useful web tools for SEOs &amp; builders" />
@@ -58,7 +82,7 @@
   <h1 class="hero-title fade-in-up">Useful web tools for SEOs &amp; builders</h1>
   <p class="hero-subtitle fade-in-up delay-1">Fast, polite, privacy-friendly. No sign-up required.</p>
   <div class="hero-cta fade-in-up delay-2">
-    <a class="btn primary lg" href="/tools/">
+    <a class="btn primary lg" href="/tools">
       Browse all tools →
     </a>
     <a class="btn secondary lg" href="/tools/wayback-fixer/">

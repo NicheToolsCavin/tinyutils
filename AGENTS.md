@@ -435,6 +435,11 @@ If code changes a tool's observable behavior and no matching log entry is found 
 
 ## Preview Protection — Automation Bypass (Required)
 
+### If PREVIEW_URL is missing — self-serve a preview
+- Run `vercel --yes` from repo root. Copy the Preview URL the CLI prints (e.g., `https://tinyutils-xxxxx.vercel.app`) into `PREVIEW_URL`.
+- Export bypass tokens from the local env files (`.env.preview.local` / `.env.vercel.preview`): `VERCEL_AUTOMATION_BYPASS_SECRET` (preferred), `PREVIEW_BYPASS_TOKEN`, `BYPASS_TOKEN`, plus `PREVIEW_SECRET`.
+- Then run `node scripts/preview_smoke.mjs` and `node scripts/smoke_data_tools_preview.mjs` with those env vars set. Do this automatically—don’t wait for the user to provide URLs or tokens.
+
 When Vercel Preview deployments are protected, use the official Automation Bypass token so smokes run non‑interactively (no SSO cookie required).
 
 Environment variables (precedence)
