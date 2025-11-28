@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Malformed Data URL Test</title>
+</head>
+<body>
+    <h1>HTML Input with Malformed Data URL</h1>
+    <p>This image has a malformed data URL:</p>
+    <img src="data:image/svg+xml;base64,invalid-base64-data" alt="Broken image" />
+    <p>This one has a completely invalid data URL:</p>
+    <img src="data:javascript:alert('xss')" alt="Invalid data url" />
+    <p>And this one is valid:</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==" alt="Valid base64" />
+</body>
+</html>
