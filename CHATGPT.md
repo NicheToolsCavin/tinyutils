@@ -4,7 +4,7 @@
 
 - Always skim `AGENTS.md` first so you pick up preview, security, and docs rules.
 - Glance at recent entries in `docs/AGENT_RUN_LOG.md` and `docs/AGENT_TASK_CHECKLIST.md` to see what other agents already did.
-- If `PREVIEW_URL` is missing, **create one yourself**: run `vercel --yes`, export the printed Preview URL, load `VERCEL_AUTOMATION_BYPASS_SECRET`/`PREVIEW_BYPASS_TOKEN`/`BYPASS_TOKEN` and `PREVIEW_SECRET` from `.env.preview.local` (or `.env.vercel.preview`), then run the preview smokes. Do not wait for the user to hand you the URL/tokens.
+- If `PREVIEW_URL` is missing, **create one yourself**: run `vercel --yes`, copy the printed Preview URL into `PREVIEW_URL`, and export `VERCEL_AUTOMATION_BYPASS_SECRET` (or `PREVIEW_BYPASS_TOKEN`/`BYPASS_TOKEN`) plus `PREVIEW_SECRET` from `.env.preview.local`. Then run `scripts/preview_smoke.mjs` and `scripts/smoke_convert_preview.mjs` with those env vars. Never wait for the user to supply the URL or tokens.
 
 ## MCP Tools — Use Them Proactively!
 
@@ -69,6 +69,44 @@
 - Cross-referencing docs
 - Finding examples and tutorials
 
+### **tiny-reactive** - Browser Automation & Testing
+
+**Specific tools available:**
+- `browser_navigate` - Navigate to URLs (use `localhost` not `127.0.0.1`)
+- `browser_type` - Type into input fields
+- `browser_click` - Click elements (fallback to `browser_evaluate` if timeout)
+- `browser_evaluate` - Execute JavaScript on page
+- `browser_wait_for` - Wait for elements to appear/hide
+- `browser_screenshot` - Capture screenshots (use relative paths)
+- `browser_get_status` - Check server/browser connection
+- `browser_capture_tool` - High-level capture workflow
+
+**When to use:**
+- **Testing preview deployments** → Navigate + interact + screenshot
+- **Verifying tool UIs** → Navigate + check elements + capture state
+- **Automated workflows** → Multi-step interactions (type → click → verify)
+- **Visual documentation** → Screenshot tool states
+- **Convert tool testing** → Test iframe preview by navigating and interacting
+
+**Example: Testing Keyword Density Tool**
+```
+1. browser_navigate → localhost:5173/tools/keyword-density
+2. browser_type → Fill textarea with test text
+3. browser_evaluate → Click analyze button via JS
+4. browser_wait_for → Wait for results table
+5. browser_evaluate → Extract results data
+```
+
+**Setup requirements:**
+- Server running with: `HTTP_API_ENABLED=true HTTP_API_TOKEN=dev123`
+- MCP config must include `HTTP_API_TOKEN=dev123` in env vars
+- Use `localhost` not `127.0.0.1` for navigation
+
+**Pro tip:** If `browser_click` times out, use `browser_evaluate` with:
+```javascript
+(document.querySelector('button.primary').click(), 'clicked')
+```
+
 ---
 
 ## Quick Decision Tree
@@ -76,9 +114,11 @@
 1. **"User wants a new tool"** → `research-manager` + `prd-generator` + `user-stories-generator` + `task-list-generator` (all automatic!)
 2. **"How does TinyUtils handle X?"** → `gitmcp-tinyutils` search
 3. **"What's the best library for Y?"** → `research-manager` + `context7`
-4. **"This UI is ugly"** → `magic`
-5. **"This is confusing/complex"** → `sequential-thinking`
-6. **"Need general info"** → `web.search`
+4. **"Test this preview deployment"** → `tiny-reactive` (navigate + interact + verify)
+5. **"Does the convert tool work?"** → `tiny-reactive` (test iframe preview)
+6. **"This UI is ugly"** → `magic`
+7. **"This is confusing/complex"** → `sequential-thinking`
+8. **"Need general info"** → `web.search`
 
 ---
 
