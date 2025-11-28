@@ -39,10 +39,8 @@
     const optExtractMedia = document.getElementById('optExtractMedia');
     const optRemoveZW = document.getElementById('optRemoveZW');
     const previewBtn = document.getElementById('previewBtn');
-    const prevHeadings = document.getElementById('prevHeadings');
-    const prevSnippets = document.getElementById('prevSnippets');
-    const prevImages = document.getElementById('prevImages');
     const previewPanel = document.getElementById('previewPanel');
+    const previewIframe = document.getElementById('previewIframe');
     const convertBtn = document.getElementById('convertBtn');
     const clearBtn = document.getElementById('clearBtn');
     const demoBtn = document.getElementById('demoBtn');
@@ -444,13 +442,15 @@
         if (thisRequest !== requestCounter) return; // stale
 
         if (previewOnly && data.preview) {
-          const headings = Array.isArray(data.preview.headings) ? data.preview.headings.slice(0, 10) : [];
-          const snippets = Array.isArray(data.preview.snippets) ? data.preview.snippets.slice(0, 5) : [];
-          const images = Array.isArray(data.preview.images) ? data.preview.images : [];
-          if (prevHeadings) prevHeadings.textContent = headings.join('\n');
-          if (prevSnippets) prevSnippets.textContent = snippets.map((s) => `${(s.before || '').slice(0, 80)} → ${(s.after || '').slice(0, 80)}`).join('\n');
-          if (prevImages) prevImages.textContent = String(images.length);
           if (previewPanel) previewPanel.style.display = '';
+          if (previewIframe) {
+            const html = data.preview.html || '';
+            if (html.trim()) {
+              previewIframe.srcdoc = html;
+            } else {
+              previewIframe.srcdoc = '<div style="padding:2rem;color:#666;">No preview available</div>';
+            }
+          }
         }
 
         function handleDataUrlDownload(event, href, filename, fallbackMime) {
@@ -507,49 +507,52 @@
           }
         }
 
-        data.outputs.forEach((output) => {
-          const tr = document.createElement('tr');
-        const format = output.target || output.format || output.to || 'unknown';
-        let filename = output.name || output.filename || `output.${format}`;
-        const blobUrl = output.blobUrl || output.url;
-        const size = output.size ? formatBytes(output.size) : '—';
+        // Only show download links in convert mode, not preview mode
+        if (!previewOnly) {
+          data.outputs.forEach((output) => {
+            const tr = document.createElement('tr');
+          const format = output.target || output.format || output.to || 'unknown';
+          let filename = output.name || output.filename || `output.${format}`;
+          const blobUrl = output.blobUrl || output.url;
+          const size = output.size ? formatBytes(output.size) : '—';
 
-        const isZip = /\.zip$/i.test(filename);
-        const customExtValue = customExt && typeof customExt.value === 'string' ? customExt.value.trim() : '';
-        if (customExtValue && !isZip) {
-          const normalizedExt = customExtValue.replace(/^\.+/, '');
-          if (normalizedExt && (format === 'txt' || format === 'md' || format === 'html')) {
-            if (/\.[^.]+$/.test(filename)) {
-              filename = filename.replace(/\.[^.]+$/, '.' + normalizedExt);
-            } else {
-              filename = filename + '.' + normalizedExt;
+          const isZip = /\.zip$/i.test(filename);
+          const customExtValue = customExt && typeof customExt.value === 'string' ? customExt.value.trim() : '';
+          if (customExtValue && !isZip) {
+            const normalizedExt = customExtValue.replace(/^\.+/, '');
+            if (normalizedExt && (format === 'txt' || format === 'md' || format === 'html')) {
+              if (/\.[^.]+$/.test(filename)) {
+                filename = filename.replace(/\.[^.]+$/, '.' + normalizedExt);
+              } else {
+                filename = filename + '.' + normalizedExt;
+              }
             }
           }
-        }
 
-          const downloadLink = document.createElement('a');
-          downloadLink.href = blobUrl;
-          downloadLink.download = filename;
-          downloadLink.textContent = 'Download';
-          downloadLink.className = 'download-link';
-          downloadLink.addEventListener('click', (event) => {
-            if (!blobUrl || !blobUrl.startsWith('data:')) return;
-            const fallbackMime = output.contentType || output.mimeType || 'application/octet-stream';
-            const handled = handleDataUrlDownload(event, blobUrl, filename, fallbackMime);
-            if (!handled) window.location.href = blobUrl;
+            const downloadLink = document.createElement('a');
+            downloadLink.href = blobUrl;
+            downloadLink.download = filename;
+            downloadLink.textContent = 'Download';
+            downloadLink.className = 'download-link';
+            downloadLink.addEventListener('click', (event) => {
+              if (!blobUrl || !blobUrl.startsWith('data:')) return;
+              const fallbackMime = output.contentType || output.mimeType || 'application/octet-stream';
+              const handled = handleDataUrlDownload(event, blobUrl, filename, fallbackMime);
+              if (!handled) window.location.href = blobUrl;
+            });
+
+            const downloadCell = document.createElement('td');
+            downloadCell.appendChild(downloadLink);
+
+            tr.innerHTML = `
+              <td>${escapeHtml(format)}${isZip ? ' <span class="badge" title="ZIP package">ZIP</span>' : ''}</td>
+              <td>${escapeHtml(filename)}</td>
+              <td>${escapeHtml(size)}</td>
+            `;
+            tr.appendChild(downloadCell);
+            resultsBody.appendChild(tr);
           });
-
-          const downloadCell = document.createElement('td');
-          downloadCell.appendChild(downloadLink);
-
-          tr.innerHTML = `
-            <td>${escapeHtml(format)}${isZip ? ' <span class="badge" title="ZIP package">ZIP</span>' : ''}</td>
-            <td>${escapeHtml(filename)}</td>
-            <td>${escapeHtml(size)}</td>
-          `;
-          tr.appendChild(downloadCell);
-          resultsBody.appendChild(tr);
-        });
+        }
 
         let baseMsg = previewOnly ? 'Preview generated.' : `Conversion complete! ${data.outputs.length} file(s) ready.`;
         if (!previewOnly && isPdfInput) baseMsg += summarizePdfMeta(data);
@@ -804,17 +807,11 @@
 
     <section class="card" aria-labelledby="resultsHeading">
       <h2 id="resultsHeading">Results</h2>
-      <div id="previewPanel" class="tableWrap" style="display:none">
-        <table id="previewTable">
-          <thead>
-            <tr>
-              <th scope="col">Headings</th>
-              <th scope="col">Snippets</th>
-              <th scope="col">Images</th>
-            </tr>
-          </thead>
-          <tbody><tr><td id="prevHeadings">—</td><td id="prevSnippets">—</td><td id="prevImages">—</td></tr></tbody>
-        </table>
+      <div id="previewPanel" style="display:none">
+        <div id="previewHtmlBox" class="preview-html">
+          <div class="preview-html__header">Preview (first 2 pages)</div>
+          <iframe id="previewIframe" sandbox="allow-same-origin allow-popups allow-forms" title="Formatted preview"></iframe>
+        </div>
       </div>
       <div class="tableWrap">
         <table id="results">
@@ -880,6 +877,10 @@
   .actions-row button.secondary { background: transparent; color: inherit; border: 1px solid rgba(255,255,255,0.2); border-radius: 0.75rem; padding: 0.55rem 1.25rem; cursor: pointer; }
   #progress { margin-top: 1rem; }
   .tableWrap { margin-top: 1rem; max-height: 70vh; overflow: auto; border: 1px solid #eee; border-radius: 8px; }
+  #previewPanel { margin-bottom: 1rem; }
+  .preview-html { margin-top: 0.75rem; border: 1px solid var(--border-default); border-radius: var(--radius-lg); overflow: hidden; background: var(--surface-base); }
+  .preview-html__header { padding: 0.6rem 0.9rem; font-weight: 600; border-bottom: 1px solid var(--border-default); background: var(--surface-elevated); }
+  #previewIframe { width: 100%; height: 22rem; border: 0; display: block; background: white; }
   #results thead th { position: sticky; top: 0; z-index: 2; background: #fff; color: #111827; box-shadow: 0 1px 0 rgba(0,0,0,0.05); }
   .download-link { color: var(--brand, #3b82f6); text-decoration: underline; cursor: pointer; }
   .toast { position: fixed; right: 16px; bottom: 16px; background: var(--panel); color: var(--text); border: 1px solid var(--border); padding: 10px 14px; border-radius: 10px; z-index: 9999; box-shadow: 0 12px 30px rgba(0,0,0,0.35); }

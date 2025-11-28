@@ -32,7 +32,7 @@
     <a class="brand" href="/">TinyUtils</a>
     <div class="row center">
       <nav class="nav">
-        <a href="/tools">Tools</a>
+        <a href="/tools/">Tools</a>
         <a href="/about.html">About</a>
         <a href="https://buymeacoffee.com/tinyutils" target="_blank" rel="noopener" class="support-link">☕ Support</a>
         <span class="nav-item">

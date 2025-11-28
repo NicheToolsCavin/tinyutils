@@ -82,7 +82,7 @@
   <h1 class="hero-title fade-in-up">Useful web tools for SEOs &amp; builders</h1>
   <p class="hero-subtitle fade-in-up delay-1">Fast, polite, privacy-friendly. No sign-up required.</p>
   <div class="hero-cta fade-in-up delay-2">
-    <a class="btn primary lg" href="/tools">
+    <a class="btn primary lg" href="/tools/">
       Browse all tools →
     </a>
     <a class="btn secondary lg" href="/tools/wayback-fixer/">

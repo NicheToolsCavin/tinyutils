@@ -788,8 +788,9 @@ def _select_preview(batch) -> dict:
                 "headings": result.preview.headings,
                 "snippets": result.preview.snippets,
                 "images": result.preview.images,
+                "html": result.preview.html,
             }
-    return {"headings": [], "snippets": [], "images": []}
+    return {"headings": [], "snippets": [], "images": [], "html": None}
 
 
 def _serialize_errors(batch) -> List[dict]:

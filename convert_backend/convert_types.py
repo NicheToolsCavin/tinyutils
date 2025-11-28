@@ -74,6 +74,7 @@ class PreviewData:
     headings: List[str] = field(default_factory=list)
     snippets: List[dict] = field(default_factory=list)
     images: List[dict] = field(default_factory=list)
+    html: Optional[str] = None
 
 
 @dataclass(slots=True)

@@ -18,6 +18,8 @@
 >
 > Scripts updated: `scripts/preview_smoke.mjs`, `scripts/smoke_convert_preview.mjs`.
 >
+> **Preview ownership — do this yourself every time:** run `vercel --yes` from repo root, copy the printed Preview URL into `PREVIEW_URL`, and export `VERCEL_AUTOMATION_BYPASS_SECRET` (or `PREVIEW_BYPASS_TOKEN`/`BYPASS_TOKEN`) plus `PREVIEW_SECRET` from `.env.preview.local` before you run any smokes. Do not wait for the user to hand you a URL/token.
+>
 > If you see a redirect loop on POST: ensure the automation secret matches the project and branch; the scripts already preflight+cookie+query param.
 >
 > **Goal**
@@ -41,7 +43,21 @@
 >
 > `magic` (21st.dev) is great for UI work — you can ask it for nicer components, tables, inputs, or whole panels when polishing pages.
 >
-> TL;DR: when it helps, agents **should** reach for these MCP servers instead of guessing — especially for docs-heavy work, deep reasoning, or UI/UX polish.
+> `tiny-reactive` provides browser automation for testing tools, capturing screenshots, and verifying UIs. **Perfect for testing Vercel preview deployments!** Navigate, click, type, wait, evaluate JS, and screenshot — all automated through MCP.
+>
+> **Key tiny-reactive use cases:**
+> - Test preview deployments with real browser automation
+> - Verify convert tool iframe preview works correctly
+> - Capture screenshots of tool UIs for documentation
+> - Automate multi-step workflows (navigate → type → click → verify results)
+> - Extract data from rendered pages (perfect for testing tools like keyword density)
+>
+> **Setup requirements:**
+> 1. Start tiny-reactive server: `cd /Users/cav/dev/playwrightwrap && HTTP_API_ENABLED=true HTTP_API_TOKEN=dev123 node dist/src/cli/tiny-reactive.js serve --host 127.0.0.1 --port 5566 --headful --debug`
+> 2. Ensure MCP config in ~/.claude.json includes `HTTP_API_TOKEN=dev123` in env vars
+> 3. Use `localhost` (not 127.0.0.1) for navigation due to allowlist
+>
+> TL;DR: when it helps, agents **should** reach for these MCP servers instead of guessing — especially for docs-heavy work, deep reasoning, UI/UX polish, or browser automation testing.
 
 
 ---

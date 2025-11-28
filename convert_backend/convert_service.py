@@ -560,6 +560,7 @@ def convert_one(
                     headings=[],
                     snippets=[html_text[:500]],
                     images=[],
+                    html=html_text,
                 )
                 before_text = html_text
                 cleaned_text = html_text
@@ -606,10 +607,24 @@ def convert_one(
                     logs=logs,
                 )
 
+                # Build a simple HTML preview from cleaned markdown (standalone off)
+                preview_html = None
+                try:
+                    pypandoc = _get_pypandoc()
+                    preview_html = pypandoc.convert_text(
+                        cleaned_text,
+                        to="html5",
+                        format="gfm",
+                        extra_args=["--standalone", "--quiet"]
+                    )
+                except Exception as exc:
+                    logs.append(f"preview_html_error={exc.__class__.__name__}")
+
                 preview = PreviewData(
                     headings=collect_headings(cleaned_text),
                     snippets=build_snippets(before_text, cleaned_text),
                     images=media_manifest(extract_dir),
+                    html=preview_html,
                 )
 
             media_artifact = _build_media_artifact(extract_dir, _safe_stem(safe_name))
@@ -831,7 +846,7 @@ def _fallback_conversion(*, name: str, input_bytes: bytes, targets: Sequence[str
                 data=data,
             )
         )
-    preview = PreviewData(headings=[], snippets=[text[:280]], images=[])
+    preview = PreviewData(headings=[], snippets=[text[:280]], images=[], html=None)
     return ConversionResult(
         name=name,
         outputs=artifacts,
@@ -917,6 +932,15 @@ def _render_pdf_via_reportlab(markdown_path: Path, *, logs: Optional[List[str]] 
             extra_args=["--standalone", "--self-contained"],
         )
 
+        # Also produce a plain-text rendering we can use in the local fallback so we
+        # never return raw Markdown markup in the PDF if the external renderer fails.
+        plain_text = pypandoc.convert_file(
+            str(markdown_path),
+            to="plain",
+            format="gfm",
+            extra_args=["--wrap=none", "--columns=1000"],
+        )
+
         # Add basic CSS for better formatting
         html_with_style = f"""
         <!DOCTYPE html>
@@ -981,25 +1005,193 @@ def _render_pdf_via_reportlab(markdown_path: Path, *, logs: Optional[List[str]] 
             import io
 
             from reportlab.lib.pagesizes import LETTER
-            from reportlab.lib.styles import getSampleStyleSheet
+            from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
             from reportlab.lib.units import inch
-            from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
+            from reportlab.platypus import (
+                Paragraph,
+                Preformatted,
+                SimpleDocTemplate,
+                Spacer,
+                ListFlowable,
+                ListItem,
+                KeepTogether,
+            )
+
+            def _inline_markdown_to_html(text: str) -> str:
+                # Minimal inline markdown → HTML for Paragraph (supports <b>/<i>/<code>) while
+                # avoiding interference between code spans and emphasis markers.
+                code_spans: list[str] = []
+
+                def _store_code(match: re.Match[str]) -> str:
+                    code_spans.append(html.escape(match.group(1), quote=False))
+                    return f"__CODE_SPAN_{len(code_spans) - 1}__"
+
+                # Protect inline code first
+                text = re.sub(r"`([^`]+)`", _store_code, text)
+                escaped = html.escape(text, quote=False)
+
+                # Bold / italic on the escaped text (avoid mid-word underscore matches)
+                escaped = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", escaped)
+                escaped = re.sub(r"__(.+?)__", r"<b>\1</b>", escaped)
+                escaped = re.sub(r"(?<!\\w)\*(?!\s)(.+?)(?<!\s)\*(?!\\w)", r"<i>\1</i>", escaped)
+                escaped = re.sub(r"(?<!\\w)_(?!\s)(.+?)(?<!\s)_(?!\\w)", r"<i>\1</i>", escaped)
+
+                def _restore_code(match: re.Match[str]) -> str:
+                    idx = int(match.group(1))
+                    return f"<font face='Courier'>{code_spans[idx]}</font>"
+
+                escaped = re.sub(r"__CODE_SPAN_(\d+)__", _restore_code, escaped)
+                return escaped.replace("<br>", "<br/>")
+
+            def _parse_markdown_to_flowables(md: str):
+                lines = md.splitlines()
+                story_local = []
+                styles = getSampleStyleSheet()
+                base = styles["Normal"]
+                base.leading = 15
+                base.spaceAfter = 8
+                base.keepTogether = True
+                body_style = ParagraphStyle(name="TUBody", parent=base)
+                h1_style = ParagraphStyle(
+                    name="TUHeading1",
+                    parent=base,
+                    fontSize=18,
+                    leading=22,
+                    spaceAfter=12,
+                    spaceBefore=18,
+                    keepTogether=True,
+                )
+                h2_style = ParagraphStyle(
+                    name="TUHeading2",
+                    parent=base,
+                    fontSize=16,
+                    leading=20,
+                    spaceAfter=10,
+                    spaceBefore=14,
+                    keepTogether=True,
+                )
+                h3_style = ParagraphStyle(
+                    name="TUHeading3",
+                    parent=base,
+                    fontSize=14,
+                    leading=18,
+                    spaceAfter=8,
+                    spaceBefore=12,
+                    keepTogether=True,
+                )
+                code_style = ParagraphStyle(
+                    name="TUCode",
+                    parent=base,
+                    fontName="Courier",
+                    fontSize=9,
+                    leading=11,
+                    backColor="#f4f4f4",
+                    leftIndent=8,
+                    rightIndent=8,
+                    spaceAfter=10,
+                    spaceBefore=10,
+                    keepTogether=True,
+                )
+
+                buf: list[str] = []
+                in_code = False
+                list_buf: list[str] = []
+
+                def flush_para():
+                    nonlocal buf
+                    if not buf:
+                        return
+                    paragraph = " ".join(buf).strip()
+                    if paragraph:
+                        story_local.append(
+                            KeepTogether(
+                                [Paragraph(_inline_markdown_to_html(paragraph), body_style), Spacer(1, 0.12 * inch)]
+                            )
+                        )
+                    buf = []
+
+                def flush_list():
+                    nonlocal list_buf
+                    if not list_buf:
+                        return
+                    items = [ListItem(Paragraph(_inline_markdown_to_html(it), body_style)) for it in list_buf]
+                    story_local.append(
+                        KeepTogether([ListFlowable(items, bulletType="bullet"), Spacer(1, 0.12 * inch)])
+                    )
+                    list_buf = []
+
+                for line in lines:
+                    stripped = line.strip()
+                    if stripped.startswith("```"):
+                        if in_code:
+                            # end code block
+                            story_local.append(
+                                KeepTogether([Preformatted("\n".join(buf), code_style), Spacer(1, 0.12 * inch)])
+                            )
+                            buf = []
+                            in_code = False
+                        else:
+                            flush_para()
+                            flush_list()
+                            in_code = True
+                            buf = []
+                        continue
+                    if in_code:
+                        buf.append(line)
+                        continue
+
+                    # Headings
+                    if stripped.startswith("### "):
+                        flush_para(); flush_list()
+                        story_local.append(
+                            KeepTogether([Paragraph(_inline_markdown_to_html(stripped[4:]), h3_style), Spacer(1, 0.14 * inch)])
+                        )
+                        continue
+                    if stripped.startswith("## "):
+                        flush_para(); flush_list()
+                        story_local.append(
+                            KeepTogether([Paragraph(_inline_markdown_to_html(stripped[3:]), h2_style), Spacer(1, 0.18 * inch)])
+                        )
+                        continue
+                    if stripped.startswith("# "):
+                        flush_para(); flush_list()
+                        story_local.append(
+                            KeepTogether([Paragraph(_inline_markdown_to_html(stripped[2:]), h1_style), Spacer(1, 0.22 * inch)])
+                        )
+                        continue
+
+                    # Lists
+                    if stripped.startswith(('- ', '* ')):
+                        buf_par = " ".join(buf).strip()
+                        if buf_par:
+                            story_local.append(
+                                KeepTogether([Paragraph(_inline_markdown_to_html(buf_par), body_style), Spacer(1, 0.12 * inch)])
+                            )
+                        buf = []
+                        list_buf.append(stripped[2:].strip())
+                        continue
+
+                    if not stripped:
+                        flush_para(); flush_list()
+                        continue
+
+                    buf.append(stripped)
+
+                flush_para(); flush_list()
+                return story_local
 
             pdf_buffer = io.BytesIO()
-            doc = SimpleDocTemplate(pdf_buffer, pagesize=LETTER)
-            styles = getSampleStyleSheet()
-            body = markdown_path.read_text(encoding="utf-8", errors="ignore")
-
-            story = []
-            for chunk in body.split("\n\n"):
-                stripped = chunk.strip()
-                if not stripped:
-                    continue
-                story.append(Paragraph(stripped.replace("\n", "<br/>"), styles["Normal"]))
-                story.append(Spacer(1, 0.15 * inch))
+            doc = SimpleDocTemplate(
+                pdf_buffer,
+                pagesize=LETTER,
+                leftMargin=0.45 * inch,
+                rightMargin=0.45 * inch,
+                topMargin=1.6 * inch,
+                bottomMargin=1.25 * inch,
+            )
+            story = _parse_markdown_to_flowables(markdown_path.read_text("utf-8", errors="ignore"))
             if not story:
-                story.append(Paragraph("(empty document)", styles["Normal"]))
-
+                story = [Paragraph("(empty document)", getSampleStyleSheet()["Normal"])]
             doc.build(story)
             if logs is not None:
                 logs.append("pdf_engine=reportlab")
