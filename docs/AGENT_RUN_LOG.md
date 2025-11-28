@@ -26,6 +26,27 @@
 <!-- RECENT ACTIVITY (Full Context) -->
 
 
+### 2025-11-28 21:10 CET - Claude Code - Format-specific preview renderers
+
+- **Mode:** autonomous
+- **Branch:** `main`
+- **Summary:**
+  - Analyzed ChatGPT's previous over-engineering failure (built 26-task infrastructure plan but skipped core feature implementation) and documented anti-patterns in AGENTS.md and CHATGPT.md with 8 core principles and 6 red flags.
+  - Implemented format-specific preview renderers end-to-end: added content/format fields to PreviewData (backend), populated fields in conversion pipeline, created 5 specialized frontend renderers (CSV→table, JSON→highlighted, MD→side-by-side, TXT→line-numbered, TeX→highlighted).
+  - Added frontend format routing logic to detect preview.format and dispatch to appropriate renderer function.
+  - Committed infrastructure utilities (detect_rows_columns, protect_csv_formulas, etc.) from ChatGPT's previous session as separate refactor commit for clear attribution.
+  - Updated tool_desc_converter.md with complete changelog entries for both preview hardening and format-specific renderers.
+- **Evidence:**
+  - Commits: b1ac87d (feat: format-specific preview renderers), c0bf9e0 (refactor: converter utilities), a2919ff (docs: changelog)
+  - convert_backend/convert_types.py:78-79 (content/format fields)
+  - src/routes/tools/text-converter/+page.svelte:98-144 (renderer functions), :495-553 (routing logic)
+  - AGENTS.md, CHATGPT.md (task execution discipline documentation)
+- **Follow-ups:**
+  - Test format-specific previews against production/preview deployment with real files
+  - Consider enhanced Markdown rendering with marked.js library
+  - Consider CSV parsing with PapaParse for better delimiter detection
+
+
 ### 2025-11-27 16:01 CET - Manual - AGENT_RUN_LOG auto-dedupe + compression
 
 - **Mode:** manual
@@ -828,4 +849,16 @@
 - **Evidence:** artifacts/convert/20251128/preview-smoke-20251128035226
 - **Follow-ups:**
   - Add user-facing PDF margin/format controls by 2025-12-01 (tracked in AGENT_TASK_CHECKLIST).
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-11-28 20:49 CET - Manual - converter preview hardening
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Added preview caps/meta flags (approxBytes,row/col,jsonNodeCount,truncated,tooBigForPreview) and HTML-in-disguise detection
+  - Applied CSV formula neutralization for CSV/TSV and PDF table exports; propagated meta through cache/fallback/error
+  - Frontend preview cards for too-large/unavailable, sticky headers with wrapping, clearer progress copy
+- **Evidence:** NONE
+- **Follow-ups:**
 
