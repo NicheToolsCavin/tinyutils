@@ -1,5 +1,24 @@
 ## Converter Tool — Description and Change Log
 
+### Major changes — 2025-11-28 16:05 CET (UTC+01:00) — Preview HTML + safer PDF fallback
+
+Added
+• Converter API now returns a formatted HTML preview (`preview.html`), and the Text Converter UI renders it in a sandboxed iframe so users see the real document instead of raw snippets.
+
+Modified
+• ReportLab fallback uses tighter side margins (0.45") and taller top/bottom padding (1.6" / 1.25") with tuned keep-together spacing to reduce cut-offs when the external renderer is unavailable.
+• Inline markdown parser processes code spans before emphasis and ignores mid-word underscores to avoid mangled env vars; unique paragraph styles prevent ReportLab duplicate-name errors that previously crashed fallback rendering.
+
+Fixed
+• Mis-indented ReportLab imports that caused a SyntaxError on module import, blocking local conversions and preview generation.
+
+Testing
+• pnpm check
+• pnpm test
+• scripts/preview_smoke.mjs (PASS) — PREVIEW_URL=https://tinyutils-ntgr30lfy-cavins-projects-7b0e00bb.vercel.app with bypass tokens
+• scripts/smoke_convert_preview.mjs (PASS) — artifacts/convert/20251128/preview-smoke-20251128035226
+• scripts/smoke_data_tools_preview.mjs (PASS) — json/csv/pdf preview APIs
+
 ### Major changes — 2025-11-24 02:45 CET (UTC+01:00) — Plain-text → Markdown auto-formatting
 
 Added

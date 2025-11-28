@@ -774,3 +774,58 @@
 - **Evidence:** Preview: https://tinyutils-fz772237b-cavins-projects-7b0e00bb.vercel.app ; smokes run locally (preview_smoke PASS, data_tools_preview PASS).
 - **Follow-ups:**
 
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-11-28 14:47 CET - Manual - PDF renderer available check
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Confirmed PDF_RENDERER_URL=https://tinyutils-pdf-2159415913.us-central1.run.app from .env.preview.local and health-checked endpoint (HTTP 405 Allow: POST) indicating service reachable; fallback should only trigger if upstream errors during render.
+- **Follow-ups:**
+  - If PDF still returns fallback output in preview, capture response logs to verify external call failure cause; otherwise no action needed.
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-11-28 15:05 CET - Manual - PDF fallback layout tweaks
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Improved PDF fallback formatting: keep-together paragraphs/lists/code, wider horizontal flow (0.75" side margins) and larger top/bottom margins (1") to avoid clipped paragraphs; inline markdown now renders bold/italic/code correctly.
+  - Tests: pnpm check + pnpm test pass; external renderer already active (playwright-chromium) and remains preferred.
+- **Follow-ups:**
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-11-28 15:38 CET - Manual - formatted preview + PDF margins tweak
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Text Converter preview now returns formatted HTML (preview.html) and UI embeds it via sandboxed iframe for true document preview instead of raw headings/snippets.
+  - ReportLab fallback margins adjusted: 0.6" side, 1.3" top, 1.1" bottom; keep-together paragraphs/lists/code for fewer clipped pages.
+- **Evidence:** UI change: src/routes/tools/text-converter/+page.svelte; Backend: convert_backend/convert_service.py, convert_backend/convert_types.py, convert_backend/app.py
+- **Follow-ups:**
+  - Add user-facing margin/format controls by Dec 1 (already noted in checklist).
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-11-28 15:43 CET - Manual - preview iframe sandbox tweak
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Preview iframe now allows same-origin + popups/forms to render formatted HTML; styles added for preview container (iframe box).
+  - Tests still green (pnpm check/test).
+- **Follow-ups:**
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-11-28 15:56 CET - Manual - converter preview HTML + PDF fallback margins
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Fixed ReportLab fallback SyntaxError and tightened margins (0.45" sides / 1.6" top / 1.25" bottom) with safer inline markdown parser + unique styles to prevent crashes and cut-offs.
+  - Ensured preview.html HTML is returned and rendered in the converter UI iframe; also pointed /tools links to /tools/ to avoid back-button oddities from 308 redirects.
+  - Deployed new preview via vercel --yes (tinyutils-ntgr30lfy-cavins-projects-7b0e00bb.vercel.app) and reran pnpm check, pnpm test, preview_smoke.mjs, smoke_convert_preview.mjs, and smoke_data_tools_preview.mjs with bypass tokens — all PASS.
+- **Evidence:** artifacts/convert/20251128/preview-smoke-20251128035226
+- **Follow-ups:**
+  - Add user-facing PDF margin/format controls by 2025-12-01 (tracked in AGENT_TASK_CHECKLIST).
+
