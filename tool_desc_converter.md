@@ -1121,3 +1121,65 @@ Testing
 
 Commits
 • TBD - feat: add Try Example UX for PR4
+
+### Major changes — 2025-11-28 21:05 CET (UTC+01:00) — Large/edge-case preview hardening
+
+Added
+• Preview/meta surface now includes approxBytes, row/col counts, jsonNodeCount, truncated, and tooBigForPreview flags so the UI can show “too large”/“simplified” states.
+• CSV/TSV inputs and PDF-derived CSV tables get automatic formula neutralization (prefix '= + - @') to block spreadsheet injection.
+
+Modified
+• Backend enforces preview-friendly caps and early short-circuit for oversized payloads; detects HTML-in-disguise and logs a security warning.
+• Preview responses propagate size/meta flags through cache, success, fallback, and error paths; CSV/TSV protected prior to pandoc.
+• Frontend shows “Too large for preview” / “Preview unavailable” cards, keeps sticky headers with wrap, and uses clearer status copy.
+
+Fixed
+• **Problem:** Large or hostile inputs could hang previews or render unsafe HTML/CSV content without user feedback.
+  - **Root cause:** No preview-size guard, limited sanitization, and missing meta to drive UI fallbacks.
+  - **Fix:** Add capped preview paths, HTML-in-disguise detection, CSV formula neutralization, meta propagation, and UI fallback cards with safe text-only handling.
+  - **Evidence:** Tests — `node --test tests/converter_edge_cases.test.mjs`; `PYTHONPATH=. pytest tests/test_converter_enhancements.py -q`.
+
+Human-readable summary
+
+Large or tricky files now fail soft: we cap previewable size, label when a preview is simplified/too big, neutralize risky CSV formulas, and block obvious HTML-in-disguise. The UI shows friendly “too large/unavailable” cards instead of blank iframes, while normal conversions still complete.
+
+Impact
+• Safer previews (no silent CSV formula or HTML sneak-through) ✅
+• Better UX on huge files: clear “too large” messaging and preserved conversions ✅
+• Preview meta is now explicit for logging, caching, and UI decisions ✅
+
+Testing
+• node --test tests/converter_edge_cases.test.mjs ✅
+• PYTHONPATH=. pytest tests/test_converter_enhancements.py -q ✅
+
+### Major changes — 2025-11-28 21:10 CET (UTC+01:00) — Format-specific preview renderers
+
+Added
+• Five specialized preview renderers for text-based formats: CSV (HTML table, first 100 rows), JSON (syntax-highlighted formatted output), Markdown (side-by-side source + rendered), TXT (line-numbered plain text), TeX (syntax-highlighted LaTeX).
+• Backend PreviewData fields: `content` (raw text, first 50KB) and `format` (target format hint: 'csv', 'json', 'md', 'txt', 'tex', 'html').
+• Frontend format detection routing: switch statement detects preview.format and calls appropriate renderer function.
+
+Modified
+• convert_types.py: Added content/format fields to PreviewData dataclass.
+• convert_service.py: Populate content/format in both via-markdown and direct-HTML conversion paths.
+• app.py: Serialize content/format fields in API response (_select_preview function).
+• +page.svelte: Added 5 renderer functions (lines 98-144) and format routing logic (lines 495-553).
+
+Fixed
+• **Problem:** All preview outputs used generic HTML iframe rendering, providing no specialized views for structured formats like CSV tables or JSON.
+  - **Root cause:** PreviewData only contained HTML snippets; no format metadata or raw content for client-side rendering.
+  - **Fix:** Added content/format fields to PreviewData, populated them in backend, implemented 5 format-specific renderers in frontend, added routing logic to detect format and dispatch to appropriate renderer.
+  - **Evidence:** Local dev server testing at localhost:5173/tools/text-converter.
+
+Human-readable summary
+
+Text-based conversion outputs (CSV, JSON, Markdown, TXT, TeX) now display in format-appropriate preview modes: CSV shows as HTML table, JSON as syntax-highlighted formatted output, Markdown as side-by-side source/rendered view, TXT as line-numbered text, and TeX as highlighted LaTeX source. HTML outputs continue using iframe rendering.
+
+Impact
+• Better preview UX for structured formats (CSV table view, JSON highlighting) ✅
+• Side-by-side Markdown preview shows both source and rendered output ✅
+• Format-specific rendering improves readability and usability ✅
+
+Documentation
+• AGENTS.md: Added task execution discipline guide with 8 core principles and 6 red flags
+• CHATGPT.md: Documented over-engineering anti-patterns (Nov 28 failure case study)
