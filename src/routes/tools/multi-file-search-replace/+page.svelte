@@ -296,10 +296,14 @@
 
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-6" in:fade>
 				<div>
-					<label class="block text-sm font-medium text-gray-700 mb-2"
-						>Find {mode === 'regex' ? '(Regex Pattern)' : 'Text'}</label
+					<label
+						class="block text-sm font-medium text-gray-700 mb-2"
+						for="find-text"
 					>
+						Find {mode === 'regex' ? '(Regex Pattern)' : 'Text'}
+					</label>
 					<input
+						id="find-text"
 						bind:value={findText}
 						type="text"
 						class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-3 border font-mono text-sm"
@@ -314,10 +318,14 @@
 					{/if}
 				</div>
 				<div>
-					<label class="block text-sm font-medium text-gray-700 mb-2"
-						>Replace with</label
+					<label
+						class="block text-sm font-medium text-gray-700 mb-2"
+						for="replace-text"
 					>
+						Replace with
+					</label>
 					<input
+						id="replace-text"
 						bind:value={replaceText}
 						type="text"
 						class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-3 border font-mono text-sm"

@@ -1,4 +1,0 @@
-Phase 1 PR4: Try example + progress indicator
-- Dead Link Finder, Sitemap Delta, Wayback Fixer, and Converter now expose role=status progress blocks and Try example inputs.
-- Progress meters update on run/demo/error states; Try example buttons load safe Demo data and reset status text.
-- Verified the new helper functions and buttons in the page markup by reviewing the generated HTML/JS (no preview smoke run executed).

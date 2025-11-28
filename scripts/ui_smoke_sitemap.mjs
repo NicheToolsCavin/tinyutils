@@ -40,23 +40,26 @@ async function runTinyReactive() {
 
   await cmd({ id: 'open', cmd: 'open', args: { url: toolUrl, waitUntil: 'networkidle' }, target: { contextId: 'default', pageId: 'active' } });
 
-  await maybeClick('#tu-consent-accept');
+  // Current UI: no consent modal; run button text is "Run diff"
+  await cmd({ id: 'ready', cmd: 'waitFor', args: { selector: 'text=Run diff', state: 'visible', timeout: 15000 } });
 
-  await cmd({ id: 'ready', cmd: 'waitFor', args: { selector: '#runBtn', state: 'visible', timeout: 15000 } });
-
-  await maybeClick('#demoBtn');
-  await cmd({ id: 'run', cmd: 'click', args: { selector: '#runBtn' } });
+  await maybeClick('text=Load demo');
+  await cmd({ id: 'run', cmd: 'click', args: { selector: 'text=Run diff' } });
 
   await cmd({
     id: 'wait-result',
     cmd: 'waitForFunction',
     args: {
       js: `() => {
-        const s = document.querySelector('#summary');
-        const stat = document.querySelector('#status');
-        const visible = s && !s.classList.contains('hidden') && s.textContent.trim().length > 0;
-        const errored = stat && /Error:/i.test(stat.textContent || '');
-        return visible || errored;
+        const summary = document.querySelector('#summaryLine');
+        const mapTable = document.querySelector('#mapTable tbody');
+        const added = document.querySelector('#addedTable tbody');
+        const unmapped = document.querySelector('#unmappedTable tbody');
+        const anyRows = [mapTable, added, unmapped]
+          .filter(Boolean)
+          .some((tbody) => Array.from(tbody.querySelectorAll('tr')).some((r) => !r.classList.contains('empty-cell')));
+        const summaryHasText = summary && summary.textContent && !/No results yet/i.test(summary.textContent);
+        return anyRows || summaryHasText;
       }`,
       timeout: 120000
     }

@@ -19,6 +19,7 @@ artifacts
 about.html
 contact.html
 cookies.html
+!static/cookies.html
 privacy.html
 support.html
 terms.html

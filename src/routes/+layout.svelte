@@ -32,7 +32,7 @@
     <a class="brand" href="/">TinyUtils</a>
     <div class="row center">
       <nav class="nav">
-        <a href="/tools/">Tools</a>
+        <a href="/tools">Tools</a>
         <a href="/about.html">About</a>
         <a href="https://buymeacoffee.com/tinyutils" target="_blank" rel="noopener" class="support-link">☕ Support</a>
         <span class="nav-item">
@@ -75,17 +75,22 @@
 
 <style>
   :global(.support-link) {
-    background: var(--gradient-brand);
-    color: white !important;
-    padding: 6px 14px;
-    border-radius: var(--radius-full);
-    transition: all var(--transition-base);
-    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary) !important;
+    font-size: 0.9rem;
+    opacity: 0.85;
+    transition:
+      color var(--transition-base),
+      opacity var(--transition-base);
   }
 
   :global(.support-link:hover) {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    color: var(--brand-500) !important;
+    opacity: 1;
   }
 
   :global(.nav-item) {

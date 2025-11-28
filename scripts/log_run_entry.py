@@ -230,32 +230,56 @@ def main() -> None:
     entries.sort(key=lambda x: x.timestamp, reverse=True)
 
     # 4. Render
+    #
+    # We keep recent entries with full context and compress older
+    # ones into one-line bullets, **without** duplicating existing
+    # compressed rows. This makes the log size stable and
+    # idempotent instead of growing on every run.
+
     final_output = [header_content.rstrip()]
-    
+
     cutoff_date = get_current_time() - timedelta(days=KEEP_DETAILED_DAYS)
-    
+
     # Split into Recent vs Archived
     recent_entries = [e for e in entries if e.timestamp >= cutoff_date]
     archived_entries = [e for e in entries if e.timestamp < cutoff_date]
 
-    # Render Recent
+    # Render Recent (full detail)
     if recent_entries:
         final_output.append("\n<!-- RECENT ACTIVITY (Full Context) -->\n")
         for e in recent_entries:
-            # Force full text if it was previously compressed but is now considered "Recent" 
-            # (Edge case: changing cutoff days, but usually won't uncompress text magically)
+            # Force full text if it was previously compressed but is now
+            # considered "Recent". We always prefer the richest form for
+            # the active window.
             final_output.append(e.to_markdown())
 
-    # Render Archive
+    # Render Archive (deduplicated bullets per day)
     if archived_entries:
         final_output.append("\n<!-- COMPRESSED HISTORY (Older than 3 days) -->\n")
         current_day = None
+        seen_for_day = set()
+
         for e in archived_entries:
             day_str = e.timestamp.strftime("%Y-%m-%d")
             if day_str != current_day:
+                # New day: reset the per-day dedupe set so each bullet
+                # is emitted at most once per calendar day.
                 final_output.append(f"\n#### {day_str}")
                 current_day = day_str
-            final_output.append(e.to_compressed())
+                seen_for_day = set()
+
+            bullet = e.to_compressed().strip()
+            if not bullet:
+                continue
+
+            # Keyed by the exact bullet text; this prevents the
+            # exponential duplication that previously happened when
+            # already-compressed lines were re-parsed and re-emitted
+            # on every run.
+            if bullet in seen_for_day:
+                continue
+            seen_for_day.add(bullet)
+            final_output.append(bullet)
 
     # 5. Write
     LOG_PATH.write_text("\n".join(final_output) + "\n", encoding='utf-8')
