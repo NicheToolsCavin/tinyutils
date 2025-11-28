@@ -19,6 +19,36 @@
       section: 'seo'
     },
     {
+      icon: '🗺️',
+      name: 'Sitemap Generator',
+      href: '/tools/sitemap-generator/',
+      tier: 'beta',
+      description:
+        'Generate XML sitemaps from URL lists. Configure changefreq, priority, and lastmod for search engines.',
+      badges: ['XML output', 'Copy/download', 'SEO ready'],
+      section: 'seo'
+    },
+    {
+      icon: '📊',
+      name: 'Keyword Density',
+      href: '/tools/keyword-density/',
+      tier: 'beta',
+      description:
+        'Analyze keyword frequency in your content. Get density percentages and CSV exports for SEO optimization.',
+      badges: ['SEO analysis', 'CSV export', 'Stop words'],
+      section: 'seo'
+    },
+    {
+      icon: '🔍',
+      name: 'Meta Preview',
+      href: '/tools/meta-preview/',
+      tier: 'beta',
+      description:
+        'Preview how your page title and description will appear when shared or listed in search results.',
+      badges: ['Meta tags', 'Title & description'],
+      section: 'seo'
+    },
+    {
       icon: '📄',
       name: 'Document Converter',
       href: '/tools/text-converter/',
@@ -32,6 +62,26 @@
         link: '/tools/formats/',
         linkText: 'View supported formats →'
       }
+    },
+    {
+      icon: '📋',
+      name: 'Formats',
+      href: '/tools/formats/',
+      tier: 'free',
+      description:
+        'View all supported document formats for our converter. See what files you can upload and download.',
+      badges: ['100+ formats', 'Input/output', 'Reference'],
+      section: 'doc'
+    },
+    {
+      icon: '🩺',
+      name: 'Encoding Doctor',
+      href: '/tools/encoding-doctor/',
+      tier: 'beta',
+      description:
+        'Fix mojibake and encoding errors like "FranÃ§ois dâ€™Arcy" → "François d\'Arcy". Repair broken accents, smart quotes, and Unicode normalization issues.',
+      badges: ['UTF-8 repair', 'Smart quotes', 'Mojibake fix'],
+      section: 'doc'
     }
   ];
 
@@ -64,13 +114,31 @@
       badges: ['Bulk mapping', 'Time windows', 'HEAD verify', 'SPN queue']
     },
     {
-      icon: '🩺',
-      name: 'Encoding Doctor',
-      href: '/tools/encoding-doctor/',
-      tier: 'beta',
+      icon: '🧬',
+      name: 'Big CSV Joiner',
+      href: '/tools/csv-joiner/',
+      tier: 'free',
       description:
-        'Fix mojibake and encoding errors like "FranÃ§ois dâ€™Arcy" → "François d\'Arcy". Repair broken accents, smart quotes, and Unicode normalization issues.',
-      badges: ['UTF-8 repair', 'Smart quotes', 'Mojibake fix']
+        'Merge two CSV/TSV files on a shared column (like Email or ID). Supports inner and left joins with automatic delimiter and header detection.',
+      badges: ['Auto delimiter', 'Inner/Left joins', 'Large files']
+    },
+    {
+      icon: '🥨',
+      name: 'Smart JSON ↔ CSV Converter',
+      href: '/tools/json-to-csv/',
+      tier: 'free',
+      description:
+        'Flatten nested JSON and JSONL logs into spreadsheet-ready CSV, or convert CSV back into JSON arrays without writing code.',
+      badges: ['JSONL support', 'Nested flattening', 'Up to 50MB']
+    },
+    {
+      icon: '📑',
+      name: 'Bulk PDF Text Extractor',
+      href: '/tools/pdf-text-extractor/',
+      tier: 'free',
+      description:
+        'Upload a ZIP of PDFs and get back a ZIP of .txt files. Ideal for research corpora, contracts, and AI pre-processing.',
+      badges: ['Batch PDFs', 'Plain text output', 'Error report']
     }
   ];
 
