@@ -62,6 +62,236 @@
 
 ---
 
+## 🎯 TASK EXECUTION DISCIPLINE — Ship Features, Not Plans
+
+**CRITICAL: Read this before starting any implementation task.**
+
+This section exists because agents have previously:
+- Created massive enterprise plans (26+ tasks) for simple 3-phase implementations
+- Built infrastructure/utilities instead of user-facing features
+- Shipped metadata plumbing but zero actual functionality
+- Got distracted by "impressive but tangential" work instead of core requirements
+
+### Core Principles
+
+**1. ALWAYS implement the CORE user-facing feature FIRST**
+
+❌ **WRONG approach:**
+- Build metadata detection utilities
+- Add size/truncation checks
+- Create "unavailable" and "too big" UI cards
+- Write security sanitization helpers
+- Plan pagination/lazy-loading/accessibility
+- **Skip the actual feature entirely**
+
+✅ **CORRECT approach:**
+- Implement the EXACT feature requested (e.g., "CSV table preview")
+- Verify it works end-to-end
+- THEN add utilities, error states, and polish
+
+**Example from Nov 28, 2024 failure:**
+- **Task:** "Implement format-specific preview methods (CSV→table, JSON→highlighted, MD→side-by-side)"
+- **What agent did:** Built `detect_rows_columns()`, `count_json_nodes()`, "too big" cards, security utils, 6-workstream enterprise plan
+- **What agent DIDN'T do:** CSV table renderer, JSON formatter, Markdown side-by-side viewer (0% of core feature)
+- **Correct order:** Build the 5 preview renderers FIRST, then add caps/security/polish
+
+---
+
+**2. Follow task specifications EXACTLY (phase-by-phase)**
+
+When given a task file with phases (Phase 1: Backend, Phase 2: Frontend, Phase 3-7: Renderers):
+- ✅ Complete Phase 1 fully before moving to Phase 2
+- ✅ Implement ALL phases in order
+- ❌ Don't skip to "advanced features" before basics work
+- ❌ Don't create your own 6-workstream plan when given a 7-phase spec
+
+If the task says "Add `content` and `format` fields to PreviewData":
+- ✅ Add those exact fields to the dataclass
+- ❌ Don't add only metadata fields and skip the core fields
+
+---
+
+**3. MVP mindset: Simplest thing that works**
+
+**First iteration should be:**
+- Minimal but FUNCTIONAL
+- User-visible (they can SEE the feature working)
+- End-to-end complete (backend → frontend → user sees result)
+
+**NOT:**
+- Enterprise-grade infrastructure
+- Pagination/virtualization/lazy-loading before basic rendering works
+- Performance caps before there's anything to cap
+- Accessibility improvements before there's a feature to make accessible
+
+**Ship the bicycle before designing the Formula 1 car.**
+
+---
+
+**4. Avoid scope creep and over-planning**
+
+If asked to implement 5 preview renderers:
+- ✅ Implement those 5 renderers
+- ❌ Don't expand to 26-task enterprise plan covering security, performance, a11y, monitoring, telemetry
+
+If the task doesn't mention pagination:
+- ✅ Build simple "first 100 rows" cap
+- ❌ Don't architect a full pagination system with "Load next 500 rows" before basic tables work
+
+**Planning is good. Over-planning is procrastination.**
+
+---
+
+**5. Infrastructure AFTER features, not before**
+
+**Correct order:**
+1. Build the feature (CSV table preview)
+2. Verify it works
+3. Add error handling (malformed CSV)
+4. Add performance caps (max 100 rows)
+5. Add security (formula escaping)
+6. Add polish (truncation banners)
+
+**Wrong order:**
+1. Build CSV formula protection utilities
+2. Add row/column detection
+3. Create "too big" UI card
+4. Plan pagination system
+5. Skip building the actual CSV table renderer
+
+**Users see features, not infrastructure.**
+
+---
+
+**6. Test the core feature end-to-end before adding polish**
+
+Before implementing:
+- "Preview unavailable" cards
+- "Too large for preview" warnings
+- Truncation banners
+- Performance telemetry
+- Accessibility improvements
+
+**FIRST verify:**
+- ✅ Can backend send CSV content + format?
+- ✅ Can frontend detect format="csv"?
+- ✅ Does CSV render as an HTML table?
+- ✅ Can user SEE the table in their browser?
+
+**If the answer to ANY of these is "no", fix that before adding polish.**
+
+---
+
+**7. When given a detailed task file (/tmp/chatgpt-task.md), FOLLOW IT**
+
+If the task file says:
+
+```
+Phase 1: Backend changes (add content/format to PreviewData)
+Phase 2: Frontend detection (switch statement routing)
+Phase 3: CSV renderer
+Phase 4: JSON renderer
+Phase 5: Markdown renderer
+...
+```
+
+**Then implement IN THAT ORDER.**
+
+Don't create your own plan. Don't skip phases. Don't reorder to "do infrastructure first."
+
+The task file author (often Claude Code) has already thought through the correct sequence. Respect it.
+
+---
+
+**8. Self-check before marking work complete**
+
+Ask yourself:
+
+1. **Can the USER see the feature working?**
+   - If no → you're not done
+   - If "well, the infrastructure is there" → you're not done
+
+2. **Did I implement the EXACT thing requested?**
+   - If you built utilities instead of features → you're not done
+   - If you planned but didn't ship → you're not done
+
+3. **Would the task requester be satisfied with this deliverable?**
+   - If they asked for "CSV table preview" and you delivered "CSV metadata detection" → you're not done
+
+4. **Is there a single end-to-end user flow that works?**
+   - Upload CSV → Click Preview → See table in browser
+   - If ANY step is missing → you're not done
+
+---
+
+### Red Flags (Stop and Reassess)
+
+🚩 **You're writing a plan longer than 10 tasks for a "simple feature" request**
+→ You're over-engineering. Simplify.
+
+🚩 **You're implementing "Phase 2" before "Phase 1" works**
+→ Stop. Go back. Build in order.
+
+🚩 **You've added 5+ utility functions but zero user-facing changes**
+→ Wrong priorities. Build the feature first.
+
+🚩 **You're discussing pagination/virtualization/lazy-loading before basic rendering exists**
+→ Premature optimization. Ship the basics.
+
+🚩 **The diff shows metadata fields added but no actual rendering logic**
+→ Infrastructure without features. Reverse your approach.
+
+🚩 **You're planning "Workstream 1-6" for a 3-day task**
+→ Scope explosion. Get back to basics.
+
+---
+
+### What "Done" Looks Like
+
+✅ **User can perform the feature end-to-end:**
+- Upload document → Click Preview → See format-specific rendering
+
+✅ **Core functionality works for ALL requested formats:**
+- CSV shows as table ✓
+- JSON shows syntax-highlighted ✓
+- Markdown shows side-by-side ✓
+- TXT shows line-numbered ✓
+- TeX shows syntax-highlighted ✓
+
+✅ **Backend sends the right data:**
+- `preview.content` contains raw text ✓
+- `preview.format` indicates type ✓
+
+✅ **Frontend routes correctly:**
+- Detects format ✓
+- Calls appropriate renderer ✓
+- Displays result ✓
+
+✅ **You can demo it working:**
+- Not "the infrastructure is ready"
+- Not "the plan is comprehensive"
+- Actually show: upload → preview → rendered output
+
+**If you can't demo it, you didn't ship it.**
+
+---
+
+### Recovery Protocol (If You Catch Yourself Over-Engineering)
+
+1. **Stop immediately**
+2. **Re-read the original task request**
+3. **Identify the ONE core user-facing feature**
+4. **Delete/shelve the enterprise plan**
+5. **Implement ONLY that core feature**
+6. **Verify it works end-to-end**
+7. **THEN ask: "Should I add polish or ship now?"**
+
+**When in doubt: ship the minimal working feature.**
+
+The user can always ask for caps/pagination/a11y/security later. They can't ask for improvements to a feature that doesn't exist.
+
+---
+
 ## ⚠️ DOCUMENTATION REQUIREMENTS — Only When Changes Occur ⚠️
 
 Document material changes using the Python scripts. Do not log for purely exploratory turns (reading/searching/understanding context) when no repo content or external state changed.

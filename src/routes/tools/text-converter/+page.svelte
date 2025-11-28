@@ -41,6 +41,8 @@
     const previewBtn = document.getElementById('previewBtn');
     const previewPanel = document.getElementById('previewPanel');
     const previewIframe = document.getElementById('previewIframe');
+    const previewUnavailableCard = document.getElementById('previewUnavailableCard');
+    const previewTooBigCard = document.getElementById('previewTooBigCard');
     const convertBtn = document.getElementById('convertBtn');
     const clearBtn = document.getElementById('clearBtn');
     const demoBtn = document.getElementById('demoBtn');
@@ -91,6 +93,54 @@
         '"': '&quot;',
         "'": '&#39;'
       })[ch]);
+    }
+
+    // Format-specific preview renderers
+    function renderCSVPreview(content) {
+      if (!content || !previewIframe) return;
+      const lines = content.split('\n').filter(l => l.trim()).slice(0, 100);
+      let html = '<style>table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:8px;text-align:left}th{background:#f4f4f4}</style><table>';
+      lines.forEach((line, idx) => {
+        const cells = line.split(',').map(c => c.trim().replace(/^"|"$/g, ''));
+        html += idx === 0 ? '<thead><tr>' : '<tr>';
+        cells.forEach(cell => {
+          html += idx === 0 ? `<th>${escapeHtml(cell)}</th>` : `<td>${escapeHtml(cell)}</td>`;
+        });
+        html += idx === 0 ? '</tr></thead><tbody>' : '</tr>';
+      });
+      html += '</tbody></table>';
+      previewIframe.srcdoc = html;
+    }
+
+    function renderJSONPreview(content) {
+      if (!content || !previewIframe) return;
+      try {
+        const formatted = JSON.stringify(JSON.parse(content), null, 2);
+        const html = `<style>pre{background:#1e1e1e;color:#d4d4d4;padding:1rem;overflow:auto;font-family:monospace}</style><pre>${escapeHtml(formatted)}</pre>`;
+        previewIframe.srcdoc = html;
+      } catch (e) {
+        renderTextPreview(content);
+      }
+    }
+
+    function renderMarkdownPreview(content) {
+      if (!content || !previewIframe) return;
+      const html = `<style>.md-container{display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding:1rem}.md-src,.md-rendered{border:1px solid #ddd;padding:1rem;overflow:auto;max-height:600px}.md-src{background:#f8f8f8;font-family:monospace;white-space:pre-wrap}</style><div class="md-container"><div><b>Source</b><div class="md-src">${escapeHtml(content)}</div></div><div><b>Rendered</b><div class="md-rendered">${content}</div></div></div>`;
+      previewIframe.srcdoc = html;
+    }
+
+    function renderTextPreview(content) {
+      if (!content || !previewIframe) return;
+      const lines = content.split('\n');
+      const numbered = lines.map((l, i) => `${String(i + 1).padStart(4, ' ')} | ${escapeHtml(l)}`).join('\n');
+      const html = `<style>pre{background:#f8f8f8;padding:1rem;font-family:monospace;overflow:auto}</style><pre>${numbered}</pre>`;
+      previewIframe.srcdoc = html;
+    }
+
+    function renderTeXPreview(content) {
+      if (!content || !previewIframe) return;
+      const html = `<style>pre{background:#1e1e1e;color:#d4d4d4;padding:1rem;overflow:auto;font-family:monospace}</style><pre>${escapeHtml(content)}</pre>`;
+      previewIframe.srcdoc = html;
     }
 
     function formatBytes(bytes) {
@@ -257,7 +307,7 @@
       updateOptionAvailability();
       if (previewPanel) previewPanel.style.display = 'none';
       if (resultsBody) resultsBody.innerHTML = '';
-      updateProgressState('Demo content loaded — press Convert to see outputs.', 0);
+      updateProgressState('Demo content loaded. Click Convert to process.', 0);
       showToast('Try example content loaded.');
     }
 
@@ -311,8 +361,8 @@
       isBusy = true;
       const isPdfInput = isPdfInputActive();
       const initialMessage = previewOnly
-        ? (isPdfInput ? 'Parsing PDF (layout-aware) — generating preview…' : 'Generating preview…')
-        : (isPdfInput ? 'Parsing PDF (layout-aware)…' : 'Converting…');
+        ? (isPdfInput ? 'Parsing PDF for preview…' : 'Generating preview…')
+        : (isPdfInput ? 'Parsing PDF…' : 'Converting…');
       updateProgressState(initialMessage, previewOnly ? 40 : 20);
       if (resultsBody) resultsBody.innerHTML = '';
       if (previewPanel) previewPanel.style.display = 'none';
@@ -322,7 +372,8 @@
       try {
         const filename = currentFile ? currentFile.name : 'input.md';
         const ext = extOf(filename);
-        let fromFormat = fromSelect ? fromSelect.value : 'auto';
+        const initialFromFormat = fromSelect ? fromSelect.value : 'auto';
+        let fromFormat = initialFromFormat;
         if (fromFormat === 'auto') {
           const looksLikeLatex = /\\documentclass\b|\\begin\{document\}|\\section\{|\\usepackage\b/.test(content);
           fromFormat = looksLikeLatex ? 'latex' : inferFormat(filename);
@@ -443,12 +494,60 @@
 
         if (previewOnly && data.preview) {
           if (previewPanel) previewPanel.style.display = '';
-          if (previewIframe) {
-            const html = data.preview.html || '';
-            if (html.trim()) {
+
+          // Reset cards/iframe visibility
+          if (previewUnavailableCard) previewUnavailableCard.style.display = 'none';
+          if (previewTooBigCard) previewTooBigCard.style.display = 'none';
+
+          const previewFlags = data.preview || {};
+          const meta = data.meta || {};
+          const isTooBig = previewFlags.tooBigForPreview || meta.fileTooLargeForPreview;
+
+          if (isTooBig) {
+            if (previewTooBigCard) previewTooBigCard.style.display = '';
+            if (previewIframe) previewIframe.srcdoc = '';
+          } else {
+            // Format-specific preview routing
+            const format = (previewFlags.format || 'html').toLowerCase();
+            const content = previewFlags.content;
+            const html = previewFlags.html;
+
+            if (content && format !== 'html') {
+              // Use format-specific renderers for text-based formats
+              switch(format) {
+                case 'csv':
+                  renderCSVPreview(content);
+                  break;
+                case 'json':
+                  renderJSONPreview(content);
+                  break;
+                case 'md':
+                case 'markdown':
+                  renderMarkdownPreview(content);
+                  break;
+                case 'txt':
+                case 'text':
+                  renderTextPreview(content);
+                  break;
+                case 'tex':
+                case 'latex':
+                  renderTeXPreview(content);
+                  break;
+                default:
+                  // Fallback to HTML if available
+                  if (html && previewIframe) {
+                    previewIframe.srcdoc = html;
+                  } else if (content && previewIframe) {
+                    renderTextPreview(content);
+                  }
+              }
+            } else if (html && previewIframe) {
+              // Use HTML preview for HTML format or when no content available
               previewIframe.srcdoc = html;
             } else {
-              previewIframe.srcdoc = '<div style="padding:2rem;color:#666;">No preview available</div>';
+              // No preview available
+              if (previewUnavailableCard) previewUnavailableCard.style.display = '';
+              if (previewIframe) previewIframe.srcdoc = '';
             }
           }
         }
@@ -554,7 +653,7 @@
           });
         }
 
-        let baseMsg = previewOnly ? 'Preview generated.' : `Conversion complete! ${data.outputs.length} file(s) ready.`;
+        let baseMsg = previewOnly ? 'Preview ready.' : `Converted ${data.outputs.length} file(s).`;
         if (!previewOnly && isPdfInput) baseMsg += summarizePdfMeta(data);
         updateProgressState(baseMsg, 100);
       } catch (err) {
@@ -598,7 +697,7 @@
       if (resultsBody) {
         resultsBody.innerHTML = '<tr id="resultsEmptyRow"><td colspan="4" style="color: var(--muted, #97a3c2); text-align: center; padding: 0.75rem 0;">No files yet — your converted files will appear here after you click <strong>Convert</strong>.</td></tr>';
       }
-      updateProgressState('Ready — paste content or upload a file, then click <strong>Convert</strong>.', null);
+      updateProgressState('Ready to convert. Paste content or upload a file.', null);
     });
 
     demoBtn?.addEventListener('click', loadTryExample);
@@ -808,6 +907,14 @@
     <section class="card" aria-labelledby="resultsHeading">
       <h2 id="resultsHeading">Results</h2>
       <div id="previewPanel" style="display:none">
+        <div id="previewUnavailableCard" class="preview-card" style="display:none;">
+          <p class="preview-card-title">🚫 Preview unavailable</p>
+          <p class="preview-card-subtitle">We couldn't generate a safe inline preview. Download to view the full file.</p>
+        </div>
+        <div id="previewTooBigCard" class="preview-card" style="display:none;">
+          <p class="preview-card-title">📦 Too large for preview</p>
+          <p class="preview-card-subtitle">This file exceeds the live preview cap but will still convert normally.</p>
+        </div>
         <div id="previewHtmlBox" class="preview-html">
           <div class="preview-html__header">Preview (first 2 pages)</div>
           <iframe id="previewIframe" sandbox="allow-same-origin allow-popups allow-forms" title="Formatted preview"></iframe>
@@ -879,9 +986,29 @@
   .tableWrap { margin-top: 1rem; max-height: 70vh; overflow: auto; border: 1px solid #eee; border-radius: 8px; }
   #previewPanel { margin-bottom: 1rem; }
   .preview-html { margin-top: 0.75rem; border: 1px solid var(--border-default); border-radius: var(--radius-lg); overflow: hidden; background: var(--surface-base); }
+  .preview-card {
+    margin-top: 0.75rem;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    background: var(--surface-base);
+    padding: 1.5rem;
+    text-align: center;
+  }
+  .preview-card-title { font-size: var(--text-lg); font-weight: 700; margin-bottom: 0.25rem; }
+  .preview-card-subtitle { color: var(--text-muted, #6b7280); }
   .preview-html__header { padding: 0.6rem 0.9rem; font-weight: 600; border-bottom: 1px solid var(--border-default); background: var(--surface-elevated); }
   #previewIframe { width: 100%; height: 22rem; border: 0; display: block; background: white; }
-  #results thead th { position: sticky; top: 0; z-index: 2; background: #fff; color: #111827; box-shadow: 0 1px 0 rgba(0,0,0,0.05); }
+  #results thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--surface-elevated, #fff);
+    color: var(--text, #111827);
+    box-shadow: 0 1px 0 rgba(0,0,0,0.05);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  #results tbody td { word-wrap: break-word; overflow-wrap: break-word; }
   .download-link { color: var(--brand, #3b82f6); text-decoration: underline; cursor: pointer; }
   .toast { position: fixed; right: 16px; bottom: 16px; background: var(--panel); color: var(--text); border: 1px solid var(--border); padding: 10px 14px; border-radius: 10px; z-index: 9999; box-shadow: 0 12px 30px rgba(0,0,0,0.35); }
   .badge { color: var(--muted, #97a3c2); font-size: 0.85rem; }

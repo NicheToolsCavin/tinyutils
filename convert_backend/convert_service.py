@@ -27,7 +27,16 @@ from api._lib import pandoc_runner
 from api._lib.html_utils import sanitize_html_for_pandoc
 from api._lib.manifests import build_snippets, collect_headings, media_manifest
 from api._lib.text_clean import normalise_markdown
-from api._lib.utils import ensure_within_limits, generate_job_id, job_workspace
+from api._lib.utils import (
+    ensure_within_limits,
+    generate_job_id,
+    job_workspace,
+    detect_rows_columns,
+    count_json_nodes,
+    detect_html_in_disguise,
+    protect_csv_formulas,
+    safe_parse_limited,
+)
 
 from .convert_types import (
     BatchResult,
@@ -306,7 +315,7 @@ def _extract_markdown_from_pdf(
                                 sep = " | ".join(["---"] * cols)
                                 md_rows = [f"| {header} |", f"| {sep} |"]
                                 for r in data:
-                                    row = [str(c or "").replace("|", "\|") for c in r]
+                                    row = [str(c or "").replace("|", "\\|") for c in r]
                                     md_rows.append("| " + " | ".join(row) + " |")
                                 page_blocks.append("\n" + "\n".join(md_rows) + "\n")
                             else:
@@ -393,6 +402,26 @@ def convert_one(
     normalized_targets = _normalize_targets(targets)
     pandoc_version = pandoc_runner.get_pandoc_version() or "unknown"
 
+    # Early size/meta capture for previews and logging
+    size_check = ensure_within_limits(len(input_bytes))
+    approx_bytes = size_check["approxBytes"]
+    truncated = size_check["truncated"]
+    too_big_for_preview = size_check["tooBigForPreview"]
+
+    try:
+        input_text = input_bytes.decode("utf-8", errors="replace")
+    except Exception:
+        input_text = ""
+
+    content_analysis = safe_parse_limited(input_text)
+    html_in_disguise_detected = detect_html_in_disguise(input_text)
+    if html_in_disguise_detected:
+        _LOGGER.warning("html_in_disguise_detected name=%s", name)
+        logs.append("security_warning=html_in_disguise_detected")
+
+    rows, cols = detect_rows_columns(input_text)
+    json_node_count = count_json_nodes(input_text)
+
     # Perform lightweight server-side format detection BEFORE computing cache key
     # so that cache distinguishes auto→latex upgrades properly.
     adjusted_from = from_format
@@ -436,6 +465,14 @@ def convert_one(
     cached = _cache_get(cache_key)
     if cached is not None:
         cached.logs.append("cache=hit")
+        cached.preview = cached.preview or PreviewData()
+        if cached.preview:
+            cached.preview.approxBytes = approx_bytes
+            cached.preview.truncated = truncated
+            cached.preview.tooBigForPreview = too_big_for_preview
+            cached.preview.row_count = rows
+            cached.preview.col_count = cols
+            cached.preview.jsonNodeCount = json_node_count
         return cached
     logs: List[str] = [f"targets={','.join(normalized_targets)}"]
     result_meta: Dict[str, Any] = {}
@@ -456,6 +493,12 @@ def convert_one(
             input_bytes=input_bytes,
             targets=normalized_targets,
             logs=logs,
+            approx_bytes=approx_bytes,
+            truncated=truncated,
+            too_big_for_preview=too_big_for_preview,
+            row_count=rows,
+            col_count=cols,
+            json_node_count=json_node_count,
         )
 
     start_time = time.time()
@@ -493,8 +536,15 @@ def convert_one(
                     )
                 from_format = adjusted_from
 
-            # Pre-process PDFs: layout-aware extraction with legacy fallback
             source_for_pandoc = input_path
+            # CSV/TSV: neutralize spreadsheet formulas before further handling
+            if input_path.suffix.lower() in {".csv", ".tsv"} or from_format in {"csv", "tsv"}:
+                original_content = source_for_pandoc.read_text("utf-8")
+                protected_content = protect_csv_formulas(original_content)
+                source_for_pandoc.write_text(protected_content, "utf-8")
+                logs.append("csv_formula_protection=applied")
+
+            # Pre-process PDFs: layout-aware extraction with legacy fallback
             if input_path.suffix.lower() == ".pdf" or from_format == "pdf":
                 # Prefer explicit option over env; keep env as default for safe rollout
                 env_mode = os.getenv("PDF_LAYOUT_MODE", "default") or "default"
@@ -556,11 +606,14 @@ def convert_one(
                 )
                 # Create minimal preview from HTML
                 html_text = source_for_pandoc.read_text("utf-8", errors="replace")
+                primary_format = normalized_targets[0] if normalized_targets else 'html'
                 preview = PreviewData(
                     headings=[],
                     snippets=[html_text[:500]],
                     images=[],
                     html=html_text,
+                    content=html_text[:50000] if html_text else None,
+                    format=primary_format,
                 )
                 before_text = html_text
                 cleaned_text = html_text
@@ -620,11 +673,22 @@ def convert_one(
                 except Exception as exc:
                     logs.append(f"preview_html_error={exc.__class__.__name__}")
 
+                # Determine primary format for preview
+                primary_format = normalized_targets[0] if normalized_targets else 'md'
+
                 preview = PreviewData(
                     headings=collect_headings(cleaned_text),
                     snippets=build_snippets(before_text, cleaned_text),
                     images=media_manifest(extract_dir),
                     html=preview_html,
+                    content=cleaned_text[:50000] if cleaned_text else None,  # First 50KB for client-side rendering
+                    format=primary_format,
+                    approxBytes=approx_bytes,
+                    truncated=truncated,
+                    tooBigForPreview=too_big_for_preview,
+                    row_count=rows,
+                    col_count=cols,
+                    jsonNodeCount=json_node_count,
                 )
 
             media_artifact = _build_media_artifact(extract_dir, _safe_stem(safe_name))
@@ -645,6 +709,12 @@ def convert_one(
             input_bytes=input_bytes,
             targets=normalized_targets,
             logs=logs,
+            approx_bytes=approx_bytes,
+            truncated=truncated,
+            too_big_for_preview=too_big_for_preview,
+            row_count=rows,
+            col_count=cols,
+            json_node_count=json_node_count,
         )
         _cache_store(cache_key, result)
         return result
@@ -662,6 +732,14 @@ def convert_one(
         return ConversionResult(
             name=name,
             logs=logs,
+            preview=PreviewData(
+                approxBytes=approx_bytes,
+                truncated=truncated,
+                tooBigForPreview=too_big_for_preview,
+                row_count=rows,
+                col_count=cols,
+                jsonNodeCount=json_node_count,
+            ),
             error=ConversionError(message=str(exc), kind=exc.__class__.__name__),
         )
 
@@ -826,7 +904,19 @@ def _build_target_artifacts(
     return artifacts
 
 
-def _fallback_conversion(*, name: str, input_bytes: bytes, targets: Sequence[str], logs: List[str]) -> ConversionResult:
+def _fallback_conversion(
+    *,
+    name: str,
+    input_bytes: bytes,
+    targets: Sequence[str],
+    logs: List[str],
+    approx_bytes: Optional[int] = None,
+    truncated: Optional[bool] = None,
+    too_big_for_preview: Optional[bool] = None,
+    row_count: Optional[int] = None,
+    col_count: Optional[int] = None,
+    json_node_count: Optional[int] = None,
+) -> ConversionResult:
     text = input_bytes.decode("utf-8", errors="replace")
     safe_stem = _safe_stem(_safe_name(name))
     artifacts: List[TargetArtifact] = []
@@ -846,7 +936,18 @@ def _fallback_conversion(*, name: str, input_bytes: bytes, targets: Sequence[str
                 data=data,
             )
         )
-    preview = PreviewData(headings=[], snippets=[text[:280]], images=[], html=None)
+    preview = PreviewData(
+        headings=[],
+        snippets=[text[:280]],
+        images=[],
+        html=None,
+        approxBytes=approx_bytes,
+        truncated=truncated,
+        tooBigForPreview=too_big_for_preview,
+        row_count=row_count,
+        col_count=col_count,
+        jsonNodeCount=json_node_count,
+    )
     return ConversionResult(
         name=name,
         outputs=artifacts,
