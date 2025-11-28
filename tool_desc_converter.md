@@ -1183,3 +1183,36 @@ Impact
 Documentation
 • AGENTS.md: Added task execution discipline guide with 8 core principles and 6 red flags
 • CHATGPT.md: Documented over-engineering anti-patterns (Nov 28 failure case study)
+
+### Major changes — 2025-11-29 00:05 CET (UTC+01:00) — Preview renderer hardening
+
+Added
+• CSV preview test coverage for quoted fields (commas and escaped quotes).
+• JSON preview guard that falls back to a lightweight text view for very large payloads.
+• Subresource Integrity (SRI) and `crossorigin`/`referrerpolicy` attributes for Prism CSS/JS and the autoloader plugin in the preview iframe.
+
+Modified
+• `+page.svelte`: CSV preview now uses a small RFC4180-style parser that understands quoted commas and doubled quotes instead of a naïve `split(',')`.
+• `+page.svelte`: Markdown preview label changed from “Formatted Text” to “Plain Text View” to more honestly describe the non-Markdown-rendered right-hand pane.
+• `+page.svelte`: JSON/Markdown/TeX preview snippets now load Prism via CDN with SRI and configure the autoloader plugin instead of hard-coding per-language component scripts.
+• `safe_parse_limited()` docstring (`api/_lib/utils.py`): clarified why the JSON node-count recursion limit defaults to 100.
+
+Fixed
+• **Problem:** CSV preview could mis-render rows containing quoted commas or embedded quotes, because it split on every comma without understanding CSV quoting rules.
+  - **Root cause:** The original renderer used `line.split(',')` with basic trimming, which breaks on fields like `"Smith, John"` or `"Says ""hello"""`.
+  - **Fix:** Introduced a tiny quote-aware line parser shared by the preview renderer and unit tests, so quoted commas stay inside cells and doubled quotes render as a single quote (HTML-escaped).
+  - **Evidence:** `node --test tests/format_preview_renderers.test.mjs` now includes `CSV preview renderer handles quoted commas and quotes` and passes.
+
+Human-readable summary
+
+The converter’s live preview is now a bit tougher and more honest. CSV tables understand common edge cases like names with commas and text containing escaped quotes, JSON prettifying backs off gracefully on giant blobs instead of risking UI jank, and the Prism-based syntax highlighting in the iframe is wired through CDN links with integrity checks. The Markdown preview still shows raw syntax on the left, but the right-hand side is now clearly labeled as a plain-text view rather than a full Markdown renderer.
+
+Impact
+• More accurate CSV tables when cells contain commas or quotes ✅
+• Safer, smoother JSON previews on very large inputs ✅
+• Stronger frontend supply-chain hygiene via SRI on Prism assets ✅
+• Clearer expectations for how the Markdown preview behaves ✅
+
+Testing
+• node --test tests/format_preview_renderers.test.mjs ✅
+• PYTHONPATH=. pytest tests/test_converter_enhancements.py -q ✅
