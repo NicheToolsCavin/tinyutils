@@ -124,4 +124,194 @@
 
 **Golden rule:** Use these tools **without asking**. The user installed them so you'd use them proactively. Don't wing it when you have specialized tools available!
 
+---
+
+## 🎯 DON'T BE THAT AGENT — Ship Features, Not Plans
+
+**READ THIS or you'll waste everyone's time.**
+
+### What NOT to do (Nov 28, 2024 failure case)
+
+**Task given:** "Implement format-specific preview methods (CSV→table, JSON→highlighted, MD→side-by-side)"
+
+**What the agent did:**
+- ❌ Created 6-workstream enterprise plan (226 lines, 26 tasks)
+- ❌ Built `detect_rows_columns()`, `count_json_nodes()`, `protect_csv_formulas()` utilities
+- ❌ Added "too big for preview" and "preview unavailable" UI cards
+- ❌ Added metadata fields to PreviewData (approxBytes, row_count, col_count)
+- ❌ Fixed an unrelated backslash escaping bug
+
+**What the agent DIDN'T do:**
+- ❌ CSV table renderer (0%)
+- ❌ JSON syntax highlighter (0%)
+- ❌ Markdown side-by-side viewer (0%)
+- ❌ TXT line-numbered preview (0%)
+- ❌ TeX syntax highlighting (0%)
+- ❌ Backend `content` and `format` fields in PreviewData
+- ❌ Frontend format detection and routing logic
+
+**Deliverable: 0% of core feature, 100% infrastructure nobody asked for.**
+
+---
+
+### The Golden Rules
+
+**1. SHIP THE FEATURE FIRST**
+
+Build what the user can SEE and USE, not what's "architecturally impressive."
+
+✅ **Right:** Build CSV table renderer → user sees table → done
+❌ **Wrong:** Build CSV metadata detector → plan pagination → add caps → skip renderer → nothing works
+
+**2. FOLLOW THE TASK FILE EXACTLY**
+
+If given `/tmp/chatgpt-task.md` with phases 1-7, implement phases 1-7 in order. Don't:
+- Create your own 26-task plan
+- Skip phases
+- Reorder to "do infrastructure first"
+- Add workstreams nobody asked for
+
+**3. MVP BEFORE POLISH**
+
+Order of operations:
+1. Build the thing (CSV table)
+2. Verify it works end-to-end
+3. Add error handling (malformed CSV)
+4. Add caps (max 100 rows)
+5. Add polish (truncation banners)
+
+**NOT:**
+1. Plan caps/pagination/virtualization
+2. Build detection utilities
+3. Add error cards
+4. Skip building the actual thing
+
+**4. INFRASTRUCTURE AFTER FEATURES**
+
+Users see features, not infrastructure.
+
+✅ Build CSV renderer → then add formula protection
+❌ Build formula protection → skip CSV renderer
+
+**5. ASK YOURSELF: "CAN THE USER SEE THIS WORKING?"**
+
+If the answer is "well, the infrastructure is in place" → **YOU'RE NOT DONE.**
+
+If you can't DEMO it (upload CSV → preview → see table), you didn't ship it.
+
+---
+
+### Red Flags 🚩
+
+Stop immediately if you're doing any of this:
+
+🚩 **Writing plans longer than 10 tasks for a "simple feature"**
+→ Over-engineering. Simplify now.
+
+🚩 **Building utilities/helpers before the actual feature**
+→ Wrong order. Flip it.
+
+🚩 **Adding metadata fields but no rendering logic**
+→ Infrastructure without features. Stop.
+
+🚩 **Talking about pagination/lazy-loading/a11y before basic rendering exists**
+→ Premature optimization. Build the basics first.
+
+🚩 **Creating "Workstream 1-6" for a 3-day task**
+→ Scope explosion. Get back to basics.
+
+🚩 **Implementing Phase 2 before Phase 1 works**
+→ Out of order. Fix it.
+
+---
+
+### What "DONE" Actually Looks Like
+
+✅ User uploads CSV → clicks Preview → sees HTML table
+✅ User uploads JSON → clicks Preview → sees syntax-highlighted formatted JSON
+✅ User uploads Markdown → clicks Preview → sees side-by-side (source + rendered)
+✅ All 5 formats work end-to-end
+✅ Backend sends `preview.content` and `preview.format`
+✅ Frontend detects format and routes to appropriate renderer
+
+**If you can DEMO this flow, you're done. If you can't, keep working.**
+
+---
+
+### Recovery Protocol
+
+If you catch yourself over-engineering:
+
+1. **STOP**
+2. Re-read the original task
+3. Identify the ONE core feature
+4. Delete the enterprise plan
+5. Implement ONLY that feature
+6. Test it end-to-end
+7. Ship it
+
+**Then ask:** "Should I add polish or move on?"
+
+Don't add polish to a feature that doesn't exist.
+
+---
+
+### Specific Example: What You Should Have Done
+
+**Task:** "Implement format-specific preview methods"
+
+**Phase 1: Backend** (30 min)
+```python
+# Add to PreviewData:
+content: Optional[str] = None
+format: Optional[str] = None
+
+# In convert_service.py, detect output format and populate:
+preview.content = cleaned_text[:50000]  # First 50KB
+preview.format = target  # 'csv', 'json', 'markdown', etc.
+```
+
+**Phase 2: Frontend routing** (15 min)
+```javascript
+const format = data.preview.format || 'html';
+switch(format) {
+  case 'csv': renderCSVPreview(data.preview.content); break;
+  case 'json': renderJSONPreview(data.preview.content); break;
+  case 'markdown': renderMarkdownPreview(data.preview.content); break;
+  case 'txt': renderTextPreview(data.preview.content); break;
+  case 'tex': renderTeXPreview(data.preview.content); break;
+  default: renderHTMLPreview(data.preview.html); break;
+}
+```
+
+**Phase 3-7: Renderers** (2-3 hours)
+- CSV: Parse lines, split by commas, render `<table>` (first 100 rows)
+- JSON: `JSON.parse()` + syntax highlighting via regex
+- Markdown: Split screen (source left, rendered right via marked.js)
+- TXT: Add line numbers, wrap in `<pre>`
+- TeX: Syntax highlight commands/braces/comments
+
+**Total time: 3-4 hours for working MVP**
+
+**Instead, you spent time on:**
+- Utility functions (detect_rows_columns, count_json_nodes)
+- Security hardening (protect_csv_formulas, detect_html_in_disguise)
+- UI cards (too big, unavailable)
+- Enterprise planning (6 workstreams, pagination, accessibility)
+- **Result: 0 working preview renderers**
+
+---
+
+### TL;DR
+
+- ✅ Ship features users can see/use
+- ✅ Follow task files phase-by-phase
+- ✅ MVP before polish
+- ✅ Infrastructure after features
+- ❌ Don't over-plan
+- ❌ Don't skip the core feature
+- ❌ Don't build utilities instead of features
+
+**If you can't demo it, you didn't ship it.**
+
 Keep changes tight and well-documented. Have fun! 🚀
