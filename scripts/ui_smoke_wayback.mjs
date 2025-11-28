@@ -41,26 +41,25 @@ async function runTinyReactive() {
 
   await cmd({ id: 'open', cmd: 'open', args: { url: toolUrl, waitUntil: 'networkidle' }, target: { contextId: 'default', pageId: 'active' } });
 
-  await maybeClick('#tu-consent-accept');
-
-  await cmd({ id: 'ready', cmd: 'waitFor', args: { selector: '#run', state: 'visible', timeout: 15000 } });
+  // Current UI (Nov 2025): no consent modal; primary button has text "Run"
+  await cmd({ id: 'ready', cmd: 'waitFor', args: { selector: 'text=Run', state: 'visible', timeout: 15000 } });
 
   const demoText = 'https://example.com/old\nhttps://example.com/missing\nhttps://example.com/2011/post';
-  await cmd({ id: 'focus', cmd: 'click', args: { selector: '#list' } });
-  await cmd({ id: 'type', cmd: 'type', args: { selector: '#list', text: demoText, delayMs: 20 } });
+  await cmd({ id: 'focus', cmd: 'click', args: { selector: '#urlsList' } });
+  await cmd({ id: 'type', cmd: 'type', args: { selector: '#urlsList', text: demoText, delayMs: 20 } });
 
-  await cmd({ id: 'run', cmd: 'click', args: { selector: '#run' } });
+  await cmd({ id: 'run', cmd: 'click', args: { selector: 'text=Run' } });
 
   await cmd({
     id: 'wait-result',
     cmd: 'waitForFunction',
     args: {
       js: `() => {
-        const tbody = document.querySelector('#tbl tbody');
-        const rows = tbody ? tbody.querySelectorAll('tr').length : 0;
-        const stat = document.querySelector('#status');
-        const hasCounts = stat && /checked|archived|no snapshot|Error/i.test(stat.textContent || '');
-        return rows > 0 || hasCounts;
+        const tbody = document.querySelector('#resultsTable tbody');
+        if (!tbody) return false;
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const meaningful = rows.some((r) => !r.classList.contains('empty'));
+        return meaningful;
       }`,
       timeout: 120000
     }

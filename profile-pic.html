@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TinyUtils Profile Pic</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      background: #e8ded0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .profile-container {
+      display: grid;
+      gap: 40px;
+      max-width: 1200px;
+    }
+
+    .profile-pic {
+      width: 400px;
+      height: 400px;
+      background: linear-gradient(135deg, #4a90e2 0%, #3b82f6 100%);
+      border-radius: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 60px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .profile-pic::before {
+      content: '';
+      position: absolute;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+      top: -50%;
+      left: -50%;
+      animation: pulse 8s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1) rotate(0deg);
+      }
+      50% {
+        transform: scale(1.1) rotate(180deg);
+      }
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+
+    .logo {
+      font-size: 72px;
+      font-weight: 800;
+      color: white;
+      letter-spacing: -2px;
+      line-height: 1;
+      margin-bottom: 20px;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .tagline {
+      font-size: 20px;
+      color: rgba(255, 255, 255, 0.95);
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+
+    /* Circular version */
+    .profile-pic.circular {
+      border-radius: 50%;
+      width: 400px;
+      height: 400px;
+    }
+
+    /* Square compact version */
+    .profile-pic.square {
+      width: 500px;
+      height: 500px;
+      padding: 80px;
+    }
+
+    .profile-pic.square .logo {
+      font-size: 84px;
+    }
+
+    .profile-pic.square .tagline {
+      font-size: 24px;
+    }
+
+    .label {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 14px;
+      color: #5d4a35;
+      font-weight: 600;
+    }
+
+    h1 {
+      font-size: 32px;
+      color: #2d1f0f;
+      margin-bottom: 40px;
+      text-align: center;
+      grid-column: 1 / -1;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 40px;
+    }
+  </style>
+</head>
+<body>
+  <div class="profile-container">
+    <h1>TinyUtils Profile Pics - Screenshot Any Below!</h1>
+
+    <div class="grid">
+      <!-- Rounded Square -->
+      <div>
+        <div class="profile-pic">
+          <div class="content">
+            <div class="logo">TinyUtils<br>.net</div>
+            <div class="tagline">Useful web tools</div>
+          </div>
+        </div>
+        <div class="label">Rounded Square (400×400)</div>
+      </div>
+
+      <!-- Circular -->
+      <div>
+        <div class="profile-pic circular">
+          <div class="content">
+            <div class="logo">TinyUtils<br>.net</div>
+            <div class="tagline">Useful web tools</div>
+          </div>
+        </div>
+        <div class="label">Circular (400×400)</div>
+      </div>
+
+      <!-- Large Square -->
+      <div>
+        <div class="profile-pic square">
+          <div class="content">
+            <div class="logo">TinyUtils<br>.net</div>
+            <div class="tagline">Useful web tools</div>
+          </div>
+        </div>
+        <div class="label">Large Square (500×500)</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
