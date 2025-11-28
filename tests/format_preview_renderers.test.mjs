@@ -26,46 +26,70 @@ function escapeHtml(value) {
 
 // Renderer implementations (simplified versions for testing)
 
-function parseCsvLine(line) {
-  const cells = [];
+function parseCsvContent(content, maxRows = 100) {
+  const rows = [];
+  let row = [];
   let current = '';
   let inQuotes = false;
 
-  for (let i = 0; i < line.length; i += 1) {
-    const ch = line[i];
+  const pushCell = () => {
+    const trimmed = current.trim();
+    let value = trimmed;
+    if (trimmed.length >= 2 && trimmed.startsWith('"') && trimmed.endsWith('"')) {
+      value = trimmed.slice(1, -1).replace(/""/g, '"');
+    }
+    row.push(value);
+    current = '';
+  };
+
+  const pushRow = () => {
+    if (row.length === 1 && row[0] === '') {
+      row = [];
+      return;
+    }
+    rows.push(row);
+    row = [];
+  };
+
+  for (let i = 0; i < content.length; i += 1) {
+    const ch = content[i];
     if (ch === '"') {
-      if (inQuotes && line[i + 1] === '"') {
+      if (inQuotes && content[i + 1] === '"') {
         current += '"';
         i += 1;
       } else {
         inQuotes = !inQuotes;
       }
     } else if (ch === ',' && !inQuotes) {
-      cells.push(current);
-      current = '';
+      pushCell();
+    } else if ((ch === '\n' || ch === '\r') && !inQuotes) {
+      pushCell();
+      pushRow();
+      if (rows.length >= maxRows) break;
+      if (ch === '\r' && content[i + 1] === '\n') {
+        i += 1;
+      }
     } else {
       current += ch;
     }
   }
-  cells.push(current);
 
-  return cells.map((cell) => {
-    const trimmed = cell.trim();
-    if (trimmed.length >= 2 && trimmed.startsWith('"') && trimmed.endsWith('"')) {
-      return trimmed.slice(1, -1);
-    }
-    return trimmed;
-  });
+  if (current.length || row.length) {
+    pushCell();
+    pushRow();
+  }
+
+  return rows.slice(0, maxRows);
 }
 
 function renderCSVPreview(content) {
   if (!content) return '';
-  const lines = content.split('\n').filter(l => l.trim()).slice(0, 100);
+  const rows = parseCsvContent(content, 100);
+  if (!rows.length) return '';
   let html = '<style>table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:8px;text-align:left}th{background:#f4f4f4}</style><table>';
-  lines.forEach((line, idx) => {
-    const cells = parseCsvLine(line);
+  rows.forEach((cells, idx) => {
     html += idx === 0 ? '<thead><tr>' : '<tr>';
-    cells.forEach(cell => {
+    cells.forEach((cell) => {
       html += idx === 0 ? `<th>${escapeHtml(cell)}</th>` : `<td>${escapeHtml(cell)}</td>`;
     });
     html += idx === 0 ? '</tr></thead><tbody>' : '</tr>';
@@ -126,6 +150,19 @@ test('CSV preview renderer handles quoted commas and quotes', () => {
 
   // Escaped quotes inside the field should render as a single quote character (HTML-escaped)
   assert.ok(result.includes('Says &quot;hello&quot; in meetings'), 'Should unescape doubled quotes inside a quoted field and escape them for HTML');
+});
+
+test('CSV preview renderer handles newlines inside quoted fields', () => {
+  const csv = 'Name,Note\n"John","Line1\\nLine2"';
+  const result = renderCSVPreview(csv);
+
+  // Both lines should stay within the same cell, not split into two rows.
+  assert.ok(result.includes('Line1'), 'Should contain first line inside quoted cell');
+  assert.ok(result.includes('Line2'), 'Should contain second line inside quoted cell');
+  // We still only expect one data row in addition to the header.
+  const rowMatches = result.match(/<tr>/g) || [];
+  // One header row + one data row = 2 <tr> tags
+  assert.equal(rowMatches.length, 2, 'Should render exactly one data row for multi-line quoted cell');
 });
 
 test('JSON preview renderer', () => {

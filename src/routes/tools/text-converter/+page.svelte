@@ -97,51 +97,83 @@
 
     // Format-specific preview renderers
 
-    function parseCsvLine(line) {
-      // Minimal RFC 4180-style CSV parser for a *single* line.
-      // NOTE: we intentionally treat each line independently, so
-      // newlines inside quoted fields are not supported in the
-      // preview table (rare in practice and preview-only).
-      const cells = [];
+    function parseCsvContent(content, maxRows = 100) {
+      // Minimal RFC 4180-style CSV parser for the *whole* content.
+      // Supports:
+      //   - quoted fields
+      //   - commas inside quotes
+      //   - doubled quotes inside quoted fields ("")
+      //   - CRLF or LF line endings
+      const rows = [];
+      let row = [];
       let current = '';
       let inQuotes = false;
 
-      for (let i = 0; i < line.length; i += 1) {
-        const ch = line[i];
+      const pushCell = () => {
+        const trimmed = current.trim();
+        let value = trimmed;
+        if (trimmed.length >= 2 && trimmed.startsWith('"') && trimmed.endsWith('"')) {
+          // Strip surrounding quotes and collapse doubled quotes.
+          value = trimmed.slice(1, -1).replace(/""/g, '"');
+        }
+        row.push(value);
+        current = '';
+      };
+
+      const pushRow = () => {
+        // Skip a completely empty row
+        if (row.length === 1 && row[0] === '') {
+          row = [];
+          return;
+        }
+        rows.push(row);
+        row = [];
+      };
+
+      for (let i = 0; i < content.length; i += 1) {
+        const ch = content[i];
         if (ch === '"') {
-          // Handle escaped quotes inside a quoted field ("")
-          if (inQuotes && line[i + 1] === '"') {
+          if (inQuotes && content[i + 1] === '"') {
             current += '"';
             i += 1;
           } else {
             inQuotes = !inQuotes;
           }
         } else if (ch === ',' && !inQuotes) {
-          cells.push(current);
-          current = '';
+          pushCell();
+        } else if ((ch === '\n' || ch === '\r') && !inQuotes) {
+          pushCell();
+          pushRow();
+          if (rows.length >= maxRows) break;
+          // Consume paired CRLF
+          if (ch === '\r' && content[i + 1] === '\n') {
+            i += 1;
+          }
         } else {
           current += ch;
         }
       }
-      cells.push(current);
 
-      return cells.map((cell) => {
-        const trimmed = cell.trim();
-        if (trimmed.length >= 2 && trimmed.startsWith('"') && trimmed.endsWith('"')) {
-          return trimmed.slice(1, -1);
-        }
-        return trimmed;
-      });
+      // Flush last cell/row
+      if (current.length || row.length) {
+        pushCell();
+        pushRow();
+      }
+
+      return rows.slice(0, maxRows);
     }
 
     function renderCSVPreview(content) {
       if (!content || !previewIframe) return;
-      const lines = content.split('\n').filter(l => l.trim()).slice(0, 100);
+      const rows = parseCsvContent(content, 100);
+      if (!rows.length) {
+        previewIframe.srcdoc = '';
+        return;
+      }
       let html = '<style>table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:8px;text-align:left}th{background:#f4f4f4}</style><table>';
-      lines.forEach((line, idx) => {
-        const cells = parseCsvLine(line);
+      rows.forEach((cells, idx) => {
         html += idx === 0 ? '<thead><tr>' : '<tr>';
-        cells.forEach(cell => {
+        cells.forEach((cell) => {
           html += idx === 0 ? `<th>${escapeHtml(cell)}</th>` : `<td>${escapeHtml(cell)}</td>`;
         });
         html += idx === 0 ? '</tr></thead><tbody>' : '</tr>';
