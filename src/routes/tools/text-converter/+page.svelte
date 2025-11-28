@@ -125,7 +125,11 @@
 
     function renderMarkdownPreview(content) {
       if (!content || !previewIframe) return;
-      const html = `<style>.md-container{display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding:1rem}.md-src,.md-rendered{border:1px solid #ddd;padding:1rem;overflow:auto;max-height:600px}.md-src{background:#f8f8f8;font-family:monospace;white-space:pre-wrap}</style><div class="md-container"><div><b>Source</b><div class="md-src">${escapeHtml(content)}</div></div><div><b>Rendered</b><div class="md-rendered">${content}</div></div></div>`;
+      // Simple side-by-side view: both sides show escaped content
+      // Left side shows raw markdown syntax, right side shows it formatted as paragraphs
+      const escaped = escapeHtml(content);
+      const formatted = escaped.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
+      const html = `<style>.md-container{display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding:1rem}.md-src,.md-formatted{border:1px solid #ddd;padding:1rem;overflow:auto;max-height:600px}.md-src{background:#f8f8f8;font-family:monospace;white-space:pre-wrap}h1,h2,h3,h4,h5,h6{margin:0.5rem 0}code{background:#f0f0f0;padding:2px 4px;border-radius:3px}</style><div class="md-container"><div><b>Markdown Source</b><div class="md-src">${escaped}</div></div><div><b>Formatted Text</b><div class="md-formatted"><p>${formatted}</p></div></div></div>`;
       previewIframe.srcdoc = html;
     }
 

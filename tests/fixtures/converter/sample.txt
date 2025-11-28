@@ -1,0 +1,48 @@
+TinyUtils Converter - Plain Text Preview Test
+
+This is a plain text file to test the line-numbered preview renderer.
+
+Section 1: Introduction
+========================
+
+Plain text files are the simplest format for storing data. They contain only
+readable characters without any formatting markup or binary data.
+
+Section 2: Features
+===================
+
+Key features of plain text:
+- Universal compatibility
+- Human-readable
+- Easy to version control
+- Lightweight and fast
+- No proprietary software needed
+
+Section 3: Use Cases
+====================
+
+Common use cases include:
+1. Configuration files (.conf, .ini, .env)
+2. Log files
+3. Documentation (README, LICENSE)
+4. Source code comments
+5. Data interchange (before CSV/JSON became popular)
+
+Section 4: Example Content
+===========================
+
+Here's a sample log entry format:
+
+[2025-11-28 21:15:00] INFO: Application started
+[2025-11-28 21:15:01] DEBUG: Loading configuration
+[2025-11-28 21:15:02] INFO: Database connected
+[2025-11-28 21:15:03] WARN: Cache miss for key 'user_123'
+[2025-11-28 21:15:04] ERROR: Failed to fetch remote resource
+
+Section 5: Conclusion
+======================
+
+Plain text remains relevant today for many applications where simplicity
+and universality are more important than rich formatting.
+
+End of test file.
