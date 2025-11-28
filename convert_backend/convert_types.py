@@ -75,6 +75,14 @@ class PreviewData:
     snippets: List[dict] = field(default_factory=list)
     images: List[dict] = field(default_factory=list)
     html: Optional[str] = None
+    content: Optional[str] = None
+    format: Optional[str] = None
+    approxBytes: Optional[int] = None
+    row_count: Optional[int] = None
+    col_count: Optional[int] = None
+    jsonNodeCount: Optional[int] = None
+    truncated: Optional[bool] = None
+    tooBigForPreview: Optional[bool] = None
 
 
 @dataclass(slots=True)
