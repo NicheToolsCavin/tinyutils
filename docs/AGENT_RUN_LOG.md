@@ -862,3 +862,16 @@
 - **Evidence:** NONE
 - **Follow-ups:**
 
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-11-29 00:06 CET - Manual - converter preview review fixes
+- **Mode:** manual
+- **Branch:** `code-gpt-5-converter-review-fixes`
+- **Summary:**
+  - Addressed PR #54 review feedback for converter preview: hardened CSV table renderer, added JSON size guard, clarified Markdown preview labeling, and documented recursion limits.
+  - Front-end: CSV preview now uses a quote-aware parser for quoted commas/quotes, JSON preview falls back to text for very large payloads, Markdown pane label now reads 'Plain Text View', and Prism assets load via CDN with SRI + autoloader.
+  - Back-end/docs: documented safe_parse_limited max_recursion rationale and appended a preview-hardening entry to tool_desc_converter.md; Node and Python converter test suites both pass.
+- **Evidence:** artifacts/converter-preview-review-fixes/20251129/
+- **Follow-ups:**
+  - Consider upgrading Prism to 1.30+ in a dedicated dependency-health pass and wiring preview smokes to assert CSV quoted-field behavior end-to-end.
+
