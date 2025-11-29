@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte';
+  import { parseCsvContent, CSV_MAX_ROWS } from '$lib/utils/csvParser.js';
 
   const DEMO_SNIPPET = [
     '# TinyUtils Demo Document',
@@ -43,6 +44,7 @@
     const previewIframe = document.getElementById('previewIframe');
     const previewUnavailableCard = document.getElementById('previewUnavailableCard');
     const previewTooBigCard = document.getElementById('previewTooBigCard');
+    const previewJsonFallbackNotice = document.getElementById('previewJsonFallbackNotice');
     const convertBtn = document.getElementById('convertBtn');
     const clearBtn = document.getElementById('clearBtn');
     const demoBtn = document.getElementById('demoBtn');
@@ -97,88 +99,27 @@
 
     // Format-specific preview renderers
 
-    function parseCsvContent(content, maxRows = 100) {
-      // Minimal RFC 4180-style CSV parser for the *whole* content.
-      // Supports:
-      //   - quoted fields
-      //   - commas inside quotes
-      //   - doubled quotes inside quoted fields ("")
-      //   - CRLF or LF line endings
-      const rows = [];
-      let row = [];
-      let current = '';
-      let inQuotes = false;
-
-      const pushCell = () => {
-        const trimmed = current.trim();
-        let value = trimmed;
-        if (trimmed.length >= 2 && trimmed.startsWith('"') && trimmed.endsWith('"')) {
-          // Strip surrounding quotes and collapse doubled quotes.
-          value = trimmed.slice(1, -1).replace(/""/g, '"');
-        }
-        row.push(value);
-        current = '';
-      };
-
-      const pushRow = () => {
-        // Skip a completely empty row
-        if (row.length === 1 && row[0] === '') {
-          row = [];
-          return;
-        }
-        rows.push(row);
-        row = [];
-      };
-
-      for (let i = 0; i < content.length; i += 1) {
-        const ch = content[i];
-        if (ch === '"') {
-          if (inQuotes && content[i + 1] === '"') {
-            current += '"';
-            i += 1;
-          } else {
-            inQuotes = !inQuotes;
-          }
-        } else if (ch === ',' && !inQuotes) {
-          pushCell();
-        } else if ((ch === '\n' || ch === '\r') && !inQuotes) {
-          pushCell();
-          pushRow();
-          if (rows.length >= maxRows) break;
-          // Consume paired CRLF
-          if (ch === '\r' && content[i + 1] === '\n') {
-            i += 1;
-          }
-        } else {
-          current += ch;
-        }
-      }
-
-      // Flush last cell/row
-      if (current.length || row.length) {
-        pushCell();
-        pushRow();
-      }
-
-      return rows.slice(0, maxRows);
-    }
-
     function renderCSVPreview(content) {
       if (!content || !previewIframe) return;
-      const rows = parseCsvContent(content, 100);
+      if (previewJsonFallbackNotice) previewJsonFallbackNotice.style.display = 'none';
+      const rows = parseCsvContent(content, CSV_MAX_ROWS);
       if (!rows.length) {
         previewIframe.srcdoc = '';
         return;
       }
-      let html = '<style>table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:8px;text-align:left}th{background:#f4f4f4}</style><table>';
+      const parts = [
+        '<style>table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:8px;text-align:left}th{background:#f4f4f4}</style>',
+        '<div data-testid="converter-csv-preview"><table data-testid="converter-csv-preview-table">'
+      ];
       rows.forEach((cells, idx) => {
-        html += idx === 0 ? '<thead><tr>' : '<tr>';
+        parts.push(idx === 0 ? '<thead><tr>' : '<tr>');
         cells.forEach((cell) => {
-          html += idx === 0 ? `<th>${escapeHtml(cell)}</th>` : `<td>${escapeHtml(cell)}</td>`;
+          parts.push(idx === 0 ? `<th>${escapeHtml(cell)}</th>` : `<td>${escapeHtml(cell)}</td>`);
         });
-        html += idx === 0 ? '</tr></thead><tbody>' : '</tr>';
+        parts.push(idx === 0 ? '</tr></thead><tbody>' : '</tr>');
       });
-      html += '</tbody></table>';
+      parts.push('</tbody></table></div>');
+      const html = parts.join('');
       previewIframe.srcdoc = html;
     }
 
@@ -188,38 +129,42 @@
       if (content.length > MAX_JSON_PRETTY_CHARS) {
         // For very large JSON, fall back to the lightweight text preview
         // instead of pretty-printing on the main thread.
-        renderTextPreview(content);
+        if (previewJsonFallbackNotice) previewJsonFallbackNotice.style.display = '';
+        renderTextPreview(content, { isJsonFallback: true });
         return;
       }
       try {
         const formatted = JSON.stringify(JSON.parse(content), null, 2);
         const html = `
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha512-vswe+cgvic/XBoF1OcM/TeJ2FW0OofqAVdCZiEYkd6dwGXthvkSFWOoGGJgS2CW70VK5dQM5Oh+7ne47s74VTg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-SkmBfuA2hqjzEVpmnMt/LINrjop3GKWqsuLSSB3e7iBmYK7JuWw4ldmmxwD9mdm2IRTTi0OxSAfEGvgEi0i2Kw==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/themes/prism-tomorrow.min.css" integrity="sha512-vswe+cgvic/XBoF1OcM/TeJ2FW0OofqAVdCZiEYkd6dwGXthvkSFWOoGGJgS2CW70VK5dQM5Oh+7ne47s74VTg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/prism.min.js" integrity="sha512-HiD3V4nv8fcjtouznjT9TqDNDm1EXngV331YGbfVGeKUoH+OLkRTCMzA34ecjlgSQZpdHZupdSrqHY+Hz3l6uQ==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-SkmBfuA2hqjzEVpmnMt/LINrjop3GKWqsuLSSB3e7iBmYK7JuWw4ldmmxwD9mdm2IRTTi0OxSAfEGvgEi0i2Kw==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
 <style>pre{margin:0;border-radius:0}body{margin:0;padding:1rem;background:#1e1e1e}</style>
 <pre><code class="language-json">${escapeHtml(formatted)}</code></pre>
 <script>
 if (window.Prism && Prism.plugins && Prism.plugins.autoloader) {
-  Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/';
+  Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/components/';
 }
 Prism.highlightAll();
 <\/script>`;
         previewIframe.srcdoc = html;
+        if (previewJsonFallbackNotice) previewJsonFallbackNotice.style.display = 'none';
       } catch (e) {
-        renderTextPreview(content);
+        if (previewJsonFallbackNotice) previewJsonFallbackNotice.style.display = '';
+        renderTextPreview(content, { isJsonFallback: true });
       }
     }
 
     function renderMarkdownPreview(content) {
       if (!content || !previewIframe) return;
+      if (previewJsonFallbackNotice) previewJsonFallbackNotice.style.display = 'none';
       // Simple side-by-side view: left shows syntax-highlighted markdown, right shows formatted text
       const escaped = escapeHtml(content);
       const formatted = escaped.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
       const html = `
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-SkmBfuA2hqjzEVpmnMt/LINrjop3GKWqsuLSSB3e7iBmYK7JuWw4ldmmxwD9mdm2IRTTi0OxSAfEGvgEi0i2Kw==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/prism.min.js" integrity="sha512-HiD3V4nv8fcjtouznjT9TqDNDm1EXngV331YGbfVGeKUoH+OLkRTCMzA34ecjlgSQZpdHZupdSrqHY+Hz3l6uQ==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-SkmBfuA2hqjzEVpmnMt/LINrjop3GKWqsuLSSB3e7iBmYK7JuWw4ldmmxwD9mdm2IRTTi0OxSAfEGvgEi0i2Kw==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
 <style>
 .md-container{display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding:1rem}
 .md-src,.md-formatted{border:1px solid #ddd;padding:1rem;overflow:auto;max-height:600px}
@@ -235,32 +180,38 @@ code{background:#f0f0f0;padding:2px 4px;border-radius:3px}
 </div>
 <script>
 if (window.Prism && Prism.plugins && Prism.plugins.autoloader) {
-  Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/';
+  Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/components/';
 }
 Prism.highlightAll();
 <\/script>`;
       previewIframe.srcdoc = html;
     }
 
-    function renderTextPreview(content) {
+    function renderTextPreview(content, { isJsonFallback = false } = {}) {
       if (!content || !previewIframe) return;
+      if (previewJsonFallbackNotice && !isJsonFallback) {
+        previewJsonFallbackNotice.style.display = 'none';
+      }
       const lines = content.split('\n');
       const numbered = lines.map((l, i) => `${String(i + 1).padStart(4, ' ')} | ${escapeHtml(l)}`).join('\n');
-      const html = `<style>pre{background:#f8f8f8;padding:1rem;font-family:monospace;overflow:auto}</style><pre>${numbered}</pre>`;
+      const html = `<style>pre{background:#f8f8f8;padding:1rem;font-family:monospace;overflow:auto}</style><pre${
+        isJsonFallback ? ' data-testid="converter-json-fallback-body"' : ''
+      }>${numbered}</pre>`;
       previewIframe.srcdoc = html;
     }
 
     function renderTeXPreview(content) {
       if (!content || !previewIframe) return;
+      if (previewJsonFallbackNotice) previewJsonFallbackNotice.style.display = 'none';
       const html = `
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha512-vswe+cgvic/XBoF1OcM/TeJ2FW0OofqAVdCZiEYkd6dwGXthvkSFWOoGGJgS2CW70VK5dQM5Oh+7ne47s74VTg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-SkmBfuA2hqjzEVpmnMt/LINrjop3GKWqsuLSSB3e7iBmYK7JuWw4ldmmxwD9mdm2IRTTi0OxSAfEGvgEi0i2Kw==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/themes/prism-tomorrow.min.css" integrity="sha512-vswe+cgvic/XBoF1OcM/TeJ2FW0OofqAVdCZiEYkd6dwGXthvkSFWOoGGJgS2CW70VK5dQM5Oh+7ne47s74VTg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/prism.min.js" integrity="sha512-HiD3V4nv8fcjtouznjT9TqDNDm1EXngV331YGbfVGeKUoH+OLkRTCMzA34ecjlgSQZpdHZupdSrqHY+Hz3l6uQ==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-SkmBfuA2hqjzEVpmnMt/LINrjop3GKWqsuLSSB3e7iBmYK7JuWw4ldmmxwD9mdm2IRTTi0OxSAfEGvgEi0i2Kw==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
 <style>pre{margin:0;border-radius:0}body{margin:0;padding:1rem;background:#1e1e1e}</style>
 <pre><code class="language-latex">${escapeHtml(content)}</code></pre>
 <script>
 if (window.Prism && Prism.plugins && Prism.plugins.autoloader) {
-  Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/';
+  Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/components/';
 }
 Prism.highlightAll();
 <\/script>`;
@@ -623,14 +574,15 @@ Prism.highlightAll();
           if (previewUnavailableCard) previewUnavailableCard.style.display = 'none';
           if (previewTooBigCard) previewTooBigCard.style.display = 'none';
 
-          const previewFlags = data.preview || {};
-          const meta = data.meta || {};
-          const isTooBig = previewFlags.tooBigForPreview || meta.fileTooLargeForPreview;
+        const previewFlags = data.preview || {};
+        const meta = data.meta || {};
+        const isTooBig = previewFlags.tooBigForPreview || meta.fileTooLargeForPreview;
 
-          if (isTooBig) {
-            if (previewTooBigCard) previewTooBigCard.style.display = '';
-            if (previewIframe) previewIframe.srcdoc = '';
-          } else {
+        if (isTooBig) {
+          if (previewTooBigCard) previewTooBigCard.style.display = '';
+          if (previewJsonFallbackNotice) previewJsonFallbackNotice.style.display = 'none';
+          if (previewIframe) previewIframe.srcdoc = '';
+        } else {
             // Format-specific preview routing
             const format = (previewFlags.format || 'html').toLowerCase();
             const content = previewFlags.content;
@@ -667,9 +619,11 @@ Prism.highlightAll();
               }
             } else if (html && previewIframe) {
               // Use HTML preview for HTML format or when no content available
+              if (previewJsonFallbackNotice) previewJsonFallbackNotice.style.display = 'none';
               previewIframe.srcdoc = html;
             } else {
               // No preview available
+              if (previewJsonFallbackNotice) previewJsonFallbackNotice.style.display = 'none';
               if (previewUnavailableCard) previewUnavailableCard.style.display = '';
               if (previewIframe) previewIframe.srcdoc = '';
             }
@@ -921,14 +875,23 @@ Prism.highlightAll();
             Enter or paste Markdown, HTML, plain text, or other document content.
           </span>
         </label>
-        <textarea id="textInput" placeholder="Enter your document content here..."></textarea>
+        <textarea
+          id="textInput"
+          data-testid="converter-text-input"
+          placeholder="Enter your document content here..."
+        ></textarea>
 
         <label for="fileInput">Or upload a file (.md, .html, .docx, .pdf, .rtf, .odt, etc.)
           <span class="help" style="color: var(--muted, #97a3c2); font-size: 0.85rem; display: block; margin-top: 0.2rem;">
             Supports many formats including Markdown, Word, PDF, HTML, RTF, OpenDocument, and LaTeX.
           </span>
         </label>
-        <input type="file" id="fileInput" accept=".md,.markdown,.txt,.html,.htm,.docx,.odt,.rtf,.pdf,.tex,.epub,.zip" />
+        <input
+          type="file"
+          id="fileInput"
+          data-testid="converter-file-input"
+          accept=".md,.markdown,.txt,.html,.htm,.docx,.odt,.rtf,.pdf,.tex,.epub,.zip"
+        />
       </div>
 
       <div class="format-options" aria-label="Format options">
@@ -1016,8 +979,22 @@ Prism.highlightAll();
       </div>
 
       <div class="actions-row">
-        <button id="previewBtn" class="secondary" type="button">Preview</button>
-        <button id="convertBtn" class="primary" type="button">Convert</button>
+        <button
+          id="previewBtn"
+          class="secondary"
+          type="button"
+          data-testid="converter-preview-button"
+        >
+          Preview
+        </button>
+        <button
+          id="convertBtn"
+          class="primary"
+          type="button"
+          data-testid="converter-convert-button"
+        >
+          Convert
+        </button>
         <button id="clearBtn" class="secondary" type="button">Clear</button>
         <button id="demoBtn" class="secondary" type="button" title="Load a small example document to see how conversion works.">Try example</button>
         <span class="badge">Shortcut: <kbd>Ctrl/Cmd + Enter</kbd> to convert</span>
@@ -1039,9 +1016,28 @@ Prism.highlightAll();
           <p class="preview-card-title">📦 Too large for preview</p>
           <p class="preview-card-subtitle">This file exceeds the live preview cap but will still convert normally.</p>
         </div>
-        <div id="previewHtmlBox" class="preview-html">
-          <div class="preview-html__header">Preview (first 2 pages)</div>
-          <iframe id="previewIframe" sandbox="allow-same-origin allow-popups allow-forms" title="Formatted preview"></iframe>
+        <div
+          id="previewJsonFallbackNotice"
+          class="preview-card"
+          style="display:none;"
+          data-testid="converter-json-fallback-notice"
+        >
+          <p class="preview-card-title">📄 JSON preview fallback</p>
+          <p class="preview-card-subtitle">
+            Large JSON detected; showing plain text preview instead of formatted highlight.
+          </p>
+        </div>
+        <div id="previewHtmlBox" class="preview-html" data-testid="converter-preview-container">
+          <div class="preview-html__header" data-testid="converter-preview-header">
+            Preview (first 2 pages)
+          </div>
+          <iframe
+            id="previewIframe"
+            sandbox="allow-scripts"
+            title="Document preview"
+            aria-label="Document preview output"
+            data-testid="converter-preview-iframe"
+          ></iframe>
         </div>
       </div>
       <div class="tableWrap">

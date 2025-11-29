@@ -62,22 +62,22 @@ async function main() {
     await page.goto(baseUrl, { waitUntil: 'networkidle0', timeout: 60000 });
 
     // Type a small Markdown sample.
-    await page.focus('#textInput');
+    await page.focus('[data-testid="converter-text-input"]');
     await page.keyboard.type('# Preview smoke\n\nHello from TinyUtils preview!');
 
     // Click Preview.
-    await page.click('#previewBtn');
+    await page.click('[data-testid="converter-preview-button"]');
 
     // Wait for the iframe to receive non-empty srcdoc.
     await page.waitForFunction(
       () => {
-        const iframe = document.querySelector('#previewIframe');
+        const iframe = document.querySelector('[data-testid="converter-preview-iframe"]');
         return iframe && typeof iframe.srcdoc === 'string' && iframe.srcdoc.trim().length > 0;
       },
       { timeout: 30000 },
     );
 
-    const iframeHtml = await page.$eval('#previewIframe', (el) => el.srcdoc || '');
+    const iframeHtml = await page.$eval('[data-testid="converter-preview-iframe"]', (el) => el.srcdoc || '');
 
     result.ok = iframeHtml.trim().length > 0;
     result.iframeSummary = {
@@ -118,4 +118,3 @@ main().catch((err) => {
   console.error('ui_smoke_converter_preview.mjs crashed:', err);
   process.exit(1);
 });
-
