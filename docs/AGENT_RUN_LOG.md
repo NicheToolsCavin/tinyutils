@@ -875,3 +875,25 @@
 - **Follow-ups:**
   - Consider upgrading Prism to 1.30+ in a dedicated dependency-health pass and wiring preview smokes to assert CSV quoted-field behavior end-to-end.
 
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-11-29 09:31 CET - Manual - fix preview smoke working dir
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Removed workflow working-directory override so preview_smoke job runs at repo root in CI
+  - Fixed preview-smoke GH Action path error (missing tinyutils subdir) enabling passing checks and merge
+- **Evidence:** NONE
+- **Follow-ups:**
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-11-29 09:36 CET - Manual - unify tool card heights
+- **Mode:** manual
+- **Branch:** `fix/tool-card-height`
+- **Summary:**
+  - Set shared min-height on ToolCard to equalize card sizes across tools grid while keeping converter content intact
+  - Kept mobile layout flexible by removing min-height below 768px
+- **Evidence:** NONE
+- **Follow-ups:**
+
