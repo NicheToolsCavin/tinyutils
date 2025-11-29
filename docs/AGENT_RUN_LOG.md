@@ -875,3 +875,41 @@
 - **Follow-ups:**
   - Consider upgrading Prism to 1.30+ in a dedicated dependency-health pass and wiring preview smokes to assert CSV quoted-field behavior end-to-end.
 
+<<<<<<< Updated upstream
+=======
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-11-29 09:31 CET - Manual - fix preview smoke working dir
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Removed workflow working-directory override so preview_smoke job runs at repo root in CI
+  - Fixed preview-smoke GH Action path error (missing tinyutils subdir) enabling passing checks and merge
+- **Evidence:** NONE
+- **Follow-ups:**
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-11-29 09:36 CET - Manual - unify tool card heights
+- **Mode:** manual
+- **Branch:** `fix/tool-card-height`
+- **Summary:**
+  - Set shared min-height on ToolCard to equalize card sizes across tools grid while keeping converter content intact
+  - Kept mobile layout flexible by removing min-height below 768px
+- **Evidence:** NONE
+- **Follow-ups:**
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-11-29 12:38 CET - Manual - converter preview CSV/JSON hardening & Prism upgrade
+- **Mode:** manual
+- **Branch:** `fix/converter-preview-hardening`
+- **Summary:**
+  - Extracted CSV preview parsing into shared src/lib/utils/csvParser.js with CSV_MAX_ROWS/CSV_MAX_CHARS guards and updated format_preview_renderers tests.
+  - Added JSON >200KB fallback notice, markup, and tests plus minor CSV/TeX preview data-testids for UI automation.
+  - Bumped Prism assets in converter preview to 1.30.0 with updated SRI and kept preview iframe sandbox tightened to allow-scripts only.
+- **Evidence:** NONE
+- **Follow-ups:**
+  - Consider extending UI smoke to cover CSV/JSON/TeX/Text previews in a later pass
+
+>>>>>>> Stashed changes

@@ -1,5 +1,48 @@
 ## Converter Tool — Description and Change Log
 
+### Major changes — 2025-11-29 11:45 CET (UTC+01:00) — CSV/JSON preview hardening, Prism 1.30.0, and iframe sandbox
+
+Added
+• Shared CSV preview parser in `src/lib/utils/csvParser.js` with `CSV_MAX_ROWS` and a soft `CSV_MAX_CHARS` guard used by the converter UI and tests.
+• JSON preview fallback notice in the Results panel that appears when pretty-print is skipped for large payloads, plus data-testids on key preview elements (textarea, buttons, iframe, CSV/TeX blocks, JSON fallback) to support UI automation.
+
+Modified
+• CSV preview now uses the shared parser and enforces a hard cap of 100 rendered data rows with a character-budget guard so extremely long single lines cannot lock up the browser; preview HTML is built via a small string-builder and wrapped with stable data-testids.
+• JSON preview keeps the existing 200KB pretty-print guard but now explicitly routes oversize/invalid JSON through the line-numbered text preview and toggles a small inline "JSON preview fallback" card so users understand why syntax highlighting is missing.
+• Prism assets in the converter preview were upgraded from 1.29.0 to 1.30.0 (covering CVE-2024‑53382) with refreshed SHA‑512 SRI hashes for `prism.min.js`, the autoloader plugin, and the Prism themes, and all autoloader `languages_path` URLs now point at the 1.30.0 components path.
+• The preview iframe sandbox was tightened to `sandbox="allow-scripts"` only (no `allow-same-origin`, forms, or popups) while retaining the CDN-based Prism highlight behavior.
+
+Fixed
+• CSV preview edge cases and limits
+  - **Problem:** The inline CSV parser and tests were duplicated, and the preview had no explicit guardrail for pathologically long lines or row counts, making it harder to reason about behavior and protect the UI from abuse.
+  - **Root cause:** CSV parsing logic lived inline in the Svelte page and in tests with only light limits; there was no shared utility or character-budget guard.
+  - **Fix:** Centralised parsing into `csvParser.js`, introduced `CSV_MAX_ROWS`/`CSV_MAX_CHARS` for previews, and extended tests to cover newline-in-quoted-field, row caps, and extremely long single-line inputs.
+  - **Evidence:** `tests/format_preview_renderers.test.mjs` now imports the shared parser and asserts both row/character limits and multi-line cell handling.
+• Large/invalid JSON preview behavior
+  - **Problem:** Very large JSON was silently rendered via the plain text fallback without any UI hint, and tests could not distinguish between pretty JSON and fallback text.
+  - **Root cause:** The 200KB guard path reused the generic text preview with no explicit JSON context or flag.
+  - **Fix:** Added a small JSON fallback notice card, plumbed a size/parse guard through `renderJSONPreview` that calls the numbered text preview with a JSON-fallback flag, and marked these cases in tests via a simple `data-json-fallback` attribute.
+  - **Evidence:** New tests in `tests/format_preview_renderers.test.mjs` assert the fallback path and the presence of JSON-fallback markers for oversize/invalid payloads.
+• Prism 1.29.0 vulnerability exposure
+  - **Problem:** The converter preview still referenced Prism 1.29.0, which is affected by a DOM clobbering vulnerability (CVE‑2024‑53382) that can enable XSS in some setups.
+  - **Root cause:** CDN URLs and SRI values had not been bumped since the original preview work.
+  - **Fix:** Switched all converter Prism includes to 1.30.0, recomputed SHA‑512 SRI for core, autoloader, and themes, and kept the autoloader pointing at the matching 1.30.0 components path.
+  - **Evidence:** Format preview tests still pass for JSON/Markdown/TeX, and SRI values match locally computed `openssl dgst -sha512 -binary | openssl base64` output for the 1.30.0 CDN assets.
+
+Human-readable summary
+
+The converter’s inline previews are now more robust, more explicit, and more secure.
+
+For CSV, the UI and tests share a single parser that understands quoted commas and newlines, with clear caps on how many rows and characters we will render into the preview table so one pathological CSV can’t bog down the browser. For JSON, the 200KB guard is still there, but instead of silently downgrading to a plain text view, the preview now shows a small message explaining that a fallback was used and the tests can tell the difference between pretty-printed JSON and the text fallback.
+
+Under the hood, Prism was upgraded from 1.29.0 to 1.30.0 with new SRI hashes to address a published DOM clobbering issue, and the preview iframe now runs with a tighter sandbox (`allow-scripts` only) while still letting syntax highlighting work. Together, these changes make the document preview safer, clearer, and easier to validate with automated UI checks.
+
+Impact
+• CSV previews are bounded and better covered by tests, reducing the risk of UI hangs from huge or malformed CSV inputs. ✅
+• Users get an explicit "JSON preview fallback" explanation when large or invalid JSON cannot be pretty-printed, instead of a silent change in behavior. ✅
+• Converter preview syntax highlighting now uses Prism 1.30.0 with fresh SRI, closing known issues in the older 1.29.0 series. ✅
+• The preview iframe runs with a stricter sandbox while preserving existing preview behavior, improving defense-in-depth for embedded HTML. ✅
+
 ### Major changes — 2025-11-28 16:05 CET (UTC+01:00) — Preview HTML + safer PDF fallback
 
 Added
