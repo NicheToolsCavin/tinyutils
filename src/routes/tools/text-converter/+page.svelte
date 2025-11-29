@@ -96,14 +96,84 @@
     }
 
     // Format-specific preview renderers
+
+    function parseCsvContent(content, maxRows = 100) {
+      // Minimal RFC 4180-style CSV parser for the *whole* content.
+      // Supports:
+      //   - quoted fields
+      //   - commas inside quotes
+      //   - doubled quotes inside quoted fields ("")
+      //   - CRLF or LF line endings
+      const rows = [];
+      let row = [];
+      let current = '';
+      let inQuotes = false;
+
+      const pushCell = () => {
+        const trimmed = current.trim();
+        let value = trimmed;
+        if (trimmed.length >= 2 && trimmed.startsWith('"') && trimmed.endsWith('"')) {
+          // Strip surrounding quotes and collapse doubled quotes.
+          value = trimmed.slice(1, -1).replace(/""/g, '"');
+        }
+        row.push(value);
+        current = '';
+      };
+
+      const pushRow = () => {
+        // Skip a completely empty row
+        if (row.length === 1 && row[0] === '') {
+          row = [];
+          return;
+        }
+        rows.push(row);
+        row = [];
+      };
+
+      for (let i = 0; i < content.length; i += 1) {
+        const ch = content[i];
+        if (ch === '"') {
+          if (inQuotes && content[i + 1] === '"') {
+            current += '"';
+            i += 1;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (ch === ',' && !inQuotes) {
+          pushCell();
+        } else if ((ch === '\n' || ch === '\r') && !inQuotes) {
+          pushCell();
+          pushRow();
+          if (rows.length >= maxRows) break;
+          // Consume paired CRLF
+          if (ch === '\r' && content[i + 1] === '\n') {
+            i += 1;
+          }
+        } else {
+          current += ch;
+        }
+      }
+
+      // Flush last cell/row
+      if (current.length || row.length) {
+        pushCell();
+        pushRow();
+      }
+
+      return rows.slice(0, maxRows);
+    }
+
     function renderCSVPreview(content) {
       if (!content || !previewIframe) return;
-      const lines = content.split('\n').filter(l => l.trim()).slice(0, 100);
+      const rows = parseCsvContent(content, 100);
+      if (!rows.length) {
+        previewIframe.srcdoc = '';
+        return;
+      }
       let html = '<style>table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:8px;text-align:left}th{background:#f4f4f4}</style><table>';
-      lines.forEach((line, idx) => {
-        const cells = line.split(',').map(c => c.trim().replace(/^"|"$/g, ''));
+      rows.forEach((cells, idx) => {
         html += idx === 0 ? '<thead><tr>' : '<tr>';
-        cells.forEach(cell => {
+        cells.forEach((cell) => {
           html += idx === 0 ? `<th>${escapeHtml(cell)}</th>` : `<td>${escapeHtml(cell)}</td>`;
         });
         html += idx === 0 ? '</tr></thead><tbody>' : '</tr>';
@@ -114,15 +184,27 @@
 
     function renderJSONPreview(content) {
       if (!content || !previewIframe) return;
+      const MAX_JSON_PRETTY_CHARS = 200000; // avoid jank on very large JSON payloads
+      if (content.length > MAX_JSON_PRETTY_CHARS) {
+        // For very large JSON, fall back to the lightweight text preview
+        // instead of pretty-printing on the main thread.
+        renderTextPreview(content);
+        return;
+      }
       try {
         const formatted = JSON.stringify(JSON.parse(content), null, 2);
         const html = `
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"><\/script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"><\/script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha512-vswe+cgvic/XBoF1OcM/TeJ2FW0OofqAVdCZiEYkd6dwGXthvkSFWOoGGJgS2CW70VK5dQM5Oh+7ne47s74VTg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-SkmBfuA2hqjzEVpmnMt/LINrjop3GKWqsuLSSB3e7iBmYK7JuWw4ldmmxwD9mdm2IRTTi0OxSAfEGvgEi0i2Kw==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
 <style>pre{margin:0;border-radius:0}body{margin:0;padding:1rem;background:#1e1e1e}</style>
 <pre><code class="language-json">${escapeHtml(formatted)}</code></pre>
-<script>Prism.highlightAll();<\/script>`;
+<script>
+if (window.Prism && Prism.plugins && Prism.plugins.autoloader) {
+  Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/';
+}
+Prism.highlightAll();
+<\/script>`;
         previewIframe.srcdoc = html;
       } catch (e) {
         renderTextPreview(content);
@@ -135,9 +217,9 @@
       const escaped = escapeHtml(content);
       const formatted = escaped.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
       const html = `
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"><\/script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markdown.min.js"><\/script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-SkmBfuA2hqjzEVpmnMt/LINrjop3GKWqsuLSSB3e7iBmYK7JuWw4ldmmxwD9mdm2IRTTi0OxSAfEGvgEi0i2Kw==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
 <style>
 .md-container{display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding:1rem}
 .md-src,.md-formatted{border:1px solid #ddd;padding:1rem;overflow:auto;max-height:600px}
@@ -149,9 +231,14 @@ code{background:#f0f0f0;padding:2px 4px;border-radius:3px}
 </style>
 <div class="md-container">
   <div><b>Markdown Source</b><div class="md-src"><pre><code class="language-markdown">${escaped}</code></pre></div></div>
-  <div><b>Formatted Text</b><div class="md-formatted"><p>${formatted}</p></div></div>
+  <div><b>Plain Text View</b><div class="md-formatted"><p>${formatted}</p></div></div>
 </div>
-<script>Prism.highlightAll();<\/script>`;
+<script>
+if (window.Prism && Prism.plugins && Prism.plugins.autoloader) {
+  Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/';
+}
+Prism.highlightAll();
+<\/script>`;
       previewIframe.srcdoc = html;
     }
 
@@ -166,12 +253,17 @@ code{background:#f0f0f0;padding:2px 4px;border-radius:3px}
     function renderTeXPreview(content) {
       if (!content || !previewIframe) return;
       const html = `
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"><\/script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-latex.min.js"><\/script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha512-vswe+cgvic/XBoF1OcM/TeJ2FW0OofqAVdCZiEYkd6dwGXthvkSFWOoGGJgS2CW70VK5dQM5Oh+7ne47s74VTg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-SkmBfuA2hqjzEVpmnMt/LINrjop3GKWqsuLSSB3e7iBmYK7JuWw4ldmmxwD9mdm2IRTTi0OxSAfEGvgEi0i2Kw==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
 <style>pre{margin:0;border-radius:0}body{margin:0;padding:1rem;background:#1e1e1e}</style>
 <pre><code class="language-latex">${escapeHtml(content)}</code></pre>
-<script>Prism.highlightAll();<\/script>`;
+<script>
+if (window.Prism && Prism.plugins && Prism.plugins.autoloader) {
+  Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/';
+}
+Prism.highlightAll();
+<\/script>`;
       previewIframe.srcdoc = html;
     }
 
