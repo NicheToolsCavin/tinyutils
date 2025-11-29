@@ -234,7 +234,13 @@ def safe_parse_limited(
     max_recursion: int = 100,
     timeout_seconds: int = 30,
 ) -> dict:
-    """Parse JSON/tabular text with size/recursion/time guards; returns meta."""
+    """Parse JSON/tabular text with size/recursion/time guards; returns meta.
+
+    ``max_recursion`` limits how deeply we walk nested JSON structures when
+    counting nodes. The default (100) is intentionally conservative: it is
+    high enough to capture realistic document shapes, but low enough to avoid
+    unbounded recursion on adversarially nested inputs.
+    """
 
     import json
     import signal
