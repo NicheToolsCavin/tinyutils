@@ -1,12 +1,13 @@
 """Tests for converter enhancements: payload caps, meta flags, etc."""
 import pytest
 from api._lib.utils import (
-    ensure_within_limits, 
-    detect_rows_columns, 
-    count_json_nodes, 
-    detect_html_in_disguise, 
-    protect_csv_formulas
+    ensure_within_limits,
+    detect_rows_columns,
+    count_json_nodes,
+    detect_html_in_disguise,
+    protect_csv_formulas,
 )
+from api._lib.html_utils import sanitize_html_for_preview
 from convert_backend.convert_types import PreviewData
 
 
@@ -152,3 +153,77 @@ class TestCsvFormulaProtection:
         protected = protect_csv_formulas(csv_content)
         # Should remain unchanged
         assert protected == csv_content
+
+
+class TestHtmlPreviewSanitization:
+    """Tests for HTML preview sanitization used in converter previews."""
+
+    def test_sanitize_html_for_preview_strips_dangerous_blocks(self):
+        raw = "<div>Hello<script>alert(1)</script><style>body{}</style></div>"
+        cleaned = sanitize_html_for_preview(raw)
+        assert "script" not in cleaned.lower()
+        assert "style" not in cleaned.lower()
+        assert "Hello" in cleaned
+
+    def test_sanitize_html_for_preview_neutralises_event_handlers_and_js_urls(self):
+        raw = '<a href="javascript:alert(1)" onclick="doThing()">Click</a>'
+        cleaned = sanitize_html_for_preview(raw)
+        lower = cleaned.lower()
+        assert "onclick" not in lower
+        assert "javascript:" not in lower
+        # We downgrade javascript: links to a harmless # URL
+        assert 'href="#"' in lower or "href='#'" in lower
+
+    def test_sanitize_html_for_preview_blocks_risky_data_urls(self):
+        """Only a tiny allow-list of image data: URLs is kept; others are neutralised."""
+
+        safe = '<img src="data:image/png;base64,AAA" alt="ok">'
+        cleaned_safe = sanitize_html_for_preview(safe)
+        # Safe image data URLs are left intact
+        assert "data:image/png" in cleaned_safe
+        assert "blocked-data-url" not in cleaned_safe
+
+        risky = '<img src="data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==" alt="x">'
+        cleaned_risky = sanitize_html_for_preview(risky)
+        lower_risky = cleaned_risky.lower()
+        # Risky data URLs are downgraded to a harmless placeholder
+        assert "blocked-data-url" in lower_risky
+        assert "data:text/html" not in lower_risky
+
+    def test_sanitize_html_for_preview_blocks_private_http_urls(self):
+        """Previews must not keep http(s) URLs pointing at private/loopback hosts."""
+
+        raw = (
+            '<img src="http://127.0.0.1/image.png">'
+            '<a href="https://10.1.2.3/internal">Link</a>'
+            '<img src="https://example.com/public.png">'
+        )
+        cleaned = sanitize_html_for_preview(raw)
+        lower = cleaned.lower()
+
+        # Private hosts are downgraded and tagged
+        assert "blocked-private-url" in lower
+        assert "127.0.0.1" not in lower
+        assert "10.1.2.3" not in lower
+
+        # Public hosts remain intact
+        assert "example.com/public.png" in lower
+
+
+class TestPreviewMetaFlags:
+    """Ensure PreviewData exposes new meta flags used by the UI."""
+
+    def test_preview_meta_has_more_flags_present(self):
+        preview = PreviewData(
+            approxBytes=1000,
+            row_count=250,
+            col_count=10,
+            jsonNodeCount=8000,
+            truncated=True,
+            tooBigForPreview=True,
+            hasMoreRows=True,
+            hasMoreNodes=True,
+        )
+
+        assert preview.hasMoreRows is True
+        assert preview.hasMoreNodes is True

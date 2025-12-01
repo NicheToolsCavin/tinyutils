@@ -161,7 +161,7 @@
 <div class="tool-page">
   <section class="tool-hero">
     <span class="tool-hero-icon" aria-hidden="true">🗺️</span>
-    <h1>Sitemap Generator</h1>
+    <h1 data-testid="sitemap-generator-heading">Sitemap Generator</h1>
     <p class="tool-hero-subtitle">
       Generate XML sitemaps for your website with customizable options.
     </p>
@@ -194,6 +194,7 @@
           type="url"
           placeholder="https://example.com"
           bind:value={baseUrl}
+          data-testid="sitemap-generator-base-url"
         />
       </div>
 
@@ -205,6 +206,7 @@
           rows="8"
           placeholder="/&#10;/about&#10;/blog/post-1 or full URLs"
           bind:value={paths}
+          data-testid="sitemap-generator-paths"
         ></textarea>
       </div>
     </div>
@@ -251,7 +253,12 @@
     </div>
 
     <div class="actions-row">
-      <button class="btn primary" type="button" on:click={generateSitemap}>
+      <button
+        class="btn primary"
+        type="button"
+        data-testid="sitemap-generator-build"
+        on:click={generateSitemap}
+      >
         Build sitemap.xml
       </button>
       <button

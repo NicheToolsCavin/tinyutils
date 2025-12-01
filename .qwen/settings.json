@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "openmemory": {
+      "command": "http://localhost:8080/mcp",
+      "args": []
+    }
+  },
+  "$version": 2
+}

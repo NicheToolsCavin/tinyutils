@@ -203,6 +203,7 @@
       rows="6"
       bind:value={urlsText}
       placeholder="https://example.com/old-page\nhttps://example.com/broken"
+      data-testid="wayback-urls-input"
     ></textarea>
   </label>
 
@@ -231,10 +232,22 @@
   </div>
 
   <div class="actions-row">
-    <button class="btn primary" type="button" on:click={runCheck} disabled={isRunning}>
+    <button
+      class="btn primary"
+      type="button"
+      data-testid="wayback-run"
+      on:click={runCheck}
+      disabled={isRunning}
+    >
       {isRunning ? 'Running…' : 'Run'}
     </button>
-    <button class="btn secondary" type="button" on:click={loadDemo} disabled={isRunning}>
+    <button
+      class="btn secondary"
+      type="button"
+      data-testid="wayback-load-demo"
+      on:click={loadDemo}
+      disabled={isRunning}
+    >
       Load demo
     </button>
     <span class="hint">Cmd/Ctrl+Enter runs</span>

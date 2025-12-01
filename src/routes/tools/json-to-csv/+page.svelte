@@ -120,6 +120,7 @@
 					type="file"
 					accept={mode === 'json_to_csv' ? '.json,.jsonl,.ndjson' : '.csv,.tsv,.txt'}
 					class="hidden"
+					data-testid="jsoncsv-upload-input"
 					on:change={handleFile}
 				/>
 				<div class="text-gray-500">
@@ -143,6 +144,7 @@
 		<button
 			class="w-full py-4 bg-gray-900 text-white font-bold rounded-xl shadow-lg hover:bg-black transition-transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2"
 			type="button"
+			data-testid="jsoncsv-convert-button"
 			disabled={!file || isProcessing}
 			on:click={convert}
 		>
@@ -198,4 +200,3 @@
 		<AdSlot slot="2563094163" format="horizontal" />
 	</div>
 </div>
-

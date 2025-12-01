@@ -623,6 +623,7 @@
       <button
         class="btn primary"
         type="button"
+        data-testid="sitemap-run-diff"
         on:click={runCompare}
         disabled={isBusy}
       >
@@ -632,7 +633,13 @@
           Run diff
         {/if}
       </button>
-      <button class="btn ghost" type="button" on:click={loadDemo} disabled={isBusy}>
+      <button
+        class="btn ghost"
+        type="button"
+        data-testid="sitemap-load-demo"
+        on:click={loadDemo}
+        disabled={isBusy}
+      >
         Load demo
       </button>
       <button class="btn ghost" type="button" on:click={shareLink}>

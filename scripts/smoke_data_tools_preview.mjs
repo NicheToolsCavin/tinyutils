@@ -180,6 +180,15 @@ function buildPdfZipFixture() {
 	return buf;
 }
 
+function buildPdfFixtureBuffer() {
+	const fixturesRoot = process.env.DATA_TOOLS_FIXTURES_DIR || path.join(os.homedir(), 'dev', 'TinyUtils', 'fixtures');
+	const pdfPath = path.join(fixturesRoot, 'pdf', 'dummy_w3c.pdf');
+	if (!fs.existsSync(pdfPath)) {
+		throw new Error(`PDF fixture not found at ${pdfPath}`);
+	}
+	return fs.readFileSync(pdfPath);
+}
+
 async function smokePdfExtract() {
 	let zipBuffer;
 	try {
@@ -221,6 +230,79 @@ async function smokePdfExtract() {
 	};
 }
 
+async function smokePdfExtractSinglePdf() {
+	let pdfBuffer;
+	try {
+		pdfBuffer = buildPdfFixtureBuffer();
+	} catch (error) {
+		return {
+			name: 'pdf_extract (single pdf fixture)',
+			status: 'fixture_error',
+			ok: false,
+			contentType: '',
+			message: error.message
+		};
+	}
+
+	const fd = new FormData();
+	fd.append('file', new Blob([pdfBuffer], { type: 'application/pdf' }), 'dummy_w3c.pdf');
+
+	const res = await fetchWithBypass('/api/pdf_extract', {
+		method: 'POST',
+		body: fd
+	});
+
+	const contentType = res.headers.get('content-type') || '';
+	const disposition = res.headers.get('content-disposition') || '';
+	const ok =
+		res.status === 200 &&
+		contentType.includes('application/zip') &&
+		disposition.includes('extracted_text.zip');
+
+	return {
+		name: 'pdf_extract (single pdf)',
+		status: res.status,
+		ok,
+		contentType,
+		disposition
+	};
+}
+
+async function smokePdfExtractorAccept() {
+	// Prefer the canonical path without trailing slash to avoid 308
+	// redirects; the bypass helpers already handle protection cookies.
+	const res = await fetchWithBypass('/tools/pdf-text-extractor', { method: 'GET' });
+	const status = res.status;
+	const html = await res.text();
+
+	// Look for the upload input and its accept attribute.
+	const inputMatch = html.match(/<input[^>]+data-testid="pdf-extract-upload-input"[^>]*>/i)
+		|| html.match(/<input[^>]+type="file"[^>]*>/i);
+	let accept = '';
+	if (inputMatch) {
+		const tag = inputMatch[0];
+		const acceptMatch = tag.match(/accept="([^"]*)"/i);
+		if (acceptMatch) accept = acceptMatch[1];
+	}
+
+	const acceptLower = accept.toLowerCase();
+	const hasZip = acceptLower.includes('.zip') || acceptLower.includes('application/zip');
+	const hasPdfExt = acceptLower.includes('.pdf');
+	const hasPdfMime = acceptLower.includes('application/pdf');
+
+	const ok = status === 200 && hasZip && hasPdfExt;
+
+	return {
+		name: 'pdf-text-extractor accept',
+		status,
+		ok,
+		accept,
+		hasZip,
+		hasPdfExt,
+		hasPdfMime
+	};
+}
+
 // --- Main ---------------------------------------------------------------
 
 (async () => {
@@ -242,6 +324,18 @@ async function smokePdfExtract() {
 		results.push(await smokePdfExtract());
 	} catch (error) {
 		results.push({ name: 'pdf_extract', status: 'error', ok: false, message: error.message });
+	}
+
+	try {
+		results.push(await smokePdfExtractSinglePdf());
+	} catch (error) {
+		results.push({ name: 'pdf_extract (single pdf)', status: 'error', ok: false, message: error.message });
+	}
+
+	try {
+		results.push(await smokePdfExtractorAccept());
+	} catch (error) {
+		results.push({ name: 'pdf-text-extractor accept', status: 'error', ok: false, message: error.message });
 	}
 
 	console.log(`Data tools preview smoke for ${BASE_URL}`);
@@ -267,4 +361,3 @@ async function smokePdfExtract() {
 	console.error('Data tools preview smoke encountered an error:', error);
 	process.exit(1);
 });
-

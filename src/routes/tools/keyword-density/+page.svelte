@@ -158,6 +158,7 @@
         rows="8"
         placeholder="Paste content here"
         bind:value={text}
+        data-testid="keyword-text-input"
       ></textarea>
     </div>
 
@@ -198,7 +199,13 @@
     </div>
 
     <div class="actions-row">
-      <button class="btn primary" type="button" on:click={analyzeKeywords} disabled={!text.trim()}>
+      <button
+        class="btn primary"
+        type="button"
+        data-testid="keyword-analyze"
+        on:click={analyzeKeywords}
+        disabled={!text.trim()}
+      >
         Analyze Density
       </button>
       <button class="btn ghost" type="button" on:click={copyCsv} disabled={!isAnalyzed}>
@@ -217,7 +224,7 @@
     <section class="card">
       <h2>Results</h2>
       <div class="tableWrap">
-        <table class="results-table">
+        <table class="results-table" data-testid="keyword-results-table">
           <thead>
             <tr>
               <th>Term</th>
