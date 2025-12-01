@@ -1,5 +1,9 @@
 <script>
+  import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
+
   const currentYear = new Date().getFullYear();
+
+  injectSpeedInsights();
 </script>
 
 <svelte:head>
