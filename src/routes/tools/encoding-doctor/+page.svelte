@@ -223,6 +223,7 @@
           rows="8"
           placeholder="Paste mojibake here, e.g. FranÃ§ois dâ€™Arcy — rÃ©sumÃ©."
           bind:value={textInput}
+          data-testid="encoding-text-input"
         ></textarea>
       </div>
 
@@ -266,7 +267,13 @@
     </div>
 
     <div class="actions-row">
-      <button class="btn primary" type="button" on:click={runRepair} disabled={isLoading}>
+      <button
+        class="btn primary"
+        type="button"
+        data-testid="encoding-run"
+        on:click={runRepair}
+        disabled={isLoading}
+      >
         {isLoading ? 'Repairing…' : 'Repair'}
       </button>
       <button
@@ -300,7 +307,10 @@
         </div>
         <div>
           <h3>After</h3>
-          <pre class="text-preview">{repairedText || '(no repaired output yet)'}</pre>
+          <pre
+            class="text-preview"
+            data-testid="encoding-after-text"
+          >{repairedText || '(no repaired output yet)'}</pre>
         </div>
       </div>
     </section>
@@ -511,4 +521,3 @@
     }
   }
 </style>
-

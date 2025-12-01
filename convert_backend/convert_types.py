@@ -21,6 +21,11 @@ class ConversionOptions:
     # PDF extractor mode: 'default' (layout-aware), 'aggressive' (denser joins), 'legacy' (text-only)
     pdf_layout_mode: str | None = None
     aggressive_pdf_mode: bool = False
+    # Optional PDF layout hints for the ReportLab fallback renderer.
+    # pdf_margin_preset: e.g. 'standard' (default), 'compact', 'wide'.
+    pdf_margin_preset: str | None = None
+    # pdf_page_size: e.g. 'letter' (default), 'A4'.
+    pdf_page_size: str | None = None
 
 
 @dataclass(slots=True)
@@ -83,6 +88,8 @@ class PreviewData:
     jsonNodeCount: Optional[int] = None
     truncated: Optional[bool] = None
     tooBigForPreview: Optional[bool] = None
+    hasMoreRows: Optional[bool] = None
+    hasMoreNodes: Optional[bool] = None
 
 
 @dataclass(slots=True)

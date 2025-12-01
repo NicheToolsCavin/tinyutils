@@ -1,6 +1,26 @@
 <script>
   import { onMount } from 'svelte';
 
+  const PREVIEW_PARSE_BUDGET_MS = 150;
+  const PREVIEW_RENDER_BUDGET_MS = 750;
+  const JSON_PREVIEW_NODE_LIMIT = 5000;
+
+  const DEV_TELEMETRY_ENABLED =
+    typeof import.meta !== 'undefined' &&
+    import.meta.env &&
+    (import.meta.env.DEV ||
+      import.meta.env.MODE === 'development' ||
+      import.meta.env.MODE === 'preview');
+
+  function logPreviewEvent(event, details = {}) {
+    if (!DEV_TELEMETRY_ENABLED) return;
+    try {
+      console.debug('[converter-preview]', event, details);
+    } catch (e) {
+      // Ignore logging failures
+    }
+  }
+
   const DEMO_SNIPPET = [
     '# TinyUtils Demo Document',
     'This demo shows headings, links, inline code, and lists so you can preview conversions.',
@@ -38,8 +58,11 @@
     const optAcceptTracked = document.getElementById('optAcceptTracked');
     const optExtractMedia = document.getElementById('optExtractMedia');
     const optRemoveZW = document.getElementById('optRemoveZW');
+    const pdfMarginPresetSel = document.getElementById('pdfMarginPreset');
+    const pdfPageSizeSel = document.getElementById('pdfPageSize');
     const previewBtn = document.getElementById('previewBtn');
     const previewPanel = document.getElementById('previewPanel');
+    const previewHeader = document.getElementById('previewHeader');
     const previewIframe = document.getElementById('previewIframe');
     const previewUnavailableCard = document.getElementById('previewUnavailableCard');
     const previewTooBigCard = document.getElementById('previewTooBigCard');
@@ -48,6 +71,7 @@
     const demoBtn = document.getElementById('demoBtn');
     const progressMessageEl = document.getElementById('progressMessage');
     const progressMeter = document.getElementById('progressMeter');
+    const previewStatusBanner = document.getElementById('previewStatusBanner');
     const resultsBody = document.querySelector('#results tbody');
 
     let currentFile = null;
@@ -93,6 +117,46 @@
         '"': '&quot;',
         "'": '&#39;'
       })[ch]);
+    }
+
+    function setPreviewBanner(message, tone = 'info') {
+      if (!previewStatusBanner) return;
+      if (!message) {
+        previewStatusBanner.textContent = '';
+        previewStatusBanner.hidden = true;
+        previewStatusBanner.classList.remove('preview-status--info', 'preview-status--warn');
+        return;
+      }
+      previewStatusBanner.textContent = message;
+      previewStatusBanner.hidden = false;
+      previewStatusBanner.classList.remove('preview-status--info', 'preview-status--warn');
+      previewStatusBanner.classList.add(tone === 'warn' ? 'preview-status--warn' : 'preview-status--info');
+    }
+
+    function sniffFormatFromContent(content) {
+      if (!content || typeof content !== 'string') return null;
+      const trimmed = content.trim();
+      if (!trimmed) return null;
+
+      // JSON-ish
+      if (/^\s*[\[{]/.test(trimmed)) return 'json';
+
+      const firstLines = trimmed.split(/\r?\n/).slice(0, 5);
+      let commaLike = 0;
+      let semiLike = 0;
+      for (const line of firstLines) {
+        if (/,/.test(line)) commaLike += 1;
+        if (/;/.test(line)) semiLike += 1;
+      }
+      if (commaLike >= 2 || semiLike >= 2) return 'csv';
+
+      if (/^#{1,6}\s/.test(firstLines[0] || '') || /^---\s*$/.test(firstLines[0] || '')) {
+        return 'md';
+      }
+
+      if (/\\documentclass|\\begin\{document\}/.test(trimmed)) return 'tex';
+
+      return null;
     }
 
     // Format-specific preview renderers
@@ -165,34 +229,101 @@
 
     function renderCSVPreview(content) {
       if (!content || !previewIframe) return;
-      const rows = parseCsvContent(content, 100);
-      if (!rows.length) {
-        previewIframe.srcdoc = '';
-        return;
-      }
-      let html = '<style>table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:8px;text-align:left}th{background:#f4f4f4}</style><table>';
-      rows.forEach((cells, idx) => {
-        html += idx === 0 ? '<thead><tr>' : '<tr>';
-        cells.forEach((cell) => {
-          html += idx === 0 ? `<th>${escapeHtml(cell)}</th>` : `<td>${escapeHtml(cell)}</td>`;
+      try {
+        const hasPerf = typeof performance !== 'undefined' && typeof performance.now === 'function';
+        const start = hasPerf ? performance.now() : 0;
+
+        const rows = parseCsvContent(content, 100);
+        if (!rows.length) {
+          previewIframe.srcdoc = '';
+          return;
+        }
+
+        let parseMs = 0;
+        if (hasPerf && start) {
+          parseMs = performance.now() - start;
+        }
+
+        if (parseMs && parseMs > PREVIEW_PARSE_BUDGET_MS) {
+          logPreviewEvent('csv_preview_parse_budget_exceeded', {
+            parseMs,
+            rowCount: rows.length
+          });
+          setPreviewBanner('Preview simplified to keep the page responsive; download for full detail.', 'warn');
+          renderTextPreview(content);
+          return;
+        }
+
+        let html = '<style>.tableWrap{max-height:480px;overflow:auto;}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:8px;text-align:left}th{background:#f4f4f4;position:sticky;top:0;z-index:1}</style><div class="tableWrap"><table>';
+        let renderBudgetHit = false;
+
+        rows.forEach((cells, idx) => {
+          if (!renderBudgetHit && hasPerf && start && PREVIEW_RENDER_BUDGET_MS > 0) {
+            const elapsed = performance.now() - start;
+            if (elapsed > PREVIEW_RENDER_BUDGET_MS) {
+              renderBudgetHit = true;
+              return;
+            }
+          }
+          html += idx === 0 ? '<thead><tr>' : '<tr>';
+          cells.forEach((cell) => {
+            html += idx === 0 ? `<th scope="col">${escapeHtml(cell)}</th>` : `<td>${escapeHtml(cell)}</td>`;
+          });
+          html += idx === 0 ? '</tr></thead><tbody>' : '</tr>';
         });
-        html += idx === 0 ? '</tr></thead><tbody>' : '</tr>';
-      });
-      html += '</tbody></table>';
-      previewIframe.srcdoc = html;
+
+        if (renderBudgetHit) {
+          logPreviewEvent('csv_preview_render_budget_exceeded', {
+            rowCount: rows.length
+          });
+          setPreviewBanner('Preview simplified to keep the page responsive; download for full detail.', 'warn');
+          renderTextPreview(content);
+          return;
+        }
+
+        html += '</tbody></table></div>';
+        previewIframe.srcdoc = html;
+      } catch (err) {
+        console.error('converter: CSV preview failed, falling back to text', err);
+        logPreviewEvent('csv_preview_error_fallback', { message: String(err && err.message || err) });
+        setPreviewBanner('Preview simplified to keep the page responsive; download for full detail.', 'warn');
+        renderTextPreview(content);
+      }
     }
 
     function renderJSONPreview(content) {
       if (!content || !previewIframe) return;
       const MAX_JSON_PRETTY_CHARS = 200000; // avoid jank on very large JSON payloads
+      const hasPerf = typeof performance !== 'undefined' && typeof performance.now === 'function';
+      const start = hasPerf ? performance.now() : 0;
+
       if (content.length > MAX_JSON_PRETTY_CHARS) {
         // For very large JSON, fall back to the lightweight text preview
         // instead of pretty-printing on the main thread.
+        logPreviewEvent('json_preview_size_budget_exceeded', {
+          length: content.length,
+          maxChars: MAX_JSON_PRETTY_CHARS
+        });
+        setPreviewBanner('Preview simplified to keep the page responsive; download for full detail.', 'warn');
         renderTextPreview(content);
         return;
       }
       try {
-        const formatted = JSON.stringify(JSON.parse(content), null, 2);
+        const parsed = JSON.parse(content);
+        let parseMs = 0;
+        if (hasPerf && start) {
+          parseMs = performance.now() - start;
+        }
+        if (parseMs && parseMs > PREVIEW_PARSE_BUDGET_MS) {
+          logPreviewEvent('json_preview_parse_budget_exceeded', { parseMs });
+          setPreviewBanner('Preview simplified to keep the page responsive; download for full detail.', 'warn');
+          renderTextPreview(content);
+          return;
+        }
+
+        const formatted = JSON.stringify(parsed, null, 2);
+
+        const beforeRender = hasPerf && start ? performance.now() : 0;
         const html = `
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha512-vswe+cgvic/XBoF1OcM/TeJ2FW0OofqAVdCZiEYkd6dwGXthvkSFWOoGGJgS2CW70VK5dQM5Oh+7ne47s74VTg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
@@ -205,17 +336,32 @@ if (window.Prism && Prism.plugins && Prism.plugins.autoloader) {
 }
 Prism.highlightAll();
 <\/script>`;
+        if (hasPerf && beforeRender) {
+          const renderMs = performance.now() - beforeRender;
+          if (renderMs > PREVIEW_RENDER_BUDGET_MS) {
+            logPreviewEvent('json_preview_render_budget_exceeded', { renderMs });
+            setPreviewBanner('Preview simplified to keep the page responsive; download for full detail.', 'warn');
+            renderTextPreview(content);
+            return;
+          }
+        }
+
         previewIframe.srcdoc = html;
       } catch (e) {
+        logPreviewEvent('json_preview_parse_error', { message: String(e && e.message || e) });
+        setPreviewBanner('Preview can\'t parse JSON; showing raw text instead.', 'warn');
         renderTextPreview(content);
       }
     }
 
     function renderMarkdownPreview(content) {
       if (!content || !previewIframe) return;
+      const hasPerf = typeof performance !== 'undefined' && typeof performance.now === 'function';
+      const start = hasPerf ? performance.now() : 0;
       // Simple side-by-side view: left shows syntax-highlighted markdown, right shows formatted text
       const escaped = escapeHtml(content);
       const formatted = escaped.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
+      const beforeRender = hasPerf && start ? performance.now() : 0;
       const html = `
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
@@ -228,6 +374,7 @@ Prism.highlightAll();
 .md-formatted{background:#fff}
 h1,h2,h3,h4,h5,h6{margin:0.5rem 0}
 code{background:#f0f0f0;padding:2px 4px;border-radius:3px}
+@media (max-width: 768px){.md-container{grid-template-columns:1fr;}}
 </style>
 <div class="md-container">
   <div><b>Markdown Source</b><div class="md-src"><pre><code class="language-markdown">${escaped}</code></pre></div></div>
@@ -239,19 +386,46 @@ if (window.Prism && Prism.plugins && Prism.plugins.autoloader) {
 }
 Prism.highlightAll();
 <\/script>`;
-      previewIframe.srcdoc = html;
+      try {
+        if (hasPerf && beforeRender) {
+          const renderMs = performance.now() - beforeRender;
+          if (renderMs > PREVIEW_RENDER_BUDGET_MS) {
+            logPreviewEvent('markdown_preview_render_budget_exceeded', { renderMs });
+            setPreviewBanner('Preview simplified to keep the page responsive; download for full detail.', 'warn');
+            renderTextPreview(content);
+            return;
+          }
+        }
+        previewIframe.srcdoc = html;
+      } catch (err) {
+        console.error('converter: Markdown preview failed, falling back to text', err);
+        logPreviewEvent('markdown_preview_error_fallback', { message: String(err && err.message || err) });
+        setPreviewBanner('Preview simplified to keep the page responsive; download for full detail.', 'warn');
+        renderTextPreview(content);
+      }
     }
 
     function renderTextPreview(content) {
       if (!content || !previewIframe) return;
+      const hasPerf = typeof performance !== 'undefined' && typeof performance.now === 'function';
+      const start = hasPerf ? performance.now() : 0;
       const lines = content.split('\n');
       const numbered = lines.map((l, i) => `${String(i + 1).padStart(4, ' ')} | ${escapeHtml(l)}`).join('\n');
       const html = `<style>pre{background:#f8f8f8;padding:1rem;font-family:monospace;overflow:auto}</style><pre>${numbered}</pre>`;
+      if (hasPerf && start) {
+        const renderMs = performance.now() - start;
+        if (renderMs > PREVIEW_RENDER_BUDGET_MS) {
+          logPreviewEvent('text_preview_render_budget_exceeded', { renderMs, lineCount: lines.length });
+          setPreviewBanner('Preview simplified to keep the page responsive; download for full detail.', 'warn');
+        }
+      }
       previewIframe.srcdoc = html;
     }
 
     function renderTeXPreview(content) {
       if (!content || !previewIframe) return;
+      const hasPerf = typeof performance !== 'undefined' && typeof performance.now === 'function';
+      const beforeRender = hasPerf ? performance.now() : 0;
       const html = `
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha512-vswe+cgvic/XBoF1OcM/TeJ2FW0OofqAVdCZiEYkd6dwGXthvkSFWOoGGJgS2CW70VK5dQM5Oh+7ne47s74VTg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
@@ -264,7 +438,23 @@ if (window.Prism && Prism.plugins && Prism.plugins.autoloader) {
 }
 Prism.highlightAll();
 <\/script>`;
-      previewIframe.srcdoc = html;
+      try {
+        if (hasPerf && beforeRender) {
+          const renderMs = performance.now() - beforeRender;
+          if (renderMs > PREVIEW_RENDER_BUDGET_MS) {
+            logPreviewEvent('tex_preview_render_budget_exceeded', { renderMs });
+            setPreviewBanner('TeX preview simplified to source-only view. Download for full document.', 'warn');
+            renderTextPreview(content);
+            return;
+          }
+        }
+        previewIframe.srcdoc = html;
+      } catch (err) {
+        console.error('converter: TeX preview failed, falling back to text', err);
+        logPreviewEvent('tex_preview_error_fallback', { message: String(err && err.message || err) });
+        setPreviewBanner('TeX preview simplified to source-only view. Download for full document.', 'warn');
+        renderTextPreview(content);
+      }
     }
 
     function formatBytes(bytes) {
@@ -403,6 +593,8 @@ Prism.highlightAll();
       if (typeof prefs.optExtractMedia === 'boolean' && optExtractMedia) optExtractMedia.checked = prefs.optExtractMedia;
       if (typeof prefs.optRemoveZW === 'boolean' && optRemoveZW) optRemoveZW.checked = prefs.optRemoveZW;
       if (prefs.customExt && customExt) customExt.value = prefs.customExt;
+      if (prefs.pdfMarginPreset && pdfMarginPresetSel) pdfMarginPresetSel.value = prefs.pdfMarginPreset;
+      if (prefs.pdfPageSize && pdfPageSizeSel) pdfPageSizeSel.value = prefs.pdfPageSize;
     }
 
     function persistPrefs() {
@@ -415,7 +607,9 @@ Prism.highlightAll();
         optAcceptTracked: optAcceptTracked ? !!optAcceptTracked.checked : true,
         optExtractMedia: optExtractMedia ? !!optExtractMedia.checked : false,
         optRemoveZW: optRemoveZW ? !!optRemoveZW.checked : true,
-        customExt: customExt ? customExt.value : ''
+        customExt: customExt ? customExt.value : '',
+        pdfMarginPreset: pdfMarginPresetSel ? pdfMarginPresetSel.value : '',
+        pdfPageSize: pdfPageSizeSel ? pdfPageSizeSel.value : '',
       };
       window.TinyUtilsStorage.savePrefs('converter', prefs);
     }
@@ -490,6 +684,7 @@ Prism.highlightAll();
       updateProgressState(initialMessage, previewOnly ? 40 : 20);
       if (resultsBody) resultsBody.innerHTML = '';
       if (previewPanel) previewPanel.style.display = 'none';
+      setPreviewBanner('', 'info');
 
       const thisRequest = ++requestCounter;
 
@@ -515,19 +710,23 @@ Prism.highlightAll();
 
         const hasMd = selectedFormats.includes('md');
         const dialectValue = mdDialectSel ? mdDialectSel.value : null;
+        const pdfMarginPreset = pdfMarginPresetSel ? pdfMarginPresetSel.value : null;
+        const pdfPageSize = pdfPageSizeSel ? pdfPageSizeSel.value : null;
 
-        const payload = {
-          inputs: [input],
-          from: fromFormat,
-          to: selectedFormats,
-          options: {
-            acceptTrackedChanges: !!optAcceptTracked?.checked,
-            extractMedia: !!optExtractMedia?.checked,
-            removeZeroWidth: !!optRemoveZW?.checked,
-            mdDialect: hasMd && dialectValue ? dialectValue : undefined
-          },
-          preview: previewOnly ? true : undefined
-        };
+          const payload = {
+            inputs: [input],
+            from: fromFormat,
+            to: selectedFormats,
+            options: {
+              acceptTrackedChanges: !!optAcceptTracked?.checked,
+              extractMedia: !!optExtractMedia?.checked,
+              removeZeroWidth: !!optRemoveZW?.checked,
+              mdDialect: hasMd && dialectValue ? dialectValue : undefined,
+              pdfMarginPreset: selectedFormats.includes('pdf') && pdfMarginPreset ? pdfMarginPreset : undefined,
+              pdfPageSize: selectedFormats.includes('pdf') && pdfPageSize ? pdfPageSize : undefined
+            },
+            preview: previewOnly ? true : undefined
+          };
 
         async function sendOnce() {
           const controller = new AbortController();
@@ -632,9 +831,88 @@ Prism.highlightAll();
             if (previewIframe) previewIframe.srcdoc = '';
           } else {
             // Format-specific preview routing
-            const format = (previewFlags.format || 'html').toLowerCase();
+            const rawFormat = (previewFlags.format || 'html').toLowerCase();
             const content = previewFlags.content;
             const html = previewFlags.html;
+
+            let effectiveFormat = rawFormat;
+
+            if (content) {
+              const sniffed = sniffFormatFromContent(content);
+              const canOverride = !rawFormat || rawFormat === 'txt' || rawFormat === 'text' || rawFormat === 'md' || rawFormat === 'markdown';
+              if (sniffed && sniffed !== rawFormat && canOverride) {
+                effectiveFormat = sniffed;
+                const labelFrom = rawFormat ? rawFormat.toUpperCase() : 'UNKNOWN';
+                const labelTo = sniffed.toUpperCase();
+                setPreviewBanner(`Format looks like ${labelTo} but marked as ${labelFrom}; previewing as ${labelTo}.`, 'info');
+                logPreviewEvent('preview_format_sniff_disagreement', {
+                  rawFormat,
+                  sniffed
+                });
+              }
+            }
+
+            if (!previewStatusBanner?.textContent && (previewFlags.truncated || previewFlags.hasMoreRows || previewFlags.hasMoreNodes)) {
+              const totalRows = typeof previewFlags.row_count === 'number' ? previewFlags.row_count : null;
+              const totalNodes = typeof previewFlags.jsonNodeCount === 'number' ? previewFlags.jsonNodeCount : null;
+
+              let msg = 'Preview truncated for large content. Download to see the full document.';
+              if (previewFlags.hasMoreRows && !previewFlags.hasMoreNodes) {
+                const shownRows = 100;
+                if (totalRows && totalRows > shownRows) {
+                  msg = `Preview truncated after the first ${shownRows} rows out of approximately ${totalRows}. Download file to see all rows.`;
+                } else {
+                  msg = 'Only part of the table is shown in the preview. Download to see all rows.';
+                }
+              } else if (previewFlags.hasMoreNodes && !previewFlags.hasMoreRows) {
+                if (totalNodes && totalNodes > JSON_PREVIEW_NODE_LIMIT) {
+                  const approxTotal = totalNodes.toLocaleString();
+                  const approxLimit = JSON_PREVIEW_NODE_LIMIT.toLocaleString();
+                  msg = `Preview truncated after about ${approxLimit} JSON nodes out of approximately ${approxTotal}. Download file to see the full structure.`;
+                } else {
+                  msg = 'JSON preview simplified to keep the page responsive. Download for the full structure.';
+                }
+              }
+
+              setPreviewBanner(msg, 'info');
+              logPreviewEvent('preview_truncated_meta', {
+                truncated: !!previewFlags.truncated,
+                hasMoreRows: !!previewFlags.hasMoreRows,
+                hasMoreNodes: !!previewFlags.hasMoreNodes,
+                row_count: totalRows,
+                jsonNodeCount: totalNodes
+              });
+            }
+
+            const format = effectiveFormat;
+
+            if (previewHeader) {
+              let label = 'Preview';
+              switch (format) {
+                case 'csv':
+                  label = 'CSV preview (first ~100 rows)';
+                  break;
+                case 'json':
+                  label = 'JSON preview';
+                  break;
+                case 'md':
+                case 'markdown':
+                  label = 'Markdown preview';
+                  break;
+                case 'txt':
+                case 'text':
+                  label = 'Text preview';
+                  break;
+                case 'tex':
+                case 'latex':
+                  label = 'TeX preview';
+                  break;
+                default:
+                  label = 'Preview';
+              }
+              previewHeader.textContent = label;
+              previewHeader.setAttribute('aria-label', `${label} – inline document preview`);
+            }
 
             if (content && format !== 'html') {
               // Use format-specific renderers for text-based formats
@@ -810,6 +1088,8 @@ Prism.highlightAll();
 
     toSingle?.addEventListener('change', () => { persistPrefs(); updateOptionAvailability(); });
     mdDialectSel?.addEventListener('change', persistPrefs);
+    pdfMarginPresetSel?.addEventListener('change', persistPrefs);
+    pdfPageSizeSel?.addEventListener('change', persistPrefs);
 
     convertBtn?.addEventListener('click', () => runConvert({ previewOnly: false }));
     previewBtn?.addEventListener('click', () => runConvert({ previewOnly: true }));
@@ -921,14 +1201,22 @@ Prism.highlightAll();
             Enter or paste Markdown, HTML, plain text, or other document content.
           </span>
         </label>
-        <textarea id="textInput" placeholder="Enter your document content here..."></textarea>
+        <textarea
+          id="textInput"
+          data-testid="converter-text-input"
+          placeholder="Enter your document content here..."
+        ></textarea>
 
         <label for="fileInput">Or upload a file (.md, .html, .docx, .pdf, .rtf, .odt, etc.)
           <span class="help" style="color: var(--muted, #97a3c2); font-size: 0.85rem; display: block; margin-top: 0.2rem;">
             Supports many formats including Markdown, Word, PDF, HTML, RTF, OpenDocument, and LaTeX.
           </span>
         </label>
-        <input type="file" id="fileInput" accept=".md,.markdown,.txt,.html,.htm,.docx,.odt,.rtf,.pdf,.tex,.epub,.zip" />
+        <input
+          type="file"
+          id="fileInput"
+          accept=".md,.markdown,.txt,.html,.htm,.docx,.odt,.rtf,.pdf,application/pdf,.tex,.epub,.zip"
+        />
       </div>
 
       <div class="format-options" aria-label="Format options">
@@ -1013,10 +1301,37 @@ Prism.highlightAll();
         <label title="Accept tracked changes in Word docs"><input type="checkbox" id="optAcceptTracked" checked /> Accept tracked changes</label>
         <label title="Extract embedded images/media when available"><input type="checkbox" id="optExtractMedia" /> Extract media</label>
         <label title="Remove zero-width characters"><input type="checkbox" id="optRemoveZW" checked /> Remove zero-width</label>
+        <div class="pdf-layout-options">
+          <label for="pdfMarginPreset">
+            <strong>PDF layout:</strong>
+            <span class="help" style="color: var(--muted, #97a3c2); font-size: 0.85rem; margin-left: 0.35rem;">
+              Affects margins for the fallback PDF renderer only.
+            </span>
+          </label>
+          <select id="pdfMarginPreset" name="pdfMarginPreset">
+            <option value="">Standard margins</option>
+            <option value="compact">Compact (smaller margins)</option>
+            <option value="wide">Wide (larger margins)</option>
+          </select>
+          <label for="pdfPageSize" style="margin-left: 0.75rem;">
+            <strong>Page size:</strong>
+          </label>
+          <select id="pdfPageSize" name="pdfPageSize">
+            <option value="">US Letter</option>
+            <option value="A4">A4</option>
+          </select>
+        </div>
       </div>
 
       <div class="actions-row">
-        <button id="previewBtn" class="secondary" type="button">Preview</button>
+        <button
+          id="previewBtn"
+          class="secondary"
+          type="button"
+          data-testid="converter-preview-button"
+        >
+          Preview
+        </button>
         <button id="convertBtn" class="primary" type="button">Convert</button>
         <button id="clearBtn" class="secondary" type="button">Clear</button>
         <button id="demoBtn" class="secondary" type="button" title="Load a small example document to see how conversion works.">Try example</button>
@@ -1039,9 +1354,27 @@ Prism.highlightAll();
           <p class="preview-card-title">📦 Too large for preview</p>
           <p class="preview-card-subtitle">This file exceeds the live preview cap but will still convert normally.</p>
         </div>
+        <div
+          id="previewStatusBanner"
+          class="preview-status-banner"
+          role="status"
+          aria-live="polite"
+          hidden
+        ></div>
         <div id="previewHtmlBox" class="preview-html">
-          <div class="preview-html__header">Preview (first 2 pages)</div>
-          <iframe id="previewIframe" sandbox="allow-same-origin allow-popups allow-forms" title="Formatted preview"></iframe>
+          <div
+            id="previewHeader"
+            class="preview-html__header"
+            data-testid="converter-preview-header"
+          >
+            Preview
+          </div>
+          <iframe
+            id="previewIframe"
+            data-testid="converter-preview-iframe"
+            sandbox="allow-same-origin allow-popups allow-forms"
+            title="Formatted preview"
+          ></iframe>
         </div>
       </div>
       <div class="tableWrap">
@@ -1120,6 +1453,9 @@ Prism.highlightAll();
   }
   .preview-card-title { font-size: var(--text-lg); font-weight: 700; margin-bottom: 0.25rem; }
   .preview-card-subtitle { color: var(--text-muted, #6b7280); }
+  .preview-status-banner { margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-muted, #6b7280); padding: 0.35rem 0.5rem; border-radius: 0.5rem; }
+  .preview-status--info { background: rgba(59, 130, 246, 0.08); color: var(--brand, #3b82f6); }
+  .preview-status--warn { background: rgba(234, 179, 8, 0.1); color: #b45309; }
   .preview-html__header { padding: 0.6rem 0.9rem; font-weight: 600; border-bottom: 1px solid var(--border-default); background: var(--surface-elevated); }
   #previewIframe { width: 100%; height: 22rem; border: 0; display: block; background: white; }
   #results thead th {

@@ -1,5 +1,75 @@
 ## Converter Tool — Description and Change Log
 
+### Major changes — 2025-12-01 03:05 CET (UTC+01:00) — html_input logs fix + preview handshake
+
+Added
+• Minimal telemetry initialisation in `convert_backend.convert_service.convert_one` so the logs list is always available before early content analysis and security checks.
+• One-shot Vercel preview protection handshake handling in `scripts/convert_health_probe.mjs` and `tests/converter_api_smoke.mjs` (30x + `_vercel_jwt` cookie retry) for `/api/convert`.
+
+Modified
+• The html→Markdown path for `html_input.html` now logs `html_in_disguise_detected` without crashing, because `logs` is initialised at the top of `convert_one` instead of only after the cache lookup.
+• Health probe and API smokes now treat an initial 30x with `_vercel_jwt` as part of the preview bypass handshake: they append the cookie to `Cookie:` and retry the same `/api/convert` URL once with `redirect: 'manual'` before asserting on JSON.
+
+Fixed
+• Internal server error on html_input.html in preview
+  - **Problem:** Calling `/api/convert` with the `html_input.html` fixture in Vercel preview returned a 500 with `UnboundLocalError: cannot access local variable 'logs' where it is not associated with a value`, and the converter API did not include an `outputs` array.
+  - **Root cause:** `convert_one` ran `detect_html_in_disguise()` and appended `"security_warning=html_in_disguise_detected"` to `logs` before `logs` was initialised in the function, so any "HTML in disguise" input crashed early.
+  - **Fix:** Initialise `logs` (including `targets=...` and `pandoc_version=...`) at the very start of `convert_one` and remove the later reinitialisation block; html fixtures now convert to Markdown and record security telemetry without raising.
+  - **Evidence:** Local `convert_batch` call for `html_input.html` produces a non-empty `md` output (size ~678 bytes, error=None); preview `/api/convert` returns a normal JSON envelope for the same fixture.
+• Preview `/api/convert` smokes blocked by 30x redirect
+  - **Problem:** After a new preview deploy, the `/api/convert` health probe and `tests/converter_api_smoke.mjs` saw `content-type: text/html` with `"Redirecting..."` bodies because Vercel returned a 307 plus an `_vercel_jwt` cookie before the actual JSON response, causing JSON parse errors and failing html_input/ODT smokes.
+  - **Root cause:** The probe and smokes only preflighted once and then assumed the first POST response would be JSON, without handling the additional 30x handshake hop introduced by Vercel protection.
+  - **Fix:** Both the probe and smokes now detect a single 30x + `_vercel_jwt` `Set-Cookie`, append that cookie to the `Cookie:` header, and retry the same `/api/convert` request once with `redirect: 'manual'` before parsing JSON.
+  - **Evidence:** `scripts/convert_health_probe.mjs` reports `pandocVersion: "3.1.11.1"` with non-trivial DOCX/MD sizes for the ODT invoice fixture on the latest preview, and `node --test tests/converter_api_smoke.mjs` passes all three smokes (`tech_doc`, `html_input.html`, `odt_invoice_sample.odt`) when `CONVERTER_API_BASE_URL` points at that preview.
+
+Human-readable summary
+
+Two small but important issues have been fixed in the converter:
+
+1. **The html_input safety check could crash conversions.** When the converter scanned inputs for "HTML in disguise" it tried to add a security note to an internal `logs` list before that list existed. For HTML-heavy test fixtures like `html_input.html` this caused a 500 error instead of a clean Markdown output. Now `logs` is created up front, so the security warning is recorded and the conversion continues normally.
+
+2. **Preview started requiring an extra protection handshake for `/api/convert`.** Vercel introduced a 30x redirect that hands back a `_vercel_jwt` cookie before serving JSON. The health probe and API smokes have been taught this new dance: if they see a redirect with `_vercel_jwt`, they stash the cookie and repeat the request once. After this tweak, both the ODT health probe and all `/api/convert` smokes (including html_input) run cleanly against the latest preview.
+
+Impact
+• html_input.html and similar HTML fixtures now convert reliably to Markdown in both the library (`convert_backend`) and the Edge `/api/convert` path, with security telemetry instead of 500 errors. ✅
+• Preview `/api/convert` health probe and `tests/converter_api_smoke.mjs` are resilient to 30x + `_vercel_jwt` protection handshakes, reducing false alarms when preview protection is enabled. ✅
+
+Testing
+• Local Python call to `convert_backend.convert_service.convert_batch()` with `html_input.html` confirms a non-blank `md` output and no error. ✅
+• `node scripts/convert_health_probe.mjs` against the latest Vercel preview (with automation bypass envs) returns a JSON summary with pandocVersion and non-trivial DOCX/MD sizes for `odt_invoice_sample.odt`. ✅
+• `CONVERTER_API_BASE_URL=<preview> node --test tests/converter_api_smoke.mjs` now passes all three smokes (tech_doc, html_input.html, odt_invoice_sample.odt) under the updated handshake logic. ✅
+
+### Major changes — 2025-12-01 03:25 CET (UTC+01:00) — PDF layout presets (margins + page size)
+
+Added
+• New `pdf_margin_preset` and `pdf_page_size` fields on `ConversionOptions` (library) and `convert_backend.app.Options` (API) so the fallback ReportLab PDF renderer can honour simple layout presets.
+• A small "PDF layout" control in the converter Svelte UI that lets users choose a margin preset (Standard, Compact, Wide) and page size (US Letter, A4); these options are sent as `pdfMarginPreset`/`pdfPageSize` only when PDF is among the requested targets.
+
+Modified
+• ReportLab fallback now derives its `pagesize` and margins from the supplied options when present:
+  - `pdf_page_size` supports `letter` (default) and `A4`.
+  - `pdf_margin_preset` supports `standard` (existing tuned values), `compact` (smaller margins), and `wide` (larger margins).
+• Converter logs include a `pdf_margin_preset=<value>` entry when a preset is active, alongside the existing `pdf_engine=reportlab` tag.
+
+Fixed
+• None – this is a user-facing enhancement rather than a bug fix. Existing PDF conversions without explicit layout options continue to use the current LETTER page size and tuned margins.
+
+Human-readable summary
+
+Previously, the converter’s fallback PDF renderer used a single hard-coded page layout: US Letter with a specific set of margins that worked well for most documents but couldn’t be tweaked without code changes. For users who want slightly tighter or wider layouts, or who prefer A4 over Letter, there was no knob to turn.
+
+Now the converter exposes a tiny layout selector: when you pick PDF as a target, you can choose a margin preset (Standard, Compact, Wide) and a page size (Letter or A4). Under the hood, those choices are passed through `/api/convert` into the ReportLab fallback, which adjusts its page size and margins accordingly. The external Chromium-based renderer (when configured) is unchanged – these presets only influence the pure-Python fallback – so existing production behaviour remains safe.
+
+Impact
+• Users who rely on the built-in PDF fallback can nudge margins tighter or wider and switch between US Letter and A4 without any CLI flags or code changes. ✅
+• Existing callers that do not set PDF layout options behave exactly as before (LETTER page size with the tuned margins). ✅
+
+Testing
+• Local library calls to `convert_backend.convert_service.convert_batch()` with `targets=['pdf']` and different `ConversionOptions(pdf_margin_preset=..., pdf_page_size=...)` confirm that the ReportLab fallback still returns valid PDF output for both default and compact/A4 presets. ✅
+• `node scripts/convert_health_probe.mjs` against the latest Vercel preview continues to succeed (non-trivial DOCX/MD sizes) using the ODT invoice fixture. ✅
+• `CONVERTER_API_BASE_URL=<preview> node --test tests/converter_api_smoke.mjs` still passes all smokes (tech_doc, html_input.html, odt_invoice_sample.odt), confirming that the new options are backwards-compatible with existing API contracts. ✅
+
+
 ### Major changes — 2025-11-28 16:05 CET (UTC+01:00) — Preview HTML + safer PDF fallback
 
 Added
@@ -1216,3 +1286,131 @@ Impact
 Testing
 • node --test tests/format_preview_renderers.test.mjs ✅
 • PYTHONPATH=. pytest tests/test_converter_enhancements.py -q ✅
+
+### Major changes — 2025-11-30 23:15 CET (UTC+01:00) — Preview fail-soft + sanitization
+
+Added
+• Soft fail-soft behaviour for converter previews: large or expensive JSON previews fall back to a line-numbered text view with a clear "preview simplified" banner, and CSV/Markdown/TeX preview errors now fail soft to text instead of breaking the page.
+• Lightweight HTML preview sanitiser that strips script/style/iframe/object/embed tags, inline event handlers, and javascript: URLs before content is rendered inside the sandboxed iframe.
+• New preview meta flags hasMoreRows/hasMoreNodes so the UI can tell when only a slice of large tables/JSON structures is shown.
+
+Modified
+• Converter backend now populates preview meta with approxBytes, row/col counts, jsonNodeCount, truncated, tooBigForPreview, hasMoreRows, and hasMoreNodes, and surfaces them through the /api/convert response.
+• CSV preview rendering in the iframe uses a scrollable tableWrap container with sticky headers for better behaviour on Safari/Firefox/mobile.
+• Markdown split view gains a simple responsive breakpoint so the two panes stack vertically on narrow screens.
+
+Fixed
+• **Problem:** Some HTML/Markdown previews could include unsafe script blocks or inline handlers, and large previews could feel janky or fail without user feedback.
+  - **Root cause:** Preview HTML was passed straight through pandoc into the iframe without a dedicated sanitisation pass, and preview renderers did not always have a safe fallback path.
+  - **Fix:** Introduced `sanitize_html_for_preview()` in the Python backend, wired it into both direct-HTML and Markdown preview paths, and added fail-soft fallbacks plus banners in the Svelte UI.
+  - **Evidence:** Tests — `node --test tests/format_preview_renderers.test.mjs`; `node --test tests/converter_edge_cases.test.mjs`; `PYTHONPATH=. pytest tests/test_converter_enhancements.py -q`.
+
+Human-readable summary
+
+Previews are now more robust and safer: if a document is huge or tricky, the converter shows a simplified text preview with a friendly banner instead of freezing, and the HTML shown in the preview iframe is scrubbed of obvious scripts and inline event hooks. For big tables and JSON blobs, the back end marks when only part of the data is being shown so the UI can explain that the full detail will be in the downloaded file.
+
+Impact
+• Faster, more predictable previews on large documents thanks to soft caps and fallbacks. ✅
+• Safer HTML/Markdown previews with scripts and javascript: URLs stripped before rendering. ✅
+• Clearer UX for partial previews, especially CSV/JSON, via new meta flags and messages. ✅
+
+Testing
+• node --test tests/format_preview_renderers.test.mjs ✅
+• node --test tests/converter_edge_cases.test.mjs ✅
+• PYTHONPATH=. pytest tests/test_converter_enhancements.py -q ✅
+
+### Major changes — 2025-12-01 10:15 CET (UTC+01:00) — ODT→DOCX regression guardrails and backend tests
+
+Added
+• New ODT invoice-style fixture (`tests/fixtures/converter/odt_invoice_sample.odt`) derived from a simple markdown invoice.
+• Python integration tests (`tests/test_convert_backend_odt_docx.py`) that drive the real `convert_backend` via-markdown pipeline for ODT inputs and assert that both markdown and DOCX outputs are non-blank and include an `INVOICE` marker.
+• Lightweight telemetry in `convert_backend.convert_service.convert_one()` logging the discovered `pandoc_version` and stage sizes for the markdown pipeline (`stage_raw_md_bytes`, `stage_filtered_md_bytes`, `stage_cleaned_md_bytes`, plus `stage_docx_bytes` when DOCX is produced).
+
+Modified
+• The via-markdown conversion path now emits a `suspected_blank_output=docx` log tag when a DOCX result for an ODT/DOCX input is suspiciously tiny (e.g., small DOCX bytes for a clearly non-trivial input), without changing user-visible behavior.
+• Internal logs for ODT/DOCX jobs now make it easier to compare dev vs preview/prod behavior by exposing pandoc version and rough stage sizes without logging document content.
+
+Fixed
+• None yet – these changes add detection, tests, and observability around ODT→DOCX blank-output regressions rather than a concrete functional fix. Current evidence suggests the bug is environment/codepath-specific and does not reproduce on the pinned dev toolchain.
+
+Human-readable summary
+
+**Problem N: The blank-invoice that won’t reproduce**
+
+Occasionally, converting an ODT invoice to Word produced an almost-empty DOCX in some environments, even though the same file looked fine when opened directly. Locally, the converter’s ODT→markdown→DOCX pipeline behaved perfectly, which made the bug feel like trying to catch a ghost: users could see it, but our tests could not.
+
+**The fix (this round): shine more light on the pipeline**
+
+Instead of guessing, we taught the converter to keep an eye on itself. We added a small ODT invoice fixture and new backend tests that run the *real* `convert_backend` path and check that both the markdown and DOCX outputs are non-blank and contain an obvious `INVOICE` marker. At the same time, the converter now logs how big each stage is (raw markdown, filtered markdown, cleaned markdown, and DOCX) and records which pandoc version it is using. If it ever produces a suspiciously tiny DOCX for a large ODT/DOCX input, it adds a `suspected_blank_output=docx` flag to the logs so we can spot the problem immediately.
+
+Impact
+• ODT→DOCX regressions are much more likely to be caught by tests before they reach users. ✅
+• When something does go wrong in preview/prod, logs now clearly show which stage lost content and which pandoc version/flags were in play. ✅
+• No changes to the public API or normal success paths; the changes are purely about coverage and observability. ✅
+
+Testing
+• .venv/bin/python -m pytest tests/test_converter_enhancements.py tests/test_convert_backend_odt_docx.py ✅
+
+Commits
+• (pending) – local working tree changes in `convert_backend/convert_service.py`, `tests/test_convert_backend_odt_docx.py`, `tests/fixtures/converter/odt_invoice_sample.*`, and `scripts/odt_docx_stage_probe.py`.
+
+### Major changes — 2025-11-30 23:45 CET (UTC+01:00) — Time budgets, URL guards, and UI smokes
+
+Added
+• Dev/preview-only telemetry hooks in the Svelte converter page so preview fallbacks, truncation, and format sniff disagreements are logged in a lightweight, console-based way.
+• Soft client-side time budgets for CSV preview rendering that detect slow parsing/rendering and fail soft to the text preview with an explanatory banner instead of risking UI jank.
+• Additional Puppeteer UI smokes for the converter: one for fail-soft banners on large CSV/JSON payloads, one for responsive Markdown behaviour at mobile widths, and one that checks the file input `accept` attribute allows PDF selection (Safari compatibility).
+
+Modified
+• `sanitize_html_for_preview()` now also downgrades risky `data:` URLs (anything outside a tiny image allow-list) and http(s) links to private/loopback hosts to harmless `#` placeholders with audit tags.
+• Converter backend logs lightweight `preview_format_mismatch=...` telemetry when content analysis (JSON/tabular) disagrees with the requested `from` format, without changing behaviour.
+• The preview header in the converter UI now carries per-format labels (CSV/JSON/Markdown/Text/TeX) and ARIA metadata so screen readers get clearer context about what is being shown.
+
+Fixed
+• **Problem:** Preview sanitisation didn’t explicitly guard against `data:` URLs with unsafe payloads or http(s) links to private hosts, and there was no backend telemetry when content clearly disagreed with the requested format.
+  - **Root cause:** The original sanitizer focused on script/style/iframe/object/embed tags and `javascript:` URLs but left other URL schemes largely untouched; converter meta analysis wasn’t wired into any logging.
+  - **Fix:** Tightened `sanitize_html_for_preview()` to neutralise non-image `data:` URLs and private-host http(s) URLs, and added best-effort format mismatch logging based on existing `safe_parse_limited()` analysis.
+  - **Evidence:** `PYTHONPATH=. pytest tests/test_converter_enhancements.py -q` (new sanitiser tests) plus `node --test tests/format_preview_renderers.test.mjs` and `node --test tests/converter_edge_cases.test.mjs`.
+
+Human-readable summary
+
+The converter’s preview layer now keeps a closer eye on where embedded URLs point and how heavy preview work gets. On the backend, HTML used in previews is scrubbed not just of scripts but also of dangerous `data:` URLs and links to obvious private hosts, and we log when content looks JSON- or table-like but the caller asked for something else. On the frontend, CSV preview has a soft time budget with a friendly fail-soft banner, the preview header clearly identifies the format for screen readers, and new Puppeteer smokes exercise large CSV/JSON previews, mobile Markdown layout, and the Safari PDF file-picker fix.
+
+Impact
+• Stronger protection against previews trying to talk to localhost/RFC1918 endpoints or embedding unsafe `data:` payloads. ✅
+• Better observability of content/format mismatches and preview fallbacks without adding heavy telemetry infrastructure. ✅
+• Higher confidence in converter UX through new UI smokes, including checks that Safari can pick `.pdf` files via the converter’s upload input. ✅
+
+Testing
+• PYTHONPATH=. pytest tests/test_converter_enhancements.py -q ✅
+• node --test tests/format_preview_renderers.test.mjs ✅
+• node --test tests/converter_edge_cases.test.mjs ✅
+• BASE_URL=https://tinyutils.net/tools/text-converter/ node scripts/ui_smoke_converter_preview.mjs (pre-existing) ✅
+• BASE_URL=https://tinyutils.net/tools/text-converter/ node scripts/ui_smoke_converter_fail_soft.mjs (requires local Chrome for Puppeteer) ⚠️
+• BASE_URL=https://tinyutils.net/tools/text-converter/ node scripts/ui_smoke_safari_pdf_accept.mjs (requires local Chrome for Puppeteer) ⚠️
+
+### Major changes — 2025-12-01 22:25 CET (UTC+01:00) — Direct DOCX/ODT outputs for rich sources
+
+Added
+• Direct docx/odt conversion path for rich inputs (`docx_strategy=direct_from_source`, `odt_strategy=direct_from_source`) covering ODT/DOCX/RTF/EPUB/HTML sources when the target is DOCX or ODT.
+
+Modified
+• convert_backend.convert_service: `_build_target_artifacts` now routes DOCX/ODT targets from rich sources through direct pandoc conversion instead of the markdown intermediate when possible; falls back to the markdown path on errors.
+• Logging retains `stage_docx_bytes` and adds strategy tags for diagnostics.
+
+Fixed
+• **Problem:** Rich-source inputs with embedded HTML tables produced near-empty DOCX because the markdown→docx writer discards raw HTML.
+  - **Root cause:** The shared markdown intermediate preserves raw HTML blocks that the docx writer ignores.
+  - **Fix:** When source is ODT/DOCX/RTF/EPUB/HTML and target is DOCX/ODT, convert directly from the source with pandoc, preserving tables/headings; keep the markdown path for previews and other targets.
+  - **Evidence:** artifacts/odt-docx-regression/20251201/nov16-30_direct_fix.txt (DOCX now contains INVOICE/Cavin markers for November 16-30.odt); pytest tests/test_convert_backend_odt_docx.py (HTML→DOCX direct-path test).
+
+Human-readable summary
+• DOCX/ODT exports from rich inputs now keep their tables/headings instead of coming out blank; backend logs which strategy was used.
+
+Impact
+• ODT/DOCX/RTF/EPUB/HTML → DOCX/ODT conversions retain full content ✅
+• Telemetry unchanged (stage_docx_bytes) plus strategy tag for debugging ✅
+• Previews and other targets unaffected ✅
+
+Testing
+• PYTHONPATH=. pytest tests/test_convert_backend_odt_docx.py
