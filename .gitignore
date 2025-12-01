@@ -43,3 +43,4 @@ build/
 .env.vercel.local
 CLAUDE.md
 AGENTS.md
+CHATGPT.md

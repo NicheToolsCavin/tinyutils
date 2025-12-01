@@ -7,16 +7,35 @@
 	let isProcessing = false;
 	let errorMessage = '';
 
+	const MAX_UPLOAD_BYTES = 50 * 1024 * 1024; // 50MB, aligned with backend
+
 	function handleFile(event) {
 		const input = event.currentTarget;
 		const selected = input.files && input.files[0] ? input.files[0] : null;
-		if (selected && selected.name.toLowerCase().endsWith('.zip')) {
-			file = selected;
-			errorMessage = '';
-		} else {
+		if (!selected) {
 			file = null;
-			errorMessage = 'Please upload a ZIP file containing PDFs.';
+			errorMessage = '';
+			return;
 		}
+
+		const name = selected.name.toLowerCase();
+		const isZip = name.endsWith('.zip');
+		const isPdf = name.endsWith('.pdf');
+
+		if (!isZip && !isPdf) {
+			file = null;
+			errorMessage = 'Please upload a PDF or a ZIP containing PDFs.';
+			return;
+		}
+
+		if (selected.size > MAX_UPLOAD_BYTES) {
+			file = null;
+			errorMessage = 'File too large. Max 50MB.';
+			return;
+		}
+
+		file = selected;
+		errorMessage = '';
 	}
 
 	async function process() {
@@ -61,14 +80,14 @@
 	<title>Bulk PDF Text Extractor | TinyUtils</title>
 	<meta
 		name="description"
-		content="Upload a ZIP of PDFs and download a ZIP of plain text files. Perfect for researchers, legal teams, and AI data preparation."
+		content="Upload a PDF or a ZIP of PDFs and download a ZIP of plain text files. Perfect for researchers, legal teams, and AI data preparation."
 	/>
 	<link rel="canonical" href="/tools/pdf-text-extractor/" />
 </svelte:head>
 
 <Hero
 	title="Bulk PDF Text Extractor"
-	subtitle="Turn a folder of PDFs into searchable plain text files in one click."
+	subtitle="Upload a single PDF or a ZIP of PDFs and get a ZIP of text files."
 />
 
 <div class="max-w-5xl mx-auto px-4 py-12">
@@ -80,18 +99,19 @@
 			>
 				<input
 					type="file"
-					accept=".zip"
+					accept=".pdf,.zip,application/pdf,application/zip"
 					class="hidden"
+					data-testid="pdf-extract-upload-input"
 					on:change={handleFile}
 				/>
 				<div class="text-gray-500">
 					{#if file}
-						<div class="text-red-600 font-bold text-lg mb-2">📦 {file.name}</div>
+						<div class="text-red-600 font-bold text-lg mb-2">📄 {file.name}</div>
 						<div class="text-sm">{(file.size / 1024 / 1024).toFixed(2)} MB</div>
 					{:else}
 						<span class="text-5xl block mb-4">📑</span>
-						<p class="font-medium text-lg text-gray-700">Drag &amp; drop a ZIP containing PDFs</p>
-						<p class="text-sm text-gray-400 mt-2">Max 50MB • Up to 50 files</p>
+						<p class="font-medium text-lg text-gray-700">Drag &amp; drop a PDF or a ZIP of PDFs</p>
+						<p class="text-sm text-gray-400 mt-2">Accepted: .pdf, .zip • Max 50MB • Up to 50 files</p>
 					{/if}
 				</div>
 			</div>
@@ -100,6 +120,7 @@
 		<button
 			class="w-full py-4 bg-gray-900 text-white font-bold rounded-xl shadow-lg hover:bg-black transition-transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2"
 			type="button"
+			data-testid="pdf-extract-run-button"
 			disabled={!file || isProcessing}
 			on:click={process}
 		>
@@ -153,4 +174,3 @@
 		<AdSlot slot="2563094163" format="horizontal" />
 	</div>
 </div>
-

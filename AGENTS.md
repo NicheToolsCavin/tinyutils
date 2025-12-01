@@ -43,6 +43,8 @@
 >
 > `magic` (21st.dev) is great for UI work — you can ask it for nicer components, tables, inputs, or whole panels when polishing pages.
 >
+> `openmemory` is the global memory MCP shared by all agents and projects; use it to store and retrieve long-lived rules, workflows, and user preferences (tagged with the project, e.g. `tinyutils`) so you don't need to re-read AGENTS/CHATGPT every time (never store secrets or tokens).
+>
 > `tiny-reactive` provides browser automation for testing tools, capturing screenshots, and verifying UIs. **Perfect for testing Vercel preview deployments!** Navigate, click, type, wait, evaluate JS, and screenshot — all automated through MCP.
 >
 > **Key tiny-reactive use cases:**
@@ -58,6 +60,146 @@
 > 3. Use `localhost` (not 127.0.0.1) for navigation due to allowlist
 >
 > TL;DR: when it helps, agents **should** reach for these MCP servers instead of guessing — especially for docs-heavy work, deep reasoning, UI/UX polish, or browser automation testing.
+
+---
+
+## OpenMemory / Venice / MCP quick reference
+
+This environment runs an OpenMemory backend with Venice embeddings and exposes it via MCP.
+
+- Backend repo: `~/dev/openmemory`
+- Backend server: `~/dev/openmemory/backend` → `npm run dev`
+- Default URL: `http://localhost:8080`
+  - MCP endpoint: `http://localhost:8080/mcp`
+  - Health: `GET /health` → JSON embedding + tier info
+  - Memory HTTP API: `POST /memory/add`, `POST /memory/query`, etc.
+- Global DB: `~/.openmemory/global.sqlite`
+- Embeddings: Venice `text-embedding-bge-m3` via OpenAI‑compatible `/embeddings`
+- Config doc: `~/dev/openmemory/OPENMEMORY_VENICE_MCP_SETUP.md`
+
+MCP servers available in this environment:
+
+- `openmemory` → OpenMemory memory engine (via `mcp-remote` → `http://localhost:8080/mcp`)
+- `context7`, `sequential-thinking`, `magic`, `tiny-reactive`, `gitmcp-tinyutils`, etc. (see `~/.code/config.toml` and `~/.codex/config.toml`)
+
+Use MCP tools for most memory operations:
+
+- `openmemory_store` → add memory
+- `openmemory_query` → semantic query
+- `openmemory_get` / `openmemory_list` / `openmemory_reinforce` → inspect and manipulate memories
+
+Use HTTP/curl only for advanced or unexposed routes:
+
+```bash
+# Health
+curl -s http://localhost:8080/health | jq
+
+# Add a memory
+curl -s -X POST http://localhost:8080/memory/add \
+  -H 'Content-Type: application/json' \
+  -d '{"content":"Example memory","user_id":"tinyutils"}'
+
+# Query memory
+curl -s -X POST http://localhost:8080/memory/query \
+  -H 'Content-Type: application/json' \
+  -d '{"query":"Example","k":8,"filters":{"user_id":"tinyutils"}}'
+
+# Dashboard JSON (no HTML UI):
+curl -s http://localhost:8080/dashboard/stats | jq
+curl -s http://localhost:8080/dashboard/health | jq
+```
+
+If OpenMemory looks broken, consult `OPENMEMORY_VENICE_MCP_SETUP.md` first.
+
+### Understanding OpenMemory: Storage, Retrieval, and Presentation
+
+OpenMemory uses a **three-layer architecture** that separates storage from retrieval from UI presentation. Understanding this prevents confusion about "truncation":
+
+**Layer 1: Storage (Ground Truth)**
+- Full memory text is stored in `memories.content` (no truncation)
+- All historical memories have complete content
+- Config: `OM_USE_SUMMARY_ONLY=false` in backend ensures full text preservation
+
+**Layer 2: Retrieval (Embeddings & Search)**
+- Semantic search (`openmemory_query`) searches against the **full stored memory text**
+- Relevance scoring is based on complete embeddings, not summaries
+- All search results pull from the full memory content
+- You always get the most semantically relevant complete memories
+
+**Layer 3: Presentation (UI Display)**
+- `openmemory_query` returns human-readable text with **short previews** (~200 chars) for quick scanning
+- JSON results in `matches[i].content` contain the **full memory text**
+- `openmemory_list` uses `content_preview` for brevity (summaries)
+- `openmemory_get` always returns the **complete memory** with no truncation
+
+### Practical: Accessing Summaries vs Full Content
+
+**Quick scan (summary first):**
+```python
+# openmemory_query returns preview snippets for quick reading
+results = openmemory_query("ChatGPT 401 preview smoke")
+# result.content shows first ~200 chars: "## ChatGPT 401 Unauthorized..."
+# Perfect for scanning many results
+```
+
+**Full details (when you need everything):**
+```python
+# Option A: Use openmemory_get with memory ID
+full_memory = openmemory_get(id="d378df52-05dc-4f07-a41d-d3f2596c978f")
+# Returns complete stored memory: full content, all metadata
+
+# Option B: Read full content from query JSON
+results = openmemory_query("issue")
+full_text = results.matches[0].content  # JSON gives you the entire memory
+```
+
+**Key distinction:**
+- Human-readable text preview (summary) = quick UI display
+- JSON `.content` field = actual full stored memory text
+- Never assume truncation = incomplete storage; the full text is there
+
+### When to Store in OpenMemory
+
+Store persistent knowledge that **multiple agents across multiple sessions will need**:
+- ✅ Operational fixes (like "ChatGPT 401 preview smoke fix" with exact steps)
+- ✅ Project rules and constraints
+- ✅ Stable workflows or patterns (e.g., "how we handle preview auth")
+- ✅ User preferences and style guidelines
+- ✅ Lessons learned (e.g., "silent blank DOCX conversion detection gap")
+
+**Never store:**
+- ❌ Secrets, tokens, API keys, credentials
+- ❌ Transient session logs
+- ❌ Temporary debugging notes
+- ❌ One-off task results (unless they're pattern-breaking insights)
+
+### Example: Storing & Retrieving a Fix
+
+**Store (once, permanently):**
+```python
+openmemory_store(
+  content="""## ChatGPT 401 Unauthorized Preview Smoke Test - FIX
+Error: ChatGPT failed with 401 unauthorized when running preview smoke tests.
+Root Cause: Missing `VERCEL_AUTOMATION_BYPASS_SECRET` env var.
+Solution: [full instructions with code blocks]
+""",
+  tags=["tinyutils", "preview", "401-unauthorized", "smoke-test"],
+  user_id="tinyutils",
+  metadata={"project": "tinyutils", "issue": "401-preview-auth"}
+)
+```
+
+**Retrieve (any future session):**
+```python
+# Agent in month 4 doesn't remember this fix
+results = openmemory_query("401 unauthorized preview smoke")
+# Gets back the fix with summary preview + full JSON content
+# Can immediately apply the solution without re-debugging
+```
+
+#  AGENTS USAGE:
+
+Due to improper use of agents, the user has described the use of certain agents in the file found in this directory: `JUSTEVERY_AGENTS_LIST.md`. When doing any multi-agent task, you  must read and follow this file.
 
 
 ---
