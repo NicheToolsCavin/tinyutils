@@ -760,7 +760,7 @@
   .card-shine {
     position: absolute;
     top: 0;
-    left: -100%;
+    left: -75%;
     width: 100%;
     height: 100%;
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
@@ -771,7 +771,7 @@
   }
 
   .glass-card:hover .card-shine {
-    left: 100%;
+    left: 75%;
   }
 
   /* Corner decorations */
