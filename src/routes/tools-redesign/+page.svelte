@@ -618,7 +618,9 @@
     transform: translateY(40px);
     animation: cardEnter 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     animation-delay: var(--delay);
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition:
+      transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+      filter 0.5s ease;
     transform-style: preserve-3d;
     cursor: pointer;
   }
@@ -639,28 +641,16 @@
     grid-row: span 1;
   }
 
-  .glass-card:hover .card-glow {
-    opacity: 0.6;
+  .glass-card:hover {
+    filter:
+      drop-shadow(0 0 20px var(--tool-color))
+      drop-shadow(0 0 40px color-mix(in srgb, var(--tool-color) 50%, transparent))
+      drop-shadow(0 0 60px color-mix(in srgb, var(--tool-color) 25%, transparent));
   }
 
-  /* Glow effect - soft ambient light with smooth falloff */
+  /* Glow effect - disabled in favor of drop-shadow filter */
   .card-glow {
-    position: absolute;
-    inset: -40px;
-    background: radial-gradient(
-      ellipse at center,
-      var(--tool-color) 0%,
-      color-mix(in srgb, var(--tool-color) 60%, transparent) 20%,
-      color-mix(in srgb, var(--tool-color) 30%, transparent) 40%,
-      color-mix(in srgb, var(--tool-color) 10%, transparent) 60%,
-      transparent 100%
-    );
-    border-radius: 50%;
-    opacity: 0;
-    filter: blur(12px);
-    transition: opacity 0.5s ease;
-    z-index: 0;
-    animation: pulse-glow 3s ease-in-out infinite;
+    display: none;
   }
 
   @keyframes pulse-glow {
