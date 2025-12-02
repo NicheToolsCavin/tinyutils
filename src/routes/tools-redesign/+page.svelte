@@ -663,7 +663,7 @@
   .card-glow {
     position: absolute;
     inset: -30px;
-    background: radial-gradient(ellipse at center, var(--tool-color) 0%, transparent 70%);
+    background: radial-gradient(ellipse at center, var(--tool-color) 0%, transparent 100%);
     border-radius: 50%;
     opacity: 0;
     filter: blur(40px);
