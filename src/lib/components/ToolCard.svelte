@@ -48,6 +48,7 @@
     flex-direction: column;
     gap: var(--space-2);
     height: 100%;
+    min-height: 440px;
   }
 
   .tool-card-enhanced::before {
@@ -202,6 +203,7 @@
     .tool-card-enhanced {
       padding: var(--space-3);
       gap: var(--space-1);
+      min-height: auto;
     }
 
     .tool-card-icon {

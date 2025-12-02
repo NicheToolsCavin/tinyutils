@@ -135,7 +135,12 @@
 		<!-- Step 1: Upload -->
 		{#if step === 1}
 			<div in:fade>
-				<h2 class="text-lg font-semibold text-gray-800 mb-4">1. Upload two files to join</h2>
+				<h2
+					class="text-lg font-semibold text-gray-800 mb-4"
+					data-testid="csv-joiner-step-heading"
+				>
+					1. Upload two files to join
+				</h2>
 				<div
 					class="border-2 border-dashed border-gray-300 rounded-xl p-10 text-center hover:bg-gray-50 transition-colors relative"
 				>
@@ -144,6 +149,7 @@
 						accept=".csv,.tsv,.txt"
 						multiple
 						class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+						data-testid="csv-joiner-upload-input"
 						on:change={(e) => {
 							files = Array.from(e.currentTarget.files ?? []).slice(0, 2);
 							if (files.length === 2) handleScan();

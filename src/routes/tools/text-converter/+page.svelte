@@ -1,6 +1,25 @@
 <script>
   import { onMount } from 'svelte';
-  import { parseCsvContent, CSV_MAX_ROWS } from '$lib/utils/csvParser.js';
+
+  const PREVIEW_PARSE_BUDGET_MS = 150;
+  const PREVIEW_RENDER_BUDGET_MS = 750;
+  const JSON_PREVIEW_NODE_LIMIT = 5000;
+
+  const DEV_TELEMETRY_ENABLED =
+    typeof import.meta !== 'undefined' &&
+    import.meta.env &&
+    (import.meta.env.DEV ||
+      import.meta.env.MODE === 'development' ||
+      import.meta.env.MODE === 'preview');
+
+  function logPreviewEvent(event, details = {}) {
+    if (!DEV_TELEMETRY_ENABLED) return;
+    try {
+      console.debug('[converter-preview]', event, details);
+    } catch (e) {
+      // Ignore logging failures
+    }
+  }
 
   const DEMO_SNIPPET = [
     '# TinyUtils Demo Document',
@@ -39,23 +58,20 @@
     const optAcceptTracked = document.getElementById('optAcceptTracked');
     const optExtractMedia = document.getElementById('optExtractMedia');
     const optRemoveZW = document.getElementById('optRemoveZW');
-    const pdfMarginsRow = document.getElementById('pdfMarginsRow');
-    const pdfMarginStrategy = document.getElementById('pdfMarginStrategy');
-    const customMarginsDiv = document.getElementById('customMarginsDiv');
-    const pdfSideMargin = document.getElementById('pdfSideMargin');
-    const pdfVertMargin = document.getElementById('pdfVertMargin');
-    const pdfPageSize = document.getElementById('pdfPageSize');
+    const pdfMarginPresetSel = document.getElementById('pdfMarginPreset');
+    const pdfPageSizeSel = document.getElementById('pdfPageSize');
     const previewBtn = document.getElementById('previewBtn');
     const previewPanel = document.getElementById('previewPanel');
+    const previewHeader = document.getElementById('previewHeader');
     const previewIframe = document.getElementById('previewIframe');
     const previewUnavailableCard = document.getElementById('previewUnavailableCard');
     const previewTooBigCard = document.getElementById('previewTooBigCard');
-    const previewJsonFallbackNotice = document.getElementById('previewJsonFallbackNotice');
     const convertBtn = document.getElementById('convertBtn');
     const clearBtn = document.getElementById('clearBtn');
     const demoBtn = document.getElementById('demoBtn');
     const progressMessageEl = document.getElementById('progressMessage');
     const progressMeter = document.getElementById('progressMeter');
+    const previewStatusBanner = document.getElementById('previewStatusBanner');
     const resultsBody = document.querySelector('#results tbody');
 
     let currentFile = null;
@@ -103,74 +119,253 @@
       })[ch]);
     }
 
+    function setPreviewBanner(message, tone = 'info') {
+      if (!previewStatusBanner) return;
+      if (!message) {
+        previewStatusBanner.textContent = '';
+        previewStatusBanner.hidden = true;
+        previewStatusBanner.classList.remove('preview-status--info', 'preview-status--warn');
+        return;
+      }
+      previewStatusBanner.textContent = message;
+      previewStatusBanner.hidden = false;
+      previewStatusBanner.classList.remove('preview-status--info', 'preview-status--warn');
+      previewStatusBanner.classList.add(tone === 'warn' ? 'preview-status--warn' : 'preview-status--info');
+    }
+
+    function sniffFormatFromContent(content) {
+      if (!content || typeof content !== 'string') return null;
+      const trimmed = content.trim();
+      if (!trimmed) return null;
+
+      // JSON-ish
+      if (/^\s*[\[{]/.test(trimmed)) return 'json';
+
+      const firstLines = trimmed.split(/\r?\n/).slice(0, 5);
+      let commaLike = 0;
+      let semiLike = 0;
+      for (const line of firstLines) {
+        if (/,/.test(line)) commaLike += 1;
+        if (/;/.test(line)) semiLike += 1;
+      }
+      if (commaLike >= 2 || semiLike >= 2) return 'csv';
+
+      if (/^#{1,6}\s/.test(firstLines[0] || '') || /^---\s*$/.test(firstLines[0] || '')) {
+        return 'md';
+      }
+
+      if (/\\documentclass|\\begin\{document\}/.test(trimmed)) return 'tex';
+
+      return null;
+    }
+
     // Format-specific preview renderers
+
+    function parseCsvContent(content, maxRows = 100) {
+      // Minimal RFC 4180-style CSV parser for the *whole* content.
+      // Supports:
+      //   - quoted fields
+      //   - commas inside quotes
+      //   - doubled quotes inside quoted fields ("")
+      //   - CRLF or LF line endings
+      const rows = [];
+      let row = [];
+      let current = '';
+      let inQuotes = false;
+
+      const pushCell = () => {
+        const trimmed = current.trim();
+        let value = trimmed;
+        if (trimmed.length >= 2 && trimmed.startsWith('"') && trimmed.endsWith('"')) {
+          // Strip surrounding quotes and collapse doubled quotes.
+          value = trimmed.slice(1, -1).replace(/""/g, '"');
+        }
+        row.push(value);
+        current = '';
+      };
+
+      const pushRow = () => {
+        // Skip a completely empty row
+        if (row.length === 1 && row[0] === '') {
+          row = [];
+          return;
+        }
+        rows.push(row);
+        row = [];
+      };
+
+      for (let i = 0; i < content.length; i += 1) {
+        const ch = content[i];
+        if (ch === '"') {
+          if (inQuotes && content[i + 1] === '"') {
+            current += '"';
+            i += 1;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (ch === ',' && !inQuotes) {
+          pushCell();
+        } else if ((ch === '\n' || ch === '\r') && !inQuotes) {
+          pushCell();
+          pushRow();
+          if (rows.length >= maxRows) break;
+          // Consume paired CRLF
+          if (ch === '\r' && content[i + 1] === '\n') {
+            i += 1;
+          }
+        } else {
+          current += ch;
+        }
+      }
+
+      // Flush last cell/row
+      if (current.length || row.length) {
+        pushCell();
+        pushRow();
+      }
+
+      return rows.slice(0, maxRows);
+    }
 
     function renderCSVPreview(content) {
       if (!content || !previewIframe) return;
-      if (previewJsonFallbackNotice) previewJsonFallbackNotice.style.display = 'none';
-      const rows = parseCsvContent(content, CSV_MAX_ROWS);
-      if (!rows.length) {
-        previewIframe.srcdoc = '';
-        return;
-      }
-      const parts = [
-        '<style>table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:8px;text-align:left}th{background:#f4f4f4}</style>',
-        '<div data-testid="converter-csv-preview"><table data-testid="converter-csv-preview-table">'
-      ];
-      rows.forEach((cells, idx) => {
-        parts.push(idx === 0 ? '<thead><tr>' : '<tr>');
-        cells.forEach((cell) => {
-          parts.push(idx === 0 ? `<th>${escapeHtml(cell)}</th>` : `<td>${escapeHtml(cell)}</td>`);
+      try {
+        const hasPerf = typeof performance !== 'undefined' && typeof performance.now === 'function';
+        const start = hasPerf ? performance.now() : 0;
+
+        const rows = parseCsvContent(content, 100);
+        if (!rows.length) {
+          previewIframe.srcdoc = '';
+          return;
+        }
+
+        let parseMs = 0;
+        if (hasPerf && start) {
+          parseMs = performance.now() - start;
+        }
+
+        if (parseMs && parseMs > PREVIEW_PARSE_BUDGET_MS) {
+          logPreviewEvent('csv_preview_parse_budget_exceeded', {
+            parseMs,
+            rowCount: rows.length
+          });
+          setPreviewBanner('Preview simplified to keep the page responsive; download for full detail.', 'warn');
+          renderTextPreview(content);
+          return;
+        }
+
+        let html = '<style>.tableWrap{max-height:480px;overflow:auto;}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:8px;text-align:left}th{background:#f4f4f4;position:sticky;top:0;z-index:1}</style><div class="tableWrap"><table>';
+        let renderBudgetHit = false;
+
+        rows.forEach((cells, idx) => {
+          if (!renderBudgetHit && hasPerf && start && PREVIEW_RENDER_BUDGET_MS > 0) {
+            const elapsed = performance.now() - start;
+            if (elapsed > PREVIEW_RENDER_BUDGET_MS) {
+              renderBudgetHit = true;
+              return;
+            }
+          }
+          html += idx === 0 ? '<thead><tr>' : '<tr>';
+          cells.forEach((cell) => {
+            html += idx === 0 ? `<th scope="col">${escapeHtml(cell)}</th>` : `<td>${escapeHtml(cell)}</td>`;
+          });
+          html += idx === 0 ? '</tr></thead><tbody>' : '</tr>';
         });
-        parts.push(idx === 0 ? '</tr></thead><tbody>' : '</tr>');
-      });
-      parts.push('</tbody></table></div>');
-      const html = parts.join('');
-      previewIframe.srcdoc = html;
+
+        if (renderBudgetHit) {
+          logPreviewEvent('csv_preview_render_budget_exceeded', {
+            rowCount: rows.length
+          });
+          setPreviewBanner('Preview simplified to keep the page responsive; download for full detail.', 'warn');
+          renderTextPreview(content);
+          return;
+        }
+
+        html += '</tbody></table></div>';
+        previewIframe.srcdoc = html;
+      } catch (err) {
+        console.error('converter: CSV preview failed, falling back to text', err);
+        logPreviewEvent('csv_preview_error_fallback', { message: String(err && err.message || err) });
+        setPreviewBanner('Preview simplified to keep the page responsive; download for full detail.', 'warn');
+        renderTextPreview(content);
+      }
     }
 
     function renderJSONPreview(content) {
       if (!content || !previewIframe) return;
       const MAX_JSON_PRETTY_CHARS = 200000; // avoid jank on very large JSON payloads
+      const hasPerf = typeof performance !== 'undefined' && typeof performance.now === 'function';
+      const start = hasPerf ? performance.now() : 0;
+
       if (content.length > MAX_JSON_PRETTY_CHARS) {
         // For very large JSON, fall back to the lightweight text preview
         // instead of pretty-printing on the main thread.
-        if (previewJsonFallbackNotice) previewJsonFallbackNotice.style.display = '';
-        renderTextPreview(content, { isJsonFallback: true });
+        logPreviewEvent('json_preview_size_budget_exceeded', {
+          length: content.length,
+          maxChars: MAX_JSON_PRETTY_CHARS
+        });
+        setPreviewBanner('Preview simplified to keep the page responsive; download for full detail.', 'warn');
+        renderTextPreview(content);
         return;
       }
       try {
-        const formatted = JSON.stringify(JSON.parse(content), null, 2);
+        const parsed = JSON.parse(content);
+        let parseMs = 0;
+        if (hasPerf && start) {
+          parseMs = performance.now() - start;
+        }
+        if (parseMs && parseMs > PREVIEW_PARSE_BUDGET_MS) {
+          logPreviewEvent('json_preview_parse_budget_exceeded', { parseMs });
+          setPreviewBanner('Preview simplified to keep the page responsive; download for full detail.', 'warn');
+          renderTextPreview(content);
+          return;
+        }
+
+        const formatted = JSON.stringify(parsed, null, 2);
+
+        const beforeRender = hasPerf && start ? performance.now() : 0;
         const html = `
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/themes/prism-tomorrow.min.css" integrity="sha512-vswe+cgvic/XBoF1OcM/TeJ2FW0OofqAVdCZiEYkd6dwGXthvkSFWOoGGJgS2CW70VK5dQM5Oh+7ne47s74VTg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/prism.min.js" integrity="sha512-HiD3V4nv8fcjtouznjT9TqDNDm1EXngV331YGbfVGeKUoH+OLkRTCMzA34ecjlgSQZpdHZupdSrqHY+Hz3l6uQ==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-SkmBfuA2hqjzEVpmnMt/LINrjop3GKWqsuLSSB3e7iBmYK7JuWw4ldmmxwD9mdm2IRTTi0OxSAfEGvgEi0i2Kw==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha512-vswe+cgvic/XBoF1OcM/TeJ2FW0OofqAVdCZiEYkd6dwGXthvkSFWOoGGJgS2CW70VK5dQM5Oh+7ne47s74VTg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-SkmBfuA2hqjzEVpmnMt/LINrjop3GKWqsuLSSB3e7iBmYK7JuWw4ldmmxwD9mdm2IRTTi0OxSAfEGvgEi0i2Kw==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
 <style>pre{margin:0;border-radius:0}body{margin:0;padding:1rem;background:#1e1e1e}</style>
 <pre><code class="language-json">${escapeHtml(formatted)}</code></pre>
 <script>
 if (window.Prism && Prism.plugins && Prism.plugins.autoloader) {
-  Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/components/';
+  Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/';
 }
 Prism.highlightAll();
 <\/script>`;
+        if (hasPerf && beforeRender) {
+          const renderMs = performance.now() - beforeRender;
+          if (renderMs > PREVIEW_RENDER_BUDGET_MS) {
+            logPreviewEvent('json_preview_render_budget_exceeded', { renderMs });
+            setPreviewBanner('Preview simplified to keep the page responsive; download for full detail.', 'warn');
+            renderTextPreview(content);
+            return;
+          }
+        }
+
         previewIframe.srcdoc = html;
-        if (previewJsonFallbackNotice) previewJsonFallbackNotice.style.display = 'none';
       } catch (e) {
-        if (previewJsonFallbackNotice) previewJsonFallbackNotice.style.display = '';
-        renderTextPreview(content, { isJsonFallback: true });
+        logPreviewEvent('json_preview_parse_error', { message: String(e && e.message || e) });
+        setPreviewBanner('Preview can\'t parse JSON; showing raw text instead.', 'warn');
+        renderTextPreview(content);
       }
     }
 
     function renderMarkdownPreview(content) {
       if (!content || !previewIframe) return;
-      if (previewJsonFallbackNotice) previewJsonFallbackNotice.style.display = 'none';
+      const hasPerf = typeof performance !== 'undefined' && typeof performance.now === 'function';
+      const start = hasPerf ? performance.now() : 0;
       // Simple side-by-side view: left shows syntax-highlighted markdown, right shows formatted text
       const escaped = escapeHtml(content);
       const formatted = escaped.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
+      const beforeRender = hasPerf && start ? performance.now() : 0;
       const html = `
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/prism.min.js" integrity="sha512-HiD3V4nv8fcjtouznjT9TqDNDm1EXngV331YGbfVGeKUoH+OLkRTCMzA34ecjlgSQZpdHZupdSrqHY+Hz3l6uQ==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-SkmBfuA2hqjzEVpmnMt/LINrjop3GKWqsuLSSB3e7iBmYK7JuWw4ldmmxwD9mdm2IRTTi0OxSAfEGvgEi0i2Kw==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-SkmBfuA2hqjzEVpmnMt/LINrjop3GKWqsuLSSB3e7iBmYK7JuWw4ldmmxwD9mdm2IRTTi0OxSAfEGvgEi0i2Kw==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
 <style>
 .md-container{display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding:1rem}
 .md-src,.md-formatted{border:1px solid #ddd;padding:1rem;overflow:auto;max-height:600px}
@@ -179,6 +374,7 @@ Prism.highlightAll();
 .md-formatted{background:#fff}
 h1,h2,h3,h4,h5,h6{margin:0.5rem 0}
 code{background:#f0f0f0;padding:2px 4px;border-radius:3px}
+@media (max-width: 768px){.md-container{grid-template-columns:1fr;}}
 </style>
 <div class="md-container">
   <div><b>Markdown Source</b><div class="md-src"><pre><code class="language-markdown">${escaped}</code></pre></div></div>
@@ -186,42 +382,79 @@ code{background:#f0f0f0;padding:2px 4px;border-radius:3px}
 </div>
 <script>
 if (window.Prism && Prism.plugins && Prism.plugins.autoloader) {
-  Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/components/';
+  Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/';
 }
 Prism.highlightAll();
 <\/script>`;
-      previewIframe.srcdoc = html;
+      try {
+        if (hasPerf && beforeRender) {
+          const renderMs = performance.now() - beforeRender;
+          if (renderMs > PREVIEW_RENDER_BUDGET_MS) {
+            logPreviewEvent('markdown_preview_render_budget_exceeded', { renderMs });
+            setPreviewBanner('Preview simplified to keep the page responsive; download for full detail.', 'warn');
+            renderTextPreview(content);
+            return;
+          }
+        }
+        previewIframe.srcdoc = html;
+      } catch (err) {
+        console.error('converter: Markdown preview failed, falling back to text', err);
+        logPreviewEvent('markdown_preview_error_fallback', { message: String(err && err.message || err) });
+        setPreviewBanner('Preview simplified to keep the page responsive; download for full detail.', 'warn');
+        renderTextPreview(content);
+      }
     }
 
-    function renderTextPreview(content, { isJsonFallback = false } = {}) {
+    function renderTextPreview(content) {
       if (!content || !previewIframe) return;
-      if (previewJsonFallbackNotice && !isJsonFallback) {
-        previewJsonFallbackNotice.style.display = 'none';
-      }
+      const hasPerf = typeof performance !== 'undefined' && typeof performance.now === 'function';
+      const start = hasPerf ? performance.now() : 0;
       const lines = content.split('\n');
       const numbered = lines.map((l, i) => `${String(i + 1).padStart(4, ' ')} | ${escapeHtml(l)}`).join('\n');
-      const html = `<style>pre{background:#f8f8f8;padding:1rem;font-family:monospace;overflow:auto}</style><pre${
-        isJsonFallback ? ' data-testid="converter-json-fallback-body"' : ''
-      }>${numbered}</pre>`;
+      const html = `<style>pre{background:#f8f8f8;padding:1rem;font-family:monospace;overflow:auto}</style><pre>${numbered}</pre>`;
+      if (hasPerf && start) {
+        const renderMs = performance.now() - start;
+        if (renderMs > PREVIEW_RENDER_BUDGET_MS) {
+          logPreviewEvent('text_preview_render_budget_exceeded', { renderMs, lineCount: lines.length });
+          setPreviewBanner('Preview simplified to keep the page responsive; download for full detail.', 'warn');
+        }
+      }
       previewIframe.srcdoc = html;
     }
 
     function renderTeXPreview(content) {
       if (!content || !previewIframe) return;
-      if (previewJsonFallbackNotice) previewJsonFallbackNotice.style.display = 'none';
+      const hasPerf = typeof performance !== 'undefined' && typeof performance.now === 'function';
+      const beforeRender = hasPerf ? performance.now() : 0;
       const html = `
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/themes/prism-tomorrow.min.css" integrity="sha512-vswe+cgvic/XBoF1OcM/TeJ2FW0OofqAVdCZiEYkd6dwGXthvkSFWOoGGJgS2CW70VK5dQM5Oh+7ne47s74VTg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/prism.min.js" integrity="sha512-HiD3V4nv8fcjtouznjT9TqDNDm1EXngV331YGbfVGeKUoH+OLkRTCMzA34ecjlgSQZpdHZupdSrqHY+Hz3l6uQ==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-SkmBfuA2hqjzEVpmnMt/LINrjop3GKWqsuLSSB3e7iBmYK7JuWw4ldmmxwD9mdm2IRTTi0OxSAfEGvgEi0i2Kw==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha512-vswe+cgvic/XBoF1OcM/TeJ2FW0OofqAVdCZiEYkd6dwGXthvkSFWOoGGJgS2CW70VK5dQM5Oh+7ne47s74VTg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-SkmBfuA2hqjzEVpmnMt/LINrjop3GKWqsuLSSB3e7iBmYK7JuWw4ldmmxwD9mdm2IRTTi0OxSAfEGvgEi0i2Kw==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
 <style>pre{margin:0;border-radius:0}body{margin:0;padding:1rem;background:#1e1e1e}</style>
 <pre><code class="language-latex">${escapeHtml(content)}</code></pre>
 <script>
 if (window.Prism && Prism.plugins && Prism.plugins.autoloader) {
-  Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/components/';
+  Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/';
 }
 Prism.highlightAll();
 <\/script>`;
-      previewIframe.srcdoc = html;
+      try {
+        if (hasPerf && beforeRender) {
+          const renderMs = performance.now() - beforeRender;
+          if (renderMs > PREVIEW_RENDER_BUDGET_MS) {
+            logPreviewEvent('tex_preview_render_budget_exceeded', { renderMs });
+            setPreviewBanner('TeX preview simplified to source-only view. Download for full document.', 'warn');
+            renderTextPreview(content);
+            return;
+          }
+        }
+        previewIframe.srcdoc = html;
+      } catch (err) {
+        console.error('converter: TeX preview failed, falling back to text', err);
+        logPreviewEvent('tex_preview_error_fallback', { message: String(err && err.message || err) });
+        setPreviewBanner('TeX preview simplified to source-only view. Download for full document.', 'warn');
+        renderTextPreview(content);
+      }
     }
 
     function formatBytes(bytes) {
@@ -346,22 +579,6 @@ Prism.highlightAll();
         mdDialectSel.disabled = !mdOn;
         mdDialectRow.style.opacity = mdOn ? '1' : '0.5';
       }
-
-      // Show/hide PDF margins section based on whether PDF is selected as a target format
-      const pdfOn = (toSingle && toSingle.value === 'pdf') || !!(toPdf && toPdf.checked);
-      if (pdfMarginsRow) {
-        pdfMarginsRow.style.display = pdfOn ? 'block' : 'none';
-        if (pdfMarginStrategy) pdfMarginStrategy.disabled = !pdfOn;
-        if (pdfPageSize) pdfPageSize.disabled = !pdfOn;
-      }
-
-      // Show/hide custom margins based on strategy selection
-      const useCustomMargins = pdfMarginStrategy && pdfMarginStrategy.value === 'custom';
-      if (customMarginsDiv) {
-        customMarginsDiv.style.display = useCustomMargins ? 'block' : 'none';
-      }
-      if (pdfSideMargin) pdfSideMargin.disabled = !useCustomMargins;
-      if (pdfVertMargin) pdfVertMargin.disabled = !useCustomMargins;
     }
 
     function restorePrefs() {
@@ -376,10 +593,8 @@ Prism.highlightAll();
       if (typeof prefs.optExtractMedia === 'boolean' && optExtractMedia) optExtractMedia.checked = prefs.optExtractMedia;
       if (typeof prefs.optRemoveZW === 'boolean' && optRemoveZW) optRemoveZW.checked = prefs.optRemoveZW;
       if (prefs.customExt && customExt) customExt.value = prefs.customExt;
-      if (prefs.pdfMarginStrategy && pdfMarginStrategy) pdfMarginStrategy.value = prefs.pdfMarginStrategy;
-      if (typeof prefs.pdfSideMargin === 'number' && pdfSideMargin) pdfSideMargin.value = prefs.pdfSideMargin;
-      if (typeof prefs.pdfVertMargin === 'number' && pdfVertMargin) pdfVertMargin.value = prefs.pdfVertMargin;
-      if (prefs.pdfPageSize && pdfPageSize) pdfPageSize.value = prefs.pdfPageSize;
+      if (prefs.pdfMarginPreset && pdfMarginPresetSel) pdfMarginPresetSel.value = prefs.pdfMarginPreset;
+      if (prefs.pdfPageSize && pdfPageSizeSel) pdfPageSizeSel.value = prefs.pdfPageSize;
     }
 
     function persistPrefs() {
@@ -393,10 +608,8 @@ Prism.highlightAll();
         optExtractMedia: optExtractMedia ? !!optExtractMedia.checked : false,
         optRemoveZW: optRemoveZW ? !!optRemoveZW.checked : true,
         customExt: customExt ? customExt.value : '',
-        pdfMarginStrategy: pdfMarginStrategy ? pdfMarginStrategy.value : 'auto',
-        pdfSideMargin: pdfSideMargin ? parseFloat(pdfSideMargin.value) : 0.45,
-        pdfVertMargin: pdfVertMargin ? parseFloat(pdfVertMargin.value) : 1,
-        pdfPageSize: pdfPageSize ? pdfPageSize.value : 'auto'
+        pdfMarginPreset: pdfMarginPresetSel ? pdfMarginPresetSel.value : '',
+        pdfPageSize: pdfPageSizeSel ? pdfPageSizeSel.value : '',
       };
       window.TinyUtilsStorage.savePrefs('converter', prefs);
     }
@@ -471,6 +684,7 @@ Prism.highlightAll();
       updateProgressState(initialMessage, previewOnly ? 40 : 20);
       if (resultsBody) resultsBody.innerHTML = '';
       if (previewPanel) previewPanel.style.display = 'none';
+      setPreviewBanner('', 'info');
 
       const thisRequest = ++requestCounter;
 
@@ -496,27 +710,23 @@ Prism.highlightAll();
 
         const hasMd = selectedFormats.includes('md');
         const dialectValue = mdDialectSel ? mdDialectSel.value : null;
+        const pdfMarginPreset = pdfMarginPresetSel ? pdfMarginPresetSel.value : null;
+        const pdfPageSize = pdfPageSizeSel ? pdfPageSizeSel.value : null;
 
-        const pdfMargins = selectedFormats.includes('pdf') ? {
-          strategy: pdfMarginStrategy ? pdfMarginStrategy.value : 'auto',
-          sideMargin: (pdfMarginStrategy?.value === 'custom' && pdfSideMargin) ? parseFloat(pdfSideMargin.value) || 0.45 : undefined,
-          vertMargin: (pdfMarginStrategy?.value === 'custom' && pdfVertMargin) ? parseFloat(pdfVertMargin.value) || 1 : undefined,
-          pageSize: pdfPageSize ? pdfPageSize.value || undefined : undefined
-        } : undefined;
-
-        const payload = {
-          inputs: [input],
-          from: fromFormat,
-          to: selectedFormats,
-          options: {
-            acceptTrackedChanges: !!optAcceptTracked?.checked,
-            extractMedia: !!optExtractMedia?.checked,
-            removeZeroWidth: !!optRemoveZW?.checked,
-            mdDialect: hasMd && dialectValue ? dialectValue : undefined,
-            pdfMargins: pdfMargins
-          },
-          preview: previewOnly ? true : undefined
-        };
+          const payload = {
+            inputs: [input],
+            from: fromFormat,
+            to: selectedFormats,
+            options: {
+              acceptTrackedChanges: !!optAcceptTracked?.checked,
+              extractMedia: !!optExtractMedia?.checked,
+              removeZeroWidth: !!optRemoveZW?.checked,
+              mdDialect: hasMd && dialectValue ? dialectValue : undefined,
+              pdfMarginPreset: selectedFormats.includes('pdf') && pdfMarginPreset ? pdfMarginPreset : undefined,
+              pdfPageSize: selectedFormats.includes('pdf') && pdfPageSize ? pdfPageSize : undefined
+            },
+            preview: previewOnly ? true : undefined
+          };
 
         async function sendOnce() {
           const controller = new AbortController();
@@ -612,19 +822,97 @@ Prism.highlightAll();
           if (previewUnavailableCard) previewUnavailableCard.style.display = 'none';
           if (previewTooBigCard) previewTooBigCard.style.display = 'none';
 
-        const previewFlags = data.preview || {};
-        const meta = data.meta || {};
-        const isTooBig = previewFlags.tooBigForPreview || meta.fileTooLargeForPreview;
+          const previewFlags = data.preview || {};
+          const meta = data.meta || {};
+          const isTooBig = previewFlags.tooBigForPreview || meta.fileTooLargeForPreview;
 
-        if (isTooBig) {
-          if (previewTooBigCard) previewTooBigCard.style.display = '';
-          if (previewJsonFallbackNotice) previewJsonFallbackNotice.style.display = 'none';
-          if (previewIframe) previewIframe.srcdoc = '';
-        } else {
+          if (isTooBig) {
+            if (previewTooBigCard) previewTooBigCard.style.display = '';
+            if (previewIframe) previewIframe.srcdoc = '';
+          } else {
             // Format-specific preview routing
-            const format = (previewFlags.format || 'html').toLowerCase();
+            const rawFormat = (previewFlags.format || 'html').toLowerCase();
             const content = previewFlags.content;
             const html = previewFlags.html;
+
+            let effectiveFormat = rawFormat;
+
+            if (content) {
+              const sniffed = sniffFormatFromContent(content);
+              const canOverride = !rawFormat || rawFormat === 'txt' || rawFormat === 'text' || rawFormat === 'md' || rawFormat === 'markdown';
+              if (sniffed && sniffed !== rawFormat && canOverride) {
+                effectiveFormat = sniffed;
+                const labelFrom = rawFormat ? rawFormat.toUpperCase() : 'UNKNOWN';
+                const labelTo = sniffed.toUpperCase();
+                setPreviewBanner(`Format looks like ${labelTo} but marked as ${labelFrom}; previewing as ${labelTo}.`, 'info');
+                logPreviewEvent('preview_format_sniff_disagreement', {
+                  rawFormat,
+                  sniffed
+                });
+              }
+            }
+
+            if (!previewStatusBanner?.textContent && (previewFlags.truncated || previewFlags.hasMoreRows || previewFlags.hasMoreNodes)) {
+              const totalRows = typeof previewFlags.row_count === 'number' ? previewFlags.row_count : null;
+              const totalNodes = typeof previewFlags.jsonNodeCount === 'number' ? previewFlags.jsonNodeCount : null;
+
+              let msg = 'Preview truncated for large content. Download to see the full document.';
+              if (previewFlags.hasMoreRows && !previewFlags.hasMoreNodes) {
+                const shownRows = 100;
+                if (totalRows && totalRows > shownRows) {
+                  msg = `Preview truncated after the first ${shownRows} rows out of approximately ${totalRows}. Download file to see all rows.`;
+                } else {
+                  msg = 'Only part of the table is shown in the preview. Download to see all rows.';
+                }
+              } else if (previewFlags.hasMoreNodes && !previewFlags.hasMoreRows) {
+                if (totalNodes && totalNodes > JSON_PREVIEW_NODE_LIMIT) {
+                  const approxTotal = totalNodes.toLocaleString();
+                  const approxLimit = JSON_PREVIEW_NODE_LIMIT.toLocaleString();
+                  msg = `Preview truncated after about ${approxLimit} JSON nodes out of approximately ${approxTotal}. Download file to see the full structure.`;
+                } else {
+                  msg = 'JSON preview simplified to keep the page responsive. Download for the full structure.';
+                }
+              }
+
+              setPreviewBanner(msg, 'info');
+              logPreviewEvent('preview_truncated_meta', {
+                truncated: !!previewFlags.truncated,
+                hasMoreRows: !!previewFlags.hasMoreRows,
+                hasMoreNodes: !!previewFlags.hasMoreNodes,
+                row_count: totalRows,
+                jsonNodeCount: totalNodes
+              });
+            }
+
+            const format = effectiveFormat;
+
+            if (previewHeader) {
+              let label = 'Preview';
+              switch (format) {
+                case 'csv':
+                  label = 'CSV preview (first ~100 rows)';
+                  break;
+                case 'json':
+                  label = 'JSON preview';
+                  break;
+                case 'md':
+                case 'markdown':
+                  label = 'Markdown preview';
+                  break;
+                case 'txt':
+                case 'text':
+                  label = 'Text preview';
+                  break;
+                case 'tex':
+                case 'latex':
+                  label = 'TeX preview';
+                  break;
+                default:
+                  label = 'Preview';
+              }
+              previewHeader.textContent = label;
+              previewHeader.setAttribute('aria-label', `${label} – inline document preview`);
+            }
 
             if (content && format !== 'html') {
               // Use format-specific renderers for text-based formats
@@ -657,11 +945,9 @@ Prism.highlightAll();
               }
             } else if (html && previewIframe) {
               // Use HTML preview for HTML format or when no content available
-              if (previewJsonFallbackNotice) previewJsonFallbackNotice.style.display = 'none';
               previewIframe.srcdoc = html;
             } else {
               // No preview available
-              if (previewJsonFallbackNotice) previewJsonFallbackNotice.style.display = 'none';
               if (previewUnavailableCard) previewUnavailableCard.style.display = '';
               if (previewIframe) previewIframe.srcdoc = '';
             }
@@ -802,6 +1088,8 @@ Prism.highlightAll();
 
     toSingle?.addEventListener('change', () => { persistPrefs(); updateOptionAvailability(); });
     mdDialectSel?.addEventListener('change', persistPrefs);
+    pdfMarginPresetSel?.addEventListener('change', persistPrefs);
+    pdfPageSizeSel?.addEventListener('change', persistPrefs);
 
     convertBtn?.addEventListener('click', () => runConvert({ previewOnly: false }));
     previewBtn?.addEventListener('click', () => runConvert({ previewOnly: true }));
@@ -826,10 +1114,6 @@ Prism.highlightAll();
     toOdt?.addEventListener('change', updateOptionAvailability);
     toPdf?.addEventListener('change', updateOptionAvailability);
     toEpub?.addEventListener('change', updateOptionAvailability);
-    pdfMarginStrategy?.addEventListener('change', () => { persistPrefs(); updateOptionAvailability(); });
-    pdfPageSize?.addEventListener('change', persistPrefs);
-    pdfSideMargin?.addEventListener('change', persistPrefs);
-    pdfVertMargin?.addEventListener('change', persistPrefs);
 
     restorePrefs();
     updateOptionAvailability();
@@ -931,8 +1215,7 @@ Prism.highlightAll();
         <input
           type="file"
           id="fileInput"
-          data-testid="converter-file-input"
-          accept=".md,.markdown,.txt,.html,.htm,.docx,.odt,.rtf,.pdf,.tex,.epub,.zip"
+          accept=".md,.markdown,.txt,.html,.htm,.docx,.odt,.rtf,.pdf,application/pdf,.tex,.epub,.zip"
         />
       </div>
 
@@ -1018,48 +1301,25 @@ Prism.highlightAll();
         <label title="Accept tracked changes in Word docs"><input type="checkbox" id="optAcceptTracked" checked /> Accept tracked changes</label>
         <label title="Extract embedded images/media when available"><input type="checkbox" id="optExtractMedia" /> Extract media</label>
         <label title="Remove zero-width characters"><input type="checkbox" id="optRemoveZW" checked /> Remove zero-width</label>
-      </div>
-
-      <div class="format-options" aria-label="PDF margins and formatting" id="pdfMarginsRow" style="display:none">
-        <p class="label-heading">
-          <strong>PDF Margins & Format:</strong>
-          <span class="help" style="color: var(--muted, #97a3c2); font-size: 0.85rem; margin-left: 0.35rem;">
-            By default, the converter preserves the original document's margins and format. Override only if needed.
-          </span>
-        </p>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-          <label>
-            <strong>Margin strategy:</strong>
-            <select id="pdfMarginStrategy">
-              <option value="auto" selected>Auto (preserve from source)</option>
-              <option value="custom">Custom margins</option>
-            </select>
+        <div class="pdf-layout-options">
+          <label for="pdfMarginPreset">
+            <strong>PDF layout:</strong>
+            <span class="help" style="color: var(--muted, #97a3c2); font-size: 0.85rem; margin-left: 0.35rem;">
+              Affects margins for the fallback PDF renderer only.
+            </span>
           </label>
-          <label>
+          <select id="pdfMarginPreset" name="pdfMarginPreset">
+            <option value="">Standard margins</option>
+            <option value="compact">Compact (smaller margins)</option>
+            <option value="wide">Wide (larger margins)</option>
+          </select>
+          <label for="pdfPageSize" style="margin-left: 0.75rem;">
             <strong>Page size:</strong>
-            <select id="pdfPageSize">
-              <option value="auto" selected>Auto (from source)</option>
-              <option value="letter">Letter (8.5" × 11")</option>
-              <option value="a4">A4 (210mm × 297mm)</option>
-              <option value="a3">A3 (297mm × 420mm)</option>
-              <option value="legal">Legal (8.5" × 14")</option>
-            </select>
           </label>
-        </div>
-        <div id="customMarginsDiv" style="display:none; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #ddd;">
-          <p style="margin: 0 0 0.5rem 0; color: var(--muted, #97a3c2); font-size: 0.85rem;">
-            Custom margin values (in inches):
-          </p>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-            <label>
-              <strong>Side margins:</strong>
-              <input type="number" id="pdfSideMargin" min="0" max="2" step="0.1" value="0.45" style="max-width: 80px;" />
-            </label>
-            <label>
-              <strong>Top/bottom margins:</strong>
-              <input type="number" id="pdfVertMargin" min="0" max="2" step="0.1" value="1" style="max-width: 80px;" />
-            </label>
-          </div>
+          <select id="pdfPageSize" name="pdfPageSize">
+            <option value="">US Letter</option>
+            <option value="A4">A4</option>
+          </select>
         </div>
       </div>
 
@@ -1072,14 +1332,7 @@ Prism.highlightAll();
         >
           Preview
         </button>
-        <button
-          id="convertBtn"
-          class="primary"
-          type="button"
-          data-testid="converter-convert-button"
-        >
-          Convert
-        </button>
+        <button id="convertBtn" class="primary" type="button">Convert</button>
         <button id="clearBtn" class="secondary" type="button">Clear</button>
         <button id="demoBtn" class="secondary" type="button" title="Load a small example document to see how conversion works.">Try example</button>
         <span class="badge">Shortcut: <kbd>Ctrl/Cmd + Enter</kbd> to convert</span>
@@ -1102,26 +1355,25 @@ Prism.highlightAll();
           <p class="preview-card-subtitle">This file exceeds the live preview cap but will still convert normally.</p>
         </div>
         <div
-          id="previewJsonFallbackNotice"
-          class="preview-card"
-          style="display:none;"
-          data-testid="converter-json-fallback-notice"
-        >
-          <p class="preview-card-title">📄 JSON preview fallback</p>
-          <p class="preview-card-subtitle">
-            Large JSON detected; showing plain text preview instead of formatted highlight.
-          </p>
-        </div>
-        <div id="previewHtmlBox" class="preview-html" data-testid="converter-preview-container">
-          <div class="preview-html__header" data-testid="converter-preview-header">
-            Preview (first 2 pages)
+          id="previewStatusBanner"
+          class="preview-status-banner"
+          role="status"
+          aria-live="polite"
+          hidden
+        ></div>
+        <div id="previewHtmlBox" class="preview-html">
+          <div
+            id="previewHeader"
+            class="preview-html__header"
+            data-testid="converter-preview-header"
+          >
+            Preview
           </div>
           <iframe
             id="previewIframe"
-            sandbox="allow-scripts"
-            title="Document preview"
-            aria-label="Document preview output"
             data-testid="converter-preview-iframe"
+            sandbox="allow-same-origin allow-popups allow-forms"
+            title="Formatted preview"
           ></iframe>
         </div>
       </div>
@@ -1186,9 +1438,7 @@ Prism.highlightAll();
   .format-options label { display: flex; align-items: center; gap: 0.5rem; }
   .actions-row { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin-top: 1rem; }
   .actions-row button.primary { background: var(--brand, #3b82f6); color: #fff; border: none; padding: 0.65rem 1.4rem; border-radius: 0.75rem; cursor: pointer; }
-  .actions-row button.primary:disabled { background: var(--surface-raised, #e0e6ed); color: var(--text-muted, #888); cursor: not-allowed; opacity: 0.6; }
   .actions-row button.secondary { background: transparent; color: inherit; border: 1px solid rgba(255,255,255,0.2); border-radius: 0.75rem; padding: 0.55rem 1.25rem; cursor: pointer; }
-  .actions-row button.secondary:disabled { background: var(--surface-raised, #e0e6ed); color: var(--text-muted, #888); border-color: transparent; cursor: not-allowed; opacity: 0.6; }
   #progress { margin-top: 1rem; }
   .tableWrap { margin-top: 1rem; max-height: 70vh; overflow: auto; border: 1px solid #eee; border-radius: 8px; }
   #previewPanel { margin-bottom: 1rem; }
@@ -1203,6 +1453,9 @@ Prism.highlightAll();
   }
   .preview-card-title { font-size: var(--text-lg); font-weight: 700; margin-bottom: 0.25rem; }
   .preview-card-subtitle { color: var(--text-muted, #6b7280); }
+  .preview-status-banner { margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-muted, #6b7280); padding: 0.35rem 0.5rem; border-radius: 0.5rem; }
+  .preview-status--info { background: rgba(59, 130, 246, 0.08); color: var(--brand, #3b82f6); }
+  .preview-status--warn { background: rgba(234, 179, 8, 0.1); color: #b45309; }
   .preview-html__header { padding: 0.6rem 0.9rem; font-weight: 600; border-bottom: 1px solid var(--border-default); background: var(--surface-elevated); }
   #previewIframe { width: 100%; height: 22rem; border: 0; display: block; background: white; }
   #results thead th {

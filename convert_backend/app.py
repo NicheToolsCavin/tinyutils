@@ -265,6 +265,8 @@ class Options(BaseModel):
     asciiPunctuation: bool = False
     mdDialect: Optional[str] = None
     aggressivePdfMode: bool = False
+    pdfMarginPreset: Optional[str] = None
+    pdfPageSize: Optional[str] = None
 
     @validator("mdDialect")
     def _validate_md_dialect(cls, value):
@@ -480,6 +482,8 @@ def convert(
                 "ascii_punctuation": request.options.asciiPunctuation,
                 "md_dialect": request.options.mdDialect,
                 "aggressive_pdf_mode": request.options.aggressivePdfMode, # New option
+                "pdf_margin_preset": request.options.pdfMarginPreset,
+                "pdf_page_size": request.options.pdfPageSize,
             }
             for k, v in extra_map.items():
                 if k in sig.parameters:
@@ -792,8 +796,30 @@ def _select_preview(batch) -> dict:
                 "content": result.preview.content,
                 "format": result.preview.format,
                 "tooBigForPreview": result.preview.tooBigForPreview,
+                "approxBytes": result.preview.approxBytes,
+                "row_count": result.preview.row_count,
+                "col_count": result.preview.col_count,
+                "jsonNodeCount": result.preview.jsonNodeCount,
+                "truncated": result.preview.truncated,
+                "hasMoreRows": result.preview.hasMoreRows,
+                "hasMoreNodes": result.preview.hasMoreNodes,
             }
-    return {"headings": [], "snippets": [], "images": [], "html": None, "content": None, "format": None}
+    return {
+        "headings": [],
+        "snippets": [],
+        "images": [],
+        "html": None,
+        "content": None,
+        "format": None,
+        "tooBigForPreview": None,
+        "approxBytes": None,
+        "row_count": None,
+        "col_count": None,
+        "jsonNodeCount": None,
+        "truncated": None,
+        "hasMoreRows": None,
+        "hasMoreNodes": None,
+    }
 
 
 def _serialize_errors(batch) -> List[dict]:
