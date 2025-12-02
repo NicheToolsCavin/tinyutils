@@ -1,0 +1,75 @@
+{
+  "description": "Golden metrics for converter fidelity validation. Each entry validates non-blank output and approximate content preservation.",
+  "November 16-30.odt": {
+    "description": "Multi-page newsletter ODT - tests ODT→DOCX/PDF conversion quality",
+    "source_size_bytes": 23836,
+    "conversions": {
+      "to_docx": {
+        "min_output_bytes": 5000,
+        "min_content_chars": 100,
+        "should_contain_phrases": [
+          "INVOICE",
+          "Cavin"
+        ],
+        "notes": "Critical fidelity test for ODT→DOCX blank output bug fix. Output should contain invoice content and identifiable markers."
+      },
+      "to_pdf": {
+        "min_output_bytes": 8000,
+        "min_content_chars": 100,
+        "should_not_be_blank": true,
+        "notes": "PDFs should render with reasonable size and contain extracted text"
+      },
+      "to_markdown": {
+        "min_output_bytes": 1000,
+        "min_content_chars": 100,
+        "should_not_be_blank": true,
+        "notes": "Markdown conversion should preserve text content"
+      }
+    }
+  },
+  "tech_doc.md": {
+    "description": "Technical documentation with code blocks, headings, tables, lists, images",
+    "conversions": {
+      "to_docx": {
+        "min_output_bytes": 15000,
+        "should_contain_phrases": ["Code", "Table", "List"],
+        "notes": "DOCX should preserve structure (headings, lists, code blocks)"
+      },
+      "to_html": {
+        "min_output_bytes": 5000,
+        "should_contain_elements": ["<h1>", "<code>", "<table>", "<ul>", "<ol>"],
+        "notes": "HTML should have semantic tags for content"
+      }
+    }
+  },
+  "lists.docx": {
+    "description": "DOCX with deep/mixed ordered and unordered lists",
+    "conversions": {
+      "to_markdown": {
+        "min_output_bytes": 1000,
+        "should_contain_phrases": ["1.", "-", "*"],
+        "notes": "Markdown should preserve list structure"
+      }
+    }
+  },
+  "images.docx": {
+    "description": "DOCX with multiple embedded images",
+    "conversions": {
+      "to_html": {
+        "min_output_bytes": 10000,
+        "should_contain_elements": ["<img"],
+        "notes": "HTML should have image tags or data URLs"
+      }
+    }
+  },
+  "html_input.html": {
+    "description": "HTML with code blocks and data URLs",
+    "conversions": {
+      "to_markdown": {
+        "min_output_bytes": 500,
+        "should_not_be_blank": true,
+        "notes": "HTML should convert to readable Markdown"
+      }
+    }
+  }
+}

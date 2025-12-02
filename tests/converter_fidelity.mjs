@@ -119,3 +119,59 @@ test('converter fidelity – html_input.html metrics stable', async () => {
   // Verify data URL sanitization didn't crash conversion (no error field)
   assert.ok(!summary.error, 'should not have conversion errors from data URLs');
 });
+
+test('converter fidelity – November 16-30.odt metrics stable (ODT→Markdown)', async () => {
+  const fixture = join(__dirname, 'fixtures', 'converter', 'November 16-30.odt');
+  const summary = await runFixture({ input: fixture, fromFormat: 'odt', targets: ['md'] });
+  assert.strictEqual(summary.name, 'November 16-30.odt');
+  assert.ok(Array.isArray(summary.outputs), 'should have outputs array');
+  assert.ok(!summary.error, 'should not have conversion errors');
+  assert.ok(summary.metrics, 'expected metrics on summary');
+
+  const golden = loadGoldenMetrics('november_16_30_odt.metrics.json');
+  const expectedMetrics = {
+    lists: golden.conversions.to_markdown.lists,
+    codeBlocks: golden.conversions.to_markdown.codeBlocks,
+    images: golden.conversions.to_markdown.images
+  };
+  assert.deepStrictEqual(summary.metrics, expectedMetrics);
+
+  // Spot-check: validate critical non-blank output for ODT→DOCX bug fix
+  assert.ok(summary.outputs[0].size >= golden.conversions.to_markdown.min_output_bytes,
+            'markdown output should meet minimum size threshold (validates no blank output)');
+  assert.ok(summary.outputs[0].size > 0, 'should not produce blank output');
+});
+
+test('converter fidelity – blog_post.docx metrics stable', async () => {
+  const fixture = join(__dirname, 'fixtures', 'converter', 'blog_post.docx');
+  const summary = await runFixture({ input: fixture, fromFormat: 'docx', targets: ['md'] });
+  assert.strictEqual(summary.name, 'blog_post.docx');
+  assert.ok(Array.isArray(summary.outputs), 'should have outputs array');
+  assert.ok(!summary.error, 'should not have conversion errors');
+  assert.ok(summary.metrics, 'expected metrics on summary');
+
+  const golden = loadGoldenMetrics('blog_post_docx.metrics.json');
+  assert.deepStrictEqual(summary.metrics, golden);
+
+  // Spot-check: verify rich document structure preservation
+  assert.ok(summary.metrics.codeBlocks.total > 0, 'should preserve code blocks');
+  assert.ok(summary.metrics.lists.bullet > 0, 'should preserve bullet lists');
+  assert.ok(summary.metrics.lists.ordered > 0, 'should preserve ordered lists');
+});
+
+test('converter fidelity – report_2025_annual.docx metrics stable', async () => {
+  const fixture = join(__dirname, 'fixtures', 'converter', 'report_2025_annual.docx');
+  const summary = await runFixture({ input: fixture, fromFormat: 'docx', targets: ['md'] });
+  assert.strictEqual(summary.name, 'report_2025_annual.docx');
+  assert.ok(Array.isArray(summary.outputs), 'should have outputs array');
+  assert.ok(!summary.error, 'should not have conversion errors');
+  assert.ok(summary.metrics, 'expected metrics on summary');
+
+  const golden = loadGoldenMetrics('report_2025_annual_docx.metrics.json');
+  assert.deepStrictEqual(summary.metrics, golden);
+
+  // Spot-check: verify complex document structure (nested lists, many items)
+  assert.ok(summary.metrics.lists.bullet >= 10, 'should preserve many bullet items');
+  assert.ok(summary.metrics.lists.ordered >= 2, 'should preserve ordered lists');
+  assert.ok(summary.metrics.lists.maxDepth >= 2, 'should preserve nested lists');
+});
