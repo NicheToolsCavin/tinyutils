@@ -103,6 +103,24 @@
 </svelte:head>
 
 <main class="liquid-glass" class:mounted>
+  <!-- SVG Filter for artifact-free glow (noise dithering) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <filter id="glow-filter" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+      <!-- Blur the source graphic -->
+      <feGaussianBlur stdDeviation="12" result="blurred" />
+      <!-- Add fractal noise for dithering -->
+      <feTurbulence type="fractalNoise" baseFrequency="1" numOctaves="3" result="noise"/>
+      <!-- Use noise to slightly displace the blurred glow (breaks up banding) -->
+      <feDisplacementMap in="blurred" in2="noise" scale="5" xChannelSelector="R" yChannelSelector="A" result="dithered"/>
+      <!-- Reduce opacity slightly -->
+      <feComponentTransfer in="dithered" result="dithered">
+        <feFuncA type="linear" slope="0.95"/>
+      </feComponentTransfer>
+      <!-- Blend original blur on top to maintain brightness -->
+      <feBlend in="dithered" in2="blurred" mode="normal"/>
+    </filter>
+  </svg>
+
   <!-- Animated mesh gradient background -->
   <div class="mesh-bg">
     <div class="gradient-orb orb-1"></div>
@@ -641,16 +659,21 @@
     grid-row: span 1;
   }
 
-  .glass-card:hover {
-    filter:
-      drop-shadow(0 0 20px var(--tool-color))
-      drop-shadow(0 0 40px color-mix(in srgb, var(--tool-color) 50%, transparent))
-      drop-shadow(0 0 60px color-mix(in srgb, var(--tool-color) 25%, transparent));
+  /* Glow effect using SVG filter with noise dithering (artifact-free!) */
+  .card-glow {
+    position: absolute;
+    inset: -20px;
+    background: var(--tool-color);
+    border-radius: 50%;
+    opacity: 0;
+    filter: url(#glow-filter);
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+    z-index: 0;
   }
 
-  /* Glow effect - disabled in favor of drop-shadow filter */
-  .card-glow {
-    display: none;
+  .glass-card:hover .card-glow {
+    opacity: 0.6;
   }
 
   @keyframes pulse-glow {
