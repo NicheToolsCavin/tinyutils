@@ -123,11 +123,11 @@
 
   .tool-card-subbox {
     border-radius: var(--radius-lg);
-    border: 1px solid rgba(148, 163, 184, 0.35);
-    background: radial-gradient(circle at top left, rgba(148, 163, 184, 0.12), rgba(15, 23, 42, 0.9));
+    border: 1px solid var(--border-subtle);
+    background: var(--surface-raised);
     padding: 0.6rem 0.8rem;
     font-size: 0.8rem;
-    color: var(--text-muted);
+    color: var(--text-secondary);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -139,10 +139,11 @@
   }
 
   .tool-card-subbox a {
-    color: var(--brand-300, #7dd3fc);
+    color: var(--brand-500);
     font-weight: var(--font-medium);
     text-decoration: none;
     white-space: nowrap;
+    transition: color var(--transition-base);
   }
 
   .tool-card-subbox a:hover {
