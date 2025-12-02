@@ -875,8 +875,6 @@
 - **Follow-ups:**
   - Consider upgrading Prism to 1.30+ in a dedicated dependency-health pass and wiring preview smokes to assert CSV quoted-field behavior end-to-end.
 
-<<<<<<< Updated upstream
-=======
 <!-- RECENT ACTIVITY (Full Context) -->
 
 ### 2025-11-29 09:31 CET - Manual - fix preview smoke working dir
@@ -911,5 +909,3 @@
 - **Evidence:** NONE
 - **Follow-ups:**
   - Consider extending UI smoke to cover CSV/JSON/TeX/Text previews in a later pass
-
->>>>>>> Stashed changes

@@ -55,7 +55,7 @@ export function parseCsvContent(content, maxRows = CSV_MAX_ROWS, maxChars = CSV_
     if (ch === '"') {
       if (inQuotes && content[i + 1] === '"') {
         current += '"';
-        i += 1;
+        i += 1; // Consume the second quote of the escaped pair ""
       } else {
         inQuotes = !inQuotes;
       }
