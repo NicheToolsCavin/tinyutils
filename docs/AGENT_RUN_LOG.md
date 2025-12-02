@@ -25,6 +25,26 @@
 
 <!-- RECENT ACTIVITY (Full Context) -->
 
+### 2025-12-02 15:45 CET - Manual - PDF margins smart defaults for high-fidelity converter
+
+**Mode:** manual
+**Branch:** `fix/converter-preview-hardening`
+**Summary:**
+- Implemented smart PDF margins UI with "Auto (preserve from source)" as default strategy
+- Users can optionally override via "Custom margins" with controls for side/top-bottom margins and page size (Letter/A4/A3/Legal/Auto)
+- Smart preferences persist across sessions via localStorage; custom inputs only show when needed
+- Aligns with high-fidelity converter philosophy: preserve original document properties by default, minimal user tweaking required
+- Backend-ready API structure supports intelligent margin handling (e.g., auto-detect from PDF metadata in future)
+- Added comprehensive documentation to tool_desc_converter.md explaining philosophy and rationale
+- All tests passing (69/69 pass, 0 fail)
+
+**Evidence:**
+- Commits: PDF margins UI feature, smart margin strategy refactor, tool documentation
+- Tests: svelte-check 0 errors; pnpm test 69 pass, 0 fail
+
+**Follow-ups:**
+- Wire backend to respect `pdfMargins.strategy` and conditionally apply custom values or auto-detection
+- Consider extending smart defaults to other formats (DOCX→MD: preserve heading levels and lists, etc.)
 
 ### 2025-11-28 21:10 CET - Claude Code - Format-specific preview renderers
 
