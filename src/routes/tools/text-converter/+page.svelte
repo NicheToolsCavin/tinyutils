@@ -39,6 +39,10 @@
     const optAcceptTracked = document.getElementById('optAcceptTracked');
     const optExtractMedia = document.getElementById('optExtractMedia');
     const optRemoveZW = document.getElementById('optRemoveZW');
+    const pdfMarginsRow = document.getElementById('pdfMarginsRow');
+    const pdfSideMargin = document.getElementById('pdfSideMargin');
+    const pdfVertMargin = document.getElementById('pdfVertMargin');
+    const pdfPageSize = document.getElementById('pdfPageSize');
     const previewBtn = document.getElementById('previewBtn');
     const previewPanel = document.getElementById('previewPanel');
     const previewIframe = document.getElementById('previewIframe');
@@ -340,6 +344,15 @@ Prism.highlightAll();
         mdDialectSel.disabled = !mdOn;
         mdDialectRow.style.opacity = mdOn ? '1' : '0.5';
       }
+
+      // Show/hide PDF margins section based on whether PDF is selected as a target format
+      const pdfOn = (toSingle && toSingle.value === 'pdf') || !!(toPdf && toPdf.checked);
+      if (pdfMarginsRow) {
+        pdfMarginsRow.style.display = pdfOn ? 'block' : 'none';
+        if (pdfSideMargin) pdfSideMargin.disabled = !pdfOn;
+        if (pdfVertMargin) pdfVertMargin.disabled = !pdfOn;
+        if (pdfPageSize) pdfPageSize.disabled = !pdfOn;
+      }
     }
 
     function restorePrefs() {
@@ -354,6 +367,9 @@ Prism.highlightAll();
       if (typeof prefs.optExtractMedia === 'boolean' && optExtractMedia) optExtractMedia.checked = prefs.optExtractMedia;
       if (typeof prefs.optRemoveZW === 'boolean' && optRemoveZW) optRemoveZW.checked = prefs.optRemoveZW;
       if (prefs.customExt && customExt) customExt.value = prefs.customExt;
+      if (typeof prefs.pdfSideMargin === 'number' && pdfSideMargin) pdfSideMargin.value = prefs.pdfSideMargin;
+      if (typeof prefs.pdfVertMargin === 'number' && pdfVertMargin) pdfVertMargin.value = prefs.pdfVertMargin;
+      if (prefs.pdfPageSize && pdfPageSize) pdfPageSize.value = prefs.pdfPageSize;
     }
 
     function persistPrefs() {
@@ -366,7 +382,10 @@ Prism.highlightAll();
         optAcceptTracked: optAcceptTracked ? !!optAcceptTracked.checked : true,
         optExtractMedia: optExtractMedia ? !!optExtractMedia.checked : false,
         optRemoveZW: optRemoveZW ? !!optRemoveZW.checked : true,
-        customExt: customExt ? customExt.value : ''
+        customExt: customExt ? customExt.value : '',
+        pdfSideMargin: pdfSideMargin ? parseFloat(pdfSideMargin.value) : 0.45,
+        pdfVertMargin: pdfVertMargin ? parseFloat(pdfVertMargin.value) : 1,
+        pdfPageSize: pdfPageSize ? pdfPageSize.value : ''
       };
       window.TinyUtilsStorage.savePrefs('converter', prefs);
     }
@@ -467,6 +486,12 @@ Prism.highlightAll();
         const hasMd = selectedFormats.includes('md');
         const dialectValue = mdDialectSel ? mdDialectSel.value : null;
 
+        const pdfMargins = selectedFormats.includes('pdf') ? {
+          sideMargin: pdfSideMargin ? parseFloat(pdfSideMargin.value) || 0.45 : 0.45,
+          vertMargin: pdfVertMargin ? parseFloat(pdfVertMargin.value) || 1 : 1,
+          pageSize: pdfPageSize ? pdfPageSize.value || undefined : undefined
+        } : undefined;
+
         const payload = {
           inputs: [input],
           from: fromFormat,
@@ -475,7 +500,8 @@ Prism.highlightAll();
             acceptTrackedChanges: !!optAcceptTracked?.checked,
             extractMedia: !!optExtractMedia?.checked,
             removeZeroWidth: !!optRemoveZW?.checked,
-            mdDialect: hasMd && dialectValue ? dialectValue : undefined
+            mdDialect: hasMd && dialectValue ? dialectValue : undefined,
+            pdfMargins: pdfMargins
           },
           preview: previewOnly ? true : undefined
         };
@@ -976,6 +1002,35 @@ Prism.highlightAll();
         <label title="Accept tracked changes in Word docs"><input type="checkbox" id="optAcceptTracked" checked /> Accept tracked changes</label>
         <label title="Extract embedded images/media when available"><input type="checkbox" id="optExtractMedia" /> Extract media</label>
         <label title="Remove zero-width characters"><input type="checkbox" id="optRemoveZW" checked /> Remove zero-width</label>
+      </div>
+
+      <div class="format-options" aria-label="PDF margins and formatting" id="pdfMarginsRow" style="display:none">
+        <p class="label-heading">
+          <strong>PDF Margins & Format:</strong>
+          <span class="help" style="color: var(--muted, #97a3c2); font-size: 0.85rem; margin-left: 0.35rem;">
+            Customize page margins and size for PDF output.
+          </span>
+        </p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <label>
+            <strong>Side margins (inches):</strong>
+            <input type="number" id="pdfSideMargin" min="0" max="2" step="0.1" value="0.45" style="max-width: 80px;" />
+          </label>
+          <label>
+            <strong>Top/bottom margins (inches):</strong>
+            <input type="number" id="pdfVertMargin" min="0" max="2" step="0.1" value="1" style="max-width: 80px;" />
+          </label>
+          <label>
+            <strong>Page size:</strong>
+            <select id="pdfPageSize">
+              <option value="">Auto (from source)</option>
+              <option value="letter" selected>Letter (8.5" × 11")</option>
+              <option value="a4">A4 (210mm × 297mm)</option>
+              <option value="a3">A3 (297mm × 420mm)</option>
+              <option value="legal">Legal (8.5" × 14")</option>
+            </select>
+          </label>
+        </div>
       </div>
 
       <div class="actions-row">
