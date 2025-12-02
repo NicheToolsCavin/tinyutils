@@ -1,5 +1,26 @@
 ## Converter Tool — Description and Change Log
 
+### Major changes — 2025-12-02 15:30 CET (UTC+01:00) — PDF margins smart defaults for high-fidelity conversions
+
+Added
+• PDF Margins & Format section in converter UI with two strategies:
+  - **Auto (preserve from source)** [DEFAULT]: Converter intelligently extracts and preserves original document's margins and page size for maximum fidelity.
+  - **Custom margins**: Optional override for users who need non-standard margins (side margins 0–2", top/bottom 0–2", page size: Letter/A4/A3/Legal/Auto).
+• Smart preferences: Users' margin strategy, custom values, and page size selections persist across sessions via localStorage.
+• Conditional UI: Custom margin inputs only appear when "Custom margins" strategy is selected, keeping the interface clean by default.
+
+Philosophy & Rationale
+The converter now embodies a high-fidelity-first design philosophy:
+1. **Smart defaults do the heavy lifting**: Most conversions just work because we preserve original document properties (margins, layout) when possible.
+2. **Minimal required tweaking**: Users only override defaults when they have specific formatting needs (e.g., forcing A4 instead of Letter, or custom margins for reprinting).
+3. **Graceful degradation**: When exact fidelity isn't possible (e.g., DOCX features unsupported in Markdown), we get as close as practical (preserve tables, headings, lists) rather than forcing generic fallbacks.
+4. **Transparent strategy**: The margin strategy is passed to the API (`auto` vs `custom`) so the backend can apply intelligent fallback behavior on error.
+
+Impact
+• Reduces user friction: no more hunting for margin settings unless conversion looks wrong. ✅
+• Improves output quality: preserves original document properties instead of applying hardcoded defaults. ✅
+• Backend-ready: API structure supports intelligent margin handling for future enhancements (e.g., auto-detect from PDF metadata, smart margin scaling for format changes). ✅
+
 ### Major changes — 2025-11-29 11:45 CET (UTC+01:00) — CSV/JSON preview hardening, Prism 1.30.0, and iframe sandbox
 
 Added
