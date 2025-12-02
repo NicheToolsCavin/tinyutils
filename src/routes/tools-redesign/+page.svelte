@@ -667,28 +667,25 @@
     grid-row: span 1;
   }
 
-  /* Glow effect - ChatGPT solution: gradient center OUTSIDE card */
+  /* Glow effect - simple and subtle, no animations */
   .card-glow {
     position: absolute;
-    inset: -35%;
+    inset: -20%;
     pointer-events: none;
     opacity: 0;
-    transform: translateZ(0);
     background: radial-gradient(
-      140% 200% at 50% 130%,
-      color-mix(in srgb, var(--tool-color) 80%, transparent) 0%,
-      color-mix(in srgb, var(--tool-color) 40%, transparent) 35%,
-      color-mix(in srgb, var(--tool-color) 10%, transparent) 65%,
-      rgba(0, 0, 0, 0) 100%
+      ellipse at 50% 100%,
+      color-mix(in srgb, var(--tool-color) 60%, transparent) 0%,
+      color-mix(in srgb, var(--tool-color) 30%, transparent) 40%,
+      transparent 100%
     );
-    filter: blur(36px);
-    mix-blend-mode: screen;
-    transition: opacity 0.45s ease-out;
+    filter: blur(30px);
+    transition: opacity 0.4s ease;
     z-index: 0;
   }
 
   .card-shell:hover .card-glow {
-    opacity: 0.3;
+    opacity: 0.25;
   }
 
   @keyframes pulse-glow {
