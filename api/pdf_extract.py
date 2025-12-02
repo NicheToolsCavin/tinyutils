@@ -60,8 +60,10 @@ class handler(BaseHTTPRequestHandler):  # type: ignore[name-defined]
 
             processed_count = 0
             error_log: List[str] = []
+            is_zip_upload = False
 
             if zipfile.is_zipfile(file_like):
+                is_zip_upload = True
                 # Bulk ZIP-of-PDFs path (existing behavior, preserved).
                 file_like.seek(0)
                 try:
@@ -138,7 +140,10 @@ class handler(BaseHTTPRequestHandler):  # type: ignore[name-defined]
             output_zip.close()
 
             if processed_count == 0 and not error_log:
-                self._send_error(400, "No PDF files found in upload")
+                if is_zip_upload:
+                    self._send_error(400, "No PDF files found in ZIP archive")
+                else:
+                    self._send_error(422, "Failed to extract text from PDF")
                 return
 
             output_io.seek(0)
