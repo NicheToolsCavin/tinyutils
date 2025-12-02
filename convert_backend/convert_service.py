@@ -96,6 +96,12 @@ HEADING_SIZE_THRESHOLDS: Tuple[Tuple[float, int], ...] = (
 )
 MAX_HEADING_BLOCK_LENGTH = 120
 
+# Blank output detection thresholds for ODT→DOCX conversions
+# If input is > BLANK_OUTPUT_INPUT_THRESHOLD_BYTES but output is < BLANK_OUTPUT_OUTPUT_THRESHOLD_BYTES,
+# the conversion may have failed to preserve content (suspected blank output)
+BLANK_OUTPUT_INPUT_THRESHOLD_BYTES = 4096  # Minimum input size to check
+BLANK_OUTPUT_OUTPUT_THRESHOLD_BYTES = 1024  # Maximum output size to consider blank
+
 
 def _is_preview_env() -> bool:
     """Check if running in Vercel preview environment."""
@@ -254,8 +260,8 @@ def _extract_markdown_from_pdf(
                             for frag in getattr(line_item, "_objs", []):
                                 if frag.__class__.__name__ == "LTChar":
                                     sizes.append(getattr(frag, "size", 0.0))
-                    except Exception:
-                        pass
+                    except Exception as exc:
+                        _LOGGER.debug("heading_classification_error err=%s", exc)
                     level = _classify_heading(sizes)
                     marker = _format_list_marker(block)
                     if level is not None and len(block) < MAX_HEADING_BLOCK_LENGTH:
@@ -346,9 +352,10 @@ def _extract_markdown_from_pdf(
                                     note += f" — see [{csv_filename}]({csv_filename})"
                                 page_blocks.append(note)
                                 page_blocks.append("```csv\n" + csv_text + "\n```\n")
-            except Exception:
+            except Exception as exc:
                 # If pdfplumber not available or errors, ignore silently
-                pass
+                # Log at debug level since this is an optional optimization
+                _LOGGER.debug("pdfplumber_extraction_error err=%s", exc)
 
             # Separate pages by thematic break
             if page_blocks:
@@ -423,7 +430,8 @@ def convert_one(
 
     try:
         input_text = input_bytes.decode("utf-8", errors="replace")
-    except Exception:
+    except Exception as exc:
+        _LOGGER.debug("input_text_decoding_error err=%s", exc)
         input_text = ""
 
     content_analysis = safe_parse_limited(input_text)
@@ -447,7 +455,8 @@ def convert_one(
     adjusted_from = from_format
     try:
         sample_text = input_bytes[:4096].decode("utf-8", errors="ignore")
-    except Exception:
+    except Exception as exc:
+        _LOGGER.debug("sample_text_decoding_error err=%s", exc)
         sample_text = ""
     def _looks_like_latex(t: str) -> bool:
         return bool(t) and (
@@ -749,8 +758,8 @@ def convert_one(
                             if (
                                 from_format in {"odt", "docx"}
                                 and approx_bytes
-                                and approx_bytes > 4096
-                                and docx_bytes < 1024
+                                and approx_bytes > BLANK_OUTPUT_INPUT_THRESHOLD_BYTES
+                                and docx_bytes < BLANK_OUTPUT_OUTPUT_THRESHOLD_BYTES
                             ):
                                 logs.append("suspected_blank_output=docx")
                             break
