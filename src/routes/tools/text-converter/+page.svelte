@@ -40,6 +40,8 @@
     const optExtractMedia = document.getElementById('optExtractMedia');
     const optRemoveZW = document.getElementById('optRemoveZW');
     const pdfMarginsRow = document.getElementById('pdfMarginsRow');
+    const pdfMarginStrategy = document.getElementById('pdfMarginStrategy');
+    const customMarginsDiv = document.getElementById('customMarginsDiv');
     const pdfSideMargin = document.getElementById('pdfSideMargin');
     const pdfVertMargin = document.getElementById('pdfVertMargin');
     const pdfPageSize = document.getElementById('pdfPageSize');
@@ -349,10 +351,17 @@ Prism.highlightAll();
       const pdfOn = (toSingle && toSingle.value === 'pdf') || !!(toPdf && toPdf.checked);
       if (pdfMarginsRow) {
         pdfMarginsRow.style.display = pdfOn ? 'block' : 'none';
-        if (pdfSideMargin) pdfSideMargin.disabled = !pdfOn;
-        if (pdfVertMargin) pdfVertMargin.disabled = !pdfOn;
+        if (pdfMarginStrategy) pdfMarginStrategy.disabled = !pdfOn;
         if (pdfPageSize) pdfPageSize.disabled = !pdfOn;
       }
+
+      // Show/hide custom margins based on strategy selection
+      const useCustomMargins = pdfMarginStrategy && pdfMarginStrategy.value === 'custom';
+      if (customMarginsDiv) {
+        customMarginsDiv.style.display = useCustomMargins ? 'block' : 'none';
+      }
+      if (pdfSideMargin) pdfSideMargin.disabled = !useCustomMargins;
+      if (pdfVertMargin) pdfVertMargin.disabled = !useCustomMargins;
     }
 
     function restorePrefs() {
@@ -367,6 +376,7 @@ Prism.highlightAll();
       if (typeof prefs.optExtractMedia === 'boolean' && optExtractMedia) optExtractMedia.checked = prefs.optExtractMedia;
       if (typeof prefs.optRemoveZW === 'boolean' && optRemoveZW) optRemoveZW.checked = prefs.optRemoveZW;
       if (prefs.customExt && customExt) customExt.value = prefs.customExt;
+      if (prefs.pdfMarginStrategy && pdfMarginStrategy) pdfMarginStrategy.value = prefs.pdfMarginStrategy;
       if (typeof prefs.pdfSideMargin === 'number' && pdfSideMargin) pdfSideMargin.value = prefs.pdfSideMargin;
       if (typeof prefs.pdfVertMargin === 'number' && pdfVertMargin) pdfVertMargin.value = prefs.pdfVertMargin;
       if (prefs.pdfPageSize && pdfPageSize) pdfPageSize.value = prefs.pdfPageSize;
@@ -383,9 +393,10 @@ Prism.highlightAll();
         optExtractMedia: optExtractMedia ? !!optExtractMedia.checked : false,
         optRemoveZW: optRemoveZW ? !!optRemoveZW.checked : true,
         customExt: customExt ? customExt.value : '',
+        pdfMarginStrategy: pdfMarginStrategy ? pdfMarginStrategy.value : 'auto',
         pdfSideMargin: pdfSideMargin ? parseFloat(pdfSideMargin.value) : 0.45,
         pdfVertMargin: pdfVertMargin ? parseFloat(pdfVertMargin.value) : 1,
-        pdfPageSize: pdfPageSize ? pdfPageSize.value : ''
+        pdfPageSize: pdfPageSize ? pdfPageSize.value : 'auto'
       };
       window.TinyUtilsStorage.savePrefs('converter', prefs);
     }
@@ -487,8 +498,9 @@ Prism.highlightAll();
         const dialectValue = mdDialectSel ? mdDialectSel.value : null;
 
         const pdfMargins = selectedFormats.includes('pdf') ? {
-          sideMargin: pdfSideMargin ? parseFloat(pdfSideMargin.value) || 0.45 : 0.45,
-          vertMargin: pdfVertMargin ? parseFloat(pdfVertMargin.value) || 1 : 1,
+          strategy: pdfMarginStrategy ? pdfMarginStrategy.value : 'auto',
+          sideMargin: (pdfMarginStrategy?.value === 'custom' && pdfSideMargin) ? parseFloat(pdfSideMargin.value) || 0.45 : undefined,
+          vertMargin: (pdfMarginStrategy?.value === 'custom' && pdfVertMargin) ? parseFloat(pdfVertMargin.value) || 1 : undefined,
           pageSize: pdfPageSize ? pdfPageSize.value || undefined : undefined
         } : undefined;
 
@@ -814,6 +826,10 @@ Prism.highlightAll();
     toOdt?.addEventListener('change', updateOptionAvailability);
     toPdf?.addEventListener('change', updateOptionAvailability);
     toEpub?.addEventListener('change', updateOptionAvailability);
+    pdfMarginStrategy?.addEventListener('change', () => { persistPrefs(); updateOptionAvailability(); });
+    pdfPageSize?.addEventListener('change', persistPrefs);
+    pdfSideMargin?.addEventListener('change', persistPrefs);
+    pdfVertMargin?.addEventListener('change', persistPrefs);
 
     restorePrefs();
     updateOptionAvailability();
@@ -1008,28 +1024,42 @@ Prism.highlightAll();
         <p class="label-heading">
           <strong>PDF Margins & Format:</strong>
           <span class="help" style="color: var(--muted, #97a3c2); font-size: 0.85rem; margin-left: 0.35rem;">
-            Customize page margins and size for PDF output.
+            By default, the converter preserves the original document's margins and format. Override only if needed.
           </span>
         </p>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
           <label>
-            <strong>Side margins (inches):</strong>
-            <input type="number" id="pdfSideMargin" min="0" max="2" step="0.1" value="0.45" style="max-width: 80px;" />
-          </label>
-          <label>
-            <strong>Top/bottom margins (inches):</strong>
-            <input type="number" id="pdfVertMargin" min="0" max="2" step="0.1" value="1" style="max-width: 80px;" />
+            <strong>Margin strategy:</strong>
+            <select id="pdfMarginStrategy">
+              <option value="auto" selected>Auto (preserve from source)</option>
+              <option value="custom">Custom margins</option>
+            </select>
           </label>
           <label>
             <strong>Page size:</strong>
             <select id="pdfPageSize">
-              <option value="">Auto (from source)</option>
-              <option value="letter" selected>Letter (8.5" × 11")</option>
+              <option value="auto" selected>Auto (from source)</option>
+              <option value="letter">Letter (8.5" × 11")</option>
               <option value="a4">A4 (210mm × 297mm)</option>
               <option value="a3">A3 (297mm × 420mm)</option>
               <option value="legal">Legal (8.5" × 14")</option>
             </select>
           </label>
+        </div>
+        <div id="customMarginsDiv" style="display:none; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #ddd;">
+          <p style="margin: 0 0 0.5rem 0; color: var(--muted, #97a3c2); font-size: 0.85rem;">
+            Custom margin values (in inches):
+          </p>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <label>
+              <strong>Side margins:</strong>
+              <input type="number" id="pdfSideMargin" min="0" max="2" step="0.1" value="0.45" style="max-width: 80px;" />
+            </label>
+            <label>
+              <strong>Top/bottom margins:</strong>
+              <input type="number" id="pdfVertMargin" min="0" max="2" step="0.1" value="1" style="max-width: 80px;" />
+            </label>
+          </div>
         </div>
       </div>
 
