@@ -25,6 +25,50 @@
 
 <!-- RECENT ACTIVITY (Full Context) -->
 
+### 2025-12-02 17:15 CET - Claude Code - UI/UX enhancements & cleanup sprint
+
+**Mode:** autonomous
+**Branch:** `fix/converter-preview-hardening`
+**Summary:**
+- **Cleanup Sprint**: Removed 6 outdated backup HTML files from tools directory
+  - Deleted: tools/dead-link-finder/index-old.html, tools/sitemap-delta/index-old.html, tools/wayback-fixer/index-old.html, tools/text-converter/index-old.html, tools/index-old.html, tools/index-static-backup.html
+  - Improves codebase clarity and reduces maintenance burden
+
+- **Accessibility Improvements**:
+  - Fixed light theme text-muted contrast (#645135) for WCAG AA compliance (previously #7a6750 had ~4.1:1 contrast, now meets 4.5:1)
+  - Ensured aria-pressed syncs properly on theme-toggle by deferring initialization to DOMContentLoaded (timing fix for early script execution)
+
+- **Visual Polish**:
+  - Added disabled button visual states with background color changes across actions-row buttons
+    - Primary buttons: muted background with reduced opacity on disabled state
+    - Secondary buttons: raised surface background with transparent border on disabled state
+  - Implemented scroll-snap for filter groups on mobile (<480px breakpoint)
+    - Horizontal scrolling with mandatory snap points for better touch UX
+    - WebKit momentum scrolling enabled for smooth mobile interaction
+
+- **User Feedback**:
+  - Added copy-to-clipboard toast feedback in sitemap-delta tool
+    - Visual confirmation when summary, rules, or share link copied (2-second auto-dismiss)
+    - Slide-in animation with error handling and user-friendly messages
+  - Toasts also present in keyword-density and sitemap-generator (enhanced existing implementations)
+
+**Evidence:**
+- Commits: 4123f63 (cleanup & accessibility), c181dfd (UI/UX enhancements & polish)
+- All 69 tests passing (verified no regressions)
+- Files modified:
+  - styles/design-tokens.css (light theme contrast fix)
+  - scripts/theme-toggle.js (aria-pressed sync timing)
+  - src/routes/tools/text-converter/+page.svelte (disabled button states)
+  - src/routes/tools/dead-link-finder/+page.svelte (scroll-snap implementation)
+  - src/routes/tools/sitemap-delta/+page.svelte (toast feedback system + UI)
+
+**Follow-ups:**
+- Visual QA on light mode preview to verify contrast improvements
+- Test scroll-snap on actual mobile devices (iOS Safari, Android Chrome)
+- Monitor toast performance under rapid copy actions
+
+---
+
 ### 2025-12-02 16:45 CET - Claude Code - Light mode color fixes & Phase 2 Track 4 unblock
 
 **Mode:** autonomous
