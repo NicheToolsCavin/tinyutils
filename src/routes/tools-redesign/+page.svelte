@@ -688,7 +688,7 @@
   }
 
   .card-shell:hover .card-glow {
-    opacity: 0.75;
+    opacity: 0.3;
   }
 
   @keyframes pulse-glow {
