@@ -25,6 +25,40 @@
 
 <!-- RECENT ACTIVITY (Full Context) -->
 
+### 2025-12-02 16:30 CET - Claude Code - Converter fixture expansion + fidelity tests (Workstream B)
+
+**Mode:** automated
+**Branch:** `fix/converter-preview-hardening`
+**Summary:**
+- **Workstream B.1**: Generated golden metrics for critical November 16-30.odt (ODT→Markdown) fixture with fidelity test validation
+  - Created november_16_30_odt.metrics.json with expected metrics for ODT→Markdown conversion
+  - Added regression test to converter_fidelity.mjs to detect blank output and metric drift
+  - Validates fix for reported ODT→DOCX blank output bug remains stable
+
+- **Workstream B.2**: Expanded real-world fixture set with blog post and report-style documents
+  - Created blog_post.docx: realistic blog with 6 bullet lists, 1 ordered list, 2 code blocks (4205 bytes markdown output)
+  - Created report_2025_annual.docx: comprehensive report with 14 bullet lists, 3 ordered lists (max depth 2), 1 code block (5617 bytes markdown output)
+  - Generated golden metrics for both fixtures (blog_post_docx.metrics.json, report_2025_annual_docx.metrics.json)
+  - Added two new fidelity regression tests to validate structural preservation
+
+- **Converter fidelity test suite**: Now covers 7 fixtures with full regression detection
+  - tech_doc.docx, lists.docx, images.docx, html_input.html (existing)
+  - November 16-30.odt, blog_post.docx, report_2025_annual.docx (new)
+
+- **Documentation**: Updated tests/fixtures/converter/README.md to document all fixtures and mark completed additions
+
+**Evidence:**
+- Commits: feat(converter): expand real-world fixture set and fidelity coverage (Workstream B)
+- Tests: All 7 converter fidelity tests pass; full suite 69/69 pass, 0 fail
+- Files: 2 new DOCX fixtures, 2 new markdown sources, 3 golden metrics JSON, 3 new regression tests
+
+**Follow-ups:**
+- Add PDF and EPUB input fixtures for additional format coverage
+- Consider adding RTF input fixture for format preservation testing
+- Extend golden metrics to cover output quality metrics (file size bounds, content presence checks)
+
+---
+
 ### 2025-12-02 15:45 CET - Manual - PDF margins smart defaults for high-fidelity converter
 
 **Mode:** manual
