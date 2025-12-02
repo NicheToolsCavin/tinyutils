@@ -83,8 +83,8 @@
 }
 
 .toast{position:fixed;right:12px;bottom:12px;background:var(--panel);color:var(--text);border:1px solid var(--border);padding:8px 12px;border-radius:10px;z-index:9999;box-shadow:0 6px 20px rgba(0,0,0,.25)}  .cell-url, td.url, .urlCell { word-break: break-all; }
-.status progress{width:100%;height:6px;border-radius:999px;margin-top:0.35rem;background:rgba(255,255,255,0.12);border:none}
-.status progress::-webkit-progress-bar{background:rgba(255,255,255,0.12);border-radius:999px}
+.status progress{width:100%;height:6px;border-radius:999px;margin-top:0.35rem;background:var(--progress-bg,rgba(255,255,255,0.12));border:none}
+.status progress::-webkit-progress-bar{background:var(--progress-bg,rgba(255,255,255,0.12));border-radius:999px}
 .status progress::-webkit-progress-value{background:var(--brand,#3b82f6);border-radius:999px}
 </style>
   <script defer src="/scripts/analytics.js"></script>

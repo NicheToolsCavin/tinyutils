@@ -74,14 +74,14 @@
     .grid{display:grid;gap:12px}
     .two{grid-template-columns:1fr 1fr}
     .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:12px}
-    .btn{background:var(--brand);border:none;border-radius:10px;color:#fff;padding:10px 14px;cursor:pointer}
+    .btn{background:var(--brand);border:none;border-radius:10px;color:var(--text-inverse,#fff);padding:10px 14px;cursor:pointer}
     .btn.secondary{background:var(--panel);border:1px solid var(--border)}
     .btn:disabled{opacity:.6;cursor:not-allowed}
     textarea,input,select{background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px;width:100%}
     label{font-size:14px}
     .status{margin-top:6px;opacity:.8}
-    .status progress{width:100%;height:6px;border-radius:999px;margin-top:0.35rem;background:rgba(255,255,255,.12);border:none}
-    .status progress::-webkit-progress-bar{background:rgba(255,255,255,.12);border-radius:999px}
+    .status progress{width:100%;height:6px;border-radius:999px;margin-top:0.35rem;background:var(--progress-bg,rgba(255,255,255,.12));border:none}
+    .status progress::-webkit-progress-bar{background:var(--progress-bg,rgba(255,255,255,.12));border-radius:999px}
     .status progress::-webkit-progress-value{background:var(--brand,#3b82f6);border-radius:999px}
     .chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
     .chip{border:1px solid var(--border);border-radius:999px;padding:4px 8px;font-size:12px}

@@ -101,16 +101,16 @@
     .format-options { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; margin-top: 1rem; }
     .format-options label { display: flex; align-items: center; gap: 0.5rem; }
     .actions-row { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin-top: 1rem; }
-    .actions-row button.primary { background: var(--brand, #3b82f6); color: #fff; border: none; padding: 0.65rem 1.4rem; border-radius: 0.75rem; cursor: pointer; }
+    .actions-row button.primary { background: var(--brand, #3b82f6); color: var(--text-inverse, #fff); border: none; padding: 0.65rem 1.4rem; border-radius: 0.75rem; cursor: pointer; }
     .actions-row button.primary[disabled] { opacity: 0.6; cursor: not-allowed; }
-    .actions-row button.secondary { background: transparent; color: inherit; border: 1px solid rgba(255,255,255,0.2); border-radius: 0.75rem; padding: 0.55rem 1.25rem; cursor: pointer; }
+    .actions-row button.secondary { background: transparent; color: inherit; border: 1px solid var(--border-default); border-radius: 0.75rem; padding: 0.55rem 1.25rem; cursor: pointer; }
     #progress { margin-top: 1rem; }
-    .tableWrap { margin-top: 1rem; max-height: 70vh; overflow: auto; border: 1px solid #eee; border-radius: 8px; }
-    #results thead th { position: sticky; top: 0; z-index: 2; background: #fff; color: #111827; box-shadow: 0 1px 0 rgba(0,0,0,0.05); }
+    .tableWrap { margin-top: 1rem; max-height: 70vh; overflow: auto; border: 1px solid var(--border-default); border-radius: 8px; }
+    #results thead th { position: sticky; top: 0; z-index: 2; background: var(--surface-raised); color: var(--text-secondary); box-shadow: 0 1px 0 rgba(0,0,0,0.05); }
     .download-link { color: var(--brand, #3b82f6); text-decoration: underline; cursor: pointer; }
     .toast { position: fixed; right: 16px; bottom: 16px; background: var(--panel); color: var(--text); border: 1px solid var(--border); padding: 10px 14px; border-radius: 10px; z-index: 9999; box-shadow: 0 12px 30px rgba(0,0,0,0.35); }
     .badge { color: var(--muted, #97a3c2); font-size: 0.85rem; }
-    kbd { background: rgba(255,255,255,0.1); padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-size: 0.85rem; }
+    kbd { background: var(--surface-raised); padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-size: 0.85rem; }
     .formats-card summary { list-style: none; cursor: pointer; display: flex; flex-direction: column; gap: 0.25rem; position: relative; padding-left: 1.2rem; }
     .formats-card summary::-webkit-details-marker { display: none; }
     .formats-card summary::before { content: '▸'; position: absolute; left: 0; top: 0.35rem; font-size: 0.9rem; color: var(--muted, #97a3c2); transition: transform 0.15s ease; }
