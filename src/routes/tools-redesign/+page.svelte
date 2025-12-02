@@ -621,8 +621,6 @@
     transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     transform-style: preserve-3d;
     cursor: pointer;
-    overflow: hidden;
-    border-radius: 24px;
   }
 
   /* Different sizes for bento grid */
@@ -645,14 +643,14 @@
     opacity: 0.6;
   }
 
-  /* Glow effect - hover only, less bright */
+  /* Glow effect - soft ambient light with smooth falloff */
   .card-glow {
     position: absolute;
-    inset: -20px;
-    background: var(--tool-gradient);
-    border-radius: 32px;
+    inset: -30px;
+    background: radial-gradient(ellipse at center, var(--tool-color) 0%, transparent 70%);
+    border-radius: 50%;
     opacity: 0;
-    filter: blur(40px);
+    filter: blur(50px);
     transition: opacity 0.5s ease;
     z-index: 0;
     animation: pulse-glow 3s ease-in-out infinite;
