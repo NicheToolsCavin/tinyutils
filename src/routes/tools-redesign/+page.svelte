@@ -646,11 +646,18 @@
   /* Glow effect - soft ambient light with smooth falloff */
   .card-glow {
     position: absolute;
-    inset: -30px;
-    background: radial-gradient(ellipse at center, var(--tool-color) 0%, transparent 70%);
+    inset: -40px;
+    background: radial-gradient(
+      ellipse at center,
+      var(--tool-color) 0%,
+      color-mix(in srgb, var(--tool-color) 60%, transparent) 20%,
+      color-mix(in srgb, var(--tool-color) 30%, transparent) 40%,
+      color-mix(in srgb, var(--tool-color) 10%, transparent) 60%,
+      transparent 100%
+    );
     border-radius: 50%;
     opacity: 0;
-    filter: blur(50px);
+    filter: blur(12px);
     transition: opacity 0.5s ease;
     z-index: 0;
     animation: pulse-glow 3s ease-in-out infinite;
