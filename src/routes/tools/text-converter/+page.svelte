@@ -1186,7 +1186,9 @@ Prism.highlightAll();
   .format-options label { display: flex; align-items: center; gap: 0.5rem; }
   .actions-row { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin-top: 1rem; }
   .actions-row button.primary { background: var(--brand, #3b82f6); color: #fff; border: none; padding: 0.65rem 1.4rem; border-radius: 0.75rem; cursor: pointer; }
+  .actions-row button.primary:disabled { background: var(--surface-raised, #e0e6ed); color: var(--text-muted, #888); cursor: not-allowed; opacity: 0.6; }
   .actions-row button.secondary { background: transparent; color: inherit; border: 1px solid rgba(255,255,255,0.2); border-radius: 0.75rem; padding: 0.55rem 1.25rem; cursor: pointer; }
+  .actions-row button.secondary:disabled { background: var(--surface-raised, #e0e6ed); color: var(--text-muted, #888); border-color: transparent; cursor: not-allowed; opacity: 0.6; }
   #progress { margin-top: 1rem; }
   .tableWrap { margin-top: 1rem; max-height: 70vh; overflow: auto; border: 1px solid #eee; border-radius: 8px; }
   #previewPanel { margin-bottom: 1rem; }

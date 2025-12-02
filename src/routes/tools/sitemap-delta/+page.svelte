@@ -104,6 +104,12 @@
   let statusMessage = 'Ready.';
   let statusPercent = 0;
   let errorMessage: string | null = null;
+  let toastMessage = '';
+
+  function showToast(msg: string, durationMs = 2000) {
+    toastMessage = msg;
+    setTimeout(() => { toastMessage = ''; }, durationMs);
+  }
 
   // Results
   let lastResults: ApiSuccess | null = null;
@@ -427,7 +433,8 @@
 
     navigator.clipboard
       .writeText(summary)
-      .catch((err) => console.warn('Copy failed', err));
+      .then(() => showToast('Summary copied to clipboard'))
+      .catch((err) => showToast('Copy failed: ' + (err?.message || 'Unknown error')));
   }
 
   function copyRulesText() {
@@ -452,7 +459,8 @@
     const txt = lines.join('\n');
     navigator.clipboard
       .writeText(txt)
-      .catch((err) => console.warn('Copy failed', err));
+      .then(() => showToast('Rules copied to clipboard'))
+      .catch((err) => showToast('Copy failed: ' + (err?.message || 'Unknown error')));
   }
 
   function shareLink() {
@@ -461,7 +469,8 @@
     window.location.hash = hash;
     navigator.clipboard
       .writeText(window.location.href)
-      .catch((err) => console.warn('Share copy failed', err));
+      .then(() => showToast('Share link copied to clipboard'))
+      .catch((err) => showToast('Copy failed: ' + (err?.message || 'Unknown error')));
   }
 
   onMount(() => {
@@ -655,6 +664,10 @@
 
     {#if errorMessage}
       <p class="error" role="alert">{errorMessage}</p>
+    {/if}
+
+    {#if toastMessage}
+      <div class="toast" role="status" aria-live="polite">{toastMessage}</div>
     {/if}
   </section>
 
@@ -1038,6 +1051,31 @@
   @media (max-width: 900px) {
     .results-tables {
       grid-template-columns: 1fr;
+    }
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    background: var(--brand-500, #3b82f6);
+    color: white;
+    padding: 12px 16px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    font-size: 0.9rem;
+    animation: slideIn 0.3s ease-out;
+    z-index: 1000;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateY(100px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
     }
   }
 </style>

@@ -925,12 +925,30 @@
     flex-wrap: wrap;
     gap: 0.5rem;
     font-size: 0.82rem;
+    scroll-snap-type: x proximity;
   }
 
   .filter-group label {
     display: flex;
     align-items: center;
     gap: 0.3rem;
+    scroll-snap-align: start;
+    scroll-snap-stop: auto;
+  }
+
+  @media (max-width: 480px) {
+    .filter-group {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 0.25rem;
+    }
+
+    .filter-group label {
+      flex-shrink: 0;
+      scroll-snap-stop: always;
+    }
   }
 
   .search-group {
