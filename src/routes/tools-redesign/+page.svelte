@@ -77,17 +77,17 @@
     }
   ];
 
-  // 3D tilt effect
+  // 3D tilt effect - VERY subtle (divide by 80 instead of 10)
   function handleMouseMove(e, card) {
     const rect = card.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
-    const rotateX = (y - centerY) / 10;
-    const rotateY = (centerX - x) / 10;
+    const rotateX = (y - centerY) / 80;  // Much more subtle
+    const rotateY = (centerX - x) / 80;  // 2-3 degrees max instead of 15-30
 
-    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`;
+    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(5px)`;
   }
 
   function handleMouseLeave(card) {
@@ -184,6 +184,8 @@
           <article
             class="glass-card"
             class:featured={tool.featured}
+            on:mousemove={(e) => handleMouseMove(e, e.currentTarget)}
+            on:mouseleave={(e) => handleMouseLeave(e.currentTarget)}
           >
 
           <!-- Liquid morphing blob decoration -->
