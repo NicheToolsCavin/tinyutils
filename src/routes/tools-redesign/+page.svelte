@@ -659,21 +659,21 @@
     grid-row: span 1;
   }
 
-  /* Glow effect using SVG filter with noise dithering (artifact-free!) */
+  /* Glow effect - back to basics, very subtle to minimize visible artifacts */
   .card-glow {
     position: absolute;
-    inset: -20px;
-    background: var(--tool-color);
+    inset: -30px;
+    background: radial-gradient(ellipse at center, var(--tool-color) 0%, transparent 70%);
     border-radius: 50%;
     opacity: 0;
-    filter: url(#glow-filter);
+    filter: blur(40px);
     transition: opacity 0.5s ease;
     pointer-events: none;
     z-index: 0;
   }
 
   .glass-card:hover .card-glow {
-    opacity: 0.6;
+    opacity: 0.25;
   }
 
   @keyframes pulse-glow {
