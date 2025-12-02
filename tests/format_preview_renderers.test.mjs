@@ -126,6 +126,18 @@ test('CSV preview renderer handles newlines inside quoted fields', () => {
   assert.equal(rowMatches.length, 2, 'Should render exactly one data row for multi-line quoted cell');
 });
 
+test('CSV preview renderer handles CRLF line endings', () => {
+  const csv = 'Name,Age\r\n"John Doe",25\r\n"Jane Smith",30';
+  const result = renderCSVPreview(csv);
+
+  // Both rows should be parsed correctly despite CRLF endings
+  assert.ok(result.includes('John Doe'), 'Should parse first row with CRLF');
+  assert.ok(result.includes('Jane Smith'), 'Should parse second row with CRLF');
+  const rowMatches = result.match(/<tr>/g) || [];
+  // One header row + two data rows = 3 <tr> tags
+  assert.equal(rowMatches.length, 3, 'Should correctly parse CRLF-delimited rows');
+});
+
 test('CSV preview enforces row and character limits', () => {
   const manyRows = Array.from({ length: CSV_MAX_ROWS + 20 }, (_, i) => `row${i},value${i}`).join('\n');
   const result = renderCSVPreview(`col1,col2\n${manyRows}`);
