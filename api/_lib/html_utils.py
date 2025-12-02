@@ -1,22 +1,32 @@
 """HTML processing utilities for converter."""
 
 import re
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote
 import ipaddress
+
+# Maximum HTML size to process to prevent ReDoS attacks
+_MAX_HTML_SIZE_BYTES = 10_000_000
 
 # Matches src="data:..." to capture data URL payloads for pre-pandoc cleanup
 _DATA_URL_RE = re.compile(r'src="data:([^"]*)"', re.IGNORECASE)
 
-# Matches full blocks of clearly dangerous tags we never want in previews
-_DANGEROUS_TAG_RE = re.compile(
-    r"<\s*(script|style|iframe|object|embed)\b.*?</\s*\1\s*>",
-    re.IGNORECASE | re.DOTALL,
+# Matches opening tags for dangerous elements (simpler, more reliable than matching pairs)
+# Handles: <script...>, <script />, etc. but NOT the closing tag
+_DANGEROUS_OPENING_TAG_RE = re.compile(
+    r"<\s*(?:script|style|iframe|object|embed)\b[^>]*>",
+    re.IGNORECASE,
 )
 
-# Matches inline event handler attributes such as onclick="..."
+# Matches closing tags for dangerous elements
+_DANGEROUS_CLOSING_TAG_RE = re.compile(
+    r"</\s*(?:script|style|iframe|object|embed)\s*>",
+    re.IGNORECASE,
+)
+
+# Matches inline event handler attributes with or without quotes: onclick="...", onload='...', onerror=...
 _ON_ATTR_RE = re.compile(
-    r"\s+on[a-zA-Z]+\s*=\s*(?:'[^']*'|\"[^\"]*\")",
-    re.IGNORECASE | re.DOTALL,
+    r"\s+on[a-zA-Z]+\s*=\s*(?:['\"](?:[^'\"]*)['\"]|[^\s>]+)",
+    re.IGNORECASE,
 )
 
 # Matches javascript: URLs in href/src attributes
@@ -32,37 +42,89 @@ _URL_ATTR_RE = re.compile(
 )
 
 
+# Safe image MIME types for data URLs (excludes SVG which can contain scripts)
 _SAFE_DATA_MIME_PREFIXES = (
     "image/png",
     "image/jpeg",
     "image/jpg",
     "image/gif",
     "image/webp",
+    "image/avif",
 )
 
 
 def _is_private_host(host: str) -> bool:
-    """Return True if *host* is clearly private/loopback.
+    """Return True if *host* is clearly private/loopback/metadata.
 
-    We avoid pulling in third‑party deps and rely on :mod:`ipaddress` plus
+    Blocks:
+    - Loopback addresses (127.0.0.1, ::1)
+    - RFC1918 private ranges (10.*, 172.16.*, 192.168.*)
+    - Link-local addresses (169.254.*, fe80::)
+    - Reserved/special ranges (0.0.0.0, 255.255.255.255, etc.)
+    - Cloud metadata endpoints (169.254.169.254 for AWS/GCP)
+    - .local domains (mDNS)
+
+    We avoid pulling in third-party deps and rely on :mod:`ipaddress` plus
     simple string checks for common private hostnames.
     """
 
-    host = (host or "").strip().split("%")[0]  # drop IPv6 zone id if present
     if not host:
         return False
 
-    lower = host.lower()
+    # URL decode if necessary to catch encoding tricks like %25 (encoded %)
+    # Only decode once to avoid double-decode attacks
+    try:
+        decoded_host = unquote(host, errors="strict")
+    except Exception:
+        # If decoding fails, use the original
+        decoded_host = host
+
+    # Extract IPv6 zone ID safely (only for bracketed IPv6 addresses)
+    # Format: [fe80::1%eth0] → extract "fe80::1"
+    clean_host = decoded_host.strip()
+    if clean_host.startswith("[") and "]" in clean_host:
+        # Bracketed IPv6: extract the IP part before ]
+        clean_host = clean_host[1:clean_host.index("]")]
+    else:
+        # For non-bracketed addresses, don't split on % as it could be URL encoding
+        pass
+
+    if not clean_host:
+        return False
+
+    lower = clean_host.lower()
+
+    # Check simple hostname matches first
     if lower in {"localhost", "localhost.", "::1"}:
         return True
-    if lower.endswith(".local"):
+
+    # Check .local domain suffix
+    if lower.endswith(".local") or lower.endswith(".localhost"):
         return True
 
+    # Check cloud/container metadata endpoints
+    if lower in {
+        "169.254.169.254",  # AWS/GCP/Azure metadata
+        "fd00:ec2::254",  # AWS IPv6 metadata
+        "metadata.google.internal",  # GCP
+    }:
+        return True
+
+    # Try to parse as IP address for comprehensive checking
     try:
         ip = ipaddress.ip_address(lower)
     except ValueError:
+        # Not an IP address, just a hostname - already checked .local above
         return False
-    return ip.is_private or ip.is_loopback
+
+    # Use ipaddress module checks for comprehensive range validation
+    # This covers: is_private (RFC1918), is_loopback, is_link_local, is_reserved
+    return (
+        ip.is_private
+        or ip.is_loopback
+        or ip.is_link_local  # 169.254.0.0/16, fe80::/10
+        or ip.is_reserved  # Special ranges like 0.0.0.0/8, 255.255.255.255, etc.
+    )
 
 
 def _filter_preview_data_urls(match: re.Match[str]) -> str:
@@ -157,12 +219,38 @@ def sanitize_html_for_preview(html_text: str) -> str:
 
     The goal is "safe enough" for untrusted content without pulling in a
     heavy HTML sanitizer dependency.
+
+    This function blocks:
+    - Dangerous tags: <script>, <style>, <iframe>, <object>, <embed>
+    - Inline event handlers: onclick, onload, onerror, etc. (quoted or unquoted)
+    - javascript: URLs in href/src attributes
+    - Risky data: URLs (only safe image MIME types allowed)
+    - Private/metadata IP addresses (SSRF protection)
+
+    Args:
+        html_text: Raw HTML text that may contain malicious content
+
+    Returns:
+        Sanitized HTML safe for rendering in a preview iframe
+
+    Raises:
+        ValueError: If html_text exceeds maximum safe size
     """
 
-    # Strip dangerous containers entirely
-    cleaned = _DANGEROUS_TAG_RE.sub("", html_text)
+    # Prevent ReDoS attacks by rejecting overly large HTML
+    if len(html_text) > _MAX_HTML_SIZE_BYTES:
+        raise ValueError(
+            f"HTML content too large ({len(html_text)} bytes, max {_MAX_HTML_SIZE_BYTES})"
+        )
 
-    # Remove inline event handlers like onclick="..." / onload='...'
+    # Strip dangerous opening tags entirely (handles <script>, <script />, etc.)
+    cleaned = _DANGEROUS_OPENING_TAG_RE.sub("", html_text)
+
+    # Strip dangerous closing tags
+    cleaned = _DANGEROUS_CLOSING_TAG_RE.sub("", cleaned)
+
+    # Remove inline event handlers (handles both quoted and unquoted attributes)
+    # Examples removed: onclick="...", onload='...', onerror=alert(1)
     cleaned = _ON_ATTR_RE.sub("", cleaned)
 
     # Neutralise javascript: URLs in href/src by downgrading to a harmless '#'

@@ -111,7 +111,8 @@ class handler(BaseHTTPRequestHandler):  # type: ignore[name-defined]
                 # text or non-PDF blobs). This restores the original contract of
                 # returning a 4xx JSON error for clearly bad inputs instead of a
                 # 200 ZIP.
-                header = file_bytes.lstrip()[:5]
+                # Note: Only check first 512 bytes to avoid expensive lstrip on large files
+                header = file_bytes[:512].lstrip(b" \t\n\r")[:5]
                 if not header.startswith(b"%PDF"):
                     self._send_error(422, "Invalid ZIP or PDF file")
                     return

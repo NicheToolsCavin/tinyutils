@@ -7,9 +7,9 @@ node_modules/
 .vercel/
 *.zip
 .code/
-.code/
 .vercel
 artifacts/
+VibeCoderOutput/
 .DS_Store
 
 # Python cache and compiled files
@@ -45,4 +45,3 @@ CLAUDE.md
 AGENTS.md
 CHATGPT.md
 GOOGLECLOUD.md
-CHATGPT.md
