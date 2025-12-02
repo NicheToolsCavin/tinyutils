@@ -22,14 +22,15 @@
   .tools-hero::before {
     content: '';
     position: absolute;
-    top: -30%;
-    left: -30%;
-    width: 160%;
-    height: 160%;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
     background: radial-gradient(
       circle at 50% 50%,
       rgba(59, 130, 246, 0.08) 0%,
-      transparent 50%
+      rgba(59, 130, 246, 0.02) 40%,
+      transparent 70%
     );
     animation: pulse 10s ease-in-out infinite;
     pointer-events: none;

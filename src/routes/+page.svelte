@@ -151,14 +151,15 @@
   .hero-enhanced::before {
     content: '';
     position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
+    top: -60%;
+    left: -60%;
+    width: 220%;
+    height: 220%;
     background: radial-gradient(
       circle at 50% 50%,
       rgba(59, 130, 246, 0.1) 0%,
-      transparent 50%
+      rgba(59, 130, 246, 0.04) 35%,
+      transparent 65%
     );
     animation: pulse 8s ease-in-out infinite;
     pointer-events: none;
