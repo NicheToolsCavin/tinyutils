@@ -174,15 +174,19 @@
   <section class="tools-section">
     <div class="bento-grid">
       {#each tools as tool, i}
-        <article
-          class="glass-card size-{tool.size}"
-          class:featured={tool.featured}
+        <div
+          class="card-shell size-{tool.size}"
           style="--tool-color: {tool.color}; --tool-gradient: {tool.gradient}; --delay: {i * 0.08}s"
-          on:mousemove={(e) => handleMouseMove(e, e.currentTarget)}
-          on:mouseleave={(e) => handleMouseLeave(e.currentTarget)}
         >
-          <!-- Glow effect -->
+          <!-- Glow effect - OUTSIDE card to avoid clipping -->
           <div class="card-glow"></div>
+
+          <article
+            class="glass-card"
+            class:featured={tool.featured}
+            on:mousemove={(e) => handleMouseMove(e, e.currentTarget)}
+            on:mouseleave={(e) => handleMouseLeave(e.currentTarget)}
+          >
 
           <!-- Liquid morphing blob decoration -->
           <div class="liquid-blob"></div>
@@ -241,6 +245,7 @@
           <div class="corner-decoration corner-tl"></div>
           <div class="corner-decoration corner-br"></div>
         </article>
+        </div>
       {/each}
     </div>
   </section>
@@ -629,16 +634,19 @@
     grid-auto-rows: 280px;
   }
 
-  /* ===== GLASS CARDS ===== */
-  .glass-card {
+  /* ===== CARD SHELL (wrapper for glow) ===== */
+  .card-shell {
     position: relative;
     opacity: 0;
     transform: translateY(40px);
     animation: cardEnter 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     animation-delay: var(--delay);
-    transition:
-      transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
-      filter 0.5s ease;
+  }
+
+  /* ===== GLASS CARDS ===== */
+  .glass-card {
+    position: relative;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     transform-style: preserve-3d;
     cursor: pointer;
   }
@@ -659,21 +667,28 @@
     grid-row: span 1;
   }
 
-  /* Glow effect - back to basics, very subtle to minimize visible artifacts */
+  /* Glow effect - ChatGPT solution: gradient center OUTSIDE card */
   .card-glow {
     position: absolute;
-    inset: -30px;
-    background: radial-gradient(ellipse at center, var(--tool-color) 0%, transparent 100%);
-    border-radius: 50%;
-    opacity: 0;
-    filter: blur(40px);
-    transition: opacity 0.5s ease;
+    inset: -35%;
     pointer-events: none;
+    opacity: 0;
+    transform: translateZ(0);
+    background: radial-gradient(
+      140% 200% at 50% 130%,
+      color-mix(in srgb, var(--tool-color) 80%, transparent) 0%,
+      color-mix(in srgb, var(--tool-color) 40%, transparent) 35%,
+      color-mix(in srgb, var(--tool-color) 10%, transparent) 65%,
+      rgba(0, 0, 0, 0) 100%
+    );
+    filter: blur(36px);
+    mix-blend-mode: screen;
+    transition: opacity 0.45s ease-out;
     z-index: 0;
   }
 
-  .glass-card:hover .card-glow {
-    opacity: 0.25;
+  .card-shell:hover .card-glow {
+    opacity: 0.75;
   }
 
   @keyframes pulse-glow {
