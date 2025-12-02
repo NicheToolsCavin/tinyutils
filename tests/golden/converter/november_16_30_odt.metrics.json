@@ -1,0 +1,31 @@
+{
+  "description": "Golden metrics for November 16-30.odt (multi-page ODT newsletter). Critical for validating ODT→Markdown fidelity and blank output bug fix.",
+  "fixture": "November 16-30.odt",
+  "source_format": "odt",
+  "conversions": {
+    "to_markdown": {
+      "min_output_bytes": 2000,
+      "expected_bytes_approx": 2349,
+      "should_not_be_blank": true,
+      "lists": {
+        "bullet": 0,
+        "ordered": 0,
+        "maxDepth": 0
+      },
+      "codeBlocks": {
+        "total": 0,
+        "languages": []
+      },
+      "images": {
+        "total": 0
+      },
+      "notes": "Newsletter ODT converts to plain markdown without code blocks or embedded images. Validates that ODT→Markdown preserves text content without blank output regression."
+    },
+    "to_html": {
+      "min_output_bytes": 2000,
+      "expected_bytes_approx": 2350,
+      "should_not_be_blank": true,
+      "notes": "HTML conversion should produce similar-sized output with proper tag structure. Validates HTML generation doesn't produce blank output."
+    }
+  }
+}
