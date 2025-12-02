@@ -33,7 +33,7 @@ If you create a new project or new Cloud Run service, you have failed.
 
 **Environment Variables:**
 ```bash
-CONVERTER_SHARED_SECRET=lfrnNS6TnRdOOpwIFwYF80b5vt6INKJdMvtr7zNhf6w=
+CONVERTER_SHARED_SECRET=7w0UEYs4+oF9StN8Tw/uFEmlvKpeChUX9B8eLmMmLak=
 PDF_MAX_PAGES=50
 PDF_MAX_BYTES=5242880
 REQUEST_TIMEOUT=25
@@ -77,7 +77,7 @@ RATE_LIMIT_PER_MIN=60
 
 ### The Shared Secret
 
-**CONVERTER_SHARED_SECRET:** `lfrnNS6TnRdOOpwIFwYF80b5vt6INKJdMvtr7zNhf6w=`
+**CONVERTER_SHARED_SECRET:** `7w0UEYs4+oF9StN8Tw/uFEmlvKpeChUX9B8eLmMmLak=`
 
 This is used by:
 - Cloud Run services (tinyutils-pdf, pdf-renderer)
@@ -122,7 +122,7 @@ gcloud run deploy tinyutils-pdf \
   --region=us-central1 \
   --platform=managed \
   --allow-unauthenticated \
-  --set-env-vars "CONVERTER_SHARED_SECRET=lfrnNS6TnRdOOpwIFwYF80b5vt6INKJdMvtr7zNhf6w=" \
+  --set-env-vars "CONVERTER_SHARED_SECRET=7w0UEYs4+oF9StN8Tw/uFEmlvKpeChUX9B8eLmMmLak=" \
   --set-env-vars "PDF_MAX_PAGES=50" \
   --set-env-vars "PDF_MAX_BYTES=5242880" \
   --set-env-vars "REQUEST_TIMEOUT=25" \
@@ -291,7 +291,7 @@ If you answered YES to all of these, you're good. If NO to any, READ THIS FILE A
 **One project:** `gen-lang-client-0391296421`
 **One service:** `tinyutils-pdf`
 **One URL:** `https://tinyutils-pdf-2159415913.us-central1.run.app`
-**One secret:** `lfrnNS6TnRdOOpwIFwYF80b5vt6INKJdMvtr7zNhf6w=`
+**One secret:** `7w0UEYs4+oF9StN8Tw/uFEmlvKpeChUX9B8eLmMmLak=`
 **Secrets location:** `.env.gcloud`, `.env.preview.local`
 
 **DO NOT:**
