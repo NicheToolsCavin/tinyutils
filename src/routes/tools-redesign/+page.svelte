@@ -184,8 +184,6 @@
           <article
             class="glass-card"
             class:featured={tool.featured}
-            on:mousemove={(e) => handleMouseMove(e, e.currentTarget)}
-            on:mouseleave={(e) => handleMouseLeave(e.currentTarget)}
           >
 
           <!-- Liquid morphing blob decoration -->
