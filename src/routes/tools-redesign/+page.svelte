@@ -640,18 +640,17 @@
   }
 
   .glass-card:hover .card-glow {
-    opacity: 1;
+    opacity: 0.6;
   }
 
-  /* Glow effect - using box-shadow for natural smooth falloff */
+  /* Glow effect - soft ambient light with smooth falloff */
   .card-glow {
     position: absolute;
-    inset: 0;
-    border-radius: 24px;
+    inset: -30px;
+    background: radial-gradient(ellipse at center, var(--tool-color) 0%, transparent 70%);
+    border-radius: 50%;
     opacity: 0;
-    box-shadow:
-      0 0 40px 15px var(--tool-color),
-      0 0 80px 30px var(--tool-color);
+    filter: blur(50px);
     transition: opacity 0.5s ease;
     z-index: 0;
     animation: pulse-glow 3s ease-in-out infinite;
