@@ -25,6 +25,49 @@
 
 <!-- RECENT ACTIVITY (Full Context) -->
 
+### 2025-12-02 16:45 CET - Claude Code - Light mode color fixes & Phase 2 Track 4 unblock
+
+**Mode:** autonomous
+**Branch:** `fix/converter-preview-hardening`
+**Summary:**
+- **Identified & Fixed 7 Light Mode UI Bugs** blocking Phase 2 Track 4 visual QA
+  - Found hardcoded white colors (#fff, rgba(255,255,255,X)) across 7 tools
+  - Converted all to design tokens (var(--text-inverse), var(--surface-raised), var(--border-default))
+  - Fixed table header backgrounds: #fff → var(--surface-raised)
+  - Fixed progress bars: rgba(255,255,255,0.12) → var(--progress-bg)
+  - Fixed button text colors: #fff → var(--text-inverse)
+
+- **Tools Fixed** (in priority order):
+  1. text-converter: button colors, table headers, kbd styling
+  2. dead-link-finder: button colors, table headers, debug panel styling
+  3. wayback-fixer: button colors, progress bar backgrounds
+  4. sitemap-delta: progress bar backgrounds for light mode visibility
+  5. encoding-doctor: primary button text colors
+  6. keyword-density: legacy consent banner button colors
+  7. meta-preview: legacy consent banner button colors
+
+- **Design System Impact**:
+  - All UI elements now properly adapt to light mode using design tokens
+  - No more hardcoded dark-mode-specific colors
+  - Fallbacks ensure backward compatibility
+  - Contrasts should now meet WCAG AA standards for light mode
+
+**Evidence:**
+- Commit: 48dced7 (fix(ui): resolve light mode color issues across 7 tools)
+- All 69 tests still passing (verified no regressions)
+
+**Follow-ups:**
+- Run visual QA on light mode preview to verify fixes
+- Verify WCAG AA contrast ratios for all light mode colors
+- Test across Safari, Firefox, Chrome for light mode rendering
+- Consider adding light mode screenshot tests to CI/CD
+
+**Blockers Resolved:**
+- ✅ Phase 2 Track 4 (Light Mode Visual QA) now unblocked
+- Ready for preview deployment + visual validation
+
+---
+
 ### 2025-12-02 16:30 CET - Claude Code - Converter fixture expansion + fidelity tests (Workstream B)
 
 **Mode:** automated
