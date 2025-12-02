@@ -174,7 +174,9 @@
             <!-- Floating badge for featured -->
             {#if tool.featured}
               <div class="featured-badge">
-                <span>⭐</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="#FFD700" stroke="#FFD700" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
                 <span>Popular</span>
               </div>
             {/if}
@@ -243,6 +245,11 @@
     box-sizing: border-box;
   }
 
+  /* Hide the default site header on this page */
+  :global(.site-header) {
+    display: none;
+  }
+
   .liquid-glass {
     min-height: 100vh;
     background: #0a0a0a;
@@ -266,7 +273,7 @@
     position: absolute;
     border-radius: 50%;
     filter: blur(120px);
-    opacity: 0.5;
+    opacity: 0.4;
     animation: float 20s ease-in-out infinite;
   }
 
@@ -322,7 +329,7 @@
   .blob {
     position: fixed;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
     pointer-events: none;
     z-index: 1;
     animation: blob-float 15s ease-in-out infinite;
@@ -388,14 +395,14 @@
     align-items: center;
     gap: 2rem;
     padding: 0.75rem 1.5rem;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 100px;
     box-shadow:
       0 8px 32px rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
   }
 
   .nav-logo {
@@ -435,10 +442,10 @@
   }
 
   .nav-link {
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(255, 255, 255, 0.9);
     text-decoration: none;
     font-size: 0.9375rem;
-    font-weight: 500;
+    font-weight: 600;
     transition: color 0.2s ease;
     position: relative;
   }
@@ -467,7 +474,7 @@
     align-items: center;
     gap: 0.25rem;
     padding: 0.5rem 1rem;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.12);
     border-radius: 100px;
     border: 1px solid rgba(255, 255, 255, 0.2);
   }
@@ -487,7 +494,7 @@
     z-index: 2;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 12rem 2rem 6rem;
+    padding: 10rem 2rem 5rem;
     text-align: center;
   }
 
@@ -499,11 +506,11 @@
   .sparkle-container {
     position: relative;
     margin-bottom: 1rem;
-    height: 80px;
+    height: 70px;
   }
 
   .sparkle {
-    font-size: 4rem;
+    font-size: 3.5rem;
     display: inline-block;
     opacity: 0;
     animation: sparkle 2s ease-in-out infinite, fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
@@ -511,7 +518,7 @@
 
   .sparkle-orbit {
     position: absolute;
-    font-size: 2rem;
+    font-size: 1.75rem;
     top: 0;
     left: 50%;
     animation: orbit 4s linear infinite;
@@ -537,7 +544,7 @@
 
   .hero-title {
     font-family: 'Syne', sans-serif;
-    font-size: clamp(3rem, 8vw, 6rem);
+    font-size: clamp(2.75rem, 7vw, 5rem);
     font-weight: 800;
     line-height: 1.1;
     margin: 0 0 2rem;
@@ -636,7 +643,7 @@
     opacity: 1;
   }
 
-  /* Glow effect */
+  /* Glow effect - toned down */
   .card-glow {
     position: absolute;
     inset: -20px;
@@ -652,13 +659,15 @@
   @keyframes pulse-glow {
     0%, 100% {
       transform: scale(1);
+      opacity: 0.3;
     }
     50% {
       transform: scale(1.05);
+      opacity: 0.5;
     }
   }
 
-  /* Liquid morphing blob */
+  /* Liquid morphing blob - toned down */
   .liquid-blob {
     position: absolute;
     width: 200px;
@@ -667,7 +676,7 @@
     right: -50px;
     background: radial-gradient(circle, var(--tool-color) 0%, transparent 70%);
     border-radius: 50%;
-    opacity: 0.1;
+    opacity: 0.08;
     filter: blur(60px);
     z-index: 0;
     animation: morph 8s ease-in-out infinite;
@@ -725,7 +734,7 @@
     align-items: center;
     gap: 0.375rem;
     padding: 0.375rem 0.75rem;
-    background: rgba(255, 215, 0, 0.1);
+    background: rgba(255, 215, 0, 0.12);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 215, 0, 0.3);
     border-radius: 100px;
@@ -733,6 +742,11 @@
     font-weight: 600;
     color: #FFD700;
     animation: badge-float 3s ease-in-out infinite;
+  }
+
+  .featured-badge svg {
+    width: 14px;
+    height: 14px;
   }
 
   @keyframes badge-float {
@@ -832,7 +846,7 @@
   }
 
   .glass-card:hover .icon-glow {
-    opacity: 0.6;
+    opacity: 0.4;
   }
 
   .card-category {
