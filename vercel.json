@@ -1,4 +1,14 @@
 {
+  "functions": {
+    "api/**": {
+      "memory": 3008,
+      "maxDuration": 60
+    },
+    "api/convert/**": {
+      "memory": 3008,
+      "maxDuration": 120
+    }
+  },
   "headers": [
     {
       "source": "/ads.txt",
