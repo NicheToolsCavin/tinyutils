@@ -121,11 +121,18 @@
         type="url"
         placeholder="https://example.com/article"
         bind:value={url}
+        data-testid="meta-url-input"
       />
     </div>
 
     <div class="actions-row">
-      <button class="btn primary" type="button" on:click={runPreview} disabled={isLoading}>
+      <button
+        class="btn primary"
+        type="button"
+        data-testid="meta-preview-run"
+        on:click={runPreview}
+        disabled={isLoading}
+      >
         {isLoading ? 'Fetching…' : 'Preview'}
       </button>
       <div class="hint">
@@ -142,7 +149,7 @@
     <section class="card">
       <h2>Extracted meta</h2>
       <div class="tableWrap">
-        <table class="results-table">
+        <table class="results-table" data-testid="meta-results-table">
           <tbody>
             <tr>
               <th scope="row">Requested URL</th>
@@ -152,7 +159,7 @@
             </tr>
             <tr>
               <th scope="row">Title</th>
-              <td>{result.title || '—'}</td>
+              <td data-testid="meta-title-cell">{result.title || '—'}</td>
             </tr>
             <tr>
               <th scope="row">Description</th>
@@ -280,4 +287,3 @@
     color: var(--text-muted);
   }
 </style>
-

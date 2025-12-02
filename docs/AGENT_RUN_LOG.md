@@ -25,147 +25,6 @@
 
 <!-- RECENT ACTIVITY (Full Context) -->
 
-### 2025-12-02 17:15 CET - Claude Code - UI/UX enhancements & cleanup sprint
-
-**Mode:** autonomous
-**Branch:** `fix/converter-preview-hardening`
-**Summary:**
-- **Cleanup Sprint**: Removed 6 outdated backup HTML files from tools directory
-  - Deleted: tools/dead-link-finder/index-old.html, tools/sitemap-delta/index-old.html, tools/wayback-fixer/index-old.html, tools/text-converter/index-old.html, tools/index-old.html, tools/index-static-backup.html
-  - Improves codebase clarity and reduces maintenance burden
-
-- **Accessibility Improvements**:
-  - Fixed light theme text-muted contrast (#645135) for WCAG AA compliance (previously #7a6750 had ~4.1:1 contrast, now meets 4.5:1)
-  - Ensured aria-pressed syncs properly on theme-toggle by deferring initialization to DOMContentLoaded (timing fix for early script execution)
-
-- **Visual Polish**:
-  - Added disabled button visual states with background color changes across actions-row buttons
-    - Primary buttons: muted background with reduced opacity on disabled state
-    - Secondary buttons: raised surface background with transparent border on disabled state
-  - Implemented scroll-snap for filter groups on mobile (<480px breakpoint)
-    - Horizontal scrolling with mandatory snap points for better touch UX
-    - WebKit momentum scrolling enabled for smooth mobile interaction
-
-- **User Feedback**:
-  - Added copy-to-clipboard toast feedback in sitemap-delta tool
-    - Visual confirmation when summary, rules, or share link copied (2-second auto-dismiss)
-    - Slide-in animation with error handling and user-friendly messages
-  - Toasts also present in keyword-density and sitemap-generator (enhanced existing implementations)
-
-**Evidence:**
-- Commits: 4123f63 (cleanup & accessibility), c181dfd (UI/UX enhancements & polish)
-- All 69 tests passing (verified no regressions)
-- Files modified:
-  - styles/design-tokens.css (light theme contrast fix)
-  - scripts/theme-toggle.js (aria-pressed sync timing)
-  - src/routes/tools/text-converter/+page.svelte (disabled button states)
-  - src/routes/tools/dead-link-finder/+page.svelte (scroll-snap implementation)
-  - src/routes/tools/sitemap-delta/+page.svelte (toast feedback system + UI)
-
-**Follow-ups:**
-- Visual QA on light mode preview to verify contrast improvements
-- Test scroll-snap on actual mobile devices (iOS Safari, Android Chrome)
-- Monitor toast performance under rapid copy actions
-
----
-
-### 2025-12-02 16:45 CET - Claude Code - Light mode color fixes & Phase 2 Track 4 unblock
-
-**Mode:** autonomous
-**Branch:** `fix/converter-preview-hardening`
-**Summary:**
-- **Identified & Fixed 7 Light Mode UI Bugs** blocking Phase 2 Track 4 visual QA
-  - Found hardcoded white colors (#fff, rgba(255,255,255,X)) across 7 tools
-  - Converted all to design tokens (var(--text-inverse), var(--surface-raised), var(--border-default))
-  - Fixed table header backgrounds: #fff → var(--surface-raised)
-  - Fixed progress bars: rgba(255,255,255,0.12) → var(--progress-bg)
-  - Fixed button text colors: #fff → var(--text-inverse)
-
-- **Tools Fixed** (in priority order):
-  1. text-converter: button colors, table headers, kbd styling
-  2. dead-link-finder: button colors, table headers, debug panel styling
-  3. wayback-fixer: button colors, progress bar backgrounds
-  4. sitemap-delta: progress bar backgrounds for light mode visibility
-  5. encoding-doctor: primary button text colors
-  6. keyword-density: legacy consent banner button colors
-  7. meta-preview: legacy consent banner button colors
-
-- **Design System Impact**:
-  - All UI elements now properly adapt to light mode using design tokens
-  - No more hardcoded dark-mode-specific colors
-  - Fallbacks ensure backward compatibility
-  - Contrasts should now meet WCAG AA standards for light mode
-
-**Evidence:**
-- Commit: 48dced7 (fix(ui): resolve light mode color issues across 7 tools)
-- All 69 tests still passing (verified no regressions)
-
-**Follow-ups:**
-- Run visual QA on light mode preview to verify fixes
-- Verify WCAG AA contrast ratios for all light mode colors
-- Test across Safari, Firefox, Chrome for light mode rendering
-- Consider adding light mode screenshot tests to CI/CD
-
-**Blockers Resolved:**
-- ✅ Phase 2 Track 4 (Light Mode Visual QA) now unblocked
-- Ready for preview deployment + visual validation
-
----
-
-### 2025-12-02 16:30 CET - Claude Code - Converter fixture expansion + fidelity tests (Workstream B)
-
-**Mode:** automated
-**Branch:** `fix/converter-preview-hardening`
-**Summary:**
-- **Workstream B.1**: Generated golden metrics for critical November 16-30.odt (ODT→Markdown) fixture with fidelity test validation
-  - Created november_16_30_odt.metrics.json with expected metrics for ODT→Markdown conversion
-  - Added regression test to converter_fidelity.mjs to detect blank output and metric drift
-  - Validates fix for reported ODT→DOCX blank output bug remains stable
-
-- **Workstream B.2**: Expanded real-world fixture set with blog post and report-style documents
-  - Created blog_post.docx: realistic blog with 6 bullet lists, 1 ordered list, 2 code blocks (4205 bytes markdown output)
-  - Created report_2025_annual.docx: comprehensive report with 14 bullet lists, 3 ordered lists (max depth 2), 1 code block (5617 bytes markdown output)
-  - Generated golden metrics for both fixtures (blog_post_docx.metrics.json, report_2025_annual_docx.metrics.json)
-  - Added two new fidelity regression tests to validate structural preservation
-
-- **Converter fidelity test suite**: Now covers 7 fixtures with full regression detection
-  - tech_doc.docx, lists.docx, images.docx, html_input.html (existing)
-  - November 16-30.odt, blog_post.docx, report_2025_annual.docx (new)
-
-- **Documentation**: Updated tests/fixtures/converter/README.md to document all fixtures and mark completed additions
-
-**Evidence:**
-- Commits: feat(converter): expand real-world fixture set and fidelity coverage (Workstream B)
-- Tests: All 7 converter fidelity tests pass; full suite 69/69 pass, 0 fail
-- Files: 2 new DOCX fixtures, 2 new markdown sources, 3 golden metrics JSON, 3 new regression tests
-
-**Follow-ups:**
-- Add PDF and EPUB input fixtures for additional format coverage
-- Consider adding RTF input fixture for format preservation testing
-- Extend golden metrics to cover output quality metrics (file size bounds, content presence checks)
-
----
-
-### 2025-12-02 15:45 CET - Manual - PDF margins smart defaults for high-fidelity converter
-
-**Mode:** manual
-**Branch:** `fix/converter-preview-hardening`
-**Summary:**
-- Implemented smart PDF margins UI with "Auto (preserve from source)" as default strategy
-- Users can optionally override via "Custom margins" with controls for side/top-bottom margins and page size (Letter/A4/A3/Legal/Auto)
-- Smart preferences persist across sessions via localStorage; custom inputs only show when needed
-- Aligns with high-fidelity converter philosophy: preserve original document properties by default, minimal user tweaking required
-- Backend-ready API structure supports intelligent margin handling (e.g., auto-detect from PDF metadata in future)
-- Added comprehensive documentation to tool_desc_converter.md explaining philosophy and rationale
-- All tests passing (69/69 pass, 0 fail)
-
-**Evidence:**
-- Commits: PDF margins UI feature, smart margin strategy refactor, tool documentation
-- Tests: svelte-check 0 errors; pnpm test 69 pass, 0 fail
-
-**Follow-ups:**
-- Wire backend to respect `pdfMargins.strategy` and conditionally apply custom values or auto-detection
-- Consider extending smart defaults to other formats (DOCX→MD: preserve heading levels and lists, etc.)
 
 ### 2025-11-28 21:10 CET - Claude Code - Format-specific preview renderers
 
@@ -1040,13 +899,202 @@
 
 <!-- RECENT ACTIVITY (Full Context) -->
 
-### 2025-11-29 12:38 CET - Manual - converter preview CSV/JSON hardening & Prism upgrade
+### 2025-11-29 13:02 CET - Manual - scaffold tiny-reactive E2E harness (converter)
 - **Mode:** manual
-- **Branch:** `fix/converter-preview-hardening`
+- **Branch:** `fix/tool-card-height`
 - **Summary:**
-  - Extracted CSV preview parsing into shared src/lib/utils/csvParser.js with CSV_MAX_ROWS/CSV_MAX_CHARS guards and updated format_preview_renderers tests.
-  - Added JSON >200KB fallback notice, markup, and tests plus minor CSV/TeX preview data-testids for UI automation.
-  - Bumped Prism assets in converter preview to 1.30.0 with updated SRI and kept preview iframe sandbox tightened to allow-scripts only.
+  - Added tests/e2e/tiny-reactive-harness.mjs as a minimal tiny-reactive UI harness and exemplar converter preview flow using data-testids.
+  - Harness reads PREVIEW_URL/TINY_REACTIVE_BASE_URL/TINY_REACTIVE_TOKEN, runs one converter happy-path, and writes summary+PNG under artifacts/ui/converter/<date>.
 - **Evidence:** NONE
 - **Follow-ups:**
-  - Consider extending UI smoke to cover CSV/JSON/TeX/Text previews in a later pass
+  - Extend harness to other tools and migrate into CI once tiny-reactive is wired.
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-11-30 10:57 CET - Auto - tiny-reactive E2E slice 1
+- **Mode:** auto
+- **Branch:** `fix/tool-card-height`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Added converter Try example → Convert tiny-reactive flow plus DLF list-mode + export wiring and updated run-all aggregator.
+- **Evidence:** artifacts/ui/**
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-11-30 11:25 CET - Auto - tiny-reactive Tier0 flows for CSV/JSON tools
+- **Mode:** auto
+- **Branch:** `fix/tool-card-height`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Added Tier0 tiny-reactive UI flows for CSV Joiner and JSON↔CSV tools, plus registry/run-all wiring and minimal data-testids.
+- **Evidence:** artifacts/ui/csv-joiner/**, artifacts/ui/json-to-csv/**
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-11-30 11:36 CET - Auto - tiny-reactive Tier0 flows for PDF extractor & sitemap generator
+- **Mode:** auto
+- **Branch:** `fix/tool-card-height`
+- **CWD:** /Users/cav/dev/TinyUtils/tinyutils
+- **Summary:**
+  - Added Tier0 tiny-reactive UI harnesses for Bulk PDF Text Extractor and Sitemap Generator, including minimal data-testids, registry entries, and run-all wiring.
+- **Evidence:** artifacts/ui/pdf-text-extractor/**, artifacts/ui/sitemap-generator/**
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-11-30 18:37 CET - Manual - add Vercel Speed Insights
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Installed @vercel/speed-insights via pnpm and wired injectSpeedInsights in root SvelteKit layout for performance analytics.
+  - Resolved npm/pnpm dependency conflict by using pnpm add so lockfile and node_modules stay consistent with existing SvelteKit toolchain.
+- **Evidence:** artifacts/speed-insights/20251130/
+- **Follow-ups:**
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-11-30 18:40 CET - Manual - converter preview fail-soft + sanitization
+- **Mode:** manual
+- **Branch:** `fix/tool-card-height`
+- **Summary:**
+  - Hardened converter previews with backend HTML sanitisation and new meta flags (hasMoreRows/hasMoreNodes) plus telemetry for truncated previews.
+  - Updated Svelte converter UI with soft fail-soft behaviour for CSV/JSON/Markdown/TeX previews, a live preview status banner, and a Safari-friendly PDF file accept pattern.
+  - All targeted tests passing (pytest test_converter_enhancements; node --test format_preview_renderers,converter_edge_cases) and vite build OK with only unused-selector warnings.
+- **Evidence:** artifacts/converter-preview-failsoft/20251130/
+- **Follow-ups:**
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-11-30 19:31 CET - Manual - converter preview time budgets and URL guards
+- **Mode:** manual
+- **Branch:** `fix/tool-card-height`
+- **Summary:**
+  - Added client-side CSV preview time budgets with fail-soft banner + dev telemetry.
+  - Tightened HTML preview sanitiser to neutralise risky data: URLs and private-host http(s) links.
+  - Introduced lightweight backend format-mismatch telemetry and new Puppeteer UI smokes (fail-soft, responsive Markdown, Safari PDF accept).
+- **Evidence:** artifacts/converter-preview-timebudget/20251130/
+- **Follow-ups:**
+  - Run new converter UI smokes against Vercel preview/production once Chrome/Safari are available.
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-11-30 20:15 CET - Manual - document openmemory MCP usage
+- **Mode:** manual
+- **Branch:** `fix/tool-card-height`
+- **Summary:**
+  - Documented openmemory (memory MCP) usage in CHATGPT.md under MCP Tools and in AGENTS.md MCP section so agents store/retrieve long-lived TinyUtils rules and preferences safely.
+  - Clarified that openmemory should hold concise, non-sensitive project rules/workflows (no secrets/tokens) to avoid re-reading AGENTS/CHATGPT every session.
+- **Evidence:** artifacts/mcp-openmemory-usage/20251130
+- **Follow-ups:**
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-01 01:38 CET - Manual - ODT→DOCX regression guardrails and tests
+- **Mode:** manual
+- **Branch:** `fix/tool-card-height`
+- **Summary:**
+  - Added odt_invoice_sample fixture and convert_backend integration tests for odt→docx/md non-blank output with INVOICE markers.
+  - Instrumented convert_backend.convert_one with pandoc version and stage size telemetry plus a suspected_blank_output log tag for tiny DOCX results on large ODT/DOCX inputs.
+  - Created scripts/odt_docx_stage_probe.py and captured local stage probe output under artifacts/odt-docx-regression/20251201/.
+- **Evidence:** artifacts/odt-docx-regression/20251201/
+- **Follow-ups:**
+  - Investigate preview/prod pandoc version and codepath differences once instrumentation is deployed.
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-01 03:24 CET - Manual - converter html_input logs fix + preview handshake
+- **Mode:** manual
+- **Branch:** `fix/tool-card-height`
+- **Summary:**
+  - Fixed UnboundLocalError on html_input.html by initialising logs at the top of convert_backend.convert_service.convert_one so security telemetry (html_in_disguise_detected) cannot reference logs before assignment.
+  - Updated scripts/convert_health_probe.mjs and tests/converter_api_smoke.mjs to handle Vercel 30x + _vercel_jwt preview protection handshake (one-shot cookie retry) for /api/convert.
+  - Verified /api/convert health probe and all converter_api_smoke tests (tech_doc, html_input.html, odt_invoice_sample.odt) pass against the latest Vercel preview using automation bypass secrets.
+- **Evidence:** artifacts/convert/20251201/html-input-handshake/
+- **Follow-ups:**
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-01 03:36 CET - Manual - converter PDF layout presets UI
+- **Mode:** manual
+- **Branch:** `fix/tool-card-height`
+- **Summary:**
+  - Added pdf_margin_preset/pdf_page_size to ConversionOptions and wired them into the ReportLab fallback so PDF page size and margin presets can be controlled via the converter API.
+  - Extended convert_backend.app.Options and Svelte converter UI to expose a simple PDF layout control (margin preset + page size) that only affects the fallback PDF renderer; defaults remain unchanged for existing users.
+  - Re-ran /api/convert health probe and converter_api_smoke tests against the latest Vercel preview to confirm html_input/ODT smokes still pass with the new options in place.
+- **Evidence:** artifacts/convert/20251201/pdf-layout-presets-ui/
+- **Follow-ups:**
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-01 03:57 CET - Manual - converter PDF layout UX note
+- **Mode:** manual
+- **Branch:** `fix/tool-card-height`
+- **Summary:**
+  - Clarified in the converter UI that the new PDF layout controls (margin preset + page size) affect only the fallback PDF renderer, not the external Chromium-based renderer.
+  - Aligned tool_desc_converter.md with the UI by noting that pdf_margin_preset/pdf_page_size apply to the ReportLab fallback path while the external PDF renderer remains unchanged.
+  - Revalidated converter_api_smoke.mjs against the latest Vercel preview after the doc/UX note to ensure no behaviour regressions.
+- **Evidence:** artifacts/convert/20251201/pdf-layout-ux-note/
+- **Follow-ups:**
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-01 04:24 CET - Manual - tiny-reactive Safari PDF preview bypass
+- **Mode:** manual
+- **Branch:** `fix/tool-card-height`
+- **Summary:**
+  - Updated scripts/ui_smoke_safari_pdf_accept.mjs to support Vercel preview protection bypass (preflight with x-vercel-protection-bypass/x-vercel-set-bypass-cookie, capture _vercel_jwt, and setCookies via Tiny-Reactive) so the smoke can load /tools/text-converter/ on protected previews.
+  - Re-ran the Safari PDF accept UI smoke against the current Vercel preview using automation bypass secrets; the smoke now reaches the converter page but reports that the live accept attribute does not yet include .pdf/application/pdf on that preview.
+- **Evidence:** artifacts/convert/20251201/safari-pdf-preview-bypass/
+- **Follow-ups:**
+  - Investigate why the current preview/production converter still lacks .pdf/application/pdf in the file input accept attribute despite the repo having the correct markup (likely a deploy/parity gap).
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-01 07:31 CET - Manual - Safari PDF accept tiny-reactive smoke fix
+- **Mode:** manual
+- **Branch:** `fix/tool-card-height`
+- **Summary:**
+  - Fixed Safari PDF accept tiny-reactive smoke by reading Tiny-Reactive evaluate envelopes via data.value (accept/outerHTML) instead of data.result, so #fileInput and its accept attribute are captured correctly.
+  - Confirmed preview bypass + _vercel_jwt cookies are set via setCookies into the Tiny-Reactive context, and that the browser actually loads the real converter page rather than the Vercel auth shell.
+  - Re-ran scripts/ui_smoke_safari_pdf_accept.mjs against preview tinyutils-efuyt344x-cavins-projects-7b0e00bb.vercel.app; the smoke now sees #fileInput with .pdf and application/pdf in accept and reports status=pass.
+- **Evidence:** artifacts/convert/20251201/safari-pdf-preview-bypass/
+- **Follow-ups:**
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-01 11:26 CET - Manual - PDF Text Extractor single-PDF support
+- **Mode:** manual
+- **Branch:** `fix/tool-card-height`
+- **Summary:**
+  - Updated Bulk PDF Text Extractor UI to clearly accept both single PDFs and ZIPs: Svelte page now uses accept=".pdf,.zip,application/pdf,application/zip" and copy that lists accepted types and the 50MB cap.
+  - Extended api/pdf_extract.py to detect whether the upload is a ZIP or a single PDF (via zipfile.is_zipfile), preserving the ZIP-of-PDFs bulk behavior while adding a single-PDF path that returns a ZIP containing document.txt.
+  - Added a preview test for single-PDF uploads in tests/data_tools_preview.test.mjs and extended scripts/smoke_data_tools_preview.mjs with a single-PDF smoke and a PDF Text Extractor accept-check; on the current preview ZIP mode passes, single-PDF checks return 422 until this backend is deployed.
+- **Evidence:** artifacts/convert/20251201/safari-pdf-preview-bypass/
+- **Follow-ups:**
+  - Deploy pdf_extract + pdf-text-extractor changes to a new Vercel preview, rerun data_tools_preview.test.mjs and smoke_data_tools_preview.mjs there, then roll out to prod once preview is green.
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-01 21:55 CET - Manual - fix ODT→DOCX blank output via direct docx path
+- **Mode:** manual
+- **Branch:** `fix/tool-card-height`
+- **Summary:**
+  - Added direct docx conversion for odt/docx sources in convert_backend to avoid raw-HTML markdown loss (docx_strategy=direct_from_source).
+  - Reproduced invoice ODT (November 16-30.odt) blank DOCX via markdown path; direct pandoc odt→docx now preserves INVOICE/Cavin content.
+  - Updated test stub to accept options kwarg; tests/test_convert_backend_odt_docx.py now passes; stage probe evidence captured.
+- **Evidence:** artifacts/odt-docx-regression/20251201/nov16-30_direct_fix.txt
+- **Follow-ups:**
+  - Run converter API/UI smokes on preview after sync to branch
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-01 22:01 CET - Manual - expand direct DOCX/ODT routing for rich sources
+- **Mode:** manual
+- **Branch:** `fix/tool-card-height`
+- **Summary:**
+  - Route DOCX/ODT targets from rich sources (odt/docx/rtf/epub/html) through direct pandoc conversion to preserve tables/headings; keep markdown path fallback.
+  - Added HTML→DOCX direct-path test; ODT invoice DOCX now contains INVOICE/Cavin markers (docx_strategy=direct_from_source).
+  - Updated tool_desc_converter.md with new strategy and evidence.
+- **Evidence:** artifacts/odt-docx-regression/20251201/nov16-30_direct_fix.txt
+- **Follow-ups:**
+  - Run converter API/UI smokes on preview after syncing branch
+

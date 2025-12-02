@@ -24,7 +24,7 @@ except Exception:  # pragma: no cover
 
 # Use absolute imports so the module works both locally and inside Vercel lambdas
 from api._lib import pandoc_runner
-from api._lib.html_utils import sanitize_html_for_pandoc
+from api._lib.html_utils import sanitize_html_for_pandoc, sanitize_html_for_preview
 from api._lib.manifests import build_snippets, collect_headings, media_manifest
 from api._lib.text_clean import normalise_markdown
 from api._lib.utils import (
@@ -82,12 +82,25 @@ _CACHE: "OrderedDict[str, ConversionResult]" = OrderedDict()
 
 _LOGGER = logging.getLogger(__name__)
 
+
+# Soft caps used when deciding whether a preview is likely to be truncated
+# on the client. These do not affect conversion outputs – they are only used
+# to populate preview metadata and telemetry.
+CSV_PREVIEW_ROWS = 100
+JSON_PREVIEW_NODE_LIMIT = 5000
+
 HEADING_SIZE_THRESHOLDS: Tuple[Tuple[float, int], ...] = (
     (18.0, 1),
     (16.0, 2),
     (14.0, 3),
 )
 MAX_HEADING_BLOCK_LENGTH = 120
+
+# Blank output detection thresholds for ODT→DOCX conversions
+# If input is > BLANK_OUTPUT_INPUT_THRESHOLD_BYTES but output is < BLANK_OUTPUT_OUTPUT_THRESHOLD_BYTES,
+# the conversion may have failed to preserve content (suspected blank output)
+BLANK_OUTPUT_INPUT_THRESHOLD_BYTES = 4096  # Minimum input size to check
+BLANK_OUTPUT_OUTPUT_THRESHOLD_BYTES = 1024  # Maximum output size to consider blank
 
 
 def _is_preview_env() -> bool:
@@ -247,8 +260,8 @@ def _extract_markdown_from_pdf(
                             for frag in getattr(line_item, "_objs", []):
                                 if frag.__class__.__name__ == "LTChar":
                                     sizes.append(getattr(frag, "size", 0.0))
-                    except Exception:
-                        pass
+                    except Exception as exc:
+                        _LOGGER.debug("heading_classification_error err=%s", exc)
                     level = _classify_heading(sizes)
                     marker = _format_list_marker(block)
                     if level is not None and len(block) < MAX_HEADING_BLOCK_LENGTH:
@@ -339,9 +352,10 @@ def _extract_markdown_from_pdf(
                                     note += f" — see [{csv_filename}]({csv_filename})"
                                 page_blocks.append(note)
                                 page_blocks.append("```csv\n" + csv_text + "\n```\n")
-            except Exception:
+            except Exception as exc:
                 # If pdfplumber not available or errors, ignore silently
-                pass
+                # Log at debug level since this is an optional optimization
+                _LOGGER.debug("pdfplumber_extraction_error err=%s", exc)
 
             # Separate pages by thematic break
             if page_blocks:
@@ -402,6 +416,12 @@ def convert_one(
     normalized_targets = _normalize_targets(targets)
     pandoc_version = pandoc_runner.get_pandoc_version() or "unknown"
 
+    # Minimal telemetry list used throughout the conversion pipeline.
+    # Initialise this before any early analysis so that security warnings
+    # like html_in_disguise_detected can safely append to it.
+    logs: List[str] = [f"targets={','.join(normalized_targets)}"]
+    logs.append(f"pandoc_version={pandoc_version}")
+
     # Early size/meta capture for previews and logging
     size_check = ensure_within_limits(len(input_bytes))
     approx_bytes = size_check["approxBytes"]
@@ -410,7 +430,8 @@ def convert_one(
 
     try:
         input_text = input_bytes.decode("utf-8", errors="replace")
-    except Exception:
+    except Exception as exc:
+        _LOGGER.debug("input_text_decoding_error err=%s", exc)
         input_text = ""
 
     content_analysis = safe_parse_limited(input_text)
@@ -422,12 +443,20 @@ def convert_one(
     rows, cols = detect_rows_columns(input_text)
     json_node_count = count_json_nodes(input_text)
 
+    # Preview-level meta flags used by the UI. These are conservative
+    # estimates based on the full input, not on the preview payload alone.
+    has_more_rows = rows > CSV_PREVIEW_ROWS if rows is not None else False
+    has_more_nodes = (
+        json_node_count is not None and json_node_count > JSON_PREVIEW_NODE_LIMIT
+    )
+
     # Perform lightweight server-side format detection BEFORE computing cache key
     # so that cache distinguishes auto→latex upgrades properly.
     adjusted_from = from_format
     try:
         sample_text = input_bytes[:4096].decode("utf-8", errors="ignore")
-    except Exception:
+    except Exception as exc:
+        _LOGGER.debug("sample_text_decoding_error err=%s", exc)
         sample_text = ""
     def _looks_like_latex(t: str) -> bool:
         return bool(t) and (
@@ -473,8 +502,38 @@ def convert_one(
             cached.preview.row_count = rows
             cached.preview.col_count = cols
             cached.preview.jsonNodeCount = json_node_count
+            cached.preview.hasMoreRows = has_more_rows
+            cached.preview.hasMoreNodes = has_more_nodes
         return cached
-    logs: List[str] = [f"targets={','.join(normalized_targets)}"]
+
+    if truncated:
+        logs.append("preview_truncated=1")
+    if has_more_rows:
+        logs.append("preview_has_more_rows=1")
+    if has_more_nodes:
+        logs.append("preview_has_more_nodes=1")
+
+    # Lightweight backend telemetry for obvious content/format mismatches.
+    # This is best-effort and never affects the conversion result.
+    try:
+        guessed_kind = None
+        if content_analysis.get("is_json"):
+            guessed_kind = "json"
+        else:
+            ca_rows = content_analysis.get("row_count")
+            ca_cols = content_analysis.get("col_count")
+            if isinstance(ca_rows, int) and isinstance(ca_cols, int) and ca_rows > 0 and ca_cols > 1:
+                guessed_kind = "tabular"
+
+        canonical_from = (adjusted_from or from_format or "").lower() if (adjusted_from or from_format) else ""
+
+        if guessed_kind and canonical_from:
+            if guessed_kind == "json" and canonical_from not in {"json"}:
+                logs.append(f"preview_format_mismatch=content_json_from_{canonical_from}")
+            elif guessed_kind == "tabular" and canonical_from not in {"csv", "tsv"}:
+                logs.append(f"preview_format_mismatch=content_tabular_from_{canonical_from}")
+    except Exception as exc:  # pragma: no cover - telemetry only
+        _LOGGER.debug("preview_format_mismatch_telemetry_failed name=%s err=%s", name, exc)
     result_meta: Dict[str, Any] = {}
 
     try:
@@ -604,16 +663,28 @@ def convert_one(
                     base_name=_safe_stem(safe_name),
                     logs=logs,
                 )
-                # Create minimal preview from HTML
+                # Create minimal preview from HTML. This HTML is rendered
+                # inside a sandboxed iframe, so we run it through a
+                # lightweight sanitizer that strips scripts and obvious
+                # javascript: URLs.
                 html_text = source_for_pandoc.read_text("utf-8", errors="replace")
+                safe_html = sanitize_html_for_preview(html_text) if html_text else None
                 primary_format = normalized_targets[0] if normalized_targets else 'html'
                 preview = PreviewData(
                     headings=[],
-                    snippets=[html_text[:500]],
+                    snippets=[html_text[:500]] if html_text else [],
                     images=[],
-                    html=html_text,
+                    html=safe_html,
                     content=html_text[:50000] if html_text else None,
                     format=primary_format,
+                    approxBytes=approx_bytes,
+                    truncated=truncated,
+                    tooBigForPreview=too_big_for_preview,
+                    row_count=rows,
+                    col_count=cols,
+                    jsonNodeCount=json_node_count,
+                    hasMoreRows=has_more_rows,
+                    hasMoreNodes=has_more_nodes,
                 )
                 before_text = html_text
                 cleaned_text = html_text
@@ -651,6 +722,21 @@ def convert_one(
                 cleaned_md.write_text(cleaned_text, "utf-8")
                 logs.append(f"cleanup_stats={json.dumps(stats.__dict__, sort_keys=True)}")
 
+                # Stage size telemetry for markdown-based pipeline.
+                try:
+                    logs.append(
+                        f"stage_raw_md_bytes={len(before_text.encode('utf-8'))}"
+                    )
+                    logs.append(
+                        f"stage_filtered_md_bytes={len(filtered_text.encode('utf-8'))}"
+                    )
+                    logs.append(
+                        f"stage_cleaned_md_bytes={len(cleaned_text.encode('utf-8'))}"
+                    )
+                except Exception:
+                    # Best-effort only; never interfere with conversions.
+                    pass
+
                 outputs = _build_target_artifacts(
                     targets=normalized_targets,
                     cleaned_path=cleaned_md,
@@ -658,7 +744,28 @@ def convert_one(
                     base_name=_safe_stem(safe_name),
                     md_dialect=getattr(opts, "md_dialect", None),
                     logs=logs,
+                    options=opts,
+                    original_path=input_path,
+                    original_from_format=from_format,
                 )
+
+                # DOCX stage size + suspected-blank guard for ODT/DOCX inputs.
+                try:
+                    for art in outputs:
+                        if art.target == "docx":
+                            docx_bytes = len(art.data or b"")
+                            logs.append(f"stage_docx_bytes={docx_bytes}")
+                            if (
+                                from_format in {"odt", "docx"}
+                                and approx_bytes
+                                and approx_bytes > BLANK_OUTPUT_INPUT_THRESHOLD_BYTES
+                                and docx_bytes < BLANK_OUTPUT_OUTPUT_THRESHOLD_BYTES
+                            ):
+                                logs.append("suspected_blank_output=docx")
+                            break
+                except Exception:
+                    # Telemetry only; do not affect conversion.
+                    pass
 
                 # Build a simple HTML preview from cleaned markdown (standalone off)
                 preview_html = None
@@ -672,6 +779,9 @@ def convert_one(
                     )
                 except Exception as exc:
                     logs.append(f"preview_html_error={exc.__class__.__name__}")
+
+                if preview_html:
+                    preview_html = sanitize_html_for_preview(preview_html)
 
                 # Determine primary format for preview
                 primary_format = normalized_targets[0] if normalized_targets else 'md'
@@ -689,6 +799,8 @@ def convert_one(
                     row_count=rows,
                     col_count=cols,
                     jsonNodeCount=json_node_count,
+                    hasMoreRows=has_more_rows,
+                    hasMoreNodes=has_more_nodes,
                 )
 
             media_artifact = _build_media_artifact(extract_dir, _safe_stem(safe_name))
@@ -739,6 +851,8 @@ def convert_one(
                 row_count=rows,
                 col_count=cols,
                 jsonNodeCount=json_node_count,
+                hasMoreRows=has_more_rows,
+                hasMoreNodes=has_more_nodes,
             ),
             error=ConversionError(message=str(exc), kind=exc.__class__.__name__),
         )
@@ -865,6 +979,9 @@ def _build_target_artifacts(
     base_name: str,
     md_dialect: Optional[str] = None,
     logs: Optional[List[str]] = None,
+    options: Optional[ConversionOptions] = None,
+    original_path: Optional[Path] = None,
+    original_from_format: Optional[str] = None,
 ) -> List[TargetArtifact]:
     artifacts: List[TargetArtifact] = []
     for target in targets:
@@ -892,7 +1009,37 @@ def _build_target_artifacts(
                         logs.append(f"md_dialect_error={exc.__class__.__name__}")
                     data = cleaned_text.encode("utf-8")
         else:
-            data = _render_markdown_target(cleaned_path, target, logs=logs)
+            # Prefer direct conversion from rich sources for higher fidelity.
+            direct_rich_sources = {"odt", "docx", "rtf", "epub", "html"}
+            if (
+                target in {"docx", "odt"}
+                and original_path is not None
+                and original_from_format in direct_rich_sources
+            ):
+                try:
+                    pypandoc = _get_pypandoc()
+                    output_path = cleaned_path.parent / f"{base_name}.{TARGET_EXTENSIONS[target]}"
+                    pypandoc.convert_file(
+                        str(original_path),
+                        to=target,
+                        format=original_from_format,
+                        outputfile=str(output_path),
+                        extra_args=["--wrap=none"],
+                    )
+                    data = output_path.read_bytes()
+                    if logs is not None:
+                        logs.append(f"{target}_strategy=direct_from_source")
+                except Exception as exc:  # pragma: no cover - fall back
+                    if logs is not None:
+                        logs.append(f"{target}_direct_error={exc.__class__.__name__}")
+                    data = _render_markdown_target(
+                        cleaned_path,
+                        target,
+                        logs=logs,
+                        options=options,
+                    )
+            else:
+                data = _render_markdown_target(cleaned_path, target, logs=logs, options=options)
         artifacts.append(
             TargetArtifact(
                 target=target,
@@ -947,6 +1094,8 @@ def _fallback_conversion(
         row_count=row_count,
         col_count=col_count,
         jsonNodeCount=json_node_count,
+        hasMoreRows=False,
+        hasMoreNodes=False,
     )
     return ConversionResult(
         name=name,
@@ -957,12 +1106,18 @@ def _fallback_conversion(
     )
 
 
-def _render_markdown_target(cleaned_path: Path, target: str, *, logs: Optional[List[str]] = None) -> bytes:
+def _render_markdown_target(
+    cleaned_path: Path,
+    target: str,
+    *,
+    logs: Optional[List[str]] = None,
+    options: Optional[ConversionOptions] = None,
+) -> bytes:
     pypandoc = _get_pypandoc()
 
     if target == "pdf":
-        # PDF requires special handling - prefer external renderer when configured
-        return _render_pdf_via_reportlab(cleaned_path, logs=logs)
+        # PDF requires special handling - prefer external renderer when configured.
+        return _render_pdf_via_reportlab(cleaned_path, logs=logs, options=options)
     elif target == "docx":
         # DOCX output via pandoc (native support)
         output_path = cleaned_path.parent / f"{cleaned_path.stem}.docx"
@@ -1016,7 +1171,12 @@ def _render_markdown_target(cleaned_path: Path, target: str, *, logs: Optional[L
         return rendered.encode("utf-8")
 
 
-def _render_pdf_via_reportlab(markdown_path: Path, *, logs: Optional[List[str]] = None) -> bytes:
+def _render_pdf_via_reportlab(
+    markdown_path: Path,
+    *,
+    logs: Optional[List[str]] = None,
+    options: Optional[ConversionOptions] = None,
+) -> bytes:
     """Convert markdown to PDF using external renderer, then a pure-Python ReportLab fallback.
 
     Strategy: Convert markdown → HTML (via pandoc) → PDF (via external renderer if available).
@@ -1281,14 +1441,40 @@ def _render_pdf_via_reportlab(markdown_path: Path, *, logs: Optional[List[str]] 
                 flush_para(); flush_list()
                 return story_local
 
+            # Page size selection (ReportLab fallback only). Default is LETTER; allow a
+            # simple A4 override via ConversionOptions.pdf_page_size.
+            pagesize = LETTER
+            if options is not None and isinstance(options.pdf_page_size, str):
+                size = options.pdf_page_size.strip().lower()
+                if size == "a4":
+                    from reportlab.lib.pagesizes import A4
+
+                    pagesize = A4
+
+            # Margin presets for ReportLab fallback. Defaults match the existing
+            # tuned values; presets allow slightly tighter or wider layouts.
+            left_margin = 0.45 * inch
+            right_margin = 0.45 * inch
+            top_margin = 1.6 * inch
+            bottom_margin = 1.25 * inch
+            preset = None
+            if options is not None and isinstance(options.pdf_margin_preset, str):
+                preset = options.pdf_margin_preset.strip().lower()
+                if preset == "compact":
+                    left_margin = right_margin = 0.4 * inch
+                    top_margin = bottom_margin = 0.8 * inch
+                elif preset == "wide":
+                    left_margin = right_margin = 1.0 * inch
+                    top_margin = bottom_margin = 1.5 * inch
+
             pdf_buffer = io.BytesIO()
             doc = SimpleDocTemplate(
                 pdf_buffer,
-                pagesize=LETTER,
-                leftMargin=0.45 * inch,
-                rightMargin=0.45 * inch,
-                topMargin=1.6 * inch,
-                bottomMargin=1.25 * inch,
+                pagesize=pagesize,
+                leftMargin=left_margin,
+                rightMargin=right_margin,
+                topMargin=top_margin,
+                bottomMargin=bottom_margin,
             )
             story = _parse_markdown_to_flowables(markdown_path.read_text("utf-8", errors="ignore"))
             if not story:
@@ -1296,6 +1482,8 @@ def _render_pdf_via_reportlab(markdown_path: Path, *, logs: Optional[List[str]] 
             doc.build(story)
             if logs is not None:
                 logs.append("pdf_engine=reportlab")
+                if preset:
+                    logs.append(f"pdf_margin_preset={preset}")
             return pdf_buffer.getvalue()
         except Exception as rl_exc:
             _LOGGER.error("reportlab fallback failed: %s", rl_exc)
@@ -1426,6 +1614,17 @@ def _clone_result(result: ConversionResult) -> ConversionResult:
             headings=list(result.preview.headings),
             snippets=list(result.preview.snippets),
             images=list(result.preview.images),
+            html=result.preview.html,
+            content=result.preview.content,
+            format=result.preview.format,
+            approxBytes=result.preview.approxBytes,
+            row_count=result.preview.row_count,
+            col_count=result.preview.col_count,
+            jsonNodeCount=result.preview.jsonNodeCount,
+            truncated=result.preview.truncated,
+            tooBigForPreview=result.preview.tooBigForPreview,
+            hasMoreRows=result.preview.hasMoreRows,
+            hasMoreNodes=result.preview.hasMoreNodes,
         )
     media = None
     if result.media:

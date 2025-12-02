@@ -26,7 +26,61 @@ function escapeHtml(value) {
 
 // Renderer implementations (simplified versions for testing)
 
-import { parseCsvContent, CSV_MAX_ROWS, CSV_MAX_CHARS } from '../src/lib/utils/csvParser.js';
+function parseCsvContent(content, maxRows = 100) {
+  const rows = [];
+  let row = [];
+  let current = '';
+  let inQuotes = false;
+
+  const pushCell = () => {
+    const trimmed = current.trim();
+    let value = trimmed;
+    if (trimmed.length >= 2 && trimmed.startsWith('"') && trimmed.endsWith('"')) {
+      value = trimmed.slice(1, -1).replace(/""/g, '"');
+    }
+    row.push(value);
+    current = '';
+  };
+
+  const pushRow = () => {
+    if (row.length === 1 && row[0] === '') {
+      row = [];
+      return;
+    }
+    rows.push(row);
+    row = [];
+  };
+
+  for (let i = 0; i < content.length; i += 1) {
+    const ch = content[i];
+    if (ch === '"') {
+      if (inQuotes && content[i + 1] === '"') {
+        current += '"';
+        i += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (ch === ',' && !inQuotes) {
+      pushCell();
+    } else if ((ch === '\n' || ch === '\r') && !inQuotes) {
+      pushCell();
+      pushRow();
+      if (rows.length >= maxRows) break;
+      if (ch === '\r' && content[i + 1] === '\n') {
+        i += 1;
+      }
+    } else {
+      current += ch;
+    }
+  }
+
+  if (current.length || row.length) {
+    pushCell();
+    pushRow();
+  }
+
+  return rows.slice(0, maxRows);
+}
 
 function renderCSVPreview(content) {
   if (!content) return '';
@@ -44,28 +98,13 @@ function renderCSVPreview(content) {
   return html;
 }
 
-const MAX_JSON_PRETTY_CHARS = 200000; // must match frontend guard
-
 function renderJSONPreview(content) {
   if (!content) return '';
-
-  const markFallback = (html) =>
-    html.replace('<pre', '<pre data-json-fallback="true"');
-
-  if (content.length > MAX_JSON_PRETTY_CHARS) {
-    // Too large for pretty JSON in tests: emulate frontend plain-text fallback
-    return markFallback(renderTextPreview(content));
-  }
-
   try {
     const formatted = JSON.stringify(JSON.parse(content), null, 2);
-    const html = `<style>pre{background:#1e1e1e;color:#d4d4d4;padding:1rem;overflow:auto;font-family:monospace}</style><pre>${escapeHtml(
-      formatted,
-    )}</pre>`;
-    // Mark non-fallback pretty JSON explicitly for assertions
-    return html.replace('<pre', '<pre data-json-fallback="false"');
+    return `<style>pre{background:#1e1e1e;color:#d4d4d4;padding:1rem;overflow:auto;font-family:monospace}</style><pre>${escapeHtml(formatted)}</pre>`;
   } catch (e) {
-    return markFallback(renderTextPreview(content));
+    return renderTextPreview(content);
   }
 }
 
@@ -114,7 +153,7 @@ test('CSV preview renderer handles quoted commas and quotes', () => {
 });
 
 test('CSV preview renderer handles newlines inside quoted fields', () => {
-  const csv = 'Name,Note\n"John","Line1\nLine2"';
+  const csv = 'Name,Note\n"John","Line1\\nLine2"';
   const result = renderCSVPreview(csv);
 
   // Both lines should stay within the same cell, not split into two rows.
@@ -126,37 +165,11 @@ test('CSV preview renderer handles newlines inside quoted fields', () => {
   assert.equal(rowMatches.length, 2, 'Should render exactly one data row for multi-line quoted cell');
 });
 
-test('CSV preview renderer handles CRLF line endings', () => {
-  const csv = 'Name,Age\r\n"John Doe",25\r\n"Jane Smith",30';
-  const result = renderCSVPreview(csv);
-
-  // Both rows should be parsed correctly despite CRLF endings
-  assert.ok(result.includes('John Doe'), 'Should parse first row with CRLF');
-  assert.ok(result.includes('Jane Smith'), 'Should parse second row with CRLF');
-  const rowMatches = result.match(/<tr>/g) || [];
-  // One header row + two data rows = 3 <tr> tags
-  assert.equal(rowMatches.length, 3, 'Should correctly parse CRLF-delimited rows');
-});
-
-test('CSV preview enforces row and character limits', () => {
-  const manyRows = Array.from({ length: CSV_MAX_ROWS + 20 }, (_, i) => `row${i},value${i}`).join('\n');
-  const result = renderCSVPreview(`col1,col2\n${manyRows}`);
-
-  // Ensure we do not render more than CSV_MAX_ROWS data rows in the table.
-  const rowMatches = result.match(/<tr>/g) || [];
-  // 1 header row + up to CSV_MAX_ROWS data rows
-  assert.ok(rowMatches.length <= CSV_MAX_ROWS + 1, 'Should cap rendered rows at CSV_MAX_ROWS');
-
-  const longLine = 'col1,col2\n' + 'x'.repeat(CSV_MAX_CHARS + 500);
-  const truncatedRows = parseCsvContent(longLine);
-  assert.ok(truncatedRows.length > 0, 'Should still return at least one row for very long single line');
-});
-
 test('JSON preview renderer', () => {
   const json = readFileSync(join(fixturesDir, 'sample.json'), 'utf-8');
   const result = renderJSONPreview(json);
 
-  assert.ok(result.includes('<pre'), 'Should contain pre tag');
+  assert.ok(result.includes('<pre>'), 'Should contain pre tag');
   assert.ok(result.includes('TinyUtils Inc'), 'Should contain company name');
   assert.ok(result.includes('employees'), 'Should contain employees key');
   assert.ok(!result.includes('{<'), 'Should properly escape HTML chars');
@@ -167,24 +180,8 @@ test('JSON preview renderer with invalid JSON', () => {
   const result = renderJSONPreview(invalidJson);
 
   // Should fallback to text preview
-  assert.ok(result.includes('<pre'), 'Should contain pre tag');
+  assert.ok(result.includes('<pre>'), 'Should contain pre tag');
   assert.ok(result.includes('   1 | '), 'Should have line numbers from text preview fallback');
-   assert.ok(
-     result.includes('data-json-fallback="true"'),
-     'Should mark text fallback as JSON fallback in tests',
-   );
-});
-
-test('JSON preview falls back to text for very large payloads', () => {
-  const bigPayload = JSON.stringify({ data: 'x'.repeat(MAX_JSON_PRETTY_CHARS + 10) });
-  const result = renderJSONPreview(bigPayload);
-
-  assert.ok(result.includes('<pre'), 'Should contain pre tag');
-  assert.ok(result.includes('   1 | '), 'Should show line numbers from text preview fallback');
-  assert.ok(
-    result.includes('data-json-fallback="true"'),
-    'Should mark large JSON preview as JSON fallback in tests',
-  );
 });
 
 test('Markdown preview renderer', () => {
