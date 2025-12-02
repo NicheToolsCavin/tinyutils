@@ -76,12 +76,11 @@
     }
   }
 
-  var currentTheme = getInitialTheme();
-  applyTheme(currentTheme);
+  function initializeTheme(){
+    var currentTheme = getInitialTheme();
+    applyTheme(currentTheme);
 
-  window.addEventListener('DOMContentLoaded', function(){
     var buttons = document.querySelectorAll('[data-theme-toggle]');
-    if(!buttons.length) return;
     for(var i=0;i<buttons.length;i++){
       buttons[i].addEventListener('click', function(){
         var active = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
@@ -89,5 +88,11 @@
         applyTheme(next);
       });
     }
-  });
+  }
+
+  if(document.readyState === 'loading'){
+    window.addEventListener('DOMContentLoaded', initializeTheme);
+  } else {
+    initializeTheme();
+  }
 })();

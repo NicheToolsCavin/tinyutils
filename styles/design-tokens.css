@@ -228,7 +228,7 @@ html[data-theme="light"] {
   --text-primary: #2d1f0f;      /* Very dark brown */
   --text-secondary: #4a3520;    /* Dark brown */
   --text-tertiary: #5d4a35;     /* Medium brown */
-  --text-muted: #7a6750;        /* Muted brown */
+  --text-muted: #645135;        /* Muted brown - darkened for WCAG AA contrast (4.5:1 on parchment) */
   --text-inverse: #f0e8da;      /* Muted cream text on dark backgrounds */
 
   /* Brand colors (softer, warmer blues for light mode) */
