@@ -273,7 +273,7 @@
     position: absolute;
     border-radius: 50%;
     filter: blur(120px);
-    opacity: 0.4;
+    opacity: 0.5;
     animation: float 20s ease-in-out infinite;
   }
 
@@ -329,7 +329,7 @@
   .blob {
     position: fixed;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
     pointer-events: none;
     z-index: 1;
     animation: blob-float 15s ease-in-out infinite;
@@ -640,10 +640,10 @@
   }
 
   .glass-card:hover .card-glow {
-    opacity: 1;
+    opacity: 0.6;
   }
 
-  /* Glow effect - toned down */
+  /* Glow effect - hover only, less bright */
   .card-glow {
     position: absolute;
     inset: -20px;
@@ -659,11 +659,9 @@
   @keyframes pulse-glow {
     0%, 100% {
       transform: scale(1);
-      opacity: 0.3;
     }
     50% {
       transform: scale(1.05);
-      opacity: 0.5;
     }
   }
 
@@ -846,7 +844,7 @@
   }
 
   .glass-card:hover .icon-glow {
-    opacity: 0.4;
+    opacity: 0.3;
   }
 
   .card-category {
