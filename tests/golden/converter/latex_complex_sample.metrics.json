@@ -5,23 +5,21 @@
     "maxDepth": 2
   },
   "codeBlocks": {
-    "total": 2,
-    "languages": [
-      "js"
-    ]
+    "total": 1,
+    "languages": []
   },
   "images": {
-    "total": 2,
-    "html_img_tags": 1
+    "total": 0,
+    "html_img_tags": 0
   },
   "footnotes": {
-    "total": 0
+    "total": 4
   },
   "headings": {
-    "total": 4,
+    "total": 12,
     "levels": {
-      "h1": 1,
-      "h2": 3
+      "h1": 8,
+      "h2": 4
     }
   }
 }

@@ -1,25 +1,26 @@
 {
   "lists": {
-    "bullet": 0,
+    "bullet": 1,
     "ordered": 0,
-    "maxDepth": 0
+    "maxDepth": 1
   },
   "codeBlocks": {
     "total": 0,
     "languages": []
   },
   "images": {
-    "total": 2,
-    "html_img_tags": 2
+    "total": 0,
+    "html_img_tags": 0
   },
   "footnotes": {
-    "total": 0
+    "total": 9
   },
   "headings": {
-    "total": 3,
+    "total": 7,
     "levels": {
       "h1": 1,
-      "h2": 2
+      "h2": 4,
+      "h3": 2
     }
   }
 }
