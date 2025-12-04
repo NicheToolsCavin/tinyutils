@@ -16,5 +16,8 @@ pdfminer.six>=20231228,<20300000
 # Header/footer extraction from DOCX (pandoc limitation workaround)
 python-docx>=1.1,<2.0
 
+# DOCX→HTML with style preservation (colors, bold, italic) - lighter than LibreOffice
+mammoth>=1.6,<2.0
+
 # LibreOffice HTML parsing for color/alignment preservation
 beautifulsoup4>=4.12,<5.0
