@@ -5,7 +5,11 @@ import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 const config = {
   preprocess: vitePreprocess(),
   kit: {
-    adapter: adapter({ runtime: 'nodejs22.x' }),
+    adapter: adapter({
+      runtime: 'nodejs22.x',
+      // Exclude Python API routes from SvelteKit - let Vercel handle them directly
+      external: ['/api/convert', '/api/bulk-replace']
+    }),
     prerender: {
       entries: ['*'],
       handleHttpError: 'warn'
