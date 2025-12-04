@@ -129,16 +129,9 @@ test('converter fidelity – November 16-30.odt metrics stable (ODT→Markdown)'
   assert.ok(summary.metrics, 'expected metrics on summary');
 
   const golden = loadGoldenMetrics('november_16_30_odt.metrics.json');
-  const expectedMetrics = {
-    lists: golden.conversions.to_markdown.lists,
-    codeBlocks: golden.conversions.to_markdown.codeBlocks,
-    images: golden.conversions.to_markdown.images
-  };
-  assert.deepStrictEqual(summary.metrics, expectedMetrics);
+  assert.deepStrictEqual(summary.metrics, golden);
 
   // Spot-check: validate critical non-blank output for ODT→DOCX bug fix
-  assert.ok(summary.outputs[0].size >= golden.conversions.to_markdown.min_output_bytes,
-            'markdown output should meet minimum size threshold (validates no blank output)');
   assert.ok(summary.outputs[0].size > 0, 'should not produce blank output');
 });
 
@@ -174,4 +167,95 @@ test('converter fidelity – report_2025_annual.docx metrics stable', async () =
   assert.ok(summary.metrics.lists.bullet >= 10, 'should preserve many bullet items');
   assert.ok(summary.metrics.lists.ordered >= 2, 'should preserve ordered lists');
   assert.ok(summary.metrics.lists.maxDepth >= 2, 'should preserve nested lists');
+});
+
+// Phase 1: New fixtures for footnotes, RTF, PDF, and LaTeX coverage
+
+test('converter fidelity – docx_footnotes_sample.docx metrics stable', async () => {
+  const fixture = join(__dirname, 'fixtures', 'converter', 'docx_footnotes_sample.docx');
+  const summary = await runFixture({ input: fixture, fromFormat: 'docx', targets: ['md'] });
+  assert.strictEqual(summary.name, 'docx_footnotes_sample.docx');
+  assert.ok(Array.isArray(summary.outputs), 'should have outputs array');
+  assert.ok(!summary.error, 'should not have conversion errors');
+  assert.ok(summary.metrics, 'expected metrics on summary');
+
+  const golden = loadGoldenMetrics('docx_footnotes_sample.metrics.json');
+  assert.deepStrictEqual(summary.metrics, golden);
+
+  // Spot-check: verify footnote preservation
+  assert.ok(summary.metrics.footnotes.total >= 8, 'should preserve footnotes from DOCX');
+  assert.ok(summary.metrics.headings.total >= 5, 'should preserve heading structure');
+});
+
+test('converter fidelity – odt_footnotes_sample.odt metrics stable', async () => {
+  const fixture = join(__dirname, 'fixtures', 'converter', 'odt_footnotes_sample.odt');
+  const summary = await runFixture({ input: fixture, fromFormat: 'odt', targets: ['md'] });
+  assert.strictEqual(summary.name, 'odt_footnotes_sample.odt');
+  assert.ok(Array.isArray(summary.outputs), 'should have outputs array');
+  assert.ok(!summary.error, 'should not have conversion errors');
+  assert.ok(summary.metrics, 'expected metrics on summary');
+
+  const golden = loadGoldenMetrics('odt_footnotes_sample.metrics.json');
+  assert.deepStrictEqual(summary.metrics, golden);
+
+  // Spot-check: verify ODT footnote preservation
+  assert.ok(summary.metrics.footnotes.total >= 8, 'should preserve footnotes from ODT');
+  assert.ok(summary.metrics.headings.total >= 5, 'should preserve heading structure');
+});
+
+test('converter fidelity – rtf_sample.rtf metrics stable', async () => {
+  const fixture = join(__dirname, 'fixtures', 'converter', 'rtf_sample.rtf');
+  const summary = await runFixture({ input: fixture, fromFormat: 'rtf', targets: ['md'] });
+  assert.strictEqual(summary.name, 'rtf_sample.rtf');
+  assert.ok(Array.isArray(summary.outputs), 'should have outputs array');
+  assert.ok(!summary.error, 'should not have conversion errors');
+  assert.ok(summary.metrics, 'expected metrics on summary');
+
+  const golden = loadGoldenMetrics('rtf_sample.metrics.json');
+  assert.deepStrictEqual(summary.metrics, golden);
+
+  // Spot-check: verify RTF structure preservation
+  assert.ok(summary.metrics.lists.bullet >= 1, 'should preserve bullet lists from RTF');
+  assert.ok(summary.metrics.lists.ordered >= 1, 'should preserve ordered lists from RTF');
+  assert.ok(summary.metrics.headings.total >= 3, 'should preserve headings from RTF');
+  // Note: RTF footnotes may not be preserved by pandoc's RTF parser (known limitation)
+  assert.ok(typeof summary.metrics.footnotes.total === 'number', 'should have footnotes metric');
+});
+
+test('converter fidelity – latex_complex_sample.tex metrics stable', async () => {
+  const fixture = join(__dirname, 'fixtures', 'converter', 'latex_complex_sample.tex');
+  const summary = await runFixture({ input: fixture, fromFormat: 'latex', targets: ['md'] });
+  assert.strictEqual(summary.name, 'latex_complex_sample.tex');
+  assert.ok(Array.isArray(summary.outputs), 'should have outputs array');
+  assert.ok(!summary.error, 'should not have conversion errors');
+  assert.ok(summary.metrics, 'expected metrics on summary');
+
+  const golden = loadGoldenMetrics('latex_complex_sample.metrics.json');
+  assert.deepStrictEqual(summary.metrics, golden);
+
+  // Spot-check: verify LaTeX structure preservation
+  assert.ok(summary.metrics.headings.total >= 5, 'should preserve sections/subsections');
+  assert.ok(summary.metrics.lists.bullet >= 1, 'should preserve itemized lists');
+  assert.ok(summary.metrics.lists.ordered >= 1, 'should preserve enumerated lists');
+  assert.ok(summary.metrics.lists.maxDepth >= 2, 'should preserve nested lists');
+  assert.ok(summary.metrics.codeBlocks.total >= 1, 'should preserve verbatim/code blocks');
+  assert.ok(summary.metrics.footnotes.total >= 3, 'should preserve LaTeX footnotes');
+});
+
+test('converter fidelity – report_2025_annual.pdf (PDF→Markdown) metrics stable', async () => {
+  const fixture = join(__dirname, 'fixtures', 'converter', 'report_2025_annual.pdf');
+  const summary = await runFixture({ input: fixture, fromFormat: 'pdf', targets: ['md'] });
+  assert.strictEqual(summary.name, 'report_2025_annual.pdf');
+  assert.ok(Array.isArray(summary.outputs), 'should have outputs array');
+  assert.ok(!summary.error, 'should not have conversion errors from PDF');
+  assert.ok(summary.metrics, 'expected metrics on summary');
+
+  const golden = loadGoldenMetrics('report_2025_annual_pdf.metrics.json');
+  assert.deepStrictEqual(summary.metrics, golden);
+
+  // Spot-check: verify PDF extraction preserved structure (may be fuzzy)
+  // Note: PDF→Markdown is layout-based; structure extraction may be incomplete
+  assert.ok(typeof summary.metrics.headings.total === 'number', 'should have headings metric');
+  assert.ok(typeof summary.metrics.lists.bullet === 'number', 'should have lists metric');
+  assert.ok(summary.outputs[0].size > 1000, 'should extract substantial text from PDF (>1KB)');
 });

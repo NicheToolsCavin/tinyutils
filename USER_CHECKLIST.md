@@ -52,3 +52,14 @@ Only add an item when:
     - Adjust autoscaling / max instances if volumes change.
   - The repo is already wired for this; ongoing cost/usage decisions are yours.
 
+## 5. Workstream 2: Bulk Replace API
+
+- [ ] Fix `/api/bulk-replace` on current Vercel preview
+  - Preview URL: https://tinyutils-e2en8enzf-cavins-projects-7b0e00bb.vercel.app
+  - Problem: Bulk Replace API smoke (`scripts/smoke_bulk_replace_preview.mjs`) receives an HTML/auth response (401 text/html) from `/api/bulk-replace` instead of the expected 200 JSON `{ ok: true, data: { stats, diffs } }`.
+  - Actions:
+    - In Vercel, verify preview protection and bypass settings for this project/branch.
+    - Ensure `VERCEL_AUTOMATION_BYPASS_SECRET` / `PREVIEW_BYPASS_TOKEN` / `BYPASS_TOKEN` and `PREVIEW_SECRET` are valid for this preview.
+    - Confirm that the Python `api/bulk-replace.py` function is deployed and reachable on previews (not gated behind additional auth).
+    - Once fixed, rerun `node scripts/smoke_bulk_replace_preview.mjs` with `PREVIEW_URL` set to this URL until it reports `envBlocked: false` and `ok: true`.
+  - Additional note (2025-12-04): On the Santa Phase 6 preview for branch `feat/converter-test-coverage-100pct`, `/api/bulk-replace` at `https://tinyutils-c2z1p3co8-cavins-projects-7b0e00bb.vercel.app/api/bulk-replace` currently returns a Vercel-level 307 redirect loop with `content-type: text/plain` and body `Redirecting...`, repeatedly setting `_vercel_jwt` and never reaching the Python handler; diagnostic artifacts are stored under `artifacts/api/bulk-find-replace/20251204/`. Bulk Replace API smokes remain environment-blocked until this redirect loop is resolved in the Vercel configuration.

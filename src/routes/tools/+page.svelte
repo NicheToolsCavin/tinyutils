@@ -176,12 +176,12 @@
 </svelte:head>
 
 <!-- Hero section with gradient -->
-<Hero subtitle="Advanced features for professionals and for passersby." />
+<Hero subtitle="Advanced features for professionals and for passersby." data-testid="tools-hero" />
 
 <!-- Top tools layout -->
 <div class="tools-top-layout">
   <!-- SEO Tools Section -->
-  <section class="tools-section">
+  <section class="tools-section" data-testid="tools-section-seo">
     <SectionHeader
       title="SEO &amp; Site Management"
       description="Find broken links, compare sitemaps, and map URLs to archive snapshots."
@@ -202,7 +202,7 @@
   </section>
 
   <!-- Document Tools Section -->
-  <section class="tools-section">
+  <section class="tools-section" data-testid="tools-section-doc">
     <SectionHeader
       title="Document Tools"
       description="Convert between 100+ formats with our Pandoc-powered engine."
@@ -225,15 +225,15 @@
 </div>
 
 <!-- See More Button -->
-<div class="see-more">
-  <a class="btn secondary" href="#more-tools" id="see-more">See more tools ↓</a>
+<div class="see-more" data-testid="tools-see-more">
+  <a class="btn secondary" href="#more-tools" id="see-more" data-testid="tools-see-more-button">See more tools ↓</a>
 </div>
 
 <!-- Real Ad Slot -->
 <AdSlot wrapperClass="ad-slot ad-slot-wide" />
 
 <!-- More Tools Grid -->
-<div class="tools-sections-wrapper" id="more-tools">
+<div class="tools-sections-wrapper" id="more-tools" data-testid="tools-more-tools">
   <div class="tools-grid two-col-bottom">
     {#each moreTools as tool, i}
       <ToolCard

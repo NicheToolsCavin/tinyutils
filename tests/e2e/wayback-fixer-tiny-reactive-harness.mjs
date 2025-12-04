@@ -7,6 +7,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { createTinyReactiveClient } from './harness/client.mjs';
+import { patchExportDownloads, validateExport } from './harness/export-validator.mjs';
 import { tools } from './harness/registry.mjs';
 
 const PREVIEW_URL = (process.env.PREVIEW_URL || '').replace(/\/$/, '');
@@ -79,7 +80,32 @@ async function main() {
     // 7) Capture the status/meta text
     const statusText = await getText(wayback.selectors.statusText).catch(() => null);
     summary.status = statusText || null;
-    summary.ok = !!statusText && /Done\./i.test(statusText);
+    const statusOk = !!statusText && /Done\./i.test(statusText || '') && /snapshot|replacements|redirects/i.test(statusText || '');
+
+    // 8) Validate Replacements CSV and 410 CSV exports using the shared
+    // export validator. As with other harnesses, we assert against real
+    // blob contents produced by the UI, never fake rows.
+    await patchExportDownloads(client, '__waybackExportMeta');
+
+    const replacementsResult = await validateExport(
+      client,
+      '.export-row .btn.secondary:nth-of-type(1)',
+      '__waybackExportMeta',
+      /replacements.*\.csv\|/i,
+      /url|snapshot|replacement/i,
+    );
+    summary.exportReplacements = replacementsResult;
+
+    const csv410Result = await validateExport(
+      client,
+      '.export-row .btn.secondary:nth-of-type(2)',
+      '__waybackExportMeta',
+      /410.*\.csv\|/i,
+      /410|url|reason/i,
+    );
+    summary.export410 = csv410Result;
+
+    summary.ok = statusOk && replacementsResult.ok && csv410Result.ok;
 
     // 8) Capture a screenshot
     const screenshotPath = resolve(artifactDir, 'wayback-fixer-ui.png');
@@ -118,4 +144,3 @@ main().catch((err) => {
   console.error('wayback-fixer tiny-reactive harness crashed:', err);
   process.exit(1);
 });
-

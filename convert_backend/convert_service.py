@@ -48,6 +48,14 @@ from .convert_types import (
     PreviewData,
     TargetArtifact,
 )
+from . import page_break_marker
+from . import comments_extractor
+
+# LibreOffice integration (optional)
+try:
+    from . import libreoffice_converter
+except ImportError:  # pragma: no cover
+    libreoffice_converter = None  # type: ignore
 
 
 TARGET_EXTENSIONS = {
@@ -603,6 +611,40 @@ def convert_one(
                 source_for_pandoc.write_text(protected_content, "utf-8")
                 logs.append("csv_formula_protection=applied")
 
+            # LibreOffice preprocessing: color/alignment preservation via HTML export
+            if (
+                opts.use_libreoffice
+                and libreoffice_converter is not None
+                and from_format in {"docx", "odt", "rtf"}
+                and (opts.preserve_colors or opts.preserve_alignment)
+            ):
+                try:
+                    if libreoffice_converter.is_libreoffice_available():
+                        html_content, lo_meta = libreoffice_converter.convert_via_libreoffice(
+                            input_path,
+                            preserve_colors=opts.preserve_colors,
+                            preserve_alignment=opts.preserve_alignment,
+                        )
+                        # Write HTML to temp file for pandoc processing
+                        html_path = workspace / f"{input_path.stem}_libreoffice.html"
+                        html_path.write_text(html_content, "utf-8")
+                        source_for_pandoc = html_path
+                        from_format = "html"
+                        logs.append("libreoffice_preprocessing=enabled")
+                        logs.append(f"libreoffice_colors_extracted={lo_meta.get('colors_extracted', 0)}")
+                        logs.append(f"libreoffice_alignments_extracted={lo_meta.get('alignments_extracted', 0)}")
+                    else:
+                        logs.append("libreoffice_preprocessing=unavailable_fallback_to_pandoc")
+                except Exception as exc:
+                    _LOGGER.warning(
+                        "libreoffice preprocessing failed name=%s error=%s",
+                        name,
+                        exc,
+                        exc_info=True,
+                    )
+                    logs.append(f"libreoffice_preprocessing_error={exc.__class__.__name__}")
+                    # Fall back to standard pandoc conversion
+
             # Pre-process PDFs: layout-aware extraction with legacy fallback
             if input_path.suffix.lower() == ".pdf" or from_format == "pdf":
                 # Prefer explicit option over env; keep env as default for safe rollout
@@ -652,9 +694,14 @@ def convert_one(
 
             # Check if we can do direct conversion without markdown intermediate
             # This fixes HTML→Plain Text truncation and HTML→HTML stray code issues
-            can_do_direct = from_format == "html" and all(t in ["txt", "html"] for t in normalized_targets)
+            can_do_direct_html = from_format == "html" and all(t in ["txt", "html"] for t in normalized_targets)
 
-            if can_do_direct:
+            # Direct MD→PDF path: skip normalization for faithful conversion
+            # When input is already markdown and we're only generating PDF, skip the
+            # MD→MD normalization pipeline that escapes chars and alters formatting
+            can_do_direct_md_pdf = (from_format in ["markdown", "md"]) and (normalized_targets == ["pdf"])
+
+            if can_do_direct_html:
                 logs.append("conversion_strategy=direct_html")
                 # Direct HTML conversion without markdown intermediate
                 outputs = _build_direct_html_artifacts(
@@ -688,6 +735,47 @@ def convert_one(
                 )
                 before_text = html_text
                 cleaned_text = html_text
+            elif can_do_direct_md_pdf:
+                logs.append("conversion_strategy=direct_md_pdf")
+                # Direct MD→PDF: Skip normalization for faithful conversion
+                # Read the source markdown as-is without pandoc MD→MD processing
+                source_text = source_for_pandoc.read_text("utf-8", errors="replace")
+
+                # Generate PDF directly from source markdown
+                pdf_data = _render_pdf_via_reportlab(
+                    source_for_pandoc,
+                    logs=logs,
+                    options=opts,
+                )
+
+                outputs = [
+                    TargetArtifact(
+                        target="pdf",
+                        name=f"{_safe_stem(safe_name)}.pdf",
+                        content_type=TARGET_CONTENT_TYPES["pdf"],
+                        data=pdf_data,
+                    )
+                ]
+
+                # Minimal preview for direct MD→PDF path
+                preview = PreviewData(
+                    headings=collect_headings(source_text),
+                    snippets=[source_text[:280]],
+                    images=[],
+                    html=None,
+                    content=source_text[:50000],
+                    format="pdf",
+                    approxBytes=approx_bytes,
+                    truncated=truncated,
+                    tooBigForPreview=too_big_for_preview,
+                    row_count=rows,
+                    col_count=cols,
+                    jsonNodeCount=json_node_count,
+                    hasMoreRows=has_more_rows,
+                    hasMoreNodes=has_more_nodes,
+                )
+                before_text = source_text
+                cleaned_text = source_text
             else:
                 logs.append("conversion_strategy=via_markdown")
                 # HTML conversion uses specialized Lua filters to convert semantic elements
@@ -719,20 +807,65 @@ def convert_one(
                     filtered_text,
                     remove_zero_width=opts.remove_zero_width,
                 )
+
+                # Phase 5 backend polish: page-break markers and comments extraction
+                # Both are DOCX-only opt-in features controlled by ConversionOptions
+                if from_format == "docx":
+                    # Insert page-break markers if requested
+                    if opts.insert_page_break_markers:
+                        try:
+                            pb_indices = page_break_marker.find_page_break_paragraph_indices(input_path)
+                            if pb_indices:
+                                # Simple heuristic: map paragraph index to markdown line
+                                # This assumes rough 1:1 mapping; more sophisticated mapping
+                                # would require AST analysis which is out of scope
+                                line_indices = pb_indices  # Direct mapping heuristic
+                                cleaned_text = page_break_marker.add_page_break_markers(
+                                    cleaned_text, line_indices
+                                )
+                                logs.append(f"page_breaks_inserted={len(pb_indices)}")
+                        except Exception as exc:
+                            logs.append(f"page_break_marker_error={exc.__class__.__name__}")
+
+                    # Extract and append comments if requested
+                    if opts.extract_comments:
+                        try:
+                            cleaned_text = comments_extractor.append_comments_to_markdown(
+                                cleaned_text, input_path
+                            )
+                            logs.append("comments_extracted=1")
+                        except Exception as exc:
+                            logs.append(f"comments_extraction_error={exc.__class__.__name__}")
+
                 cleaned_md.write_text(cleaned_text, "utf-8")
                 logs.append(f"cleanup_stats={json.dumps(stats.__dict__, sort_keys=True)}")
 
                 # Stage size telemetry for markdown-based pipeline.
                 try:
-                    logs.append(
-                        f"stage_raw_md_bytes={len(before_text.encode('utf-8'))}"
-                    )
-                    logs.append(
-                        f"stage_filtered_md_bytes={len(filtered_text.encode('utf-8'))}"
-                    )
-                    logs.append(
-                        f"stage_cleaned_md_bytes={len(cleaned_text.encode('utf-8'))}"
-                    )
+                    raw_md_bytes = len(before_text.encode("utf-8"))
+                    filtered_md_bytes = len(filtered_text.encode("utf-8"))
+                    cleaned_md_bytes = len(cleaned_text.encode("utf-8"))
+
+                    logs.append(f"stage_raw_md_bytes={raw_md_bytes}")
+                    logs.append(f"stage_filtered_md_bytes={filtered_md_bytes}")
+                    logs.append(f"stage_cleaned_md_bytes={cleaned_md_bytes}")
+
+                    # Passive content-loss guard for markdown outputs produced
+                    # from rich document sources. If the cleaned markdown is
+                    # implausibly small compared to the original input size,
+                    # emit a suspected_blank_output tag for diagnostics only.
+                    if (
+                        from_format in {"odt", "docx", "rtf", "html"}
+                        and approx_bytes
+                        and approx_bytes > BLANK_OUTPUT_INPUT_THRESHOLD_BYTES
+                        # Treat markdown as suspicious only when it is both
+                        # absolutely tiny and less than ~5% of the original
+                        # input size. This keeps the guard sensitive for
+                        # truly blank/near-blank outputs while avoiding
+                        # false positives for compact but valid documents.
+                        and cleaned_md_bytes < max(512, int(approx_bytes * 0.05))
+                    ):
+                        logs.append("suspected_blank_output=md")
                 except Exception:
                     # Best-effort only; never interfere with conversions.
                     pass
@@ -749,19 +882,35 @@ def convert_one(
                     original_from_format=from_format,
                 )
 
-                # DOCX stage size + suspected-blank guard for ODT/DOCX inputs.
+                # DOCX stage size + suspected-blank guard for ODT/DOCX/HTML
+                # inputs. This is telemetry-only and must never affect
+                # behaviour: it helps detect regressions where a large rich
+                # document produces a suspiciously small DOCX file.
                 try:
                     for art in outputs:
                         if art.target == "docx":
                             docx_bytes = len(art.data or b"")
                             logs.append(f"stage_docx_bytes={docx_bytes}")
                             if (
-                                from_format in {"odt", "docx"}
+                                from_format in {"odt", "docx", "html"}
                                 and approx_bytes
                                 and approx_bytes > BLANK_OUTPUT_INPUT_THRESHOLD_BYTES
                                 and docx_bytes < BLANK_OUTPUT_OUTPUT_THRESHOLD_BYTES
                             ):
                                 logs.append("suspected_blank_output=docx")
+                            # For DOCX roundtrips, also log a coarse size
+                            # ratio so tests/diagnostics can spot
+                            # disproportionate changes even when the output
+                            # is above the absolute tiny threshold.
+                            if approx_bytes and from_format == "docx":
+                                try:
+                                    ratio = docx_bytes / float(approx_bytes)
+                                    logs.append(
+                                        f"docx_roundtrip_ratio={ratio:.3f}"
+                                    )
+                                except Exception:
+                                    # Telemetry only.
+                                    pass
                             break
                 except Exception:
                     # Telemetry only; do not affect conversion.
@@ -1276,11 +1425,36 @@ def _render_pdf_via_reportlab(
                 ListFlowable,
                 ListItem,
                 KeepTogether,
+                Flowable,
             )
+
+            class HorizontalLine(Flowable):
+                """Draws a horizontal line separator"""
+                def __init__(self, width_percent=100, thickness=0.5, space_before=4, space_after=4):
+                    Flowable.__init__(self)
+                    self.width_percent = width_percent
+                    self.thickness = thickness
+                    self.space_before = space_before
+                    self.space_after = space_after
+
+                def wrap(self, availWidth, availHeight):
+                    self.width = availWidth * (self.width_percent / 100.0)
+                    self.height = self.thickness + self.space_before + self.space_after
+                    return (self.width, self.height)
+
+                def draw(self):
+                    self.canv.setLineWidth(self.thickness)
+                    self.canv.setStrokeColorRGB(0.5, 0.5, 0.5)
+                    y = self.space_after
+                    self.canv.line(0, y, self.width, y)
 
             def _inline_markdown_to_html(text: str) -> str:
                 # Minimal inline markdown → HTML for Paragraph (supports <b>/<i>/<code>) while
                 # avoiding interference between code spans and emphasis markers.
+
+                # Strip control characters (especially 0x7F DEL) that cause rendering artifacts
+                text = text.replace('\x7f', '')
+
                 code_spans: list[str] = []
 
                 def _store_code(match: re.Match[str]) -> str:
@@ -1291,11 +1465,27 @@ def _render_pdf_via_reportlab(
                 text = re.sub(r"`([^`]+)`", _store_code, text)
                 escaped = html.escape(text, quote=False)
 
+                # Unescape markdown escape sequences (pandoc adds these during MD→MD normalization)
+                # This fixes the issue where `__________` becomes `\__________` and renders as backslashes
+                escaped = re.sub(r'\\([_*\[\](){}#+\-.!`|\\])', r'\1', escaped)
+
                 # Bold / italic on the escaped text (avoid mid-word underscore matches)
-                escaped = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", escaped)
-                escaped = re.sub(r"__(.+?)__", r"<b>\1</b>", escaped)
-                escaped = re.sub(r"(?<!\\w)\*(?!\s)(.+?)(?<!\s)\*(?!\\w)", r"<i>\1</i>", escaped)
-                escaped = re.sub(r"(?<!\\w)_(?!\s)(.+?)(?<!\s)_(?!\\w)", r"<i>\1</i>", escaped)
+                # IMPORTANT: Only match emphasis when content isn't ALL underscores/asterisks
+                # This prevents `__________` (fill-in blanks) from being treated as bold markup
+                escaped = re.sub(r"\*\*(?![\*_\s]+\*\*)(.+?)(?<![\*_\s])\*\*", r"<b>\1</b>", escaped)
+                escaped = re.sub(r"__(?![_*\s]+__)(.+?)(?<![_*\s])__", r"<b>\1</b>", escaped)
+
+                # Italic with single asterisk/underscore - improved to handle *(Answer:) 1 __________* patterns
+                # Use callback to skip when content is ONLY underscores/spaces/asterisks (fill-in blanks)
+                def _italic_asterisk(match: re.Match[str]) -> str:
+                    content = match.group(1)
+                    # Don't convert if content is only underscores, spaces, or asterisks
+                    if re.match(r'^[_\s*]+$', content):
+                        return match.group(0)
+                    return f"<i>{content}</i>"
+
+                escaped = re.sub(r'(?<!\w)\*([^\*\n]+?)\*(?!\w)', _italic_asterisk, escaped)
+                escaped = re.sub(r'(?<!\w)_([^_\n]+?)_(?!\w)', _italic_asterisk, escaped)
 
                 def _restore_code(match: re.Match[str]) -> str:
                     idx = int(match.group(1))
@@ -1305,12 +1495,15 @@ def _render_pdf_via_reportlab(
                 return escaped.replace("<br>", "<br/>")
 
             def _parse_markdown_to_flowables(md: str):
+                # Sanitize control characters at the top level (especially 0x7F DEL)
+                md = md.replace('\x7f', '')
+
                 lines = md.splitlines()
                 story_local = []
                 styles = getSampleStyleSheet()
                 base = styles["Normal"]
-                base.leading = 15
-                base.spaceAfter = 8
+                base.leading = 14
+                base.spaceAfter = 4
                 base.keepTogether = True
                 body_style = ParagraphStyle(name="TUBody", parent=base)
                 h1_style = ParagraphStyle(
@@ -1318,27 +1511,27 @@ def _render_pdf_via_reportlab(
                     parent=base,
                     fontSize=18,
                     leading=22,
-                    spaceAfter=12,
-                    spaceBefore=18,
-                    keepTogether=True,
+                    spaceAfter=4,
+                    spaceBefore=8,
+                    keepWithNext=True,
                 )
                 h2_style = ParagraphStyle(
                     name="TUHeading2",
                     parent=base,
                     fontSize=16,
                     leading=20,
-                    spaceAfter=10,
-                    spaceBefore=14,
-                    keepTogether=True,
+                    spaceAfter=3,
+                    spaceBefore=6,
+                    keepWithNext=True,
                 )
                 h3_style = ParagraphStyle(
                     name="TUHeading3",
                     parent=base,
                     fontSize=14,
                     leading=18,
-                    spaceAfter=8,
-                    spaceBefore=12,
-                    keepTogether=True,
+                    spaceAfter=2,
+                    spaceBefore=4,
+                    keepWithNext=True,
                 )
                 code_style = ParagraphStyle(
                     name="TUCode",
@@ -1353,10 +1546,21 @@ def _render_pdf_via_reportlab(
                     spaceBefore=10,
                     keepTogether=True,
                 )
+                blockquote_style = ParagraphStyle(
+                    name="TUBlockquote",
+                    parent=base,
+                    leftIndent=20,
+                    rightIndent=10,
+                    fontSize=11,
+                    textColor="#333333",
+                    spaceAfter=6,
+                    spaceBefore=6,
+                )
 
                 buf: list[str] = []
                 in_code = False
                 list_buf: list[str] = []
+                blockquote_buf: list[str] = []
 
                 def flush_para():
                     nonlocal buf
@@ -1366,7 +1570,7 @@ def _render_pdf_via_reportlab(
                     if paragraph:
                         story_local.append(
                             KeepTogether(
-                                [Paragraph(_inline_markdown_to_html(paragraph), body_style), Spacer(1, 0.12 * inch)]
+                                [Paragraph(_inline_markdown_to_html(paragraph), body_style), Spacer(1, 0.06 * inch)]
                             )
                         )
                     buf = []
@@ -1377,9 +1581,18 @@ def _render_pdf_via_reportlab(
                         return
                     items = [ListItem(Paragraph(_inline_markdown_to_html(it), body_style)) for it in list_buf]
                     story_local.append(
-                        KeepTogether([ListFlowable(items, bulletType="bullet"), Spacer(1, 0.12 * inch)])
+                        KeepTogether([ListFlowable(items, bulletType="bullet"), Spacer(1, 0.06 * inch)])
                     )
                     list_buf = []
+
+                def flush_blockquote():
+                    nonlocal blockquote_buf
+                    if not blockquote_buf:
+                        return
+                    blockquote_text = " ".join(blockquote_buf).strip()
+                    if blockquote_text:
+                        story_local.append(Paragraph(_inline_markdown_to_html(blockquote_text), blockquote_style))
+                    blockquote_buf = []
 
                 for line in lines:
                     stripped = line.strip()
@@ -1387,7 +1600,7 @@ def _render_pdf_via_reportlab(
                         if in_code:
                             # end code block
                             story_local.append(
-                                KeepTogether([Preformatted("\n".join(buf), code_style), Spacer(1, 0.12 * inch)])
+                                KeepTogether([Preformatted("\n".join(buf), code_style), Spacer(1, 0.06 * inch)])
                             )
                             buf = []
                             in_code = False
@@ -1401,24 +1614,38 @@ def _render_pdf_via_reportlab(
                         buf.append(line)
                         continue
 
+                    # HTML comments (skip them)
+                    if stripped.startswith("<!--") and stripped.endswith("-->"):
+                        continue
+
+                    # Blockquotes - accumulate into buffer for proper formatting
+                    if stripped.startswith("> "):
+                        flush_para(); flush_list()  # Close any open para/list first
+                        blockquote_buf.append(stripped[2:].strip())
+                        continue
+                    elif stripped.startswith(">") and stripped != ">":
+                        flush_para(); flush_list()
+                        blockquote_buf.append(stripped[1:].strip())
+                        continue
+
+                    # Horizontal rules (---, ***, ___)
+                    if stripped in ("---", "***", "___") or (len(stripped) >= 3 and all(c == '-' for c in stripped)):
+                        flush_para(); flush_list(); flush_blockquote()
+                        story_local.append(HorizontalLine())
+                        continue
+
                     # Headings
                     if stripped.startswith("### "):
-                        flush_para(); flush_list()
-                        story_local.append(
-                            KeepTogether([Paragraph(_inline_markdown_to_html(stripped[4:]), h3_style), Spacer(1, 0.14 * inch)])
-                        )
+                        flush_para(); flush_list(); flush_blockquote()
+                        story_local.append(Paragraph(_inline_markdown_to_html(stripped[4:]), h3_style))
                         continue
                     if stripped.startswith("## "):
-                        flush_para(); flush_list()
-                        story_local.append(
-                            KeepTogether([Paragraph(_inline_markdown_to_html(stripped[3:]), h2_style), Spacer(1, 0.18 * inch)])
-                        )
+                        flush_para(); flush_list(); flush_blockquote()
+                        story_local.append(Paragraph(_inline_markdown_to_html(stripped[3:]), h2_style))
                         continue
                     if stripped.startswith("# "):
-                        flush_para(); flush_list()
-                        story_local.append(
-                            KeepTogether([Paragraph(_inline_markdown_to_html(stripped[2:]), h1_style), Spacer(1, 0.22 * inch)])
-                        )
+                        flush_para(); flush_list(); flush_blockquote()
+                        story_local.append(Paragraph(_inline_markdown_to_html(stripped[2:]), h1_style))
                         continue
 
                     # Lists
@@ -1433,12 +1660,12 @@ def _render_pdf_via_reportlab(
                         continue
 
                     if not stripped:
-                        flush_para(); flush_list()
+                        flush_para(); flush_list(); flush_blockquote()
                         continue
 
                     buf.append(stripped)
 
-                flush_para(); flush_list()
+                flush_para(); flush_list(); flush_blockquote()
                 return story_local
 
             # Page size selection (ReportLab fallback only). Default is LETTER; allow a
@@ -1451,12 +1678,12 @@ def _render_pdf_via_reportlab(
 
                     pagesize = A4
 
-            # Margin presets for ReportLab fallback. Defaults match the existing
-            # tuned values; presets allow slightly tighter or wider layouts.
-            left_margin = 0.45 * inch
-            right_margin = 0.45 * inch
-            top_margin = 1.6 * inch
-            bottom_margin = 1.25 * inch
+            # Margin presets for ReportLab fallback. Use reasonable defaults similar to
+            # standard document margins (1 inch top/bottom, 0.75 inch left/right).
+            left_margin = 0.75 * inch
+            right_margin = 0.75 * inch
+            top_margin = 0.75 * inch
+            bottom_margin = 0.5 * inch
             preset = None
             if options is not None and isinstance(options.pdf_margin_preset, str):
                 preset = options.pdf_margin_preset.strip().lower()
@@ -1575,6 +1802,13 @@ def _build_cache_key(
     hasher.update(pandoc_version.encode("utf-8", "ignore"))
     if from_format:
         hasher.update(from_format.encode("utf-8", "ignore"))
+    # Include LibreOffice options in cache key
+    hasher.update(str(options.use_libreoffice).encode("ascii"))
+    hasher.update(str(options.preserve_colors).encode("ascii"))
+    hasher.update(str(options.preserve_alignment).encode("ascii"))
+    # Phase 5 backend polish: page-break markers and comments
+    hasher.update(str(options.insert_page_break_markers).encode("ascii"))
+    hasher.update(str(options.extract_comments).encode("ascii"))
     return hasher.hexdigest()
 
 

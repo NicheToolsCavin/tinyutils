@@ -9,7 +9,7 @@
 </svelte:head>
 
 <div class="tool-page">
-  <section class="tool-hero">
+  <section class="tool-hero" data-testid="formats-hero">
     <span class="tool-hero-icon" aria-hidden="true">📄</span>
     <h1>Supported Formats</h1>
     <p class="tool-hero-subtitle">
@@ -37,7 +37,7 @@
 
   <section class="formats-layout container">
     <div class="formats-grid">
-      <section class="card" aria-labelledby="inputsHeading">
+      <section class="card" aria-labelledby="inputsHeading" data-testid="formats-inputs-section">
         <h2 id="inputsHeading">Inputs</h2>
         <ul class="formats-list">
           <li><strong>Markdown:</strong> .md, .markdown</li>
@@ -52,7 +52,7 @@
         </ul>
       </section>
 
-      <section class="card" aria-labelledby="outputsHeading">
+      <section class="card" aria-labelledby="outputsHeading" data-testid="formats-outputs-section">
         <h2 id="outputsHeading">Outputs</h2>
         <ul class="formats-list">
           <li><strong>Markdown:</strong> .md (multiple dialects available)</li>
@@ -71,9 +71,9 @@
       toggle in the converter.
     </p>
 
-    <div class="actions-row">
+    <div class="actions-row" data-testid="formats-actions-row">
       <a class="btn secondary" href="/tools/">← Back to Tools</a>
-      <a class="btn primary" href="/tools/text-converter/">Open Converter</a>
+      <a class="btn primary" href="/tools/text-converter/" data-testid="formats-open-converter">Open Converter</a>
     </div>
   </section>
 </div>

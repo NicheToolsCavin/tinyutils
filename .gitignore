@@ -46,3 +46,7 @@ AGENTS.md
 CHATGPT.md
 GOOGLECLOUD.md
 .env*.local
+
+# Tiny-reactive saved auth state (contains Vercel session cookies)
+.tiny-reactive-vercel-auth.json
+.tiny-reactive-vercel-login.json
