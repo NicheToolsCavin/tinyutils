@@ -11,9 +11,11 @@ Endpoints:
 """
 from __future__ import annotations
 
+import html
 import json
 import logging
 import os
+import re
 import shutil
 import subprocess
 import tempfile
@@ -54,13 +56,46 @@ def _get_storage_client():
 
 
 def parse_gs_uri(uri: str) -> Tuple[str, str]:
-    """Parse gs://bucket/path into (bucket, path)."""
+    """Parse gs://bucket/path into (bucket, path).
+
+    Security: Validates URI format and rejects path traversal attempts.
+    """
     if not uri.startswith("gs://"):
         raise ValueError(f"Expected gs:// URI, got: {uri}")
     parts = uri[5:].split("/", 1)
     if len(parts) != 2 or not parts[0] or not parts[1]:
         raise ValueError(f"Invalid gs:// URI: {uri}")
-    return parts[0], parts[1]
+
+    bucket, blob_path = parts[0], parts[1]
+
+    # Security: Reject path traversal attempts
+    if ".." in blob_path or blob_path.startswith("/"):
+        raise ValueError(f"Invalid blob path (path traversal rejected): {blob_path}")
+
+    # Security: Validate bucket name format (alphanumeric, hyphens, underscores, dots)
+    if not re.match(r'^[a-z0-9][a-z0-9._-]{1,61}[a-z0-9]$', bucket):
+        raise ValueError(f"Invalid bucket name format: {bucket}")
+
+    return bucket, blob_path
+
+
+def validate_filename(filename: str) -> str:
+    """Validate and sanitize a filename to prevent path traversal.
+
+    Security: Ensures filename contains no path components and is safe to use.
+    """
+    # Get just the final path component
+    safe_name = Path(filename).name
+
+    # Reject if it still contains path traversal or is empty
+    if not safe_name or ".." in safe_name or "/" in safe_name or "\\" in safe_name:
+        raise ValueError(f"Invalid filename (rejected): {filename}")
+
+    # Reject hidden files (starting with dot) except valid extensions
+    if safe_name.startswith(".") and safe_name not in {".docx", ".odt", ".pdf"}:
+        raise ValueError(f"Hidden filename rejected: {filename}")
+
+    return safe_name
 
 
 def download_from_gcs(uri: str, dest: Path) -> Path:
@@ -173,7 +208,11 @@ def convert_document(
 
 
 def extract_style_metadata(html_path: Path) -> Dict[str, Any]:
-    """Extract color/alignment metadata from HTML output."""
+    """Extract color/alignment metadata from HTML output.
+
+    Security: All extracted text is HTML-escaped to prevent injection attacks
+    if this metadata is logged, returned in API responses, or rendered.
+    """
     try:
         from bs4 import BeautifulSoup
 
@@ -186,9 +225,13 @@ def extract_style_metadata(html_path: Path) -> Dict[str, Any]:
         for elem in soup.find_all(style=True):
             style = (elem.get("style") or "").lower()
             if "color:" in style:
-                colors.append(elem.get_text()[:50])
+                # Sanitize extracted text to prevent HTML injection
+                text = html.escape(elem.get_text()[:50])
+                colors.append(text)
             if "text-align:" in style:
-                alignments.append(elem.get_text()[:50])
+                # Sanitize extracted text to prevent HTML injection
+                text = html.escape(elem.get_text()[:50])
+                alignments.append(text)
 
         return {
             "colors_found": len(colors),
@@ -201,7 +244,8 @@ def extract_style_metadata(html_path: Path) -> Dict[str, Any]:
         return {"colors_found": 0, "alignments_found": 0}
     except Exception as e:
         logger.warning(f"Style extraction failed: {e}")
-        return {"error": str(e)}
+        # Escape error message too for safety
+        return {"error": html.escape(str(e))}
 
 
 # =============================================================================
@@ -319,9 +363,10 @@ class LibreOfficeHandler(BaseHTTPRequestHandler):
             with tempfile.TemporaryDirectory() as tmpdir:
                 tmpdir_path = Path(tmpdir)
 
-                # Extract filename from GCS URI
+                # Extract and validate filename from GCS URI
+                # Security: validate_filename prevents path traversal attacks
                 _, blob_name = parse_gs_uri(input_gcs_uri)
-                input_filename = Path(blob_name).name
+                input_filename = validate_filename(Path(blob_name).name)
                 input_path = tmpdir_path / input_filename
 
                 # Download input file
