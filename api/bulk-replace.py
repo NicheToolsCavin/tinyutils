@@ -14,8 +14,6 @@ import difflib
 import os
 import time
 import uuid
-import signal
-import contextlib
 import traceback
 from typing import Optional
 
@@ -29,7 +27,7 @@ except ImportError:
 MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024  # 50MB
 MAX_FILES_COUNT = 500
 MAX_COMPRESSION_RATIO = 10  # Zip bomb protection
-REGEX_TIMEOUT_SECONDS = 5  # ReDoS protection
+# Note: ReDoS timeouts removed for serverless compatibility
 
 ALLOWED_TEXT_EXTENSIONS = {
     '.txt', '.md', '.markdown', '.html', '.htm', '.css', '.js', '.jsx',
@@ -89,21 +87,6 @@ def detect_and_decode(raw_bytes):
 
     # Fallback to latin-1 (accepts all bytes)
     return raw_bytes.decode('latin-1', errors='replace'), 'latin-1'
-
-@contextlib.contextmanager
-def timeout_context(seconds):
-    """Context manager for regex operation timeout."""
-    def timeout_handler(signum, frame):
-        raise TimeoutError("Operation timed out")
-
-    # Save old handler
-    old_handler = signal.signal(signal.SIGALRM, timeout_handler)
-    signal.alarm(seconds)
-    try:
-        yield
-    finally:
-        signal.alarm(0)
-        signal.signal(signal.SIGALRM, old_handler)
 
 def send_error(code: int, message: str, request_id: str):
     """Send TinyUtils-standard error response."""
@@ -243,17 +226,14 @@ async def bulk_replace(
             if detected_encoding != 'utf-8':
                 stats["encodingIssues"].append(f"{file_info.filename}: {detected_encoding}")
 
-            # Apply replacement with timeout
+            # Apply replacement (no timeout in serverless environment)
             try:
-                with timeout_context(REGEX_TIMEOUT_SECONDS):
-                    # Count matches before replacement
-                    matches = list(re.finditer(find_pattern, original_text, flags=regex_flags))
-                    match_count = len(matches)
+                # Count matches before replacement
+                matches = list(re.finditer(find_pattern, original_text, flags=regex_flags))
+                match_count = len(matches)
 
-                    # Apply replacement
-                    new_text = re.sub(find_pattern, replace, original_text, flags=regex_flags)
-            except TimeoutError:
-                return send_error(422, "Regex too complex (timeout after 5 seconds). Try a simpler pattern.", request_id)
+                # Apply replacement
+                new_text = re.sub(find_pattern, replace, original_text, flags=regex_flags)
             except re.error as e:
                 return send_error(422, f"Regex error: {str(e)}", request_id)
 
