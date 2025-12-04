@@ -4,8 +4,6 @@ Bulk Find & Replace API - Multi-file search and replace with visual diffs
 Accepts ZIP uploads, applies text/regex replacements, returns preview or download.
 Security: Zip bomb protection, path traversal checks, ReDoS timeouts.
 """
-from http.server import BaseHTTPRequestHandler
-import cgi
 import json
 import zipfile
 import io
@@ -17,6 +15,7 @@ import uuid
 import signal
 import contextlib
 import traceback
+from urllib.parse import parse_qs
 
 try:
     import chardet
@@ -87,225 +86,274 @@ def detect_and_decode(raw_bytes):
     # Fallback to latin-1 (accepts all bytes)
     return raw_bytes.decode('latin-1', errors='replace'), 'latin-1'
 
+@contextlib.contextmanager
+def timeout_context(seconds):
+    """Context manager for regex operation timeout."""
+    def timeout_handler(signum, frame):
+        raise TimeoutError("Operation timed out")
+
+    # Save old handler
+    old_handler = signal.signal(signal.SIGALRM, timeout_handler)
+    signal.alarm(seconds)
+    try:
+        yield
+    finally:
+        signal.alarm(0)
+        signal.signal(signal.SIGALRM, old_handler)
+
+def parse_multipart_form(body, content_type):
+    """Parse multipart/form-data manually."""
+    import email
+    from email import message_from_bytes
+
+    # Add Content-Type header to body for email parser
+    headers = f"Content-Type: {content_type}\r\n\r\n".encode()
+    msg = message_from_bytes(headers + body)
+
+    form_data = {}
+    file_data = None
+
+    if msg.is_multipart():
+        for part in msg.walk():
+            content_disposition = part.get('Content-Disposition', '')
+            if 'name=' in content_disposition:
+                # Extract field name
+                name = None
+                for item in content_disposition.split(';'):
+                    item = item.strip()
+                    if item.startswith('name='):
+                        name = item.split('=', 1)[1].strip('"')
+                        break
+
+                if name:
+                    payload = part.get_payload(decode=True)
+                    if 'filename=' in content_disposition:
+                        # This is the file
+                        file_data = payload
+                        form_data['file'] = payload
+                    else:
+                        # Regular form field
+                        form_data[name] = payload.decode('utf-8') if payload else ''
+
+    return form_data
+
+def send_json_response(status_code, data, request_id):
+    """Return JSON response in Vercel format."""
+    return {
+        'statusCode': status_code,
+        'headers': {
+            'Content-Type': 'application/json',
+            'X-Request-ID': request_id,
+            'Cache-Control': 'no-store'
+        },
+        'body': json.dumps(data)
+    }
+
+def send_error(code, message, request_id):
+    """Send TinyUtils-standard error response."""
+    response = {
+        "ok": False,
+        "message": message,
+        "code": code,
+        "requestId": request_id
+    }
+    return send_json_response(code, response, request_id)
+
+def send_success(data, request_id, processing_time_ms):
+    """Send TinyUtils-standard success response."""
+    response = {
+        "ok": True,
+        "data": data,
+        "meta": {
+            "runTimestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "requestId": request_id,
+            "processingTimeMs": processing_time_ms,
+            "mode": "bulk-replace",
+            "chardetAvailable": CHARDET_AVAILABLE
+        }
+    }
+    return send_json_response(200, response, request_id)
+
 # --- Main Handler ---
 
-class handler(BaseHTTPRequestHandler):
+def handler(event, context):
+    """Modern Vercel Python serverless function handler."""
+    request_id = str(uuid.uuid4())
+    start_time = time.time()
 
-    @contextlib.contextmanager
-    def timeout(self, seconds):
-        """Context manager for regex operation timeout."""
-        def timeout_handler(signum, frame):
-            raise TimeoutError("Operation timed out")
+    try:
+        # Parse request
+        http_method = event.get('httpMethod') or event.get('method', 'GET')
 
-        # Save old handler
-        old_handler = signal.signal(signal.SIGALRM, timeout_handler)
-        signal.alarm(seconds)
+        if http_method != 'POST':
+            return send_error(405, "Method not allowed", request_id)
+
+        # Get request body
+        body = event.get('body', b'')
+        if isinstance(body, str):
+            body = body.encode('utf-8')
+
+        # Get content type
+        headers = event.get('headers', {})
+        content_type = headers.get('content-type') or headers.get('Content-Type', '')
+
+        if 'multipart/form-data' not in content_type:
+            return send_error(400, "Content-Type must be multipart/form-data", request_id)
+
+        # Parse form data
+        form = parse_multipart_form(body, content_type)
+
+        # Extract parameters
+        mode = form.get('mode', 'simple')
+        find_raw = form.get('find', '')
+        replace_raw = form.get('replace', '')
+        action = form.get('action', 'preview')
+        is_case_sensitive = form.get('case_sensitive', 'false') == 'true'
+
+        file_bytes = form.get('file')
+        if not file_bytes:
+            return send_error(400, "No file uploaded", request_id)
+
+        # Size validation
+        if len(file_bytes) > MAX_FILE_SIZE_BYTES:
+            max_mb = MAX_FILE_SIZE_BYTES / 1024 / 1024
+            return send_error(413, f"File too large (max {max_mb:.0f}MB)", request_id)
+
+        # Open ZIP and check for zip bomb
         try:
-            yield
-        finally:
-            signal.alarm(0)
-            signal.signal(signal.SIGALRM, old_handler)
+            input_zip = zipfile.ZipFile(io.BytesIO(file_bytes), 'r')
+        except zipfile.BadZipFile:
+            return send_error(422, "Invalid ZIP file", request_id)
 
-    def do_POST(self):
-        request_id = str(uuid.uuid4())
-        start_time = time.time()
+        total_uncompressed = sum(f.file_size for f in input_zip.infolist() if not f.is_dir())
+        if total_uncompressed > len(file_bytes) * MAX_COMPRESSION_RATIO:
+            return send_error(422, "Suspicious ZIP file (compression ratio too high)", request_id)
 
+        # Prepare regex logic
+        regex_flags = re.MULTILINE
+        if not is_case_sensitive:
+            regex_flags |= re.IGNORECASE
+
+        if mode == 'regex':
+            find_pattern = find_raw
+        else:
+            # Simple mode: escape special chars for literal matching
+            find_pattern = re.escape(find_raw)
+
+        if not find_pattern:
+            return send_error(400, "Search pattern cannot be empty", request_id)
+
+        # Validate regex syntax
         try:
-            # 1. Parse Headers & Form
-            content_type, pdict = cgi.parse_header(self.headers.get('content-type'))
-            if content_type != 'multipart/form-data':
-                return self._send_error(400, "Content-Type must be multipart/form-data", request_id)
+            re.compile(find_pattern, regex_flags)
+        except re.error as e:
+            return send_error(422, f"Invalid regex pattern: {str(e)}", request_id)
 
-            pdict['boundary'] = bytes(pdict['boundary'], "utf-8")
-            form = cgi.parse_multipart(self.rfile, pdict)
+        # Process ZIP
+        output_io = io.BytesIO()
+        output_zip = zipfile.ZipFile(output_io, 'w', zipfile.ZIP_DEFLATED)
 
-            # 2. Extract Data
-            mode = form.get('mode', ['simple'])[0]  # 'simple' or 'regex'
-            find_raw = form.get('find', [''])[0]
-            replace_raw = form.get('replace', [''])[0]
-            action = form.get('action', ['preview'])[0]  # 'preview' or 'download'
-            is_case_sensitive = form.get('case_sensitive', ['false'])[0] == 'true'
+        diff_results = []
+        stats = {
+            "filesScanned": 0,
+            "filesModified": 0,
+            "filesSkipped": 0,
+            "totalReplacements": 0,
+            "encodingIssues": [],
+            "skippedFiles": []
+        }
 
-            uploaded_files = form.get('file')
+        for file_info in input_zip.infolist():
+            if file_info.is_dir():
+                continue
 
-            if not uploaded_files or len(uploaded_files) == 0:
-                return self._send_error(400, "No file uploaded", request_id)
+            # Path traversal check
+            if not is_safe_path(file_info.filename):
+                stats["skippedFiles"].append(f"{file_info.filename}: unsafe path")
+                continue
 
-            file_bytes = uploaded_files[0]
+            raw_data = input_zip.read(file_info)
+            _, ext = os.path.splitext(file_info.filename)
 
-            # 3. Size Validation
-            if len(file_bytes) > MAX_FILE_SIZE_BYTES:
-                max_mb = MAX_FILE_SIZE_BYTES / 1024 / 1024
-                return self._send_error(413, f"File too large (max {max_mb:.0f}MB)", request_id)
+            # Binary safety check
+            if ext.lower() not in ALLOWED_TEXT_EXTENSIONS or is_likely_binary(raw_data):
+                output_zip.writestr(file_info, raw_data)
+                stats["skippedFiles"].append(f"{file_info.filename}: binary file")
+                continue
 
-            # 4. Open ZIP and check for zip bomb
+            # Decode with encoding detection
+            original_text, detected_encoding = detect_and_decode(raw_data)
+            if detected_encoding != 'utf-8':
+                stats["encodingIssues"].append(f"{file_info.filename}: {detected_encoding}")
+
+            # Apply replacement with timeout
             try:
-                input_zip = zipfile.ZipFile(io.BytesIO(file_bytes), 'r')
-            except zipfile.BadZipFile:
-                return self._send_error(422, "Invalid ZIP file", request_id)
+                with timeout_context(REGEX_TIMEOUT_SECONDS):
+                    # Count matches before replacement
+                    matches = list(re.finditer(find_pattern, original_text, flags=regex_flags))
+                    match_count = len(matches)
 
-            total_uncompressed = sum(f.file_size for f in input_zip.infolist() if not f.is_dir())
-            if total_uncompressed > len(file_bytes) * MAX_COMPRESSION_RATIO:
-                return self._send_error(422, "Suspicious ZIP file (compression ratio too high)", request_id)
-
-            # 5. Prepare Regex Logic
-            regex_flags = re.MULTILINE
-            if not is_case_sensitive:
-                regex_flags |= re.IGNORECASE
-
-            if mode == 'regex':
-                find_pattern = find_raw
-            else:
-                # Simple mode: escape special chars for literal matching
-                find_pattern = re.escape(find_raw)
-
-            if not find_pattern:
-                return self._send_error(400, "Search pattern cannot be empty", request_id)
-
-            # Validate regex syntax
-            try:
-                re.compile(find_pattern, regex_flags)
+                    # Apply replacement
+                    new_text = re.sub(find_pattern, replace_raw, original_text, flags=regex_flags)
+            except TimeoutError:
+                return send_error(422, "Regex too complex (timeout after 5 seconds). Try a simpler pattern.", request_id)
             except re.error as e:
-                return self._send_error(422, f"Invalid regex pattern: {str(e)}", request_id)
+                return send_error(422, f"Regex error: {str(e)}", request_id)
 
-            # 6. Process ZIP
-            output_io = io.BytesIO()
-            output_zip = zipfile.ZipFile(output_io, 'w', zipfile.ZIP_DEFLATED)
+            # Calculate changes
+            is_changed = new_text != original_text
+            stats["filesScanned"] += 1
 
-            diff_results = []
-            stats = {
-                "filesScanned": 0,
-                "filesModified": 0,
-                "filesSkipped": 0,
-                "totalReplacements": 0,
-                "encodingIssues": [],
-                "skippedFiles": []
-            }
+            if is_changed:
+                stats["filesModified"] += 1
+                stats["totalReplacements"] += match_count
 
-            for file_info in input_zip.infolist():
-                if file_info.is_dir():
-                    continue
-
-                # Path traversal check
-                if not is_safe_path(file_info.filename):
-                    stats["skippedFiles"].append(f"{file_info.filename}: unsafe path")
-                    continue
-
-                raw_data = input_zip.read(file_info)
-                _, ext = os.path.splitext(file_info.filename)
-
-                # Binary Safety Check
-                if ext.lower() not in ALLOWED_TEXT_EXTENSIONS or is_likely_binary(raw_data):
-                    output_zip.writestr(file_info, raw_data)
-                    stats["skippedFiles"].append(f"{file_info.filename}: binary file")
-                    continue
-
-                # Decode with encoding detection
-                original_text, detected_encoding = detect_and_decode(raw_data)
-                if detected_encoding != 'utf-8':
-                    stats["encodingIssues"].append(f"{file_info.filename}: {detected_encoding}")
-
-                # Apply Replacement with timeout
-                try:
-                    with self.timeout(REGEX_TIMEOUT_SECONDS):
-                        # Count matches before replacement
-                        matches = list(re.finditer(find_pattern, original_text, flags=regex_flags))
-                        match_count = len(matches)
-
-                        # Apply replacement
-                        new_text = re.sub(find_pattern, replace_raw, original_text, flags=regex_flags)
-                except TimeoutError:
-                    return self._send_error(422, "Regex too complex (timeout after 5 seconds). Try a simpler pattern.", request_id)
-                except re.error as e:
-                    return self._send_error(422, f"Regex error: {str(e)}", request_id)
-
-                # Calculate changes
-                is_changed = new_text != original_text
-                stats["filesScanned"] += 1
-
+            if action == 'preview':
                 if is_changed:
-                    stats["filesModified"] += 1
-                    stats["totalReplacements"] += match_count
+                    diff = difflib.unified_diff(
+                        original_text.splitlines(),
+                        new_text.splitlines(),
+                        fromfile=file_info.filename,
+                        tofile=file_info.filename,
+                        n=2,
+                        lineterm=''
+                    )
+                    diff_results.append({
+                        'filename': file_info.filename,
+                        'diff': '\n'.join(list(diff)),
+                        'matchCount': match_count
+                    })
 
-                if action == 'preview':
-                    if is_changed:
-                        diff = difflib.unified_diff(
-                            original_text.splitlines(),
-                            new_text.splitlines(),
-                            fromfile=file_info.filename,
-                            tofile=file_info.filename,
-                            n=2,
-                            lineterm=''
-                        )
-                        diff_results.append({
-                            'filename': file_info.filename,
-                            'diff': '\n'.join(list(diff)),
-                            'matchCount': match_count
-                        })
+            elif action == 'download':
+                output_zip.writestr(file_info.filename, new_text.encode('utf-8'))
 
-                elif action == 'download':
-                    output_zip.writestr(file_info.filename, new_text.encode('utf-8'))
+            if stats["filesScanned"] >= MAX_FILES_COUNT:
+                break
 
-                if stats["filesScanned"] >= MAX_FILES_COUNT:
-                    break
+        output_zip.close()
+        input_zip.close()
 
-            output_zip.close()
-            input_zip.close()
+        # Response
+        processing_time_ms = int((time.time() - start_time) * 1000)
 
-            # 7. Response
-            processing_time_ms = int((time.time() - start_time) * 1000)
-
-            if action == 'download':
-                self.send_response(200)
-                self.send_header('Content-Type', 'application/zip')
-                self.send_header('Content-Disposition', 'attachment; filename="tinyutils_processed.zip"')
-                self.send_header('X-Request-ID', request_id)
-                self.end_headers()
-                output_io.seek(0)
-                self.wfile.write(output_io.getvalue())
-            else:
-                self._send_success({
-                    "diffs": diff_results,
-                    "stats": stats
-                }, request_id, processing_time_ms)
-
-        except Exception as e:
-            traceback.print_exc()
-            self._send_error(500, f"Server error: {str(e)}", request_id)
-
-    def _send_success(self, data, request_id, processing_time_ms):
-        """Send TinyUtils-standard success response."""
-        self.send_response(200)
-        self.send_header('Content-Type', 'application/json')
-        self.send_header('X-Request-ID', request_id)
-        self.send_header('Cache-Control', 'no-store')
-        self.end_headers()
-
-        response = {
-            "ok": True,
-            "data": data,
-            "meta": {
-                "runTimestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-                "requestId": request_id,
-                "processingTimeMs": processing_time_ms,
-                "mode": "bulk-replace",
-                "chardetAvailable": CHARDET_AVAILABLE
+        if action == 'download':
+            output_io.seek(0)
+            return {
+                'statusCode': 200,
+                'headers': {
+                    'Content-Type': 'application/zip',
+                    'Content-Disposition': 'attachment; filename="tinyutils_processed.zip"',
+                    'X-Request-ID': request_id
+                },
+                'body': output_io.getvalue(),
+                'isBase64Encoded': True
             }
-        }
-        self.wfile.write(json.dumps(response).encode('utf-8'))
+        else:
+            return send_success({
+                "diffs": diff_results,
+                "stats": stats
+            }, request_id, processing_time_ms)
 
-    def _send_error(self, code, message, request_id):
-        """Send TinyUtils-standard error response."""
-        self.send_response(code)
-        self.send_header('Content-Type', 'application/json')
-        self.send_header('X-Request-ID', request_id)
-        self.send_header('Cache-Control', 'no-store')
-        self.end_headers()
-
-        response = {
-            "ok": False,
-            "message": message,
-            "code": code,
-            "requestId": request_id
-        }
-        self.wfile.write(json.dumps(response).encode('utf-8'))
+    except Exception as e:
+        traceback.print_exc()
+        return send_error(500, f"Server error: {str(e)}", request_id)
