@@ -1,0 +1,3 @@
+# Requirements for api/bulk-replace.py
+# Character encoding detection (improves text file handling)
+chardet>=5.0,<6.0
