@@ -1,6 +1,7 @@
 // Tiny-reactive HTTP client and basic UI actions used by E2E tests.
 
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, writeFile, access } from 'node:fs/promises';
+import { constants } from 'node:fs';
 import path from 'node:path';
 
 import fetch from 'node-fetch';
@@ -38,6 +39,144 @@ async function preflightBypass(url) {
     // best-effort
   }
   return headers;
+}
+
+// Parse _vercel_jwt cookie from Set-Cookie header
+function parseHandshakeCookie(setCookieHeader) {
+  if (!setCookieHeader) return null;
+  const fragments = setCookieHeader.split('\n');
+  for (const fragment of fragments) {
+    const trimmed = fragment.trim();
+    if (!trimmed) continue;
+    const [cookiePair] = trimmed.split(';');
+    if (cookiePair.startsWith('_vercel_jwt=')) {
+      return cookiePair;
+    }
+  }
+  return null;
+}
+
+// Apply preview bypass by setting cookies in the tiny-reactive browser context
+// AND navigating to the root to complete the handshake.
+// This is CRITICAL for preview environments - without it, browser-side fetch()
+// calls will get 401 because document.cookie is empty.
+//
+// PERMANENT AUTH OPTIONS (checked in order):
+// 1. .tiny-reactive-vercel-login.json - Your Vercel.com login (works for ALL previews)
+//    Created by: node scripts/save_vercel_login.mjs
+// 2. .tiny-reactive-vercel-auth.json - Preview-specific auth (works for one preview)
+//    Created by: node scripts/login_to_vercel_once.mjs
+// 3. Bypass token method (fallback if no saved auth)
+async function applyPreviewBypassIfNeeded(client, baseUrl) {
+  const VERCEL_LOGIN_FILE = './.tiny-reactive-vercel-login.json';
+  const PREVIEW_AUTH_FILE = './.tiny-reactive-vercel-auth.json';
+
+  // Option 1: Check for saved Vercel login (works for ALL preview URLs!)
+  try {
+    await access(VERCEL_LOGIN_FILE, constants.R_OK);
+
+    // Load saved Vercel login - this is your actual Vercel.com account login!
+    await client.trCmd({
+      id: 'load-vercel-login',
+      cmd: 'loadAuthState',
+      args: { path: VERCEL_LOGIN_FILE }
+    });
+
+    console.log('✅ Loaded Vercel login from', VERCEL_LOGIN_FILE);
+    return; // Done! Works for any preview URL
+  } catch {
+    // No saved Vercel login, try preview-specific auth
+  }
+
+  // Option 2: Check for preview-specific saved auth
+  try {
+    await access(PREVIEW_AUTH_FILE, constants.R_OK);
+
+    // Load saved auth state - this includes all cookies from when you signed in!
+    await client.trCmd({
+      id: 'load-preview-auth',
+      cmd: 'loadAuthState',
+      args: { path: PREVIEW_AUTH_FILE }
+    });
+
+    console.log('✅ Loaded saved preview auth from', PREVIEW_AUTH_FILE);
+    return; // Done! No bypass token needed
+  } catch {
+    // No saved auth, fall back to bypass token method
+  }
+
+  const token = process.env.VERCEL_AUTOMATION_BYPASS_SECRET
+    || process.env.PREVIEW_BYPASS_TOKEN
+    || process.env.BYPASS_TOKEN;
+  const previewSecret = (process.env.PREVIEW_SECRET || '').trim();
+
+  if (!token) {
+    console.warn('⚠️  No saved auth and no bypass token. Run: node scripts/login_to_vercel_once.mjs');
+    return;
+  }
+
+  try {
+    // Preflight the preview root with bypass headers to trigger Vercel's
+    // protection handshake and get the _vercel_jwt cookie.
+    const preflightUrl = new URL(baseUrl);
+    preflightUrl.pathname = '/';
+    preflightUrl.searchParams.set('x-vercel-set-bypass-cookie', 'true');
+    preflightUrl.searchParams.set('x-vercel-protection-bypass', token);
+
+    const headers = {
+      'x-vercel-protection-bypass': token,
+      'x-vercel-set-bypass-cookie': 'true',
+      Cookie: `vercel-protection-bypass=${token}`,
+    };
+    if (previewSecret) {
+      headers['x-preview-secret'] = previewSecret;
+    }
+
+    const res = await fetch(preflightUrl.toString(), {
+      method: 'GET',
+      headers,
+      redirect: 'manual',
+    });
+
+    const handshake = parseHandshakeCookie(res.headers.get('set-cookie'));
+    const cookies = [];
+
+    // Always set the protection-bypass cookie in the browser context so
+    // pages that rely on it (not just APIs) see the same automation token.
+    cookies.push({
+      name: 'vercel-protection-bypass',
+      value: token,
+      url: baseUrl,
+    });
+
+    // If we received a _vercel_jwt cookie, propagate that as well so the
+    // browser context looks authenticated to Vercel's protection layer.
+    if (handshake) {
+      const [name, ...rest] = handshake.split('=');
+      const value = rest.join('=').split(';')[0];
+      cookies.push({ name, value, url: baseUrl });
+    }
+
+    if (cookies.length) {
+      await client.trCmd({
+        id: 'set-cookie',
+        cmd: 'setCookies',
+        args: { cookies },
+      });
+    }
+
+    // CRITICAL: After setting cookies, navigate to the preview root so the
+    // browser completes the protection handshake in a real navigation context.
+    // Without this step, the cookies won't be properly activated for API calls.
+    await client.trCmd({
+      id: 'open-root',
+      cmd: 'open',
+      args: { url: baseUrl, waitUntil: 'networkidle' },
+      target: { contextId: 'default', pageId: 'active' }
+    });
+  } catch (error) {
+    console.warn('⚠️  preview bypass cookie setup failed:', error.message);
+  }
 }
 
 export function createTinyReactiveClient({ baseUrl, token }) {
@@ -187,3 +326,7 @@ export function createTinyReactiveClient({ baseUrl, token }) {
     preflightBypass,
   };
 }
+
+// Expose helpers for harnesses that need to preflight
+// preview URLs or construct consistent bypass headers.
+export { buildBypassHeaders, preflightBypass, applyPreviewBypassIfNeeded };

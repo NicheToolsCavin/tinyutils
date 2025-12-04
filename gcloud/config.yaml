@@ -1,0 +1,19 @@
+# TinyUtils WS2 LibreOffice converter (stub)
+project_id: tinyutils-dev          # Override via gcloud config set project
+region: europe-west1               # Cloud Run region
+service: tinyutils-libreoffice     # Cloud Run service name
+artifact_repo: tinyutils-artifacts # Artifact Registry repo
+bucket: tinyutils-convert-staging  # GCS bucket for temp IO
+concurrency: 4
+cpu: 1
+memory: 512Mi
+timeout_seconds: 120
+min_instances: 0
+max_instances: 1
+env:
+  SOFFICE_BIN: libreoffice
+  TMPDIR: /tmp
+notes: |
+  Stub configuration for WS2 prep. These values are safe defaults and should
+  be adjusted per environment before any deploy. No live deployment occurs here.
+

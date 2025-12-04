@@ -1,0 +1,5 @@
+# Requirements for api/bulk-replace/index.py
+# FastAPI framework (ASGI-compatible, works with Vercel serverless)
+fastapi>=0.110,<1.0
+# Character encoding detection (improves text file handling)
+chardet>=5.0,<6.0

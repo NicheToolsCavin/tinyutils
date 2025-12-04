@@ -1,0 +1,165 @@
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                    WORKSTREAM 2: TEST MATRIX VISUALIZATION                      │
+│                         Format Conversion Coverage Map                          │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+PRIORITY 1: Rich Format Roundtrips (Critical - Blank Output Prevention)
+╔════════════════════════════════════════════════════════════════════════════════╗
+║ 1. ODT → DOCX     ✓ TESTED  ⚠️  CRITICAL (blank bug fixed)                     ║
+║    Fixture: November 16-30.odt (24KB)                                          ║
+║    Guards:  suspected_blank_output=docx, stage_docx_bytes                      ║
+║    Tests:   test_convert_backend_odt_docx.py:27-58                             ║
+║                                                                                 ║
+║ 2. ODT → MD       ✓ TESTED                                                     ║
+║    Fixture: November 16-30.odt                                                 ║
+║    Guards:  min_output_bytes >= 2000                                           ║
+║    Tests:   converter_fidelity.mjs:123-143                                     ║
+║                                                                                 ║
+║ 3. DOCX → DOCX    ✓ TESTED  🔄 ROUNDTRIP                                        ║
+║    Fixture: docx_report_sample.docx (11KB)                                     ║
+║    Guards:  EXTEND blank-output detection → roundtrip degradation              ║
+║    Tests:   test_convert_backend_odt_docx.py:182-211                           ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+PRIORITY 2: HTML Pipeline (Direct Path Validation)
+╔════════════════════════════════════════════════════════════════════════════════╗
+║ 4. HTML → DOCX    ⚡ NEW - EXTEND GUARDS                                        ║
+║    Fixture: html_input.html (1KB)                                              ║
+║    Guards:  ADD "html" to line 759 in convert_service.py                       ║
+║    Tests:   NEW test_html_to_docx_not_blank_preserves_tables()                 ║
+║                                                                                 ║
+║ 5. HTML → MD      ✓ TESTED                                                     ║
+║    Fixture: html_input.html                                                    ║
+║    Guards:  Metrics validation (code blocks, lists preserved)                  ║
+║    Tests:   converter_fidelity.mjs:105-121                                     ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+PRIORITY 3: Fidelity-Critical Formats (Content Preservation)
+╔════════════════════════════════════════════════════════════════════════════════╗
+║ 6. DOCX → MD      ⚡ NEW GUARDS (content loss detection)                        ║
+║    Fixtures: blog_post.docx, tech_doc.docx, report_2025_annual.docx           ║
+║    Guards:   NEW suspected_content_loss=md (if cleaned_md < 10% of input)     ║
+║    Tests:    EXTEND existing converter_fidelity.mjs tests with size checks     ║
+║                                                                                 ║
+║ 7. PDF → MD       ⚡ NEW - LAYOUT-AWARE EXTRACTION                              ║
+║    Fixture:  🚧 MISSING sample.pdf (need to create ~50KB tech doc)             ║
+║    Guards:   pdf_degraded=timeout|too_short, pdf_extraction_strategy           ║
+║    Tests:    NEW test_pdf_to_markdown_layout_aware()                           ║
+║                                                                                 ║
+║ 8. PDF → TXT      ⚡ NEW - PLAIN TEXT FIDELITY                                  ║
+║    Fixture:  Same sample.pdf                                                   ║
+║    Guards:   NEW suspected_extraction_failure=pdf_to_txt (if < 5% of input)   ║
+║    Tests:    NEW test_pdf_to_txt_non_blank()                                   ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+PRIORITY 4: Edge Cases & Regressions
+╔════════════════════════════════════════════════════════════════════════════════╗
+║ 9. HTML → TXT     ⚡ NEW TEST (direct path already implemented)                 ║
+║    Fixture:  html_input.html                                                   ║
+║    Guards:   NEW suspected_truncation=html_to_txt (validate no regression)    ║
+║    Tests:    NEW test_html_to_txt_no_truncation()                              ║
+║                                                                                 ║
+║ 10. DOCX → PDF    ⚡ NEW - REPORTLAB FALLBACK VALIDATION                        ║
+║     Fixture: tech_doc.docx (13KB)                                              ║
+║     Guards:  pdf_engine=reportlab|external (validate fallback works)           ║
+║     Tests:   NEW test_docx_to_pdf_reportlab_fallback()                         ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                          SILENT-FAILURE GUARD SUMMARY                           │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+EXISTING GUARDS (1 active, 1 validated by tests)
+  ✓ ODT/DOCX → DOCX blank detection (lines 752-768)
+  ✓ PDF extraction quality logging (lines 618-643)
+
+PROPOSED EXTENSIONS (4 new guards)
+  1. HTML → DOCX blank detection      (extend line 759)
+  2. Markdown content loss guard      (add after line 722)
+  3. HTML → TXT truncation guard      (add after line 956)
+  4. DOCX roundtrip degradation guard (extend line 754-765 block)
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                             IMPLEMENTATION STATUS                               │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+COVERAGE SUMMARY
+  Currently Tested:     7/10 combos  (70%)
+  With Proposed Tests: 10/10 combos (100%)
+
+SILENT-FAILURE DETECTION
+  Currently Active:     1 guard  (ODT/DOCX → DOCX)
+  With Proposed Adds:   5 guards (+HTML, +MD loss, +TXT, +roundtrip)
+
+FIXTURE GAPS
+  Missing: sample.pdf (~50KB technical doc with headings/lists/code/table)
+  Action:  Create 1 new fixture file
+
+GOLDEN METRICS GAPS
+  Missing: 5 new golden metric files for new test combinations
+  Action:  Create JSON files with expected thresholds
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                               QUICK REFERENCE                                   │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+KEY FILES
+  convert_backend/convert_service.py        Core logic + guards (lines 99-103, 752-768)
+  tests/converter_fidelity.mjs             JS metrics validation (7 tests)
+  tests/test_convert_backend_odt_docx.py   Python integration tests (6 tests)
+  tests/fixtures/converter/                Input fixtures (20+ files)
+  tests/golden/converter/                  Expected output metrics (7 JSON files)
+
+TELEMETRY LOG KEYS (for test assertions)
+  stage_docx_bytes=<N>                    DOCX output size
+  suspected_blank_output=docx             Blank DOCX warning
+  suspected_content_loss=md               Markdown content loss (proposed)
+  suspected_truncation=html_to_txt        HTML→TXT truncation (proposed)
+  suspected_roundtrip_degradation=docx    DOCX roundtrip mismatch (proposed)
+  pdf_engine=pdfminer_six|reportlab       PDF rendering engine
+  pdf_degraded=timeout|too_short          PDF extraction quality warning
+
+THRESHOLDS
+  BLANK_OUTPUT_INPUT_THRESHOLD_BYTES  = 4096  (min input size to check)
+  BLANK_OUTPUT_OUTPUT_THRESHOLD_BYTES = 1024  (max output before warning)
+  Content loss ratio threshold         = 0.1   (warn if output < 10% of input)
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                             EXECUTION CHECKLIST                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+Phase 1: Add Missing Fixtures
+  [ ] Create tests/fixtures/converter/sample.pdf (2-page tech doc, ~50KB)
+
+Phase 2: Extend Silent-Failure Guards (convert_service.py)
+  [ ] Line 759: Add "html" to from_format check
+  [ ] After line 722: Add markdown content-loss guard
+  [ ] After line 956: Add TXT truncation guard
+  [ ] In 754-765 block: Add DOCX roundtrip guard
+
+Phase 3: Add Golden Metrics (tests/golden/converter/)
+  [ ] html_input_docx.metrics.json
+  [ ] sample_pdf_md.metrics.json
+  [ ] sample_pdf_txt.metrics.json
+  [ ] docx_report_sample_docx_roundtrip.metrics.json
+  [ ] tech_doc_pdf.metrics.json
+
+Phase 4: Add Test Cases
+  [ ] Python: test_html_to_docx_not_blank_preserves_tables()
+  [ ] Python: test_pdf_to_markdown_layout_aware()
+  [ ] Python: test_docx_roundtrip_no_degradation()
+  [ ] JavaScript: HTML→DOCX metrics validation test
+  [ ] JavaScript: PDF→MD metrics validation test
+
+Phase 5: Validate & Tune
+  [ ] Run full test suite (npm test && pytest)
+  [ ] Check for false positives in CI logs
+  [ ] Tune thresholds if needed
+  [ ] Update AGENTS.md with guard locations
+
+ESTIMATED EFFORT: ~3 hours for complete implementation
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                     STATUS: READY FOR IMPLEMENTATION                            │
+│                 All code locations identified, thresholds defined               │
+└─────────────────────────────────────────────────────────────────────────────────┘

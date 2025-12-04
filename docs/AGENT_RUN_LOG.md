@@ -26,6 +26,28 @@
 <!-- RECENT ACTIVITY (Full Context) -->
 
 
+### 2025-12-03 17:15 CET - Claude Code - MD→PDF: Control character cleanup and italic asterisk handling
+
+- **Mode:** autonomous
+- **Branch:** `feat/tools-redesign-vintage`
+- **Summary:**
+  - Fixed two critical MD→PDF rendering artifacts in ReportLab fallback path identified by ChatGPT analysis of Typora vs TinyUtils output comparison.
+  - **Fix 1:** Stripped 0x7F (DEL) control characters that appeared ~26 times throughout PDF as weird box glyphs. Added sanitization at two levels: (1) top of `_parse_markdown_to_flowables()` for document-level cleaning, and (2) in `_inline_markdown_to_html()` for inline text processing.
+  - **Fix 2:** Fixed literal asterisks showing in italic patterns like `*(Answer:) 1 __________ 2 __________*`. Root cause: original italic regex had negative lookbehind `(?<![\*_\s])` that prevented matching when content ended with underscores. Replaced with callback-based approach using semantic validation: match broadly, then intelligently filter in callback (skip if content is ONLY underscores/spaces/asterisks, otherwise strip asterisks and apply italic).
+  - Verified fixes with comprehensive PDF validation: 0x7F count = 0 (was ~26), asterisk count = 0 (all 11 `(Answer:)` lines clean).
+  - Updated tool_desc_converter.md with detailed change entry including root cause analysis, fix implementation, and evidence.
+- **Evidence:**
+  - convert_backend/convert_service.py:1384 (control char strip in `_inline_markdown_to_html`)
+  - convert_backend/convert_service.py:1406-1416 (new `_italic_asterisk` callback function with semantic validation)
+  - convert_backend/convert_service.py:1427 (control char strip in `_parse_markdown_to_flowables`)
+  - Test: python3 test_md_pdf_fix.py → TinyUtils_Output_KevinReview_FIXED.pdf
+  - PDF validation: pdfplumber extraction confirms 0 control chars, 0 literal asterisks, clean formatting
+  - tool_desc_converter.md:1418-1476 (complete changelog entry)
+- **Follow-ups:**
+  - Monitor for other control character edge cases (0x00-0x1F, 0x7F-0x9F)
+  - Consider adding general control character sanitization for all non-printable chars
+  - Test with more complex markdown documents containing mixed emphasis and fill-in patterns
+
 ### 2025-11-28 21:10 CET - Claude Code - Format-specific preview renderers
 
 - **Mode:** autonomous
@@ -1109,4 +1131,278 @@
   - Added naming notes and small copy updates in SvelteKit migration docs, New ideas specs, and context files so future agents see Bulk Find & Replace as the current tool name while still recognizing the older label.
 - **Evidence:** artifacts/bulk-find-replace-rename/20251202/
 - **Follow-ups:**
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-03 02:27 CET - Manual - OpenMemory init for TinyUtils session
+- **Mode:** manual
+- **Branch:** `tools-redesign-vintage`
+- **Summary:**
+  - Initialized OpenMemory memory for current Code agent session with key repo rules (AGENTS, CLAUDE, JUSTEVERY_AGENTS_LIST, SECURITY) and plans context.
+  - Created artifacts/openmemory_init_tinyutils_20251203.json as the payload used to add the memory via OpenMemory HTTP API.
+- **Evidence:** artifacts/openmemory_init_tinyutils_20251203.json
+- **Follow-ups:**
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-03 02:39 CET - Manual - Tier0 tiny-reactive flows for home/tools/formats/multi-file
+- **Mode:** manual
+- **Branch:** `feat/tools-redesign-vintage`
+- **Summary:**
+  - Added data-testid attributes to home, tools index, formats, and multi-file search & replace pages to support stable tiny-reactive Tier0 tests.
+  - Extended tests/e2e/harness/registry.mjs with entries for home, toolsIndex, formatsPage, and multiFileSearchReplace paths and selectors.
+  - Created four tiny-reactive Tier0 harness scripts for /, /tools/, /tools/formats/, and /tools/multi-file-search-replace/ that assert minimal presence of hero/sections and primary controls and capture screenshots.
+- **Evidence:** artifacts/ui/home,artifacts/ui/tools-index,artifacts/ui/formats-page,artifacts/ui/multi-file-search-replace
+- **Follow-ups:**
+  - Consider Tier1 flows later to exercise multi-file search & replace preview/diff behavior with fixtures.
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-03 02:44 CET - Manual - preview_smoke tools/multi-file progress expectations
+- **Mode:** manual
+- **Branch:** `feat/tools-redesign-vintage`
+- **Summary:**
+  - Aligned scripts/preview_smoke.mjs page expectations with the new Svelte tools: only Dead Link Finder and Text Converter now assert the shared progress-banner marker, while Sitemap Delta, Wayback Fixer, and Multi-File Search & Replace only assert the ad-slot wrapper.
+  - Confirmed /tools/multi-file-search-replace/ and /api/multi-file-search-replace are already covered in the pages/apis lists and that 308 redirects for /tools* are treated as success by the smoke harness.
+- **Evidence:** scripts/preview_smoke.mjs
+- **Follow-ups:**
+  - Add a later workstream for syntax-highlighting preview polish now marked as required, once preview smokes and Tier0 flows remain green.
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-03 02:52 CET - Manual - converter preview syntax highlighting polish
+- **Mode:** manual
+- **Branch:** `feat/tools-redesign-vintage`
+- **Summary:**
+  - Added theme-aware iframe styling and copy-to-clipboard controls for JSON, Markdown, and TeX converter previews using getPreviewThemeForIframe() and lightweight inline JS in src/routes/tools/text-converter/+page.svelte.
+  - Kept Prism CDN includes and performance budgets intact while aligning preview backgrounds/borders/text with existing design tokens and light/dark mode.
+- **Evidence:** src/routes/tools/text-converter/+page.svelte
+- **Follow-ups:**
+  - Optionally extend copy-to-clipboard to plain text preview and refine Prism theme choice per mode in a later pass.
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-03 03:07 CET - Manual - converter QA follow-ups (size limits, downloads, progress copy)
+- **Mode:** manual
+- **Branch:** `feat/tools-redesign-vintage`
+- **Summary:**
+  - Surfaced converter backend size expectations in the Svelte UI by adding a hero note about ~100MB per-file guidance and clarifying that very large documents may skip inline preview but still convert and download successfully.
+  - Updated the Input help text and preview truncation messaging so users know when on-page previews are limited and that full content remains available via downloads.
+  - Clarified download behavior by renaming results table links to 'Download file', adding a tooltip about secure browser downloads, and refining the final progress message to explicitly tell users to use the Download File links.
+- **Evidence:** src/routes/tools/text-converter/+page.svelte
+- **Follow-ups:**
+  - Future work: consider exposing the effective MAX_FILE_MB value directly in the UI from env/config and adding more granular per-format guidance if needed.
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-03 03:21 CET - Manual - add Tier1 tiny-reactive harness for MFSR
+- **Mode:** manual
+- **Branch:** `feat/tools-redesign-vintage`
+- **Summary:**
+  - Implemented Tier1 tiny-reactive harness for /tools/multi-file-search-replace/ using a tiny ZIP fixture and mfsr-* data-testids.
+  - Added client-side test hook to inject a base64-encoded ZIP file into the MFSR Svelte page for stable automation.
+  - Extended tiny-reactive registry selectors for MFSR stats and wired harness artifacts under artifacts/ui/multi-file-search-replace/.
+- **Evidence:** artifacts/ui/multi-file-search-replace/
+- **Follow-ups:**
+  - Run the new Tier1 tiny-reactive harness once a fresh Vercel preview and tiny-reactive controller are available.
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-03 03:27 CET - Manual - preview_smoke.mjs against SvelteKit tools preview
+- **Mode:** manual
+- **Branch:** `feat/tools-redesign-vintage`
+- **Summary:**
+  - Ran scripts/preview_smoke.mjs against PREVIEW_URL=https://tinyutils-e2en8enzf-cavins-projects-7b0e00bb.vercel.app with automation bypass envs from .env.preview.local.
+  - All /tools* pages (/, /tools/, DLF, Sitemap Delta, Wayback Fixer, Text Converter, Multi-File Search & Replace) returned 200 or 308 per updated expectations.
+  - All Edge APIs (/api/check, /api/metafetch, /api/sitemap-delta, /api/wayback-fixer, /api/multi-file-search-replace) returned 200 JSON with x-request-id, so preview_smoke.mjs reported PASS.
+- **Evidence:** artifacts/preview-smokes/
+- **Follow-ups:**
+  - Next: run tiny-reactive Tier0/Tier1 harnesses against this preview and expand higher-tier tiny-reactive flows per e2e UI plan.
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-03 10:55 CET - Manual - Workstream 1 ODT→DOCX blank output already resolved
+- **Mode:** manual
+- **Branch:** `feat/tools-redesign-vintage`
+- **Summary:**
+  - Confirmed via AGENT_RUN_LOG, tool_desc_converter.md, tests/converter_fidelity.mjs, and tests/test_convert_backend_odt_docx.py that the November 16-30.odt blank ODT→DOCX bug was already reproduced, fixed, and guarded by fixtures + tests.
+  - Workstream 1 (ODT→DOCX blank-output repro + fix) requires no new code; future work should build on existing tests and silent-failure guards instead of re-implementing.
+- **Follow-ups:**
+  - Shift focus to Workstream 2: converter format matrix + silent-failure guard across multiple input→output pairs.
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-03 11:06 CET - Manual - Workstream 2 converter matrix + guards (code only)
+- **Mode:** manual
+- **Branch:** `feat/tools-redesign-vintage`
+- **Summary:**
+  - Extended convert_backend markdown and DOCX telemetry with size-based suspected_blank_output tags for md/docx/html sources, without changing API outcomes.
+  - Added Python guard tests to ensure normal DOCX report roundtrip does not log suspected_blank_output, while tiny stubbed markdown outputs do trigger the md guard.
+  - Confirmed existing JS converter_fidelity.mjs matrix already covers blog_post, tech_doc, report_2025_annual, images, lists, November 16-30.odt, and html_input.html; no changes required there.
+- **Follow-ups:**
+  - Install pdfminer deps before running pytest for convert_backend tests, then extend guards to PDF→text in a future slice if needed.
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-03 11:13 CET - Manual - Workstream 2 backend test blocker (pandoc missing)
+- **Mode:** manual
+- **Branch:** `feat/tools-redesign-vintage`
+- **Summary:**
+  - Attempted to run PYTHONPATH=. .venv-pdf/bin/python -m pytest -q tests/test_convert_backend_odt_docx.py with pdfminer.six and pytest installed into a local venv; tests failed because convert_backend.pandoc_runner.ensure_pandoc() raises PandocError: pypandoc not installed, so DOCX/MD outputs are invalid (BadZipFile, ODT binary in markdown).
+  - Ran node --test tests/converter_fidelity.mjs in the same environment; all seven converter fidelity tests (blog_post, tech_doc, report_2025_annual, images, lists, November 16-30.odt, html_input.html) passed, confirming the JS matrix is green.
+  - No additional code changes are required for Workstream 2; full backend verification now depends on installing and wiring pypandoc + a pandoc binary so convert_backend can execute real ODT/DOCX/HTML conversions instead of fallback payloads.
+- **Follow-ups:**
+  - Install pypandoc and a usable pandoc binary in the TinyUtils test environment, then re-run PYTHONPATH=. .venv-pdf/bin/python -m pytest -q tests/test_convert_backend_odt_docx.py to validate ODT/DOCX/HTML conversion tests and new telemetry guards end-to-end.
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-03 11:24 CET - Manual - Bulk Replace API smoke script
+- **Mode:** manual
+- **Branch:** `feat/tools-redesign-vintage`
+- **Summary:**
+  - Added scripts/smoke_bulk_replace_preview.mjs to POST the Tier1 tiny ZIP fixture to /api/bulk-replace (mode=simple, action=preview, find=TODO, replace=DONE) and record JSON summaries under artifacts/mfsr/<YYYYMMDD>/bulk-replace-api-{local,preview}.json with envBlocked detection for HTML/auth shells.
+  - Local run with BASE_URL=http://localhost:8788 currently fails with fetch failed (no local bulk-replace server listening), while a preview-style run against https://example.com returns text/html 403 and is correctly classified as envBlocked=true with an auth/HTML error.
+- **Follow-ups:**
+  - Re-run smoke_bulk_replace_preview.mjs against a real TinyUtils preview once PREVIEW_URL and bypass tokens are configured; if envBlocked=true for that preview, append a USER_CHECKLIST.md item to fix /api/bulk-replace deployment/auth, otherwise treat the preview as healthy for Bulk Replace API.
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-03 11:28 CET - Manual - Bulk Replace API smoke vs current preview
+- **Mode:** manual
+- **Branch:** `feat/tools-redesign-vintage`
+- **Summary:**
+  - Ran scripts/smoke_bulk_replace_preview.mjs against PREVIEW_URL=https://tinyutils-e2en8enzf-cavins-projects-7b0e00bb.vercel.app with bypass envs from .vercel/.env.preview.local; the smoke received a 401 text/html response from /api/bulk-replace and correctly classified envBlocked=true with error 'Received HTML/auth response instead of JSON from /api/bulk-replace'.
+  - Local run with BASE_URL=http://localhost:8788 still fails with fetch failed (no local bulk-replace server); the smoke script now writes JSON summaries under artifacts/mfsr/<YYYYMMDD>/bulk-replace-api-{local,preview}.json for inspection.
+  - Added a USER_CHECKLIST.md item for the owner to fix /api/bulk-replace on the current preview so it returns 200 JSON { ok: true, data: { stats, diffs } } to the smoke instead of HTML/auth, while keeping Tier1 tiny-reactive assertions honest (no fake stats).
+- **Follow-ups:**
+  - Once Vercel preview /api/bulk-replace returns JSON, rerun smoke_bulk_replace_preview.mjs and then re-run the Tier1 tiny-reactive harness for Bulk Find & Replace so stats/diffs assertions pass end-to-end.
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-03 11:42 CET - Manual - converter PDF UX preview copy
+- **Mode:** manual
+- **Branch:** `feat/tools-redesign-vintage`
+- **Summary:**
+  - Aligned converter preview 'too large for preview' card copy with existing size caps and fail-soft behavior; clarified that full converted downloads remain available even when inline preview is skipped.
+  - Verified converter backend via node --test tests/converter_fidelity.mjs (all 7 fidelity suites passing).
+- **Evidence:** artifacts/converter-ux/20251203/
+- **Follow-ups:**
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-03 11:55 CET - Manual - DLF tiny-reactive Tier0/Tier1 harness
+- **Mode:** manual
+- **Branch:** `feat/tools-redesign-vintage`
+- **Summary:**
+  - Extended tests/e2e/dlf-tiny-reactive-harness.mjs to use applyPreviewBypassIfNeeded, exercise both single-page and list-mode crawls, and assert CSV/JSON exports via real blob downloads captured through anchor-click instrumentation.
+  - Left Sitemap Delta and Wayback Fixer harnesses as scaffolds but documented follow-up Tier0/Tier1 export coverage and status assertions based on the tiny-reactive plan and Claude agent guidance.
+- **Evidence:** artifacts/dlf-harness/20251203/
+- **Follow-ups:**
+  - Add export-validation utilities and extend Sitemap Delta / Wayback Fixer harnesses with CSV/JSON export checks in a follow-up slice.
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-03 12:24 CET - Manual - export validator + Sitemap/Wayback tiny-reactive exports
+- **Mode:** manual
+- **Branch:** `feat/tools-redesign-vintage`
+- **Summary:**
+  - Added tests/e2e/harness/export-validator.mjs to patch anchor downloads in the browser context and capture filename|snippet markers for real blob exports.
+  - Updated sitemap-delta-tiny-reactive-harness.mjs and wayback-fixer-tiny-reactive-harness.mjs to call patchExportDownloads/validateExport so Tier0/Tier1 flows now assert CSV/JSON exports using real download blobs instead of stubs.
+  - Harness scripts currently exit with code 2 when PREVIEW_URL/TINY_REACTIVE_BASE_URL/TINY_REACTIVE_TOKEN are unset, so full end-to-end runs are env-blocked until tiny-reactive and preview env vars are configured.
+- **Evidence:** artifacts/dlf-harness/20251203/sitemap-wayback-export-validator.txt
+- **Follow-ups:**
+  - Configure tiny-reactive + preview env vars and re-run sitemap-delta/wayback-fixer tiny-reactive harnesses to confirm export assertions are green.
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-03 12:40 CET - Manual - fix ui run-all harness paths
+- **Mode:** manual
+- **Branch:** `feat/tools-redesign-vintage`
+- **Summary:**
+  - Adjusted tests/e2e/run-all.mjs to build absolute harness script paths via import.meta.url so spawn() no longer points at tests/e2e/tests/e2e/*.mjs when run from different working directories.
+  - Re-ran sitemap-delta- and wayback-fixer tiny-reactive harnesses; both still exit early with PREVIEW_URL/TINY_REACTIVE_BASE_URL/TINY_REACTIVE_TOKEN required, indicating env/tiny-reactive server is not configured in this shell.
+- **Evidence:** artifacts/ui/20251203/run-all-path-fix.txt
+- **Follow-ups:**
+  - Set PREVIEW_URL/TINY_REACTIVE_BASE_URL/TINY_REACTIVE_TOKEN and re-run tests/e2e/run-all.mjs to validate tiny-reactive flows and export assertions end-to-end.
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-04 03:41 CET - Manual - Phase 6 preview tiny-reactive harness run (converter + bulk-replace)
+- **Mode:** manual
+- **Branch:** `feat/converter-test-coverage-100pct`
+- **Summary:**
+  - Ran Phase 6 tiny-reactive preview harnesses against latest Vercel preview for this branch using PREVIEW_URL from vercel --yes and bypass envs from .env.preview.local/.vercel/.env.preview.local.
+  - Converter harnesses (converter-color-alignment-tiny-reactive-harness.mjs, converter-page-break-tiny-reactive-harness.mjs) both passed: UI reachable via bypass, downloads contained expected color/alignment and page-break markers, JSON summaries + screenshots stored under artifacts/ui/converter/20251204.
+  - Bulk Find & Replace harnesses failed due to harness-level issues, not preview/auth: UI harness reports 'Cannot read properties of undefined (reading path)' because tools.bulkFindReplace is missing in tests/e2e/harness/registry.mjs, and API smoke harness fails with 'require is not defined' in an ESM .mjs file using CommonJS require + stubbed createTestZip().
+  - No preview or auth errors observed for converter flows; Bulk Replace preview/API behaviour remains unverified in this run pending harness fixes. Existing USER_CHECKLIST Bulk Replace API item remains valid.
+- **Evidence:** artifacts/api/bulk-find-replace/20251204/
+- **Follow-ups:**
+  - Wire a tools.bulkFindReplace entry in tests/e2e/harness/registry.mjs and migrate tests/e2e/bulk-replace-api-smoke.mjs away from top-level require/FormData into an ESM-friendly, minimal JSON or simple GET-based smoke; then rerun Phase 6 harnesses and update USER_CHECKLIST item #5 if /api/bulk-replace still returns HTML/auth shells.
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-04 03:52 CET - Manual - Phase 6 bulk-replace harness fixes + preview rerun
+- **Mode:** manual
+- **Branch:** `feat/converter-test-coverage-100pct`
+- **Summary:**
+  - Added tools.bulkFindReplace mapping in tests/e2e/harness/registry.mjs pointing to /tools/multi-file-search-replace/ reusing existing mfsr-* data-testids, and rewrote tests/e2e/bulk-replace-api-smoke.mjs as a pure ESM minimal GET-based smoke (no require/FormData) that treats non-404 responses as endpoint-present.
+  - Reran Phase 6 bulk-replace preview harnesses against PREVIEW_URL=https://tinyutils-c2z1p3co8-cavins-projects-7b0e00bb.vercel.app with bypass envs loaded: bulk-replace tiny-reactive UI harness now passes (ok=true, steps: open page, wait upload + inputs, fill find/replace) and writes JSON+PNG under artifacts/ui/bulk-find-replace/20251204/.
+  - bulk-replace-api-smoke.mjs still fails with error='fetch failed' and no HTTP status code, indicating a connectivity or preview-network issue when calling GET /api/bulk-replace rather than a JSON/contract regression; actual preview response could not be captured by this harness in this environment.
+  - No changes made to backend converter/Bulk Replace logic; this run strictly adjusts harness wiring and confirms Bulk Replace UI page is reachable on preview via tiny-reactive. Bulk Replace API behaviour on this preview remains partially env-blocked pending a more robust fetch diagnostic or alternative smoke path.
+- **Evidence:** artifacts/api/bulk-find-replace/20251204/
+- **Follow-ups:**
+  - Consider adding a tiny diagnostic helper (Node script or curl-based smoke) that can capture raw HTTP status/body for /api/bulk-replace on preview even when node-fetch reports 'fetch failed', so future runs can distinguish DNS/TLS/network errors from 401/404 HTML auth shells without changing backend code.
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-04 03:58 CET - Manual - Bulk Replace /api/bulk-replace preview diagnostic (Phase 6)
+- **Mode:** manual
+- **Branch:** `feat/converter-test-coverage-100pct`
+- **Summary:**
+  - Ran a minimal curl-based diagnostic against PREVIEW_URL=/api/bulk-replace using PREVIEW_URL from .vercel_last_preview.log and bypass env vars from .env.preview.local/.vercel/.env.preview.local, capturing raw status/body into artifacts/api/bulk-find-replace/20251204/.
+  - Initial GET without -L returned HTTP 307 with content-type=text/plain and body 'Redirecting...', plus a Set-Cookie for _vercel_jwt; this confirms the endpoint exists on the preview and is fronted by Vercel, but does not expose the underlying app response yet.
+  - A follow-up GET with -L hit a redirect loop: curl reported 'Maximum (50) redirects followed' and the response stream shows repeated HTTP/2 307 redirects from /api/bulk-replace to itself with text/plain 'Redirecting...' and new _vercel_jwt cookies, never surfacing a 2xx/4xx from the backend handler.
+  - Classification: current preview's /api/bulk-replace is effectively stuck behind a Vercel-level redirect loop (protection/edge config), not a straightforward 401/404 HTML shell or JSON contract error; from this environment we cannot reach the Python handler to confirm JSON vs HTML behaviour, so Bulk Replace API remains environment-blocked for this Santa Phase 6 run.
+- **Evidence:** artifacts/api/bulk-find-replace/20251204/bulk-replace-curl-follow-stderr.txt
+- **Follow-ups:**
+  - When investigating Bulk Replace API in a future session, consider running an owner-side preview check (or Vercel dashboard inspection) to resolve the 307 redirect loop so that /api/bulk-replace can be exercised end-to-end by CI/tiny-reactive smokes.
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-04 04:03 CET - Manual - USER_CHECKLIST note for Bulk Replace /api/bulk-replace 307 loop
+- **Mode:** manual
+- **Branch:** `feat/converter-test-coverage-100pct`
+- **Summary:**
+  - Appended an owner-facing note to USER_CHECKLIST.md under 'Workstream 2: Bulk Replace API' documenting that the Santa Phase 6 preview at https://tinyutils-c2z1p3co8-cavins-projects-7b0e00bb.vercel.app/api/bulk-replace currently returns a Vercel 307 redirect loop with text/plain 'Redirecting…' and repeated _vercel_jwt cookies, never reaching the Python handler.
+  - Referenced diagnostic artifacts at artifacts/api/bulk-find-replace/20251204/, so future runs and the human owner can correlate the checklist item with the captured headers/body and address the redirect loop in the Vercel dashboard.
+- **Evidence:** artifacts/api/bulk-find-replace/20251204/
+- **Follow-ups:**
+  - Owner: inspect Vercel preview configuration for /api/bulk-replace (protection/redirects/functions) to eliminate the 307 loop so CI/tiny-reactive smokes can see the real JSON response from the Bulk Replace handler.
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-04 04:29 CET - Manual - Santa Plan Phases 1–6 implementation summary
+- **Mode:** manual
+- **Branch:** `feat/converter-test-coverage-100pct`
+- **Summary:**
+  - Added plans/IMPLEMENTATION_SUMMARY.md capturing Santa’s Master Plan Phases 1–6 for the converter and Bulk Replace: backend features, test results, preview/tiny-reactive harness outcomes, and the current Bulk Replace API env-block status.
+  - Summary covers Phases 1–5 backend work (fixtures, LibreOffice integration, extractors, page-break/comments flags, local E2E), backend pytest status (187 collected, 181 passed, 6 skipped), and Phase 6 converter preview harnesses (color/alignment + page-break markers) passing on the current Vercel preview.
+  - Also documents Bulk Replace preview status: tiny-reactive UI harness passing, API smoke env-blocked by a Vercel 307 redirect loop on /api/bulk-replace (text/plain 'Redirecting…' with repeated _vercel_jwt), with artifacts under artifacts/api/bulk-find-replace/20251204/ and an owner follow-up recorded in USER_CHECKLIST.md.
+- **Evidence:** artifacts/api/bulk-find-replace/20251204/
+- **Follow-ups:**
+  - Future agents can start from plans/IMPLEMENTATION_SUMMARY.md for a high-level view of converter/Bulk Replace status instead of re-deriving Santa’s plan state from scratch.
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-04 09:39 CET - Manual - preview_smoke + tiny-reactive preview harnesses (converter + Bulk Replace)
+- **Mode:** manual
+- **Branch:** `feat/converter-test-coverage-100pct`
+- **Summary:**
+  - Ran scripts/preview_smoke.mjs against PREVIEW_URL=https://tinyutils-fod6rop6c-cavins-projects-7b0e00bb.vercel.app with automation bypass; all pages (/ , /tools/*, /cookies.html) and core APIs (/api/check, /api/metafetch, /api/sitemap-delta, /api/wayback-fixer, /api/multi-file-search-replace) reported OK (200 or preview-safe 308 for /tools*), so preview_smoke.mjs PASS.
+  - Executed converter tiny-reactive preview harnesses (tests/e2e/converter-convert-tiny-reactive-harness.mjs, converter-color-alignment-tiny-reactive-harness.mjs, converter-page-break-tiny-reactive-harness.mjs) against the same preview using .tiny-reactive-vercel-login.json + bypass envs; all three flows PASS with JSON + PNG artifacts under artifacts/ui/converter/20251204/.
+  - Ran Bulk Replace tiny-reactive UI harness (tests/e2e/bulk-replace-tiny-reactive-harness.mjs) against PREVIEW_URL; UI smoke PASS with artifacts at artifacts/ui/bulk-find-replace/20251204/bulk-replace-smoke.{json,png} confirming the /tools/multi-file-search-replace/ page loads and basic find/replace inputs are present.
+  - Re-ran Bulk Replace ESM API smoke (tests/e2e/bulk-replace-api-smoke.mjs) against PREVIEW_URL; smoke still env-blocked with error='fetch failed' and no HTTP responseCode, consistent with the previously observed Vercel 307 redirect loop on /api/bulk-replace. Diagnostics and smoke artifacts remain under artifacts/api/bulk-find-replace/20251204/.
+- **Evidence:** artifacts/api/bulk-find-replace/20251204/
+- **Follow-ups:**
+  - Owner: resolve the /api/bulk-replace 307 redirect loop in Vercel so the Bulk Replace API smoke can exercise the Python handler and return JSON (then rerun tests/e2e/bulk-replace-api-smoke.mjs).
 

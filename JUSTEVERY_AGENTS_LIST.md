@@ -10,11 +10,7 @@ DO NOT USE AGENTS NOT ON THE LIST UNLESS TOLD OTHERWISE. DO NOT USE FEWER AGENTS
 
 Agents to use: 
 
-ThomasR
-
 LeoMoralez
-
-SonicTornado
 
 3DMan
 
@@ -32,3 +28,9 @@ Agents to use:
 Same as above but also use:
 
 claude-sonnet-4.5
+
+
+
+RIP: 
+
+ThomasR and SonicTornado -- both accounts are expired and will not be joining us again :()

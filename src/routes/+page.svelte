@@ -78,11 +78,11 @@
   <meta name="twitter:card" content="summary_large_image" />
 </svelte:head>
 
-<section class="hero-enhanced">
-  <h1 class="hero-title fade-in-up">Useful web tools for SEOs &amp; builders</h1>
-  <p class="hero-subtitle fade-in-up delay-1">Fast, polite, privacy-friendly. No sign-up required.</p>
-  <div class="hero-cta fade-in-up delay-2">
-    <a class="btn primary lg" href="/tools/">
+<section class="hero-enhanced" data-testid="home-hero">
+	<h1 class="hero-title fade-in-up" data-testid="home-hero-title">Useful web tools for SEOs &amp; builders</h1>
+	<p class="hero-subtitle fade-in-up delay-1" data-testid="home-hero-subtitle">Fast, polite, privacy-friendly. No sign-up required.</p>
+	<div class="hero-cta fade-in-up delay-2">
+		<a class="btn primary lg" href="/tools/" data-testid="home-cta-browse-tools">
       Browse all tools →
     </a>
     <a class="btn secondary lg" href="/tools/wayback-fixer/">
@@ -96,9 +96,9 @@
     <!-- Top ad slot -->
     <AdSlot style="margin: var(--space-12) 0;" />
 
-    <section class="tool-cards" id="tools-list">
+    <section class="tool-cards" id="tools-list" data-testid="home-tools-list">
       {#each tools as tool, i}
-        <article class={"tool-card fade-in-up delay-" + (i + 1)}>
+        <article class={"tool-card fade-in-up delay-" + (i + 1)} data-testid={`home-tool-card-${i}`}>
           <span class="tool-icon">{tool.icon}</span>
           <h2 class="tool-title">{tool.title}</h2>
           <p class="tool-description">
