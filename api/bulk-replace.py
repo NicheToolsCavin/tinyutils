@@ -4,6 +4,8 @@ Bulk Find & Replace API - Multi-file search and replace with visual diffs
 Accepts ZIP uploads, applies text/regex replacements, returns preview or download.
 Security: Zip bomb protection, path traversal checks, ReDoS timeouts.
 """
+from fastapi import FastAPI, File, Form, UploadFile, Response
+from fastapi.responses import JSONResponse, StreamingResponse
 import json
 import zipfile
 import io
@@ -15,7 +17,7 @@ import uuid
 import signal
 import contextlib
 import traceback
-from urllib.parse import parse_qs
+from typing import Optional
 
 try:
     import chardet
@@ -36,6 +38,8 @@ ALLOWED_TEXT_EXTENSIONS = {
     '.svelte', '.vue', '.toml', '.go', '.rs', '.rust', '.swift', '.kt',
     '.sh', '.bash', '.zsh', '.fish', '.r', '.scala', '.clj', '.ex', '.exs'
 }
+
+app = FastAPI()
 
 # --- Helpers ---
 
@@ -101,118 +105,70 @@ def timeout_context(seconds):
         signal.alarm(0)
         signal.signal(signal.SIGALRM, old_handler)
 
-def parse_multipart_form(body, content_type):
-    """Parse multipart/form-data manually."""
-    import email
-    from email import message_from_bytes
-
-    # Add Content-Type header to body for email parser
-    headers = f"Content-Type: {content_type}\r\n\r\n".encode()
-    msg = message_from_bytes(headers + body)
-
-    form_data = {}
-    file_data = None
-
-    if msg.is_multipart():
-        for part in msg.walk():
-            content_disposition = part.get('Content-Disposition', '')
-            if 'name=' in content_disposition:
-                # Extract field name
-                name = None
-                for item in content_disposition.split(';'):
-                    item = item.strip()
-                    if item.startswith('name='):
-                        name = item.split('=', 1)[1].strip('"')
-                        break
-
-                if name:
-                    payload = part.get_payload(decode=True)
-                    if 'filename=' in content_disposition:
-                        # This is the file
-                        file_data = payload
-                        form_data['file'] = payload
-                    else:
-                        # Regular form field
-                        form_data[name] = payload.decode('utf-8') if payload else ''
-
-    return form_data
-
-def send_json_response(status_code, data, request_id):
-    """Return JSON response in Vercel format."""
-    return {
-        'statusCode': status_code,
-        'headers': {
-            'Content-Type': 'application/json',
+def send_error(code: int, message: str, request_id: str):
+    """Send TinyUtils-standard error response."""
+    return JSONResponse(
+        status_code=code,
+        content={
+            "ok": False,
+            "message": message,
+            "code": code,
+            "requestId": request_id
+        },
+        headers={
             'X-Request-ID': request_id,
             'Cache-Control': 'no-store'
-        },
-        'body': json.dumps(data)
-    }
-
-def send_error(code, message, request_id):
-    """Send TinyUtils-standard error response."""
-    response = {
-        "ok": False,
-        "message": message,
-        "code": code,
-        "requestId": request_id
-    }
-    return send_json_response(code, response, request_id)
-
-def send_success(data, request_id, processing_time_ms):
-    """Send TinyUtils-standard success response."""
-    response = {
-        "ok": True,
-        "data": data,
-        "meta": {
-            "runTimestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-            "requestId": request_id,
-            "processingTimeMs": processing_time_ms,
-            "mode": "bulk-replace",
-            "chardetAvailable": CHARDET_AVAILABLE
         }
-    }
-    return send_json_response(200, response, request_id)
+    )
 
-# --- Main Handler ---
+def send_success(data: dict, request_id: str, processing_time_ms: int):
+    """Send TinyUtils-standard success response."""
+    return JSONResponse(
+        content={
+            "ok": True,
+            "data": data,
+            "meta": {
+                "runTimestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                "requestId": request_id,
+                "processingTimeMs": processing_time_ms,
+                "mode": "bulk-replace",
+                "chardetAvailable": CHARDET_AVAILABLE
+            }
+        },
+        headers={
+            'X-Request-ID': request_id,
+            'Cache-Control': 'no-store'
+        }
+    )
 
-def handler(event, context):
-    """Modern Vercel Python serverless function handler."""
+# --- Main Endpoint ---
+
+@app.post("/api/bulk-replace")
+async def bulk_replace(
+    file: UploadFile = File(...),
+    mode: str = Form("simple"),
+    find: str = Form(...),
+    replace: str = Form(""),
+    action: str = Form("preview"),
+    case_sensitive: str = Form("false")
+):
+    """
+    Bulk find and replace in ZIP archive.
+
+    Args:
+        file: ZIP file containing text files
+        mode: 'simple' or 'regex'
+        find: Search pattern (text or regex)
+        replace: Replacement text
+        action: 'preview' or 'download'
+        case_sensitive: 'true' or 'false'
+    """
     request_id = str(uuid.uuid4())
     start_time = time.time()
 
     try:
-        # Parse request
-        http_method = event.get('httpMethod') or event.get('method', 'GET')
-
-        if http_method != 'POST':
-            return send_error(405, "Method not allowed", request_id)
-
-        # Get request body
-        body = event.get('body', b'')
-        if isinstance(body, str):
-            body = body.encode('utf-8')
-
-        # Get content type
-        headers = event.get('headers', {})
-        content_type = headers.get('content-type') or headers.get('Content-Type', '')
-
-        if 'multipart/form-data' not in content_type:
-            return send_error(400, "Content-Type must be multipart/form-data", request_id)
-
-        # Parse form data
-        form = parse_multipart_form(body, content_type)
-
-        # Extract parameters
-        mode = form.get('mode', 'simple')
-        find_raw = form.get('find', '')
-        replace_raw = form.get('replace', '')
-        action = form.get('action', 'preview')
-        is_case_sensitive = form.get('case_sensitive', 'false') == 'true'
-
-        file_bytes = form.get('file')
-        if not file_bytes:
-            return send_error(400, "No file uploaded", request_id)
+        # Read file
+        file_bytes = await file.read()
 
         # Size validation
         if len(file_bytes) > MAX_FILE_SIZE_BYTES:
@@ -230,15 +186,16 @@ def handler(event, context):
             return send_error(422, "Suspicious ZIP file (compression ratio too high)", request_id)
 
         # Prepare regex logic
+        is_case_sensitive = case_sensitive == 'true'
         regex_flags = re.MULTILINE
         if not is_case_sensitive:
             regex_flags |= re.IGNORECASE
 
         if mode == 'regex':
-            find_pattern = find_raw
+            find_pattern = find
         else:
             # Simple mode: escape special chars for literal matching
-            find_pattern = re.escape(find_raw)
+            find_pattern = re.escape(find)
 
         if not find_pattern:
             return send_error(400, "Search pattern cannot be empty", request_id)
@@ -294,7 +251,7 @@ def handler(event, context):
                     match_count = len(matches)
 
                     # Apply replacement
-                    new_text = re.sub(find_pattern, replace_raw, original_text, flags=regex_flags)
+                    new_text = re.sub(find_pattern, replace, original_text, flags=regex_flags)
             except TimeoutError:
                 return send_error(422, "Regex too complex (timeout after 5 seconds). Try a simpler pattern.", request_id)
             except re.error as e:
@@ -338,16 +295,14 @@ def handler(event, context):
 
         if action == 'download':
             output_io.seek(0)
-            return {
-                'statusCode': 200,
-                'headers': {
-                    'Content-Type': 'application/zip',
+            return StreamingResponse(
+                output_io,
+                media_type='application/zip',
+                headers={
                     'Content-Disposition': 'attachment; filename="tinyutils_processed.zip"',
                     'X-Request-ID': request_id
-                },
-                'body': output_io.getvalue(),
-                'isBase64Encoded': True
-            }
+                }
+            )
         else:
             return send_success({
                 "diffs": diff_results,
@@ -357,3 +312,6 @@ def handler(event, context):
     except Exception as e:
         traceback.print_exc()
         return send_error(500, f"Server error: {str(e)}", request_id)
+
+# Export for Vercel
+handler = app
