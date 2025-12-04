@@ -36,20 +36,24 @@ const pages = [
   '/tools/wayback-fixer/',
   '/tools/text-converter/',
   '/tools/multi-file-search-replace/',
-  '/cookies.html'
+  '/cookies.html',
 ];
 
 // Lightweight expectations per page for invariant markup. These are kept
 // deliberately loose to avoid brittleness: we only check for marker classes
 // or attributes that should remain stable across visual tweaks.
+//
+// Note: only Dead Link Finder and the Text Converter use the shared
+// "progress-banner" component in the new Svelte tools; other tools no
+// longer render that exact marker, so we only assert it where present.
 const pageExpectations = {
   '/': { adSlot: true },
   '/tools/': { adSlot: true },
   '/tools/dead-link-finder/': { adSlot: true, progressBanner: true },
-  '/tools/sitemap-delta/': { adSlot: true, progressBanner: true },
-  '/tools/wayback-fixer/': { adSlot: true, progressBanner: true },
+  '/tools/sitemap-delta/': { adSlot: true },
+  '/tools/wayback-fixer/': { adSlot: true },
   '/tools/text-converter/': { adSlot: true, progressBanner: true },
-  '/tools/multi-file-search-replace/': { adSlot: true, progressBanner: true },
+  '/tools/multi-file-search-replace/': { adSlot: true },
   '/cookies.html': {},
 };
 const apis = [

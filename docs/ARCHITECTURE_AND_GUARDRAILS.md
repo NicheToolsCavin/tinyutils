@@ -8,7 +8,7 @@
   - `tools/sitemap-delta/` — Sitemap Delta
   - `tools/wayback-fixer/` — Wayback Fixer
   - `tools/text-converter/` — Text/Document Converter
-  - `tools/multi-file-search-replace/` — Multi-file Search & Replace
+  - `tools/multi-file-search-replace/` — Bulk Find & Replace (formerly “Multi-file Search & Replace”)
   - `tools/encoding-doctor/` — Encoding Doctor
   - `tools/formats/`, `tools/keyword-density.html`, `tools/meta-preview.html`, etc.
 - Edge API layer: `api/` implements JSON-only Edge handlers backing the tools:
@@ -17,7 +17,7 @@
   - `api/wayback-fixer.js` — Wayback Fixer backend
   - `api/metafetch.js` — Metadata fetch for previews
   - `api/encoding-doctor.js` — Encoding Doctor backend
-  - `api/multi-file-search-replace.js` — Multi-file Search & Replace backend
+  - `api/multi-file-search-replace.js` — Bulk Find & Replace backend (formerly “Multi-file Search & Replace”)
   - `api/convert/*` — Converter backend (Python via bridges in `api/_lib`)
   - `api/health.js`, `api/fence.js` — health/preview protection helpers
 - Shared backend utilities:
@@ -102,7 +102,7 @@
   - `meta.fileCount` — number of file entries returned.
   - `meta.options` — echo of the effective repair options (autoRepair, normalizeForm, smartPunctuation).
   - Error notes such as `text_too_large`, `blob_payload_too_large`, `invalid_blob_url`, `unsupported_blob_scheme`, `disallowed_blob_host`, and `missing_input` are carried in `meta.note`.
-- **Multi-file Search & Replace (`/api/multi-file-search-replace`)**
+- **Bulk Find & Replace (`/api/multi-file-search-replace`)** _(formerly “Multi-file Search & Replace”)_
   - `meta.totalFiles` / `meta.changedFiles` — total files processed and the subset that changed.
   - `meta.exportFormat` — normalised export format (`md` or `txt`).
   - `meta.previewOnly` — whether this run was preview-only vs apply.
@@ -154,7 +154,7 @@
   - Run the regex-based secret scan and env-file check from `SECURITY.md` before opening a PR.
 
 ### 5. Documentation & change logging
-- Whenever behavior changes for a tool (Dead Link Finder, Sitemap Delta, Wayback Fixer, Converter, Multi-file Search Replace, etc.):
+- Whenever behavior changes for a tool (Dead Link Finder, Sitemap Delta, Wayback Fixer, Converter, Bulk Find & Replace, etc.):
   - Append a dated entry to the corresponding `tool_desc_*.md` file using the required "Added/Modified/Fixed" format, human summary, impact, testing, and commit IDs.
 - For each meaningful task or batch of changes:
   - Use `python scripts/log_run_entry.py` to append to `docs/AGENT_RUN_LOG.md`.

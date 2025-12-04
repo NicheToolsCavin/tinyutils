@@ -21,6 +21,22 @@
     }
   }
 
+  function getPreviewThemeForIframe() {
+    if (typeof document === 'undefined') {
+      return {
+        surface: '#1e1e1e',
+        text: '#f9fafb',
+        border: 'rgba(148, 163, 184, 0.4)'
+      };
+    }
+    const root = document.documentElement;
+    const styles = getComputedStyle(root);
+    const surface = (styles.getPropertyValue('--surface-base') || '').trim() || '#1e1e1e';
+    const text = (styles.getPropertyValue('--text-primary') || '').trim() || '#f9fafb';
+    const border = (styles.getPropertyValue('--border-default') || '').trim() || 'rgba(148, 163, 184, 0.4)';
+    return { surface, text, border };
+  }
+
   const DEMO_SNIPPET = [
     '# TinyUtils Demo Document',
     'This demo shows headings, links, inline code, and lists so you can preview conversions.',
@@ -324,17 +340,45 @@
         const formatted = JSON.stringify(parsed, null, 2);
 
         const beforeRender = hasPerf && start ? performance.now() : 0;
+        const theme = getPreviewThemeForIframe();
         const html = `
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha512-vswe+cgvic/XBoF1OcM/TeJ2FW0OofqAVdCZiEYkd6dwGXthvkSFWOoGGJgS2CW70VK5dQM5Oh+7ne47s74VTg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-SkmBfuA2hqjzEVpmnMt/LINrjop3GKWqsuLSSB3e7iBmYK7JuWw4ldmmxwD9mdm2IRTTi0OxSAfEGvgEi0i2Kw==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
-<style>pre{margin:0;border-radius:0}body{margin:0;padding:1rem;background:#1e1e1e}</style>
-<pre><code class="language-json">${escapeHtml(formatted)}</code></pre>
+<style>
+body{margin:0;padding:1rem;background:${theme.surface};color:${theme.text};}
+.preview-shell{position:relative;}
+pre{margin:0;border-radius:0.5rem;border:1px solid ${theme.border};overflow:auto;}
+.copy-btn{position:absolute;top:0.5rem;right:0.5rem;font-size:12px;padding:0.2rem 0.6rem;border-radius:999px;border:1px solid ${theme.border};background:rgba(0,0,0,0.05);color:${theme.text};cursor:pointer;}
+.copy-btn[data-state="copied"]{background:${theme.border};}
+</style>
+<div class="preview-shell">
+  <button class="copy-btn" type="button" data-state="idle">Copy</button>
+  <pre><code class="language-json">${escapeHtml(formatted)}</code></pre>
+</div>
 <script>
 if (window.Prism && Prism.plugins && Prism.plugins.autoloader) {
   Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/';
 }
 Prism.highlightAll();
+(function(){
+  const btn = document.querySelector('.copy-btn');
+  const code = document.querySelector('pre code');
+  if (!btn || !code || !navigator.clipboard) return;
+  btn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(code.innerText || '');
+      btn.dataset.state = 'copied';
+      btn.textContent = 'Copied!';
+      setTimeout(() => {
+        btn.dataset.state = 'idle';
+        btn.textContent = 'Copy';
+      }, 1500);
+    } catch (err) {
+      console.error('copy failed', err);
+    }
+  });
+})();
 <\/script>`;
         if (hasPerf && beforeRender) {
           const renderMs = performance.now() - beforeRender;
@@ -362,22 +406,32 @@ Prism.highlightAll();
       const escaped = escapeHtml(content);
       const formatted = escaped.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
       const beforeRender = hasPerf && start ? performance.now() : 0;
+      const theme = getPreviewThemeForIframe();
       const html = `
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-SkmBfuA2hqjzEVpmnMt/LINrjop3GKWqsuLSSB3e7iBmYK7JuWw4ldmmxwD9mdm2IRTTi0OxSAfEGvgEi0i2Kw==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
 <style>
-.md-container{display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding:1rem}
-.md-src,.md-formatted{border:1px solid #ddd;padding:1rem;overflow:auto;max-height:600px}
-.md-src{background:#f5f2f0}
+body{margin:0;padding:1rem;background:${theme.surface};color:${theme.text};}
+.md-container{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.md-src,.md-formatted{border:1px solid ${theme.border};padding:1rem;overflow:auto;max-height:600px;border-radius:0.75rem;background:rgba(0,0,0,0.02)}
+.md-src{position:relative;}
 .md-src pre{margin:0;background:transparent}
-.md-formatted{background:#fff}
+.md-formatted{background:${theme.surface};}
+.copy-btn{position:absolute;top:0.5rem;right:0.5rem;font-size:12px;padding:0.2rem 0.6rem;border-radius:999px;border:1px solid ${theme.border};background:rgba(0,0,0,0.05);color:${theme.text};cursor:pointer;}
+.copy-btn[data-state="copied"]{background:${theme.border};}
 h1,h2,h3,h4,h5,h6{margin:0.5rem 0}
-code{background:#f0f0f0;padding:2px 4px;border-radius:3px}
+code{background:rgba(0,0,0,0.06);padding:2px 4px;border-radius:3px}
 @media (max-width: 768px){.md-container{grid-template-columns:1fr;}}
 </style>
 <div class="md-container">
-  <div><b>Markdown Source</b><div class="md-src"><pre><code class="language-markdown">${escaped}</code></pre></div></div>
+  <div>
+    <b>Markdown Source</b>
+    <div class="md-src">
+      <button class="copy-btn" type="button" data-state="idle">Copy</button>
+      <pre><code class="language-markdown">${escaped}</code></pre>
+    </div>
+  </div>
   <div><b>Plain Text View</b><div class="md-formatted"><p>${formatted}</p></div></div>
 </div>
 <script>
@@ -385,6 +439,24 @@ if (window.Prism && Prism.plugins && Prism.plugins.autoloader) {
   Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/';
 }
 Prism.highlightAll();
+(function(){
+  const btn = document.querySelector('.copy-btn');
+  const code = document.querySelector('.md-src code');
+  if (!btn || !code || !navigator.clipboard) return;
+  btn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(code.innerText || '');
+      btn.dataset.state = 'copied';
+      btn.textContent = 'Copied!';
+      setTimeout(() => {
+        btn.dataset.state = 'idle';
+        btn.textContent = 'Copy';
+      }, 1500);
+    } catch (err) {
+      console.error('copy failed', err);
+    }
+  });
+})();
 <\/script>`;
       try {
         if (hasPerf && beforeRender) {
@@ -426,17 +498,45 @@ Prism.highlightAll();
       if (!content || !previewIframe) return;
       const hasPerf = typeof performance !== 'undefined' && typeof performance.now === 'function';
       const beforeRender = hasPerf ? performance.now() : 0;
+      const theme = getPreviewThemeForIframe();
       const html = `
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha512-vswe+cgvic/XBoF1OcM/TeJ2FW0OofqAVdCZiEYkd6dwGXthvkSFWOoGGJgS2CW70VK5dQM5Oh+7ne47s74VTg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-SkmBfuA2hqjzEVpmnMt/LINrjop3GKWqsuLSSB3e7iBmYK7JuWw4ldmmxwD9mdm2IRTTi0OxSAfEGvgEi0i2Kw==" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
-<style>pre{margin:0;border-radius:0}body{margin:0;padding:1rem;background:#1e1e1e}</style>
-<pre><code class="language-latex">${escapeHtml(content)}</code></pre>
+<style>
+body{margin:0;padding:1rem;background:${theme.surface};color:${theme.text};}
+.preview-shell{position:relative;}
+pre{margin:0;border-radius:0.5rem;border:1px solid ${theme.border};overflow:auto;}
+.copy-btn{position:absolute;top:0.5rem;right:0.5rem;font-size:12px;padding:0.2rem 0.6rem;border-radius:999px;border:1px solid ${theme.border};background:rgba(0,0,0,0.05);color:${theme.text};cursor:pointer;}
+.copy-btn[data-state="copied"]{background:${theme.border};}
+</style>
+<div class="preview-shell">
+  <button class="copy-btn" type="button" data-state="idle">Copy</button>
+  <pre><code class="language-latex">${escapeHtml(content)}</code></pre>
+</div>
 <script>
 if (window.Prism && Prism.plugins && Prism.plugins.autoloader) {
   Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/';
 }
 Prism.highlightAll();
+(function(){
+  const btn = document.querySelector('.copy-btn');
+  const code = document.querySelector('pre code');
+  if (!btn || !code || !navigator.clipboard) return;
+  btn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(code.innerText || '');
+      btn.dataset.state = 'copied';
+      btn.textContent = 'Copied!';
+      setTimeout(() => {
+        btn.dataset.state = 'idle';
+        btn.textContent = 'Copy';
+      }, 1500);
+    } catch (err) {
+      console.error('copy failed', err);
+    }
+  });
+})();
 <\/script>`;
       try {
         if (hasPerf && beforeRender) {
@@ -829,6 +929,7 @@ Prism.highlightAll();
           if (isTooBig) {
             if (previewTooBigCard) previewTooBigCard.style.display = '';
             if (previewIframe) previewIframe.srcdoc = '';
+            setPreviewBanner('This file is too large for a full inline preview, but the complete converted file is ready to download below.', 'info');
           } else {
             // Format-specific preview routing
             const rawFormat = (previewFlags.format || 'html').toLowerCase();
@@ -856,7 +957,7 @@ Prism.highlightAll();
               const totalRows = typeof previewFlags.row_count === 'number' ? previewFlags.row_count : null;
               const totalNodes = typeof previewFlags.jsonNodeCount === 'number' ? previewFlags.jsonNodeCount : null;
 
-              let msg = 'Preview truncated for large content. Download to see the full document.';
+              let msg = 'Preview truncated for large content to keep the page responsive. Download the file below to see everything.';
               if (previewFlags.hasMoreRows && !previewFlags.hasMoreNodes) {
                 const shownRows = 100;
                 if (totalRows && totalRows > shownRows) {
@@ -1033,8 +1134,9 @@ Prism.highlightAll();
             const downloadLink = document.createElement('a');
             downloadLink.href = blobUrl;
             downloadLink.download = filename;
-            downloadLink.textContent = 'Download';
+            downloadLink.textContent = 'Download file';
             downloadLink.className = 'download-link';
+            downloadLink.title = 'Download file via a secure browser download';
             downloadLink.addEventListener('click', (event) => {
               if (!blobUrl || !blobUrl.startsWith('data:')) return;
               const fallbackMime = output.contentType || output.mimeType || 'application/octet-stream';
@@ -1055,7 +1157,9 @@ Prism.highlightAll();
           });
         }
 
-        let baseMsg = previewOnly ? 'Preview ready.' : `Converted ${data.outputs.length} file(s).`;
+        let baseMsg = previewOnly
+          ? 'Preview ready. Download to inspect the full converted file.'
+          : `Converted ${data.outputs.length} file(s). Use the Download File links below to save each result.`;
         if (!previewOnly && isPdfInput) baseMsg += summarizePdfMeta(data);
         updateProgressState(baseMsg, 100);
       } catch (err) {
@@ -1164,6 +1268,10 @@ Prism.highlightAll();
       <p class="tool-hero-subtitle">
         Convert between 100+ document formats: Markdown, PDF, DOCX, HTML, RTF, ODT, LaTeX, and more. Paste content or upload a file, choose your format, then download.
       </p>
+      <p class="tool-hero-note">
+        For best results, keep individual files under roughly 100&nbsp;MB. Very large files may skip the inline preview
+        but will still convert and be available to download.
+      </p>
       <p><a class="cta" href="/tools/">← Back to all tools</a></p>
     </div>
 
@@ -1194,6 +1302,7 @@ Prism.highlightAll();
       <h2 id="inputHeading">Input</h2>
       <p class="help" style="color: var(--muted, #97a3c2); margin-top: 0.25rem; max-width: 46rem;">
         Start here: paste your content or upload a file, pick your output format, then click <strong>Convert</strong>.
+        Extremely large documents may take longer and may only show a partial on-page preview, but your downloads will still contain the full converted content.
       </p>
       <div class="input-section">
         <label for="textInput">Paste your document content
@@ -1352,7 +1461,7 @@ Prism.highlightAll();
         </div>
         <div id="previewTooBigCard" class="preview-card" style="display:none;">
           <p class="preview-card-title">📦 Too large for preview</p>
-          <p class="preview-card-subtitle">This file exceeds the live preview cap but will still convert normally.</p>
+          <p class="preview-card-subtitle">This file is too large for a full inline preview, but the complete converted document is still ready to download below.</p>
         </div>
         <div
           id="previewStatusBanner"

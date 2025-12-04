@@ -3,6 +3,7 @@ pydantic>=2.6,<3.0
 requests>=2.31,<3.0
 pypandoc>=1.12,<2.0
 chardet>=5.0,<6.0
+beautifulsoup4>=4.12,<5.0
 
 pypdf>=3.17,<5.0
 reportlab>=4.0,<5.0
@@ -11,3 +12,12 @@ pdfplumber>=0.10,<1.0
 # Tested locally on Python 3.12 with pdfminer.six==20251107 during `vercel build`
 # Use a high upper bound because date-based versions (e.g., 20251107) exceed simple year numbers
 pdfminer.six>=20231228,<20300000
+
+# Header/footer extraction from DOCX (pandoc limitation workaround)
+python-docx>=1.1,<2.0
+
+# DOCX→HTML with style preservation (colors, bold, italic) - lighter than LibreOffice
+mammoth>=1.6,<2.0
+
+# LibreOffice HTML parsing for color/alignment preservation
+beautifulsoup4>=4.12,<5.0

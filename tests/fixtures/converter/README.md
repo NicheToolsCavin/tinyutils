@@ -57,15 +57,56 @@ behavior before/after fidelity improvements.
 - **`sample.csv`, `sample.json`, `sample.tex`, `sample.txt`** — Format-specific test files
   - Tests: Preview rendering, format-specific handlers
 
+### Footnote-specific Fixtures (Phase 1)
+
+- **`docx_footnotes_sample.docx`** — DOCX with comprehensive footnote testing
+  - Purpose: Test footnote/endnote preservation in DOCX→MD/DOCX conversions
+  - Size: ~12KB
+  - Content: 9 footnotes across paragraphs, lists, and tables; 7 headings (h1-h3)
+  - Metrics: 9 footnotes, 7 headings, 1 bullet list
+  - Critical for: Validating footnote preservation (Phase 2 requirement)
+
+- **`odt_footnotes_sample.odt`** — ODT with comprehensive footnote testing
+  - Purpose: Test footnote/endnote preservation in ODT→MD/DOCX conversions
+  - Size: ~8KB
+  - Content: 9 footnotes across paragraphs, lists, and tables; 7 headings
+  - Metrics: 9 footnotes, 7 headings, 1 bullet list
+  - Critical for: Validating ODT footnote fidelity
+
+### Additional Format Coverage (Phase 1)
+
+- **`rtf_sample.rtf`** — RTF with headings, lists, table, and notes
+  - Purpose: Test RTF→MD conversion quality and structure preservation
+  - Size: ~2.3KB
+  - Content: Headings (h1-h2), bullet lists, ordered lists, table, footnote markers
+  - Metrics: 5 headings, 1 bullet list, 1 ordered list
+  - Note: RTF footnotes may not be preserved by pandoc (known limitation)
+  - Critical for: Bringing RTF into fidelity test coverage (Phase 4)
+
+- **`latex_complex_sample.tex`** — Advanced LaTeX with equations, lists, tables, figures, footnotes
+  - Purpose: Test LaTeX→MD conversion for STEM documents
+  - Size: ~2.5KB
+  - Content: Sections/subsections, equations (display + inline), nested lists, table, figure environment, verbatim code, 4 footnotes
+  - Metrics: Variable (depends on LaTeX parsing), includes math blocks
+  - Critical for: LaTeX source testing (Phase 4)
+
+- **`report_2025_annual.pdf`** — PDF generated from DOCX for PDF→MD testing
+  - Purpose: Test PDF→Markdown extraction (layout-aware path via pdfminer)
+  - Size: ~8.3KB (4 pages)
+  - Content: Multi-section report with headings, lists, tables
+  - Note: PDF extraction is layout-based; structure may be fuzzy
+  - Critical for: PDF fidelity testing (Phase 4)
+
 ## Future Fixture Additions
 
-To improve fidelity coverage, the following document types should be added:
+To improve fidelity coverage, the following document types could be added:
 - ~~Blog post DOCX with images, links, and inline formatting~~ ✓ Added (blog_post.docx, blog_post.md)
 - ~~Report-style DOCX with headings (multi-level), lists, tables~~ ✓ Added (report_2025_annual.docx, report_2025_annual.md)
-- PDF with mixed content (text, tables, images) for PDF→Markdown testing
+- ~~PDF with mixed content (text, tables, images) for PDF→Markdown testing~~ ✓ Added (report_2025_annual.pdf)
+- ~~RTF with preserved formatting (bold, italic, colors)~~ ✓ Added (rtf_sample.rtf)
+- ~~LaTeX source documents for STEM document testing~~ ✓ Added (latex_complex_sample.tex, sample.tex)
+- ~~DOCX/ODT with footnotes and endnotes~~ ✓ Added (docx_footnotes_sample.docx, odt_footnotes_sample.odt)
 - EPUB for ebook conversion testing
-- RTF with preserved formatting (bold, italic, colors)
-- LaTeX source documents for STEM document testing
 
 ## Golden Metrics
 

@@ -1,0 +1,116 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{hyperref}
+
+\title{Advanced LaTeX Features}
+\author{TinyUtils Team}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+This is an expanded \LaTeX{} document demonstrating advanced features including mathematics, lists, figures, tables, and footnotes\footnote{This is the first footnote, testing note preservation in LaTeX conversion.}.
+
+\section{Mathematical Equations}
+
+\subsection{Display Equations}
+
+The quadratic formula is given by:
+\begin{equation}
+x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
+\label{eq:quadratic}
+\end{equation}
+
+Einstein's mass-energy equivalence:
+\begin{equation}
+E = mc^2
+\end{equation}
+
+\subsection{Inline Mathematics}
+
+Inline math can be written like $E = mc^2$ or $\pi \approx 3.14159$. The Pythagorean theorem states that $a^2 + b^2 = c^2$ for right triangles\footnote{Named after the Greek mathematician Pythagoras.}.
+
+\section{Lists and Structures}
+
+\subsection{Itemized List}
+
+\begin{itemize}
+    \item First item
+    \item Second item with \textbf{bold text}
+    \item Third item with \textit{italic text}
+    \item Fourth item with \texttt{monospace code}
+    \begin{itemize}
+        \item Nested sub-item A
+        \item Nested sub-item B
+    \end{itemize}
+\end{itemize}
+
+\subsection{Enumerated List}
+
+\begin{enumerate}
+    \item Introduction and background
+    \item Methodology and approach
+    \item Experimental results
+    \item Discussion and analysis
+    \item Conclusion and future work
+\end{enumerate}
+
+\section{Tables}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|c|r|}
+\hline
+\textbf{Column A} & \textbf{Column B} & \textbf{Column C} \\
+\hline
+Left aligned & Centered & Right aligned \\
+Data 1 & Data 2 & Data 3 \\
+Row 3 & Value & 42 \\
+\hline
+\end{tabular}
+\caption{Example table demonstrating alignment and borders.}
+\label{tab:example}
+\end{table}
+
+See Table~\ref{tab:example} for an example of tabular data.
+
+\section{Figures and Graphics}
+
+Figure environments are commonly used in scientific documents\footnote{Figures allow for captions and cross-references, making documents more professional.}:
+
+\begin{figure}[h]
+\centering
+% Note: In a real document, this would include an actual image
+% \includegraphics[width=0.5\textwidth]{example-image}
+\fbox{\parbox{0.4\textwidth}{\centering [Placeholder for Figure]\\Image would appear here}}
+\caption{Placeholder figure demonstrating figure environment.}
+\label{fig:example}
+\end{figure}
+
+As shown in Figure~\ref{fig:example}, figures can be referenced in text.
+
+\section{Code and Verbatim Text}
+
+Inline code: \texttt{print("Hello World")}
+
+Code block example:
+\begin{verbatim}
+def factorial(n):
+    if n <= 1:
+        return 1
+    return n * factorial(n - 1)
+\end{verbatim}
+
+\section{Cross-References}
+
+LaTeX supports cross-referencing equations like Equation~\ref{eq:quadratic}, tables like Table~\ref{tab:example}, and figures like Figure~\ref{fig:example}.
+
+\section{Conclusion}
+
+This document demonstrates comprehensive \LaTeX{} features: sections, equations, lists (nested and flat), tables, figures, code blocks, and footnotes. These elements should be preserved during format conversion to ensure fidelity\footnote{Fourth and final footnote for testing multiple notes in LaTeX.}.
+
+\end{document}

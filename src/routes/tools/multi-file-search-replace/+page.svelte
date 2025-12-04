@@ -16,6 +16,27 @@
 	let errorMessage = '';
 	let previewData = null;
 
+	// Test hook: allow tiny-reactive Tier1 harness to inject
+	// a small ZIP fixture without relying on native file dialogs.
+	if (typeof window !== 'undefined') {
+		window.__mfsrTestSetFileFromBase64 = (fileName, base64) => {
+			try {
+				const binary = atob(base64);
+				const len = binary.length;
+				const bytes = new Uint8Array(len);
+				for (let i = 0; i < len; i += 1) {
+					bytes[i] = binary.charCodeAt(i);
+				}
+				const blob = new Blob([bytes], { type: 'application/zip' });
+				file = new File([blob], fileName, { type: 'application/zip' });
+				status = 'idle';
+				errorMessage = '';
+			} catch (err) {
+				console.error('mfsr test hook failed', err);
+			}
+		};
+	}
+
 	// Regex Examples
 	const REGEX_EXAMPLES = [
 		{
@@ -100,6 +121,11 @@
 				previewData = data.data;
 				status = 'previewing';
 				saveToHash();
+				// Expose last preview payload for tiny-reactive Tier1
+				// harnesses and debugging.
+				if (typeof window !== 'undefined') {
+					window.__mfsrLastPreview = previewData;
+				}
 			}
 		} catch (e) {
 			status = 'error';
@@ -208,7 +234,7 @@
 	subtitle="Edit hundreds of files at once. Upload a ZIP, preview the diffs, download."
 />
 
-<div class="max-w-5xl mx-auto px-4 py-12">
+	<div class="max-w-5xl mx-auto px-4 py-12" data-testid="mfsr-page">
 	<!-- Main Card -->
 	<div class="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100">
 		<!-- Step 1: Upload -->
@@ -224,7 +250,7 @@
 				{/if}
 			</div>
 
-			<label class="block w-full cursor-pointer group">
+			<label class="block w-full cursor-pointer group" data-testid="mfsr-upload-zone">
 				<div
 					class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center transition-all group-hover:border-blue-500 group-hover:bg-blue-50"
 				>
@@ -304,6 +330,7 @@
 					</label>
 					<input
 						id="find-text"
+						data-testid="mfsr-find-input"
 						bind:value={findText}
 						type="text"
 						class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-3 border font-mono text-sm"
@@ -326,6 +353,7 @@
 					</label>
 					<input
 						id="replace-text"
+						data-testid="mfsr-replace-input"
 						bind:value={replaceText}
 						type="text"
 						class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-3 border font-mono text-sm"
@@ -337,6 +365,7 @@
 			<div class="mt-4 flex items-center">
 				<input
 					id="case-sensitive"
+					data-testid="mfsr-case-checkbox"
 					type="checkbox"
 					bind:checked={isCaseSensitive}
 					class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
@@ -350,6 +379,7 @@
 				<button
 					disabled={!file || status === 'uploading' || !findText}
 					on:click={() => processFiles('preview')}
+					data-testid="mfsr-preview-button"
 					class="px-6 py-3 bg-gray-800 hover:bg-gray-900 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
 				>
 					{#if status === 'uploading'}
@@ -397,7 +427,7 @@
 
 	<!-- Step 3: Results -->
 	{#if status === 'previewing' && previewData}
-		<div class="mt-12" transition:slide>
+		<div class="mt-12" transition:slide data-testid="mfsr-review-section">
 			<div class="flex items-center justify-between mb-6">
 				<h3 class="text-2xl font-bold text-gray-800">Review Changes</h3>
 				<div class="flex gap-3">
@@ -429,26 +459,26 @@
 			</div>
 
 			<!-- Statistics -->
-			<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-				<div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 text-center">
+				<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" data-testid="mfsr-stats-grid">
+					<div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 text-center" data-testid="mfsr-stats-files-scanned">
 					<div class="text-3xl font-bold text-gray-800">
 						{previewData.stats.filesScanned}
 					</div>
 					<div class="text-gray-500 text-sm">Files Scanned</div>
 				</div>
-				<div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 text-center">
+					<div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 text-center" data-testid="mfsr-stats-files-modified">
 					<div class="text-3xl font-bold text-blue-600">
 						{previewData.stats.filesModified}
 					</div>
 					<div class="text-gray-500 text-sm">Files Modified</div>
 				</div>
-				<div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 text-center">
+					<div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 text-center" data-testid="mfsr-stats-total-matches">
 					<div class="text-3xl font-bold text-purple-600">
 						{previewData.stats.totalReplacements}
 					</div>
 					<div class="text-gray-500 text-sm">Total Matches</div>
 				</div>
-				<div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 text-center">
+					<div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 text-center" data-testid="mfsr-stats-files-skipped">
 					<div class="text-3xl font-bold text-gray-400">
 						{previewData.stats.filesSkipped}
 					</div>
@@ -470,6 +500,8 @@
 					{#each previewData.diffs as diff}
 						<div
 							class="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm"
+							data-testid="mfsr-diff-item"
+							data-filename={diff.filename}
 						>
 							<div
 								class="bg-gray-50 px-4 py-2 border-b border-gray-200 text-sm font-mono text-gray-600 font-semibold flex justify-between items-center"

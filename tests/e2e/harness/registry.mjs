@@ -98,4 +98,67 @@ export const tools = {
       buildButton: '[data-testid="sitemap-generator-build"]',
     },
   },
+  home: {
+    path: '/',
+    selectors: {
+      heroTitle: '[data-testid="home-hero-title"]',
+      heroSubtitle: '[data-testid="home-hero-subtitle"]',
+      toolsList: '[data-testid="home-tools-list"]',
+      firstToolCard: '[data-testid="home-tool-card-0"]',
+      browseToolsCta: '[data-testid="home-cta-browse-tools"]',
+    },
+  },
+  toolsIndex: {
+    path: '/tools/',
+    selectors: {
+      hero: '[data-testid="tools-hero"]',
+      seoSection: '[data-testid="tools-section-seo"]',
+      docSection: '[data-testid="tools-section-doc"]',
+      seeMoreButton: '[data-testid="tools-see-more-button"]',
+      moreTools: '[data-testid="tools-more-tools"]',
+    },
+  },
+  formatsPage: {
+    path: '/tools/formats/',
+    selectors: {
+      hero: '[data-testid="formats-hero"]',
+      inputsSection: '[data-testid="formats-inputs-section"]',
+      outputsSection: '[data-testid="formats-outputs-section"]',
+      openConverterButton: '[data-testid="formats-open-converter"]',
+    },
+  },
+  bulkFindReplace: {
+    path: '/tools/multi-file-search-replace/',
+    selectors: {
+      // Map Bulk Find & Replace harness to existing multi-file search/replace test ids
+      fileInput: '[data-testid="mfsr-upload-zone"]',
+      findInput: '[data-testid="mfsr-find-input"]',
+      replaceInput: '[data-testid="mfsr-replace-input"]',
+      caseCheckbox: '[data-testid="mfsr-case-checkbox"]',
+      previewButton: '[data-testid="mfsr-preview-button"]',
+      reviewSection: '[data-testid="mfsr-review-section"]',
+      statsFilesScanned: '[data-testid="mfsr-stats-files-scanned"]',
+      statsFilesModified: '[data-testid="mfsr-stats-files-modified"]',
+      statsTotalMatches: '[data-testid="mfsr-stats-total-matches"]',
+      statsFilesSkipped: '[data-testid="mfsr-stats-files-skipped"]',
+      diffItem: '[data-testid="mfsr-diff-item"]',
+    },
+  },
+  multiFileSearchReplace: {
+    path: '/tools/multi-file-search-replace/',
+    selectors: {
+      page: '[data-testid="mfsr-page"]',
+      uploadZone: '[data-testid="mfsr-upload-zone"]',
+      findInput: '[data-testid="mfsr-find-input"]',
+      replaceInput: '[data-testid="mfsr-replace-input"]',
+      caseCheckbox: '[data-testid="mfsr-case-checkbox"]',
+      previewButton: '[data-testid="mfsr-preview-button"]',
+      reviewSection: '[data-testid="mfsr-review-section"]',
+      statsFilesScanned: '[data-testid="mfsr-stats-files-scanned"]',
+      statsFilesModified: '[data-testid="mfsr-stats-files-modified"]',
+      statsTotalMatches: '[data-testid="mfsr-stats-total-matches"]',
+      statsFilesSkipped: '[data-testid="mfsr-stats-files-skipped"]',
+      diffItem: '[data-testid="mfsr-diff-item"]',
+    },
+  },
 };

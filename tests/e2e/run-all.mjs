@@ -10,6 +10,9 @@ import { spawn } from 'node:child_process';
 import { mkdir, readFile, writeFile, stat } from 'node:fs/promises';
 import { runNodeScript } from './util-runner.mjs';
 import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
 const today = new Date();
 const dateSlug = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(
@@ -17,10 +20,10 @@ const dateSlug = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(
 ).padStart(2, '0')}`;
 
 async function runConverterFlow() {
-  const previewScriptPath = 'tests/e2e/tiny-reactive-harness.mjs';
-  const convertScriptPath = 'tests/e2e/converter-convert-tiny-reactive-harness.mjs';
-  const dataToolsApiScript = 'tests/e2e/data-tools-api-assert.mjs';
-  const urlGuardApiScript = 'tests/e2e/url-guard-api-assert.mjs';
+  const previewScriptPath = resolve(__dirname, 'tiny-reactive-harness.mjs');
+  const convertScriptPath = resolve(__dirname, 'converter-convert-tiny-reactive-harness.mjs');
+  const dataToolsApiScript = resolve(__dirname, 'data-tools-api-assert.mjs');
+  const urlGuardApiScript = resolve(__dirname, 'url-guard-api-assert.mjs');
 
   const artifactDir = resolve('artifacts', 'ui', 'converter', dateSlug);
 
@@ -106,7 +109,7 @@ async function runConverterFlow() {
 }
 
 async function runDeadLinkFinderFlow() {
-  const scriptPath = 'tests/e2e/dlf-tiny-reactive-harness.mjs';
+  const scriptPath = resolve(__dirname, 'dlf-tiny-reactive-harness.mjs');
 
   const exitCode = await new Promise((resolveCode) => {
     const child = spawn('node', [scriptPath], {
@@ -149,7 +152,7 @@ async function runDeadLinkFinderFlow() {
 }
 
 async function runDataToolsUiFlow() {
-  const scriptPath = 'tests/e2e/data-tools-tiny-reactive-harness.mjs';
+  const scriptPath = resolve(__dirname, 'data-tools-tiny-reactive-harness.mjs');
   const exitCode = await new Promise((resolveCode) => {
     const child = spawn('node', [scriptPath], {
       stdio: 'inherit',
@@ -180,7 +183,7 @@ async function runDataToolsUiFlow() {
 }
 
 async function runSitemapDeltaFlow() {
-  const scriptPath = 'tests/e2e/sitemap-delta-tiny-reactive-harness.mjs';
+  const scriptPath = resolve(__dirname, 'sitemap-delta-tiny-reactive-harness.mjs');
 
   const exitCode = await new Promise((resolveCode) => {
     const child = spawn('node', [scriptPath], {
@@ -223,7 +226,7 @@ async function runSitemapDeltaFlow() {
 }
 
 async function runWaybackFixerFlow() {
-  const scriptPath = 'tests/e2e/wayback-fixer-tiny-reactive-harness.mjs';
+  const scriptPath = resolve(__dirname, 'wayback-fixer-tiny-reactive-harness.mjs');
 
   const exitCode = await new Promise((resolveCode) => {
     const child = spawn('node', [scriptPath], {
@@ -266,7 +269,7 @@ async function runWaybackFixerFlow() {
 }
 
 async function runEncodingDoctorFlow() {
-  const scriptPath = 'tests/e2e/encoding-doctor-tiny-reactive-harness.mjs';
+  const scriptPath = resolve(__dirname, 'encoding-doctor-tiny-reactive-harness.mjs');
 
   const exitCode = await new Promise((resolveCode) => {
     const child = spawn('node', [scriptPath], {
@@ -309,7 +312,7 @@ async function runEncodingDoctorFlow() {
 }
 
 async function runKeywordDensityFlow() {
-  const scriptPath = 'tests/e2e/keyword-density-tiny-reactive-harness.mjs';
+  const scriptPath = resolve(__dirname, 'keyword-density-tiny-reactive-harness.mjs');
 
   const exitCode = await new Promise((resolveCode) => {
     const child = spawn('node', [scriptPath], {
@@ -352,7 +355,7 @@ async function runKeywordDensityFlow() {
 }
 
 async function runMetaPreviewFlow() {
-  const scriptPath = 'tests/e2e/meta-preview-tiny-reactive-harness.mjs';
+  const scriptPath = resolve(__dirname, 'meta-preview-tiny-reactive-harness.mjs');
 
   const exitCode = await new Promise((resolveCode) => {
     const child = spawn('node', [scriptPath], {
@@ -395,7 +398,7 @@ async function runMetaPreviewFlow() {
 }
 
 async function runCsvJoinerFlow() {
-  const scriptPath = 'tests/e2e/csv-joiner-tiny-reactive-harness.mjs';
+  const scriptPath = resolve(__dirname, 'csv-joiner-tiny-reactive-harness.mjs');
 
   const exitCode = await new Promise((resolveCode) => {
     const child = spawn('node', [scriptPath], {
@@ -438,7 +441,7 @@ async function runCsvJoinerFlow() {
 }
 
 async function runJsonToCsvFlow() {
-  const scriptPath = 'tests/e2e/json-to-csv-tiny-reactive-harness.mjs';
+  const scriptPath = resolve(__dirname, 'json-to-csv-tiny-reactive-harness.mjs');
 
   const exitCode = await new Promise((resolveCode) => {
     const child = spawn('node', [scriptPath], {
@@ -481,7 +484,7 @@ async function runJsonToCsvFlow() {
 }
 
 async function runPdfTextExtractorFlow() {
-  const scriptPath = 'tests/e2e/pdf-text-extractor-tiny-reactive-harness.mjs';
+  const scriptPath = resolve(__dirname, 'pdf-text-extractor-tiny-reactive-harness.mjs');
 
   const exitCode = await new Promise((resolveCode) => {
     const child = spawn('node', [scriptPath], {
@@ -524,7 +527,7 @@ async function runPdfTextExtractorFlow() {
 }
 
 async function runSitemapGeneratorFlow() {
-  const scriptPath = 'tests/e2e/sitemap-generator-tiny-reactive-harness.mjs';
+  const scriptPath = resolve(__dirname, 'sitemap-generator-tiny-reactive-harness.mjs');
 
   const exitCode = await new Promise((resolveCode) => {
     const child = spawn('node', [scriptPath], {

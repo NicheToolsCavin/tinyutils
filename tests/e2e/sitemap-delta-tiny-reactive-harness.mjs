@@ -7,6 +7,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { createTinyReactiveClient } from './harness/client.mjs';
+import { patchExportDownloads, validateExport } from './harness/export-validator.mjs';
 import { tools } from './harness/registry.mjs';
 
 const PREVIEW_URL = (process.env.PREVIEW_URL || '').replace(/\/$/, '');
@@ -73,12 +74,37 @@ async function main() {
     // 6) Capture the summary line text
     const summaryLine = await getText(sitemap.selectors.summaryLine);
     summary.summaryLine = summaryLine || null;
-    summary.ok = !!summaryLine;
+    const baseOk = !!summaryLine;
 
     // 7) Capture a screenshot
     const screenshotPath = resolve(artifactDir, 'sitemap-delta-ui.png');
     await screenshot(screenshotPath, { fullPage: true });
     summary.screenshot = screenshotPath;
+
+    // 8) Validate CSV/JSON exports using the shared export validator. This
+    // relies on the same CSV/JSON payloads that real users download; we
+    // never stub rows or simulate fake data.
+    await patchExportDownloads(client, '__sitemapExportMeta');
+
+    const csvResult = await validateExport(
+      client,
+      'button.btn.secondary:nth-of-type(1)',
+      '__sitemapExportMeta',
+      /\.csv\|/i,
+      /url|removed|added/i,
+    );
+    summary.exportCsv = csvResult;
+
+    const jsonResult = await validateExport(
+      client,
+      'button.btn.secondary:nth-of-type(2)',
+      '__sitemapExportMeta',
+      /\.json\|/i,
+      /"meta"|"rows"|"tool"/i,
+    );
+    summary.exportJson = jsonResult;
+
+    summary.ok = baseOk && csvResult.ok && jsonResult.ok;
 
     await writeFile(
       resolve(artifactDir, 'sitemap-delta-preview.json'),
@@ -112,4 +138,3 @@ main().catch((err) => {
   console.error('sitemap-delta tiny-reactive harness crashed:', err);
   process.exit(1);
 });
-
