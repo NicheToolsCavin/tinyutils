@@ -136,6 +136,17 @@ async def root():
         "version": "1.0.0"
     })
 
+# Vercel file-based routing: also register at full path for robustness
+@app.get("/api/bulk-replace", include_in_schema=False)
+async def root_full_path():
+    """Health check endpoint (full path variant for Vercel routing)."""
+    return JSONResponse({
+        "ok": True,
+        "service": "bulk-replace",
+        "message": "POST a ZIP file to this endpoint with find/replace parameters",
+        "version": "1.0.0"
+    })
+
 @app.post("/")
 async def bulk_replace(
     file: UploadFile = File(...),
@@ -302,6 +313,19 @@ async def bulk_replace(
     except Exception as e:
         traceback.print_exc()
         return send_error(500, f"Server error: {str(e)}", request_id)
+
+# Vercel file-based routing: also register POST at full path
+@app.post("/api/bulk-replace", include_in_schema=False)
+async def bulk_replace_full_path(
+    file: UploadFile = File(...),
+    mode: str = Form("simple"),
+    find: str = Form(...),
+    replace: str = Form(""),
+    action: str = Form("preview"),
+    case_sensitive: str = Form("false")
+):
+    """Bulk find/replace endpoint (full path variant for Vercel routing)."""
+    return await bulk_replace(file, mode, find, replace, action, case_sensitive)
 
 # Vercel expects 'app' export for FastAPI functions
 __all__ = ["app"]
