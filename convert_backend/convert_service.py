@@ -57,6 +57,20 @@ try:
 except ImportError:  # pragma: no cover
     libreoffice_converter = None  # type: ignore
 
+# Smart routing for DOCX conversion (Mammoth for colors, LibreOffice for complex)
+try:
+    from . import smart_router
+    from .smart_router import ConversionTier
+except ImportError:  # pragma: no cover
+    smart_router = None  # type: ignore
+    ConversionTier = None  # type: ignore
+
+# Mammoth for lightweight DOCX→HTML with colors (optional)
+try:
+    import mammoth
+except ImportError:  # pragma: no cover
+    mammoth = None  # type: ignore
+
 
 TARGET_EXTENSIONS = {
     "md": "md",
@@ -611,39 +625,84 @@ def convert_one(
                 source_for_pandoc.write_text(protected_content, "utf-8")
                 logs.append("csv_formula_protection=applied")
 
-            # LibreOffice preprocessing: color/alignment preservation via HTML export
+            # Smart routing for DOCX/ODT: pick lightest tool that preserves features
+            # Tier 1: Pandoc (fast, loses colors)
+            # Tier 2: Mammoth (fast, preserves colors) - runs on Vercel
+            # Tier 3: LibreOffice (full fidelity) - requires Cloud Run
             if (
-                opts.use_libreoffice
-                and libreoffice_converter is not None
-                and from_format in {"docx", "odt", "rtf"}
-                and (opts.preserve_colors or opts.preserve_alignment)
+                from_format in {"docx", "odt", "rtf"}
+                and (opts.preserve_colors or opts.preserve_alignment or opts.use_libreoffice)
             ):
-                try:
-                    if libreoffice_converter.is_libreoffice_available():
-                        html_content, lo_meta = libreoffice_converter.convert_via_libreoffice(
-                            input_path,
-                            preserve_colors=opts.preserve_colors,
-                            preserve_alignment=opts.preserve_alignment,
-                        )
-                        # Write HTML to temp file for pandoc processing
-                        html_path = workspace / f"{input_path.stem}_libreoffice.html"
+                recommended_tier = ConversionTier.PANDOC if ConversionTier else None
+                features_summary = "unknown"
+
+                # Analyze document to pick the right tier
+                if smart_router is not None and from_format == "docx":
+                    try:
+                        tier, features = smart_router.get_recommended_tier(input_path)
+                        recommended_tier = tier
+                        features_summary = features.summary()
+                        logs.append(f"docx_features={features_summary}")
+                        logs.append(f"smart_routing_tier={tier.value}")
+                    except Exception as e:
+                        _LOGGER.warning(f"Smart routing analysis failed: {e}")
+                        logs.append("smart_routing=analysis_failed")
+                        # Default to Mammoth for safety
+                        recommended_tier = ConversionTier.MAMMOTH if ConversionTier else None
+
+                # Tier 2: Use Mammoth for colors (runs on Vercel, fast)
+                if (
+                    recommended_tier == ConversionTier.MAMMOTH
+                    and mammoth is not None
+                    and from_format == "docx"
+                ):
+                    try:
+                        with open(input_path, 'rb') as docx_file:
+                            result = mammoth.convert_to_html(docx_file)
+                        html_content = result.value
+                        html_path = workspace / f"{input_path.stem}_mammoth.html"
                         html_path.write_text(html_content, "utf-8")
                         source_for_pandoc = html_path
                         from_format = "html"
-                        logs.append("libreoffice_preprocessing=enabled")
-                        logs.append(f"libreoffice_colors_extracted={lo_meta.get('colors_extracted', 0)}")
-                        logs.append(f"libreoffice_alignments_extracted={lo_meta.get('alignments_extracted', 0)}")
-                    else:
-                        logs.append("libreoffice_preprocessing=unavailable_fallback_to_pandoc")
-                except Exception as exc:
-                    _LOGGER.warning(
-                        "libreoffice preprocessing failed name=%s error=%s",
-                        name,
-                        exc,
-                        exc_info=True,
-                    )
-                    logs.append(f"libreoffice_preprocessing_error={exc.__class__.__name__}")
-                    # Fall back to standard pandoc conversion
+                        logs.append("mammoth_conversion=enabled")
+                        if result.messages:
+                            logs.append(f"mammoth_warnings={len(result.messages)}")
+                    except Exception as exc:
+                        _LOGGER.warning(f"Mammoth conversion failed: {exc}")
+                        logs.append(f"mammoth_error={exc.__class__.__name__}")
+                        # Fall through to LibreOffice or Pandoc
+
+                # Tier 3: Use LibreOffice for complex features (Cloud Run)
+                elif (
+                    (recommended_tier == ConversionTier.LIBREOFFICE or opts.use_libreoffice)
+                    and libreoffice_converter is not None
+                ):
+                    try:
+                        if libreoffice_converter.is_libreoffice_available():
+                            html_content, lo_meta = libreoffice_converter.convert_via_libreoffice(
+                                input_path,
+                                preserve_colors=opts.preserve_colors,
+                                preserve_alignment=opts.preserve_alignment,
+                            )
+                            html_path = workspace / f"{input_path.stem}_libreoffice.html"
+                            html_path.write_text(html_content, "utf-8")
+                            source_for_pandoc = html_path
+                            from_format = "html"
+                            logs.append("libreoffice_preprocessing=enabled")
+                            logs.append(f"libreoffice_colors_extracted={lo_meta.get('colors_extracted', 0)}")
+                            logs.append(f"libreoffice_alignments_extracted={lo_meta.get('alignments_extracted', 0)}")
+                        else:
+                            logs.append("libreoffice_preprocessing=unavailable_fallback_to_pandoc")
+                    except Exception as exc:
+                        _LOGGER.warning(
+                            "libreoffice preprocessing failed name=%s error=%s",
+                            name,
+                            exc,
+                            exc_info=True,
+                        )
+                        logs.append(f"libreoffice_preprocessing_error={exc.__class__.__name__}")
+
+                # Tier 1: Fall back to Pandoc (default)
 
             # Pre-process PDFs: layout-aware extraction with legacy fallback
             if input_path.suffix.lower() == ".pdf" or from_format == "pdf":

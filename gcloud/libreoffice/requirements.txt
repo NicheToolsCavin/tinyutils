@@ -1,0 +1,12 @@
+# TinyUtils LibreOffice Conversion Service - Dependencies
+# Keep minimal for fast container builds
+
+# GCS integration (only needed if using GCS storage)
+google-cloud-storage>=2.14.0,<3.0
+
+# HTML parsing for style extraction (optional but recommended)
+beautifulsoup4>=4.12.0,<5.0
+lxml>=5.0.0,<6.0
+
+# Note: The service uses Python's built-in http.server for simplicity.
+# No web framework dependencies needed.
