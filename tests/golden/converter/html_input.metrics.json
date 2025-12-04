@@ -11,7 +11,17 @@
     ]
   },
   "images": {
-    "total": 1
+    "total": 2,
+    "html_img_tags": 1
+  },
+  "footnotes": {
+    "total": 0
+  },
+  "headings": {
+    "total": 4,
+    "levels": {
+      "h1": 1,
+      "h2": 3
+    }
   }
 }
-

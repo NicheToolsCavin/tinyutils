@@ -9,6 +9,19 @@
     "languages": []
   },
   "images": {
+    "total": 0,
+    "html_img_tags": 0
+  },
+  "footnotes": {
     "total": 0
+  },
+  "headings": {
+    "total": 22,
+    "levels": {
+      "h1": 1,
+      "h2": 7,
+      "h3": 13,
+      "h4": 1
+    }
   }
 }

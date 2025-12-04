@@ -28,7 +28,7 @@ The site is in **excellent shape**. Preview smokes are **PASSING**, converter is
 
 1. **308 Redirects on /tools\*** - Vercel adds trailing slash redirects; smoke script now handles this gracefully
 2. **Light Theme** - Could use more polish on some components
-3. **Multi-file Search & Replace** - Has shell page, needs full implementation
+3. **Bulk Find & Replace** (formerly "Multi-file Search & Replace") - Has shell page, needs full implementation
 
 ---
 

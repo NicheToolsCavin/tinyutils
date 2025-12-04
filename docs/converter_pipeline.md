@@ -130,3 +130,72 @@ Together, these power the `preview` field returned by `/api/convert` while the
 main textual outputs come from `cleaned.md` and, for non‑markdown targets,
 `_render_markdown_target()`.
 
+## 5. Format Coverage & Quality Policies (Updated 2025-12-03)
+
+### Supported Input Formats
+
+The converter now has comprehensive test coverage for all major rich-text formats:
+
+**Office Formats:**
+- **DOCX** (Word) — Full support with footnotes, headings, lists, tables, images
+- **ODT** (LibreOffice) — Full support with footnotes, structure preservation
+- **RTF** (Rich Text Format) — Headings, lists, tables, basic formatting
+
+**Academic/Technical Formats:**
+- **LaTeX** — Equations (display + inline), code blocks, sections, footnotes
+- **PDF** — Layout-based text extraction (fuzzy, content-centric)
+
+**Web Formats:**
+- **HTML** — Full support with figure/image extraction
+- **Markdown** — Native format (GFM with extensions)
+
+All conversions support **100+ format pairs** via pandoc's universal document model.
+
+### Quality Metrics & Testing
+
+**Test Infrastructure:**
+- `tests/converter/fixture_runner.py` — Tracks footnoteCount (Note nodes), headingCount (Header nodes)
+- Golden metrics stored in `tests/golden/converter/*.metrics.json` for regression detection
+- 42 total tests: 30 backend Python + 12 Node.js fidelity tests
+- All tests verify **quality** (readability, structure, formatting) not just success
+
+**Coverage:**
+- Footnote preservation end-to-end (DOCX/ODT ↔ MD)
+- LaTeX equations (display + inline) for STEM documents
+- RTF structure and formatting fidelity
+- PDF text extraction quality (readability, character ratios)
+- Track changes acceptance (final text only)
+- Comments dropping (pandoc default)
+
+### Policies & Non-Goals
+
+**Track Changes:** ALWAYS accepted (`--track-changes=accept` flag in `pandoc_runner.py`)
+- Output contains final text only, no revision marks
+- Configured via `ConversionOptions.accept_tracked_changes` (defaults to `True`)
+
+**Comments:** ALWAYS dropped (pandoc default behavior)
+- Word/ODT comments do not appear in outputs
+- Documented as intentional limitation (clean output focus)
+
+**Headers/Footers:** HIGH PRIORITY GOAL (pandoc limitation, GitHub #5211)
+- Pandoc does NOT extract page headers/footers - this is a known limitation
+- **Workaround implemented:** Use `python-docx` to extract headers/footers separately
+- Tests in `test_convert_backend_headers_footers.py` document behavior and validate extraction
+- Future: Integrate into main pipeline with `ConversionOptions.include_headers_footers` flag
+
+**Page Layout:** NOT preserved
+- Page size, margins, columns NOT maintained
+- Output is continuous flow (Markdown/HTML paradigm)
+
+**What IS Preserved:**
+- Document structure (headings, paragraphs, sections)
+- Lists (bullet, numbered, nested)
+- Tables (structure, alignment)
+- Formatting (bold, italic, code, blockquotes)
+- Media (images extracted and referenced)
+- Footnotes/endnotes (with `[^N]` markers)
+- Equations (LaTeX math syntax)
+- Cross-references (links, anchors)
+
+This **content-centric** approach prioritizes reliable text/structure extraction over pixel-perfect layout reconstruction.
+

@@ -26,6 +26,14 @@ class ConversionOptions:
     pdf_margin_preset: str | None = None
     # pdf_page_size: e.g. 'letter' (default), 'A4'.
     pdf_page_size: str | None = None
+    # LibreOffice integration for color/alignment preservation
+    use_libreoffice: bool = False
+    preserve_colors: bool = False
+    preserve_alignment: bool = False
+    # Page-break marker insertion (DOCX only)
+    insert_page_break_markers: bool = False
+    # Comments extraction (DOCX only) - appends comment summary to markdown
+    extract_comments: bool = False
 
 
 @dataclass(slots=True)

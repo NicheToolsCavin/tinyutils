@@ -1,3 +1,4 @@
-# Canonical Python deps live in api/convert/requirements.txt
-# Root file just includes that list so Vercel installs everything once.
+# Canonical Python deps live in api/*/requirements.txt
+# Root file includes all API requirements so Vercel installs everything once.
 -r api/convert/requirements.txt
+-r api/bulk-replace/requirements.txt

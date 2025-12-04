@@ -1,0 +1,15 @@
+Vercel CLI 48.8.2
+WARN! `--confirm` is deprecated, please use `--yes` instead
+Retrieving project…
+Deploying cavins-projects-7b0e00bb/tinyutils
+Uploading [--------------------] (0.0B/207.6KB)
+Uploading [=====---------------] (52.9KB/207.6KB)
+Uploading [===========---------] (116.9KB/207.6KB)
+Uploading [===============-----] (164.9KB/207.6KB)
+Uploading [====================] (207.6KB/207.6KB)
+Inspect: https://vercel.com/cavins-projects-7b0e00bb/tinyutils/3JWFpE61mAh81GaYwSj7NtKNFPEQ [5s]
+Preview: https://tinyutils-fod6rop6c-cavins-projects-7b0e00bb.vercel.app [5s]
+https://tinyutils-fod6rop6c-cavins-projects-7b0e00bb.vercel.appQueued
+Building
+Completing
+To deploy to production (www.tinyutils.net), run `vercel --prod`

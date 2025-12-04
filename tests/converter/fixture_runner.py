@@ -36,6 +36,8 @@ def compute_metrics(markdown_text: str) -> dict[str, Any]:
     structure to count list, code block, and image nodes. It is
     intentionally minimal and designed for regression tests rather than
     full introspection.
+
+    Also counts HTML <img> tags since pandoc may output figures as raw HTML.
     """
 
     # Write markdown to a temporary file for pandoc to consume.
@@ -61,10 +63,17 @@ def compute_metrics(markdown_text: str) -> dict[str, Any]:
         except OSError:
             pass
 
+    # Count HTML <img> tags in the raw markdown text since pandoc outputs
+    # DOCX/ODT figures as raw HTML <figure><img>...</figure> blocks.
+    import re
+    html_img_count = len(re.findall(r'<img\s+[^>]*src=', markdown_text, re.IGNORECASE))
+
     metrics: dict[str, Any] = {
         "lists": {"bullet": 0, "ordered": 0, "maxDepth": 0},
         "codeBlocks": {"total": 0, "languages": []},
-        "images": {"total": 0},
+        "images": {"total": 0, "html_img_tags": html_img_count},
+        "footnotes": {"total": 0},
+        "headings": {"total": 0, "levels": {}},
     }
 
     langs: set[str] = set()
@@ -92,6 +101,20 @@ def compute_metrics(markdown_text: str) -> dict[str, Any]:
                     pass
             elif t == "Image":
                 metrics["images"]["total"] += 1
+            elif t == "Note":
+                # Pandoc represents footnotes/endnotes as Note nodes
+                metrics["footnotes"]["total"] += 1
+            elif t == "Header":
+                # Pandoc Header: c = [level, attr, inlines]
+                metrics["headings"]["total"] += 1
+                try:
+                    level = c[0] if isinstance(c, list) and len(c) > 0 else 1
+                    level_key = f"h{level}"
+                    metrics["headings"]["levels"][level_key] = (
+                        metrics["headings"]["levels"].get(level_key, 0) + 1
+                    )
+                except Exception:
+                    pass
 
             # Recurse into children
             if isinstance(c, list):
@@ -108,6 +131,8 @@ def compute_metrics(markdown_text: str) -> dict[str, Any]:
 
     walk(doc)
     metrics["codeBlocks"]["languages"] = sorted(langs)
+    # Include HTML img tags in the total count (DOCX/ODT figures are raw HTML)
+    metrics["images"]["total"] += html_img_count
     return metrics
 
 
