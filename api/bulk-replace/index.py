@@ -293,5 +293,5 @@ async def bulk_replace(
         traceback.print_exc()
         return send_error(500, f"Server error: {str(e)}", request_id)
 
-# Export for Vercel
-handler = app
+# Vercel expects 'app' export for FastAPI functions
+__all__ = ["app"]
