@@ -126,7 +126,7 @@ def send_success(data: dict, request_id: str, processing_time_ms: int):
 
 # --- Main Endpoint ---
 
-@app.post("/api/bulk-replace")
+@app.post("/")
 async def bulk_replace(
     file: UploadFile = File(...),
     mode: str = Form("simple"),
