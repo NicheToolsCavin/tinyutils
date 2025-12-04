@@ -126,6 +126,16 @@ def send_success(data: dict, request_id: str, processing_time_ms: int):
 
 # --- Main Endpoint ---
 
+@app.get("/")
+async def root():
+    """Health check endpoint."""
+    return JSONResponse({
+        "ok": True,
+        "service": "bulk-replace",
+        "message": "POST a ZIP file to this endpoint with find/replace parameters",
+        "version": "1.0.0"
+    })
+
 @app.post("/")
 async def bulk_replace(
     file: UploadFile = File(...),
