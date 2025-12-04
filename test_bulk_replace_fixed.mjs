@@ -3,7 +3,7 @@
 
 const TINY_REACTIVE_URL = process.env.TINY_REACTIVE_URL || 'http://127.0.0.1:5566';
 const TINY_REACTIVE_TOKEN = process.env.TINY_REACTIVE_TOKEN || 'dev123';
-const PREVIEW_URL = 'https://tinyutils-otyrymik4-cavins-projects-7b0e00bb.vercel.app';
+const PREVIEW_URL = 'https://tinyutils-2uq1t8tlf-cavins-projects-7b0e00bb.vercel.app';
 const AUTH_STATE_FILE = './.tiny-reactive-vercel-login.json';
 
 async function trCmd(body) {
