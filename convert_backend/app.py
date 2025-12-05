@@ -92,8 +92,63 @@ _ensure_pydantic_core()
 
 from pydantic import BaseModel, Field, validator, model_validator
 
-from fastapi import FastAPI, Header, HTTPException, Request, Response
+from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
+
+# API Key auth configuration
+CONVERT_API_KEY = os.getenv("CONVERT_API_KEY", "").strip()
+ALLOWED_ORIGINS = {"tinyutils.net", "www.tinyutils.net", "localhost", "127.0.0.1"}
+
+
+def _is_same_origin(request: Request) -> bool:
+    """Check if request comes from allowed web origins."""
+    # Check Origin header (for CORS preflight and JS fetch)
+    origin = request.headers.get("origin", "")
+    if origin:
+        from urllib.parse import urlparse
+        parsed = urlparse(origin)
+        if parsed.hostname in ALLOWED_ORIGINS:
+            return True
+
+    # Check Referer header (for form submissions and regular requests)
+    referer = request.headers.get("referer", "")
+    if referer:
+        from urllib.parse import urlparse
+        parsed = urlparse(referer)
+        if parsed.hostname in ALLOWED_ORIGINS:
+            return True
+
+    return False
+
+
+def _verify_api_access(
+    request: Request,
+    x_api_key: Optional[str] = Header(default=None, alias="x-api-key"),
+) -> None:
+    """Verify request has valid API access (same-origin OR valid API key).
+
+    - Web UI requests from tinyutils.net: Allowed without key
+    - CLI/script requests with valid X-API-Key: Allowed
+    - All other requests: Rejected with 401
+    """
+    # If no API key is configured, allow all requests (backward compat)
+    if not CONVERT_API_KEY:
+        return
+
+    # Allow same-origin requests (web UI)
+    if _is_same_origin(request):
+        return
+
+    # Check API key for non-browser requests
+    if x_api_key and x_api_key == CONVERT_API_KEY:
+        return
+
+    # Reject unauthorized requests
+    raise HTTPException(
+        status_code=401,
+        detail="API key required. Use X-API-Key header for CLI/script access.",
+        headers={"WWW-Authenticate": "ApiKey"},
+    )
 
 if TYPE_CHECKING:  # pragma: no cover - type checking only
     from tinyutils.convert import (
@@ -382,10 +437,12 @@ def convert_health_alias() -> JSONResponse:  # pragma: no cover - simple delegat
 @app.post("/api/convert", include_in_schema=False)
 def convert_alias(
     request: ConvertRequest,
+    http_request: Request,
     response: Response = _TEST_RESPONSE_SENTINEL,
     request_id: Optional[str] = Header(default=None, alias="x-request-id"),
+    _: None = Depends(_verify_api_access),
 ) -> dict:  # pragma: no cover - simple delegate
-    return convert(request, response, request_id)
+    return convert(request, http_request, response, request_id)
 
 # Compatibility for Vercel rewrites that still forward to the filename path
 @app.get("/api/convert/index.py", include_in_schema=False)
@@ -398,17 +455,21 @@ def convert_health_filename_alias(request: Request) -> JSONResponse:  # pragma: 
 @app.post("/api/convert/index.py", include_in_schema=False)
 def convert_filename_alias(
     request: ConvertRequest,
+    http_request: Request,
     response: Response = _TEST_RESPONSE_SENTINEL,
     request_id: Optional[str] = Header(default=None, alias="x-request-id"),
+    _: None = Depends(_verify_api_access),
 ) -> dict:  # pragma: no cover
-    return convert(request, response, request_id)
+    return convert(request, http_request, response, request_id)
 
 
 @app.post("/")
 def convert(
     request: ConvertRequest,
+    http_request: Request,
     response: Response = _TEST_RESPONSE_SENTINEL,
     request_id: Optional[str] = Header(default=None, alias="x-request-id"),
+    _: None = Depends(_verify_api_access),
 ) -> dict:
     request_id_value = request_id if isinstance(request_id, str) else None
     resolved_request_id = request_id_value or uuid.uuid4().hex
