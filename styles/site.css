@@ -270,6 +270,67 @@ html.ads-hidden .ad-slot{
   }
 }
 
+/* ============================================
+   FORM ELEMENTS - Global Theme-Aware Styling
+   ============================================ */
+
+/* Base styling for all form elements */
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
+  background: var(--surface-base);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg, 0.75rem);
+  padding: 0.75rem 1rem;
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.5;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:not([type="checkbox"]):not([type="radio"])::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):hover,
+select:hover,
+textarea:hover {
+  border-color: var(--border-strong);
+}
+
+input:not([type="checkbox"]):not([type="radio"]):focus,
+select:focus,
+textarea:focus {
+  border-color: var(--brand-500, #3b82f6);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  outline: none;
+}
+
+/* Light mode specific overrides for form elements */
+html[data-theme="light"] input:not([type="checkbox"]):not([type="radio"]),
+html[data-theme="light"] select,
+html[data-theme="light"] textarea {
+  background: #fff;
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+
+html[data-theme="light"] input:not([type="checkbox"]):not([type="radio"])::placeholder,
+html[data-theme="light"] textarea::placeholder {
+  color: var(--text-tertiary);
+}
+
+html[data-theme="light"] input:not([type="checkbox"]):not([type="radio"]):focus,
+html[data-theme="light"] select:focus,
+html[data-theme="light"] textarea:focus {
+  background: #fff;
+  border-color: var(--brand-500, #3b82f6);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
 /* Small phones */
 @media (max-width: 480px) {
   .hero h1,
