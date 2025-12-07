@@ -8,6 +8,11 @@ thead th{position:sticky;top:0;background:var(--panel,#0b1224);z-index:2}
 tbody tr:nth-child(odd){background:rgba(255,255,255,.02)}
 tbody tr:hover{background:rgba(255,255,255,.04)}
 th,td{padding:10px;border-bottom:1px solid var(--border,#1e2230);vertical-align:top}
+/* Light mode table overrides */
+html[data-theme="light"] thead th{background:#e0d5c5;color:#2d1f0f}
+html[data-theme="light"] tbody tr:nth-child(odd){background:rgba(93,74,53,.04)}
+html[data-theme="light"] tbody tr:hover{background:rgba(93,74,53,.08)}
+html[data-theme="light"] th,html[data-theme="light"] td{border-bottom-color:#d5c4af}
 /* Focus visibility */
 :focus-visible{outline:2px solid var(--focus-ring,#facc15);outline-offset:2px;border-radius:6px}
 /* Hover animation for cards & CTA boxes */

@@ -331,6 +331,54 @@ html[data-theme="light"] textarea:focus {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
 }
 
+/* Light mode: Table headers */
+html[data-theme="light"] thead th,
+html[data-theme="light"] .tableWrap thead th,
+html[data-theme="light"] #results thead th {
+  background: #e0d5c5 !important;  /* Darker parchment for contrast */
+  color: var(--text-primary, #2d1f0f);
+  border-bottom-color: var(--border-default, #d5c4af);
+}
+
+/* Light mode: Progress banner */
+html[data-theme="light"] .progress-banner {
+  background: transparent;
+  color: var(--text-primary, #2d1f0f);
+}
+
+html[data-theme="light"] .progress-banner .progress-text {
+  color: var(--text-primary, #2d1f0f);
+}
+
+html[data-theme="light"] .progress-banner progress {
+  background: rgba(93, 74, 53, 0.15);
+}
+
+html[data-theme="light"] .progress-banner progress::-webkit-progress-bar {
+  background: rgba(93, 74, 53, 0.15);
+}
+
+/* Light mode: Badges */
+html[data-theme="light"] .badge {
+  background: #e0d5c5;
+  color: var(--text-secondary, #4a3520);
+  border-color: var(--border-default, #d5c4af);
+}
+
+/* Light mode: Table rows */
+html[data-theme="light"] tbody tr:nth-child(odd) {
+  background: rgba(93, 74, 53, 0.04);
+}
+
+html[data-theme="light"] tbody tr:hover {
+  background: rgba(93, 74, 53, 0.08);
+}
+
+html[data-theme="light"] th,
+html[data-theme="light"] td {
+  border-bottom-color: var(--border-default, #d5c4af);
+}
+
 /* Small phones */
 @media (max-width: 480px) {
   .hero h1,
