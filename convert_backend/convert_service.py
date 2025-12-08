@@ -1574,21 +1574,38 @@ def _render_pdf_via_reportlab(
                     # Skip internal anchor links (ReportLab can't handle #fragment URLs)
                     if url.startswith('#'):
                         return text  # Just show the text without link
+                    # Security: Only allow safe URL schemes (prevent javascript:, data:, etc.)
+                    url_lower = url.lower().strip()
+                    if not (url_lower.startswith('http://') or url_lower.startswith('https://') or url_lower.startswith('mailto:')):
+                        return text  # Show text without link for unsafe schemes
+                    # Security: Escape URL to prevent XSS via attribute injection
+                    safe_url = html.escape(url, quote=True)
                     # ReportLab uses <a> tags with color attribute for styling
-                    return f'<a href="{url}" color="blue">{text}</a>'
+                    return f'<a href="{safe_url}" color="blue">{text}</a>'
 
                 escaped = re.sub(r'\[([^\]]+)\]\(([^)\s]+)(?:\s+"[^"]*")?\)', _convert_link, escaped)
 
                 # Convert bare URLs to clickable links (http://, https://)
+                # Security: Limit URL length to prevent ReDoS attacks (max 2000 chars)
+                def _convert_bare_url(match: re.Match[str]) -> str:
+                    url = match.group(1)
+                    if len(url) > 2000:
+                        return url  # Too long, don't linkify
+                    safe_url = html.escape(url, quote=True)
+                    return f'<a href="{safe_url}" color="blue">{safe_url}</a>'
+
                 escaped = re.sub(
-                    r'(?<!["\'>])(https?://[^\s<>\[\]]+)',
-                    r'<a href="\1" color="blue">\1</a>',
+                    r'(?<!["\'>])(https?://[^\s<>\[\]]{1,2000})',
+                    _convert_bare_url,
                     escaped
                 )
 
                 def _restore_code(match: re.Match[str]) -> str:
                     idx = int(match.group(1))
-                    return f"<font face='Courier'>{code_spans[idx]}</font>"
+                    # Bounds check to prevent IndexError on malformed input
+                    if 0 <= idx < len(code_spans):
+                        return f"<font face='Courier'>{code_spans[idx]}</font>"
+                    return match.group(0)  # Return original if invalid index
 
                 # Restore code spans using the null-byte delimited placeholders
                 escaped = re.sub(r"\x00CS(\d+)\x00", _restore_code, escaped)
@@ -1747,7 +1764,12 @@ def _render_pdf_via_reportlab(
                     )
 
                     # Determine column count from the widest row
-                    col_count = max(len(row) for row in table_buf) if table_buf else 0
+                    # Handle empty or all-empty-row tables gracefully
+                    if not table_buf or not any(table_buf):
+                        in_table = False
+                        table_buf = []
+                        return
+                    col_count = max(len(row) for row in table_buf)
                     if col_count == 0:
                         in_table = False
                         table_buf = []
@@ -1757,6 +1779,9 @@ def _render_pdf_via_reportlab(
                     # Available width ~6.5 inches, min 0.4" per column for readability
                     max_cols = 16  # 6.5" / 0.4" ≈ 16 columns max
                     if col_count > max_cols:
+                        # Log warning about table truncation (logs from outer scope)
+                        if logs is not None:
+                            logs.append(f"table_truncated={col_count}→{max_cols}")
                         col_count = max_cols  # Truncate extra columns
 
                     # Normalize all rows to same column count
