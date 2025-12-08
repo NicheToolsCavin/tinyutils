@@ -501,7 +501,7 @@ def convert_one(
     #    pipeline (lists/headings, cleanup, dialects) can enrich it.
     #    This mirrors the UI's "Auto" path for pasted content, which
     #    already sends markdown to the server.
-    if adjusted_from in ("text", "txt"):
+    if adjusted_from in ("text", "txt", "plain"):
         adjusted_from = "markdown"
 
     cache_key = _build_cache_key(
@@ -1485,7 +1485,10 @@ def _render_pdf_via_reportlab(
                 ListItem,
                 KeepTogether,
                 Flowable,
+                Table,
+                TableStyle,
             )
+            from reportlab.lib import colors
 
             class HorizontalLine(Flowable):
                 """Draws a horizontal line separator"""
@@ -1518,7 +1521,9 @@ def _render_pdf_via_reportlab(
 
                 def _store_code(match: re.Match[str]) -> str:
                     code_spans.append(html.escape(match.group(1), quote=False))
-                    return f"__CODE_SPAN_{len(code_spans) - 1}__"
+                    # Use null bytes as delimiters to avoid collision with markdown emphasis patterns
+                    # The previous __CODE_SPAN_X__ was being matched by the __...__  bold regex
+                    return f"\x00CS{len(code_spans) - 1}\x00"
 
                 # Protect inline code first
                 text = re.sub(r"`([^`]+)`", _store_code, text)
@@ -1531,6 +1536,13 @@ def _render_pdf_via_reportlab(
                 # Bold / italic on the escaped text (avoid mid-word underscore matches)
                 # IMPORTANT: Only match emphasis when content isn't ALL underscores/asterisks
                 # This prevents `__________` (fill-in blanks) from being treated as bold markup
+
+                # Handle bold+italic FIRST (triple asterisks/underscores) to avoid nesting issues
+                # ***text*** and ___text___ should become <b><i>text</i></b> with proper nesting
+                escaped = re.sub(r"\*\*\*(?![\*_\s]+\*\*\*)(.+?)(?<![\*_\s])\*\*\*", r"<b><i>\1</i></b>", escaped)
+                escaped = re.sub(r"___(?![_*\s]+___)(.+?)(?<![_*\s])___", r"<b><i>\1</i></b>", escaped)
+
+                # Then handle bold (double asterisks/underscores)
                 escaped = re.sub(r"\*\*(?![\*_\s]+\*\*)(.+?)(?<![\*_\s])\*\*", r"<b>\1</b>", escaped)
                 escaped = re.sub(r"__(?![_*\s]+__)(.+?)(?<![_*\s])__", r"<b>\1</b>", escaped)
 
@@ -1546,11 +1558,40 @@ def _render_pdf_via_reportlab(
                 escaped = re.sub(r'(?<!\w)\*([^\*\n]+?)\*(?!\w)', _italic_asterisk, escaped)
                 escaped = re.sub(r'(?<!\w)_([^_\n]+?)_(?!\w)', _italic_asterisk, escaped)
 
+                # Convert markdown images ![alt](url) to placeholder text
+                # ReportLab can't render remote images inline, so show descriptive text
+                def _convert_image(match: re.Match[str]) -> str:
+                    alt = match.group(1)
+                    return f'<i>[Image: {alt}]</i>' if alt else '<i>[Image]</i>'
+
+                escaped = re.sub(r'!\[([^\]]*)\]\([^)]+\)', _convert_image, escaped)
+
+                # Convert markdown links [text](url) to HTML anchors
+                # Also handle [text](url "title") format
+                def _convert_link(match: re.Match[str]) -> str:
+                    text = match.group(1)
+                    url = match.group(2)
+                    # Skip internal anchor links (ReportLab can't handle #fragment URLs)
+                    if url.startswith('#'):
+                        return text  # Just show the text without link
+                    # ReportLab uses <a> tags with color attribute for styling
+                    return f'<a href="{url}" color="blue">{text}</a>'
+
+                escaped = re.sub(r'\[([^\]]+)\]\(([^)\s]+)(?:\s+"[^"]*")?\)', _convert_link, escaped)
+
+                # Convert bare URLs to clickable links (http://, https://)
+                escaped = re.sub(
+                    r'(?<!["\'>])(https?://[^\s<>\[\]]+)',
+                    r'<a href="\1" color="blue">\1</a>',
+                    escaped
+                )
+
                 def _restore_code(match: re.Match[str]) -> str:
                     idx = int(match.group(1))
                     return f"<font face='Courier'>{code_spans[idx]}</font>"
 
-                escaped = re.sub(r"__CODE_SPAN_(\d+)__", _restore_code, escaped)
+                # Restore code spans using the null-byte delimited placeholders
+                escaped = re.sub(r"\x00CS(\d+)\x00", _restore_code, escaped)
                 return escaped.replace("<br>", "<br/>")
 
             def _parse_markdown_to_flowables(md: str):
@@ -1592,6 +1633,37 @@ def _render_pdf_via_reportlab(
                     spaceBefore=4,
                     keepWithNext=True,
                 )
+                h4_style = ParagraphStyle(
+                    name="TUHeading4",
+                    parent=base,
+                    fontSize=12,
+                    leading=16,
+                    spaceAfter=2,
+                    spaceBefore=3,
+                    keepWithNext=True,
+                    fontName="Helvetica-Bold",
+                )
+                h5_style = ParagraphStyle(
+                    name="TUHeading5",
+                    parent=base,
+                    fontSize=11,
+                    leading=14,
+                    spaceAfter=1,
+                    spaceBefore=2,
+                    keepWithNext=True,
+                    fontName="Helvetica-Bold",
+                )
+                h6_style = ParagraphStyle(
+                    name="TUHeading6",
+                    parent=base,
+                    fontSize=10,
+                    leading=13,
+                    spaceAfter=1,
+                    spaceBefore=2,
+                    keepWithNext=True,
+                    fontName="Helvetica-Bold",
+                    textColor="#666666",
+                )
                 code_style = ParagraphStyle(
                     name="TUCode",
                     parent=base,
@@ -1620,6 +1692,111 @@ def _render_pdf_via_reportlab(
                 in_code = False
                 list_buf: list[str] = []
                 blockquote_buf: list[str] = []
+                table_buf: list[list[str]] = []  # Buffer for collecting table rows
+                in_table = False
+
+                def is_table_separator(line: str) -> bool:
+                    """Check if line is a markdown table separator (e.g., |---|---|)"""
+                    stripped = line.strip()
+                    # Must contain pipe and dashes
+                    if '|' not in stripped or '-' not in stripped:
+                        return False
+                    # Remove pipes and check if remaining is mostly dashes, colons, spaces
+                    cells = stripped.split('|')
+                    for cell in cells:
+                        cell = cell.strip()
+                        if cell and not all(c in '-: ' for c in cell):
+                            return False
+                    return True
+
+                def parse_table_row(line: str) -> list[str]:
+                    """Parse a pipe-separated table row into cells"""
+                    stripped = line.strip()
+                    # Remove leading/trailing pipes if present
+                    if stripped.startswith('|'):
+                        stripped = stripped[1:]
+                    if stripped.endswith('|'):
+                        stripped = stripped[:-1]
+                    # Split by pipe and clean each cell
+                    return [cell.strip() for cell in stripped.split('|')]
+
+                def flush_table():
+                    """Convert accumulated table rows into a ReportLab Table flowable"""
+                    nonlocal table_buf, in_table
+                    if not table_buf:
+                        in_table = False
+                        return
+
+                    # Build table data with Paragraph cells for text formatting
+                    table_cell_style = ParagraphStyle(
+                        name="TUTableCell",
+                        parent=body_style,
+                        fontSize=10,
+                        leading=12,
+                        spaceAfter=0,
+                        spaceBefore=0,
+                    )
+                    table_header_style = ParagraphStyle(
+                        name="TUTableHeader",
+                        parent=body_style,
+                        fontSize=10,
+                        leading=12,
+                        fontName="Helvetica-Bold",
+                        spaceAfter=0,
+                        spaceBefore=0,
+                    )
+
+                    # Determine column count from the widest row
+                    col_count = max(len(row) for row in table_buf) if table_buf else 0
+                    if col_count == 0:
+                        in_table = False
+                        table_buf = []
+                        return
+
+                    # Limit columns to fit page width (letter size minus margins)
+                    # Available width ~6.5 inches, min 0.4" per column for readability
+                    max_cols = 16  # 6.5" / 0.4" ≈ 16 columns max
+                    if col_count > max_cols:
+                        col_count = max_cols  # Truncate extra columns
+
+                    # Normalize all rows to same column count
+                    normalized_rows = []
+                    for i, row in enumerate(table_buf):
+                        while len(row) < col_count:
+                            row.append("")
+                        # First row is header, use bold style
+                        style = table_header_style if i == 0 else table_cell_style
+                        normalized_rows.append([
+                            Paragraph(_inline_markdown_to_html(cell), style) for cell in row[:col_count]
+                        ])
+
+                    # Calculate column widths to fit page
+                    available_width = 6.5 * inch
+                    col_width = available_width / col_count
+
+                    # Create ReportLab Table with explicit column widths
+                    tbl = Table(normalized_rows, repeatRows=1, colWidths=[col_width] * col_count)
+
+                    # Style the table
+                    style_commands = [
+                        ('BACKGROUND', (0, 0), (-1, 0), colors.Color(0.9, 0.9, 0.9)),  # Header bg
+                        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                        ('GRID', (0, 0), (-1, -1), 0.5, colors.Color(0.7, 0.7, 0.7)),
+                        ('TOPPADDING', (0, 0), (-1, -1), 4),
+                        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+                        ('LEFTPADDING', (0, 0), (-1, -1), 6),
+                        ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+                    ]
+                    tbl.setStyle(TableStyle(style_commands))
+
+                    story_local.append(Spacer(1, 0.1 * inch))
+                    story_local.append(tbl)
+                    story_local.append(Spacer(1, 0.1 * inch))
+
+                    table_buf = []
+                    in_table = False
 
                 def flush_para():
                     nonlocal buf
@@ -1679,31 +1856,64 @@ def _render_pdf_via_reportlab(
 
                     # Blockquotes - accumulate into buffer for proper formatting
                     if stripped.startswith("> "):
-                        flush_para(); flush_list()  # Close any open para/list first
+                        flush_para(); flush_list(); flush_table()  # Close any open para/list/table first
                         blockquote_buf.append(stripped[2:].strip())
                         continue
                     elif stripped.startswith(">") and stripped != ">":
-                        flush_para(); flush_list()
+                        flush_para(); flush_list(); flush_table()
                         blockquote_buf.append(stripped[1:].strip())
                         continue
 
+                    # Table detection - lines with pipe characters
+                    if '|' in stripped:
+                        # Check if this is a table separator line (skip it but stay in table mode)
+                        if is_table_separator(stripped):
+                            # If we have a header row collected, this confirms we're in a table
+                            if table_buf:
+                                in_table = True
+                            continue
+
+                        # This is a data row - parse it
+                        row = parse_table_row(stripped)
+                        if row and any(cell.strip() for cell in row):  # At least one non-empty cell
+                            flush_para(); flush_list(); flush_blockquote()
+                            table_buf.append(row)
+                            in_table = True
+                            continue
+
+                    # If we were in a table but hit a non-table line, flush the table
+                    if in_table:
+                        flush_table()
+
                     # Horizontal rules (---, ***, ___)
                     if stripped in ("---", "***", "___") or (len(stripped) >= 3 and all(c == '-' for c in stripped)):
-                        flush_para(); flush_list(); flush_blockquote()
+                        flush_para(); flush_list(); flush_blockquote(); flush_table()
                         story_local.append(HorizontalLine())
                         continue
 
-                    # Headings
+                    # Headings - check from most hashes to least (H6→H1) to avoid prefix matches
+                    if stripped.startswith("###### "):
+                        flush_para(); flush_list(); flush_blockquote(); flush_table()
+                        story_local.append(Paragraph(_inline_markdown_to_html(stripped[7:]), h6_style))
+                        continue
+                    if stripped.startswith("##### "):
+                        flush_para(); flush_list(); flush_blockquote(); flush_table()
+                        story_local.append(Paragraph(_inline_markdown_to_html(stripped[6:]), h5_style))
+                        continue
+                    if stripped.startswith("#### "):
+                        flush_para(); flush_list(); flush_blockquote(); flush_table()
+                        story_local.append(Paragraph(_inline_markdown_to_html(stripped[5:]), h4_style))
+                        continue
                     if stripped.startswith("### "):
-                        flush_para(); flush_list(); flush_blockquote()
+                        flush_para(); flush_list(); flush_blockquote(); flush_table()
                         story_local.append(Paragraph(_inline_markdown_to_html(stripped[4:]), h3_style))
                         continue
                     if stripped.startswith("## "):
-                        flush_para(); flush_list(); flush_blockquote()
+                        flush_para(); flush_list(); flush_blockquote(); flush_table()
                         story_local.append(Paragraph(_inline_markdown_to_html(stripped[3:]), h2_style))
                         continue
                     if stripped.startswith("# "):
-                        flush_para(); flush_list(); flush_blockquote()
+                        flush_para(); flush_list(); flush_blockquote(); flush_table()
                         story_local.append(Paragraph(_inline_markdown_to_html(stripped[2:]), h1_style))
                         continue
 
@@ -1719,12 +1929,12 @@ def _render_pdf_via_reportlab(
                         continue
 
                     if not stripped:
-                        flush_para(); flush_list(); flush_blockquote()
+                        flush_para(); flush_list(); flush_blockquote(); flush_table()
                         continue
 
                     buf.append(stripped)
 
-                flush_para(); flush_list(); flush_blockquote()
+                flush_para(); flush_list(); flush_blockquote(); flush_table()
                 return story_local
 
             # Page size selection (ReportLab fallback only). Default is LETTER; allow a
