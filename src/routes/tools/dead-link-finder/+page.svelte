@@ -819,6 +819,16 @@
     font-size: 0.92rem;
   }
 
+  /* Safari ignores 'color' on select elements until interaction */
+  select.field-input {
+    -webkit-text-fill-color: var(--text-primary, #f9fafb);
+  }
+
+  select.field-input option {
+    background: var(--surface-elevated, #0f172a);
+    color: var(--text-primary, #f9fafb);
+  }
+
   .field-input.mono {
     font-family: var(--font-mono, SFMono-Regular, Menlo, Monaco, Consolas,
         'Liberation Mono', 'Courier New', monospace);
