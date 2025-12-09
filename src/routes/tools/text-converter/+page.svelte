@@ -1184,6 +1184,35 @@ Prism.highlightAll();
             tr.appendChild(downloadCell);
             resultsBody.appendChild(tr);
           });
+
+          // Update preview for PDF format in Convert mode
+          const firstOutput = data.outputs[0];
+          const outputFormat = (firstOutput?.target || firstOutput?.format || firstOutput?.to || '').toLowerCase();
+          if (outputFormat === 'pdf') {
+            if (previewUnavailableCard) previewUnavailableCard.style.display = 'none';
+            if (previewTooBigCard) previewTooBigCard.style.display = 'none';
+            if (previewIframe) {
+              const theme = getPreviewThemeForIframe();
+              previewIframe.srcdoc = `
+                <style>
+                  body { margin: 0; padding: 2rem; background: ${theme.surface}; color: ${theme.text}; font-family: system-ui, sans-serif; text-align: center; }
+                  .pdf-notice { max-width: 400px; margin: 2rem auto; padding: 1.5rem; border: 1px solid ${theme.border}; border-radius: 12px; background: rgba(0,0,0,0.03); }
+                  .pdf-notice h3 { margin: 0 0 0.5rem; font-size: 1.1rem; }
+                  .pdf-notice p { margin: 0; font-size: 0.9rem; opacity: 0.8; }
+                  .pdf-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+                </style>
+                <div class="pdf-notice">
+                  <div class="pdf-icon">📄</div>
+                  <h3>PDF Ready for Download</h3>
+                  <p>PDF files cannot be previewed inline. Your converted PDF is ready — use the download link below to save it.</p>
+                </div>
+              `;
+            }
+            if (previewHeader) {
+              previewHeader.textContent = 'PDF output';
+              previewHeader.setAttribute('aria-label', 'PDF output – inline document preview');
+            }
+          }
         }
 
         let baseMsg = previewOnly
