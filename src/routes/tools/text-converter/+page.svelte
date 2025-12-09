@@ -932,7 +932,11 @@ Prism.highlightAll();
             setPreviewBanner('This file is too large for a full inline preview, but the complete converted file is ready to download below.', 'info');
           } else {
             // Format-specific preview routing
-            const rawFormat = (previewFlags.format || 'html').toLowerCase();
+            // Get output format from first output (for binary formats like PDF) or from preview flags
+            const outputFormat = data.outputs && data.outputs.length > 0
+              ? (data.outputs[0].target || data.outputs[0].format || data.outputs[0].to || '').toLowerCase()
+              : '';
+            const rawFormat = outputFormat || (previewFlags.format || 'html').toLowerCase();
             const content = previewFlags.content;
             const html = previewFlags.html;
 
