@@ -97,25 +97,33 @@ from fastapi.responses import JSONResponse
 
 # API Key auth configuration
 CONVERT_API_KEY = os.getenv("CONVERT_API_KEY", "").strip()
-ALLOWED_ORIGINS = {"tinyutils.net", "www.tinyutils.net", "localhost", "127.0.0.1"}
+ALLOWED_ORIGINS = {"tinyutils.net", "www.tinyutils.net", "tinyutils.vercel.app", "localhost", "127.0.0.1"}
+
+
+def _is_vercel_preview(hostname: str | None) -> bool:
+    """Check if hostname is a Vercel preview deployment for this project."""
+    if not hostname:
+        return False
+    # Match preview URLs like: tinyutils-abc123-cavins-projects-xxx.vercel.app
+    return hostname.endswith(".vercel.app") and hostname.startswith("tinyutils-")
 
 
 def _is_same_origin(request: Request) -> bool:
     """Check if request comes from allowed web origins."""
+    from urllib.parse import urlparse
+
     # Check Origin header (for CORS preflight and JS fetch)
     origin = request.headers.get("origin", "")
     if origin:
-        from urllib.parse import urlparse
         parsed = urlparse(origin)
-        if parsed.hostname in ALLOWED_ORIGINS:
+        if parsed.hostname in ALLOWED_ORIGINS or _is_vercel_preview(parsed.hostname):
             return True
 
     # Check Referer header (for form submissions and regular requests)
     referer = request.headers.get("referer", "")
     if referer:
-        from urllib.parse import urlparse
         parsed = urlparse(referer)
-        if parsed.hostname in ALLOWED_ORIGINS:
+        if parsed.hostname in ALLOWED_ORIGINS or _is_vercel_preview(parsed.hostname):
             return True
 
     return False
