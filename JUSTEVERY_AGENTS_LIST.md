@@ -31,6 +31,27 @@ claude-sonnet-4.5
 
 
 
-RIP: 
+## Dec. 9, 2025: 21:55
+
+Agents to use:
+
+**Claude models:**
+- claude-opus-4.5 — Frontline Claude for challenging or high-stakes tasks; excels at all coding tasks and novel problem solving.
+- claude-sonnet-4.5 — God-tier AI. Super intuitive, strong at implementation, tool use, debugging, and testing.
+- claude-haiku-4.5 — Very fast model for simple tasks. Similar to gemini-2.5-flash in capability.
+
+**ChatGPT Teams accounts (business group):**
+- cavinsays — GPT-5.1-codex-max xhigh. Very smart and thorough. Good for long-running tasks and complex code.
+- foai_user3 — GPT-5.1-codex-max xhigh. Very smart and thorough. Good for long-running tasks and complex code.
+- 3DMan — GPT-5.1-codex-max high. Smart and capable. Good balance of speed and thoroughness.
+- LeoMoralez — GPT-5.1 high. More creative and better at leadership/planning. Thinks outside the box.
+
+**Other models:**
+- gemini-2.5-flash — Fast, large context. Good for scaffolding and budget-sensitive operations.
+- qwen-3-coder — Fast and effective. Good for alternative opinions due to different training data.
+
+
+
+RIP:
 
 ThomasR and SonicTornado -- both accounts are expired and will not be joining us again :()
