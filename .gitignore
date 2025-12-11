@@ -50,3 +50,5 @@ GOOGLECLOUD.md
 # Tiny-reactive saved auth state (contains Vercel session cookies)
 .tiny-reactive-vercel-auth.json
 .tiny-reactive-vercel-login.json
+vibe-session.log
+test_artifacts/

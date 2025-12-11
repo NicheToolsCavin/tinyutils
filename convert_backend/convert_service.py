@@ -1417,12 +1417,12 @@ def _render_pdf_via_reportlab(
         <head>
             <meta charset=\"utf-8\">
             <style>
-                body {{ font-family: Arial, sans-serif; margin: 40px; }}
+                body {{ font-family: "Liberation Sans", "DejaVu Sans", "Noto Sans", Arial, Helvetica, sans-serif; margin: 40px; }}
                 h1 {{ font-size: 24px; margin-top: 20px; }}
                 h2 {{ font-size: 20px; margin-top: 16px; }}
                 h3 {{ font-size: 16px; margin-top: 12px; }}
                 p {{ line-height: 1.6; }}
-                code {{ background-color: #f4f4f4; padding: 2px 4px; font-family: monospace; }}
+                code {{ background-color: #f4f4f4; padding: 2px 4px; font-family: "Liberation Mono", "DejaVu Sans Mono", "Noto Sans Mono", Consolas, monospace; }}
                 pre {{ background-color: #f4f4f4; padding: 10px; overflow-x: auto; }}
             </style>
         </head>
@@ -1489,6 +1489,33 @@ def _render_pdf_via_reportlab(
                 TableStyle,
             )
             from reportlab.lib import colors
+            from reportlab.pdfbase import pdfmetrics
+            from reportlab.pdfbase.ttfonts import TTFont
+
+            # Register DejaVu Sans fonts for full Unicode/IPA support
+            # The fonts are bundled in the project's fonts/ directory
+            _fonts_registered = False
+            try:
+                fonts_dir = Path(__file__).parent.parent / "fonts"
+                dejavu_sans = fonts_dir / "DejaVuSans.ttf"
+                dejavu_sans_bold = fonts_dir / "DejaVuSans-Bold.ttf"
+                dejavu_mono = fonts_dir / "DejaVuSansMono.ttf"
+
+                if dejavu_sans.exists():
+                    pdfmetrics.registerFont(TTFont("DejaVuSans", str(dejavu_sans)))
+                if dejavu_sans_bold.exists():
+                    pdfmetrics.registerFont(TTFont("DejaVuSans-Bold", str(dejavu_sans_bold)))
+                if dejavu_mono.exists():
+                    pdfmetrics.registerFont(TTFont("DejaVuSansMono", str(dejavu_mono)))
+                _fonts_registered = True
+                _LOGGER.info("Registered DejaVu fonts for Unicode/IPA support")
+            except Exception as e:
+                _LOGGER.warning("Failed to register DejaVu fonts, falling back to Helvetica: %s", e)
+
+            # Determine which fonts to use (DejaVu if available, else Helvetica)
+            _BODY_FONT = "DejaVuSans" if _fonts_registered else "Helvetica"
+            _BOLD_FONT = "DejaVuSans-Bold" if _fonts_registered else "Helvetica-Bold"
+            _MONO_FONT = "DejaVuSansMono" if _fonts_registered else "Courier"
 
             class HorizontalLine(Flowable):
                 """Draws a horizontal line separator"""
@@ -1604,7 +1631,7 @@ def _render_pdf_via_reportlab(
                     idx = int(match.group(1))
                     # Bounds check to prevent IndexError on malformed input
                     if 0 <= idx < len(code_spans):
-                        return f"<font face='Courier'>{code_spans[idx]}</font>"
+                        return f"<font face='{_MONO_FONT}'>{code_spans[idx]}</font>"
                     return match.group(0)  # Return original if invalid index
 
                 # Restore code spans using the null-byte delimited placeholders
@@ -1619,10 +1646,11 @@ def _render_pdf_via_reportlab(
                 story_local = []
                 styles = getSampleStyleSheet()
                 base = styles["Normal"]
+                base.fontName = _BODY_FONT  # Use DejaVu for Unicode/IPA support
                 base.leading = 14
                 base.spaceAfter = 4
                 base.keepTogether = True
-                body_style = ParagraphStyle(name="TUBody", parent=base)
+                body_style = ParagraphStyle(name="TUBody", parent=base, fontName=_BODY_FONT)
                 h1_style = ParagraphStyle(
                     name="TUHeading1",
                     parent=base,
@@ -1658,7 +1686,7 @@ def _render_pdf_via_reportlab(
                     spaceAfter=2,
                     spaceBefore=3,
                     keepWithNext=True,
-                    fontName="Helvetica-Bold",
+                    fontName=_BOLD_FONT,
                 )
                 h5_style = ParagraphStyle(
                     name="TUHeading5",
@@ -1668,7 +1696,7 @@ def _render_pdf_via_reportlab(
                     spaceAfter=1,
                     spaceBefore=2,
                     keepWithNext=True,
-                    fontName="Helvetica-Bold",
+                    fontName=_BOLD_FONT,
                 )
                 h6_style = ParagraphStyle(
                     name="TUHeading6",
@@ -1678,13 +1706,13 @@ def _render_pdf_via_reportlab(
                     spaceAfter=1,
                     spaceBefore=2,
                     keepWithNext=True,
-                    fontName="Helvetica-Bold",
+                    fontName=_BOLD_FONT,
                     textColor="#666666",
                 )
                 code_style = ParagraphStyle(
                     name="TUCode",
                     parent=base,
-                    fontName="Courier",
+                    fontName=_MONO_FONT,
                     fontSize=9,
                     leading=11,
                     backColor="#f4f4f4",
@@ -1758,7 +1786,7 @@ def _render_pdf_via_reportlab(
                         parent=body_style,
                         fontSize=10,
                         leading=12,
-                        fontName="Helvetica-Bold",
+                        fontName=_BOLD_FONT,
                         spaceAfter=0,
                         spaceBefore=0,
                     )
@@ -1805,7 +1833,7 @@ def _render_pdf_via_reportlab(
                     # Style the table
                     style_commands = [
                         ('BACKGROUND', (0, 0), (-1, 0), colors.Color(0.9, 0.9, 0.9)),  # Header bg
-                        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                        ('FONTNAME', (0, 0), (-1, 0), _BOLD_FONT),
                         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
                         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
                         ('GRID', (0, 0), (-1, -1), 0.5, colors.Color(0.7, 0.7, 0.7)),
