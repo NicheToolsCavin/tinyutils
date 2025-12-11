@@ -47,6 +47,7 @@ def _rate_check(ip: str):
     _rate[ip]=(tokens-1, ts)
 
 @app.get("/healthz")
+@app.get("/health")  # Alternative endpoint (Cloud Run intercepts /healthz)
 async def healthz():
     return {"ok": True, "engine": ENGINE, "version": ENGINE_VERSION}
 
