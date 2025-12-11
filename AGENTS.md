@@ -1,5 +1,25 @@
 # AGENTS.md
 
+## CRITICAL: Check OpenMemory FIRST!
+
+**Before diving into any TinyUtils task, query OpenMemory:**
+
+```
+openmemory_query("TinyUtils")              # General project context
+openmemory_query("TinyUtils troubleshooting")  # Known issues & solutions
+openmemory_query("Vercel deployment")      # Deployment gotchas
+openmemory_query("converter")              # Text converter specifics
+```
+
+**Key TinyUtils gotchas stored in memory:**
+- **Vercel deployment**: `git push` does NOT auto-deploy to production! Use `vercel --prod`
+- **Text converter**: `previewOnly=true` and `previewOnly=false` are SEPARATE code paths - changes often need BOTH
+- **Preview URLs**: Require SSO or bypass tokens (see below)
+
+**30 seconds of memory queries can save 30 minutes of debugging.**
+
+---
+
 > >>> READ THIS FIRST — PREVIEW BYPASS FOR AUTOMATION <<<
 >
 > To access locked Vercel previews non‑interactively, export one of these (in order):
@@ -883,23 +903,19 @@ Operational notes
 
 - 
 
-## Agent Orchestration — Sources, Priority, and Benches (2025-11-14 17:00 CET)
+## Agent Orchestration — Sources and Priority
 
 Where configuration lives
-- Local roster (live precedence): `.code/agents/roster.json` (gitignored). Contains active/bench flags and selection policy used by the orchestrator.
-- External config (shared machine profile): `~/dev/CodeProjects/code_config_hacks/.code/config.toml`. Enables/disables named agents and sets wrapper args.
+- **Agent list:** `JUSTEVERY_AGENTS_LIST.md` — Human-readable list of available agents with descriptions and model configs. Updated by user.
+- **External config:** `~/dev/CodeProjects/code_config_hacks/.code/config.toml` — Enables/disables named agents and sets wrapper args, model parameters, and env vars.
 
 Current policy (effective now)
-- Prefer enabled, non-benched agents; auto-unbench when bench expires.
-- Selection order: `code-teams-personal`, `code-teams-tarot`, `code-teams-teacher`, `SonicTornado`, `ThomasR`, `code-gpt-5-codex`, `qwen-3-coder`, `gemini-2.5-flash`, `claude-sonnet-4.5`.
-- Bench status is defined only in the local roster (`.code/agents/roster.json`). Refer to that file for the current, authoritative bench windows.
+- Prefer enabled agents in order listed in `JUSTEVERY_AGENTS_LIST.md`.
+- Selection order: `claude-opus-4.5`, `claude-sonnet-4.5`, `claude-haiku-4.5`, `cavinsays`, `foai_user3`, `3DMan`, `LeoMoralez`, `gemini-2.5-flash`, `qwen-3-coder`.
 
 How to change
-- Update local roster: edit `.code/agents/roster.json` (adjust `bench.until`, `selection_order`, or `active`). Takes effect immediately for new runs.
-- Update external defaults: edit `~/dev/CodeProjects/code_config_hacks/.code/config.toml` (toggle `[[agents]].enabled = true/false`). Keep this in sync with the roster to avoid conflicts.
-
-Reasoning
-- This alignment prevents the external TOML from silently disabling agents the roster/TUI tries to use, ensuring custom ChatGPT accounts are prioritized while temporarily excluding models on cooldown.
+- Update `JUSTEVERY_AGENTS_LIST.md` to add/remove agents or change the recommended order.
+- Update `~/dev/CodeProjects/code_config_hacks/.code/config.toml` to toggle `[[agents]].enabled = true/false` or adjust model parameters.
 
 
 
@@ -920,3 +936,144 @@ which is located in:
 ```~/.opt/bin` 
 
 which should be in the path.
+
+<!-- BEGIN CODE-PLUS -->
+# code-plus Lifecycle Hooks
+
+> **Project:** code-plus — Claude Code Plugin Compatibility Layer
+>
+> This file provides lifecycle hook instructions for Claude Code agents.
+> It is auto-injected by the code-plus wrapper during SessionStart.
+
+---
+
+## MANDATORY: Lifecycle Hooks
+
+You have access to the `claude-plugins-mcp` MCP server which provides lifecycle hooks.
+
+### Critical Requirements (NON-NEGOTIABLE)
+
+**1. Before completing ANY task, you MUST call:**
+
+```
+lifecycle_check({ event: "stop", context: "<summary of what you did>" })
+```
+
+- If `allow_exit` is `false`, continue with the provided `continue_prompt`
+- Do NOT finish until this returns `allow_exit: true`
+
+**Why:** This allows plugins to:
+- Inject additional requirements before you exit
+- Run cleanup hooks
+- Check Ralph loop completion promises
+
+**2. Before editing sensitive files** (.env, credentials, config files):
+
+```
+lifecycle_check({ event: "pre_tool_use", tool: "edit", args: { file: "..." } })
+```
+
+- If `allow` is `false`, do NOT proceed with the edit
+- Ask the user for permission if blocked
+
+**3. If Ralph loop is active**, call `ralph_check()` periodically:
+
+```
+ralph_check()
+```
+
+- If `should_continue` is `true`, continue iterating with the provided `prompt`
+- Include iteration count in status updates
+- Update the user on progress
+
+**4. Understand Plugin Commands**
+
+The following commands from Claude Code plugins are available as MCP tools:
+
+<!-- PLUGIN_COMMANDS_LIST - auto-injected by installer -->
+- /analyze-codebase:analyze-codebase — ---
+- /ultrathink:ultrathink — ---
+- /code-review:code-review — ---
+- /commit-commands:clean_gone — ---
+- /commit-commands:commit-push-pr — ---
+- /commit-commands:commit — ---
+- /ralph-wiggum:cancel-ralph — ---
+- /ralph-wiggum:help — ---
+- /ralph-wiggum:ralph-loop — ---
+- /demo-plugin:demo — Demo
+
+---
+
+## Usage Examples
+
+### Normal Workflow
+
+```
+You: Build a REST API with authentication
+Claude: [implements code]
+Claude: [calls lifecycle_check before finishing]
+MCP Server: allow_exit=true (all plugins approved)
+Claude: Here's your API!
+```
+
+### Ralph Loop Workflow
+
+```
+You: ralph "Build todo API with tests" --max-iter 20
+code-plus: Starting Ralph loop (iteration 1)
+Claude: [builds basic API]
+Claude: [calls ralph_check]
+MCP Server: should_continue=true, iteration=1
+Claude: [continues with tests]
+Code: Iteration 2
+Claude: [adds error handling]
+Claude: [calls ralph_check]
+MCP Server: should_continue=false (iteration limit reached)
+Claude: Complete!
+```
+
+### Plugin Hook Example
+
+```
+You: review this code with code-review plugin
+Claude: [edits file]
+Claude: [calls lifecycle_check for pre_tool_use]
+MCP Server: [code-review plugin runs linting]
+Claude: Code review passed, continuing...
+```
+
+---
+
+## Available MCP Tools
+
+- `lifecycle_check(event, tool?, args?, context?)` — Soft hooks for lifecycle events
+- `ralph_check()` — Check Ralph loop status
+- `ralph_start(prompt, max_iterations?, completion_promise?)` — Start a Ralph loop
+- `plugin_command(command, args)` — Execute Claude Code plugin commands (future)
+
+---
+
+## Why This Matters
+
+These hooks enable **Claude Code plugins** (like `code-review`, `ralph-wiggum`, `frontend-design`) to work in code/codex, which normally doesn't support plugins.
+
+Failing to call lifecycle hooks:
+- 🚫 Breaks plugin functionality
+- 🚫 Can cause infinite loops in Ralph mode
+- 🚫 Skips security checks (pre_tool_use)
+- 🚫 Breaks plugin cleanup operations
+
+**You MUST call these hooks. They are not optional.**
+
+---
+
+## Questions?
+
+See the code-plus documentation:
+- Main plan: `~/dev/CodeProjects/justeverycodeskill/CODE-PLUS-PLAN.md`
+- Full AGENTS.md: `~/dev/CodeProjects/justeverycodeskill/AGENTS.md`
+
+---
+
+*Auto-generated by code-plus SessionStart hook. Do not manually edit this section.*
+<!-- END CODE-PLUS -->
