@@ -67,3 +67,26 @@ print(json.dumps(res))
 	assert.ok(!parsed.file_text.includes(boundary));
 });
 
+test('python multipart parser rejects malformed payloads', { skip: !PYTHON_AVAILABLE }, () => {
+	const boundary = '----tinyutilsboundary';
+	const body = Buffer.from('not a multipart body', 'utf8');
+
+	const code = `
+import base64, io
+from api._lib.multipart import MultipartParseError, parse_multipart_form
+body = base64.b64decode("${body.toString('base64')}")
+headers = {
+  "content-type": "multipart/form-data; boundary=${boundary}",
+  "content-length": str(len(body)),
+}
+try:
+  parse_multipart_form(headers, io.BytesIO(body))
+  print("unexpected_ok")
+except MultipartParseError as e:
+  print(f"err:{e.status}:{e}")
+`;
+
+	const output = runPython(code);
+	assert.notEqual(output, 'unexpected_ok');
+	assert.match(output, /^err:400:/);
+});
