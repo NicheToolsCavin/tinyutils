@@ -26,6 +26,23 @@ class MultipartParseError(Exception):
         self.status = status
 
 
+_READ_CHUNK_BYTES = 64 * 1024
+
+
+def _read_exact(rfile: BinaryIO, nbytes: int) -> bytes:
+    """Read exactly `nbytes` from `rfile` unless EOF is reached early."""
+
+    buf = bytearray()
+    remaining = nbytes
+    while remaining > 0:
+        chunk = rfile.read(min(_READ_CHUNK_BYTES, remaining))
+        if not chunk:
+            break
+        buf.extend(chunk)
+        remaining -= len(chunk)
+    return bytes(buf)
+
+
 def parse_multipart_form(
     headers: Mapping[str, str],
     rfile: BinaryIO,
@@ -63,7 +80,7 @@ def parse_multipart_form(
     if max_body_bytes is not None and content_length > max_body_bytes:
         raise MultipartParseError("Upload too large", status=413)
 
-    body = rfile.read(content_length)
+    body = _read_exact(rfile, content_length)
     if len(body) != content_length:
         raise MultipartParseError("Incomplete request body", status=400)
 
@@ -74,6 +91,8 @@ def parse_multipart_form(
     )
     try:
         msg = BytesParser(policy=default).parsebytes(mime_bytes)
+    except MemoryError:
+        raise
     except Exception as exc:
         raise MultipartParseError("Invalid multipart/form-data payload", status=400) from exc
     if not msg.is_multipart():

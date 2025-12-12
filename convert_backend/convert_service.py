@@ -118,10 +118,6 @@ _REPORTLAB_MONO_FONT = "Courier"
 def _ensure_reportlab_fonts_registered() -> None:
     global _REPORTLAB_FONTS_REGISTERED
     global _REPORTLAB_BODY_FONT, _REPORTLAB_BOLD_FONT, _REPORTLAB_MONO_FONT
-
-    if _REPORTLAB_FONTS_REGISTERED:
-        return
-
     with _REPORTLAB_FONT_LOCK:
         if _REPORTLAB_FONTS_REGISTERED:
             return
@@ -151,7 +147,11 @@ def _ensure_reportlab_fonts_registered() -> None:
 
             _LOGGER.info("Registered DejaVu fonts for Unicode/IPA support")
         except Exception as exc:
-            _LOGGER.warning("Failed to register DejaVu fonts; using Helvetica fallback: %s", exc)
+            _LOGGER.warning(
+                "Failed to register DejaVu fonts; using Helvetica fallback: %s",
+                exc,
+                exc_info=True,
+            )
         finally:
             # Mark as attempted so we don't re-do I/O/registration on every request.
             _REPORTLAB_FONTS_REGISTERED = True
