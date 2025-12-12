@@ -69,7 +69,8 @@ class handler(BaseHTTPRequestHandler):  # type: ignore[name-defined]
                 self._send_error(exc.status, str(exc))
                 return
 
-            mode = form.get("mode", ["json_to_csv"])[0]
+            mode_list = form.get("mode") or ["json_to_csv"]
+            mode = mode_list[0] if mode_list else "json_to_csv"
             files = form.get("file") or []
             if not files:
                 self._send_error(400, "No file uploaded")
