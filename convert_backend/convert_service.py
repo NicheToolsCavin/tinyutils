@@ -104,6 +104,58 @@ _CACHE: "OrderedDict[str, ConversionResult]" = OrderedDict()
 
 _LOGGER = logging.getLogger(__name__)
 
+# -------- ReportLab font registration (once per process) --------
+# ReportLab's built-in Helvetica/Vera fonts do not cover IPA glyphs (U+0250–U+02AF).
+# TinyUtils bundles DejaVu fonts under /fonts and registers them when ReportLab PDF
+# rendering is used.
+_REPORTLAB_FONTS_REGISTERED = False
+_REPORTLAB_FONT_LOCK = threading.Lock()
+_REPORTLAB_BODY_FONT = "Helvetica"
+_REPORTLAB_BOLD_FONT = "Helvetica-Bold"
+_REPORTLAB_MONO_FONT = "Courier"
+
+
+def _ensure_reportlab_fonts_registered() -> None:
+    global _REPORTLAB_FONTS_REGISTERED
+    global _REPORTLAB_BODY_FONT, _REPORTLAB_BOLD_FONT, _REPORTLAB_MONO_FONT
+
+    if _REPORTLAB_FONTS_REGISTERED:
+        return
+
+    with _REPORTLAB_FONT_LOCK:
+        if _REPORTLAB_FONTS_REGISTERED:
+            return
+
+        try:
+            from reportlab.pdfbase import pdfmetrics
+            from reportlab.pdfbase.ttfonts import TTFont
+
+            fonts_dir = Path(__file__).parent.parent / "fonts"
+            dejavu_sans = fonts_dir / "DejaVuSans.ttf"
+            if not dejavu_sans.exists():
+                _LOGGER.debug("DejaVu fonts not found at %s; using Helvetica fallback", fonts_dir)
+                return
+
+            pdfmetrics.registerFont(TTFont("DejaVuSans", str(dejavu_sans)))
+            _REPORTLAB_BODY_FONT = "DejaVuSans"
+
+            dejavu_sans_bold = fonts_dir / "DejaVuSans-Bold.ttf"
+            if dejavu_sans_bold.exists():
+                pdfmetrics.registerFont(TTFont("DejaVuSans-Bold", str(dejavu_sans_bold)))
+                _REPORTLAB_BOLD_FONT = "DejaVuSans-Bold"
+
+            dejavu_mono = fonts_dir / "DejaVuSansMono.ttf"
+            if dejavu_mono.exists():
+                pdfmetrics.registerFont(TTFont("DejaVuSansMono", str(dejavu_mono)))
+                _REPORTLAB_MONO_FONT = "DejaVuSansMono"
+
+            _LOGGER.info("Registered DejaVu fonts for Unicode/IPA support")
+        except Exception as exc:
+            _LOGGER.warning("Failed to register DejaVu fonts; using Helvetica fallback: %s", exc)
+        finally:
+            # Mark as attempted so we don't re-do I/O/registration on every request.
+            _REPORTLAB_FONTS_REGISTERED = True
+
 
 # Soft caps used when deciding whether a preview is likely to be truncated
 # on the client. These do not affect conversion outputs – they are only used
@@ -1489,33 +1541,11 @@ def _render_pdf_via_reportlab(
                 TableStyle,
             )
             from reportlab.lib import colors
-            from reportlab.pdfbase import pdfmetrics
-            from reportlab.pdfbase.ttfonts import TTFont
 
-            # Register DejaVu Sans fonts for full Unicode/IPA support
-            # The fonts are bundled in the project's fonts/ directory
-            _fonts_registered = False
-            try:
-                fonts_dir = Path(__file__).parent.parent / "fonts"
-                dejavu_sans = fonts_dir / "DejaVuSans.ttf"
-                dejavu_sans_bold = fonts_dir / "DejaVuSans-Bold.ttf"
-                dejavu_mono = fonts_dir / "DejaVuSansMono.ttf"
-
-                if dejavu_sans.exists():
-                    pdfmetrics.registerFont(TTFont("DejaVuSans", str(dejavu_sans)))
-                if dejavu_sans_bold.exists():
-                    pdfmetrics.registerFont(TTFont("DejaVuSans-Bold", str(dejavu_sans_bold)))
-                if dejavu_mono.exists():
-                    pdfmetrics.registerFont(TTFont("DejaVuSansMono", str(dejavu_mono)))
-                _fonts_registered = True
-                _LOGGER.info("Registered DejaVu fonts for Unicode/IPA support")
-            except Exception as e:
-                _LOGGER.warning("Failed to register DejaVu fonts, falling back to Helvetica: %s", e)
-
-            # Determine which fonts to use (DejaVu if available, else Helvetica)
-            _BODY_FONT = "DejaVuSans" if _fonts_registered else "Helvetica"
-            _BOLD_FONT = "DejaVuSans-Bold" if _fonts_registered else "Helvetica-Bold"
-            _MONO_FONT = "DejaVuSansMono" if _fonts_registered else "Courier"
+            _ensure_reportlab_fonts_registered()
+            _BODY_FONT = _REPORTLAB_BODY_FONT
+            _BOLD_FONT = _REPORTLAB_BOLD_FONT
+            _MONO_FONT = _REPORTLAB_MONO_FONT
 
             class HorizontalLine(Flowable):
                 """Draws a horizontal line separator"""

@@ -29,6 +29,7 @@ class handler(BaseHTTPRequestHandler):  # type: ignore[name-defined]
     def do_POST(self) -> None:  # noqa: N802
         try:
             try:
+                # Allow small overhead above upload cap for multipart boundaries + form fields.
                 form = parse_multipart_form(
                     self.headers,
                     self.rfile,

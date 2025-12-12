@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from email.parser import BytesParser
 from email.policy import default
-from typing import Dict, List, Union
+from typing import BinaryIO, Dict, List, Mapping, Union
 
 
 FormValue = Union[str, bytes]
@@ -26,7 +26,12 @@ class MultipartParseError(Exception):
         self.status = status
 
 
-def parse_multipart_form(headers, rfile, *, max_body_bytes: int | None = None) -> FormData:
+def parse_multipart_form(
+    headers: Mapping[str, str],
+    rfile: BinaryIO,
+    *,
+    max_body_bytes: int | None = None,
+) -> FormData:
     """Parse multipart/form-data from a BaseHTTPRequestHandler-like request.
 
     Args:
@@ -67,7 +72,10 @@ def parse_multipart_form(headers, rfile, *, max_body_bytes: int | None = None) -
         f"Content-Type: {content_type}\r\nMIME-Version: 1.0\r\n\r\n".encode("utf-8")
         + body
     )
-    msg = BytesParser(policy=default).parsebytes(mime_bytes)
+    try:
+        msg = BytesParser(policy=default).parsebytes(mime_bytes)
+    except Exception as exc:
+        raise MultipartParseError("Invalid multipart/form-data payload", status=400) from exc
     if not msg.is_multipart():
         raise MultipartParseError("Invalid multipart/form-data payload", status=400)
 
@@ -90,4 +98,3 @@ def parse_multipart_form(headers, rfile, *, max_body_bytes: int | None = None) -
         out.setdefault(name, []).append(text.rstrip("\r\n"))
 
     return out
-

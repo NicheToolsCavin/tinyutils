@@ -1734,3 +1734,31 @@ Files Modified
 • convert_backend/convert_service.py:1384 (control char strip in `_inline_markdown_to_html`)
 • convert_backend/convert_service.py:1406-1416 (new `_italic_asterisk` callback approach)
 • convert_backend/convert_service.py:1427 (control char strip in `_parse_markdown_to_flowables`)
+
+### Major changes — 2025-12-12 20:15 CET (UTC+01:00) — PDF Unicode/IPA font fallback (DejaVu) + license
+
+Added
+• Bundled DejaVu font files under `/fonts` for Unicode/IPA glyph coverage in generated PDFs.
+• Added `fonts/LICENSE` with the DejaVu/Bitstream Vera license text for compliance.
+
+Modified
+• ReportLab PDF fallback now registers DejaVu fonts once per process and uses them for body/bold/mono styles when available.
+
+Fixed
+• **Problem:** IPA symbols (ɪ, ə, ʃ, ŋ, θ, etc.) rendered as tofu/black squares in PDF output.
+  - **Root cause:** ReportLab’s default Helvetica/Vera fonts don’t include IPA glyphs (U+0250–U+02AF).
+  - **Fix:** Register DejaVu Sans fonts (bundled in `/fonts`) and use them for ReportLab PDF rendering.
+  - **Evidence:** New unit test asserts DejaVu font usage for IPA PDF generation.
+
+Human-readable summary
+
+Some documents (especially language-learning content) include IPA pronunciation symbols like “ə” and “ʃ”. Previously, TinyUtils PDFs could show these as empty squares because the default PDF fonts didn’t include those characters. This update bundles DejaVu fonts (which include IPA glyphs) and uses them automatically when TinyUtils generates PDFs locally, so IPA characters render correctly. A license file is included alongside the fonts, as required by the DejaVu/Bitstream Vera license.
+
+Impact
+• Markdown → PDF output correctly renders IPA symbols when the ReportLab fallback path is used ✅
+
+Testing
+• `.venv/bin/pytest -q tests/test_convert_backend_pdf_unicode_fonts.py` ✅
+
+Commits
+• (pending) fix(converter): DejaVu font registration caching + license
