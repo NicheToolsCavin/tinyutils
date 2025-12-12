@@ -10,15 +10,21 @@ API="$BASE/api/check"
 
 jq --version >/dev/null 2>&1 || { echo "jq required"; exit 2; }
 
-status_code() { awk 'NR==1{print $2}'; }
-content_type() { awk -F': ' 'BEGIN{IGNORECASE=1} tolower($1)=="content-type"{print tolower($2)}' | tr -d '\r'; }
+status_code() { awk '/^HTTP/{code=$2} END{print code}'; }
+content_type() {
+  awk -F': ' '
+    BEGIN{IGNORECASE=1}
+    tolower($1)=="content-type"{ct=tolower($2)}
+    END{gsub("\r","",ct); print ct}
+  ';
+}
 
 # Bootstrap protection bypass cookie if token provided
 BOOTSTRAP_ONCE=0
 maybe_bypass() {
   local token="${VERCEL_AUTOMATION_BYPASS_SECRET:-}"
   if [ $BOOTSTRAP_ONCE -eq 0 ] && [ -n "$token" ]; then
-    curl -sS -D "$ART/set_cookie.headers" -H "x-vercel-protection-bypass: $token" \
+    curl -sS -L --max-redirs 3 -D "$ART/set_cookie.headers" -H "x-vercel-protection-bypass: $token" \
       "${BASE%/}/?x-vercel-set-bypass-cookie=true" -c "$ART/cookies.txt" -o "$ART/set_cookie.html" || true
     BOOTSTRAP_ONCE=1
   fi
@@ -30,7 +36,7 @@ call_api () {
   # Save headers/body for diagnostics
   local hdr="$ART/resp.headers" body="$ART/resp.json"
   : > "$hdr"; : > "$body"
-  curl -sS -D "$hdr" -b "$ART/cookies.txt" -H 'content-type: application/json' \
+  curl -sS -L --max-redirs 3 -D "$hdr" -b "$ART/cookies.txt" -H 'content-type: application/json' \
     ${PREVIEW_SECRET:+-H "x-preview-secret: $PREVIEW_SECRET"} \
     -d "$json" "$API" -o "$body" || true
   local sc ct

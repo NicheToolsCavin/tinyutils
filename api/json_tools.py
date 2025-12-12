@@ -10,12 +10,12 @@ CSV hardening to keep spreadsheet formulas inert.
 """
 
 from http.server import BaseHTTPRequestHandler
-import cgi
 import csv
 import io
 import json
 from typing import Any, Dict, List
 
+from api._lib.multipart import MultipartParseError, parse_multipart_form
 
 MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024  # 50MB
 CSV_DANGEROUS_PREFIXES = ("=", "+", "-", "@")
@@ -58,20 +58,19 @@ def _harden_cell(value: Any) -> str:
 class handler(BaseHTTPRequestHandler):  # type: ignore[name-defined]
     def do_POST(self) -> None:  # noqa: N802
         try:
-            content_type, pdict = cgi.parse_header(self.headers.get("content-type"))
-            if content_type != "multipart/form-data":
-                self._send_error(400, "Content-Type must be multipart/form-data")
+            try:
+                # Allow small overhead above file cap for multipart boundaries + form fields.
+                form = parse_multipart_form(
+                    self.headers,
+                    self.rfile,
+                    max_body_bytes=MAX_FILE_SIZE_BYTES + (5 * 1024 * 1024),
+                )
+            except MultipartParseError as exc:
+                self._send_error(exc.status, str(exc))
                 return
 
-            boundary = pdict.get("boundary")
-            if not boundary:
-                self._send_error(400, "Missing multipart boundary")
-                return
-
-            pdict["boundary"] = boundary.encode("utf-8")
-            form = cgi.parse_multipart(self.rfile, pdict)
-
-            mode = form.get("mode", ["json_to_csv"])[0]
+            mode_value = (form.get("mode") or ["json_to_csv"])[0]
+            mode = mode_value if isinstance(mode_value, str) else "json_to_csv"
             files = form.get("file") or []
             if not files:
                 self._send_error(400, "No file uploaded")
@@ -176,4 +175,3 @@ class handler(BaseHTTPRequestHandler):  # type: ignore[name-defined]
         self.send_header("Cache-Control", "no-store")
         self.end_headers()
         self.wfile.write(json.dumps({"error": message}).encode("utf-8"))
-

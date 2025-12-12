@@ -27,3 +27,33 @@ Testing
 Commits
 • (pending) feat(csv-joiner): add /api/csv_join endpoint and Svelte tool page
 
+### Major changes — 2025-12-12 18:27 CET (UTC+01:00) — Python 3.13+ multipart parsing compatibility
+
+Added
+• New helper `api/_lib/multipart.py` that parses `multipart/form-data` uploads via the stdlib `email` module (avoids removed `cgi`).
+
+Modified
+• `/api/csv_join` (`api/csv_join.py`) now uses `parse_multipart_form(...)` for multipart parsing.
+
+Fixed
+• CSV Joiner no longer fails on Python 3.13+ where `import cgi` raises `ModuleNotFoundError`.
+
+Human-readable summary
+
+**Problem: uploads broke on newer Python**
+
+The CSV Joiner backend used Python’s old `cgi` module to read uploaded files. Newer Python versions removed `cgi`, which caused uploads to crash before the tool could even read the CSVs.
+
+**The fix: modern multipart parsing**
+
+TinyUtils now parses file uploads using a small helper built on Python’s `email` module (still standard library). The API behavior stays the same, but the tool works again on modern Python runtimes.
+
+Impact
+• Keeps `/api/csv_join` working on Python 3.13+ (local dev + future runtime upgrades). ✅
+
+Testing
+• `pnpm test` (includes Python import checks + multipart unit coverage) ✅
+• `.venv/bin/pytest -q` ✅
+
+Commits
+• (pending) fix(csv-joiner): replace deprecated cgi multipart parsing

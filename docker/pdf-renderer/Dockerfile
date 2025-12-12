@@ -68,7 +68,7 @@ RUN pip install --no-cache-dir fastapi uvicorn[standard] pydantic==2.* \
 WORKDIR /app
 COPY service /app
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-  CMD wget -qO- http://127.0.0.1:8080/healthz || exit 1
+  CMD wget -qO- http://127.0.0.1:8080/health || exit 1
 EXPOSE 8080
 ENV PORT=8080
 CMD ["uvicorn","main:app","--host","0.0.0.0","--port","8080"]

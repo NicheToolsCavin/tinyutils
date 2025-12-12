@@ -62,3 +62,33 @@ Testing
 Commits
 • (pending) feat(pdf-extract): accept single PDF uploads and clarify accepted types in Bulk PDF Text Extractor UI.
 
+### Major changes — 2025-12-12 18:27 CET (UTC+01:00) — Python 3.13+ multipart parsing compatibility
+
+Added
+• New helper `api/_lib/multipart.py` that parses `multipart/form-data` uploads via the stdlib `email` module (avoids removed `cgi`).
+
+Modified
+• `/api/pdf_extract` (`api/pdf_extract.py`) now uses `parse_multipart_form(...)` for multipart parsing.
+
+Fixed
+• PDF Text Extractor uploads no longer fail on Python 3.13+ where `import cgi` raises `ModuleNotFoundError`.
+
+Human-readable summary
+
+**Problem: uploads broke on newer Python**
+
+The PDF Text Extractor backend used Python’s old `cgi` module to read uploaded ZIP/PDF files. Newer Python versions removed `cgi`, which can crash uploads immediately.
+
+**The fix: modern multipart parsing**
+
+TinyUtils now parses file uploads using a small helper built on Python’s `email` module (still standard library). The API behavior stays the same, but the tool works again on modern Python runtimes.
+
+Impact
+• Keeps `/api/pdf_extract` working on Python 3.13+ (local dev + future runtime upgrades). ✅
+
+Testing
+• `pnpm test` (includes Python import checks + multipart unit coverage) ✅
+• `.venv/bin/pytest -q` ✅
+
+Commits
+• (pending) fix(pdf-extract): replace deprecated cgi multipart parsing
