@@ -61,9 +61,8 @@ class handler(BaseHTTPRequestHandler):  # type: ignore[name-defined]
                 self._send_error(exc.status, str(exc))
                 return
 
-            action = (form.get("action") or ["scan"])[0]
-            if not isinstance(action, str):
-                action = "scan"
+            action_value = (form.get("action") or ["scan"])[0]
+            action = action_value if isinstance(action_value, str) else "scan"
             files = form.get("files") or []
 
             if len(files) < 2:
