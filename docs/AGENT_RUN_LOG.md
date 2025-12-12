@@ -1418,3 +1418,16 @@
   - Made scripts/smoke_dlf_extras.sh follow redirects and read final HTTP status (fixes apex→www 308 causing false failures)
 - **Evidence:** artifacts/repo-review/20251212/smoke_dlf_extras_retry.txt
 - **Follow-ups:**
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-12 23:09 CET - Manual - repo review follow-ups (pytest + multipart hardening)
+- **Mode:** manual
+- **Branch:** `fix/unicode-ipa-fonts`
+- **Summary:**
+  - Added pytest.ini to ignore local gitignored test_artifacts so the default pytest run stays clean.
+  - Hardened Python multipart parsing (chunked reads, clearer action/mode handling) and added unit coverage.
+  - Simplified ReportLab DejaVu font registration locking and improved fallback logging.
+- **Evidence:** artifacts/repo-review/20251212/final_20251212-230711_pytest.txt
+- **Follow-ups:**
+
