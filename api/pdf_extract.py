@@ -11,7 +11,6 @@ per file.
 """
 
 from http.server import BaseHTTPRequestHandler
-import cgi
 import io
 import json
 import os
@@ -20,6 +19,7 @@ from typing import List
 
 from pypdf import PdfReader
 
+from api._lib.multipart import MultipartParseError, parse_multipart_form
 
 MAX_UPLOAD_SIZE_BYTES = 50 * 1024 * 1024  # 50MB upload cap
 MAX_FILES_LIMIT = 50  # Avoid runaway processing
@@ -28,18 +28,15 @@ MAX_FILES_LIMIT = 50  # Avoid runaway processing
 class handler(BaseHTTPRequestHandler):  # type: ignore[name-defined]
     def do_POST(self) -> None:  # noqa: N802
         try:
-            content_type, pdict = cgi.parse_header(self.headers.get("content-type"))
-            if content_type != "multipart/form-data":
-                self._send_error(400, "Content-Type must be multipart/form-data")
+            try:
+                form = parse_multipart_form(
+                    self.headers,
+                    self.rfile,
+                    max_body_bytes=MAX_UPLOAD_SIZE_BYTES + (5 * 1024 * 1024),
+                )
+            except MultipartParseError as exc:
+                self._send_error(exc.status, str(exc))
                 return
-
-            boundary = pdict.get("boundary")
-            if not boundary:
-                self._send_error(400, "Missing multipart boundary")
-                return
-
-            pdict["boundary"] = boundary.encode("utf-8")
-            form = cgi.parse_multipart(self.rfile, pdict)
 
             uploaded_files: List[bytes] = form.get("file") or []
             if not uploaded_files:
