@@ -12,13 +12,13 @@ results in Excel/Sheets does not execute formulas.
 """
 
 from http.server import BaseHTTPRequestHandler
-import cgi
 import csv
 import io
 import json
 import sys
 from typing import List
 
+from api._lib.multipart import MultipartParseError, parse_multipart_form
 
 # Allow very large CSV fields (long text blobs)
 csv.field_size_limit(sys.maxsize)
@@ -50,18 +50,15 @@ def _harden_row(row: List[str]) -> List[str]:
 class handler(BaseHTTPRequestHandler):  # type: ignore[name-defined]
     def do_POST(self) -> None:  # noqa: N802 (BaseHTTPRequestHandler API)
         try:
-            content_type, pdict = cgi.parse_header(self.headers.get("content-type"))
-            if content_type != "multipart/form-data":
-                self._send_error(400, "Content-Type must be multipart/form-data")
+            try:
+                form = parse_multipart_form(
+                    self.headers,
+                    self.rfile,
+                    max_body_bytes=(2 * MAX_FILE_SIZE_BYTES) + (10 * 1024 * 1024),
+                )
+            except MultipartParseError as exc:
+                self._send_error(exc.status, str(exc))
                 return
-
-            boundary = pdict.get("boundary")
-            if not boundary:
-                self._send_error(400, "Missing multipart boundary")
-                return
-
-            pdict["boundary"] = boundary.encode("utf-8")
-            form = cgi.parse_multipart(self.rfile, pdict)
 
             action = form.get("action", ["scan"])[0]
             files = form.get("files") or []
@@ -205,4 +202,3 @@ class handler(BaseHTTPRequestHandler):  # type: ignore[name-defined]
         self.send_header("Cache-Control", "no-store")
         self.end_headers()
         self.wfile.write(json.dumps({"error": message}).encode("utf-8"))
-

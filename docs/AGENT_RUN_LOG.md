@@ -1406,3 +1406,15 @@
 - **Follow-ups:**
   - Owner: resolve the /api/bulk-replace 307 redirect loop in Vercel so the Bulk Replace API smoke can exercise the Python handler and return JSON (then rerun tests/e2e/bulk-replace-api-smoke.mjs).
 
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-12 18:29 CET - Manual - repo review bug sweep
+- **Mode:** manual
+- **Branch:** `fix/unicode-ipa-fonts`
+- **Summary:**
+  - Replaced deprecated Python cgi multipart parsing with stdlib email-based parser for /api/csv_join, /api/json_tools, /api/pdf_extract
+  - Added multipart parsing test coverage and updated Node tests to no longer depend on `import cgi`
+  - Fixed svelte-check/build warnings by adding a hidden sentinel element for dynamically-applied preview status classes in the text converter page
+  - Made scripts/smoke_dlf_extras.sh follow redirects and read final HTTP status (fixes apex→www 308 causing false failures)
+- **Evidence:** artifacts/repo-review/20251212/smoke_dlf_extras_retry.txt
+- **Follow-ups:**
