@@ -1431,3 +1431,15 @@
 - **Evidence:** artifacts/repo-review/20251212/final_20251212-230711_pytest.txt
 - **Follow-ups:**
 
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-13 12:14 CET - Manual - image compressor deep review
+- **Mode:** manual
+- **Branch:** `feat/image-compressor`
+- **Summary:**
+  - Added new /tools/image-compressor/ tool (client-side compress/convert, HEIC decode, ZIP batch, worker pipeline).
+  - Fixed image-compressor UX edge cases (cancel race, progress counting, safer single-file download names, better MIME inference).
+  - Updated CSP to allow blob image previews + wasm decode; updated sitemaps; added a UI smoke script.
+- **Evidence:** artifacts/ui/image-compressor/20251213/
+- **Follow-ups:**
+  - Open a PR for feat/image-compressor when ready.
