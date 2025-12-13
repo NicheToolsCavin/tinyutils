@@ -8,11 +8,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.resolve(__dirname, '..');
 
-let PYTHON_HAS_CGI = true;
+let PYTHON_AVAILABLE = true;
 try {
-	execFileSync('python3', ['-c', 'import cgi'], { cwd: ROOT, encoding: 'utf8' });
+	execFileSync('python3', ['--version'], { cwd: ROOT, encoding: 'utf8' });
 } catch {
-	PYTHON_HAS_CGI = false;
+	PYTHON_AVAILABLE = false;
 }
 
 function runPython(code) {
@@ -33,7 +33,7 @@ function pythonImport(moduleName, relPath, expr) {
 	return JSON.parse(runPython(code));
 }
 
-test('csv_join._harden_row prefixes spreadsheet-style prefixes', { skip: !PYTHON_HAS_CGI }, () => {
+test('csv_join._harden_row prefixes spreadsheet-style prefixes', { skip: !PYTHON_AVAILABLE }, () => {
 	const result = pythonImport(
 		'csv_join',
 		'api/csv_join.py',
@@ -42,7 +42,7 @@ test('csv_join._harden_row prefixes spreadsheet-style prefixes', { skip: !PYTHON
 	assert.deepEqual(result, ["'=SUM(A1:A2)", "'+PLUS", "'-MINUS", "'@CMD", 'safe', '']);
 });
 
-test('json_tools._harden_cell matches CSV hardening rules', { skip: !PYTHON_HAS_CGI }, () => {
+test('json_tools._harden_cell matches CSV hardening rules', { skip: !PYTHON_AVAILABLE }, () => {
 	const values = ['=X', '+X', '-X', '@X', ' ok', '', null];
 	const hardened = pythonImport(
 		'json_tools',
@@ -52,7 +52,7 @@ test('json_tools._harden_cell matches CSV hardening rules', { skip: !PYTHON_HAS_
 	assert.deepEqual(hardened, ["'=X", "'+X", "'-X", "'@X", ' ok', '', '']);
 });
 
-test('flatten_json flattens nested objects and arrays reliably', { skip: !PYTHON_HAS_CGI }, () => {
+test('flatten_json flattens nested objects and arrays reliably', { skip: !PYTHON_AVAILABLE }, () => {
 	const flattened = pythonImport(
 		'json_tools',
 		'api/json_tools.py',
