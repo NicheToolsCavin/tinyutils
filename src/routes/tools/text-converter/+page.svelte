@@ -1528,6 +1528,7 @@ Prism.highlightAll();
           aria-live="polite"
           hidden
         ></div>
+        <div class="css-sentinel preview-status--info preview-status--warn"></div>
         <div id="previewHtmlBox" class="preview-html">
           <div
             id="previewHeader"
