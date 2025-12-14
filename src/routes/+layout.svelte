@@ -39,8 +39,8 @@
       <nav class="nav">
         <a
           href="/tools/"
-          class:active={page.url.pathname.startsWith('/tools/')}
-          aria-current={page.url.pathname.startsWith('/tools/') ? 'page' : undefined}
+          class:active={page.url.pathname === '/tools' || page.url.pathname.startsWith('/tools/')}
+          aria-current={page.url.pathname === '/tools' || page.url.pathname.startsWith('/tools/') ? 'page' : undefined}
           >Tools</a
         >
         <a
