@@ -1480,3 +1480,16 @@
 - **Evidence:** artifacts/nav/20251214/
 - **Follow-ups:**
 
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-14 16:56 CET - Manual - open PR for nav/blog uniformity
+- **Mode:** manual
+- **Branch:** `nav-blog-uniform`
+- **Summary:**
+  - Opened PR #62 for nav/blog uniformity changes.
+  - Branch pushed: nav-blog-uniform (commit 7485897).
+  - Nav now includes Blog link across site, active highlighting, and unified Privacy dropdown.
+- **Evidence:** artifacts/nav/20251214/
+- **Follow-ups:**
+  - Wait for Vercel preview URL on PR #62, then run scripts/preview_smoke.mjs against it.
+
