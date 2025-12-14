@@ -1493,3 +1493,16 @@
 - **Follow-ups:**
   - Wait for Vercel preview URL on PR #62, then run scripts/preview_smoke.mjs against it.
 
+### 2025-12-14 17:20 CET - Manual - fix Vercel preview build + validate preview smoke
+- **Mode:** manual
+- **Branch:** `nav-blog-uniform`
+- **Summary:**
+  - Fixed Vercel preview build failure caused by an incorrect SvelteKit import in `src/routes/+layout.svelte` (`/state` → `$app/state`).
+  - Tweaked SvelteKit Tools nav highlighting so it marks active for both `/tools` and `/tools/*`.
+  - Verified the latest Vercel preview is now deployable and ran `scripts/preview_smoke.mjs` against the newest preview URL (PASS).
+- **Evidence:**
+  - PR #62 checks green (including Vercel).
+  - Preview URL (latest): https://tinyutils-19y4pbw7s-cavins-projects-7b0e00bb.vercel.app
+  - Local: `pnpm build` OK; `pnpm check` + `pnpm test` OK.
+- **Follow-ups:**
+  - None (ready to merge when desired).
