@@ -2,48 +2,9 @@
 <meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
 <title>Privacy — TinyUtils</title>
 <script src='/scripts/theme-toggle.js'></script>
+<script defer src='/scripts/nav-active.js'></script>
 <link rel='stylesheet' href='/styles/site.css'><link rel='stylesheet' href='/public/styles.css'><link rel="icon" href="/public/icons/tinyutils-icon-dark-32.png" media="(prefers-color-scheme: dark)"><link rel="icon" href="/public/icons/tinyutils-icon-light-32.png" media="(prefers-color-scheme: light)"><link rel="icon" type="image/png" sizes="32x32" href="/public/icons/tinyutils-icon-dark-32.png"><link rel="apple-touch-icon" sizes="180x180" href="/public/icons/tinyutils-icon-light-180.png">
-<style>
-  /* Dropdown menu styles */
-  .nav-item {
-    position: relative;
-    display: inline-block;
-  }
 
-  .nav-dropdown {
-    display: none;
-    position: absolute;
-    top: 100%;
-    right: 0;
-    background: var(--surface-base);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-lg);
-    padding: var(--space-2);
-    margin-top: var(--space-3);
-    min-width: 200px;
-    box-shadow: var(--shadow-xl);
-    z-index: 1000;
-  }
-
-  .nav-item:hover .nav-dropdown {
-    display: block;
-  }
-
-  .nav-dropdown a {
-    display: block;
-    padding: var(--space-2) var(--space-3);
-    color: var(--text-primary);
-    text-decoration: none;
-    border-radius: var(--radius-md);
-    transition: all var(--transition-base);
-    font-size: var(--text-sm);
-  }
-
-  .nav-dropdown a:hover {
-    background: var(--surface-raised);
-    color: var(--brand-500);
-  }
-</style>
   <script defer src="/scripts/analytics.js"></script>
 </head>
 <body>
@@ -57,8 +18,9 @@
         <a href="/tools/">Tools</a>
         <a href="/blog/">Blog</a>
         <a href="/about.html">About</a>
+        <a href="https://buymeacoffee.com/tinyutils" target="_blank" rel="noopener" class="support-link">☕ Support</a>
         <span class="nav-item">
-          <a class="active" href="/privacy.html">Privacy</a>
+          <a href="/privacy.html">Privacy</a>
           <div class="nav-dropdown">
             <a href="/cookies.html">Cookie settings</a>
             <a href="/privacy.html">Privacy policy</a>
@@ -74,7 +36,7 @@
 <main id='main'><div class='container'><div class='card'>
 <h2>Privacy</h2>
 <p>No login, no user accounts, and no selling of your personal data. TinyUtils runs on Vercel's infrastructure, which maintains server logs (including URLs and IP addresses) for operational purposes. We don't directly access or sell this data, but Vercel retains logs per their own policies.</p>
-<p>We may use privacy-friendly analytics to understand which tools are used the most; when analytics are on, measurements are aggregated and you can disable them at any time. For a more detailed, user-facing view of cookies, ads, and local storage, see our <a href='/cookies.html'>Cookie &amp; privacy settings</a> page.</p>
+<p>We may use privacy-friendly analytics to understand which tools are used the most; when analytics are on, measurements are aggregated and you can disable them at any time. For a more detailed, user-facing view of cookies, ads, and local storage, see our <a href='/cookies.html'>Cookie settings</a> page.</p>
 <p>Google Ads (AdSense) may appear on some pages. Google may use cookies or similar technologies to deliver and measure ads; TinyUtils does not get access to your raw ad profile. For more about how Google uses information from sites like ours, see <a href='https://business.safety.google/privacy/' target='_blank' rel='noreferrer'>Google's Privacy &amp; Terms for partners</a>.</p>
 </div></div>
 </main>
@@ -85,7 +47,7 @@
     <span>
       <a href="/about.html">About</a> ·
       <a href="/blog/">Blog</a> ·
-      <a href="/cookies.html">Cookie &amp; privacy settings</a> ·
+      <a href="/cookies.html">Cookie settings</a> ·
       <a href="/privacy.html">Privacy</a> ·
       <a href="/terms.html">Terms</a>
     </span>
