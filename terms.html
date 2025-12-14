@@ -2,48 +2,9 @@
 <meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
 <title>Terms — TinyUtils</title>
 <script src='/scripts/theme-toggle.js'></script>
+<script defer src='/scripts/nav-active.js'></script>
 <link rel='stylesheet' href='/styles/site.css'><link rel='stylesheet' href='/public/styles.css'><link rel="icon" href="/public/icons/tinyutils-icon-dark-32.png" media="(prefers-color-scheme: dark)"><link rel="icon" href="/public/icons/tinyutils-icon-light-32.png" media="(prefers-color-scheme: light)"><link rel="icon" type="image/png" sizes="32x32" href="/public/icons/tinyutils-icon-dark-32.png"><link rel="apple-touch-icon" sizes="180x180" href="/public/icons/tinyutils-icon-light-180.png">
-<style>
-  /* Dropdown menu styles */
-  .nav-item {
-    position: relative;
-    display: inline-block;
-  }
 
-  .nav-dropdown {
-    display: none;
-    position: absolute;
-    top: 100%;
-    right: 0;
-    background: var(--surface-base);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-lg);
-    padding: var(--space-2);
-    margin-top: var(--space-3);
-    min-width: 200px;
-    box-shadow: var(--shadow-xl);
-    z-index: 1000;
-  }
-
-  .nav-item:hover .nav-dropdown {
-    display: block;
-  }
-
-  .nav-dropdown a {
-    display: block;
-    padding: var(--space-2) var(--space-3);
-    color: var(--text-primary);
-    text-decoration: none;
-    border-radius: var(--radius-md);
-    transition: all var(--transition-base);
-    font-size: var(--text-sm);
-  }
-
-  .nav-dropdown a:hover {
-    background: var(--surface-raised);
-    color: var(--brand-500);
-  }
-</style>
   <script defer src="/scripts/analytics.js"></script>
 </head>
 <body>
@@ -57,8 +18,9 @@
         <a href="/tools/">Tools</a>
         <a href="/blog/">Blog</a>
         <a href="/about.html">About</a>
+        <a href="https://buymeacoffee.com/tinyutils" target="_blank" rel="noopener" class="support-link">☕ Support</a>
         <span class="nav-item">
-          <a class="active" href="/privacy.html">Privacy</a>
+          <a href="/privacy.html">Privacy</a>
           <div class="nav-dropdown">
             <a href="/cookies.html">Cookie settings</a>
             <a href="/privacy.html">Privacy policy</a>
@@ -83,7 +45,7 @@
     <span>
       <a href="/about.html">About</a> ·
       <a href="/blog/">Blog</a> ·
-      <a href="/cookies.html">Cookie &amp; privacy settings</a> ·
+      <a href="/cookies.html">Cookie settings</a> ·
       <a href="/privacy.html">Privacy</a> ·
       <a href="/terms.html">Terms</a>
     </span>

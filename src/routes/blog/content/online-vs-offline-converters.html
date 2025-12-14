@@ -1,0 +1,129 @@
+<p>
+  Choosing between an online converter and an offline converter feels like a philosophical debate until you have a deadline.
+  Then it becomes: “what will work <em>right now</em>, and will it mess up my formatting?”
+</p>
+
+<p>
+  This guide is a practical decision tree.
+  You’ll get a clear answer for common scenarios (sensitive docs, big batches, tricky formatting), plus a short QA checklist.
+</p>
+
+<h2 id="tldr">TL;DR</h2>
+<ul>
+  <li><strong>Quick, one-off conversions:</strong> online is usually easiest.</li>
+  <li><strong>Sensitive/confidential files:</strong> offline is usually safer.</li>
+  <li><strong>Formatting matters (tables, math, complex layouts):</strong> plan to QA either way.</li>
+  <li><strong>Batch jobs / automation:</strong> offline tools and scripts often win.</li>
+</ul>
+
+<h2 id="tradeoffs">The real tradeoffs</h2>
+
+<h3>1) Privacy</h3>
+<p>
+  Offline conversion is the simplest privacy story: the file stays on your machine.
+  With online conversion, you’re uploading the file somewhere — which might be totally fine for a resume,
+  and totally not fine for client contracts.
+</p>
+
+<p>
+  If you do use an online converter, look for clear privacy language.
+  For example, TinyUtils’ converter pages and FAQ state that uploaded files are automatically deleted after conversion.
+  (Still: if the file is truly sensitive, offline is the conservative choice.)
+</p>
+
+<h3>2) Convenience</h3>
+<p>
+  Online tools are great for “I’m on a laptop with no setup time.”
+  Open a tab, drop a file, download the result.
+  No installs. No dependencies.
+</p>
+
+<h3>3) Formatting fidelity</h3>
+<p>
+  This is the sneaky one.
+  Some conversions are easy (DOCX ↔ PDF for simple docs).
+  Others are inherently messy (complex tables, footnotes, math, custom fonts).
+</p>
+
+<p>
+  The important mindset: conversion is translation.
+  Translation is never 100% perfect.
+  Your job is to choose the best translator <em>and then proofread</em>.
+</p>
+
+<h3>4) Speed</h3>
+<p>
+  Offline can be faster for big batches (no upload time).
+  Online can be faster for one-offs (no install time).
+  Pick the bottleneck you’d rather have.
+</p>
+
+<h3>5) Automation</h3>
+<p>
+  If you need to convert hundreds of files repeatedly, offline tools and scripts tend to be the best fit.
+  They’re more controllable and reproducible.
+  Online tools are usually better for human-in-the-loop workflows.
+</p>
+
+<h2 id="when-online">When an online converter is the best choice</h2>
+<ul>
+  <li>You’re doing a quick one-off conversion.</li>
+  <li>You’re on a locked-down machine (no installs).</li>
+  <li>You need something shareable for non-technical teammates.</li>
+  <li>The file is not sensitive (or your org approves the workflow).</li>
+</ul>
+
+<p>
+  If that’s you, try the TinyUtils converter:
+  <a href="/tools/text-converter/">Document Converter</a>.
+</p>
+
+<h2 id="when-offline">When an offline converter is the best choice</h2>
+<ul>
+  <li>The document is confidential or regulated.</li>
+  <li>You need repeatable batch conversions.</li>
+  <li>You want full control over fonts, templates, and exact tool versions.</li>
+  <li>You’re converting the same format combination often.</li>
+</ul>
+
+<p>
+  Offline examples (depending on formats):
+  Pandoc, LibreOffice, and other local tooling.
+  (Which one is “best” depends heavily on what you’re converting.)
+</p>
+
+<h2 id="qa">QA checklist (do this every time you care about quality)</h2>
+<p>
+  If you only do one thing: do a 60-second spot-check.
+  It will save you from the “everything looked fine until the PDF went to the client” moment.
+</p>
+<ul>
+  <li><strong>Headings:</strong> are H1/H2/H3 preserved?</li>
+  <li><strong>Lists:</strong> do bullets and numbering still make sense?</li>
+  <li><strong>Tables:</strong> are columns aligned and readable?</li>
+  <li><strong>Links:</strong> are URLs still clickable and correct?</li>
+  <li><strong>Images:</strong> missing images are common — check them.</li>
+  <li><strong>“Blank output” check:</strong> scroll the output. Seriously. It happens.</li>
+</ul>
+
+<h2 id="faq">FAQ</h2>
+
+<h3>Is “online converter” automatically unsafe?</h3>
+<p>
+  Not automatically.
+  It depends on the tool’s privacy posture, your risk tolerance, and the content.
+  But if the file is truly sensitive, offline is the simplest safe answer.
+</p>
+
+<h3>Which format conversions are the hardest?</h3>
+<p>
+  Complex layouts (tables, footnotes, math, fancy typography) are harder.
+  Plain text and simple docs are easier.
+</p>
+
+<h2 id="next">Next steps</h2>
+<p>
+  If you want a quick conversion now, start with
+  <a href="/tools/text-converter/">TinyUtils Document Converter</a>.
+  If you’re converting something sensitive, use offline tools — and still do the QA checklist.
+</p>

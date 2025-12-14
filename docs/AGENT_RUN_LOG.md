@@ -1443,3 +1443,40 @@
 - **Evidence:** artifacts/ui/image-compressor/20251213/
 - **Follow-ups:**
   - Open a PR for feat/image-compressor when ready.
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-14 00:41 CET - Manual - add human writing skill + humanize blog outlines
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Added a reusable human-writing skill checklist for natural TinyUtils blog voice.
+  - Rewrote the /blog/best-broken-link-checkers/ outline copy to be more specific and less template-like.
+- **Evidence:** artifacts/blog/20251214/
+- **Follow-ups:**
+  - Apply the same voice pass to the other blog outlines in src/routes/blog/postData.js.
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-14 00:48 CET - Manual - casual persona pass for blog outlines
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Expanded the human-writing skill with a persona mode for casual, varied blog voice.
+  - Rewrote all blog outline placeholders in src/routes/blog/postData.js with varied casual personas (funny/matter-of-fact/touching) while staying honest.
+- **Evidence:** artifacts/blog/20251214/
+- **Follow-ups:**
+  - Optional: apply the same persona approach to the actual full blog posts as they get written.
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-14 14:21 CET - Manual - unify nav + blog link + active highlighting
+- **Mode:** manual
+- **Branch:** `fix/nav-blog-uniform`
+- **Summary:**
+  - Made header navigation consistent across static pages, tool pages, and blog pages; added Blog + Support links everywhere.
+  - Added active highlighting via JS (static) and route-aware active classes (SvelteKit layout).
+  - Removed duplicated dropdown CSS and centralized nav styling in site.css; fixed theme-toggle favicon path detection for /public/icons vs /icons.
+- **Evidence:** artifacts/nav/20251214/
+- **Follow-ups:**
+
