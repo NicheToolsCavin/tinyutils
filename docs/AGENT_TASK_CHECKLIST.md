@@ -13,6 +13,7 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 ## Active Tasks (Newest First)
 
 | Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
+| Open PR: nav/blog uniformity | manual-2025-12-14 CET | Completed | ✅ Opened PR #62 from branch nav-blog-uniform (commit 7485897) and pushed to origin. Next: grab Vercel Preview URL from PR comment and run preview_smoke.mjs. |
 | Unify nav + show Blog everywhere + active highlighting | manual-2025-12-14 CET | Completed | ✅ Unified header nav across static HTML, tools, blog, and SvelteKit layout; added Blog + Support links, Privacy dropdown, and active highlighting (scripts/nav-active.js + Svelte route-aware classes). Tests: pnpm test PASS; pnpm check PASS. |
 | Unify nav + show Blog everywhere + active highlighting | manual-2025-12-14 CET | Completed | ✅ Unified header nav across static HTML, tools, blog, and SvelteKit layout; added Blog and Support links, dropdown Privacy section, and active highlighting (nav-active.js + Svelte route classes). Tests: pnpm test PASS; pnpm check PASS. Evidence: artifacts/nav/20251214/ (manual browser QA on localhost). |
 | Casual persona pass for TinyUtils blog outlines | manual-2025-12-14 | Completed | ✅ Updated human-writing skill with persona mode and rewrote blog outline placeholders across src/routes/blog/postData.js. Evidence: artifacts/blog/20251214/blog-outlines-personas.txt |
