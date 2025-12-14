@@ -1,5 +1,5 @@
 <script>
-  import { page } from '/state';
+  import { page } from '$app/state';
   import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
 
   const currentYear = new Date().getFullYear();
