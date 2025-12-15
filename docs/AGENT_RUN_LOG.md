@@ -26,6 +26,62 @@
 <!-- RECENT ACTIVITY (Full Context) -->
 
 
+### 2025-12-15 08:30 CET - Claude Code - 43 new SEO blog posts (overnight batch)
+
+**Overnight autonomous blog writing session:**
+
+Completed the 73-topic SEO blog matrix by writing all remaining 43 blog content files. Session included:
+
+**Document Converter Blogs (31 new files):**
+- Markdown converters: markdown-to-html, markdown-to-epub, markdown-to-odt, markdown-to-rtf, markdown-to-latex, markdown-to-txt
+- PDF converters: pdf-to-html, pdf-to-txt, pdf-to-odt, pdf-to-rtf, pdf-to-epub
+- DOCX converters: docx-to-html, docx-to-odt, docx-to-rtf, docx-to-txt, docx-to-epub
+- ODT converters: odt-to-pdf, odt-to-docx, odt-to-markdown, odt-to-html, odt-to-rtf
+- RTF converters: rtf-to-pdf, rtf-to-docx
+- EPUB converters: epub-to-pdf, epub-to-markdown
+- LaTeX converters: latex-to-pdf, latex-to-html
+- HTML converters: html-to-docx, html-to-txt, html-to-epub, html-to-odt
+- Special: word-track-changes-to-clean
+
+**Image Converter Blogs (5 new files):**
+- jpg-to-png-converter, batch-image-compression, optimize-png-for-web, webp-compression-guide, extract-text-from-pdf
+
+**SEO/Link Tool Blogs (7 new files):**
+- sitemap-comparison-tool, privacy-first-web-tools
+- broken-link-checker-agencies, broken-link-checker-api
+- fix-broken-links-archive-org, website-time-machine-guide
+
+**Updated postData.js** with all 43 new imports and post entries.
+
+**Total blogs now: 73** (30 previous + 43 new = complete SEO matrix)
+
+Files: src/routes/blog/content/*.html (43 new), src/routes/blog/postData.js
+
+Tests: pnpm check PASS (0 errors), pnpm test PASS (72/72, 5 skipped)
+
+
+### 2025-12-15 17:45 CET - Claude Code - Bug fixes + 9 new SEO blogs
+
+**Bug fixes from security/logic/performance audit:**
+- Fixed redirect loop off-by-one in check.js (line 276: `<=` → `<`)
+- Fixed worker slot acquisition tracking in check.js (added `slotAcquired` guard for counter decrement)
+- Fixed nested sitemap silent drop in sitemap-delta.js (added warning note)
+- Added DocumentFragment for DOM rendering performance in dead-link-finder
+- Documented CSP unsafe-inline for future refactor in AGENT_TASK_CHECKLIST.md
+
+**9 new SEO blog posts created:**
+- heic-to-png-converter, gif-to-webp-converter, png-to-jpg-converter (image)
+- markdown-to-pdf-converter, markdown-to-docx-converter (document)
+- html-to-pdf-converter, html-to-markdown-converter (document)
+- docx-to-pdf-converter, pdf-to-docx-converter (document)
+
+**Total blogs now: 30** (12 original + 18 new across two sessions)
+
+Files: api/check.js, api/sitemap-delta.js, tools/dead-link-finder/index.html, docs/AGENT_TASK_CHECKLIST.md, src/routes/blog/postData.js, src/routes/blog/content/*.html (9 new)
+
+Tests: pnpm check PASS (0 errors), pnpm test PASS (72/72)
+
+
 ### 2025-12-03 17:15 CET - Claude Code - MD→PDF: Control character cleanup and italic asterisk handling
 
 - **Mode:** autonomous

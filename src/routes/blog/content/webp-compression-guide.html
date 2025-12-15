@@ -1,0 +1,117 @@
+<p>
+  WebP is the modern image format for the web. It's smaller than JPG and PNG
+  while maintaining quality. Here's how to use it effectively.
+</p>
+
+<h2 id="tldr">TL;DR</h2>
+<ul>
+  <li>WebP offers 25-50% smaller files than JPG/PNG</li>
+  <li>Supports both lossy (like JPG) and lossless (like PNG)</li>
+  <li>Supports transparency (like PNG)</li>
+  <li>All modern browsers support WebP</li>
+  <li>Use <a href="/tools/image-compressor/">TinyUtils Image Compressor</a> to convert</li>
+</ul>
+
+<h2 id="what">What is WebP?</h2>
+<p>
+  WebP is an image format developed by Google. It uses modern compression techniques
+  to achieve smaller file sizes without visible quality loss. It's now supported
+  by all major browsers (Chrome, Firefox, Safari, Edge).
+</p>
+
+<h2 id="benefits">Benefits of WebP</h2>
+<ul>
+  <li><strong>Smaller files</strong> — 25-50% smaller than equivalent JPG/PNG</li>
+  <li><strong>Faster loading</strong> — Less data = faster pages</li>
+  <li><strong>Transparency</strong> — Alpha channel support</li>
+  <li><strong>Animation</strong> — Can replace GIF (smaller files)</li>
+</ul>
+
+<h2 id="settings">Quality settings</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Quality</th>
+      <th>Use case</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>100%</td>
+      <td>Lossless</td>
+      <td>Same as PNG quality</td>
+    </tr>
+    <tr>
+      <td>85-90%</td>
+      <td>High quality photos</td>
+      <td>Recommended default</td>
+    </tr>
+    <tr>
+      <td>75-80%</td>
+      <td>Web images</td>
+      <td>Good balance</td>
+    </tr>
+    <tr>
+      <td>60-70%</td>
+      <td>Thumbnails</td>
+      <td>Noticeable compression</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="convert">How to convert to WebP</h2>
+<ol>
+  <li>Open <a href="/tools/image-compressor/">TinyUtils Image Compressor</a></li>
+  <li>Drop your JPG, PNG, or other images</li>
+  <li>Select <strong>WebP</strong> as output format</li>
+  <li>Adjust quality (85% recommended)</li>
+  <li>Download the WebP files</li>
+</ol>
+
+<h2 id="compatibility">Browser compatibility</h2>
+<p>
+  As of 2023, WebP is supported by:
+</p>
+<ul>
+  <li>Chrome (since 2010)</li>
+  <li>Firefox (since 2019)</li>
+  <li>Safari (since 2020)</li>
+  <li>Edge (since Chromium switch)</li>
+</ul>
+<p>
+  Only Internet Explorer lacks support — and IE is dead.
+</p>
+
+<h2 id="serving">Serving WebP on your site</h2>
+<p>
+  Use the <code>&lt;picture&gt;</code> element for fallbacks:
+</p>
+<pre><code>&lt;picture&gt;
+  &lt;source srcset="image.webp" type="image/webp"&gt;
+  &lt;img src="image.jpg" alt="Description"&gt;
+&lt;/picture&gt;</code></pre>
+
+<h2 id="faq">FAQ</h2>
+
+<h3>Should I convert all my images to WebP?</h3>
+<p>
+  For web use, yes. The file size savings are worth it.
+</p>
+
+<h3>Is WebP better than AVIF?</h3>
+<p>
+  AVIF is newer and can be smaller, but has less browser support.
+  WebP is the safer choice for now.
+</p>
+
+<h3>Can I use WebP in email?</h3>
+<p>
+  Email clients vary. JPG/PNG are safer for email. WebP is best for web.
+</p>
+
+<h2 id="next">Next steps</h2>
+<p>
+  Ready to optimize with WebP? Open <a href="/tools/image-compressor/">TinyUtils Image Compressor</a>
+  and convert your images.
+</p>

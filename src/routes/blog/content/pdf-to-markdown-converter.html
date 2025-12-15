@@ -1,0 +1,102 @@
+<p>
+  You've got a PDF full of content you need in Markdown.
+  Maybe it's documentation you want to put on GitHub.
+  Maybe it's a report you need to edit in a static site generator.
+  Whatever the reason, here's how to convert PDF to Markdown cleanly.
+</p>
+
+<h2 id="tldr">TL;DR</h2>
+<ul>
+  <li>Use <a href="/tools/text-converter/">TinyUtils Document Converter</a> to convert PDF to Markdown.</li>
+  <li>Works best with text-based PDFs (not scanned images).</li>
+  <li>Preserves headings, lists, tables, and basic formatting.</li>
+  <li>Complex layouts may need manual cleanup.</li>
+</ul>
+
+<h2 id="why">Why convert PDF to Markdown?</h2>
+<ul>
+  <li><strong>Version control</strong> — Markdown plays nice with Git</li>
+  <li><strong>Static sites</strong> — Jekyll, Hugo, Astro all use Markdown</li>
+  <li><strong>Documentation</strong> — README files, wikis, docs-as-code</li>
+  <li><strong>Editing</strong> — Markdown is easier to edit than PDF</li>
+  <li><strong>Portability</strong> — Plain text works everywhere</li>
+</ul>
+
+<h2 id="how">How to convert PDF to Markdown</h2>
+<ol>
+  <li>Open <a href="/tools/text-converter/">TinyUtils Document Converter</a>.</li>
+  <li>Upload your PDF file.</li>
+  <li>Select <strong>Markdown</strong> as output format.</li>
+  <li>Click convert.</li>
+  <li>Download your Markdown file.</li>
+</ol>
+
+<h2 id="what-works">What converts well</h2>
+<ul>
+  <li><strong>Headings</strong> — H1, H2, H3 structure preserved</li>
+  <li><strong>Paragraphs</strong> — Text flows correctly</li>
+  <li><strong>Lists</strong> — Bullets and numbered lists</li>
+  <li><strong>Bold/Italic</strong> — Basic formatting</li>
+  <li><strong>Links</strong> — Hyperlinks preserved</li>
+  <li><strong>Tables</strong> — Simple tables (complex ones may need cleanup)</li>
+  <li><strong>Code blocks</strong> — If formatted as monospace</li>
+</ul>
+
+<h2 id="limitations">What doesn't convert perfectly</h2>
+<ul>
+  <li><strong>Multi-column layouts</strong> — May merge incorrectly</li>
+  <li><strong>Scanned PDFs</strong> — No OCR; you get nothing</li>
+  <li><strong>Complex tables</strong> — Merged cells, nested tables</li>
+  <li><strong>Footnotes</strong> — May appear inline or at the end</li>
+  <li><strong>Images</strong> — Extracted separately, linked in Markdown</li>
+</ul>
+
+<h2 id="scanned">What about scanned PDFs?</h2>
+<p>
+  If your PDF is a scanned document (images of pages, not selectable text),
+  you need OCR (Optical Character Recognition) first.
+  TinyUtils focuses on text-based PDFs. For scanned documents, try Adobe Acrobat's OCR or
+  Google Drive's built-in OCR.
+</p>
+
+<h2 id="tips">Tips for better results</h2>
+<ul>
+  <li><strong>Start with good PDFs</strong> — Well-structured PDFs convert cleanly</li>
+  <li><strong>Check the output</strong> — Always review converted Markdown</li>
+  <li><strong>Fix headers manually</strong> — Sometimes H2 becomes H3</li>
+  <li><strong>Clean up tables</strong> — Markdown tables are finicky</li>
+</ul>
+
+<h2 id="formats">Other output options</h2>
+<p>
+  Don't need Markdown specifically? TinyUtils can also convert PDF to:
+</p>
+<ul>
+  <li><a href="/blog/pdf-to-docx-converter/">Word (DOCX)</a> — For editing in Microsoft Word</li>
+  <li><a href="/blog/pdf-to-html-converter/">HTML</a> — For web publishing</li>
+  <li>Plain text — Just the text, no formatting</li>
+</ul>
+
+<h2 id="faq">FAQ</h2>
+
+<h3>Does this work with password-protected PDFs?</h3>
+<p>
+  No. You'll need to unlock the PDF first using the password.
+</p>
+
+<h3>What Markdown flavor is output?</h3>
+<p>
+  GitHub Flavored Markdown (GFM) by default.
+  Tables, fenced code blocks, and task lists are supported.
+</p>
+
+<h3>Can I convert multiple PDFs at once?</h3>
+<p>
+  Yes! Upload multiple files and convert them in batch.
+</p>
+
+<h2 id="next">Next steps</h2>
+<p>
+  Ready to convert? Open <a href="/tools/text-converter/">TinyUtils Document Converter</a>,
+  upload your PDF, and get clean Markdown in seconds.
+</p>

@@ -1,0 +1,135 @@
+<p>
+  PNG files are great for screenshots, logos, and anything with transparency.
+  But they can get <em>chunky</em>. A single PNG screenshot can easily hit 2-5 MB,
+  which is brutal for page load times and email attachments.
+</p>
+
+<p>
+  The good news: PNG compression can often cut file sizes by 50-80% without visible quality loss.
+  And you can do it right in your browser without uploading to sketchy servers.
+</p>
+
+<h2 id="tldr">TL;DR</h2>
+<ul>
+  <li>Use <a href="/tools/image-compressor/">TinyUtils Image Compressor</a> for quick, private PNG compression.</li>
+  <li>For web use, consider converting to WebP (even smaller files).</li>
+  <li>Resize first if your PNG is larger than it needs to be.</li>
+  <li>Lossless PNG compression is limited; lossy (via WebP/JPEG) saves more.</li>
+</ul>
+
+<h2 id="why">Why PNG files get so large</h2>
+<p>
+  PNG uses lossless compression, which means it preserves every pixel exactly.
+  That's great for quality, but it limits how much the file can shrink.
+  Screenshots, UI mockups, and graphics with large flat color areas compress well.
+  Photos? Not so much — that's where JPEG or WebP wins.
+</p>
+
+<h2 id="how">How to compress PNG online (step-by-step)</h2>
+<ol>
+  <li>Open <a href="/tools/image-compressor/">TinyUtils Image Compressor</a>.</li>
+  <li>Drag and drop your PNG files (batch is fine).</li>
+  <li>Choose output format:
+    <ul>
+      <li><strong>PNG</strong> — keeps transparency, moderate compression</li>
+      <li><strong>WebP</strong> — best compression, keeps transparency, modern browsers only</li>
+      <li><strong>JPEG</strong> — smallest for photos, but no transparency</li>
+    </ul>
+  </li>
+  <li>Adjust quality slider (80% is a good starting point for WebP/JPEG).</li>
+  <li>Optional: set max width/height to resize.</li>
+  <li>Download the compressed files.</li>
+</ol>
+
+<h2 id="lossless-vs-lossy">Lossless vs lossy: what's the difference?</h2>
+<p>
+  <strong>Lossless</strong> (PNG → PNG): The image looks identical, pixel for pixel.
+  Compression is limited to removing metadata and optimizing encoding.
+  Expect 10-30% size reduction.
+</p>
+<p>
+  <strong>Lossy</strong> (PNG → WebP or JPEG): Some pixel data is discarded.
+  At 80% quality, most people can't tell the difference.
+  Expect 60-90% size reduction.
+</p>
+
+<h2 id="transparency">What about transparency?</h2>
+<p>
+  PNG supports transparency. JPEG doesn't.
+  If you need a transparent background, stick with PNG or WebP.
+  Converting a transparent PNG to JPEG will give you a white (or black) background.
+</p>
+
+<h2 id="resize">The resize trick</h2>
+<p>
+  A 4000×3000 PNG is massive no matter how you compress it.
+  If you're using it on a website at 800px wide, resize to 1600px (2x for retina).
+  This often saves more than any compression setting.
+</p>
+
+<h2 id="batch">Batch compression</h2>
+<p>
+  Got 50 screenshots? Don't compress them one by one.
+  TinyUtils Image Compressor handles batches — drop them all in, adjust settings once,
+  and download a ZIP of the results.
+</p>
+
+<h2 id="benchmarks">Real-world compression results</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Original</th>
+      <th>Format</th>
+      <th>Quality</th>
+      <th>Result</th>
+      <th>Savings</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>2.4 MB PNG (screenshot)</td>
+      <td>PNG</td>
+      <td>—</td>
+      <td>1.8 MB</td>
+      <td>25%</td>
+    </tr>
+    <tr>
+      <td>2.4 MB PNG (screenshot)</td>
+      <td>WebP</td>
+      <td>85%</td>
+      <td>180 KB</td>
+      <td>92%</td>
+    </tr>
+    <tr>
+      <td>800 KB PNG (logo)</td>
+      <td>WebP</td>
+      <td>90%</td>
+      <td>45 KB</td>
+      <td>94%</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="faq">FAQ</h2>
+
+<h3>Is online PNG compression safe?</h3>
+<p>
+  It depends on the tool. TinyUtils processes images in your browser — files never leave your device.
+  Many other tools upload to servers. Check their privacy policy.
+</p>
+
+<h3>Will I lose quality?</h3>
+<p>
+  With PNG → PNG, no. With PNG → WebP/JPEG at 80%+, quality loss is usually invisible.
+</p>
+
+<h3>Can I compress PNGs with transparency?</h3>
+<p>
+  Yes. PNG and WebP both support transparency. JPEG doesn't.
+</p>
+
+<h2 id="next">Next steps</h2>
+<p>
+  Ready to shrink those PNGs? Open <a href="/tools/image-compressor/">TinyUtils Image Compressor</a>,
+  drop in your files, and see how much space you save.
+</p>

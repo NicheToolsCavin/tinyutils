@@ -123,3 +123,64 @@
     </span>
   </div>
 </footer>
+
+<style>
+  :global(.nav a.support-link) {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    opacity: 0.85;
+    transition:
+      color var(--transition-base),
+      opacity var(--transition-base);
+  }
+
+  :global(.nav a.support-link:hover) {
+    color: var(--brand-500);
+    opacity: 1;
+  }
+
+  :global(.nav-item) {
+    position: relative;
+    display: inline-block;
+  }
+
+  :global(.nav-dropdown) {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--surface-base);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: var(--space-2);
+    margin-top: var(--space-3);
+    min-width: 200px;
+    box-shadow: var(--shadow-xl);
+    z-index: 1000;
+  }
+
+  :global(.nav-item:hover .nav-dropdown),
+  :global(.nav-item:focus-within .nav-dropdown) {
+    display: block;
+  }
+
+  :global(.nav-dropdown a) {
+    display: block;
+    padding: var(--space-2) var(--space-3);
+    color: var(--text-primary);
+    text-decoration: none;
+    border-radius: var(--radius-md);
+    transition: all var(--transition-base);
+    font-size: var(--text-sm);
+  }
+
+  :global(.nav-dropdown a:hover) {
+    background: var(--surface-raised);
+    color: var(--brand-500);
+  }
+</style>
