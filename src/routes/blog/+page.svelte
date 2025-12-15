@@ -2,71 +2,45 @@
   export let data;
   const { posts, title, description, ogImage, icons } = data;
 
-  // Get category, icon, and thumbnail image based on post slug
-  // Order matters: more specific patterns checked first to avoid mis-categorization
-  // e.g., archive must come before image because 'webpage' contains 'webp'
+  // Get category and icon based on post slug
+  // Each post has its own unique thumbnail at /blog/posts/{slug}.jpg
   function getPostCategory(slug) {
+    // All posts have unique thumbnails
+    const thumb = `/blog/posts/${slug}.jpg`;
+
     // Archive and recovery - check FIRST to prevent false matches
-    // ('recover-deleted-webpage' would match 'webp' in image otherwise)
     if (slug.includes('wayback') || slug.includes('archive') || slug.includes('recover') ||
         slug.includes('time-machine')) {
-      return { category: 'archive', icon: '⏪', thumb: '/blog/archive-category.jpg' };
+      return { category: 'archive', icon: '⏪', thumb };
     }
     // Privacy-focused
     if (slug.includes('privacy')) {
-      return { category: 'privacy', icon: '🔒', thumb: '/blog/privacy-category.jpg' };
+      return { category: 'privacy', icon: '🔒', thumb };
     }
-    // Document conversion - with sub-categories for variety
+    // Document conversion
     if (slug.includes('pdf') || slug.includes('docx') || slug.includes('markdown') ||
         slug.includes('html-to') || slug.includes('latex') || slug.includes('epub') ||
         slug.includes('odt') || slug.includes('rtf') || slug.includes('word') ||
         slug.includes('document') || slug.includes('extract-text')) {
-      // Sub-categorize for visual variety
-      if (slug.includes('pdf')) {
-        return { category: 'document', icon: '📄', thumb: '/blog/doc-pdf.jpg' };
-      }
-      if (slug.includes('markdown')) {
-        return { category: 'document', icon: '📝', thumb: '/blog/doc-markdown.jpg' };
-      }
-      if (slug.includes('docx') || slug.includes('word')) {
-        return { category: 'document', icon: '📃', thumb: '/blog/doc-word.jpg' };
-      }
-      if (slug.includes('epub')) {
-        return { category: 'document', icon: '📖', thumb: '/blog/doc-epub.jpg' };
-      }
-      if (slug.includes('latex')) {
-        return { category: 'document', icon: '📐', thumb: '/blog/doc-latex.jpg' };
-      }
-      // ODT, RTF, TXT, HTML fallback
-      return { category: 'document', icon: '📄', thumb: '/blog/doc-text.jpg' };
+      const icon = slug.includes('pdf') ? '📄' : slug.includes('markdown') ? '📝' :
+                   slug.includes('epub') ? '📖' : slug.includes('latex') ? '📐' : '📃';
+      return { category: 'document', icon, thumb };
     }
     // SEO and site management
     if (slug.includes('broken-link') || slug.includes('sitemap') || slug.includes('seo') ||
         slug.includes('redirect') || slug.includes('migration')) {
-      return { category: 'seo', icon: '🔍', thumb: '/blog/seo-category.jpg' };
+      return { category: 'seo', icon: '🔍', thumb };
     }
-    // Image-related posts (format conversions, compression)
+    // Image-related posts
     if (slug.includes('heic') || slug.includes('webp') || slug.includes('png') ||
         slug.includes('jpg') || slug.includes('jpeg') || slug.includes('gif') ||
         slug.includes('compress') || slug.includes('image') || slug.includes('batch')) {
-      // Sub-categorize for visual variety (check gif before webp since gif-to-webp is about GIF)
-      if (slug.includes('heic')) {
-        return { category: 'image', icon: '📱', thumb: '/blog/img-heic.jpg' };
-      }
-      if (slug.includes('gif')) {
-        return { category: 'image', icon: '🎞️', thumb: '/blog/img-gif.jpg' };
-      }
-      if (slug.includes('webp')) {
-        return { category: 'image', icon: '🌐', thumb: '/blog/img-webp.jpg' };
-      }
-      if (slug.includes('compress') || slug.includes('batch') || slug.includes('optimize')) {
-        return { category: 'image', icon: '⚡', thumb: '/blog/img-compress.jpg' };
-      }
-      // PNG/JPG fallback
-      return { category: 'image', icon: '🖼️', thumb: '/blog/img-photo.jpg' };
+      const icon = slug.includes('heic') ? '📱' : slug.includes('gif') ? '🎞️' :
+                   slug.includes('compress') || slug.includes('batch') ? '⚡' : '🖼️';
+      return { category: 'image', icon, thumb };
     }
     // Default fallback
-    return { category: 'general', icon: '🛠️', thumb: '/blog/general-category.jpg' };
+    return { category: 'general', icon: '🛠️', thumb };
   }
 </script>
 

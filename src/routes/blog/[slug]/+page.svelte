@@ -27,46 +27,31 @@
   const publishedLabel = published ? dateFormatter.format(new Date(published)) : null;
   const updatedLabel = updated ? dateFormatter.format(new Date(updated)) : null;
 
-  // Get category and thumbnail based on slug (same logic as listing page)
-  function getPostCategory(s) {
-    // Archive first to prevent 'webpage' matching 'webp'
+  // Get category based on slug - each post has unique thumbnail at /blog/posts/{slug}.jpg
+  function getCategory(s) {
     if (s.includes('wayback') || s.includes('archive') || s.includes('recover') || s.includes('time-machine')) {
-      return { category: 'archive', thumb: '/blog/archive-category.jpg' };
+      return 'archive';
     }
-    if (s.includes('privacy')) {
-      return { category: 'privacy', thumb: '/blog/privacy-category.jpg' };
-    }
-    // Document with sub-categories
+    if (s.includes('privacy')) return 'privacy';
     if (s.includes('pdf') || s.includes('docx') || s.includes('markdown') || s.includes('html-to') ||
         s.includes('latex') || s.includes('epub') || s.includes('odt') || s.includes('rtf') ||
         s.includes('word') || s.includes('document') || s.includes('extract-text')) {
-      if (s.includes('pdf')) return { category: 'document', thumb: '/blog/doc-pdf.jpg' };
-      if (s.includes('markdown')) return { category: 'document', thumb: '/blog/doc-markdown.jpg' };
-      if (s.includes('docx') || s.includes('word')) return { category: 'document', thumb: '/blog/doc-word.jpg' };
-      if (s.includes('epub')) return { category: 'document', thumb: '/blog/doc-epub.jpg' };
-      if (s.includes('latex')) return { category: 'document', thumb: '/blog/doc-latex.jpg' };
-      return { category: 'document', thumb: '/blog/doc-text.jpg' };
+      return 'document';
     }
-    // SEO
     if (s.includes('broken-link') || s.includes('sitemap') || s.includes('seo') ||
         s.includes('redirect') || s.includes('migration')) {
-      return { category: 'seo', thumb: '/blog/seo-category.jpg' };
+      return 'seo';
     }
-    // Image with sub-categories
     if (s.includes('heic') || s.includes('webp') || s.includes('png') || s.includes('jpg') ||
         s.includes('jpeg') || s.includes('gif') || s.includes('compress') || s.includes('image') ||
         s.includes('batch')) {
-      if (s.includes('heic')) return { category: 'image', thumb: '/blog/img-heic.jpg' };
-      if (s.includes('gif')) return { category: 'image', thumb: '/blog/img-gif.jpg' };
-      if (s.includes('webp')) return { category: 'image', thumb: '/blog/img-webp.jpg' };
-      if (s.includes('compress') || s.includes('batch') || s.includes('optimize'))
-        return { category: 'image', thumb: '/blog/img-compress.jpg' };
-      return { category: 'image', thumb: '/blog/img-photo.jpg' };
+      return 'image';
     }
-    return { category: 'general', thumb: '/blog/general-category.jpg' };
+    return 'general';
   }
 
-  const { category, thumb } = getPostCategory(slug);
+  const category = getCategory(slug);
+  const thumb = `/blog/posts/${slug}.jpg`;
 </script>
 
 <svelte:head>
