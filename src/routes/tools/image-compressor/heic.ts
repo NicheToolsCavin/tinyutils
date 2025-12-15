@@ -3,19 +3,75 @@
  *
  * IMPORTANT: This intentionally runs on the main thread (DOM context) because
  * heic2any is not reliably worker-safe across bundlers.
+ *
+ * SAFARI FIX: Safari has native HEIC decoding via createImageBitmap().
+ * We try native decoding first (fast, reliable on Safari) and only fall back
+ * to heic2any if native fails (needed for Chrome/Firefox which lack HEIC support).
  */
 
-export async function heicToBlob(
-	file: Blob,
+/**
+ * Try to decode the blob natively using createImageBitmap.
+ * Works on Safari (which has native HEIC support) and for pre-converted files.
+ */
+async function tryNativeDecode(blob: Blob): Promise<ImageBitmap | null> {
+	try {
+		// Safari and macOS can decode HEIC natively
+		return await createImageBitmap(blob);
+	} catch {
+		return null;
+	}
+}
+
+/**
+ * Render an ImageBitmap to a canvas and export as the target format.
+ */
+function bitmapToBlob(
+	bitmap: ImageBitmap,
 	toType: 'image/png' | 'image/jpeg',
-	quality = 0.92
+	quality: number
+): Promise<Blob> {
+	const canvas = document.createElement('canvas');
+	canvas.width = bitmap.width;
+	canvas.height = bitmap.height;
+
+	const ctx = canvas.getContext('2d');
+	if (!ctx) throw new Error('2D context unavailable');
+
+	// For JPEG, fill with white background first (transparency → white)
+	if (toType === 'image/jpeg') {
+		ctx.fillStyle = '#ffffff';
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
+	}
+
+	ctx.drawImage(bitmap, 0, 0);
+	bitmap.close();
+
+	return new Promise((resolve, reject) => {
+		canvas.toBlob(
+			(b) => {
+				if (!b) reject(new Error('Failed to encode image'));
+				else resolve(b);
+			},
+			toType,
+			quality
+		);
+	});
+}
+
+/**
+ * Use heic2any library as a fallback for browsers without native HEIC support.
+ */
+async function decodeWithHeic2any(
+	blob: Blob,
+	toType: 'image/png' | 'image/jpeg',
+	quality: number
 ): Promise<Blob> {
 	// heic2any is big (~332kB gz), so keep it out of the initial bundle.
 	const mod = await import('heic2any');
 	const heic2any: any = (mod as any).default ?? mod;
 
 	const out = await heic2any({
-		blob: file,
+		blob,
 		toType,
 		quality
 	});
@@ -26,4 +82,22 @@ export async function heicToBlob(
 		return out[0] as Blob;
 	}
 	return out as Blob;
+}
+
+export async function heicToBlob(
+	file: Blob,
+	toType: 'image/png' | 'image/jpeg',
+	quality = 0.92
+): Promise<Blob> {
+	// Strategy: Try native decode first (Safari, pre-converted files), then heic2any fallback.
+	// This fixes Safari which has native HEIC support and may pre-convert in file picker.
+
+	// 1. Try native createImageBitmap (works on Safari, or if macOS pre-converted to JPEG)
+	const nativeBitmap = await tryNativeDecode(file);
+	if (nativeBitmap) {
+		return bitmapToBlob(nativeBitmap, toType, quality);
+	}
+
+	// 2. Fall back to heic2any for browsers without native HEIC support (Chrome, Firefox)
+	return decodeWithHeic2any(file, toType, quality);
 }
