@@ -1,4 +1,5 @@
 <script>
+  import { page } from '$app/state';
   import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
 
   const currentYear = new Date().getFullYear();
@@ -36,15 +37,61 @@
     <a class="brand" href="/">TinyUtils</a>
     <div class="row center">
       <nav class="nav">
-        <a href="/tools/">Tools</a>
-        <a href="/about.html">About</a>
+        <a
+          href="/tools/"
+          class:active={page.url.pathname === '/tools' || page.url.pathname.startsWith('/tools/')}
+          aria-current={page.url.pathname === '/tools' || page.url.pathname.startsWith('/tools/') ? 'page' : undefined}
+          >Tools</a
+        >
+        <a
+          href="/blog/"
+          class:active={page.url.pathname.startsWith('/blog')}
+          aria-current={page.url.pathname.startsWith('/blog') ? 'page' : undefined}
+          >Blog</a
+        >
+        <a
+          href="/about.html"
+          class:active={page.url.pathname === '/about.html'}
+          aria-current={page.url.pathname === '/about.html' ? 'page' : undefined}
+          >About</a
+        >
         <a href="https://buymeacoffee.com/tinyutils" target="_blank" rel="noopener" class="support-link">☕ Support</a>
         <span class="nav-item">
-          <a href="/privacy.html">Privacy</a>
+          <a
+            href="/privacy.html"
+            class:active={
+              page.url.pathname === '/privacy.html' ||
+              page.url.pathname === '/cookies.html' ||
+              page.url.pathname === '/terms.html'
+            }
+            aria-current={
+              page.url.pathname === '/privacy.html' ||
+              page.url.pathname === '/cookies.html' ||
+              page.url.pathname === '/terms.html'
+                ? 'page'
+                : undefined
+            }
+            >Privacy</a
+          >
           <div class="nav-dropdown">
-            <a href="/cookies.html">Cookie settings</a>
-            <a href="/privacy.html">Privacy policy</a>
-            <a href="/terms.html">Terms of service</a>
+            <a
+              href="/cookies.html"
+              class:active={page.url.pathname === '/cookies.html'}
+              aria-current={page.url.pathname === '/cookies.html' ? 'page' : undefined}
+              >Cookie settings</a
+            >
+            <a
+              href="/privacy.html"
+              class:active={page.url.pathname === '/privacy.html'}
+              aria-current={page.url.pathname === '/privacy.html' ? 'page' : undefined}
+              >Privacy policy</a
+            >
+            <a
+              href="/terms.html"
+              class:active={page.url.pathname === '/terms.html'}
+              aria-current={page.url.pathname === '/terms.html' ? 'page' : undefined}
+              >Terms of service</a
+            >
           </div>
         </span>
       </nav>
@@ -76,63 +123,3 @@
     </span>
   </div>
 </footer>
-
-<style>
-  :global(.support-link) {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 8px;
-    border-radius: var(--radius-md);
-    color: var(--text-secondary) !important;
-    font-size: 0.9rem;
-    opacity: 0.85;
-    transition:
-      color var(--transition-base),
-      opacity var(--transition-base);
-  }
-
-  :global(.support-link:hover) {
-    color: var(--brand-500) !important;
-    opacity: 1;
-  }
-
-  :global(.nav-item) {
-    position: relative;
-    display: inline-block;
-  }
-
-  :global(.nav-dropdown) {
-    display: none;
-    position: absolute;
-    top: 100%;
-    right: 0;
-    background: var(--surface-base);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-lg);
-    padding: var(--space-2);
-    margin-top: var(--space-3);
-    min-width: 200px;
-    box-shadow: var(--shadow-xl);
-    z-index: 1000;
-  }
-
-  :global(.nav-item:hover .nav-dropdown) {
-    display: block;
-  }
-
-  :global(.nav-dropdown a) {
-    display: block;
-    padding: var(--space-2) var(--space-3);
-    color: var(--text-primary);
-    text-decoration: none;
-    border-radius: var(--radius-md);
-    transition: all var(--transition-base);
-    font-size: var(--text-sm);
-  }
-
-  :global(.nav-dropdown a:hover) {
-    background: var(--surface-raised);
-    color: var(--brand-500);
-  }
-</style>

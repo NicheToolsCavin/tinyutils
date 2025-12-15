@@ -1,10 +1,52 @@
-<!doctype html><html lang='en'><head>
-<meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
-<title>Feedback — TinyUtils</title><link rel='stylesheet' href='/public/styles.css'><link rel="icon" href="/public/icons/tinyutils-icon-dark-32.png" media="(prefers-color-scheme: dark)"><link rel="icon" href="/public/icons/tinyutils-icon-light-32.png" media="(prefers-color-scheme: light)"><link rel="icon" type="image/png" sizes="32x32" href="/public/icons/tinyutils-icon-dark-32.png"><link rel="apple-touch-icon" sizes="180x180" href="/public/icons/tinyutils-icon-light-180.png">
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Feedback — TinyUtils</title>
+  <meta name="description" content="Send feedback, bug reports, and feature ideas for TinyUtils.">
+  <link rel="canonical" href="/feedback.html">
+  <link rel="icon" href="/public/icons/tinyutils-icon-dark-32.png" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="/public/icons/tinyutils-icon-light-32.png" media="(prefers-color-scheme: light)">
+  <link rel="icon" type="image/png" sizes="32x32" href="/public/icons/tinyutils-icon-dark-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/public/icons/tinyutils-icon-light-180.png">
+  <link rel="stylesheet" href="/styles/site.css">
+  <link rel="stylesheet" href="/public/styles.css">
+  <script src="/scripts/theme-toggle.js"></script>
+  <script defer src="/scripts/nav-active.js"></script>
   <script defer src="/scripts/analytics.js"></script>
 </head>
-<body><div class='container'><div class='card'>
-<h2>Feedback</h2>
-<p>Email: <a href='mailto:hello@tinyutils.net'>hello@tinyutils.net</a></p>
-<p class='small'>Prefer forms? Replace this page with a Netlify/Vercel form later.</p>
-</div></div></body></html>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+  <header class="site-header">
+    <div class="container row between center">
+      <a class="brand" href="/">TinyUtils</a>
+      <div class="row center">
+        <nav class="nav">
+          <a href="/tools/">Tools</a>
+          <a href="/blog/">Blog</a>
+          <a href="/about.html">About</a>
+          <a href="https://buymeacoffee.com/tinyutils" target="_blank" rel="noopener" class="support-link">☕ Support</a>
+          <span class="nav-item">
+            <a href="/privacy.html">Privacy</a>
+            <div class="nav-dropdown">
+              <a href="/cookies.html">Cookie settings</a>
+              <a href="/privacy.html">Privacy policy</a>
+              <a href="/terms.html">Terms of service</a>
+            </div>
+          </span>
+        </nav>
+        <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false">Dark</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" class="container">
+    <section class="card" role="region" aria-labelledby="feedbackHeading" style="margin-top: var(--space-10);">
+      <h2 id="feedbackHeading">Feedback</h2>
+      <p>Email: <a href="mailto:hello@tinyutils.net">hello@tinyutils.net</a></p>
+      <p class="small">Prefer forms? We can replace this page with a simple Vercel form later.</p>
+    </section>
+  </main>
+</body>
+</html>

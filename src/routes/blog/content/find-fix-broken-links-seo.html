@@ -1,0 +1,180 @@
+<p>
+  Broken links are rarely the “big problem.” They’re the paper cuts.
+  One or two don’t matter much — but a bunch of them turns your site into a maze of dead ends.
+</p>
+
+<p>
+  This guide is a workflow you can actually run:
+  <strong>discover → export → prioritize → fix → verify → repeat</strong>.
+  No magical SEO tricks. Just the boring stuff that works.
+</p>
+
+<h2 id="what">What counts as a “broken link”?</h2>
+<p>
+  People usually mean “404”, but you’ll want to catch a few categories:
+</p>
+<ul>
+  <li><strong>404 Not Found:</strong> page doesn’t exist (common after migrations and CMS changes).</li>
+  <li><strong>410 Gone:</strong> intentionally removed (fine if deliberate, but fix internal links pointing to it).</li>
+  <li><strong>5xx errors:</strong> server issues (these are urgent).</li>
+  <li><strong>Redirect chains:</strong> A → B → C. “Works”, but slow and messy.</li>
+  <li><strong>Redirect loops:</strong> A → B → A. Pure chaos.</li>
+</ul>
+
+<h2 id="seo-impact">Do broken links hurt SEO?</h2>
+<p>
+  Not in the dramatic “your site is doomed” way.
+  More like:
+</p>
+<ul>
+  <li><strong>Users bounce</strong> when they hit dead ends (and they don’t politely tell you).</li>
+  <li><strong>Crawlers waste time</strong> crawling broken paths instead of useful pages.</li>
+  <li><strong>Internal linking gets weaker</strong> when links point to dead pages or chain redirects.</li>
+</ul>
+
+<p>
+  Fixing broken internal links is usually worth it.
+  Fixing broken external links is worth it when they’re important to the page (citations, resources, conversion flow).
+</p>
+
+<h2 id="step1">Step 1: Find broken links (use multiple sources)</h2>
+<p>
+  Don’t rely on one data source.
+  Each one catches different problems.
+</p>
+
+<h3>Option A: Crawl a page or site</h3>
+<p>
+  For quick audits, start with a web-based crawler.
+  Run <a href="/tools/dead-link-finder/">TinyUtils Dead Link Finder</a>, export results, and you immediately have something actionable.
+</p>
+
+<h3>Option B: Google Search Console (verification + discovery)</h3>
+<p>
+  Search Console can show URLs Google encountered that returned errors.
+  It’s great for “what Google actually saw”, especially after a migration.
+</p>
+
+<h3>Option C: Logs and analytics (prioritization fuel)</h3>
+<p>
+  If you can access server logs or analytics, use them.
+  A broken link that gets 5,000 visits a month is a different kind of problem than one nobody hits.
+</p>
+
+<h3>Option D: Backlink tools (if you care about link equity)</h3>
+<p>
+  If the broken URL has backlinks, the right fix might be a redirect (or restoring the content).
+  Backlink tools help you find those.
+</p>
+
+<h2 id="step2">Step 2: Export + group the issues</h2>
+<p>
+  Export your crawl results.
+  If your tool supports it, include:
+</p>
+<ul>
+  <li>Broken URL</li>
+  <li>Status code (404/410/500/etc.)</li>
+  <li>“Found on” page(s)</li>
+  <li>Final destination (for redirects)</li>
+</ul>
+
+<p>
+  Then group by pattern. Patterns are your friend:
+</p>
+<ul>
+  <li>Trailing slash changes</li>
+  <li>HTTP → HTTPS</li>
+  <li>Old folder moved (<code>/blog/</code> → <code>/guides/</code>)</li>
+  <li>Case changes (<code>/About</code> vs <code>/about</code>)</li>
+</ul>
+
+<h2 id="step3">Step 3: Prioritize (fix what matters first)</h2>
+<p>
+  Use this order if you want maximum impact with minimal time:
+</p>
+<ol>
+  <li><strong>5xx errors</strong> (site health emergencies).</li>
+  <li><strong>Broken internal links</strong> on key templates (nav, footer, homepage, top landing pages).</li>
+  <li><strong>Broken pages with backlinks</strong> (preserve link equity).</li>
+  <li><strong>Broken external links</strong> that are essential references or conversions.</li>
+  <li><strong>Everything else</strong> (cleanup sweep).</li>
+</ol>
+
+<h2 id="step4">Step 4: Fix (choose the right repair)</h2>
+
+<h3>Fix A: Update the link (best for internal links)</h3>
+<p>
+  If your page links to the wrong URL, fix the link.
+  Don’t rely on redirects forever.
+</p>
+
+<h3>Fix B: Add a redirect (best when an old URL should live on)</h3>
+<p>
+  For removed/moved pages, a <code>301</code> redirect to the closest relevant page is often the right move.
+  Try to avoid “redirect everything to the homepage” — it’s usually a bad user experience.
+</p>
+<p>
+  If you’re doing this at scale, use a mapping workflow:
+  compare old vs new URL lists and generate rules.
+  <a href="/tools/sitemap-delta/">TinyUtils Sitemap Delta</a> is built for this.
+</p>
+
+<h3>Fix C: Serve 410 (when it’s truly gone)</h3>
+<p>
+  If content was intentionally removed and there’s no replacement, a <code>410</code> can be cleaner than a forever-redirect.
+  But do make sure internal links stop pointing to it.
+</p>
+
+<h3>Fix D: Replace broken outbound links</h3>
+<p>
+  If you link to external resources that died, replace them.
+  Sometimes a Wayback snapshot is enough, sometimes you pick a better source.
+  For bulk recovery workflows, see <a href="/tools/wayback-fixer/">Wayback Fixer</a>.
+</p>
+
+<h2 id="step5">Step 5: Kill redirect chains</h2>
+<p>
+  Redirects are fine. Redirect chains are not.
+  If you can, update internal links so they point directly to the final URL.
+  One clean hop beats three “it works” hops.
+</p>
+
+<h2 id="step6">Step 6: Verify (don’t trust vibes)</h2>
+<ul>
+  <li>Re-crawl after deployment to confirm errors dropped.</li>
+  <li>Spot-check key templates (nav/footer/critical pages).</li>
+  <li>Use Search Console to confirm Google sees fewer errors over time.</li>
+  <li>Schedule a follow-up crawl so issues don’t creep back.</li>
+</ul>
+
+<h2 id="checklist">Quick checklist (copy/paste)</h2>
+<ul>
+  <li>✅ Crawl and export broken URLs with “found on” pages</li>
+  <li>✅ Fix internal links on templates first</li>
+  <li>✅ Redirect important old URLs (avoid homepage dumping)</li>
+  <li>✅ Remove redirect chains</li>
+  <li>✅ Re-crawl and verify</li>
+</ul>
+
+<h2 id="faq">FAQ</h2>
+
+<h3>How often should I check for broken links?</h3>
+<p>
+  For active sites: monthly is a good baseline.
+  For large sites or frequent publishing: weekly checks can be worth it.
+</p>
+
+<h3>Should I redirect every 404?</h3>
+<p>
+  No. Redirect pages that moved or still have value. If something is truly gone with no replacement, a 410 can be fine.
+  The goal is helpful navigation, not “zero 404s at all costs.”
+</p>
+
+<h2 id="next">Next step</h2>
+<p>
+  Start by crawling a key page (homepage or a top category page) with
+  <a href="/tools/dead-link-finder/">TinyUtils Dead Link Finder</a>.
+  Export the results and fix the first 10 issues.
+  You’ll be surprised how much that alone cleans up.
+</p>

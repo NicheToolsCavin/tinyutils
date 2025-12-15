@@ -1,0 +1,129 @@
+<p>
+  You don’t wake up and think “today I’ll switch broken link checkers.”
+  You switch because your current tool did one of these:
+  timed out, missed half the site, or gave you a report that’s technically correct but emotionally unhelpful.
+</p>
+
+<p>
+  This post is a practical list of alternatives — <em>by category</em> — so you can pick the right kind of tool and move on with your life.
+  (Bonus: a tiny selection checklist so you don’t buy a spaceship when you needed a bicycle.)
+</p>
+
+<h2 id="switch">When it’s time to switch</h2>
+<ul>
+  <li><strong>It times out or caps crawls</strong> before you get anything useful.</li>
+  <li><strong>It misses JS-rendered links</strong> (React/Vue routes, client-side nav, etc.).</li>
+  <li><strong>No “found on” context</strong> — you get broken URLs but not where they came from.</li>
+  <li><strong>Exports are painful</strong> (or non-existent), so fixing becomes manual detective work.</li>
+  <li><strong>You need a workflow</strong>: recurring checks, team handoff, or client reporting.</li>
+</ul>
+
+<h2 id="types">Alternatives by type (pick your lane)</h2>
+
+<h3 id="web">1) Web-based checkers (fast, shareable, usually simplest)</h3>
+<p>
+  Use a web checker when you want quick results, a clean export, and no installation.
+  This is ideal for small-to-mid sites, content audits, or quick “is this page full of 404s?” checks.
+</p>
+<ul>
+  <li>
+    <strong>Try:</strong> <a href="/tools/dead-link-finder/">TinyUtils Dead Link Finder</a>
+    (great for “paste URL → export results”).
+  </li>
+  <li><strong>Also consider:</strong> tools like Dr Link Check for a more monitoring/reporting vibe.</li>
+</ul>
+
+<h3 id="desktop">2) Desktop crawlers (deep crawling + rules + full control)</h3>
+<p>
+  If your site is large, complex, or JS-heavy, desktop crawlers are the grown-up tools.
+  They can crawl deeper, apply rules, extract data, and generally tell you more.
+  The tradeoff is time: setup time, crawl time, and “why is my laptop fan doing this?” time.
+</p>
+<ul>
+  <li><strong>Screaming Frog</strong> — powerful, flexible, widely used for audits.</li>
+  <li><strong>Sitebulb</strong> — strong reporting and “explain the issue” output.</li>
+  <li><strong>Integrity (Mac)</strong> — lightweight option for simpler scans.</li>
+</ul>
+
+<h3 id="suites">3) SEO suites (broken links + audit + backlinks + reporting)</h3>
+<p>
+  If you’re already paying for an SEO suite, the “broken link” problem often shows up inside a bigger job:
+  site health, backlink cleanup, content planning, and reporting.
+  Suites can be great because they connect errors to context.
+</p>
+<ul>
+  <li><strong>Ahrefs</strong> — excellent for backlink-driven prioritization.</li>
+  <li><strong>Semrush</strong> — strong project and reporting workflows.</li>
+</ul>
+
+<h3 id="monitoring">4) Monitoring tools (alerts instead of audits)</h3>
+<p>
+  If your site changes constantly, running “big crawls” is like sweeping during a sandstorm.
+  Monitoring tools are built for “tell me when it breaks” and “show me what changed.”
+</p>
+<ul>
+  <li><strong>ContentKing</strong> (example of this category) — continuous checks and alerts.</li>
+  <li>
+    Or roll your own routine: schedule a crawl, export, and track deltas.
+    (If you like control, this can be surprisingly effective.)
+  </li>
+</ul>
+
+<h2 id="decision">A simple selection matrix</h2>
+<p>Pick the row that matches your reality:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Your situation</th>
+      <th>Pick this</th>
+      <th>Why</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Small site, quick checks</td>
+      <td>Web checker</td>
+      <td>Fast feedback, easy export, minimal setup</td>
+    </tr>
+    <tr>
+      <td>Large / JS-heavy site</td>
+      <td>Desktop crawler</td>
+      <td>Deeper crawling, more control, better diagnostics</td>
+    </tr>
+    <tr>
+      <td>Backlink cleanup &amp; prioritization</td>
+      <td>SEO suite</td>
+      <td>Connect broken pages to link and traffic signals</td>
+    </tr>
+    <tr>
+      <td>You want alerts (not quarterly audits)</td>
+      <td>Monitoring</td>
+      <td>Catch issues early, reduce “surprise” outages</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="checklist">The “don’t regret this later” checklist</h2>
+<p>Before you commit to a new tool, confirm it can do these:</p>
+<ul>
+  <li><strong>Exports:</strong> CSV (at minimum). Bonus: include “found on” pages and anchor text.</li>
+  <li><strong>Redirect detail:</strong> show chains/loops (or at least final destination).</li>
+  <li><strong>Controls:</strong> crawl limits, include/exclude patterns, and a polite rate limit.</li>
+  <li><strong>JS support (if needed):</strong> if your site relies on client-side rendering, basic crawls can lie to you.</li>
+  <li><strong>Repeatability:</strong> can you run the same check next week and compare results?</li>
+</ul>
+
+<blockquote>
+  Tiny rule of thumb: if you can’t hand the export to “future you” (or a teammate) and fix links in under an hour,
+  you didn’t pick a tool — you picked a hobby.
+</blockquote>
+
+<h2 id="next">Next steps</h2>
+<p>
+  If you want the simplest starting point, run a scan with
+  <a href="/tools/dead-link-finder/">TinyUtils Dead Link Finder</a>.
+  Then use the workflow in
+  <a href="/blog/find-fix-broken-links-seo/">How to Find and Fix Broken Links for SEO</a>
+  to prioritize and ship clean fixes.
+</p>

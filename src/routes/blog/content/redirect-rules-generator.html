@@ -1,0 +1,121 @@
+<p>
+  Redirect rules are boring. And then one day they’re <em>very</em> exciting because your migration went live
+  and now half your URLs are 404.
+  (Fun.)
+</p>
+
+<p>
+  This guide shows a sane way to generate Nginx redirects from a URL list:
+  map old → new, export rules, test, and avoid redirect chains.
+  We’ll use <a href="/tools/sitemap-delta/">TinyUtils Sitemap Delta</a> because it’s built for this exact job.
+</p>
+
+<h2 id="tldr">TL;DR</h2>
+<ol>
+  <li>Get your <strong>old URL list</strong> (old sitemap, logs, exports).</li>
+  <li>Get your <strong>new URL list</strong> (new sitemap, staging crawl).</li>
+  <li>Compare them in <a href="/tools/sitemap-delta/">Sitemap Delta</a>.</li>
+  <li>Export Nginx rules and test the top URLs.</li>
+  <li>Fix chains and weird edge cases before launch.</li>
+</ol>
+
+<h2 id="inputs">Step 1: Get the right inputs</h2>
+
+<h3>Old URLs</h3>
+<ul>
+  <li>Old sitemap (best)</li>
+  <li>Server logs (great for “what people actually hit”)</li>
+  <li>Analytics exports / Search Console coverage</li>
+</ul>
+
+<h3>New URLs</h3>
+<ul>
+  <li>New sitemap (best)</li>
+  <li>Staging crawl (good if sitemap isn’t ready)</li>
+</ul>
+
+<blockquote>
+  If you only do one thing: include your high-traffic URLs.
+  Fixing 20 important redirects beats “technically mapped 5,000” every time.
+</blockquote>
+
+<h2 id="map">Step 2: Map old → new (don’t wing it)</h2>
+<p>
+  The goal is to send users to the closest relevant page.
+  Avoid the lazy pattern of redirecting everything to the homepage.
+  It’s a bad user experience and it makes analytics useless.
+</p>
+
+<p>
+  <a href="/tools/sitemap-delta/">TinyUtils Sitemap Delta</a> helps by comparing old and new lists,
+  clustering patterns, and exporting redirect rules.
+</p>
+
+<h2 id="rules">Step 3: Generate Nginx rules</h2>
+<p>
+  In Nginx, redirects are often done with <code>return 301</code> or <code>rewrite</code>.
+  Here are common patterns (examples only — your site may differ):
+</p>
+
+<pre><code># Exact match (simple and clean)
+location = /old-page/ {
+  return 301 /new-page/;
+}
+
+# Match both /old-page and /old-page/
+rewrite ^/old-page/?$ /new-page/ permanent;
+
+# Folder move example
+rewrite ^/old-section/(.*)$ /new-section/$1 permanent;
+</code></pre>
+
+<p>
+  Rules should be:
+</p>
+<ul>
+  <li><strong>Specific before wildcard</strong> (so you don’t accidentally redirect too much).</li>
+  <li><strong>Consistent</strong> about trailing slashes and casing.</li>
+  <li><strong>Deliberate</strong> about query strings (don’t “maybe” handle them).</li>
+</ul>
+
+<h2 id="testing">Step 4: Test (before you deploy, not after)</h2>
+<p>
+  Testing doesn’t need to be fancy.
+  It just needs to exist.
+</p>
+
+<h3>What to test</h3>
+<ul>
+  <li>Top 20–50 old URLs (traffic + backlinks)</li>
+  <li>Templates (blog posts, categories, product pages)</li>
+  <li>Edge cases (uppercase, trailing slash, old folders)</li>
+</ul>
+
+<h3>How to test</h3>
+<p>
+  Use <code>curl</code> and confirm status codes and destinations:
+</p>
+<pre><code>curl -I https://example.com/old-page/
+</code></pre>
+
+<p>
+  You want:
+  <code>301</code> from old → new, then <code>200</code> on the destination.
+  If you see multiple redirects before the final <code>200</code>, you’ve created a chain.
+</p>
+
+<h2 id="common">Common mistakes (avoid these)</h2>
+<ul>
+  <li><strong>Redirect chains:</strong> A → B → C. Update rules so A goes directly to C.</li>
+  <li><strong>Looping redirects:</strong> usually a trailing slash or HTTP/HTTPS mismatch.</li>
+  <li><strong>Overbroad wildcards:</strong> redirecting too much can break unrelated pages.</li>
+  <li><strong>Forgetting internal links:</strong> fix internal links so they don’t rely on redirects.</li>
+</ul>
+
+<h2 id="next">Next steps</h2>
+<p>
+  If you have old + new sitemaps, go straight to
+  <a href="/tools/sitemap-delta/">TinyUtils Sitemap Delta</a>.
+  Export rules, test the top URLs, and ship.
+  Your future self (and your Search Console graphs) will thank you.
+</p>

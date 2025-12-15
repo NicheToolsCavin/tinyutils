@@ -8,7 +8,7 @@
   <meta name="description" content={description} />
   <link rel="canonical" href="/blog/" />
   <meta property="og:title" content={title} />
-  <meta property="og:description" content="SEO guides, tutorials, and case studies." />
+  <meta property="og:description" content={description} />
   <meta property="og:type" content="website" />
   <meta property="og:image" content={ogImage} />
   <meta name="twitter:card" content="summary_large_image" />
@@ -23,8 +23,8 @@
     <div class="blog-hero">
       <h1>Blog</h1>
       <p class="blog-hero-subtitle">
-        SEO guides, tutorials, and case studies about broken links, document conversion, Wayback Machine,
-        and web migration strategies.
+        Practical guides about image compression, broken links, document conversion, the Wayback Machine,
+        and website migrations — written to be useful, not fluffy.
       </p>
     </div>
 

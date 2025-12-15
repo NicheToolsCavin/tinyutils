@@ -1,0 +1,127 @@
+<p>
+  Losing a webpage is a special kind of stress.
+  Sometimes it’s “oops, we deleted it.” Sometimes it’s “the CMS migration ate it.”
+  Sometimes it’s “someone changed a URL and nobody told the redirects.”
+</p>
+
+<p>
+  This guide gives you three practical recovery methods, plus the cleanup steps that actually stop the bleeding.
+  And yes — it’s written by someone who has watched a perfectly good page vanish into the void.
+</p>
+
+<h2 id="first">First: confirm what happened</h2>
+<p>
+  Before you start “recovery”, check the live URL.
+  You’re looking for one of these:
+</p>
+<ul>
+  <li><strong>200:</strong> the page exists (maybe it’s just changed).</li>
+  <li><strong>301/302:</strong> it moved (good — follow the chain and see where).</li>
+  <li><strong>404:</strong> not found (common after deletions and migrations).</li>
+  <li><strong>410:</strong> intentionally removed.</li>
+</ul>
+
+<p>
+  Also check for alternate versions:
+  <code>http</code> vs <code>https</code>, trailing slash, <code>www</code> vs non‑<code>www</code>, and case.
+  Half of “deleted pages” are actually “same page, different URL.”
+</p>
+
+<h2 id="method1">Method 1: Recover from the Wayback Machine (best overall)</h2>
+<p>
+  The Internet Archive’s Wayback Machine is the most reliable public source for old versions of pages.
+  If your page was live long enough (and not blocked), there’s a decent chance you’ll find snapshots.
+</p>
+
+<h3>How to do it</h3>
+<ol>
+  <li>Look up the URL on the Wayback Machine and check available snapshots.</li>
+  <li>Pick the best snapshot (usually the newest good one).</li>
+  <li>Save the content (HTML/text) and any critical assets (images, PDFs).</li>
+</ol>
+
+<p>
+  If you’re doing this for many URLs, use
+  <a href="/tools/wayback-fixer/">TinyUtils Wayback Fixer</a>
+  to bulk map dead URLs to snapshots and export results.
+</p>
+
+<h2 id="method2">Method 2: Search engine copies (hit-or-miss in 2025)</h2>
+<p>
+  In the past, Google’s cached page feature was a common recovery trick.
+  Google has since removed cached links from Search results, and cache access has been phased down.
+  So: don’t rely on it.
+</p>
+
+<p>
+  Still, you may find copies via:
+</p>
+<ul>
+  <li>Other search engines’ previews/caches (varies by engine and region).</li>
+  <li>Third-party SEO tools that store page snapshots for auditing.</li>
+  <li>Sites that quoted or mirrored parts of your content.</li>
+</ul>
+
+<h2 id="method3">Method 3: Your own backups (the most underrated option)</h2>
+<p>
+  If the page was on a CMS, check:
+</p>
+<ul>
+  <li>CMS revisions and drafts</li>
+  <li>Staging environments</li>
+  <li>Git history (if the site is versioned)</li>
+  <li>Database backups</li>
+  <li>Static site builds (old deploy artifacts)</li>
+</ul>
+
+<p>
+  This method wins when the Wayback snapshot is missing images or when you need the exact original formatting.
+</p>
+
+<h2 id="rebuild">If you find a copy: rebuild the page the right way</h2>
+<p>
+  Recovery isn’t just pasting text into a new URL.
+  The goal is to restore users’ path and preserve search intent.
+</p>
+
+<ul>
+  <li>
+    <strong>Use the original URL if possible.</strong>
+    Keeping the same URL avoids a lot of SEO and redirect work.
+  </li>
+  <li>
+    <strong>If the URL changed:</strong> add a clean <code>301</code> redirect from the old URL to the new one.
+  </li>
+  <li>
+    <strong>Restore internal links:</strong> update nav/footer links so they point to the live page, not a redirect chain.
+  </li>
+</ul>
+
+<p>
+  If you’re building lots of redirects, a sitemap comparison workflow helps.
+  <a href="/tools/sitemap-delta/">TinyUtils Sitemap Delta</a> can generate redirect rules from old vs new URL lists.
+</p>
+
+<h2 id="no-snapshot">If there’s no snapshot</h2>
+<p>
+  It’s not over — it just changes from “recover” to “reconstruct.”
+</p>
+<ul>
+  <li><strong>Use related pages</strong> to rebuild the outline and key points.</li>
+  <li><strong>Ask linking sites</strong> if they have a saved copy (it happens more than you’d expect).</li>
+  <li><strong>Publish a replacement page</strong> that clearly answers the same intent, then redirect what you can.</li>
+</ul>
+
+<h2 id="legal">Quick legal / ethics note</h2>
+<p>
+  Only republish content you own or have rights to use.
+  The Wayback Machine is amazing for recovery, but it doesn’t grant permission.
+</p>
+
+<h2 id="next">Next steps</h2>
+<p>
+  If you’re dealing with multiple dead URLs, start with
+  <a href="/tools/wayback-fixer/">Wayback Fixer</a>
+  to map URLs to snapshots.
+  Then follow with a redirect plan so users stop hitting dead ends.
+</p>
