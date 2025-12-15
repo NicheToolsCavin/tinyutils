@@ -1,0 +1,104 @@
+<p>
+  Want to automate broken link detection? Build link checking into
+  your deployment pipeline or monitoring system.
+</p>
+
+<h2 id="tldr">TL;DR</h2>
+<ul>
+  <li>TinyUtils provides a Dead Link Finder API</li>
+  <li>Integrate into CI/CD for pre-deploy checks</li>
+  <li>Set up scheduled monitoring for production</li>
+  <li>Parse JSON response for automated remediation</li>
+</ul>
+
+<h2 id="why">Why use an API?</h2>
+<ul>
+  <li><strong>Automation</strong> — No manual clicking required</li>
+  <li><strong>CI/CD integration</strong> — Fail builds on broken links</li>
+  <li><strong>Monitoring</strong> — Schedule regular health checks</li>
+  <li><strong>Alerts</strong> — Get notified when links break</li>
+</ul>
+
+<h2 id="api">The Dead Link Finder API</h2>
+<p>
+  The TinyUtils Dead Link Finder exposes a JSON API for programmatic access.
+</p>
+
+<h3>Endpoint</h3>
+<pre><code>POST /api/check
+Content-Type: application/json
+
+{
+  "pageUrl": "https://example.com/page",
+  "scope": "domain",
+  "includeAssets": false
+}</code></pre>
+
+<h3>Response</h3>
+<pre><code>{
+  "ok": true,
+  "rows": [
+    {
+      "link": "https://example.com/broken",
+      "status": 404,
+      "finalUrl": null
+    }
+  ],
+  "meta": {
+    "totals": { "checked": 42, "broken": 3 }
+  }
+}</code></pre>
+
+<h2 id="integration">Integration patterns</h2>
+
+<h3>CI/CD pre-deploy check</h3>
+<p>
+  Add a step in your GitHub Actions or GitLab CI to check staging
+  before promoting to production. Fail the build if critical links break.
+</p>
+
+<h3>Scheduled monitoring</h3>
+<p>
+  Use cron or a monitoring service to run daily checks.
+  Alert on Slack or email when broken links appear.
+</p>
+
+<h3>Post-deploy verification</h3>
+<p>
+  After deployment, verify that new pages have valid links.
+  Catch issues before users report them.
+</p>
+
+<h2 id="parsing">Parsing results</h2>
+<ul>
+  <li><strong>Status codes</strong> — 404 = not found, 500 = server error</li>
+  <li><strong>Redirects</strong> — Check if redirects are expected</li>
+  <li><strong>Timeouts</strong> — May indicate server issues</li>
+  <li><strong>Filtering</strong> — Focus on 4xx and 5xx errors</li>
+</ul>
+
+<h2 id="faq">FAQ</h2>
+
+<h3>Are there rate limits?</h3>
+<p>
+  The API has built-in concurrency limits to be respectful to
+  target sites. For high-volume needs, batch your requests.
+</p>
+
+<h3>Can I check multiple pages?</h3>
+<p>
+  Make separate API calls for each page. Parallelize for speed,
+  but respect rate limits.
+</p>
+
+<h3>What about authenticated pages?</h3>
+<p>
+  The API checks publicly accessible pages. For authenticated
+  content, you'll need a custom solution.
+</p>
+
+<h2 id="next">Next steps</h2>
+<p>
+  Try the API manually first with <a href="/tools/dead-link-finder/">Dead Link Finder</a>,
+  then integrate into your automation.
+</p>

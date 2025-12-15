@@ -1,0 +1,103 @@
+<p>
+  Need to get text out of a PDF? Whether for analysis, editing, or reuse,
+  here's the complete guide to PDF text extraction.
+</p>
+
+<h2 id="tldr">TL;DR</h2>
+<ul>
+  <li>Digital PDFs: Use <a href="/tools/text-converter/">TinyUtils Document Converter</a> → Plain Text</li>
+  <li>Scanned PDFs: Need OCR (optical character recognition)</li>
+  <li>Test first: Can you select text in the PDF? If yes, it's digital.</li>
+</ul>
+
+<h2 id="types">Two types of PDFs</h2>
+
+<h3>Digital PDFs</h3>
+<p>
+  Created from Word, HTML, or other text sources. The text is actual text data.
+  You can select it, search it, copy it.
+</p>
+
+<h3>Scanned PDFs</h3>
+<p>
+  Images of documents. The "text" is actually pixels. You can't select individual words.
+  These require OCR to extract text.
+</p>
+
+<h2 id="test">How to tell the difference</h2>
+<ol>
+  <li>Open the PDF</li>
+  <li>Try to select text with your cursor</li>
+  <li>If you can highlight words → Digital (easy to extract)</li>
+  <li>If you can only select the whole page as an image → Scanned (needs OCR)</li>
+</ol>
+
+<h2 id="digital">Extracting text from digital PDFs</h2>
+<ol>
+  <li>Go to <a href="/tools/text-converter/">TinyUtils Document Converter</a></li>
+  <li>Upload your PDF</li>
+  <li>Select <strong>Plain Text</strong> as output</li>
+  <li>Download the .txt file</li>
+</ol>
+
+<h2 id="scanned">Extracting text from scanned PDFs</h2>
+<p>
+  Scanned PDFs need OCR. Options include:
+</p>
+<ul>
+  <li><strong>Adobe Acrobat</strong> — Built-in OCR</li>
+  <li><strong>Google Docs</strong> — Upload PDF, it runs OCR automatically</li>
+  <li><strong>Online OCR tools</strong> — Various free options</li>
+</ul>
+
+<h2 id="tables">Extracting tables</h2>
+<p>
+  Table data extracts as text, but structure may be lost. For structured data:
+</p>
+<ul>
+  <li>Convert to DOCX first, then extract</li>
+  <li>Use specialized PDF-to-CSV tools</li>
+  <li>Manual cleanup may be needed</li>
+</ul>
+
+<h2 id="common">Common issues</h2>
+
+<h3>Weird line breaks</h3>
+<p>
+  PDFs store text line-by-line. Paragraphs may have breaks mid-sentence.
+  Find-and-replace can fix this.
+</p>
+
+<h3>Missing text</h3>
+<p>
+  Some PDFs use images for headings or styled text. Those won't extract.
+</p>
+
+<h3>Garbled characters</h3>
+<p>
+  Custom fonts or encoding issues. Try a different extraction method or tool.
+</p>
+
+<h2 id="faq">FAQ</h2>
+
+<h3>Can I extract text from a password-protected PDF?</h3>
+<p>
+  You need to unlock it first. Some tools can extract from read-only PDFs,
+  but not from fully encrypted ones.
+</p>
+
+<h3>Will formatting be preserved?</h3>
+<p>
+  Plain text has no formatting. For formatted output, convert to Markdown or DOCX instead.
+</p>
+
+<h3>Can I extract text from a specific page?</h3>
+<p>
+  Extract the whole document, then take the portion you need.
+</p>
+
+<h2 id="next">Next steps</h2>
+<p>
+  Ready to extract text from your PDF? Open <a href="/tools/text-converter/">TinyUtils Document Converter</a>
+  and get plain text output.
+</p>

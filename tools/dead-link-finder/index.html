@@ -564,7 +564,8 @@
     }
 
     function renderRows(rows) {
-      resultsBody.innerHTML = '';
+      // Use DocumentFragment for single reflow (performance: N appends → 1)
+      const fragment = document.createDocumentFragment();
       rows.forEach((row, index) => {
         const tr = document.createElement('tr');
         tr.dataset.group = statusGroup(row.status);
@@ -584,8 +585,10 @@
           <td class="cell-url">${escapeHtml(row.note || '')}</td>
           <td>${row.chain ?? 0}</td>
         `;
-        resultsBody.appendChild(tr);
+        fragment.appendChild(tr);
       });
+      resultsBody.innerHTML = '';
+      resultsBody.appendChild(fragment);
 
       resultsBody.querySelectorAll('button[data-copy]').forEach((btn) => {
         btn.addEventListener('click', async () => {

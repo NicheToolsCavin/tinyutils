@@ -75,11 +75,13 @@
 
       <div class="article-body">{@html content}</div>
 
-      <div class="cta-box">
-        <h3>{ctaTitle}</h3>
-        <p>{ctaText}</p>
-        <a href={ctaLink}>{ctaLinkText}</a>
-      </div>
+      {#if ctaTitle && ctaLink}
+        <div class="cta-box">
+          <h3>{ctaTitle}</h3>
+          <p>{ctaText}</p>
+          <a href={ctaLink}>{ctaLinkText}</a>
+        </div>
+      {/if}
     </section>
   </article>
 </div>

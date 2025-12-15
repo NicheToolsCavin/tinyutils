@@ -992,15 +992,23 @@ The following commands from Claude Code plugins are available as MCP tools:
 
 <!-- PLUGIN_COMMANDS_LIST - auto-injected by installer -->
 - /analyze-codebase:analyze-codebase — ---
+- /audit:audit — ---
+- /bug-detective:bug-detective — ---
+- /lyra:lyra — ---
+- /sugar:sugar-analyze — ---
+- /sugar:sugar-review — ---
+- /sugar:sugar-run — ---
+- /sugar:sugar-status — ---
+- /sugar:sugar-task — ---
 - /ultrathink:ultrathink — ---
 - /code-review:code-review — ---
 - /commit-commands:clean_gone — ---
 - /commit-commands:commit-push-pr — ---
 - /commit-commands:commit — ---
+- /feature-dev:feature-dev — ---
 - /ralph-wiggum:cancel-ralph — ---
 - /ralph-wiggum:help — ---
 - /ralph-wiggum:ralph-loop — ---
-- /demo-plugin:demo — Demo
 
 ---
 
