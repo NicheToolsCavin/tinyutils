@@ -1,0 +1,125 @@
+<p>
+  The Wayback Machine is like the internet’s attic.
+  Most of it is dust, but when you need an old version of a page, it’s suddenly the most beautiful place on earth.
+</p>
+
+<p>
+  This guide explains the three APIs you’ll actually use in 2025:
+  <strong>Availability</strong> (closest snapshot), <strong>CDX</strong> (list snapshots), and <strong>SavePageNow</strong> (request a save).
+  I’ll include copy‑paste examples so you can try it without writing a whole program.
+</p>
+
+<h2 id="tldr">TL;DR</h2>
+<ul>
+  <li>
+    <strong>Want the closest snapshot?</strong>
+    Use <code>https://archive.org/wayback/available?url=…</code>
+  </li>
+  <li>
+    <strong>Want a list of captures?</strong>
+    Use <code>https://web.archive.org/cdx/search/cdx?url=…</code>
+  </li>
+  <li>
+    <strong>Want to request a new snapshot?</strong>
+    Use SavePageNow (works best with backoff and patience).
+  </li>
+  <li>
+    <strong>Don’t want to code?</strong>
+    Use <a href="/tools/wayback-fixer/">TinyUtils Wayback Fixer</a>.
+  </li>
+</ul>
+
+<h2 id="availability">1) Availability API (closest snapshot)</h2>
+<p>
+  This is the simplest endpoint: give it a URL, get back the closest archived snapshot (if one exists).
+  It’s perfect for “does the archive have this?” checks.
+</p>
+
+<h3>Example (closest snapshot)</h3>
+<pre><code>curl "https://archive.org/wayback/available?url=https://example.com/"
+</code></pre>
+
+<h3>Example (closest to a date)</h3>
+<pre><code>curl "https://archive.org/wayback/available?url=https://example.com/&amp;timestamp=20200101"
+</code></pre>
+
+<p>
+  In the JSON response, you’ll typically look for:
+  <code>archived_snapshots.closest.url</code>, <code>archived_snapshots.closest.timestamp</code>, and <code>archived_snapshots.closest.status</code>.
+</p>
+
+<h2 id="cdx">2) CDX API (list captures and filter them)</h2>
+<p>
+  If the Availability API is “give me the closest snapshot”,
+  CDX is “show me everything you’ve got.”
+  You can filter by date ranges, status codes, and dedupe results.
+</p>
+
+<h3>Example (list captures, JSON output)</h3>
+<pre><code>curl "https://web.archive.org/cdx/search/cdx?url=example.com/&amp;output=json"
+</code></pre>
+
+<h3>Example (filter to successful captures)</h3>
+<pre><code>curl "https://web.archive.org/cdx/search/cdx?url=example.com/&amp;output=json&amp;filter=statuscode:200"
+</code></pre>
+
+<h3>Example (date range + fields)</h3>
+<pre><code>curl "https://web.archive.org/cdx/search/cdx?url=example.com/&amp;output=json&amp;from=2020&amp;to=2025&amp;fl=timestamp,original,statuscode"
+</code></pre>
+
+<h3>Common CDX parameters</h3>
+<ul>
+  <li><code>url</code> — required.</li>
+  <li><code>from</code> / <code>to</code> — date range (YYYY or YYYYMMDDhhmmss).</li>
+  <li><code>filter</code> — filter results (e.g. <code>statuscode:200</code>).</li>
+  <li><code>collapse</code> — dedupe adjacent results (e.g. <code>digest</code> or <code>timestamp:8</code>).</li>
+  <li><code>matchType</code> — exact vs prefix/host/domain matching.</li>
+  <li><code>fl</code> — fields you want back (timestamp, original, statuscode, etc.).</li>
+</ul>
+
+<blockquote>
+  Practical tip: if you only need one snapshot per day, use <code>collapse=timestamp:8</code>.
+  It keeps results usable.
+</blockquote>
+
+<h2 id="savepagenow">3) SavePageNow (request a new snapshot)</h2>
+<p>
+  SavePageNow is the “please archive this now” flow.
+  It’s useful when a page is disappearing or when you’re preserving sources.
+  The big two rules:
+</p>
+<ul>
+  <li><strong>Expect rate limits</strong> (HTTP 429) and add backoff.</li>
+  <li><strong>Not everything can be archived</strong> (blocked pages, dynamic apps, robots restrictions, etc.).</li>
+</ul>
+
+<p>
+  A simple way to trigger a save is visiting:
+  <code>https://web.archive.org/save/https://example.com/</code>
+  in a browser.
+  For bulk and programmatic workflows, you’ll want to use the documented APIs and handle retries.
+</p>
+
+<h2 id="polite">Be polite (rate limits and retries)</h2>
+<p>
+  If you’re querying lots of URLs, treat the archive like a shared resource:
+</p>
+<ul>
+  <li>Use a small concurrency (a few requests at a time).</li>
+  <li>Retry on <code>429</code> and <code>5xx</code> with a short jitter delay.</li>
+  <li>Cache results so you don’t re-hit the same URLs repeatedly.</li>
+</ul>
+
+<h2 id="nocode">No-code option (bulk restore/export)</h2>
+<p>
+  If what you really want is “give me archived versions for these dead URLs”,
+  you don’t need to code.
+  Use <a href="/tools/wayback-fixer/">TinyUtils Wayback Fixer</a> to bulk map URLs to snapshots and export the results.
+</p>
+
+<h2 id="next">Next steps</h2>
+<p>
+  Start with the Availability API for a single URL.
+  When you need lists and filters, move to CDX.
+  When you need to preserve a page before it disappears, use SavePageNow (and add backoff).
+</p>

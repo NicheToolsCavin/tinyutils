@@ -1,0 +1,124 @@
+<p>
+  “Compress images” sounds like a boring chore until you’re staring at a 14 MB PNG wondering why your page feels like dial‑up.
+  Or you’re trying to email a client and Gmail is like: <em>nope</em>.
+</p>
+
+<p>
+  The good news: you can compress images <strong>without uploading them to a server</strong>.
+  That’s useful for privacy (personal photos, client work, NDA stuff) and it’s often faster because there’s no round trip.
+</p>
+
+<h2 id="tldr">TL;DR</h2>
+<ul>
+  <li>
+    If you just want to compress quickly in your browser, use
+    <a href="/tools/image-compressor/">TinyUtils Image Compressor</a>.
+  </li>
+  <li><strong>Photos:</strong> use JPEG or WebP.</li>
+  <li><strong>Graphics with transparency:</strong> use PNG or WebP.</li>
+  <li><strong>For websites:</strong> WebP is usually the best default in 2025.</li>
+</ul>
+
+<h2 id="what">What “no upload” actually means</h2>
+<p>
+  Some tools say “no upload” but still send your files to a server.
+  The real “no upload” version is <strong>client-side processing</strong>:
+  the compression happens inside your browser, and the file never leaves your device.
+</p>
+
+<p>
+  TinyUtils Image Compressor is built for that: it runs in your browser and doesn’t require an account.
+</p>
+
+<h2 id="steps">How to compress images without uploading</h2>
+<ol>
+  <li>
+    Open <a href="/tools/image-compressor/">TinyUtils Image Compressor</a>.
+  </li>
+  <li>
+    Drag and drop your images (you can batch a bunch at once).
+  </li>
+  <li>
+    Pick an output format:
+    <ul>
+      <li><strong>Keep</strong> (same format) if you mainly want resizing or a small quality tweak</li>
+      <li><strong>WebP</strong> for the best “smaller file, looks good” default</li>
+      <li><strong>JPEG</strong> for compatibility and photos</li>
+      <li><strong>PNG</strong> for transparency and crisp UI</li>
+    </ul>
+  </li>
+  <li>
+    Adjust quality (for JPEG/WebP) and optional resize settings.
+  </li>
+  <li>
+    Download the results (single files or a ZIP for batches).
+  </li>
+</ol>
+
+<h2 id="format">JPEG vs PNG vs WebP (quick guide)</h2>
+
+<h3>Use JPEG when…</h3>
+<ul>
+  <li>It’s a photo (especially lots of colors / gradients).</li>
+  <li>You need maximum compatibility.</li>
+</ul>
+
+<h3>Use PNG when…</h3>
+<ul>
+  <li>You need transparency.</li>
+  <li>It’s UI (icons, sharp edges, screenshots) and JPEG artifacts look awful.</li>
+</ul>
+
+<h3>Use WebP when…</h3>
+<ul>
+  <li>You’re optimizing for the web in 2025.</li>
+  <li>You want smaller files without the “why does this look crunchy?” problem.</li>
+</ul>
+
+<h2 id="quality">Quality settings that usually work</h2>
+<p>
+  There’s no perfect number because every image is different.
+  But if you want a starting point:
+</p>
+<ul>
+  <li><strong>Photos:</strong> start around <code>0.80</code> quality for WebP/JPEG, then nudge down if needed.</li>
+  <li><strong>UI screenshots:</strong> keep quality higher, or consider PNG/WebP “keep crisp edges”.</li>
+  <li><strong>Huge images:</strong> resizing often saves more than quality tweaks.</li>
+</ul>
+
+<h2 id="resize">The “secret weapon” is resizing</h2>
+<p>
+  A lot of “my image is massive” problems are really “my image is 4000px wide and I display it at 900px.”
+  If the image is going on a website, set a sensible max width.
+  Your users (and your bandwidth bill) will thank you.
+</p>
+
+<h2 id="gotchas">Common gotchas (so you don’t rage-quit)</h2>
+<ul>
+  <li>
+    <strong>Transparency → JPEG:</strong> JPEG doesn’t support transparency.
+    If you convert a transparent PNG to JPEG, you’ll get a background.
+  </li>
+  <li>
+    <strong>Over-compression:</strong> if faces look like watercolor, bump quality up a bit.
+  </li>
+  <li>
+    <strong>“It’s still big”:</strong> check dimensions. A 6000×4000 image will be big even at low quality.
+  </li>
+</ul>
+
+<h2 id="seo">SEO note: why this matters for rankings</h2>
+<p>
+  Image weight affects page speed.
+  Page speed affects user behavior.
+  User behavior affects everything.
+  So while “compress images” isn’t magic SEO fairy dust, it’s one of the easiest high‑impact technical wins.
+</p>
+
+<h2 id="next">Next steps</h2>
+<p>
+  If you want to do this right now: open
+  <a href="/tools/image-compressor/">TinyUtils Image Compressor</a>, drop a few images, and aim for
+  “looks the same, smaller file.”
+  That’s the whole game.
+</p>

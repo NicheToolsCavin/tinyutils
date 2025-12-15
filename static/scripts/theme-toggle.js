@@ -24,6 +24,18 @@
     return 'dark';
   }
 
+  function detectIconPrefix(){
+    try{
+      var icons = document.querySelectorAll('link[rel~=icon], link[rel=apple-touch-icon]');
+      for(var i=0;i<icons.length;i++){
+        var href = icons[i].getAttribute('href') || '';
+        if(href.indexOf('/public/icons/') === 0) return '/public/icons';
+        if(href.indexOf('/icons/') === 0) return '/icons';
+      }
+    }catch(e){}
+    return '/icons';
+  }
+
   function applyTheme(theme){
     if(theme !== 'light' && theme !== 'dark') theme = 'dark';
     document.documentElement.setAttribute('data-theme', theme);
@@ -36,7 +48,8 @@
       var head = document.head || document.getElementsByTagName('head')[0];
       if(head){
         var palette = theme === 'light' ? 'light' : 'dark';
-        var base = '/icons/tinyutils-icon-' + palette + '-';
+        var prefix = detectIconPrefix();
+        var base = prefix + '/tinyutils-icon-' + palette + '-';
 
         // remove legacy icons so browsers don't pick stale ones
         var legacy = head.querySelectorAll('link[rel~="icon"]:not([id^="tu-"]), link[rel="apple-touch-icon"]:not([id^="tu-"])');

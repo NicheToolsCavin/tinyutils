@@ -15,47 +15,7 @@
   <link rel="stylesheet" href="/public/styles.css">
   <script defer src="/scripts/consent.js"></script>
   <script defer src="/scripts/adsense-monitor.js"></script>
-  <style>
-    /* Dropdown menu styles */
-    .nav-item {
-      position: relative;
-      display: inline-block;
-    }
-
-    .nav-dropdown {
-      display: none;
-      position: absolute;
-      top: 100%;
-      right: 0;
-      background: var(--surface-base);
-      border: 1px solid var(--border-default);
-      border-radius: var(--radius-lg);
-      padding: var(--space-2);
-      margin-top: var(--space-3);
-      min-width: 200px;
-      box-shadow: var(--shadow-xl);
-      z-index: 1000;
-    }
-
-    .nav-item:hover .nav-dropdown {
-      display: block;
-    }
-
-    .nav-dropdown a {
-      display: block;
-      padding: var(--space-2) var(--space-3);
-      color: var(--text-primary);
-      text-decoration: none;
-      border-radius: var(--radius-md);
-      transition: all var(--transition-base);
-      font-size: var(--text-sm);
-    }
-
-    .nav-dropdown a:hover {
-      background: var(--surface-raised);
-      color: var(--brand-500);
-    }
-  </style>
+  <script defer src="/scripts/nav-active.js"></script>
   <script defer src="/scripts/analytics.js"></script>
 </head>
 <body>
@@ -68,7 +28,8 @@
         <nav class="nav">
           <a href="/tools/">Tools</a>
           <a href="/blog/">Blog</a>
-          <a class="active" href="/about.html">About</a>
+          <a href="/about.html">About</a>
+          <a href="https://buymeacoffee.com/tinyutils" target="_blank" rel="noopener" class="support-link">☕ Support</a>
           <span class="nav-item">
             <a href="/privacy.html">Privacy</a>
             <div class="nav-dropdown">
@@ -92,7 +53,7 @@
       <p>The site is a static HTML/CSS/JavaScript front-end deployed on Vercel, plus a handful of serverless APIs for more complex work (like fetching metadata or converting documents). There are no user accounts or dashboards to manage — just tools you can open, use, and close again.</p>
 
       <h2>Privacy & safety</h2>
-      <p>TinyUtils does not run user logins or sell personal data. Some tools need to fetch URLs you paste to do their job; those requests are made on your behalf and may briefly appear in server logs for abuse prevention and debugging. For the full picture, see the <a href="/cookies.html">Cookie &amp; privacy settings</a> and <a href="/privacy.html">Privacy</a> pages.</p>
+      <p>TinyUtils does not run user logins or sell personal data. Some tools need to fetch URLs you paste to do their job; those requests are made on your behalf and may briefly appear in server logs for abuse prevention and debugging. For the full picture, see <a href="/cookies.html">Cookie settings</a> and the <a href="/privacy.html">Privacy</a> page.</p>
 
       <h2>Who it’s for</h2>
       <p>These tools are designed for people who are comfortable working in the browser and reading raw results. They’re intentionally minimal: no animations, no popups, and no onboarding flows. If you know what you’re looking for, TinyUtils aims to get you there quickly and stay out of your way.</p>
@@ -108,7 +69,7 @@
       <span>
         <a href="/about.html">About</a> ·
         <a href="/blog/">Blog</a> ·
-        <a href="/cookies.html">Cookie &amp; privacy settings</a> ·
+        <a href="/cookies.html">Cookie settings</a> ·
         <a href="/privacy.html">Privacy</a> ·
         <a href="/terms.html">Terms</a>
       </span>
