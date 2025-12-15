@@ -85,7 +85,8 @@
     }
   ];
 
-  const moreTools = [
+  // Image & Media Tools - featured prominently
+  const imageTools = [
     {
       icon: '🖼️',
       name: 'Image Compressor & Converter',
@@ -94,7 +95,11 @@
       description:
         'Compress and convert images in your browser - PNG, JPG, WebP, and HEIC. Batch process and download as a ZIP. Files never leave your device.',
       badges: ['HEIC support', 'Batch ZIP', 'Quality slider', 'Resize']
-    },
+    }
+  ];
+
+  // SEO & Migration Tools
+  const migrationTools = [
     {
       icon: '🗺️',
       name: 'Sitemap Delta + Redirect Mapper',
@@ -105,15 +110,6 @@
       badges: ['Smart mapping', 'Confidence scores', 'Rewrite exports', '410 CSV']
     },
     {
-      icon: '🔍',
-      name: 'Bulk Find & Replace',
-      href: '/tools/multi-file-search-replace/',
-      tier: 'free',
-      description:
-        'Upload a ZIP and find/replace text across 500 files at once. Visual diff preview, regex support, CSV export. No command line required.',
-      badges: ['500 files', 'Visual diffs', 'Regex patterns', 'CSV export']
-    },
-    {
       icon: '⏪',
       name: 'Wayback Fixer',
       href: '/tools/wayback-fixer/',
@@ -121,6 +117,19 @@
       description:
         'Bulk-map broken URLs to Internet Archive snapshots. Configurable time windows, optional HEAD verification, and Save Page Now integration.',
       badges: ['Bulk mapping', 'Time windows', 'HEAD verify', 'SPN queue']
+    }
+  ];
+
+  // Data & File Processing Tools
+  const dataTools = [
+    {
+      icon: '🔍',
+      name: 'Bulk Find & Replace',
+      href: '/tools/multi-file-search-replace/',
+      tier: 'free',
+      description:
+        'Upload a ZIP and find/replace text across 500 files at once. Visual diff preview, regex support, CSV export. No command line required.',
+      badges: ['500 files', 'Visual diffs', 'Regex patterns', 'CSV export']
     },
     {
       icon: '🧬',
@@ -241,21 +250,71 @@
 <!-- Real Ad Slot -->
 <AdSlot wrapperClass="ad-slot ad-slot-wide" />
 
-<!-- More Tools Grid -->
+<!-- More Tools - Categorized Sections -->
 <div class="tools-sections-wrapper" id="more-tools" data-testid="tools-more-tools">
-  <div class="tools-grid two-col-bottom">
-    {#each moreTools as tool, i}
-      <ToolCard
-        icon={tool.icon}
-        name={tool.name}
-        href={tool.href}
-        description={tool.description}
-        badges={tool.badges}
-        tier={tool.tier}
-        delay={i + 2}
+  <!-- Image & Media Section -->
+  <section class="tools-section-bottom" data-testid="tools-section-image">
+    <SectionHeader
+      title="Image &amp; Media"
+      description="Process images locally - nothing leaves your device."
+    />
+    <div class="tools-grid single-featured">
+      {#each imageTools as tool, i}
+        <ToolCard
+          icon={tool.icon}
+          name={tool.name}
+          href={tool.href}
+          description={tool.description}
+          badges={tool.badges}
+          tier={tool.tier}
+          delay={i + 2}
+        />
+      {/each}
+    </div>
+  </section>
+
+  <!-- Migration & Archives Section -->
+  <div class="tools-bottom-layout">
+    <section class="tools-section-bottom" data-testid="tools-section-migration">
+      <SectionHeader
+        title="Migration &amp; Archives"
+        description="Compare sitemaps and recover broken URLs."
       />
-    {/each}
-    <div class="tool-card-spacer" aria-hidden="true"></div>
+      <div class="tools-grid">
+        {#each migrationTools as tool, i}
+          <ToolCard
+            icon={tool.icon}
+            name={tool.name}
+            href={tool.href}
+            description={tool.description}
+            badges={tool.badges}
+            tier={tool.tier}
+            delay={i + 3}
+          />
+        {/each}
+      </div>
+    </section>
+
+    <!-- Data & File Processing Section -->
+    <section class="tools-section-bottom" data-testid="tools-section-data">
+      <SectionHeader
+        title="Data &amp; Files"
+        description="Transform, join, and extract data from various formats."
+      />
+      <div class="tools-grid">
+        {#each dataTools as tool, i}
+          <ToolCard
+            icon={tool.icon}
+            name={tool.name}
+            href={tool.href}
+            description={tool.description}
+            badges={tool.badges}
+            tier={tool.tier}
+            delay={i + 5}
+          />
+        {/each}
+      </div>
+    </section>
   </div>
 </div>
 
@@ -270,11 +329,27 @@
     margin-bottom: 0;
   }
 
+  .tools-section-bottom {
+    margin-top: var(--space-8);
+  }
+
+  .tools-section-bottom:first-child {
+    margin-top: 0;
+  }
+
   .tools-top-layout {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
     gap: var(--space-6);
     margin-top: var(--space-6);
+  }
+
+  /* Bottom layout mirrors top layout structure */
+  .tools-bottom-layout {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: var(--space-6);
+    margin-top: var(--space-8);
   }
 
   /* Enhanced Tool Cards */
@@ -289,18 +364,10 @@
     grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
   }
 
-  .two-col-bottom {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  @media (max-width: 820px) {
-    .two-col-bottom {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  .tool-card-spacer {
-    visibility: hidden;
+  /* Single featured tool - centered with max-width */
+  .tools-grid.single-featured {
+    max-width: 600px;
+    margin: 0 auto;
   }
 
   .see-more {
