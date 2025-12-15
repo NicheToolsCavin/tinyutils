@@ -60,3 +60,5 @@
 {"level":30,"time":1765833452004,"pid":79708,"hostname":"JupiterAbundance.local","msg":"MCP Server initialized"}
 {"level":30,"time":1765833452004,"pid":79708,"hostname":"JupiterAbundance.local","msg":"Registering tools from Tool Registry..."}
 {"level":30,"time":1765833452005,"pid":79708,"hostname":"JupiterAbundance.local","msg":"Registered 15 tools dynamically with MCP server."}
+{"level":30,"time":1765833660218,"pid":79708,"hostname":"JupiterAbundance.local","msg":"All SSE connections closed."}
+{"level":30,"time":1765833660218,"pid":79708,"hostname":"JupiterAbundance.local","msg":"Closing all 0 active SSE connections..."}
