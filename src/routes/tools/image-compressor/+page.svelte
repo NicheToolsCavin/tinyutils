@@ -408,14 +408,11 @@
 
 				// HEIC decode: convert to PNG or JPEG as an intermediate
 				const isHeic = isHeicFile(task.inputFile);
-				console.log('[processor] File:', task.inputName, 'type:', task.inputFile.type, 'isHeic:', isHeic);
 				if (isHeic) {
 					const intermediate: 'image/png' | 'image/jpeg' =
 						settings.outputFormat === 'jpeg' ? 'image/jpeg' : 'image/png';
-					console.log('[processor] Converting HEIC to', intermediate);
 					inputBlob = await heicToBlob(task.inputFile, intermediate, 0.92);
 					inputType = intermediate;
-					console.log('[processor] HEIC conversion complete, blob size:', inputBlob.size);
 				}
 
 				let outMime = outputMimeFromFormat(settings.outputFormat, inputType);
@@ -522,6 +519,10 @@
 			addError(`Failed to create ZIP: ${err?.message || 'Unknown error'}`);
 		}
 	}
+
+	// Reactive statements for button states - Svelte needs these to track dependencies
+	$: canProcessNow = tasks.length > 0 && !isProcessing;
+	$: canDownloadNow = doneTasks.length > 0 && !isProcessing;
 
 	function canProcess(): boolean {
 		return tasks.length > 0 && !isProcessing;
@@ -783,7 +784,7 @@
 			</div>
 
 			<div class="row wrap gap-sm">
-				<button class="btn primary" type="button" disabled={!canProcess()} on:click={startProcessing}>
+				<button class="btn primary" type="button" disabled={!canProcessNow} on:click={startProcessing}>
 					{isProcessing ? (isCancelling ? 'Cancelling...' : 'Processing...') : 'Process images'}
 				</button>
 
@@ -791,7 +792,7 @@
 					{isCancelling ? 'Cancelling...' : 'Cancel'}
 				</button>
 
-				<button class="btn" type="button" disabled={!canDownload()} on:click={downloadAll}>
+				<button class="btn" type="button" disabled={!canDownloadNow} on:click={downloadAll}>
 					Download {doneTasks.length > 1 ? 'all (ZIP)' : 'file'}
 				</button>
 			</div>
