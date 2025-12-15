@@ -3,31 +3,37 @@
   const { posts, title, description, ogImage, icons } = data;
 
   // Get category and icon based on post slug
+  // Order matters: more specific patterns checked first to avoid mis-categorization
   function getPostCategory(slug) {
+    // Image-related posts (format conversions, compression)
     if (slug.includes('heic') || slug.includes('webp') || slug.includes('png') ||
         slug.includes('jpg') || slug.includes('jpeg') || slug.includes('gif') ||
         slug.includes('compress') || slug.includes('image') || slug.includes('batch-image')) {
-      return { category: 'image', icon: '🖼️', gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' };
+      return { category: 'image', icon: '🖼️' };
     }
+    // Document conversion and extraction
     if (slug.includes('pdf') || slug.includes('docx') || slug.includes('markdown') ||
         slug.includes('html-to') || slug.includes('latex') || slug.includes('epub') ||
         slug.includes('odt') || slug.includes('rtf') || slug.includes('word') ||
         slug.includes('document') || slug.includes('extract-text')) {
-      return { category: 'document', icon: '📄', gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' };
+      return { category: 'document', icon: '📄' };
     }
+    // SEO and site management
     if (slug.includes('broken-link') || slug.includes('sitemap') || slug.includes('seo') ||
         slug.includes('redirect') || slug.includes('migration')) {
-      return { category: 'seo', icon: '🔍', gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' };
+      return { category: 'seo', icon: '🔍' };
     }
+    // Archive and recovery
     if (slug.includes('wayback') || slug.includes('archive') || slug.includes('recover') ||
         slug.includes('time-machine')) {
-      return { category: 'archive', icon: '⏪', gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' };
+      return { category: 'archive', icon: '⏪' };
     }
+    // Privacy-focused
     if (slug.includes('privacy')) {
-      return { category: 'privacy', icon: '🔒', gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)' };
+      return { category: 'privacy', icon: '🔒' };
     }
-    // Default
-    return { category: 'general', icon: '🛠️', gradient: 'linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)' };
+    // Default fallback
+    return { category: 'general', icon: '🛠️' };
   }
 </script>
 
@@ -60,8 +66,8 @@
       {#each posts as post}
         {@const cat = getPostCategory(post.slug)}
         <article class="blog-card">
-          <div class="blog-card-thumb" style="background: {cat.gradient}">
-            <span class="blog-card-icon">{cat.icon}</span>
+          <div class="blog-card-thumb blog-card-thumb--{cat.category}">
+            <span class="blog-card-icon" role="img" aria-label="{cat.category} category">{cat.icon}</span>
             <span class="blog-card-category">{cat.category}</span>
           </div>
           <div class="blog-card-content">
@@ -100,7 +106,7 @@
 
   .blog-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
     gap: var(--space-6);
     margin-top: var(--space-8);
   }
@@ -128,6 +134,31 @@
     align-items: center;
     justify-content: center;
     position: relative;
+  }
+
+  /* Category-specific gradient backgrounds (CSP-safe) */
+  .blog-card-thumb--image {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+
+  .blog-card-thumb--document {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  }
+
+  .blog-card-thumb--seo {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  }
+
+  .blog-card-thumb--archive {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  }
+
+  .blog-card-thumb--privacy {
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  }
+
+  .blog-card-thumb--general {
+    background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
   }
 
   .blog-card-icon {

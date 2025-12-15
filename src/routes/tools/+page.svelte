@@ -339,7 +339,7 @@
 
   .tools-top-layout {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
     gap: var(--space-6);
     margin-top: var(--space-6);
   }
@@ -347,7 +347,7 @@
   /* Bottom layout mirrors top layout structure */
   .tools-bottom-layout {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
     gap: var(--space-6);
     margin-top: var(--space-8);
   }
@@ -355,13 +355,13 @@
   /* Enhanced Tool Cards */
   .tools-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
     gap: var(--space-6);
     align-items: stretch;
   }
 
   .tools-top-layout .tools-grid {
-    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
   }
 
   /* Single featured tool - centered with max-width */
