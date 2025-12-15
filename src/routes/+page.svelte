@@ -35,6 +35,14 @@
       badges: ['Chromium PDF', 'Pandoc engine', '100+ formats']
     },
     {
+      icon: '🖼️',
+      title: 'Image Compressor',
+      href: '/tools/image-compressor/',
+      description:
+        'Compress and convert images in your browser. Supports JPEG, PNG, WebP, and HEIC with adjustable quality. No upload required—100% private.',
+      badges: ['Client-side', 'HEIC support', 'Batch process']
+    },
+    {
       icon: '🧬',
       title: 'Big CSV Joiner',
       href: '/tools/csv-joiner/',
@@ -65,13 +73,13 @@
   <title>TinyUtils — Useful web tools for SEOs &amp; builders</title>
   <meta
 		name="description"
-		content="Dead Link Finder, Sitemap Delta, Wayback Fixer, a flexible document converter, and new data tools like CSV Joiner, JSON↔CSV, and Bulk PDF extractor. Fast, polite, privacy-friendly tools for SEOs and builders."
+		content="Dead Link Finder, Sitemap Delta, Wayback Fixer, Document Converter, Image Compressor, and data tools like CSV Joiner, JSON↔CSV, and Bulk PDF extractor. Fast, polite, privacy-friendly tools for SEOs and builders."
   />
   <link rel="canonical" href="/" />
   <meta property="og:title" content="TinyUtils — Useful web tools for SEOs &amp; builders" />
   <meta
     property="og:description"
-    content="Dead Link Finder, Sitemap Delta, Wayback Fixer, and a flexible document converter for many document formats."
+    content="Dead Link Finder, Sitemap Delta, Wayback Fixer, Document Converter, Image Compressor, and data tools for SEOs and builders."
   />
   <meta property="og:image" content="/og.png" />
   <meta property="og:url" content="https://tinyutils.net/" />
@@ -318,6 +326,22 @@
 
   .delay-4 {
     animation-delay: 0.4s;
+  }
+
+  .delay-5 {
+    animation-delay: 0.5s;
+  }
+
+  .delay-6 {
+    animation-delay: 0.6s;
+  }
+
+  .delay-7 {
+    animation-delay: 0.7s;
+  }
+
+  .delay-8 {
+    animation-delay: 0.8s;
   }
 
   @keyframes fadeInUp {
