@@ -1574,6 +1574,11 @@ def _render_pdf_via_reportlab(
             _BOLD_FONT = _REPORTLAB_BOLD_FONT
             _MONO_FONT = _REPORTLAB_MONO_FONT
 
+            _ensure_reportlab_fonts_registered()
+            _BODY_FONT = _REPORTLAB_BODY_FONT
+            _BOLD_FONT = _REPORTLAB_BOLD_FONT
+            _MONO_FONT = _REPORTLAB_MONO_FONT
+
             class HorizontalLine(Flowable):
                 """Draws a horizontal line separator"""
                 def __init__(self, width_percent=100, thickness=0.5, space_before=4, space_after=4):
