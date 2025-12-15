@@ -87,6 +87,15 @@
 
   const moreTools = [
     {
+      icon: '🖼️',
+      name: 'Image Compressor & Converter',
+      href: '/tools/image-compressor/',
+      tier: 'free',
+      description:
+        'Compress and convert images in your browser - PNG, JPG, WebP, and HEIC. Batch process and download as a ZIP. Files never leave your device.',
+      badges: ['HEIC support', 'Batch ZIP', 'Quality slider', 'Resize']
+    },
+    {
       icon: '🗺️',
       name: 'Sitemap Delta + Redirect Mapper',
       href: '/tools/sitemap-delta/',

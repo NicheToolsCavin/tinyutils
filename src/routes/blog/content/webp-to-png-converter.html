@@ -1,0 +1,105 @@
+<p>
+  WebP is great for the web, but sometimes you need a PNG.
+  Maybe you're uploading to a platform that doesn't support WebP.
+  Maybe you need to edit the image in software that chokes on WebP.
+  Maybe you just want transparency in a format everything understands.
+</p>
+
+<p>
+  Converting WebP to PNG is quick and free — here's how.
+</p>
+
+<h2 id="tldr">TL;DR</h2>
+<ul>
+  <li>Use <a href="/tools/image-compressor/">TinyUtils Image Compressor</a> to convert WebP to PNG.</li>
+  <li>PNG files will be larger than the original WebP (that's expected).</li>
+  <li>Transparency is preserved during conversion.</li>
+  <li>No upload required — conversion happens in your browser.</li>
+</ul>
+
+<h2 id="why">Why convert WebP to PNG?</h2>
+<ul>
+  <li><strong>Compatibility</strong> — Some apps/platforms don't support WebP</li>
+  <li><strong>Editing</strong> — PNG is universally supported in image editors</li>
+  <li><strong>Printing</strong> — Print services often prefer PNG or TIFF</li>
+  <li><strong>Transparency</strong> — Need an editable file with alpha channel</li>
+</ul>
+
+<h2 id="how">How to convert WebP to PNG</h2>
+<ol>
+  <li>Open <a href="/tools/image-compressor/">TinyUtils Image Compressor</a>.</li>
+  <li>Drag and drop your WebP files.</li>
+  <li>Select <strong>PNG</strong> as output format.</li>
+  <li>Download the converted files.</li>
+</ol>
+
+<p>
+  That's it. No quality slider needed — PNG is lossless.
+</p>
+
+<h2 id="size">Why is my PNG bigger than the WebP?</h2>
+<p>
+  This is normal and expected. WebP uses lossy compression (by default), while PNG is lossless.
+  When you convert, the PNG preserves all the pixels from the WebP exactly — but without the compression tricks that made WebP small.
+</p>
+<p>
+  Think of it like this: compressing a sponge (WebP), then putting it in a rigid box (PNG).
+  The box is bigger because it can't squeeze.
+</p>
+
+<h2 id="transparency">Does transparency survive?</h2>
+<p>
+  Yes! Both WebP and PNG support transparency.
+  Converting between them preserves the alpha channel perfectly.
+</p>
+
+<h2 id="batch">Batch conversion</h2>
+<p>
+  Got a folder of WebP files? Drop them all into TinyUtils.
+  Select PNG output, and download a ZIP with all the converted files.
+</p>
+
+<h2 id="quality">Quality considerations</h2>
+<p>
+  You can't "recover" quality lost during WebP compression.
+  If the original WebP was saved at 70% quality, the PNG will have the same artifacts — just in a different container.
+</p>
+<p>
+  For best results, start with high-quality WebP files (85%+) if you know you'll need to convert later.
+</p>
+
+<h2 id="alternatives">When to use JPEG instead</h2>
+<p>
+  If you're converting for compatibility and don't need transparency, JPEG might be a better choice.
+  JPEG files are smaller than PNG for photos.
+</p>
+<ul>
+  <li><strong>Need transparency?</strong> → PNG</li>
+  <li><strong>Photo without transparency?</strong> → JPEG might be smaller</li>
+</ul>
+
+<h2 id="faq">FAQ</h2>
+
+<h3>Can I convert PNG back to WebP later?</h3>
+<p>
+  Yes, but each conversion can introduce slight changes.
+  If you're going round-trip, expect some quality degradation over multiple conversions.
+</p>
+
+<h3>Is WebP to PNG lossless?</h3>
+<p>
+  The conversion itself is lossless — PNG preserves exactly what was in the WebP.
+  But if the WebP was lossy, those artifacts are now "baked in."
+</p>
+
+<h3>What about animated WebP?</h3>
+<p>
+  Animated WebP → PNG gives you the first frame only.
+  For animations, you'd need to convert to GIF or extract all frames.
+</p>
+
+<h2 id="next">Next steps</h2>
+<p>
+  Need to convert WebP to PNG? Open <a href="/tools/image-compressor/">TinyUtils Image Compressor</a>,
+  drop in your files, and get PNG versions in seconds.
+</p>

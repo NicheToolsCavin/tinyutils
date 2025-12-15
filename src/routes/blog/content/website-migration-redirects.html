@@ -1,0 +1,109 @@
+<p>
+  Website migrations don’t usually fail because of one spectacular mistake.
+  They fail because of 400 tiny “eh, we’ll fix it later” decisions.
+  And then Search Console lights up like a Christmas tree.
+</p>
+
+<p>
+  This is a practical SEO checklist for migrations.
+  The focus is broken links, redirects, and the stuff that keeps traffic from falling off a cliff.
+</p>
+
+<h2 id="tldr">TL;DR migration checklist</h2>
+<ul>
+  <li>✅ Inventory old URLs (old sitemap + logs)</li>
+  <li>✅ Build a 301/410 redirect map (old → new)</li>
+  <li>✅ Update internal links (don’t rely on redirects)</li>
+  <li>✅ Launch QA crawl (catch 404s, loops, chains)</li>
+  <li>✅ Monitor Search Console + logs after launch</li>
+</ul>
+
+<h2 id="prep">Prep (before you touch anything)</h2>
+
+<h3>1) Inventory URLs</h3>
+<p>
+  You need an “old world” URL list.
+  The best sources:
+</p>
+<ul>
+  <li>Old sitemap(s)</li>
+  <li>Server logs (what people and bots actually hit)</li>
+  <li>Analytics / Search Console exports</li>
+</ul>
+
+<h3>2) Decide your redirect policy</h3>
+<ul>
+  <li><strong>301</strong> for real moves (old page has a new home).</li>
+  <li><strong>410</strong> for intentional removals (no replacement).</li>
+  <li>Avoid blanket redirects (everything → homepage) unless you enjoy confusing users.</li>
+</ul>
+
+<h3>3) Freeze the window</h3>
+<p>
+  Plan a deploy window and a rollback plan.
+  Migrations fail most often when changes keep shipping while redirects are half done.
+</p>
+
+<h2 id="map">Map redirects (the part that saves you)</h2>
+<p>
+  If you have old + new sitemaps, you can generate a mapping workflow instead of hand-editing spreadsheets.
+  Use <a href="/tools/sitemap-delta/">TinyUtils Sitemap Delta</a> to compare lists and export redirect rules.
+</p>
+
+<h3>Rules of thumb</h3>
+<ul>
+  <li><strong>Closest match beats “kind of related”.</strong> Redirect to the page that answers the same intent.</li>
+  <li><strong>Specific before wildcard.</strong> Wildcards are powerful and dangerous.</li>
+  <li><strong>Kill chains.</strong> Old URLs should point directly to the final destination.</li>
+  <li><strong>Normalize slashes and casing.</strong> Most redirect bugs are “almost the same URL”.</li>
+</ul>
+
+<h2 id="implement">Implement (don’t forget internal links)</h2>
+<p>
+  Redirects are necessary — but they shouldn’t be your internal navigation system.
+  After you add redirects:
+</p>
+<ul>
+  <li>Update nav and footer links.</li>
+  <li>Update canonical URLs.</li>
+  <li>Update sitemap(s) to reflect the new structure.</li>
+</ul>
+
+<h2 id="qa">Launch QA (catch disasters before Google does)</h2>
+<p>
+  Do a crawl right after launch.
+  Start with templates because they multiply:
+  homepage, nav/footer, category pages, top blog templates.
+</p>
+
+<ul>
+  <li>
+    Run a scan with <a href="/tools/dead-link-finder/">TinyUtils Dead Link Finder</a>
+    to catch 404s and broken outbound links.
+  </li>
+  <li>
+    Re-run <a href="/tools/sitemap-delta/">Sitemap Delta</a> to confirm old URLs now resolve correctly.
+  </li>
+</ul>
+
+<h3>What you’re looking for</h3>
+<ul>
+  <li>404s on important pages</li>
+  <li>Redirect loops</li>
+  <li>Redirect chains</li>
+  <li>Robots/sitemap mistakes</li>
+</ul>
+
+<h2 id="after">After launch (monitor like it’s your job)</h2>
+<ul>
+  <li>Watch Search Console for spikes in “not found” URLs.</li>
+  <li>Watch logs for repeated 404s (especially old URLs still being hit).</li>
+  <li>Fix the top 20 issues first — it’s usually most of the impact.</li>
+</ul>
+
+<h2 id="next">Next steps</h2>
+<p>
+  If you’re migrating soon, start by comparing sitemaps with
+  <a href="/tools/sitemap-delta/">TinyUtils Sitemap Delta</a>.
+  Then run <a href="/tools/dead-link-finder/">Dead Link Finder</a> after launch to catch the broken stuff fast.
+</p>

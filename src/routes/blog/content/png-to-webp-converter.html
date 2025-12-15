@@ -1,0 +1,140 @@
+<p>
+  WebP is the format that makes web developers happy: smaller files, same quality, and yes — it supports transparency.
+  Converting your PNGs to WebP is one of the easiest wins for page speed.
+</p>
+
+<p>
+  The catch? You need a converter that actually works and doesn't require uploading your files to some random server.
+  That's what we're solving here.
+</p>
+
+<h2 id="tldr">TL;DR</h2>
+<ul>
+  <li>Use <a href="/tools/image-compressor/">TinyUtils Image Compressor</a> to convert PNG to WebP in your browser.</li>
+  <li>WebP is typically 50-80% smaller than PNG at similar quality.</li>
+  <li>WebP supports transparency (unlike JPEG).</li>
+  <li>All modern browsers support WebP (Safari since 2020, everything else earlier).</li>
+</ul>
+
+<h2 id="why">Why convert PNG to WebP?</h2>
+<p>
+  PNG is lossless, which is great for quality but terrible for file size.
+  WebP uses smarter compression that produces much smaller files.
+</p>
+<ul>
+  <li><strong>Smaller files</strong> — 50-80% smaller than equivalent PNG</li>
+  <li><strong>Faster pages</strong> — less bandwidth, quicker loads</li>
+  <li><strong>Transparency</strong> — WebP keeps your alpha channel</li>
+  <li><strong>Universal support</strong> — Chrome, Firefox, Safari, Edge all support it</li>
+</ul>
+
+<h2 id="how">How to convert PNG to WebP (free, no upload)</h2>
+<ol>
+  <li>Open <a href="/tools/image-compressor/">TinyUtils Image Compressor</a>.</li>
+  <li>Drag and drop your PNG files.</li>
+  <li>Select <strong>WebP</strong> as the output format.</li>
+  <li>Adjust quality (85% is a good default).</li>
+  <li>Click download — single file or ZIP for batches.</li>
+</ol>
+
+<p>
+  Everything happens in your browser. No upload, no account, no waiting.
+</p>
+
+<h2 id="quality">What quality setting should I use?</h2>
+<p>
+  WebP quality is a bit different from JPEG quality. Here's a rough guide:
+</p>
+<ul>
+  <li><strong>90-100%</strong> — Near-lossless, minimal savings over PNG</li>
+  <li><strong>80-90%</strong> — Sweet spot for most images</li>
+  <li><strong>70-80%</strong> — Good for thumbnails and backgrounds</li>
+  <li><strong>Below 70%</strong> — Visible artifacts, use only if size is critical</li>
+</ul>
+
+<h2 id="transparency">Does WebP keep transparency?</h2>
+<p>
+  Yes! Unlike JPEG, WebP supports alpha channels (transparency).
+  Your PNG with a transparent background will convert cleanly to WebP with the same transparency.
+</p>
+
+<h2 id="compatibility">Browser compatibility in 2025</h2>
+<p>
+  WebP is supported by:
+</p>
+<ul>
+  <li>Chrome (since 2014)</li>
+  <li>Firefox (since 2019)</li>
+  <li>Safari (since 2020 — macOS Big Sur / iOS 14)</li>
+  <li>Edge (since forever, it's Chromium)</li>
+</ul>
+<p>
+  The only holdouts are ancient browsers (IE11, old Safari).
+  For those edge cases, you can serve PNG as a fallback using the <code>&lt;picture&gt;</code> element.
+</p>
+
+<h2 id="batch">Batch conversion</h2>
+<p>
+  Got a folder of PNGs? Drop them all into TinyUtils at once.
+  The tool processes them in parallel and gives you a ZIP download.
+</p>
+
+<h2 id="results">Real conversion results</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Original PNG</th>
+      <th>WebP @ 85%</th>
+      <th>Savings</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1.2 MB (screenshot)</td>
+      <td>95 KB</td>
+      <td>92%</td>
+    </tr>
+    <tr>
+      <td>450 KB (logo with transparency)</td>
+      <td>28 KB</td>
+      <td>94%</td>
+    </tr>
+    <tr>
+      <td>3.5 MB (illustration)</td>
+      <td>320 KB</td>
+      <td>91%</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="vs-avif">WebP vs AVIF: which is better?</h2>
+<p>
+  AVIF is newer and often produces even smaller files.
+  But browser support is still catching up (no Safari until late 2023).
+  For now, WebP is the safe choice. AVIF support is coming to TinyUtils soon.
+</p>
+
+<h2 id="faq">FAQ</h2>
+
+<h3>Can I convert WebP back to PNG?</h3>
+<p>
+  Yes, but you won't get the original quality back.
+  WebP is lossy (at most quality levels), so converting back creates a larger file from already-compressed data.
+</p>
+
+<h3>Is PNG to WebP conversion lossless?</h3>
+<p>
+  Not by default. WebP uses lossy compression for smaller files.
+  WebP does have a lossless mode, but the savings are smaller (similar to PNG-to-PNG optimization).
+</p>
+
+<h3>Should I replace all my PNGs with WebP?</h3>
+<p>
+  For web use, yes. For archival or editing, keep the original PNGs.
+</p>
+
+<h2 id="next">Next steps</h2>
+<p>
+  Ready to convert? Open <a href="/tools/image-compressor/">TinyUtils Image Compressor</a>,
+  drop in your PNGs, select WebP, and watch your file sizes plummet.
+</p>

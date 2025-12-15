@@ -1,0 +1,114 @@
+<p>
+  WordPress has a plugin for everything.
+  That’s a blessing, and also how you end up with a site that loads like it’s powered by a lemon.
+</p>
+
+<p>
+  If you’re trying to find broken links on a WordPress site, you have two main options:
+  <strong>scan from inside WordPress (plugin)</strong> or <strong>scan from outside (web tool / crawler)</strong>.
+  Here’s the honest comparison.
+</p>
+
+<h2 id="tldr">TL;DR</h2>
+<ul>
+  <li><strong>Want the simplest and safest for performance?</strong> Use an external web tool.</li>
+  <li><strong>Want in-dashboard editing and scheduled scans?</strong> A plugin can help (but watch load).</li>
+  <li><strong>Running a big audit?</strong> External scan first, then fix internally.</li>
+</ul>
+
+<h2 id="plugins">WordPress broken link checker plugins</h2>
+
+<h3>Pros</h3>
+<ul>
+  <li><strong>Runs inside WordPress</strong> (can see internal content and sometimes draft areas).</li>
+  <li><strong>Convenient editing</strong> (fix links right from the dashboard).</li>
+  <li><strong>Scheduling</strong> (runs periodically without you thinking about it).</li>
+</ul>
+
+<h3>Cons</h3>
+<ul>
+  <li><strong>Performance overhead</strong> (crawling is work, and your server pays the bill).</li>
+  <li><strong>Hosting limits</strong> (shared hosts and managed WP can throttle long scans).</li>
+  <li><strong>WP cron weirdness</strong> (scheduled tasks are not always reliable).</li>
+</ul>
+
+<h2 id="webtools">Web tools / external crawlers</h2>
+<p>
+  External tools scan your site like a user/bot would: from the outside.
+  That means no plugin install and no server load from crawling.
+</p>
+
+<h3>Pros</h3>
+<ul>
+  <li><strong>No install</strong> (you can run it today).</li>
+  <li><strong>No WP performance hit</strong> (the crawling happens externally).</li>
+  <li><strong>Exports</strong> (CSV results are perfect for fixing or delegating).</li>
+</ul>
+
+<h3>Cons</h3>
+<ul>
+  <li><strong>Public access required</strong> (if content is gated behind login, it may be missed).</li>
+  <li><strong>Some JS-heavy links can be missed</strong> unless the crawler renders JS.</li>
+</ul>
+
+<p>
+  If you want a simple external scan with exportable results, use
+  <a href="/tools/dead-link-finder/">TinyUtils Dead Link Finder</a>.
+</p>
+
+<h2 id="pick">When to pick each (quick guide)</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Your situation</th>
+      <th>Pick</th>
+      <th>Why</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Small blog, occasional checks</td>
+      <td>Web tool</td>
+      <td>Fast, no overhead, easy exports</td>
+    </tr>
+    <tr>
+      <td>You need in-dashboard fixing</td>
+      <td>Plugin</td>
+      <td>Convenient editing inside WP</td>
+    </tr>
+    <tr>
+      <td>High-traffic site, performance sensitive</td>
+      <td>Web tool</td>
+      <td>No server load from crawling</td>
+    </tr>
+    <tr>
+      <td>Agency doing audits + handoff</td>
+      <td>Web tool + exports</td>
+      <td>CSV handoff is cleaner than screenshots</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="tips">Migration tips (so you don’t make it worse)</h2>
+<ul>
+  <li>
+    <strong>Don’t scan during peak traffic.</strong> Crawls can spike CPU and DB load.
+  </li>
+  <li>
+    <strong>Export results.</strong> Treat it like a bug list, not a one-time report.
+  </li>
+  <li>
+    <strong>Fix internal links directly.</strong> Redirects are useful, but internal links shouldn’t rely on them forever.
+  </li>
+  <li>
+    <strong>Re-scan after fixes.</strong> Broken links are a regression-prone feature.
+  </li>
+</ul>
+
+<h2 id="next">Next steps</h2>
+<p>
+  If you want the lowest-friction option, start with
+  <a href="/tools/dead-link-finder/">TinyUtils Dead Link Finder</a>.
+  Export the results and fix the top issues first (nav, footer, top pages).
+  That’s usually 80% of the payoff.
+</p>

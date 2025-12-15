@@ -26,6 +26,62 @@
 <!-- RECENT ACTIVITY (Full Context) -->
 
 
+### 2025-12-15 08:30 CET - Claude Code - 43 new SEO blog posts (overnight batch)
+
+**Overnight autonomous blog writing session:**
+
+Completed the 73-topic SEO blog matrix by writing all remaining 43 blog content files. Session included:
+
+**Document Converter Blogs (31 new files):**
+- Markdown converters: markdown-to-html, markdown-to-epub, markdown-to-odt, markdown-to-rtf, markdown-to-latex, markdown-to-txt
+- PDF converters: pdf-to-html, pdf-to-txt, pdf-to-odt, pdf-to-rtf, pdf-to-epub
+- DOCX converters: docx-to-html, docx-to-odt, docx-to-rtf, docx-to-txt, docx-to-epub
+- ODT converters: odt-to-pdf, odt-to-docx, odt-to-markdown, odt-to-html, odt-to-rtf
+- RTF converters: rtf-to-pdf, rtf-to-docx
+- EPUB converters: epub-to-pdf, epub-to-markdown
+- LaTeX converters: latex-to-pdf, latex-to-html
+- HTML converters: html-to-docx, html-to-txt, html-to-epub, html-to-odt
+- Special: word-track-changes-to-clean
+
+**Image Converter Blogs (5 new files):**
+- jpg-to-png-converter, batch-image-compression, optimize-png-for-web, webp-compression-guide, extract-text-from-pdf
+
+**SEO/Link Tool Blogs (7 new files):**
+- sitemap-comparison-tool, privacy-first-web-tools
+- broken-link-checker-agencies, broken-link-checker-api
+- fix-broken-links-archive-org, website-time-machine-guide
+
+**Updated postData.js** with all 43 new imports and post entries.
+
+**Total blogs now: 73** (30 previous + 43 new = complete SEO matrix)
+
+Files: src/routes/blog/content/*.html (43 new), src/routes/blog/postData.js
+
+Tests: pnpm check PASS (0 errors), pnpm test PASS (72/72, 5 skipped)
+
+
+### 2025-12-15 17:45 CET - Claude Code - Bug fixes + 9 new SEO blogs
+
+**Bug fixes from security/logic/performance audit:**
+- Fixed redirect loop off-by-one in check.js (line 276: `<=` → `<`)
+- Fixed worker slot acquisition tracking in check.js (added `slotAcquired` guard for counter decrement)
+- Fixed nested sitemap silent drop in sitemap-delta.js (added warning note)
+- Added DocumentFragment for DOM rendering performance in dead-link-finder
+- Documented CSP unsafe-inline for future refactor in AGENT_TASK_CHECKLIST.md
+
+**9 new SEO blog posts created:**
+- heic-to-png-converter, gif-to-webp-converter, png-to-jpg-converter (image)
+- markdown-to-pdf-converter, markdown-to-docx-converter (document)
+- html-to-pdf-converter, html-to-markdown-converter (document)
+- docx-to-pdf-converter, pdf-to-docx-converter (document)
+
+**Total blogs now: 30** (12 original + 18 new across two sessions)
+
+Files: api/check.js, api/sitemap-delta.js, tools/dead-link-finder/index.html, docs/AGENT_TASK_CHECKLIST.md, src/routes/blog/postData.js, src/routes/blog/content/*.html (9 new)
+
+Tests: pnpm check PASS (0 errors), pnpm test PASS (72/72)
+
+
 ### 2025-12-03 17:15 CET - Claude Code - MD→PDF: Control character cleanup and italic asterisk handling
 
 - **Mode:** autonomous
@@ -1431,3 +1487,78 @@
 - **Evidence:** artifacts/repo-review/20251212/final_20251212-230711_pytest.txt
 - **Follow-ups:**
 
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-13 12:14 CET - Manual - image compressor deep review
+- **Mode:** manual
+- **Branch:** `feat/image-compressor`
+- **Summary:**
+  - Added new /tools/image-compressor/ tool (client-side compress/convert, HEIC decode, ZIP batch, worker pipeline).
+  - Fixed image-compressor UX edge cases (cancel race, progress counting, safer single-file download names, better MIME inference).
+  - Updated CSP to allow blob image previews + wasm decode; updated sitemaps; added a UI smoke script.
+- **Evidence:** artifacts/ui/image-compressor/20251213/
+- **Follow-ups:**
+  - Open a PR for feat/image-compressor when ready.
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-14 00:41 CET - Manual - add human writing skill + humanize blog outlines
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Added a reusable human-writing skill checklist for natural TinyUtils blog voice.
+  - Rewrote the /blog/best-broken-link-checkers/ outline copy to be more specific and less template-like.
+- **Evidence:** artifacts/blog/20251214/
+- **Follow-ups:**
+  - Apply the same voice pass to the other blog outlines in src/routes/blog/postData.js.
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-14 00:48 CET - Manual - casual persona pass for blog outlines
+- **Mode:** manual
+- **Branch:** `main`
+- **Summary:**
+  - Expanded the human-writing skill with a persona mode for casual, varied blog voice.
+  - Rewrote all blog outline placeholders in src/routes/blog/postData.js with varied casual personas (funny/matter-of-fact/touching) while staying honest.
+- **Evidence:** artifacts/blog/20251214/
+- **Follow-ups:**
+  - Optional: apply the same persona approach to the actual full blog posts as they get written.
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-14 14:21 CET - Manual - unify nav + blog link + active highlighting
+- **Mode:** manual
+- **Branch:** `fix/nav-blog-uniform`
+- **Summary:**
+  - Made header navigation consistent across static pages, tool pages, and blog pages; added Blog + Support links everywhere.
+  - Added active highlighting via JS (static) and route-aware active classes (SvelteKit layout).
+  - Removed duplicated dropdown CSS and centralized nav styling in site.css; fixed theme-toggle favicon path detection for /public/icons vs /icons.
+- **Evidence:** artifacts/nav/20251214/
+- **Follow-ups:**
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-14 16:56 CET - Manual - open PR for nav/blog uniformity
+- **Mode:** manual
+- **Branch:** `nav-blog-uniform`
+- **Summary:**
+  - Opened PR #62 for nav/blog uniformity changes.
+  - Branch pushed: nav-blog-uniform (commit 7485897).
+  - Nav now includes Blog link across site, active highlighting, and unified Privacy dropdown.
+- **Evidence:** artifacts/nav/20251214/
+- **Follow-ups:**
+  - Wait for Vercel preview URL on PR #62, then run scripts/preview_smoke.mjs against it.
+
+### 2025-12-14 17:20 CET - Manual - fix Vercel preview build + validate preview smoke
+- **Mode:** manual
+- **Branch:** `nav-blog-uniform`
+- **Summary:**
+  - Fixed Vercel preview build failure caused by an incorrect SvelteKit import in `src/routes/+layout.svelte` (`/state` → `$app/state`).
+  - Tweaked SvelteKit Tools nav highlighting so it marks active for both `/tools` and `/tools/*`.
+  - Verified the latest Vercel preview is now deployable and ran `scripts/preview_smoke.mjs` against the newest preview URL (PASS).
+- **Evidence:**
+  - PR #62 checks green (including Vercel).
+  - Preview URL (latest): https://tinyutils-19y4pbw7s-cavins-projects-7b0e00bb.vercel.app
+  - Local: `pnpm build` OK; `pnpm check` + `pnpm test` OK.
+- **Follow-ups:**
+  - None (ready to merge when desired).

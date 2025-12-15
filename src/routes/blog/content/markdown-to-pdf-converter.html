@@ -1,0 +1,124 @@
+<p>
+  Markdown is perfect for writing. But when you need to share a polished document,
+  PDF is the universal format. Here's how to convert your .md files to PDF.
+</p>
+
+<h2 id="tldr">TL;DR</h2>
+<ul>
+  <li>Open <a href="/tools/text-converter/">TinyUtils Document Converter</a></li>
+  <li>Upload your Markdown file (.md)</li>
+  <li>Select <strong>PDF</strong> as output</li>
+  <li>Click convert</li>
+  <li>Download the formatted PDF</li>
+</ul>
+
+<h2 id="why">Why convert Markdown to PDF?</h2>
+<ul>
+  <li><strong>Sharing</strong> — Everyone can open a PDF, not everyone knows Markdown</li>
+  <li><strong>Printing</strong> — PDF preserves layout across printers</li>
+  <li><strong>Archival</strong> — PDF is a long-term storage format</li>
+  <li><strong>Signatures</strong> — PDF supports digital signatures</li>
+  <li><strong>No editing</strong> — Recipients see it as you intended</li>
+</ul>
+
+<h2 id="preserved">What converts</h2>
+<ul>
+  <li><strong>Headings</strong> — # through ###### become styled headers</li>
+  <li><strong>Lists</strong> — Bullets and numbered lists preserved</li>
+  <li><strong>Bold/Italic</strong> — **bold** and *italic* formatting</li>
+  <li><strong>Links</strong> — Clickable in the PDF</li>
+  <li><strong>Code blocks</strong> — Syntax highlighting preserved</li>
+  <li><strong>Tables</strong> — Markdown tables become PDF tables</li>
+  <li><strong>Images</strong> — Referenced images embedded in PDF</li>
+</ul>
+
+<h2 id="steps">How to convert</h2>
+<ol>
+  <li>Go to <a href="/tools/text-converter/">TinyUtils Document Converter</a></li>
+  <li>Upload your .md file (or paste Markdown text)</li>
+  <li>Select <strong>PDF</strong> from the output dropdown</li>
+  <li>Click <strong>Convert</strong></li>
+  <li>Preview the result</li>
+  <li>Download your PDF</li>
+</ol>
+
+<h2 id="styling">Styling options</h2>
+<p>
+  The converter applies sensible defaults:
+</p>
+<ul>
+  <li>Clean, readable font</li>
+  <li>Appropriate margins</li>
+  <li>Page breaks before major headings</li>
+  <li>Syntax highlighting for code</li>
+</ul>
+
+<h2 id="images">How images work</h2>
+<p>
+  If your Markdown references images with relative paths like <code>![](images/diagram.png)</code>,
+  make sure those images are included. The converter embeds them in the PDF.
+</p>
+<p>
+  For images hosted online, the converter fetches and embeds them.
+</p>
+
+<h2 id="batch">Multiple files</h2>
+<p>
+  Have several Markdown files? Upload them all and get a ZIP of PDFs.
+  Each .md file becomes one PDF.
+</p>
+
+<h2 id="frontmatter">YAML frontmatter</h2>
+<p>
+  If your Markdown has YAML frontmatter (title, author, date), it's processed:
+</p>
+<pre><code>---
+title: My Document
+author: Jane Doe
+date: 2025-01-15
+---
+
+# Introduction
+...</code></pre>
+<p>
+  The title and author appear in the PDF metadata.
+</p>
+
+<h2 id="faq">FAQ</h2>
+
+<h3>What Markdown flavor is supported?</h3>
+<p>
+  GitHub Flavored Markdown (GFM). Tables, task lists, strikethrough, and fenced code blocks all work.
+</p>
+
+<h3>Can I customize fonts or colors?</h3>
+<p>
+  The current version uses clean defaults. For advanced styling, convert to HTML first,
+  add CSS, then convert that HTML to PDF.
+</p>
+
+<h3>Are links clickable in the PDF?</h3>
+<p>
+  Yes. Both inline links and reference-style links become clickable.
+</p>
+
+<h3>What about math equations?</h3>
+<p>
+  LaTeX math (like <code>$x^2$</code>) is rendered if present in the source.
+</p>
+
+<h2 id="alternatives">Other output formats</h2>
+<p>
+  Need something other than PDF?
+</p>
+<ul>
+  <li><a href="/blog/markdown-to-docx-converter/">Markdown to Word (DOCX)</a></li>
+  <li><a href="/tools/text-converter/">Markdown to HTML</a></li>
+  <li><a href="/tools/text-converter/">Markdown to plain text</a></li>
+</ul>
+
+<h2 id="next">Next steps</h2>
+<p>
+  Ready to turn your Markdown into a polished PDF? Open <a href="/tools/text-converter/">TinyUtils Document Converter</a>
+  and upload your .md file.
+</p>

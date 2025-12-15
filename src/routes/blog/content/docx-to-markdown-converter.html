@@ -1,0 +1,122 @@
+<p>
+  Microsoft Word is great for writing, but terrible for version control, static sites, and documentation workflows.
+  If you want your .docx content in a more portable format, Markdown is the answer.
+</p>
+
+<h2 id="tldr">TL;DR</h2>
+<ul>
+  <li>Use <a href="/tools/text-converter/">TinyUtils Document Converter</a> to convert DOCX to Markdown.</li>
+  <li>Headings, lists, bold, italic, links, and tables all convert.</li>
+  <li>Images are extracted and linked in the Markdown.</li>
+  <li>Track changes are automatically accepted (final text only).</li>
+</ul>
+
+<h2 id="why">Why convert Word to Markdown?</h2>
+<ul>
+  <li><strong>Git-friendly</strong> — Track changes with version control</li>
+  <li><strong>Static sites</strong> — Hugo, Jekyll, Docusaurus, Astro</li>
+  <li><strong>Documentation</strong> — docs-as-code workflows</li>
+  <li><strong>Collaboration</strong> — Markdown works in GitHub, GitLab, Notion</li>
+  <li><strong>Future-proof</strong> — Plain text never becomes obsolete</li>
+</ul>
+
+<h2 id="how">How to convert DOCX to Markdown</h2>
+<ol>
+  <li>Open <a href="/tools/text-converter/">TinyUtils Document Converter</a>.</li>
+  <li>Upload your .docx file.</li>
+  <li>Select <strong>Markdown</strong> as output.</li>
+  <li>Click convert.</li>
+  <li>Download the Markdown file (with any extracted images).</li>
+</ol>
+
+<h2 id="preserved">What's preserved</h2>
+<ul>
+  <li><strong>Headings</strong> — H1 through H6 become # through ######</li>
+  <li><strong>Lists</strong> — Bullets, numbered lists, nested up to 3 levels</li>
+  <li><strong>Formatting</strong> — Bold (**), italic (*), strikethrough (~~)</li>
+  <li><strong>Links</strong> — Hyperlinks preserved as [text](url)</li>
+  <li><strong>Tables</strong> — Converted to Markdown tables</li>
+  <li><strong>Images</strong> — Extracted and linked as ![alt](path)</li>
+  <li><strong>Code blocks</strong> — If styled as monospace/code</li>
+  <li><strong>Blockquotes</strong> — Preserved as > syntax</li>
+  <li><strong>Footnotes</strong> — Converted to [^1] format</li>
+</ul>
+
+<h2 id="track-changes">What about Track Changes?</h2>
+<p>
+  If your document has tracked changes (insertions, deletions, comments),
+  the converter automatically accepts all changes and outputs the final text.
+  Comments are dropped. This gives you clean, conflict-free Markdown.
+</p>
+
+<h2 id="not-preserved">What doesn't convert</h2>
+<ul>
+  <li><strong>Headers/Footers</strong> — Not part of Markdown</li>
+  <li><strong>Page layouts</strong> — Columns, page breaks</li>
+  <li><strong>Fonts/Colors</strong> — Markdown is content, not presentation</li>
+  <li><strong>Comments</strong> — Dropped (content only)</li>
+  <li><strong>Complex tables</strong> — Merged cells may break</li>
+</ul>
+
+<h2 id="images">How images are handled</h2>
+<p>
+  Embedded images in your DOCX are extracted and saved separately.
+  The Markdown references them with relative paths:
+</p>
+<pre><code>![Chart showing sales data](media/image1.png)</code></pre>
+<p>
+  You'll get a zip with both the .md file and a media folder.
+</p>
+
+<h2 id="flavor">Markdown flavor</h2>
+<p>
+  Output is GitHub Flavored Markdown (GFM):
+</p>
+<ul>
+  <li>Fenced code blocks with ```</li>
+  <li>Tables with | pipes |</li>
+  <li>Task lists with - [ ]</li>
+  <li>Strikethrough with ~~text~~</li>
+</ul>
+
+<h2 id="batch">Batch conversion</h2>
+<p>
+  Got a folder of Word documents? Upload them all.
+  TinyUtils converts each one and provides a ZIP with all the Markdown files.
+</p>
+
+<h2 id="alternatives">Other output formats</h2>
+<p>
+  Need something other than Markdown? TinyUtils also converts DOCX to:
+</p>
+<ul>
+  <li><a href="/tools/text-converter/">PDF</a></li>
+  <li><a href="/tools/text-converter/">HTML</a></li>
+  <li>Plain text</li>
+  <li>ODT (LibreOffice)</li>
+</ul>
+
+<h2 id="faq">FAQ</h2>
+
+<h3>What about .doc files (old Word format)?</h3>
+<p>
+  The converter works best with .docx. For old .doc files,
+  open in Word and save as .docx first.
+</p>
+
+<h3>Can I convert back from Markdown to Word?</h3>
+<p>
+  Yes! TinyUtils supports <a href="/tools/text-converter/">Markdown to DOCX</a> as well.
+</p>
+
+<h3>How's the table conversion?</h3>
+<p>
+  Simple tables convert well. Complex tables with merged cells or nested content
+  may need manual cleanup. Markdown tables are inherently limited.
+</p>
+
+<h2 id="next">Next steps</h2>
+<p>
+  Ready to liberate your Word docs? Open <a href="/tools/text-converter/">TinyUtils Document Converter</a>,
+  upload your DOCX, and get clean Markdown.
+</p>

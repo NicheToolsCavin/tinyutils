@@ -1,0 +1,102 @@
+<p>
+  This is a <strong>composite case study</strong> — a realistic “what this usually looks like” based on common recovery patterns.
+  I’m not pretending it’s one specific client story, because that would be weird.
+  But if you’ve ever lost a site during a redesign, this will feel painfully familiar.
+</p>
+
+<h2 id="scenario">Scenario</h2>
+<ul>
+  <li>A site was redesigned and launched with a new URL structure.</li>
+  <li>The old site was taken down.</li>
+  <li>There was no recent full backup.</li>
+  <li>Traffic dropped and 404s spiked.</li>
+</ul>
+
+<p>
+  The goal wasn’t “recreate every pixel.”
+  The goal was:
+  <strong>restore the most important pages</strong> and
+  <strong>stop users (and crawlers) from hitting dead ends</strong>.
+</p>
+
+<h2 id="approach">Approach</h2>
+
+<h3>1) Inventory the URLs (don’t guess)</h3>
+<p>
+  You need a list of what existed.
+  Good sources:
+</p>
+<ul>
+  <li>Old sitemaps (best)</li>
+  <li>Server logs and analytics (what people actually hit)</li>
+  <li>Backlink exports (what other sites still reference)</li>
+</ul>
+
+<h3>2) Find the best Wayback snapshots</h3>
+<p>
+  Next, map each dead URL to an archived snapshot.
+  Manually, you can do this one-by-one.
+  For a pile of URLs, use
+  <a href="/tools/wayback-fixer/">TinyUtils Wayback Fixer</a>
+  to bulk map URLs to snapshots and export the results.
+</p>
+
+<h3>3) Restore content and assets</h3>
+<p>
+  Getting HTML back is the easy part.
+  The harder part is assets: images, PDFs, CSS, embedded scripts.
+  Prioritize what matters:
+</p>
+<ul>
+  <li>Landing pages and conversion pages</li>
+  <li>High-traffic blog posts</li>
+  <li>Pages with backlinks</li>
+  <li>Downloads and critical resources</li>
+</ul>
+
+<h3>4) Build a redirect plan (or your recovery won’t stick)</h3>
+<p>
+  Restoring pages is great.
+  But if old URLs still 404, users and search engines don’t magically find the new location.
+</p>
+
+<p>
+  A simple redirect strategy:
+</p>
+<ul>
+  <li><strong>301</strong> redirect old → restored where there’s a clear match.</li>
+  <li><strong>410</strong> true removals (content you intentionally don’t want back).</li>
+  <li>Avoid redirect chains (old → temp → new → final).</li>
+</ul>
+
+<p>
+  For bulk mapping and exports, compare old and new URL lists with
+  <a href="/tools/sitemap-delta/">TinyUtils Sitemap Delta</a>.
+</p>
+
+<h2 id="outcomes">Outcomes (what “success” looks like)</h2>
+<p>
+  In a recovery like this, “success” usually means:
+</p>
+<ul>
+  <li>Users stop hitting dead ends on the most important paths.</li>
+  <li>Search Console shows fewer 404 errors over time.</li>
+  <li>Key landing pages return and start earning traffic again.</li>
+  <li>The team has a repeatable process for future changes.</li>
+</ul>
+
+<h2 id="lessons">Lessons learned (aka “the boring secret sauce”)</h2>
+<ol>
+  <li><strong>Inventory first.</strong> You can’t fix what you didn’t list.</li>
+  <li><strong>Prioritize templates.</strong> Nav/footer mistakes multiply fast.</li>
+  <li><strong>Redirect intentionally.</strong> “Everything to homepage” is not a strategy.</li>
+  <li><strong>Verify after launch.</strong> Crawl again and confirm.</li>
+</ol>
+
+<h2 id="next">Next steps</h2>
+<p>
+  If you’re staring at a list of dead URLs, start with
+  <a href="/tools/wayback-fixer/">Wayback Fixer</a>
+  to map snapshots at scale.
+  Then build a redirect plan so recovery actually reaches users.
+</p>

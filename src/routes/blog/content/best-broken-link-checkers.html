@@ -1,0 +1,274 @@
+<p>
+  Broken links are the internet’s version of leaving a banana peel on the stairs.
+  You don’t notice them until a user slips, your analytics screams, or Google starts treating your crawl budget like a limited‑edition snack.
+</p>
+
+<p>
+  This guide compares broken link checker tools that people actually use in 2025 — from quick web scanners to heavy desktop crawlers.
+  I’ll keep it practical: what to pick, what to skip, and what you’ll wish you’d checked before you ran a 6‑hour crawl.
+</p>
+
+<h2 id="tldr">TL;DR: the quick picks</h2>
+<ul>
+  <li>
+    <strong>Want “paste URL → get a CSV”?</strong> Use a web-based checker like
+    <a href="/tools/dead-link-finder/">TinyUtils Dead Link Finder</a>.
+  </li>
+  <li><strong>Need deep crawling + rules?</strong> Use a desktop crawler (Screaming Frog / Sitebulb).</li>
+  <li><strong>Cleaning up backlinks?</strong> Use an SEO suite (Ahrefs / Semrush) so broken pages connect to link data.</li>
+  <li><strong>Want alerts every week?</strong> Use a monitoring tool (or schedule your crawl and save exports).</li>
+</ul>
+
+<h2 id="what-matters">What matters (so you don’t pick the wrong tool)</h2>
+<p>
+  “Broken link checker” sounds like one category. It’s not.
+  The right tool depends on your site and what you’re trying to fix.
+</p>
+<ul>
+  <li>
+    <strong>Crawl depth:</strong> do you need to check one page, a folder, or an entire site?
+    (If it’s “entire site”, you want a crawler, not a single-page checker.)
+  </li>
+  <li>
+    <strong>JavaScript rendering:</strong> if links appear after React/Vue runs, basic crawlers can miss them.
+  </li>
+  <li>
+    <strong>Actionable exports:</strong> the golden output is: <em>broken URL + status + “found on” page(s)</em>.
+    A list of 404s without context is just a sad list.
+  </li>
+  <li>
+    <strong>Redirect intelligence:</strong> chains and loops can be “working” while still being a performance mess.
+  </li>
+  <li>
+    <strong>Workflow fit:</strong> one-off audit vs weekly monitoring vs agency handoff.
+    Pick for the workflow you actually do.
+  </li>
+</ul>
+
+<h2 id="comparison">Quick comparison (2025)</h2>
+<p><em>Pricing and feature sets change. Use this as a “type selector”, not gospel.</em></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Tool</th>
+      <th>Type</th>
+      <th>Best for</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><a href="/tools/dead-link-finder/">TinyUtils Dead Link Finder</a></td>
+      <td>Web</td>
+      <td>Fast checks + exports</td>
+      <td>No install, good for quick audits</td>
+    </tr>
+    <tr>
+      <td>Screaming Frog SEO Spider</td>
+      <td>Desktop</td>
+      <td>Deep crawling + rules</td>
+      <td>Powerful; bring coffee for huge sites</td>
+    </tr>
+    <tr>
+      <td>Sitebulb</td>
+      <td>Desktop</td>
+      <td>Audits + visuals</td>
+      <td>Nice reports, can handle complex sites</td>
+    </tr>
+    <tr>
+      <td>Ahrefs Site Audit</td>
+      <td>Suite</td>
+      <td>SEO audit + links</td>
+      <td>Great when broken pages intersect backlinks</td>
+    </tr>
+    <tr>
+      <td>Semrush Site Audit</td>
+      <td>Suite</td>
+      <td>SEO audit + reporting</td>
+      <td>Solid for teams that live in dashboards</td>
+    </tr>
+    <tr>
+      <td>Google Search Console</td>
+      <td>Platform</td>
+      <td>Finding what Google actually saw</td>
+      <td>Not a crawler; great for verification</td>
+    </tr>
+    <tr>
+      <td>Dr Link Check</td>
+      <td>Web</td>
+      <td>Monitoring + reports</td>
+      <td>Good when you want scheduled checks</td>
+    </tr>
+    <tr>
+      <td>ContentKing</td>
+      <td>Monitoring</td>
+      <td>Continuous changes</td>
+      <td>Great for “tell me when it breaks”</td>
+    </tr>
+    <tr>
+      <td>Integrity (Mac)</td>
+      <td>Desktop</td>
+      <td>Simple local crawling</td>
+      <td>Lightweight option for quick scans</td>
+    </tr>
+    <tr>
+      <td>W3C Link Checker / validators</td>
+      <td>Utility</td>
+      <td>Spot checks</td>
+      <td>Useful for one-off validation, not full audits</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="tools">The 10 best broken link checker tools (with honest tradeoffs)</h2>
+
+<h3 id="tinyutils">1) TinyUtils Dead Link Finder</h3>
+<p>
+  If your ideal workflow is “paste a URL, get results, export, fix”, this is the vibe.
+  It’s a web-based broken link checker designed for quick audits and clean exports.
+</p>
+<ul>
+  <li><strong>Best for:</strong> quick checks, small-to-mid sites, shareable CSV results</li>
+  <li><strong>Not great for:</strong> heavy JavaScript rendering, very large crawls with lots of rules</li>
+  <li>
+    <strong>Try it:</strong> <a href="/tools/dead-link-finder/">TinyUtils Dead Link Finder</a>
+  </li>
+</ul>
+
+<h3 id="screamingfrog">2) Screaming Frog SEO Spider</h3>
+<p>
+  The classic desktop crawler. If you need deep crawling, custom rules, and the ability to slice reports 27 ways,
+  Screaming Frog is a strong choice.
+</p>
+<ul>
+  <li><strong>Best for:</strong> technical audits, deep crawling, agency workflows</li>
+  <li><strong>Watch for:</strong> crawl settings, memory usage, and not accidentally crawling the whole universe</li>
+</ul>
+
+<h3 id="sitebulb">3) Sitebulb</h3>
+<p>
+  Sitebulb is a desktop audit tool that’s often picked for its reporting and “explain the issue” approach.
+  If you want output you can hand to someone without a technical decoder ring, it’s worth a look.
+</p>
+<ul>
+  <li><strong>Best for:</strong> audits you need to explain, JS-heavy sites (depending on setup)</li>
+  <li><strong>Not great for:</strong> ultra-fast quick checks</li>
+</ul>
+
+<h3 id="ahrefs">4) Ahrefs (Site Audit + backlinks)</h3>
+<p>
+  Ahrefs is useful when broken links aren’t just “oops”: they’re tied to backlinks, rankings, and cleanup priorities.
+  If you’re repairing high-value pages, this context matters.
+</p>
+<ul>
+  <li><strong>Best for:</strong> prioritizing broken pages with link data</li>
+  <li><strong>Watch for:</strong> it’s a suite — you’re paying for a lot more than link checking</li>
+</ul>
+
+<h3 id="semrush">5) Semrush (Site Audit + reporting)</h3>
+<p>
+  Similar category to Ahrefs, with a different reporting ecosystem.
+  If you’re already living in Semrush for projects and reports, the audit tooling can be a convenient home base.
+</p>
+<ul>
+  <li><strong>Best for:</strong> team reporting, recurring site audits</li>
+  <li><strong>Not great for:</strong> lightweight “just check this URL” tasks</li>
+</ul>
+
+<h3 id="gsc">6) Google Search Console (for verification)</h3>
+<p>
+  Search Console is not a broken link checker in the crawling-a-site sense.
+  It’s the place you go to see what Google actually encountered.
+  Use it to verify fixes and to catch problems your crawler didn’t.
+</p>
+<ul>
+  <li><strong>Best for:</strong> confirming how Google sees errors, validating post-fix improvements</li>
+  <li><strong>Watch for:</strong> it won’t tell you every “found on” page the way a crawler can</li>
+</ul>
+
+<h3 id="drlinkcheck">7) Dr Link Check</h3>
+<p>
+  If you want web-based checks with a monitoring angle (and you don’t want to run a desktop crawler),
+  this category is where to look.
+</p>
+<ul>
+  <li><strong>Best for:</strong> scheduled scans and ongoing monitoring</li>
+  <li><strong>Not great for:</strong> deep technical SEO crawling workflows</li>
+</ul>
+
+<h3 id="contentking">8) ContentKing (monitoring-first)</h3>
+<p>
+  Some teams don’t want a “big crawl every quarter”. They want “tell me when something broke.”
+  Monitoring tools shine here.
+</p>
+<ul>
+  <li><strong>Best for:</strong> continuous monitoring on active sites</li>
+  <li><strong>Watch for:</strong> pricing can be higher than one-off tools (because it’s ongoing)</li>
+</ul>
+
+<h3 id="integrity">9) Integrity (Mac)</h3>
+<p>
+  A lightweight desktop option for simple crawling.
+  If you don’t need a full SEO suite and you prefer something that feels like a utility app, this is the lane.
+</p>
+<ul>
+  <li><strong>Best for:</strong> small sites, quick local crawling, sanity checks</li>
+  <li><strong>Not great for:</strong> complex audit workflows</li>
+</ul>
+
+<h3 id="validators">10) W3C Link Checker / validators</h3>
+<p>
+  Sometimes you don’t need a “tool”. You need a quick sanity check.
+  Validators and small utilities can be perfect for that.
+</p>
+<ul>
+  <li><strong>Best for:</strong> spot-checking a single page or template output</li>
+  <li><strong>Not great for:</strong> full-site audits</li>
+</ul>
+
+<h2 id="choose">How to choose (the 30-second decision tree)</h2>
+<ul>
+  <li>
+    <strong>My site is mostly static pages:</strong> start with a web checker (fast feedback, easy export).
+  </li>
+  <li>
+    <strong>My site is large or JS-heavy:</strong> use a desktop crawler with rendering.
+  </li>
+  <li>
+    <strong>I’m cleaning up backlinks:</strong> use a suite so you can prioritize what matters.
+  </li>
+  <li>
+    <strong>I don’t want surprises:</strong> use monitoring or schedule a recurring crawl.
+  </li>
+</ul>
+
+<h2 id="faq">FAQ</h2>
+
+<h3>Do broken links hurt SEO?</h3>
+<p>
+  A few won’t tank your site overnight, but they do create friction:
+  users bounce, crawlers waste time, and internal linking signals get messy.
+  If you have a lot of broken internal links, it’s worth fixing.
+</p>
+
+<h3>What’s the difference between a 404 and a redirect?</h3>
+<p>
+  A <code>404</code> means “not found.” A <code>301</code> means “permanently moved.”
+  Redirects are often the right fix for old URLs — but avoid long redirect chains.
+</p>
+
+<h3>What should I export from a broken link checker?</h3>
+<p>
+  Minimum:
+  broken URL, status code, and the page(s) where it was found.
+  Bonus points for anchor text and redirect chain details.
+</p>
+
+<h2 id="next">Next steps</h2>
+<p>
+  Ready to fix your links instead of thinking about fixing your links?
+  Run a quick scan with <a href="/tools/dead-link-finder/">TinyUtils Dead Link Finder</a>, export the results,
+  and then follow the workflow in
+  <a href="/blog/find-fix-broken-links-seo/">How to Find and Fix Broken Links for SEO</a>.
+</p>
