@@ -2,38 +2,38 @@
   export let data;
   const { posts, title, description, ogImage, icons } = data;
 
-  // Get category and icon based on post slug
+  // Get category, icon, and thumbnail image based on post slug
   // Order matters: more specific patterns checked first to avoid mis-categorization
   function getPostCategory(slug) {
     // Image-related posts (format conversions, compression)
     if (slug.includes('heic') || slug.includes('webp') || slug.includes('png') ||
         slug.includes('jpg') || slug.includes('jpeg') || slug.includes('gif') ||
         slug.includes('compress') || slug.includes('image') || slug.includes('batch-image')) {
-      return { category: 'image', icon: '🖼️' };
+      return { category: 'image', icon: '🖼️', thumb: '/blog/image-category.jpg' };
     }
     // Document conversion and extraction
     if (slug.includes('pdf') || slug.includes('docx') || slug.includes('markdown') ||
         slug.includes('html-to') || slug.includes('latex') || slug.includes('epub') ||
         slug.includes('odt') || slug.includes('rtf') || slug.includes('word') ||
         slug.includes('document') || slug.includes('extract-text')) {
-      return { category: 'document', icon: '📄' };
+      return { category: 'document', icon: '📄', thumb: '/blog/document-category.jpg' };
     }
     // SEO and site management
     if (slug.includes('broken-link') || slug.includes('sitemap') || slug.includes('seo') ||
         slug.includes('redirect') || slug.includes('migration')) {
-      return { category: 'seo', icon: '🔍' };
+      return { category: 'seo', icon: '🔍', thumb: '/blog/seo-category.jpg' };
     }
     // Archive and recovery
     if (slug.includes('wayback') || slug.includes('archive') || slug.includes('recover') ||
         slug.includes('time-machine')) {
-      return { category: 'archive', icon: '⏪' };
+      return { category: 'archive', icon: '⏪', thumb: '/blog/archive-category.jpg' };
     }
     // Privacy-focused
     if (slug.includes('privacy')) {
-      return { category: 'privacy', icon: '🔒' };
+      return { category: 'privacy', icon: '🔒', thumb: '/blog/privacy-category.jpg' };
     }
     // Default fallback
-    return { category: 'general', icon: '🛠️' };
+    return { category: 'general', icon: '🛠️', thumb: '/blog/general-category.jpg' };
   }
 </script>
 
@@ -66,7 +66,8 @@
       {#each posts as post}
         {@const cat = getPostCategory(post.slug)}
         <article class="blog-card">
-          <div class="blog-card-thumb blog-card-thumb--{cat.category}">
+          <div class="blog-card-thumb">
+            <img src={cat.thumb} alt="{cat.category} category thumbnail" loading="lazy" />
             <span class="blog-card-icon" role="img" aria-label="{cat.category} category">{cat.icon}</span>
             <span class="blog-card-category">{cat.category}</span>
           </div>
@@ -128,42 +129,31 @@
   }
 
   .blog-card-thumb {
-    height: 140px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    height: 160px;
     position: relative;
+    overflow: hidden;
+    background: var(--surface-elevated);
   }
 
-  /* Category-specific gradient backgrounds (CSP-safe) */
-  .blog-card-thumb--image {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  .blog-card-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
   }
 
-  .blog-card-thumb--document {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  }
-
-  .blog-card-thumb--seo {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-  }
-
-  .blog-card-thumb--archive {
-    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-  }
-
-  .blog-card-thumb--privacy {
-    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-  }
-
-  .blog-card-thumb--general {
-    background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+  .blog-card:hover .blog-card-thumb img {
+    transform: scale(1.05);
   }
 
   .blog-card-icon {
-    font-size: 3rem;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2.5rem;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4));
+    z-index: 1;
   }
 
   .blog-card-category {
@@ -174,10 +164,12 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: rgba(255, 255, 255, 0.9);
-    background: rgba(0, 0, 0, 0.2);
-    padding: 2px 8px;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 3px 10px;
     border-radius: 4px;
+    z-index: 1;
+    backdrop-filter: blur(4px);
   }
 
   .blog-card-content {
