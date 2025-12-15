@@ -2,45 +2,35 @@
   export let data;
   const { posts, title, description, ogImage, icons } = data;
 
-  // Get category and icon based on post slug
+  // Get category based on post slug
   // Each post has its own unique thumbnail at /blog/posts/{slug}.jpg
   function getPostCategory(slug) {
-    // All posts have unique thumbnails
     const thumb = `/blog/posts/${slug}.jpg`;
 
     // Archive and recovery - check FIRST to prevent false matches
     if (slug.includes('wayback') || slug.includes('archive') || slug.includes('recover') ||
         slug.includes('time-machine')) {
-      return { category: 'archive', icon: '⏪', thumb };
+      return { category: 'archive', thumb };
     }
-    // Privacy-focused
     if (slug.includes('privacy')) {
-      return { category: 'privacy', icon: '🔒', thumb };
+      return { category: 'privacy', thumb };
     }
-    // Document conversion
     if (slug.includes('pdf') || slug.includes('docx') || slug.includes('markdown') ||
         slug.includes('html-to') || slug.includes('latex') || slug.includes('epub') ||
         slug.includes('odt') || slug.includes('rtf') || slug.includes('word') ||
         slug.includes('document') || slug.includes('extract-text')) {
-      const icon = slug.includes('pdf') ? '📄' : slug.includes('markdown') ? '📝' :
-                   slug.includes('epub') ? '📖' : slug.includes('latex') ? '📐' : '📃';
-      return { category: 'document', icon, thumb };
+      return { category: 'document', thumb };
     }
-    // SEO and site management
     if (slug.includes('broken-link') || slug.includes('sitemap') || slug.includes('seo') ||
         slug.includes('redirect') || slug.includes('migration')) {
-      return { category: 'seo', icon: '🔍', thumb };
+      return { category: 'seo', thumb };
     }
-    // Image-related posts
     if (slug.includes('heic') || slug.includes('webp') || slug.includes('png') ||
         slug.includes('jpg') || slug.includes('jpeg') || slug.includes('gif') ||
         slug.includes('compress') || slug.includes('image') || slug.includes('batch')) {
-      const icon = slug.includes('heic') ? '📱' : slug.includes('gif') ? '🎞️' :
-                   slug.includes('compress') || slug.includes('batch') ? '⚡' : '🖼️';
-      return { category: 'image', icon, thumb };
+      return { category: 'image', thumb };
     }
-    // Default fallback
-    return { category: 'general', icon: '🛠️', thumb };
+    return { category: 'general', thumb };
   }
 </script>
 
@@ -75,7 +65,6 @@
         <article class="blog-card">
           <div class="blog-card-thumb">
             <img src={cat.thumb} alt="{cat.category} category thumbnail" loading="lazy" />
-            <span class="blog-card-icon" role="img" aria-label="{cat.category} category">{cat.icon}</span>
             <span class="blog-card-category">{cat.category}</span>
           </div>
           <div class="blog-card-content">
@@ -151,16 +140,6 @@
 
   .blog-card:hover .blog-card-thumb img {
     transform: scale(1.05);
-  }
-
-  .blog-card-icon {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 2.5rem;
-    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4));
-    z-index: 1;
   }
 
   .blog-card-category {
