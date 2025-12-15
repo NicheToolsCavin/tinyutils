@@ -1,0 +1,89 @@
+<p>
+  Markdown is perfect for writing, but browsers speak HTML. Whether you're building a website,
+  sending an email, or embedding content in a CMS, here's how to convert Markdown to HTML.
+</p>
+
+<h2 id="tldr">TL;DR</h2>
+<ul>
+  <li>Open <a href="/tools/text-converter/">TinyUtils Document Converter</a></li>
+  <li>Upload your .md file or paste Markdown</li>
+  <li>Select <strong>HTML</strong> as output</li>
+  <li>Download clean, semantic HTML</li>
+</ul>
+
+<h2 id="why">Why convert Markdown to HTML?</h2>
+<ul>
+  <li><strong>Web publishing</strong> — HTML is what browsers render</li>
+  <li><strong>Email templates</strong> — Rich emails need HTML</li>
+  <li><strong>CMS integration</strong> — WordPress, Ghost, custom CMSes</li>
+  <li><strong>Documentation sites</strong> — Static site generators output HTML</li>
+  <li><strong>Embedding</strong> — Drop HTML into any web page</li>
+</ul>
+
+<h2 id="preserved">What converts</h2>
+<ul>
+  <li><strong># Headings</strong> → <code>&lt;h1&gt;</code> through <code>&lt;h6&gt;</code></li>
+  <li><strong>**Bold**</strong> → <code>&lt;strong&gt;</code></li>
+  <li><strong>*Italic*</strong> → <code>&lt;em&gt;</code></li>
+  <li><strong>[Links](url)</strong> → <code>&lt;a href&gt;</code></li>
+  <li><strong>- Lists</strong> → <code>&lt;ul&gt;&lt;li&gt;</code></li>
+  <li><strong>1. Numbered</strong> → <code>&lt;ol&gt;&lt;li&gt;</code></li>
+  <li><strong>```Code```</strong> → <code>&lt;pre&gt;&lt;code&gt;</code></li>
+  <li><strong>Tables</strong> → <code>&lt;table&gt;</code></li>
+  <li><strong>Images</strong> → <code>&lt;img&gt;</code></li>
+</ul>
+
+<h2 id="steps">How to convert</h2>
+<ol>
+  <li>Go to <a href="/tools/text-converter/">TinyUtils Document Converter</a></li>
+  <li>Upload your .md file or paste Markdown text</li>
+  <li>Select <strong>HTML</strong> from output options</li>
+  <li>Click <strong>Convert</strong></li>
+  <li>Download the .html file</li>
+</ol>
+
+<h2 id="output">Output format</h2>
+<p>
+  The converter outputs clean, semantic HTML5. No inline styles, no unnecessary divs.
+  Just the structure you need:
+</p>
+<pre><code>&lt;h1&gt;Title&lt;/h1&gt;
+&lt;p&gt;Paragraph text with &lt;strong&gt;bold&lt;/strong&gt; and &lt;em&gt;italic&lt;/em&gt;.&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;List item&lt;/li&gt;
+&lt;/ul&gt;</code></pre>
+
+<h2 id="styling">Adding CSS</h2>
+<p>
+  The HTML output is unstyled. Add your own CSS or use a framework like Tailwind or Bootstrap.
+  The semantic tags make styling straightforward.
+</p>
+
+<h2 id="batch">Multiple files</h2>
+<p>
+  Upload multiple Markdown files and get a ZIP of HTML files.
+</p>
+
+<h2 id="faq">FAQ</h2>
+
+<h3>What Markdown flavor is supported?</h3>
+<p>
+  GitHub Flavored Markdown (GFM). Tables, task lists, strikethrough, fenced code blocks.
+</p>
+
+<h3>Does it include a full HTML page or just the body?</h3>
+<p>
+  Just the content — no <code>&lt;html&gt;</code>, <code>&lt;head&gt;</code>, or <code>&lt;body&gt;</code> wrapper.
+  You can wrap it yourself or embed directly.
+</p>
+
+<h3>Are code blocks syntax-highlighted?</h3>
+<p>
+  The HTML includes language classes on code blocks. Add Prism.js or Highlight.js for colors.
+</p>
+
+<h2 id="next">Next steps</h2>
+<p>
+  Ready to turn your Markdown into HTML? Open <a href="/tools/text-converter/">TinyUtils Document Converter</a>
+  and get clean, semantic output.
+</p>

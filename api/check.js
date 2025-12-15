@@ -273,7 +273,7 @@ async function follow(url, timeout, headFirst, setStage) {
   let chain = 0;
   let usedGet = !headFirst;
 
-  while (chain <= MAX_REDIRECTS) {
+  while (chain < MAX_REDIRECTS) {
     let response = null;
     let fromHead = false;
     if (!usedGet) {
@@ -961,6 +961,7 @@ export default async function handler(req) {
     async function worker() {
       while (true) {
         let candidate = null;
+        let slotAcquired = false;
         for (const entry of scheduledQueue) {
           if (entry.done || entry.running) continue;
           const origin = entry.origin || 'unknown';
@@ -970,6 +971,7 @@ export default async function handler(req) {
           const previousCount = inFlightOrigin;
           perOriginInFlight.set(origin, previousCount + 1);
           globalInFlight += 1;
+          slotAcquired = true;
           if (schedulerBase.globalMaxInFlightObserved < globalInFlight) {
             schedulerBase.globalMaxInFlightObserved = globalInFlight;
           }
@@ -998,14 +1000,16 @@ export default async function handler(req) {
           candidate.done = true;
           candidate.running = false;
           completed += 1;
-          const origin = candidate.origin || 'unknown';
-          const current = perOriginInFlight.get(origin) || 0;
-          if (current <= 1) {
-            perOriginInFlight.delete(origin);
-          } else {
-            perOriginInFlight.set(origin, current - 1);
+          if (slotAcquired) {
+            const origin = candidate.origin || 'unknown';
+            const current = perOriginInFlight.get(origin) || 0;
+            if (current <= 1) {
+              perOriginInFlight.delete(origin);
+            } else {
+              perOriginInFlight.set(origin, current - 1);
+            }
+            globalInFlight = Math.max(0, globalInFlight - 1);
           }
-          globalInFlight = Math.max(0, globalInFlight - 1);
         }
       }
     }

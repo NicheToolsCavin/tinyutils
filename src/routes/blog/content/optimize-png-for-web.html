@@ -1,0 +1,111 @@
+<p>
+  PNGs can be massive. A single screenshot might be 5MB. For web use, that's unacceptable.
+  Here's how to optimize PNG files without losing quality.
+</p>
+
+<h2 id="tldr">TL;DR</h2>
+<ul>
+  <li>Use <a href="/tools/image-compressor/">TinyUtils Image Compressor</a> for quick optimization</li>
+  <li>Consider converting to WebP for 50%+ smaller files</li>
+  <li>Reduce colors if the image allows (PNG-8 vs PNG-24)</li>
+  <li>Strip metadata you don't need</li>
+</ul>
+
+<h2 id="why">Why PNG files get large</h2>
+<ul>
+  <li><strong>Lossless compression</strong> — PNG doesn't discard data</li>
+  <li><strong>24-bit color</strong> — Millions of colors = more data</li>
+  <li><strong>Metadata</strong> — Camera info, color profiles, etc.</li>
+  <li><strong>No optimization</strong> — Default exports aren't optimized</li>
+</ul>
+
+<h2 id="strategies">Optimization strategies</h2>
+
+<h3>1. Compress without conversion</h3>
+<p>
+  Use <a href="/tools/image-compressor/">TinyUtils Image Compressor</a> to reduce PNG size
+  while keeping PNG format. Typical savings: 30-50%.
+</p>
+
+<h3>2. Convert to WebP</h3>
+<p>
+  WebP supports transparency like PNG but with much better compression.
+  Savings: 50-80%. All modern browsers support WebP.
+</p>
+
+<h3>3. Reduce color palette</h3>
+<p>
+  If your image has few colors (icons, graphics), PNG-8 (256 colors) is much smaller
+  than PNG-24 (16 million colors).
+</p>
+
+<h3>4. Strip metadata</h3>
+<p>
+  Remove EXIF data, color profiles, and other embedded info.
+  Usually saves a few KB per image.
+</p>
+
+<h2 id="targets">Size targets</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Image type</th>
+      <th>Target size</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Hero image</td>
+      <td>&lt; 200KB</td>
+    </tr>
+    <tr>
+      <td>Content image</td>
+      <td>&lt; 100KB</td>
+    </tr>
+    <tr>
+      <td>Thumbnail</td>
+      <td>&lt; 20KB</td>
+    </tr>
+    <tr>
+      <td>Icon/logo</td>
+      <td>&lt; 10KB</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="when-png">When to keep PNG</h2>
+<ul>
+  <li><strong>Transparency needed</strong> — PNG handles alpha well</li>
+  <li><strong>Exact colors required</strong> — Logos, brand assets</li>
+  <li><strong>Text/UI</strong> — Sharp edges without artifacts</li>
+</ul>
+
+<h2 id="when-webp">When to use WebP instead</h2>
+<ul>
+  <li><strong>Photos</strong> — WebP beats PNG for photographic content</li>
+  <li><strong>Web performance</strong> — Smaller = faster</li>
+  <li><strong>Transparency + compression</strong> — WebP does both well</li>
+</ul>
+
+<h2 id="faq">FAQ</h2>
+
+<h3>Is PNG optimization lossy or lossless?</h3>
+<p>
+  True PNG compression is lossless. Some tools offer "lossy PNG" which reduces colors.
+</p>
+
+<h3>Will optimization affect transparency?</h3>
+<p>
+  No. Transparency is preserved through optimization.
+</p>
+
+<h3>Should I use SVG instead of PNG for icons?</h3>
+<p>
+  If the icon is vector-based, yes. SVG is infinitely scalable and often smaller.
+</p>
+
+<h2 id="next">Next steps</h2>
+<p>
+  Ready to optimize your PNGs? Open <a href="/tools/image-compressor/">TinyUtils Image Compressor</a>
+  and reduce those file sizes.
+</p>

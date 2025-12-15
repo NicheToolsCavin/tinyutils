@@ -1,0 +1,93 @@
+<p>
+  Most online tools upload your files to their servers. That's a privacy risk.
+  Here's how to find and use tools that process data locally.
+</p>
+
+<h2 id="tldr">TL;DR</h2>
+<ul>
+  <li>Look for "browser-based" or "no upload" claims</li>
+  <li>Check network requests in browser dev tools</li>
+  <li>Prefer open-source tools where possible</li>
+  <li>TinyUtils processes images entirely in your browser</li>
+</ul>
+
+<h2 id="risk">The privacy risk</h2>
+<p>
+  When you upload a file to an online converter, that file goes to someone else's server.
+  They might:
+</p>
+<ul>
+  <li>Store your files (intentionally or by accident)</li>
+  <li>Use them for training AI models</li>
+  <li>Be hacked, exposing your data</li>
+  <li>Share data with third parties</li>
+</ul>
+
+<h2 id="local">How local processing works</h2>
+<p>
+  Privacy-first tools use JavaScript and WebAssembly to process files in your browser.
+  Your files never leave your device. The server only serves the web page code —
+  it never sees your data.
+</p>
+
+<h2 id="verify">How to verify</h2>
+<ol>
+  <li>Open browser dev tools (F12)</li>
+  <li>Go to the Network tab</li>
+  <li>Process a file</li>
+  <li>Check if any requests contain your file data</li>
+</ol>
+<p>
+  For truly local tools, you'll only see the initial page load — no file uploads.
+</p>
+
+<h2 id="tinyutils">TinyUtils privacy</h2>
+<p>
+  TinyUtils Image Compressor processes everything locally:
+</p>
+<ul>
+  <li>Images are decoded in your browser</li>
+  <li>Compression happens on your device</li>
+  <li>Downloads come from your browser, not our servers</li>
+  <li>We literally can't see your files</li>
+</ul>
+
+<h2 id="limits">Limitations of local processing</h2>
+<ul>
+  <li><strong>Device power</strong> — Your computer does the work</li>
+  <li><strong>File size</strong> — Very large files may strain browser memory</li>
+  <li><strong>Complex processing</strong> — Some operations need server power</li>
+</ul>
+
+<h2 id="when-upload">When upload is OK</h2>
+<p>
+  Not all uploads are bad. Consider:
+</p>
+<ul>
+  <li><strong>Non-sensitive files</strong> — Public documents, stock photos</li>
+  <li><strong>Trusted providers</strong> — Established companies with privacy policies</li>
+  <li><strong>Temporary processing</strong> — Files deleted immediately after</li>
+</ul>
+
+<h2 id="faq">FAQ</h2>
+
+<h3>How do I know if a tool really doesn't upload?</h3>
+<p>
+  Check the Network tab in dev tools. No outbound data = truly local.
+</p>
+
+<h3>Are desktop apps more private?</h3>
+<p>
+  Not necessarily. Some desktop apps phone home. Local web apps can be just as private.
+</p>
+
+<h3>What about AI-powered tools?</h3>
+<p>
+  AI typically requires server processing. If you need AI features, your data will be processed remotely.
+</p>
+
+<h2 id="next">Next steps</h2>
+<p>
+  Want privacy-first image compression? Open <a href="/tools/image-compressor/">TinyUtils Image Compressor</a> —
+  your images never leave your device.
+</p>
