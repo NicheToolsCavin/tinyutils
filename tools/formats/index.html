@@ -12,11 +12,13 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/public/icons/tinyutils-icon-light-180.png">
   <meta property="og:title" content="Supported Formats — TinyUtils">
   <meta property="og:description" content="See the formats our converter can import and export.">
-  <meta property="og:image" content="/public/og.png">
-  <meta name="twitter:card" content="summary_large_image">
-  <link rel="stylesheet" href="/styles/site.css">
+  <meta property="og:image" content="/public/og.png"> 
+  <meta name="twitter:card" content="summary_large_image"> 
+  <link rel="stylesheet" href="/styles/site.css"> 
+  <script src="/scripts/theme-toggle.js"></script>
   <script defer src="/scripts/consent.js"></script>
   <script defer src="/scripts/adsense-monitor.js"></script>
+  <script defer src="/scripts/nav-active.js"></script>
   <script defer src="/scripts/analytics.js"></script>
 </head>
 <body>
@@ -24,15 +26,25 @@
 <header class="site-header">
   <div class="container row between center">
     <a class="brand" href="/">TinyUtils</a>
-    <nav class="nav">
-      <a href="/tools/">Tools</a>
-      <a href="/about.html">About</a>
-      <a class="active" href="/tools/formats/">Supported Formats</a>
-      <a href="/privacy.html">Privacy</a>
-      <a href="/terms.html">Terms</a>
-    </nav>
+    <div class="row center">
+      <nav class="nav">
+        <a href="/tools/">Tools</a>
+        <a href="/blog/">Blog</a>
+        <a href="/about.html">About</a>
+        <a href="https://buymeacoffee.com/tinyutils" target="_blank" rel="noopener" class="support-link">☕ Support</a>
+        <span class="nav-item">
+          <a href="/privacy.html">Privacy</a>
+          <div class="nav-dropdown">
+            <a href="/cookies.html">Cookie settings</a>
+            <a href="/privacy.html">Privacy policy</a>
+            <a href="/terms.html">Terms of service</a>
+          </div>
+        </span>
+      </nav>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false">Dark</button>
+    </div>
   </div>
-  </header>
+</header>
 
   <main id="main" class="container">
     <h1 class="mt-xl">Supported Formats</h1>

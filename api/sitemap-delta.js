@@ -234,7 +234,8 @@ async function expandIndex(children, timeoutMs, notes, limit = HARD_CAP) {
       const xml = await fetchMaybeGzip(url, timeoutMs, notes);
       const locs = extractLocs(xml, limit);
       if (locs.isIndex) {
-        notes?.add('nested_sitemap_index');
+        notes?.add('nested_sitemap_index_skipped');
+        notes?.add('warning:some_urls_may_be_missing');
         return [];
       }
       return locs.items;

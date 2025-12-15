@@ -11,7 +11,7 @@ export function load() {
       light: '/icons/tinyutils-icon-light-32.png'
     },
     description:
-      'SEO guides, tutorials, and case studies about broken links, document conversion, Wayback Machine, and web migration strategies.',
+      'Practical guides about image compression, broken links, document conversion, the Wayback Machine, and website migrations.',
     title: 'Blog — TinyUtils'
   };
 }

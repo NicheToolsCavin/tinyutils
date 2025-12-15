@@ -2,14 +2,35 @@
 <meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><meta name="robots" content="noindex">
 <title>Sitemap Generator — TinyUtils</title>
 <link rel='stylesheet' href='/public/styles.css'>
+<link rel='stylesheet' href='/styles/site.css'>
+<script src='/scripts/theme-toggle.js'></script>
+<script defer src='/scripts/nav-active.js'></script>
 <link rel="icon" href="/public/favicon.ico" sizes="any">
   <script defer src="/scripts/analytics.js"></script>
 </head>
 <body>
 <a href="#main" class="skip-link">Skip to main content</a>
-<header class='nav'>
-  <div class='brand'><img src='/public/logo.svg' width='28' height='28'><span class='name'>TinyUtils</span></div>
-  <nav class='links'><a href='/'>Dead Link Finder</a><a href='/tools/'>Tools</a></nav>
+<header class="site-header">
+  <div class="container row between center">
+    <a class="brand" href="/">TinyUtils</a>
+    <div class="row center">
+      <nav class="nav">
+        <a href="/tools/">Tools</a>
+        <a href="/blog/">Blog</a>
+        <a href="/about.html">About</a>
+        <a href="https://buymeacoffee.com/tinyutils" target="_blank" rel="noopener" class="support-link">☕ Support</a>
+        <span class="nav-item">
+          <a href="/privacy.html">Privacy</a>
+          <div class="nav-dropdown">
+            <a href="/cookies.html">Cookie settings</a>
+            <a href="/privacy.html">Privacy policy</a>
+            <a href="/terms.html">Terms of service</a>
+          </div>
+        </span>
+      </nav>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false">Dark</button>
+    </div>
+  </div>
 </header>
 <div id='main' class='container'>
   <h1>Sitemap Generator</h1>

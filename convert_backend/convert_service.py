@@ -1541,6 +1541,38 @@ def _render_pdf_via_reportlab(
                 TableStyle,
             )
             from reportlab.lib import colors
+            from reportlab.pdfbase import pdfmetrics
+            from reportlab.pdfbase.ttfonts import TTFont
+
+            # Register DejaVu Sans fonts for full Unicode/IPA support
+            # The fonts are bundled in the project's fonts/ directory
+            _fonts_registered = False
+            try:
+                fonts_dir = Path(__file__).parent.parent / "fonts"
+                dejavu_sans = fonts_dir / "DejaVuSans.ttf"
+                dejavu_sans_bold = fonts_dir / "DejaVuSans-Bold.ttf"
+                dejavu_mono = fonts_dir / "DejaVuSansMono.ttf"
+
+                if dejavu_sans.exists():
+                    pdfmetrics.registerFont(TTFont("DejaVuSans", str(dejavu_sans)))
+                if dejavu_sans_bold.exists():
+                    pdfmetrics.registerFont(TTFont("DejaVuSans-Bold", str(dejavu_sans_bold)))
+                if dejavu_mono.exists():
+                    pdfmetrics.registerFont(TTFont("DejaVuSansMono", str(dejavu_mono)))
+                _fonts_registered = True
+                _LOGGER.info("Registered DejaVu fonts for Unicode/IPA support")
+            except Exception as e:
+                _LOGGER.warning("Failed to register DejaVu fonts, falling back to Helvetica: %s", e)
+
+            # Determine which fonts to use (DejaVu if available, else Helvetica)
+            _BODY_FONT = "DejaVuSans" if _fonts_registered else "Helvetica"
+            _BOLD_FONT = "DejaVuSans-Bold" if _fonts_registered else "Helvetica-Bold"
+            _MONO_FONT = "DejaVuSansMono" if _fonts_registered else "Courier"
+
+            _ensure_reportlab_fonts_registered()
+            _BODY_FONT = _REPORTLAB_BODY_FONT
+            _BOLD_FONT = _REPORTLAB_BOLD_FONT
+            _MONO_FONT = _REPORTLAB_MONO_FONT
 
             _ensure_reportlab_fonts_registered()
             _BODY_FONT = _REPORTLAB_BODY_FONT

@@ -59,8 +59,18 @@ a:hover{color:var(--brand-2)}
 
 .site-header{border-bottom:1px solid var(--border);background:var(--bg-elevated);backdrop-filter: blur(6px);position:sticky;top:0;z-index:10}
 .site-header .brand{font-weight:700;font-size:20px;color:var(--text-primary)}
+.site-header .brand.active{color:var(--brand-500)}
 .nav a{padding:12px 10px;border-radius:10px;color:var(--text-secondary);text-decoration:none;transition:all var(--transition-base)}
 .nav a.active,.nav a:hover{background:var(--surface-raised);color:var(--text-primary)}
+
+.support-link{display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:var(--radius-md);color:var(--text-secondary) !important;font-size:.9rem;opacity:.85;transition:color var(--transition-base),opacity var(--transition-base)}
+.support-link:hover{color:var(--brand-500) !important;opacity:1}
+
+.nav-item{position:relative;display:inline-block}
+.nav-dropdown{display:none;position:absolute;top:100%;right:0;background:var(--surface-base);border:1px solid var(--border-default);border-radius:var(--radius-lg);padding:var(--space-2);margin-top:var(--space-3);min-width:200px;box-shadow:var(--shadow-xl);z-index:1000}
+.nav-item:hover .nav-dropdown{display:block}
+.nav-dropdown a{display:block;padding:var(--space-2) var(--space-3);color:var(--text-primary);text-decoration:none;border-radius:var(--radius-md);transition:all var(--transition-base);font-size:var(--text-sm)}
+.nav-dropdown a:hover{background:var(--surface-raised);color:var(--brand-500)}
 
 .theme-toggle{margin-left:10px;border-radius:999px;border:1px solid var(--border);background:var(--panel);color:var(--muted);padding:6px 10px;font-size:.85rem;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
 .theme-toggle span{font-size:.8rem}
