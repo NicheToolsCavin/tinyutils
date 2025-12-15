@@ -112,6 +112,8 @@ export async function heicToBlob(
 			return await bitmapToBlob(nativeBitmap, toType, quality);
 		} catch (err) {
 			console.error('[heic] Native decode bitmapToBlob failed:', err);
+			// Safety: ensure bitmap is closed if bitmapToBlob threw early
+			try { nativeBitmap.close(); } catch { /* already closed */ }
 			// Don't throw - fall through to heic2any as last resort
 		}
 	}
