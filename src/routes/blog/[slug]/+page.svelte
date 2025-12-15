@@ -26,6 +26,47 @@
 
   const publishedLabel = published ? dateFormatter.format(new Date(published)) : null;
   const updatedLabel = updated ? dateFormatter.format(new Date(updated)) : null;
+
+  // Get category and thumbnail based on slug (same logic as listing page)
+  function getPostCategory(s) {
+    // Archive first to prevent 'webpage' matching 'webp'
+    if (s.includes('wayback') || s.includes('archive') || s.includes('recover') || s.includes('time-machine')) {
+      return { category: 'archive', thumb: '/blog/archive-category.jpg' };
+    }
+    if (s.includes('privacy')) {
+      return { category: 'privacy', thumb: '/blog/privacy-category.jpg' };
+    }
+    // Document with sub-categories
+    if (s.includes('pdf') || s.includes('docx') || s.includes('markdown') || s.includes('html-to') ||
+        s.includes('latex') || s.includes('epub') || s.includes('odt') || s.includes('rtf') ||
+        s.includes('word') || s.includes('document') || s.includes('extract-text')) {
+      if (s.includes('pdf')) return { category: 'document', thumb: '/blog/doc-pdf.jpg' };
+      if (s.includes('markdown')) return { category: 'document', thumb: '/blog/doc-markdown.jpg' };
+      if (s.includes('docx') || s.includes('word')) return { category: 'document', thumb: '/blog/doc-word.jpg' };
+      if (s.includes('epub')) return { category: 'document', thumb: '/blog/doc-epub.jpg' };
+      if (s.includes('latex')) return { category: 'document', thumb: '/blog/doc-latex.jpg' };
+      return { category: 'document', thumb: '/blog/doc-text.jpg' };
+    }
+    // SEO
+    if (s.includes('broken-link') || s.includes('sitemap') || s.includes('seo') ||
+        s.includes('redirect') || s.includes('migration')) {
+      return { category: 'seo', thumb: '/blog/seo-category.jpg' };
+    }
+    // Image with sub-categories
+    if (s.includes('heic') || s.includes('webp') || s.includes('png') || s.includes('jpg') ||
+        s.includes('jpeg') || s.includes('gif') || s.includes('compress') || s.includes('image') ||
+        s.includes('batch')) {
+      if (s.includes('heic')) return { category: 'image', thumb: '/blog/img-heic.jpg' };
+      if (s.includes('gif')) return { category: 'image', thumb: '/blog/img-gif.jpg' };
+      if (s.includes('webp')) return { category: 'image', thumb: '/blog/img-webp.jpg' };
+      if (s.includes('compress') || s.includes('batch') || s.includes('optimize'))
+        return { category: 'image', thumb: '/blog/img-compress.jpg' };
+      return { category: 'image', thumb: '/blog/img-photo.jpg' };
+    }
+    return { category: 'general', thumb: '/blog/general-category.jpg' };
+  }
+
+  const { category, thumb } = getPostCategory(slug);
 </script>
 
 <svelte:head>
@@ -52,8 +93,13 @@
 </svelte:head>
 
 <div class="blog-article">
+  <div class="article-hero-image">
+    <img src={thumb} alt="{category} category" />
+    <div class="article-hero-overlay"></div>
+  </div>
   <article class="container">
     <header class="article-hero">
+      <span class="article-category">{category}</span>
       <h1>{title}</h1>
       <div class="article-meta">
         {#if publishedLabel}
@@ -87,11 +133,46 @@
 </div>
 
 <style>
+  .article-hero-image {
+    position: relative;
+    width: 100%;
+    height: 280px;
+    overflow: hidden;
+  }
+
+  .article-hero-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .article-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 0%, var(--surface-base) 100%);
+  }
+
+  .article-category {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--brand);
+    background: var(--surface-elevated);
+    border: 1px solid var(--border-default);
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    margin-bottom: var(--space-4);
+  }
+
   .article-hero {
     text-align: center;
-    padding: var(--space-12) 0 var(--space-8);
+    padding: var(--space-8) 0 var(--space-8);
     max-width: 800px;
     margin: 0 auto;
+    margin-top: -60px;
+    position: relative;
   }
 
   .article-hero h1 {
