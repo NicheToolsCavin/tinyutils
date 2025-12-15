@@ -407,11 +407,15 @@
 				let inputType = task.inputType || guessMimeFromName(task.inputName) || '';
 
 				// HEIC decode: convert to PNG or JPEG as an intermediate
-				if (isHeicFile(task.inputFile)) {
+				const isHeic = isHeicFile(task.inputFile);
+				console.log('[processor] File:', task.inputName, 'type:', task.inputFile.type, 'isHeic:', isHeic);
+				if (isHeic) {
 					const intermediate: 'image/png' | 'image/jpeg' =
 						settings.outputFormat === 'jpeg' ? 'image/jpeg' : 'image/png';
+					console.log('[processor] Converting HEIC to', intermediate);
 					inputBlob = await heicToBlob(task.inputFile, intermediate, 0.92);
 					inputType = intermediate;
+					console.log('[processor] HEIC conversion complete, blob size:', inputBlob.size);
 				}
 
 				let outMime = outputMimeFromFormat(settings.outputFormat, inputType);
