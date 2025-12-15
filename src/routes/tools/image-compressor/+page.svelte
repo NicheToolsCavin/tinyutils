@@ -521,26 +521,19 @@
 	}
 
 	// Reactive statements for button states - Svelte needs these to track dependencies
+	// (function calls in templates don't reactively update)
 	$: canProcessNow = tasks.length > 0 && !isProcessing;
 	$: canDownloadNow = doneTasks.length > 0 && !isProcessing;
-
-	function canProcess(): boolean {
-		return tasks.length > 0 && !isProcessing;
-	}
-
-	function canDownload(): boolean {
-		return doneTasks.length > 0 && !isProcessing;
-	}
 
 	// Keyboard shortcuts
 	function handleKeydown(e: KeyboardEvent) {
 		if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
 			e.preventDefault();
-			if (canProcess()) startProcessing();
+			if (canProcessNow) startProcessing();
 		}
 		if ((e.metaKey || e.ctrlKey) && e.key === 'e') {
 			e.preventDefault();
-			if (canDownload()) downloadAll();
+			if (canDownloadNow) downloadAll();
 		}
 	}
 
@@ -550,7 +543,7 @@
 			addFiles,
 			startProcessing,
 			getTasks: () => tasks,
-			canProcess
+			canProcess: () => canProcessNow
 		};
 	}
 </script>
