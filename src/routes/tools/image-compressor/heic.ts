@@ -16,8 +16,16 @@
 async function tryNativeDecode(blob: Blob): Promise<ImageBitmap | null> {
 	try {
 		// Safari and macOS can decode HEIC natively
-		return await createImageBitmap(blob);
-	} catch {
+		const bitmap = await createImageBitmap(blob);
+		// Validate the bitmap has valid dimensions
+		if (bitmap.width > 0 && bitmap.height > 0) {
+			return bitmap;
+		}
+		console.warn('[heic] Native decode returned invalid dimensions:', bitmap.width, bitmap.height);
+		bitmap.close();
+		return null;
+	} catch (err) {
+		console.warn('[heic] Native decode failed, will try heic2any:', err);
 		return null;
 	}
 }
@@ -70,18 +78,23 @@ async function decodeWithHeic2any(
 	const mod = await import('heic2any');
 	const heic2any: any = (mod as any).default ?? mod;
 
-	const out = await heic2any({
-		blob,
-		toType,
-		quality
-	});
+	try {
+		const out = await heic2any({
+			blob,
+			toType,
+			quality
+		});
 
-	// Some HEIF containers can produce multiple images -> heic2any may return Blob[]
-	if (Array.isArray(out)) {
-		if (!out.length) throw new Error('HEIC conversion produced no output.');
-		return out[0] as Blob;
+		// Some HEIF containers can produce multiple images -> heic2any may return Blob[]
+		if (Array.isArray(out)) {
+			if (!out.length) throw new Error('HEIC conversion produced no output.');
+			return out[0] as Blob;
+		}
+		return out as Blob;
+	} catch (err) {
+		console.error('[heic] heic2any conversion failed:', err);
+		throw err;
 	}
-	return out as Blob;
 }
 
 export async function heicToBlob(
@@ -95,7 +108,12 @@ export async function heicToBlob(
 	// 1. Try native createImageBitmap (works on Safari, or if macOS pre-converted to JPEG)
 	const nativeBitmap = await tryNativeDecode(file);
 	if (nativeBitmap) {
-		return bitmapToBlob(nativeBitmap, toType, quality);
+		try {
+			return await bitmapToBlob(nativeBitmap, toType, quality);
+		} catch (err) {
+			console.error('[heic] Native decode bitmapToBlob failed:', err);
+			// Don't throw - fall through to heic2any as last resort
+		}
 	}
 
 	// 2. Fall back to heic2any for browsers without native HEIC support (Chrome, Firefox)
