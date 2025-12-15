@@ -22,9 +22,9 @@
 
     <h2>Best ways to reach out</h2>
     <p>
-      The easiest way to report a bug or suggest an improvement is to open an issue on the project’s GitHub repository,
-      or to send a short email with a clear subject line. When you write, include the tool you were using, what you
-      expected to happen, and what actually happened.
+      The easiest way to report a bug or suggest an improvement is to send a short email to
+      <a href="mailto:nichetoolscavin@gmail.com">nichetoolscavin@gmail.com</a> with a clear subject line.
+      When you write, include the tool you were using, what you expected to happen, and what actually happened.
     </p>
 
     <h2>What to expect</h2>
