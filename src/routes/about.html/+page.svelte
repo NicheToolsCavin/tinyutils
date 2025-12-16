@@ -4,12 +4,16 @@
     name="description"
     content="Learn what TinyUtils is, who it's for, and how we think about privacy and reliability."
   />
-  <link rel="canonical" href="/about.html" />
+  <link rel="canonical" href="/about" />
   <meta property="og:title" content="About — TinyUtils" />
   <meta
     property="og:description"
     content="Learn what TinyUtils is, who it's for, and how we think about privacy and reliability."
   />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="/og.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
 </svelte:head>
 
 <div class="container">
