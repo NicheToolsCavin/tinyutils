@@ -5,14 +5,14 @@
 </p>
 
 <p>
-  The fix is simple: compress them. A well-optimized JPEG looks identical to the eye
-  but weighs 50-70% less. Here's how to do it right.
+  The fix is simple: compress them. A well‑optimized JPEG usually looks the same to a normal human
+  while taking up a lot less space. Here’s how to do it without turning faces into watercolor.
 </p>
 
 <h2 id="tldr">TL;DR</h2>
 <ul>
   <li>Use <a href="/tools/image-compressor/">TinyUtils Image Compressor</a> for free JPEG compression.</li>
-  <li>80-85% quality is the sweet spot for most photos.</li>
+  <li>80-85% quality is a good starting point for most photos.</li>
   <li>Resize images to their display size — don't serve 4000px images at 800px.</li>
   <li>For even smaller files, convert to WebP.</li>
 </ul>
@@ -64,11 +64,25 @@
   Resizing often saves more than quality reduction and has zero visual impact.
 </p>
 
+<h2 id="dont-jpeg">Don’t JPEG the wrong things</h2>
+<p>
+  JPEG is great for photos. It’s often a terrible choice for:
+</p>
+<ul>
+  <li><strong>Screenshots</strong> (text gets crunchy fast)</li>
+  <li><strong>Logos and icons</strong> (sharp edges turn fuzzy)</li>
+  <li><strong>Images with transparency</strong> (JPEG can’t do it)</li>
+</ul>
+<p>
+  For those, PNG or WebP is usually the better move. If you’re optimizing UI screenshots, start with
+  <a href="/blog/compress-png-online/">PNG compression</a> or convert to WebP.
+</p>
+
 <h2 id="metadata">Strip metadata (EXIF)</h2>
 <p>
   Camera JPEGs include metadata: GPS coordinates, camera model, timestamps.
-  This can add 50-200 KB per image. TinyUtils strips EXIF by default,
-  which is also good for privacy.
+  In many browser‑based conversions, that metadata doesn’t survive the export — which can be good for privacy.
+  If you actually need the metadata (date/location), keep the original file as your “source of truth.”
 </p>
 
 <h2 id="batch">Batch compression</h2>
@@ -84,37 +98,12 @@
   You can convert JPEG → WebP in the same tool.
 </p>
 
-<h2 id="results">Real compression results</h2>
-<table>
-  <thead>
-    <tr>
-      <th>Original JPEG</th>
-      <th>Quality</th>
-      <th>Result</th>
-      <th>Savings</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>1.8 MB (photo)</td>
-      <td>85%</td>
-      <td>380 KB</td>
-      <td>79%</td>
-    </tr>
-    <tr>
-      <td>1.8 MB (photo)</td>
-      <td>80%</td>
-      <td>280 KB</td>
-      <td>84%</td>
-    </tr>
-    <tr>
-      <td>3.2 MB (hero image)</td>
-      <td>85% + resize 2000px</td>
-      <td>195 KB</td>
-      <td>94%</td>
-    </tr>
-  </tbody>
-</table>
+<h2 id="results">What to expect</h2>
+<ul>
+  <li><strong>Resizing</strong> usually beats “more compression” for big wins.</li>
+  <li><strong>Quality 80–85%</strong> is a solid starting point for most photos.</li>
+  <li><strong>Very detailed photos</strong> (foliage, noise, grain) show artifacts sooner than simple images.</li>
+</ul>
 
 <h2 id="tools">Why not use Photoshop/GIMP?</h2>
 <p>
@@ -145,12 +134,16 @@
 
 <h3>Can I compress JPEGs without losing quality?</h3>
 <p>
-  "Lossless" JPEG compression exists but offers minimal savings (10-20%).
-  For real size reduction, you need lossy compression — but 80%+ quality is usually indistinguishable.
+  There are “lossless-ish” JPEG optimizations, but the savings are usually modest.
+  For meaningful size reduction you typically need lossy compression — ideally paired with resizing — and then you pick a quality level that still looks good for your use case.
 </p>
 
 <h2 id="next">Next steps</h2>
 <p>
   Time to shrink those JPEGs. Open <a href="/tools/image-compressor/">TinyUtils Image Compressor</a>,
   drop your photos, and aim for "looks the same, half the size."
+</p>
+<p>
+  If you’re doing this for a website, spot-check the result in the browser: make sure it still looks sharp at the size you actually display it.
+  No one wins awards for “technically smaller, visibly worse.”
 </p>

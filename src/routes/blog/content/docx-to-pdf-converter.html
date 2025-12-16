@@ -1,6 +1,6 @@
 <p>
-  Word documents are editable. PDFs are final. When you need to share a document
-  without letting anyone change it, convert DOCX to PDF.
+  DOCX is for editing. PDF is for sending.
+  If you’re done with a document and you want it to look the same on every laptop (and print the same in the end), convert it to PDF.
 </p>
 
 <h2 id="tldr">TL;DR</h2>
@@ -9,7 +9,7 @@
   <li>Upload your .docx file</li>
   <li>Select <strong>PDF</strong> as output</li>
   <li>Download the PDF</li>
-  <li>Formatting, fonts, and images preserved</li>
+  <li>Expect the layout to stay consistent (with the usual font caveats)</li>
 </ul>
 
 <h2 id="why">Why convert Word to PDF?</h2>
@@ -17,14 +17,14 @@
   <li><strong>Finalize documents</strong> — No more "track changes" surprises</li>
   <li><strong>Universal viewing</strong> — PDFs open anywhere</li>
   <li><strong>Print-ready</strong> — What you see is what prints</li>
-  <li><strong>Legal validity</strong> — PDFs are accepted for contracts</li>
+  <li><strong>Paperwork</strong> — PDFs are commonly accepted for contracts and forms</li>
   <li><strong>Email safety</strong> — PDFs can't execute macros</li>
 </ul>
 
 <h2 id="preserved">What's preserved</h2>
 <ul>
   <li><strong>Text formatting</strong> — Bold, italic, underline, colors</li>
-  <li><strong>Fonts</strong> — Embedded in the PDF</li>
+  <li><strong>Fonts</strong> — usually embedded/subset, but custom fonts can be substituted</li>
   <li><strong>Images</strong> — All graphics included</li>
   <li><strong>Tables</strong> — Structure and formatting</li>
   <li><strong>Headers/Footers</strong> — Page numbers, dates</li>
@@ -34,9 +34,10 @@
 
 <h2 id="track-changes">Track Changes</h2>
 <p>
-  If your DOCX has tracked changes, they're automatically accepted.
-  The PDF shows the final text, not the revision marks.
-  Comments are also stripped.
+  If your DOCX has Track Changes, decide what you want before you convert.
+  Some people want a “clean final” PDF. Others want a review PDF that still shows markup.
+  If you’re aiming for a clean final, accept changes and remove comments first (or use an “accept tracked changes” option if your converter provides it).
+  If you’re not sure, convert once and double‑check the output before you send it to a client.
 </p>
 
 <h2 id="steps">How to convert</h2>
@@ -48,12 +49,40 @@
   <li>Download your PDF</li>
 </ol>
 
+<h2 id="qa">Quick QA before you send it to someone</h2>
+<p>
+  Conversions usually work, but “usually” isn’t what you want when you’re emailing a client or submitting paperwork.
+  Do a 60‑second scan:
+</p>
+<ul>
+  <li><strong>Page count:</strong> does it match what you expect?</li>
+  <li><strong>Headers/footers:</strong> are page numbers and dates where they should be?</li>
+  <li><strong>Fonts:</strong> look for weird substitutions (spacing shifts are the giveaway).</li>
+  <li><strong>Images:</strong> check any diagrams/logos didn’t drop out or move.</li>
+  <li><strong>Links:</strong> click one or two if they matter.</li>
+</ul>
+
 <h2 id="fonts">About fonts</h2>
 <p>
-  Standard fonts (Arial, Times New Roman, Calibri) render correctly.
-  Custom fonts are embedded if the license allows.
-  If a font can't be embedded, a similar substitute is used.
+  Fonts are the main reason PDFs sometimes “look different” across systems.
+  If your DOCX uses standard fonts (Calibri, Arial, Times), you’re usually fine.
+  If it uses a custom font, the converter may substitute something close — which can shift line breaks and page counts.
 </p>
+<p>
+  If the exact layout matters (contracts, print layouts, anything with strict page counts), try to stick to common fonts and keep your margins conservative.
+  And if you can, compare your converted PDF to a “Save as PDF” export from Word once — it’s a good baseline for what the document is supposed to look like.
+</p>
+
+<h2 id="layout">Page breaks, sections, and “why did this move?”</h2>
+<p>
+  Word documents can have section breaks, different headers per section, columns, and other layout features that aren’t obvious until they break.
+  If your PDF looks off:
+</p>
+<ul>
+  <li><strong>Check section breaks:</strong> they can change margins/orientation mid‑doc.</li>
+  <li><strong>Watch for tables near page edges:</strong> they’re the easiest thing to reflow badly.</li>
+  <li><strong>Try exporting from Word once:</strong> if you have access to Word, it’s a good “gold standard” for layout.</li>
+</ul>
 
 <h2 id="batch">Multiple documents</h2>
 <p>
@@ -71,7 +100,7 @@
   <li><strong>Complexity</strong> — More formatting = slightly larger</li>
 </ul>
 <p>
-  Typical conversion: a 500KB DOCX becomes a 200-800KB PDF.
+  In practice: documents with lots of high‑res images will produce bigger PDFs. Text‑only docs usually stay small.
 </p>
 
 <h2 id="vs-save">Why not "Save as PDF" in Word?</h2>
@@ -118,4 +147,7 @@
 <p>
   Need to turn a Word doc into a PDF? Open <a href="/tools/text-converter/">TinyUtils Document Converter</a>,
   upload your DOCX, and download the PDF.
+</p>
+<p>
+  Double-check page breaks and links.
 </p>

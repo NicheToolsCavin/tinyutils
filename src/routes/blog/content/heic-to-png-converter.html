@@ -9,7 +9,7 @@
   <li>Drop your HEIC files (batch supported)</li>
   <li>Select <strong>PNG</strong> as output format</li>
   <li>Download individual files or ZIP</li>
-  <li>Everything happens in your browser — no upload</li>
+  <li>If privacy matters: use a converter that can run locally in your browser (and verify in DevTools → Network)</li>
 </ul>
 
 <h2 id="why-png">Why convert to PNG?</h2>
@@ -21,6 +21,26 @@
   <li><strong>Print</strong> — Higher quality for physical prints</li>
 </ul>
 
+<h2 id="when-not">When PNG is the wrong target</h2>
+<p>
+  If this is just a normal iPhone photo and you’re converting it so someone can open it,
+  PNG is usually overkill. PNG is lossless, which means it can get <em>big</em> fast.
+</p>
+<ul>
+  <li>
+    <strong>Sending a photo to a human?</strong>
+    Use <a href="/blog/heic-to-jpg-converter/">HEIC → JPG</a> (smaller, compatible, good enough).
+  </li>
+  <li>
+    <strong>Uploading photos to a website?</strong>
+    Use <a href="/blog/convert-heic-to-webp/">HEIC → WebP</a> (usually smaller than JPG).
+  </li>
+  <li>
+    <strong>Need crisp edges or transparency?</strong>
+    PNG makes sense (screenshots, UI assets, logos).
+  </li>
+</ul>
+
 <h2 id="steps">How to convert HEIC to PNG</h2>
 <ol>
   <li>Go to <a href="/tools/image-compressor/">TinyUtils Image Compressor</a></li>
@@ -30,8 +50,9 @@
   <li>Download each PNG individually or get all in a ZIP</li>
 </ol>
 <p>
-  The conversion happens entirely in your browser using JavaScript and WebAssembly.
-  Your photos never leave your device.
+  If you’re using a browser‑based converter like TinyUtils, the conversion can happen locally (client‑side).
+  If that matters to you, do a quick check: open DevTools → <strong>Network</strong>, convert one file,
+  and confirm there’s no giant upload request leaving your browser.
 </p>
 
 <h2 id="batch">Batch conversion</h2>
@@ -40,12 +61,49 @@
   TinyUtils processes files in parallel and packages everything into a single ZIP download.
 </p>
 
+<h2 id="avoid-future">Avoid future HEIC headaches</h2>
+<p>
+  If you keep tripping over HEIC, you can reduce how often you need to convert:
+</p>
+<ul>
+  <li>
+    <strong>New photos:</strong> iPhone Settings → Camera → Formats → choose <strong>Most Compatible</strong>
+    (saves JPEG instead of HEIC; uses more storage).
+  </li>
+  <li>
+    <strong>Transfers to a computer:</strong> iPhone Settings → Photos → Transfer to Mac or PC → <strong>Automatic</strong>
+    (iOS will convert on transfer in many cases).
+  </li>
+</ul>
+<p>
+  You don’t <em>have</em> to change these — HEIC is fine when you control the workflow — but it saves you from surprise “unsupported format” errors.
+</p>
+
 <h2 id="quality">Quality considerations</h2>
 <ul>
   <li><strong>HEIC is lossy</strong> — Original HEIC already has some compression</li>
   <li><strong>PNG is lossless</strong> — Conversion doesn't add more artifacts</li>
   <li><strong>File size</strong> — PNG files are larger than HEIC (no compression)</li>
-  <li><strong>Metadata</strong> — EXIF data is stripped for privacy by default</li>
+  <li><strong>Metadata</strong> — many converters re‑encode images and may drop EXIF; keep originals if you need date/location data</li>
+</ul>
+
+<h2 id="weird">If the converted PNG looks “off”</h2>
+<p>
+  Most of the time it’s fine. When it’s not, it’s usually one of these:
+</p>
+<ul>
+  <li>
+    <strong>Colors look different on Windows:</strong>
+    wide‑gamut photos (Display P3 / HDR) can look odd in some viewers. Try exporting as JPEG instead, or open in an editor and convert to sRGB.
+  </li>
+  <li>
+    <strong>It got huge:</strong>
+    that’s PNG doing PNG things. If you don’t need transparency, JPG/WebP is the practical option.
+  </li>
+  <li>
+    <strong>It still looks “compressed”:</strong>
+    the HEIC was already lossy, so those artifacts come along for the ride.
+  </li>
 </ul>
 
 <h2 id="vs-jpg">PNG vs JPG for HEIC conversion</h2>
@@ -90,7 +148,9 @@
 
 <h3>Will my photos be uploaded?</h3>
 <p>
-  No. All processing happens locally on your device. We can't see your files.
+  TinyUtils is designed to run this locally in your browser. If you want to be extra sure, verify it:
+  open DevTools → Network and make sure there’s no big file upload request during conversion.
+  (If you use other tools, read their privacy policy — “free converter” sites often upload by default.)
 </p>
 
 <h3>Can I convert HEIC from AirDrop?</h3>
@@ -113,4 +173,8 @@
 <p>
   Ready to convert your iPhone photos? Open <a href="/tools/image-compressor/">TinyUtils Image Compressor</a>,
   drop your HEIC files, select PNG, and you're done.
+</p>
+<p>
+  If you find yourself converting HEIC every week, it’s worth revisiting the iPhone settings above.
+  Converting is fine — but avoiding the problem at the source is even nicer.
 </p>

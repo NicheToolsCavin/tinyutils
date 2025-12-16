@@ -1,6 +1,6 @@
 <p>
-  Markdown is great for developers and writers, but sometimes you need to send a Word document.
-  Clients, editors, and HR departments all speak DOCX. Here's how to convert.
+  Markdown is a great writing format… right up until you need to hand the document to someone who lives in Word.
+  Clients, editors, and HR teams don’t want a repo link — they want a DOCX they can comment on.
 </p>
 
 <h2 id="tldr">TL;DR</h2>
@@ -9,7 +9,7 @@
   <li>Upload your .md file</li>
   <li>Select <strong>DOCX</strong> output</li>
   <li>Download the Word document</li>
-  <li>All formatting preserved</li>
+  <li>Most formatting carries over (expect a quick polish pass)</li>
 </ul>
 
 <h2 id="why">Why you might need this</h2>
@@ -29,7 +29,19 @@
   <li><strong>Links</strong> — Hyperlinks preserved</li>
   <li><strong>Tables</strong> — Markdown tables become Word tables</li>
   <li><strong>Code blocks</strong> — Monospace formatting applied</li>
-  <li><strong>Images</strong> — Embedded in the document</li>
+  <li><strong>Images</strong> — Can be embedded when the converter can access them</li>
+</ul>
+
+<h2 id="cleanup">What usually needs cleanup</h2>
+<p>
+  The annoying truth: Markdown doesn’t have the same concept of “page layout” that Word does. Conversion usually gets you a good draft,
+  then you spend a couple minutes on the last 10%.
+</p>
+<ul>
+  <li><strong>Spacing:</strong> Word’s default paragraph spacing can look different than your Markdown preview</li>
+  <li><strong>Tables:</strong> You may want to resize columns or tweak borders</li>
+  <li><strong>Code blocks:</strong> Long lines might wrap in weird places</li>
+  <li><strong>Links:</strong> Check any long URLs and make sure they didn’t break across lines</li>
 </ul>
 
 <h2 id="steps">How to convert</h2>
@@ -42,6 +54,20 @@
 </ol>
 <p>
   The document opens in Microsoft Word, Google Docs, LibreOffice, or any DOCX-compatible app.
+</p>
+
+<h2 id="tips">Tips for cleaner conversions</h2>
+<p>
+  Markdown is “simple” until it isn’t. If you want the DOCX to come out clean, a few habits help:
+</p>
+<ul>
+  <li><strong>Prefer real headings</strong> (<code>#</code>, <code>##</code>) over custom underline styles.</li>
+  <li><strong>Keep tables simple</strong> (Markdown tables don’t do merged cells, and Word will try its best).</li>
+  <li><strong>Avoid giant one-line paragraphs</strong> that rely on manual line breaks for spacing.</li>
+  <li><strong>Be careful with “fancy” extensions</strong> (admonitions, diagrams, custom containers). They may convert as plain text.</li>
+</ul>
+<p>
+  None of this is a dealbreaker — it just reduces the “why is this weird in Word?” cleanup.
 </p>
 
 <h2 id="styles">Word styles</h2>
@@ -77,6 +103,13 @@
 <p>
   This means you can apply Word themes and the headings update automatically.
 </p>
+<p>
+  Bonus: once headings are real Word styles, you can generate a table of contents in Word with a couple clicks.
+</p>
+<p>
+  If the spacing looks “too Word-y” (extra space after every paragraph), tweak the <strong>Normal</strong> style once.
+  That changes the whole document, and it’s way faster than fixing spacing line by line.
+</p>
 
 <h2 id="tables">Tables</h2>
 <p>
@@ -92,8 +125,8 @@
 
 <h2 id="images">Images</h2>
 <p>
-  Images referenced in your Markdown are embedded in the DOCX.
-  Online images are fetched and included.
+  If your Markdown references local images, the safest approach is to upload a ZIP that contains your <code>.md</code> file and the image files in the expected paths.
+  That way the converter can embed them into the DOCX without guessing.
 </p>
 
 <h2 id="batch">Batch conversion</h2>
@@ -116,7 +149,8 @@
 
 <h3>What about frontmatter?</h3>
 <p>
-  YAML frontmatter (title, author, date) becomes document properties in Word.
+  If your Markdown has YAML frontmatter (title, author, date), some converters use it as metadata and others keep it as plain text at the top.
+  Either way, it’s easy to remove from the final DOCX if you don’t want it there.
 </p>
 
 <h3>Can I convert back to Markdown?</h3>
@@ -126,7 +160,8 @@
 
 <h3>What Markdown flavor is supported?</h3>
 <p>
-  GitHub Flavored Markdown (GFM). Tables, task lists, strikethrough all work.
+  The common stuff: headings, lists, links, tables, and code blocks. If you rely on specific extensions (task list checkboxes, custom containers, fancy diagrams),
+  do a quick test conversion and see how it comes through.
 </p>
 
 <h2 id="alternatives">Other options</h2>
@@ -143,4 +178,7 @@
 <p>
   Need to send your Markdown as a Word doc? Open <a href="/tools/text-converter/">TinyUtils Document Converter</a>,
   upload your .md file, and download DOCX.
+</p>
+<p>
+  Then apply your Word template.
 </p>

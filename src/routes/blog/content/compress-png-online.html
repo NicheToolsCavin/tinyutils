@@ -5,8 +5,8 @@
 </p>
 
 <p>
-  The good news: PNG compression can often cut file sizes by 50-80% without visible quality loss.
-  And you can do it right in your browser without uploading to sketchy servers.
+  The good news: you can often shrink PNGs a lot without making them look worse — especially if you resize or switch to a modern format like WebP.
+  And you can do it right in your browser, without uploading your files to a random site.
 </p>
 
 <h2 id="tldr">TL;DR</h2>
@@ -45,12 +45,11 @@
 <p>
   <strong>Lossless</strong> (PNG → PNG): The image looks identical, pixel for pixel.
   Compression is limited to removing metadata and optimizing encoding.
-  Expect 10-30% size reduction.
+  Expect modest savings.
 </p>
 <p>
   <strong>Lossy</strong> (PNG → WebP or JPEG): Some pixel data is discarded.
-  At 80% quality, most people can't tell the difference.
-  Expect 60-90% size reduction.
+  At a reasonably high quality setting, most people won’t notice the difference — and the file size drop can be huge.
 </p>
 
 <h2 id="transparency">What about transparency?</h2>
@@ -67,6 +66,17 @@
   This often saves more than any compression setting.
 </p>
 
+<h2 id="palette">A PNG trick people forget: fewer colors</h2>
+<p>
+  Many PNGs (logos, UI screenshots, diagrams) don’t actually need “millions of colors.”
+  If a tool can convert a PNG to a palette-based PNG (often called “PNG‑8”), the file can drop a lot without looking different.
+  It’s not magic — it just stores fewer colors.
+</p>
+<p>
+  If your image is a photo, don’t bother. If it’s a logo, chart, or screenshot, it’s worth trying.
+  And if you control the source, <strong>SVG</strong> is often an even better “logo format” than any PNG.
+</p>
+
 <h2 id="batch">Batch compression</h2>
 <p>
   Got 50 screenshots? Don't compress them one by one.
@@ -74,53 +84,29 @@
   and download a ZIP of the results.
 </p>
 
-<h2 id="benchmarks">Real-world compression results</h2>
-<table>
-  <thead>
-    <tr>
-      <th>Original</th>
-      <th>Format</th>
-      <th>Quality</th>
-      <th>Result</th>
-      <th>Savings</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>2.4 MB PNG (screenshot)</td>
-      <td>PNG</td>
-      <td>—</td>
-      <td>1.8 MB</td>
-      <td>25%</td>
-    </tr>
-    <tr>
-      <td>2.4 MB PNG (screenshot)</td>
-      <td>WebP</td>
-      <td>85%</td>
-      <td>180 KB</td>
-      <td>92%</td>
-    </tr>
-    <tr>
-      <td>800 KB PNG (logo)</td>
-      <td>WebP</td>
-      <td>90%</td>
-      <td>45 KB</td>
-      <td>94%</td>
-    </tr>
-  </tbody>
-</table>
+<h2 id="benchmarks">What to expect</h2>
+<ul>
+  <li><strong>PNG → PNG (lossless):</strong> small win, but it keeps exact pixels.</li>
+  <li><strong>PNG → WebP:</strong> usually the best “looks the same, much smaller” option for the web.</li>
+  <li><strong>Resizing:</strong> the biggest win if your PNG is way larger than it needs to be.</li>
+</ul>
+<p>
+  If you’re shipping images on a website, a good rule is: keep PNG as your editable source (especially for UI assets),
+  but serve WebP to visitors with a PNG fallback.
+</p>
 
 <h2 id="faq">FAQ</h2>
 
 <h3>Is online PNG compression safe?</h3>
 <p>
-  It depends on the tool. TinyUtils processes images in your browser — files never leave your device.
-  Many other tools upload to servers. Check their privacy policy.
+  It depends on the tool. TinyUtils is designed to process images locally in your browser.
+  If you want to verify it, open DevTools → <strong>Network</strong>, compress one PNG, and make sure there’s no big upload request sending your file data to a server.
+  Many other “free converters” do upload by default, so check their privacy policy (and don’t assume).
 </p>
 
 <h3>Will I lose quality?</h3>
 <p>
-  With PNG → PNG, no. With PNG → WebP/JPEG at 80%+, quality loss is usually invisible.
+  With PNG → PNG, no. With PNG → WebP/JPEG at a reasonably high quality setting, most people won’t notice the difference — but it depends on the image.
 </p>
 
 <h3>Can I compress PNGs with transparency?</h3>
@@ -132,4 +118,7 @@
 <p>
   Ready to shrink those PNGs? Open <a href="/tools/image-compressor/">TinyUtils Image Compressor</a>,
   drop in your files, and see how much space you save.
+</p>
+<p>
+  Start with resizing first. Then decide if you really need PNG, or if WebP is the better shipping format.
 </p>

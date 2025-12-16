@@ -1,79 +1,154 @@
 <p>
-  PNG is great for graphics with transparency, but terrible for photos.
-  If you have a PNG photo (screenshot, export from app), converting to JPG
-  can cut file size by 80% or more.
+  PNG is excellent for graphics with transparency, screenshots with text, and images requiring lossless quality. But for photographs (where transparency isn’t needed), PNG’s lossless compression often creates unnecessarily large files. A 5MB PNG photo might become a 500KB JPG with minimal visible loss. When file size matters more than perfect pixel preservation, converting PNG to JPG is the practical choice.
 </p>
 
 <h2 id="tldr">TL;DR</h2>
 <ul>
   <li>Open <a href="/tools/image-compressor/">TinyUtils Image Compressor</a></li>
-  <li>Drop your PNG file</li>
-  <li>Select <strong>JPG/JPEG</strong> output</li>
-  <li>Set quality (85% is usually perfect)</li>
-  <li>Download the smaller JPG</li>
+  <li>Drop your PNG file(s)</li>
+  <li>Select <strong>JPG/JPEG</strong> as output format</li>
+  <li>Set quality (85% recommended for most uses)</li>
+  <li>Download the much smaller JPG file</li>
 </ul>
 
-<h2 id="when">When to convert PNG to JPG</h2>
-<ul>
-  <li><strong>Photos</strong> — Any photographic image should be JPG</li>
-  <li><strong>Screenshots with photos</strong> — If it's mostly photographic content</li>
-  <li><strong>Large images</strong> — When file size matters more than perfect quality</li>
-  <li><strong>Email attachments</strong> — JPG plays nicer with email size limits</li>
-  <li><strong>Social media</strong> — Platforms often recompress to JPG anyway</li>
-</ul>
+<h2 id="understanding">Understanding PNG and JPG</h2>
 
-<h2 id="when-not">When NOT to convert</h2>
-<ul>
-  <li><strong>Transparency needed</strong> — JPG doesn't support transparency</li>
-  <li><strong>Text/UI screenshots</strong> — JPG artifacts ruin sharp text</li>
-  <li><strong>Logos and icons</strong> — Keep as PNG or SVG</li>
-  <li><strong>Graphics with solid colors</strong> — PNG compresses these better</li>
-</ul>
+<h3>What is PNG?</h3>
+<p>
+  PNG (Portable Network Graphics) uses lossless compression—every pixel is preserved exactly as in the original. This makes PNG ideal for graphics where precision matters: screenshots, logos, diagrams, images with text. PNG also supports transparency (alpha channel), making it essential for graphics that overlay other content.
+</p>
+<p>
+  The downside: lossless compression produces larger files. A PNG photograph might be 5-10× larger than the same image as JPG.
+</p>
 
-<h2 id="steps">How to convert</h2>
+<h3>What is JPG/JPEG?</h3>
+<p>
+  JPG (Joint Photographic Experts Group) uses lossy compression—it discards some image data to achieve smaller files. The compression is tuned for photos (gradients, textures, lots of colors). At quality levels around 80–90%, it’s often hard to tell at a glance on typical photographs.
+</p>
+<p>
+  JPG is optimized for photographs and complex images with many colors and gradual tonal changes. It's poorly suited for graphics with sharp edges, text, or solid colors—these show compression artifacts.
+</p>
+
+<h2 id="when">When to Convert PNG to JPG</h2>
+
+<h3>Photographs</h3>
+<p>
+  Any photographic image should be JPG (or WebP) for web use. If you received a photo as PNG—perhaps from an editing application's export or someone's workflow quirk—converting to JPG dramatically reduces file size.
+</p>
+
+<h3>Screenshots Containing Photos</h3>
+<p>
+  If your screenshot is primarily photographic content (a website design, a photo editing session, a video frame), JPG handles it better than PNG. The photographic areas compress well; some quality loss in UI elements is acceptable.
+</p>
+
+<h3>Large Images</h3>
+<p>
+  When file size matters more than perfect quality—email attachments, web uploads, sharing via messaging apps—JPG's smaller size is worth the minor quality tradeoff.
+</p>
+
+<h3>Email Attachments</h3>
+<p>
+  Email size limits are real. A 10MB PNG attachment might fail; the same image as 1MB JPG goes through easily and loads faster for recipients.
+</p>
+
+<h3>Social Media</h3>
+<p>
+  Most social platforms recompress images to JPG regardless of what you upload. Starting with an optimized JPG gives you more control over the final quality rather than letting the platform's aggressive compression do the work.
+</p>
+
+<h3>Reducing Storage</h3>
+<p>
+  Large PNG collections—photo archives, backup folders—consume significant storage. Converting to JPG (while keeping original PNGs archived) reduces day-to-day storage needs.
+</p>
+
+<h2 id="when-not">When NOT to Convert</h2>
+
+<h3>Transparency Required</h3>
+<p>
+  JPG doesn't support transparency. Any transparent areas become solid (typically white). If your image needs a transparent background, keep it as PNG or convert to WebP instead.
+</p>
+
+<h3>Text and UI Screenshots</h3>
+<p>
+  JPG compression creates visible artifacts around sharp edges and text. Screenshots of code, documents, or user interfaces should stay PNG for readability.
+</p>
+
+<h3>Logos and Icons</h3>
+<p>
+  Logos need exact colors and sharp edges. JPG's lossy compression can introduce color shifts and edge artifacts. Keep logos as PNG, SVG, or WebP.
+</p>
+
+<h3>Graphics with Solid Colors</h3>
+<p>
+  Flat illustrations, diagrams, and graphics with large areas of solid color compress better as PNG. JPG can create visible artifacts in these areas.
+</p>
+
+<h3>Images You'll Edit Further</h3>
+<p>
+  Each JPG save loses some quality. If you'll edit the image again, keep the PNG version for editing and only export to JPG when publishing the final version.
+</p>
+
+<h2 id="steps">How to Convert PNG to JPG</h2>
+
+<h3>Using TinyUtils Image Compressor</h3>
 <ol>
-  <li>Go to <a href="/tools/image-compressor/">TinyUtils Image Compressor</a></li>
-  <li>Drop your PNG (or multiple PNGs)</li>
-  <li>Choose <strong>JPG</strong> as output</li>
-  <li>Set quality slider (default 85% is good)</li>
-  <li>Click <strong>Convert</strong></li>
-  <li>Download individually or as ZIP</li>
+  <li>Navigate to <a href="/tools/image-compressor/">TinyUtils Image Compressor</a></li>
+  <li>Drag and drop your PNG file(s) onto the upload area</li>
+  <li>Select <strong>JPG</strong> from the output format dropdown</li>
+  <li>Adjust the quality slider (85% is recommended for most uses)</li>
+  <li>Click to convert</li>
+  <li>Download individually or as ZIP for multiple files</li>
 </ol>
 
-<h2 id="quality">Quality guide</h2>
+<h3>Batch Processing</h3>
+<p>
+  Converting multiple PNGs? Drop them all at once. The converter processes each file and provides a ZIP download with all converted JPGs.
+</p>
+
+<h2 id="quality">Quality Settings Guide</h2>
 <table>
   <thead>
     <tr>
       <th>Quality</th>
-      <th>Use case</th>
-      <th>File size</th>
+      <th>Best For</th>
+      <th>File Size</th>
+      <th>Notes</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <td>95-100%</td>
-      <td>Print, archival</td>
+      <td>Print, archival, maximum quality</td>
       <td>Large</td>
+      <td>Minimal compression artifacts</td>
     </tr>
     <tr>
       <td>85-90%</td>
       <td>General use (recommended)</td>
       <td>Medium</td>
+      <td>Imperceptible quality loss for most images</td>
     </tr>
     <tr>
       <td>70-80%</td>
-      <td>Web thumbnails</td>
+      <td>Web thumbnails, previews</td>
       <td>Small</td>
+      <td>Noticeable on close inspection</td>
     </tr>
     <tr>
       <td>Below 70%</td>
       <td>Previews only</td>
       <td>Tiny</td>
+      <td>Visible artifacts</td>
     </tr>
   </tbody>
 </table>
 
-<h2 id="size">Size reduction examples</h2>
+<h3>Finding the Right Setting</h3>
+<p>
+  Start at 85%. Examine the result at the size you'll actually display it. If quality is more than adequate, try 80% or 75% for smaller files. If you see compression artifacts (blocky areas, color banding), increase quality.
+</p>
+
+<h2 id="size">File Size Reduction Examples</h2>
 <table>
   <thead>
     <tr>
@@ -89,45 +164,148 @@
       <td>90%</td>
     </tr>
     <tr>
+      <td>5 MB photo</td>
+      <td>~500 KB</td>
+      <td>90%</td>
+    </tr>
+    <tr>
       <td>500 KB screenshot</td>
       <td>~100 KB</td>
       <td>80%</td>
     </tr>
     <tr>
-      <td>5 MB export</td>
-      <td>~500 KB</td>
-      <td>90%</td>
+      <td>1 MB export</td>
+      <td>~150 KB</td>
+      <td>85%</td>
     </tr>
   </tbody>
 </table>
-
-<h2 id="transparency">What happens to transparency?</h2>
 <p>
-  JPG doesn't support transparency. Transparent areas become white by default.
-  If you need transparency, use <a href="/blog/png-to-webp-converter/">PNG to WebP</a> instead.
+  Photographs achieve the most dramatic reductions. Screenshots and graphics with sharp edges reduce less because JPG struggles with those elements.
 </p>
 
-<h2 id="faq">FAQ</h2>
+<h2 id="transparency">What Happens to Transparency?</h2>
+<p>
+  JPG doesn't support transparency. When converting a PNG with transparent areas:
+</p>
+<ul>
+  <li>Transparent pixels become a solid background color (typically white)</li>
+  <li>Semi-transparent areas blend with that background color</li>
+  <li>The result is a fully opaque image</li>
+</ul>
+
+<h3>Alternatives for Transparency</h3>
+<p>
+  If you need transparency with smaller file sizes, convert to WebP instead. WebP supports alpha channel transparency while still achieving better compression than PNG. See our <a href="/blog/webp-compression-guide">WebP compression guide</a>.
+</p>
+
+<h2 id="use-cases">Common Use Cases</h2>
+
+<h3>Photo Compression for Web</h3>
+<p>
+  Photographers often work in PNG or TIFF for editing, then export to JPG for web publishing. The web version loads quickly while the lossless version remains for future editing.
+</p>
+
+<h3>Reducing Attachment Size</h3>
+<p>
+  Email clients, messaging apps, and form uploads often have file size limits. Converting oversized PNGs to JPG lets you share images that would otherwise exceed limits.
+</p>
+
+<h3>Social Media Optimization</h3>
+<p>
+  Social platforms compress uploads aggressively. Uploading an optimized JPG at your chosen quality produces better results than letting the platform compress a massive PNG.
+</p>
+
+<h3>Website Image Optimization</h3>
+<p>
+  Site migrations sometimes reveal ancient PNG photos that should have been JPG all along. Converting reduces page weight and improves load times.
+</p>
+
+<h3>Storage Management</h3>
+<p>
+  Photo libraries accumulate PNGs from various sources. Batch converting to JPG reclaims significant storage space.
+</p>
+
+<h2 id="jpeg-artifacts">Understanding JPG Artifacts</h2>
+
+<h3>What Are Artifacts?</h3>
+<p>
+  JPG compression works by dividing images into 8×8 pixel blocks and compressing each block. At lower quality settings, these blocks become visible—especially around sharp edges and in areas of solid color. This "blocking" or "mosquito noise" is the classic JPG artifact.
+</p>
+
+<h3>Where They're Most Visible</h3>
+<ul>
+  <li>Around text and sharp edges</li>
+  <li>In areas of solid color</li>
+  <li>Around high-contrast boundaries</li>
+  <li>In the sky or smooth gradients (color banding)</li>
+</ul>
+
+<h3>Minimizing Artifacts</h3>
+<ul>
+  <li>Use higher quality settings (85%+)</li>
+  <li>Avoid multiple rounds of JPG saving</li>
+  <li>Don't use JPG for images where artifacts are obvious (text, graphics)</li>
+</ul>
+
+<h2 id="webp-alternative">WebP: A Better Alternative?</h2>
+<p>
+  For most web use cases today, WebP is a better choice than JPG:
+</p>
+<ul>
+  <li><strong>Smaller files:</strong> 25-35% smaller than JPG at equivalent quality</li>
+  <li><strong>Transparency support:</strong> Unlike JPG, WebP can have transparent areas</li>
+  <li><strong>Universal browser support:</strong> All modern browsers support WebP</li>
+</ul>
+<p>
+  JPG remains useful for maximum compatibility (some older software, email clients) and contexts where WebP isn't supported. But for web publishing, consider <a href="/blog/png-to-webp-converter">converting PNG to WebP</a> instead.
+</p>
+
+<h2 id="faq">Frequently Asked Questions</h2>
 
 <h3>Will I lose quality?</h3>
 <p>
-  Yes, but at 85%+ quality, it's usually imperceptible for photos.
-  Text and sharp edges may show artifacts.
+  Yes, but at 85%+ quality, the loss is typically imperceptible for photographs. Sharp edges and text may show visible artifacts—keep those images as PNG.
 </p>
 
 <h3>Can I convert back to PNG?</h3>
 <p>
-  Technically yes, but you won't recover the lost quality. Keep your original.
+  Technically yes, but you won't recover the lost quality. JPG compression discards data permanently. Always keep your original PNG if you might need it.
 </p>
 
 <h3>Is WebP better than JPG?</h3>
 <p>
-  For web use, yes. WebP is smaller at the same quality. But JPG has better compatibility
-  with older software and some social platforms.
+  For web use, yes. WebP produces smaller files at equivalent quality and supports transparency. JPG is better for compatibility with older systems and some applications.
 </p>
 
-<h2 id="next">Next steps</h2>
+<h3>What quality should I use?</h3>
 <p>
-  Have a PNG that's way too big? Open <a href="/tools/image-compressor/">TinyUtils Image Compressor</a>,
-  convert to JPG, and watch the file size drop.
+  Start at 85%. This provides excellent quality with significant compression. Adjust up or down based on your specific image and requirements.
+</p>
+
+<h3>Why do my text screenshots look bad as JPG?</h3>
+<p>
+  JPG compression creates artifacts around sharp edges, including text. Screenshots with text should remain PNG. Only convert to JPG if the screenshot is primarily photographic.
+</p>
+
+<h3>Can I batch convert?</h3>
+<p>
+  Yes. Upload multiple PNGs and download all converted JPGs as a ZIP file.
+</p>
+
+<h2 id="why-online">Why Use an Online Converter?</h2>
+<ul>
+  <li><strong>No installation:</strong> Works in any browser instantly</li>
+  <li><strong>Batch processing:</strong> Convert multiple files at once</li>
+  <li><strong>Consistent output:</strong> Same quality settings produce same results</li>
+  <li><strong>Cross-platform:</strong> Works on Windows, macOS, Linux, mobile</li>
+  <li><strong>Local-first:</strong> Designed to process in your browser (verify in the Network tab)</li>
+</ul>
+
+<h2 id="next">Ready to Convert?</h2>
+<p>
+  Have PNGs that are way too large? Open <a href="/tools/image-compressor/">TinyUtils Image Compressor</a> and convert to JPG. If the PNGs are photographic, it’s common to see a big drop in size. (Exact savings depend on what’s in the image.)
+</p>
+<p>
+  For related guides, see <a href="/blog/jpg-to-png-converter">JPG to PNG conversion</a>, <a href="/blog/webp-compression-guide">WebP compression guide</a>, and <a href="/blog/optimize-png-for-web">optimizing PNG for web</a>.
 </p>

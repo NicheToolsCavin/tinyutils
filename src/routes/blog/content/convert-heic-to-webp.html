@@ -1,86 +1,268 @@
 <p>
-  HEIC is the photo format your iPhone loves and the rest of the internet politely refuses to deal with.
-  If you’ve ever uploaded a photo and gotten “unsupported format”, you’ve met the HEIC problem.
-</p>
-
-<p>
-  The fix is simple: convert HEIC to a web-friendly format like WebP.
-  And you can do it without uploading your photos anywhere.
+  HEIC is the photo format your iPhone loves, and the format that makes web developers sigh. Every iPhone since 2017 defaults to HEIC for photos—it's Apple's choice for efficient storage on your device. But when you try to upload those photos to a website, add them to a project, or share them online, you hit the HEIC compatibility wall. The solution is converting to WebP: a web-native format that's universally supported, efficiently compressed, and ready for any online use case.
 </p>
 
 <h2 id="tldr">TL;DR</h2>
 <ul>
-  <li>
-    Open <a href="/tools/image-compressor/">TinyUtils Image Compressor</a>.
-  </li>
-  <li>Drop your <code>.heic</code> / <code>.heif</code> files.</li>
-  <li>Set output to <strong>WebP</strong>.</li>
-  <li>Download the converted files (single or ZIP).</li>
+  <li>Open <a href="/tools/image-compressor/">TinyUtils Image Compressor</a></li>
+  <li>Drop your <code>.heic</code> or <code>.heif</code> files</li>
+  <li>Set output format to <strong>WebP</strong></li>
+  <li>Adjust quality (0.80 is a good starting point for photos)</li>
+  <li>Download converted files (individual or ZIP for batches)</li>
 </ul>
 
-<h2 id="why">Why WebP?</h2>
+<h2 id="understanding">Understanding HEIC and WebP</h2>
+
+<h3>What is HEIC?</h3>
 <p>
-  WebP is widely supported in modern browsers and usually produces smaller files than JPEG at similar quality.
-  It’s a great “website default” in 2025.
+  HEIC (High Efficiency Image Container) is Apple's implementation of the HEIF format (High Efficiency Image Format). It uses modern compression derived from the H.265/HEVC video codec, achieving roughly 50% smaller file sizes than JPEG at equivalent quality. That's great for your iPhone's storage capacity—but problematic for compatibility.
+</p>
+<p>
+  HEIC became the default photo format for iPhones starting with iOS 11 in 2017. Unless you've manually changed your camera settings, every photo on your iPhone is probably HEIC. The format also supports features like depth maps, Live Photos, and image sequences—but for most web uses, you just want the static image data.
 </p>
 
-<h2 id="how">How to convert HEIC to WebP (no upload)</h2>
+<h3>What is WebP?</h3>
+<p>
+  WebP is Google's image format for the web, introduced in 2010 and now universally supported by all modern browsers. It offers similar compression efficiency to HEIC but with complete web compatibility. WebP supports both lossy compression (like JPEG) and lossless compression (like PNG), plus transparency and animation.
+</p>
+<p>
+  For web publishing, WebP is the pragmatic choice: excellent compression, universal browser support, and no compatibility issues.
+</p>
+
+<h2 id="why-webp"><span id="why"></span>Why Convert to WebP?</h2>
+
+<h3>Universal Web Support</h3>
+<p>
+  WebP works in Chrome, Firefox, Safari, Edge, and every other current browser. Upload to any website, embed in any webpage, send in any context that accepts images. No "unsupported format" errors, no workarounds.
+</p>
+
+<h3>Excellent Compression</h3>
+<p>
+  WebP produces smaller files than JPEG at equivalent visual quality—typically 25-35% smaller. For web use where bandwidth matters, this is significant. Your photos load faster without visible quality loss.
+</p>
+
+<h3>Maintains Quality</h3>
+<p>
+  Converting from HEIC to WebP doesn't inherently degrade quality. Both are modern, efficient formats. With appropriate quality settings, the conversion is visually lossless for practical purposes.
+</p>
+
+<h3>Transparency Support</h3>
+<p>
+  Unlike JPEG, WebP supports alpha channel transparency. If you're working with images that need transparent backgrounds, WebP handles that while still providing excellent compression.
+</p>
+
+<h3>Browser-Native Display</h3>
+<p>
+  Modern browsers render WebP without plugins or special handling. In other words: you can ship it on a website and people can just…see the image.
+</p>
+
+<h2 id="how">How to Convert HEIC to WebP</h2>
+
+<h3>Using TinyUtils Image Compressor</h3>
 <ol>
-  <li>
-    Go to <a href="/tools/image-compressor/">TinyUtils Image Compressor</a>.
-  </li>
-  <li>
-    Drag and drop your HEIC files.
-    (Batch is fine — do the whole folder. Live your best life.)
-  </li>
-  <li>
-    Choose <strong>WebP</strong> as the output format.
-  </li>
-  <li>
-    Adjust quality if needed.
-    For photos, starting around <code>0.80</code> is usually a solid first try.
-  </li>
-  <li>
-    Download the results.
-  </li>
+  <li>Navigate to <a href="/tools/image-compressor/">TinyUtils Image Compressor</a></li>
+  <li>Drag and drop your HEIC/HEIF files onto the upload area (batch upload works—drop your entire photo folder)</li>
+  <li>Select <strong>WebP</strong> as the output format</li>
+  <li>Adjust quality slider (0.80 recommended for photos, higher for important images)</li>
+  <li>Click to convert and download your WebP files</li>
+</ol>
+<p>
+  For multiple files, the tool provides individual downloads or a ZIP archive with all converted images.
+</p>
+
+<h3>Processing Runs Locally</h3>
+<p>
+  TinyUtils Image Compressor processes files in your browser. Your photos are converted locally on your device—they're not uploaded to a server. This matters for privacy-sensitive photos and ensures fast processing regardless of your internet connection speed.
+</p>
+
+<h2 id="quality">Quality Settings Guide</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Quality Level</th>
+      <th>Use Case</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0.90-1.00</td>
+      <td>Portfolio photos, important images</td>
+      <td>Near-lossless, larger files</td>
+    </tr>
+    <tr>
+      <td>0.80-0.85</td>
+      <td>General photos, social sharing</td>
+      <td>Recommended default for most uses</td>
+    </tr>
+    <tr>
+      <td>0.70-0.75</td>
+      <td>Web content, blog images</td>
+      <td>Good balance of size and quality</td>
+    </tr>
+    <tr>
+      <td>0.60-0.65</td>
+      <td>Thumbnails, previews</td>
+      <td>Noticeable compression but acceptable for small sizes</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Finding the Right Setting</h3>
+<p>
+  Start at 0.80 for photo content. Examine the result at intended display size. If quality is more than adequate, try 0.75 for smaller files. If you notice artifacts or loss of detail, increase to 0.85 or higher. The goal is the smallest file that looks good at the size you'll actually display it.
+</p>
+
+<h2 id="batch">Batch Conversion</h2>
+<p>
+  Converting an entire Camera Roll export? Drop all your HEIC files at once. TinyUtils handles batch processing, converting each file in parallel. When complete, download all WebP files as a ZIP archive with original filenames preserved (just with .webp extension).
+</p>
+
+<h3>Workflow for Large Photo Collections</h3>
+<ol>
+  <li>Export photos from Photos app or iPhone to a folder</li>
+  <li>Select all HEIC files and drag to the converter</li>
+  <li>Set quality (0.80 for most photos)</li>
+  <li>Convert all</li>
+  <li>Download ZIP archive</li>
+  <li>Extract to your project folder</li>
 </ol>
 
-<h2 id="quality">Quality tips (so it still looks good)</h2>
+<h2 id="use-cases">Common Use Cases</h2>
+
+<h3>Website Photo Galleries</h3>
+<p>
+  Building a gallery from iPhone photos? Convert your HEIC images to WebP for optimal web performance. Your gallery loads faster, and all visitors can view the images regardless of their browser or device.
+</p>
+
+<h3>E-commerce Product Photos</h3>
+<p>
+  Product photos shot on iPhone need to go on your store. HEIC won't work in most e-commerce platforms. Convert to WebP for modern platforms, or JPEG for maximum compatibility with legacy systems.
+</p>
+
+<h3>Blog Content</h3>
+<p>
+  Articles with photos benefit from WebP's efficient compression. Smaller image files mean faster page loads, better Core Web Vitals scores, and improved SEO.
+</p>
+
+<h3>Social Media Preparation</h3>
+<p>
+  While major social platforms accept HEIC, converting to WebP or JPEG gives you more control over quality and file size. Some platforms recompress uploads; starting with an optimized WebP can produce better results.
+</p>
+
+<h3>Client Deliverables</h3>
+<p>
+  Clients using Windows or older software may not be able to open HEIC files. Converting to WebP (or JPEG for maximum compatibility) ensures everyone can view the photos.
+</p>
+
+<h3>Archive and Backup</h3>
+<p>
+  While HEIC is space-efficient, it's a relatively new format. Converting important photos to WebP or keeping JPEG copies ensures long-term accessibility regardless of future format support changes.
+</p>
+
+<h2 id="heic-vs-heif">HEIC vs HEIF</h2>
+<p>
+  HEIF (High Efficiency Image Format) is the container format standard. HEIC (High Efficiency Image Coding) is a specific file extension Apple uses for HEIF files containing HEVC-compressed images. In practice, treat them the same—both convert to WebP identically. You might see <code>.heic</code> or <code>.heif</code> extensions; both work with the converter.
+</p>
+
+<h2 id="iphone-settings">Preventing Future HEIC Files</h2>
+<p>
+  If you'd rather your iPhone capture JPEG directly (avoiding conversion later), you can change the camera settings:
+</p>
+<ol>
+  <li>Open Settings on your iPhone</li>
+  <li>Scroll to Camera</li>
+  <li>Tap Formats</li>
+  <li>Select "Most Compatible" instead of "High Efficiency"</li>
+</ol>
+<p>
+  This trades storage efficiency for compatibility. Photos will be larger on your device but immediately usable everywhere. For most users who primarily share photos digitally, this tradeoff makes sense.
+</p>
+
+<h2 id="maintaining-quality">Maintaining Photo Quality</h2>
+
+<h3>Avoid Double Compression</h3>
+<p>
+  HEIC is already compressed. Converting to WebP applies additional compression. Using high quality settings (0.80+) minimizes visible quality loss. For important photos, use 0.90 or higher.
+</p>
+
+<h3>Consider Resolution</h3>
+<p>
+  iPhone photos are large—12MP or higher. If you're displaying at 800×600 pixels on a website, the full resolution is overkill. Consider resizing during or after conversion to match your actual display needs. Smaller dimensions mean smaller files with no visible difference.
+</p>
+
+<h3>Keep Originals</h3>
+<p>
+  Don't delete your HEIC originals after converting. Keep them as archives. Conversion for web is a publishing step, not a replacement for your source files.
+</p>
+
+<h2 id="webp-vs-jpeg">Why WebP Instead of JPEG?</h2>
+
+<h3>Better Compression</h3>
+<p>
+  WebP produces smaller files than JPEG at equivalent quality—typically 25-35% smaller. For web use where bandwidth matters, this is meaningful.
+</p>
+
+<h3>Modern Format</h3>
+<p>
+  WebP is actively developed and represents current best practices for web images. JPEG, while ubiquitous, is a 1990s format without recent innovation.
+</p>
+
+<h3>Transparency Option</h3>
+<p>
+  If you ever need transparency (background removal, overlays), WebP supports it. JPEG doesn't. Converting to WebP keeps your options open.
+</p>
+
+<h3>When JPEG Makes Sense</h3>
+<p>
+  Some legacy systems, email clients, and older software don't support WebP. For maximum compatibility in non-web contexts, JPEG remains a fallback option. The converter supports JPEG output too.
+</p>
+
+<h2 id="faq">Frequently Asked Questions</h2>
+
+<h3>Does converting require uploading my photos to a server?</h3>
+<p>
+  TinyUtils Image Compressor is designed to process files locally in your browser (no upload step). If you want to be sure, open DevTools → Network and confirm there’s no big POST request during conversion.
+</p>
+
+<h3>Can I convert Live Photos?</h3>
+<p>
+  The converter handles the still image component of Live Photos (the HEIC file). The video component is separate. For still web use, the converted image is what you need.
+</p>
+
+<h3>What about photo metadata (EXIF)?</h3>
+<p>
+  Basic metadata (dimensions, color profile) transfers. Some EXIF data (camera settings, GPS location) may be stripped depending on settings. For web publishing, stripped metadata is often desirable for privacy and smaller files.
+</p>
+
+<h3>Is there quality loss?</h3>
+<p>
+  At quality settings of 0.80 or higher, quality loss is imperceptible for most photos. Both HEIC and WebP are efficient formats. The conversion isn't like converting high-quality to low-quality—it's converting between two modern, efficient formats.
+</p>
+
+<h3>Can I batch convert hundreds of photos?</h3>
+<p>
+  Yes. The converter handles batch processing. Processing time depends on your device's capabilities, but modern devices handle hundreds of photos reasonably quickly.
+</p>
+
+<h3>What's the maximum file size?</h3>
+<p>
+  Browser memory is the practical limit. Most devices handle typical photo sizes (10-50MB HEIC files) without issues. Extremely large files or massive batches may require processing in smaller groups.
+</p>
+
+<h2 id="why-online">Why Use an Online Converter?</h2>
 <ul>
-  <li>
-    <strong>If it’s a photo:</strong> WebP around <code>0.75–0.85</code> is often the sweet spot.
-  </li>
-  <li>
-    <strong>If it’s a screenshot/UI:</strong> keep quality higher, or consider PNG/WebP depending on sharp edges.
-  </li>
-  <li>
-    <strong>If file size is still large:</strong> resizing can have a bigger impact than lowering quality.
-  </li>
+  <li><strong>No installation:</strong> Works immediately in any browser</li>
+  <li><strong>Cross-platform:</strong> Windows, macOS, Linux, iOS, Android</li>
+  <li><strong>Local-first:</strong> Designed to process in your browser (verify in the Network tab)</li>
+  <li><strong>Batch capable:</strong> Process many photos at once</li>
+  <li><strong>Always current:</strong> Latest conversion capabilities without updates</li>
 </ul>
 
-<h2 id="faq">FAQ</h2>
-
-<h3>Is HEIC the same as HEIF?</h3>
+<h2 id="next">Convert a Couple and Spot-Check</h2>
 <p>
-  HEIF is the container format family. HEIC is a common file extension for HEIF images.
-  In practice, treat them the same for conversion.
+  Open <a href="/tools/image-compressor/">TinyUtils Image Compressor</a>, drop a couple HEIC photos, convert to WebP, and make sure the results look right. If you’re doing a big batch, check one indoor photo and one outdoor photo first—those tend to reveal color/contrast issues quickly.
 </p>
-
-<h3>Should I convert to JPEG instead?</h3>
 <p>
-  If you need maximum compatibility (older systems, some legacy workflows), JPEG is fine.
-  For web delivery, WebP is usually the better choice.
-</p>
-
-<h3>Does converting require uploading my photos?</h3>
-<p>
-  With TinyUtils Image Compressor, processing runs in your browser.
-  That means you can convert without sending your photos to a server.
-</p>
-
-<h2 id="next">Next steps</h2>
-<p>
-  If you’re converting HEIC because you’re prepping images for a site,
-  you’ll usually want to compress at the same time.
-  Open <a href="/tools/image-compressor/">TinyUtils Image Compressor</a>, pick WebP, and you’re done.
+  For related guides, see <a href="/blog/webp-compression-guide">WebP compression guide</a>, <a href="/blog/batch-image-compression">batch image compression</a>, and <a href="/blog/optimize-png-for-web">optimizing PNG for web</a>.
 </p>

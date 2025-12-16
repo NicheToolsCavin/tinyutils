@@ -27,7 +27,22 @@
 </p>
 
 <p>
-  TinyUtils Image Compressor is built for that: it runs in your browser and doesn’t require an account.
+  TinyUtils Image Compressor is built for that: it’s designed to run locally in your browser and doesn’t require an account.
+</p>
+
+<h3>How to verify it yourself (30 seconds)</h3>
+<ol>
+  <li>Open your browser dev tools (right‑click → Inspect).</li>
+  <li>Go to the <strong>Network</strong> tab.</li>
+  <li>Compress an image.</li>
+  <li>You should not see a big file upload request leaving your browser.</li>
+</ol>
+<p>
+  You’ll still see normal requests for the website itself (HTML/CSS/JS). The point is that your image data shouldn’t be posted to an upload endpoint.
+</p>
+<p>
+  A practical way to spot uploads: look at request sizes. If you see a request that’s multiple megabytes (and it lines up with your image file size),
+  that’s almost certainly your image leaving the device.
 </p>
 
 <h2 id="steps">How to compress images without uploading</h2>
@@ -107,6 +122,19 @@
   </li>
 </ul>
 
+<h2 id="metadata">Metadata (EXIF) and privacy</h2>
+<p>
+  Photos can contain metadata like camera model, timestamps, and sometimes location.
+  When you re-encode an image (even locally in your browser), that metadata may be reduced or removed depending on the tool.
+</p>
+<ul>
+  <li><strong>If you want privacy:</strong> losing metadata is usually a good thing.</li>
+  <li><strong>If you need metadata:</strong> keep the original file as your “source of truth.”</li>
+</ul>
+<p>
+  If you’re unsure, check the file properties before and after (most OSes show at least the basics).
+</p>
+
 <h2 id="seo">SEO note: why this matters for rankings</h2>
 <p>
   Image weight affects page speed.
@@ -122,3 +150,6 @@
   “looks the same, smaller file.”
   That’s the whole game.
 </p>
+<p>
+  If you’re doing this for a website, also make sure you’re serving sensible dimensions (no 4000px images in 400px slots) and using responsive images where you can. Compression helps, but shipping fewer pixels helps even more.
+ </p>

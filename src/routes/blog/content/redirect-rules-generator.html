@@ -76,7 +76,29 @@ rewrite ^/old-section/(.*)$ /new-section/$1 permanent;
   <li><strong>Specific before wildcard</strong> (so you don’t accidentally redirect too much).</li>
   <li><strong>Consistent</strong> about trailing slashes and casing.</li>
   <li><strong>Deliberate</strong> about query strings (don’t “maybe” handle them).</li>
+  <li><strong>Readable</strong> enough that Future You can audit them at 2am.</li>
 </ul>
+
+<h3>301 vs 302 (don’t overthink it, but don’t guess)</h3>
+<p>
+  For migrations, you usually want <strong>301</strong> (permanent) redirects.
+  Use <strong>302</strong> (temporary) when you genuinely plan to change it back soon — like a short campaign, a temporary maintenance page, or an A/B test.
+  If you’re moving URLs “for good”, 301 is the default.
+</p>
+
+<h3>Query strings: keep, drop, or map?</h3>
+<p>
+  The sneaky redirect bugs usually involve query parameters.
+  Decide what your policy is and make it consistent:
+</p>
+<ul>
+  <li><strong>Keep:</strong> good when parameters matter (filters, search, pagination).</li>
+  <li><strong>Drop:</strong> good when they’re just tracking (UTM) and you want clean URLs.</li>
+  <li><strong>Map:</strong> only when you have a real 1:1 parameter change between old and new systems.</li>
+</ul>
+<p>
+  “We’ll figure it out later” turns into redirect loops and analytics chaos. Pick a rule early.
+</p>
 
 <h2 id="testing">Step 4: Test (before you deploy, not after)</h2>
 <p>
@@ -97,6 +119,17 @@ rewrite ^/old-section/(.*)$ /new-section/$1 permanent;
 </p>
 <pre><code>curl -I https://example.com/old-page/
 </code></pre>
+<p>
+  If you want to follow the redirects and see the final landing page:
+</p>
+<pre><code>curl -I -L https://example.com/old-page/
+</code></pre>
+<p>
+  If you have a list of URLs, you can test a bunch quickly:
+</p>
+<pre><code># urls.txt contains full URLs (one per line)
+cat urls.txt | xargs -n 1 -I{} sh -c 'echo \"--- {}\"; curl -sI {} | head -n 5'
+</code></pre>
 
 <p>
   You want:
@@ -109,6 +142,7 @@ rewrite ^/old-section/(.*)$ /new-section/$1 permanent;
   <li><strong>Redirect chains:</strong> A → B → C. Update rules so A goes directly to C.</li>
   <li><strong>Looping redirects:</strong> usually a trailing slash or HTTP/HTTPS mismatch.</li>
   <li><strong>Overbroad wildcards:</strong> redirecting too much can break unrelated pages.</li>
+  <li><strong>Forgetting canonical redirects:</strong> handle <code>http → https</code> and <code>www</code> vs non‑<code>www</code> cleanly and early.</li>
   <li><strong>Forgetting internal links:</strong> fix internal links so they don’t rely on redirects.</li>
 </ul>
 
@@ -118,4 +152,8 @@ rewrite ^/old-section/(.*)$ /new-section/$1 permanent;
   <a href="/tools/sitemap-delta/">TinyUtils Sitemap Delta</a>.
   Export rules, test the top URLs, and ship.
   Your future self (and your Search Console graphs) will thank you.
+</p>
+<p>
+  Also: keep your redirect rules in version control if you can, with a short note about <em>why</em> they exist.
+  Redirect files tend to outlive the people who wrote them.
 </p>

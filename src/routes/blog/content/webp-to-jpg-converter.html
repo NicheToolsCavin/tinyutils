@@ -3,12 +3,16 @@
   Need to upload to a platform that only takes JPEG? Sending images to someone using ancient software?
   Converting WebP to JPG solves that.
 </p>
+<p>
+  Most people don’t choose WebP on purpose — they just download an image from a website and end up with a <code>.webp</code> file.
+  The fix is simple: convert it to JPEG and move on with your life.
+</p>
 
 <h2 id="tldr">TL;DR</h2>
 <ul>
   <li>Use <a href="/tools/image-compressor/">TinyUtils Image Compressor</a> to convert WebP to JPEG.</li>
   <li>JPEG doesn't support transparency — transparent areas become white.</li>
-  <li>Conversion happens in your browser, no upload needed.</li>
+  <li>If privacy matters: use a converter that runs locally in your browser (and verify in DevTools → Network).</li>
   <li>For photos, JPEG is a good universal format.</li>
 </ul>
 
@@ -42,6 +46,19 @@
   If you need transparency, convert to PNG instead of JPEG.
 </p>
 
+<h2 id="background">If transparency matters (pick your background on purpose)</h2>
+<p>
+  The “transparent → white background” thing is fine for most photos, but it can ruin logos and icons.
+  If you need control over the background color, the safer workflow is:
+</p>
+<ol>
+  <li>Convert WebP → <a href="/blog/webp-to-png-converter/">PNG</a> (keep transparency).</li>
+  <li>Open the PNG in an editor and export a JPEG with the background color you actually want.</li>
+</ol>
+<p>
+  It’s one extra step, but it avoids the “why is my logo on a white box?” surprise.
+</p>
+
 <h2 id="quality">Quality settings</h2>
 <p>
   Since you're converting from one lossy format (WebP) to another (JPEG), use high quality to minimize additional degradation:
@@ -51,6 +68,9 @@
   <li><strong>85%</strong> — Good balance of quality and file size</li>
   <li><strong>Below 80%</strong> — Noticeable artifacts may appear</li>
 </ul>
+<p>
+  If you’re converting something with sharp edges (logos, UI screenshots), JPEG is rarely the best choice. Use PNG instead — you’ll keep the edges clean.
+</p>
 
 <h2 id="size">File size expectations</h2>
 <p>
@@ -64,11 +84,30 @@
 <p>
   For typical photos, expect similar file sizes at equivalent quality levels.
 </p>
+<p>
+  One gotcha: if the original WebP had transparency, JPEG has to flatten it against a background color. That can change both how it looks and how well it compresses.
+</p>
+
+<h2 id="office">Using the JPEG in Word/PowerPoint</h2>
+<p>
+  A lot of WebP → JPG conversions happen because Office apps (or older clients) are picky.
+  If you’re dropping the image into a slide deck or a Word doc, use a fairly high quality setting (around 90%) so the next export (often another PDF) doesn’t double‑trash the image.
+</p>
+<p>
+  Also: don’t rename a WebP file to <code>.jpg</code> and hope for the best. It won’t “convert” it — it just makes the filename lie.
+</p>
 
 <h2 id="batch">Batch conversion</h2>
 <p>
   Converting multiple files? Drop them all into TinyUtils at once.
   The tool processes everything in parallel and provides a ZIP download.
+</p>
+
+<h2 id="privacy">Quick “no upload” sanity check</h2>
+<p>
+  If you care about privacy, don’t rely on vibes. Verify it:
+  open DevTools → <strong>Network</strong>, convert one image, and make sure there’s no large upload request sending your file data to a server.
+  (Normal page assets loading is expected.)
 </p>
 
 <h2 id="when-png">When to use PNG instead</h2>
