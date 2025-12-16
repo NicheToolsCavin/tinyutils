@@ -1,24 +1,24 @@
 <p>
-  Still serving JPEGs in 2025? You're leaving 30-50% of your bandwidth on the table.
-  WebP does everything JPEG does — better compression, same quality — and all modern browsers support it.
+  If you’re still shipping a lot of JPEGs, WebP is usually an easy win.
+  It often comes out smaller at the same “looks fine” quality level, and modern browsers support it.
 </p>
 
 <p>
-  Converting your JPEGs to WebP is one of the fastest performance wins you can make.
-  No coding required, takes 30 seconds.
+  Converting JPEG → WebP is also a low-drama change: you don’t need to redesign anything.
+  You just produce WebP versions and serve them where you can.
 </p>
 
 <h2 id="tldr">TL;DR</h2>
 <ul>
   <li>Use <a href="/tools/image-compressor/">TinyUtils Image Compressor</a> to convert JPEG to WebP.</li>
-  <li>WebP is 25-50% smaller than JPEG at equivalent quality.</li>
+  <li>WebP is often smaller than JPEG at equivalent quality.</li>
   <li>All modern browsers support WebP (Chrome, Firefox, Safari, Edge).</li>
   <li>Keep original JPEGs for archival; serve WebP on the web.</li>
 </ul>
 
 <h2 id="why">Why convert JPEG to WebP?</h2>
 <ul>
-  <li><strong>Smaller files</strong> — Same visual quality, 25-50% less data</li>
+  <li><strong>Smaller files</strong> — Same visual quality, less data</li>
   <li><strong>Faster pages</strong> — Quicker LCP, better Core Web Vitals</li>
   <li><strong>Lower bandwidth</strong> — Cheaper hosting, better mobile experience</li>
   <li><strong>Modern standard</strong> — WebP is the new default for web images</li>
@@ -34,7 +34,8 @@
 </ol>
 
 <p>
-  The conversion happens in your browser. No files are uploaded anywhere.
+  Browser‑based converters can do this locally (client‑side). If privacy matters, verify it:
+  open DevTools → <strong>Network</strong>, convert one image, and make sure there’s no large upload request sending your file data to a server.
 </p>
 
 <h2 id="quality">Quality settings guide</h2>
@@ -42,7 +43,7 @@
   WebP quality works similarly to JPEG quality:
 </p>
 <ul>
-  <li><strong>85-95%</strong> — Indistinguishable from original JPEG</li>
+  <li><strong>85-95%</strong> — Hard to tell from the original in normal viewing</li>
   <li><strong>75-85%</strong> — Excellent for web, barely noticeable difference</li>
   <li><strong>60-75%</strong> — Good for thumbnails and previews</li>
 </ul>
@@ -63,33 +64,16 @@
   and you get a ZIP file with all the WebP versions.
 </p>
 
-<h2 id="results">Real conversion results</h2>
-<table>
-  <thead>
-    <tr>
-      <th>Original JPEG</th>
-      <th>WebP @ 80%</th>
-      <th>Savings</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>850 KB (photo)</td>
-      <td>420 KB</td>
-      <td>51%</td>
-    </tr>
-    <tr>
-      <td>1.5 MB (hero image)</td>
-      <td>680 KB</td>
-      <td>55%</td>
-    </tr>
-    <tr>
-      <td>2.2 MB (product photo)</td>
-      <td>890 KB</td>
-      <td>60%</td>
-    </tr>
-  </tbody>
-</table>
+<h2 id="results">What to expect</h2>
+<ul>
+  <li><strong>Biggest wins:</strong> large photos and hero images usually shrink nicely.</li>
+  <li><strong>Smaller wins:</strong> already heavily compressed JPEGs won’t move as much.</li>
+  <li><strong>Best win of all:</strong> resize oversized images before you convert.</li>
+</ul>
+<p>
+  If you’re optimizing a website, pair format conversion with responsive sizing.
+  A perfectly optimized WebP can still be “too big” if you’re serving a 4000px image into an 800px slot.
+</p>
 
 <h2 id="implementation">Serving WebP on your site</h2>
 <p>
@@ -102,20 +86,31 @@
 <p>
   Browsers that support WebP get the smaller file; others fall back to JPEG.
 </p>
+<p>
+  One reality check: “web support” doesn’t mean “everything supports it.”
+  For email attachments, PowerPoint decks, and random legacy systems, JPEG is still the safest bet.
+  That’s why keeping the JPEG fallback is useful even if you serve WebP on your site.
+</p>
 
 <h2 id="cms">What about WordPress/Shopify?</h2>
 <p>
-  Most modern CMS platforms handle WebP automatically if you upload in that format.
-  WordPress (5.8+) has native WebP support. Shopify converts images on the fly.
-  For older setups, just upload both versions and use the picture element.
+  Many modern CMS platforms can accept WebP uploads, and some will even serve WebP automatically.
+  The details vary by platform, theme, and CDN, so don’t assume — test one image and confirm what’s actually being served.
+  If you want maximum control, the <code>&lt;picture&gt;</code> approach above is the boring, reliable option.
+</p>
+
+<h2 id="when-not">When you don’t need to convert</h2>
+<p>
+  If you already use an image CDN that serves WebP/AVIF automatically (based on the visitor’s browser), you might not need to do manual conversions at all.
+  In that case, your job is mostly: upload good source images, make sure dimensions are sane, and let the CDN handle formats.
 </p>
 
 <h2 id="faq">FAQ</h2>
 
 <h3>Is WebP always smaller than JPEG?</h3>
 <p>
-  Almost always. In rare cases (already heavily compressed JPEGs), the savings might be minimal.
-  But for typical photos, expect 25-50% reduction.
+  Often, yes. In rare cases (already heavily compressed JPEGs), the savings can be small.
+  The fastest way to know is to convert one representative image and compare.
 </p>
 
 <h3>Should I keep my original JPEGs?</h3>
@@ -127,7 +122,7 @@
 <h3>What about AVIF?</h3>
 <p>
   AVIF is even more efficient than WebP, but browser support is still catching up.
-  For maximum compatibility in 2025, WebP is the safe choice. Use AVIF for cutting-edge optimization.
+  For maximum compatibility, WebP is the safe choice. If you want to serve AVIF too, use a fallback (<code>&lt;picture&gt;</code>) so older browsers still get WebP/JPEG.
 </p>
 
 <h2 id="next">Next steps</h2>

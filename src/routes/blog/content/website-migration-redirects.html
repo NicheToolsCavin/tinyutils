@@ -30,6 +30,10 @@
   <li>Server logs (what people and bots actually hit)</li>
   <li>Analytics / Search Console exports</li>
 </ul>
+<p>
+  Don’t skip the boring edge cases: old PDFs, campaign landing pages, and “random” blog posts from 2017 that still have backlinks.
+  Those are exactly the URLs that will show up as 404s for months if you don’t map them now.
+</p>
 
 <h3>2) Decide your redirect policy</h3>
 <ul>
@@ -49,6 +53,36 @@
   If you have old + new sitemaps, you can generate a mapping workflow instead of hand-editing spreadsheets.
   Use <a href="/tools/sitemap-delta/">TinyUtils Sitemap Delta</a> to compare lists and export redirect rules.
 </p>
+<p>
+  A simple way to think about the mapping: for each old URL, pick the new URL that answers the same intent.
+  If there isn’t a real replacement, don’t fake it — return a 410 and move on.
+</p>
+<table>
+  <thead>
+    <tr>
+      <th>Old URL</th>
+      <th>New URL</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>/pricing/</td>
+      <td>/plans/</td>
+      <td>301</td>
+    </tr>
+    <tr>
+      <td>/blog/old-post/</td>
+      <td>/blog/new-post/</td>
+      <td>301</td>
+    </tr>
+    <tr>
+      <td>/downloads/legacy-brochure.pdf</td>
+      <td>(no replacement)</td>
+      <td>410</td>
+    </tr>
+  </tbody>
+</table>
 
 <h3>Rules of thumb</h3>
 <ul>
@@ -56,6 +90,30 @@
   <li><strong>Specific before wildcard.</strong> Wildcards are powerful and dangerous.</li>
   <li><strong>Kill chains.</strong> Old URLs should point directly to the final destination.</li>
   <li><strong>Normalize slashes and casing.</strong> Most redirect bugs are “almost the same URL”.</li>
+</ul>
+
+<h3>Don’t forget the “boring” redirects</h3>
+<p>
+  Migration redirect maps are usually about content URLs, but you also want your canonical behavior to be consistent:
+</p>
+<ul>
+  <li><strong>HTTP → HTTPS</strong> (pick one and enforce it).</li>
+  <li><strong>www vs non‑www</strong> (pick one, redirect the other).</li>
+  <li><strong>Trailing slash</strong> (pick a convention and stick to it).</li>
+</ul>
+<p>
+  These don’t feel exciting, but they prevent loops and “why does Google have two versions of every page?” headaches.
+</p>
+
+<h3>Query strings: decide your policy early</h3>
+<p>
+  Some migrations change URL parameters (filters, pagination, search). Others only use parameters for tracking (UTMs).
+  Decide what you’re going to do:
+</p>
+<ul>
+  <li><strong>Keep</strong> parameters when they affect the page content.</li>
+  <li><strong>Ignore/drop</strong> tracking parameters if you want cleaner analytics and fewer “duplicate” URLs.</li>
+  <li><strong>Map</strong> only when there’s a real one-to-one translation between old and new parameter schemes.</li>
 </ul>
 
 <h2 id="implement">Implement (don’t forget internal links)</h2>
@@ -68,6 +126,10 @@
   <li>Update canonical URLs.</li>
   <li>Update sitemap(s) to reflect the new structure.</li>
 </ul>
+<p>
+  A quick sanity check that catches a lot of mistakes: every old URL should do exactly one hop (301) and land on a <strong>200</strong>.
+  If you see 301 → 301 → 200 chains, fix them now. Google follows chains, but you’re wasting crawl budget and making users wait.
+</p>
 
 <h2 id="qa">Launch QA (catch disasters before Google does)</h2>
 <p>
@@ -100,6 +162,10 @@
   <li>Watch logs for repeated 404s (especially old URLs still being hit).</li>
   <li>Fix the top 20 issues first — it’s usually most of the impact.</li>
 </ul>
+<p>
+  One practical trick: keep a simple “top 50 old URLs” list and re-check it daily for the first week.
+  It’s boring, but it catches the high-impact issues fast — before they become “why is traffic down 30%?” threads.
+</p>
 
 <h2 id="next">Next steps</h2>
 <p>

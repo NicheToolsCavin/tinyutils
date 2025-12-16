@@ -1,14 +1,14 @@
 <p>
-  Microsoft Word is great for writing, but terrible for version control, static sites, and documentation workflows.
-  If you want your .docx content in a more portable format, Markdown is the answer.
+  Word is great for writing with other humans. Markdown is great for putting content into Git, docs sites, and anything “text-first.”
+  If you have a DOCX you want to reuse in a README or a static site, converting it to Markdown gets you out of the Word ecosystem.
 </p>
 
 <h2 id="tldr">TL;DR</h2>
 <ul>
   <li>Use <a href="/tools/text-converter/">TinyUtils Document Converter</a> to convert DOCX to Markdown.</li>
-  <li>Headings, lists, bold, italic, links, and tables all convert.</li>
-  <li>Images are extracted and linked in the Markdown.</li>
-  <li>Track changes are automatically accepted (final text only).</li>
+  <li>Headings, lists, bold/italic, links, and simple tables usually convert cleanly.</li>
+  <li>Images may be extracted and referenced from the Markdown output.</li>
+  <li>If your DOCX has Track Changes, accept changes first for a “clean” export.</li>
 </ul>
 
 <h2 id="why">Why convert Word to Markdown?</h2>
@@ -32,21 +32,20 @@
 <h2 id="preserved">What's preserved</h2>
 <ul>
   <li><strong>Headings</strong> — H1 through H6 become # through ######</li>
-  <li><strong>Lists</strong> — Bullets, numbered lists, nested up to 3 levels</li>
-  <li><strong>Formatting</strong> — Bold (**), italic (*), strikethrough (~~)</li>
+  <li><strong>Lists</strong> — Bullets and numbered lists (nested lists may need a quick check)</li>
+  <li><strong>Formatting</strong> — Bold and italic</li>
   <li><strong>Links</strong> — Hyperlinks preserved as [text](url)</li>
   <li><strong>Tables</strong> — Converted to Markdown tables</li>
   <li><strong>Images</strong> — Extracted and linked as ![alt](path)</li>
   <li><strong>Code blocks</strong> — If styled as monospace/code</li>
   <li><strong>Blockquotes</strong> — Preserved as > syntax</li>
-  <li><strong>Footnotes</strong> — Converted to [^1] format</li>
 </ul>
 
 <h2 id="track-changes">What about Track Changes?</h2>
 <p>
-  If your document has tracked changes (insertions, deletions, comments),
-  the converter automatically accepts all changes and outputs the final text.
-  Comments are dropped. This gives you clean, conflict-free Markdown.
+  Track Changes is where conversions get messy. If you want a clean Markdown export, accept changes and remove comments first
+  (in Word, that’s “Accept All Changes” + delete comments). Then convert.
+  If you need help with that cleanup step, see <a href="/blog/word-track-changes-to-clean/">how to clean a document with Track Changes</a>.
 </p>
 
 <h2 id="not-preserved">What doesn't convert</h2>
@@ -58,6 +57,21 @@
   <li><strong>Complex tables</strong> — Merged cells may break</li>
 </ul>
 
+<h2 id="cleanup">A quick cleanup pass (worth doing)</h2>
+<p>
+  Treat the Markdown as a draft. A five‑minute cleanup pass gets you from “technically converted” to “pleasant to edit”:
+</p>
+<ul>
+  <li><strong>Headings:</strong> make sure the hierarchy makes sense (it’s common for everything to become H2).</li>
+  <li><strong>Lists:</strong> check nested lists — one extra space can change the structure.</li>
+  <li><strong>Tables:</strong> if the table is wide, consider rewriting it as a short list or splitting it.</li>
+  <li><strong>Line breaks:</strong> remove hard wraps inside paragraphs if they appeared.</li>
+  <li><strong>Links:</strong> click a couple to confirm they didn’t get mangled.</li>
+</ul>
+<p>
+  If you’re converting for a docs site, this is also the moment to add frontmatter (title, description) if your system uses it.
+</p>
+
 <h2 id="images">How images are handled</h2>
 <p>
   Embedded images in your DOCX are extracted and saved separately.
@@ -65,17 +79,33 @@
 </p>
 <pre><code>![Chart showing sales data](media/image1.png)</code></pre>
 <p>
-  You'll get a zip with both the .md file and a media folder.
+  Depending on the converter and output, you may receive the Markdown plus a folder (or ZIP) containing the extracted images.
+</p>
+
+<h2 id="footnotes">Footnotes, endnotes, and “Word magic”</h2>
+<p>
+  Word has features Markdown doesn’t really have a native home for: footnotes, endnotes, tracked comments, and rich cross-references.
+  Different converters handle these differently.
+</p>
+<ul>
+  <li><strong>Footnotes:</strong> might become Markdown footnote syntax (<code>[^1]</code>) or get inlined at the end.</li>
+  <li><strong>Cross-references:</strong> often turn into plain text (“see section 3”) without a clickable link.</li>
+  <li><strong>Comments:</strong> usually dropped (content-only export).</li>
+</ul>
+<p>
+  If those features matter, do a quick test on a short sample before you convert a 40-page document.
+</p>
+<p>
+  And if you’re publishing to a platform like GitHub or a docs site, preview the Markdown there — not just in your editor.
 </p>
 
 <h2 id="flavor">Markdown flavor</h2>
 <p>
-  Output is GitHub Flavored Markdown (GFM):
+  Output aims for a GitHub‑flavored style of Markdown (GFM‑ish):
 </p>
 <ul>
   <li>Fenced code blocks with ```</li>
   <li>Tables with | pipes |</li>
-  <li>Task lists with - [ ]</li>
   <li>Strikethrough with ~~text~~</li>
 </ul>
 
@@ -117,6 +147,6 @@
 
 <h2 id="next">Next steps</h2>
 <p>
-  Ready to liberate your Word docs? Open <a href="/tools/text-converter/">TinyUtils Document Converter</a>,
-  upload your DOCX, and get clean Markdown.
+  If you want a Markdown version of your DOCX, open <a href="/tools/text-converter/">TinyUtils Document Converter</a>,
+  upload your file, and convert. Afterward, skim headings, lists, and tables — those are the usual trouble spots.
 </p>

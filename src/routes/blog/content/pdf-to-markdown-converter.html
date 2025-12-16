@@ -13,6 +13,19 @@
   <li>Complex layouts may need manual cleanup.</li>
 </ul>
 
+<h2 id="reality-check">Reality check: PDFs aren’t “documents” in the way you think</h2>
+<p>
+  A PDF is closer to a printout than a Word file. It often doesn’t store “this is a heading” or “this is a list” — it stores where to draw glyphs on a page.
+  Converting to Markdown is basically asking a tool to reconstruct structure from that layout.
+</p>
+<p>
+  Two quick sanity checks before you convert:
+</p>
+<ul>
+  <li><strong>Can you select text?</strong> If you can’t highlight text, it’s probably a scan and you need OCR first.</li>
+  <li><strong>Is it one column?</strong> Multi‑column PDFs (newsletters, brochures) are where reading order gets weird.</li>
+</ul>
+
 <h2 id="why">Why convert PDF to Markdown?</h2>
 <ul>
   <li><strong>Version control</strong> — Markdown plays nice with Git</li>
@@ -30,6 +43,13 @@
   <li>Click convert.</li>
   <li>Download your Markdown file.</li>
 </ol>
+
+<h2 id="source">If you can, get the source file</h2>
+<p>
+  This sounds obvious, but it saves hours: if the PDF was generated from Word, Google Docs, or Markdown in the first place,
+  ask for that source file. Converting a PDF is always a reconstruction problem.
+  Converting from the original source is usually cleaner, faster, and less “why is this table cursed?”
+</p>
 
 <h2 id="what-works">What converts well</h2>
 <ul>
@@ -65,7 +85,28 @@
   <li><strong>Check the output</strong> — Always review converted Markdown</li>
   <li><strong>Fix headers manually</strong> — Sometimes H2 becomes H3</li>
   <li><strong>Clean up tables</strong> — Markdown tables are finicky</li>
+  <li><strong>Watch for repeated headers/footers</strong> — PDFs love stamping the same line on every page</li>
 </ul>
+<p>
+  A couple of “quick wins” that fix a lot of converted PDFs:
+</p>
+<ul>
+  <li><strong>Hard line breaks:</strong> If paragraphs look like one sentence per line, replace line breaks between lowercase letters with a space.</li>
+  <li><strong>Hyphenation:</strong> If you see words like <code>docu-\nment</code>, join them back together.</li>
+</ul>
+
+<h2 id="cleanup-more">Common cleanup patterns (the boring stuff that matters)</h2>
+<p>
+  PDFs often inject things that aren’t “content” but still get converted:
+</p>
+<ul>
+  <li><strong>Page numbers:</strong> you’ll see stray <code>12</code> / <code>13</code> lines in the middle of paragraphs.</li>
+  <li><strong>Running headers:</strong> document title repeated on every page.</li>
+  <li><strong>Line-wrapped URLs:</strong> a long link breaks across lines and stops being clickable.</li>
+</ul>
+<p>
+  If you’re converting a long report, it’s often faster to fix these with a couple targeted find/replace passes than to “hand edit” every page.
+</p>
 
 <h2 id="formats">Other output options</h2>
 <p>
@@ -86,8 +127,8 @@
 
 <h3>What Markdown flavor is output?</h3>
 <p>
-  GitHub Flavored Markdown (GFM) by default.
-  Tables, fenced code blocks, and task lists are supported.
+  A GitHub‑ish flavor (GFM‑style) is the usual target, because it’s what most tools accept.
+  If you rely on specific extensions (task lists, special callouts), scan the output and adjust.
 </p>
 
 <h3>Can I convert multiple PDFs at once?</h3>

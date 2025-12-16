@@ -1,6 +1,5 @@
 <p>
-  Got a folder full of images? Compressing them one by one is tedious.
-  Here's how to batch compress multiple images at once.
+  Optimizing one image is easy. Optimizing a hundred? That's tedious without the right tools. Batch image compression processes entire folders of images at once—resizing, compressing, and converting them for web use while you focus on other tasks. Launch a website, prepare email attachments, or reclaim storage space without touching each file individually.
 </p>
 
 <h2 id="tldr">TL;DR</h2>
@@ -12,37 +11,117 @@
   <li>Download as ZIP</li>
 </ul>
 
-<h2 id="why">Why batch compress?</h2>
-<ul>
-  <li><strong>Website launches</strong> — Optimize all images before going live</li>
-  <li><strong>Email attachments</strong> — Fit under size limits</li>
-  <li><strong>Storage</strong> — Reclaim disk space</li>
-  <li><strong>Performance</strong> — Faster page loads</li>
-</ul>
+<h2 id="understanding-batch">Understanding Batch Compression</h2>
 
-<h2 id="steps">How to batch compress</h2>
+<h3>What is Batch Processing?</h3>
+<p>
+  Batch processing applies the same operation to multiple files simultaneously. Instead of opening each image, adjusting settings, saving, and repeating—batch compression handles everything in one pass. Upload 50 images, set your preferences once, and download 50 optimized images.
+</p>
+
+<h3>Why Batch Matters</h3>
+<p>
+  Time savings compound quickly. If optimizing one image takes 30 seconds manually, 100 images takes nearly an hour. Batch processing handles those 100 images in minutes. For regular image optimization needs—website updates, product catalogs, photo archives—batch processing is essential.
+</p>
+
+<h2 id="why">Why Batch Compress Images?</h2>
+
+<h3>1. Website Launches</h3>
+<p>
+  Launching a new website with dozens or hundreds of images? Every image needs optimization for fast page loads. Batch compression prepares your entire image library for the web in one session.
+</p>
+
+<h3>2. E-Commerce Catalogs</h3>
+<p>
+  Product images drive sales, but oversized images slow down your store. Process entire product catalogs—product photos, thumbnails, detail shots—maintaining visual quality while hitting size targets.
+</p>
+
+<h3>3. Email Campaigns</h3>
+<p>
+  Email attachments have size limits. Batch compress photos before sending newsletters, sharing album links, or attaching images to messages. Get under size limits without sacrificing too much quality.
+</p>
+
+<h3>4. Storage Optimization</h3>
+<p>
+  Photo libraries grow endlessly. Batch compress archived photos to reclaim disk space. A 50% size reduction across thousands of photos frees gigabytes of storage.
+</p>
+
+<h3>5. Social Media Preparation</h3>
+<p>
+  Preparing images for social media posts, ads, or campaigns? Batch process to consistent sizes and file sizes before uploading to your social media management tools.
+</p>
+
+<h3>6. Blog Content</h3>
+<p>
+  Bloggers with image-heavy posts need optimized images for every article. Batch compress before uploading to your CMS. Your readers get faster load times; your hosting costs stay lower.
+</p>
+
+<h3>7. Client Deliverables</h3>
+<p>
+  Photographers and designers delivering images to clients often need web-ready versions alongside full-resolution originals. Batch create optimized copies without touching your source files.
+</p>
+
+<h2 id="steps">How to Batch Compress Images</h2>
+
+<h3>Using TinyUtils Image Compressor</h3>
 <ol>
-  <li>Go to <a href="/tools/image-compressor/">TinyUtils Image Compressor</a></li>
-  <li>Drag and drop multiple files (or select a folder)</li>
-  <li>Choose output format (keep original, or convert all to WebP)</li>
-  <li>Set quality level (85% recommended for photos)</li>
+  <li>Navigate to <a href="/tools/image-compressor/">TinyUtils Image Compressor</a></li>
+  <li>Drag and drop multiple files, or click to select a batch</li>
+  <li>Choose output format (keep original, or convert all to WebP, JPG, or PNG)</li>
+  <li>Set quality level (higher = larger files, lower = smaller files)</li>
+  <li>Optionally set maximum dimensions for resizing</li>
   <li>Click <strong>Compress All</strong></li>
-  <li>Download the ZIP containing all compressed images</li>
+  <li>Download the ZIP containing all processed images</li>
 </ol>
+<p>
+  The image compressor is designed to do the work in your browser (no “upload a folder and wait” step). If you want to double-check, open DevTools → Network and make sure there aren’t any large upload requests while you compress.
+</p>
 
-<h2 id="formats">Supported formats</h2>
-<ul>
-  <li><strong>Input:</strong> JPG, JPEG, PNG, WebP, GIF, HEIC, HEIF</li>
-  <li><strong>Output:</strong> JPG, PNG, WebP (or keep original format)</li>
-</ul>
-
-<h2 id="settings">Recommended settings</h2>
+<h2 id="formats">Supported Formats</h2>
 <table>
   <thead>
     <tr>
-      <th>Use case</th>
+      <th>Input Formats</th>
+      <th>Output Formats</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>JPG / JPEG</td>
+      <td>JPG / JPEG</td>
+    </tr>
+    <tr>
+      <td>PNG</td>
+      <td>PNG</td>
+    </tr>
+    <tr>
+      <td>WebP</td>
+      <td>WebP</td>
+    </tr>
+    <tr>
+      <td>GIF</td>
+      <td>Keep original format</td>
+    </tr>
+    <tr>
+      <td>HEIC / HEIF</td>
+      <td>—</td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  HEIC images (from iPhones) can be converted to web-friendly formats like JPG or WebP during batch processing.
+</p>
+
+<h2 id="settings">Recommended Quality Settings</h2>
+<p>
+  Quality is a tradeoff: higher quality means larger files. Here are starting points for common use cases:
+</p>
+<table>
+  <thead>
+    <tr>
+      <th>Use Case</th>
       <th>Format</th>
       <th>Quality</th>
+      <th>Expected Savings</th>
     </tr>
   </thead>
   <tbody>
@@ -50,57 +129,198 @@
       <td>Website photos</td>
       <td>WebP</td>
       <td>80-85%</td>
+      <td>60-75% smaller</td>
+    </tr>
+    <tr>
+      <td>Blog images</td>
+      <td>JPG</td>
+      <td>80-85%</td>
+      <td>50-70% smaller</td>
     </tr>
     <tr>
       <td>Email attachments</td>
       <td>JPG</td>
       <td>75-80%</td>
+      <td>60-80% smaller</td>
+    </tr>
+    <tr>
+      <td>Product thumbnails</td>
+      <td>WebP</td>
+      <td>75-80%</td>
+      <td>70-80% smaller</td>
     </tr>
     <tr>
       <td>Graphics/logos</td>
       <td>PNG</td>
       <td>N/A (lossless)</td>
+      <td>10-30% smaller</td>
     </tr>
     <tr>
-      <td>Maximum savings</td>
+      <td>Maximum compression</td>
       <td>WebP</td>
       <td>70-75%</td>
+      <td>75-85% smaller</td>
+    </tr>
+    <tr>
+      <td>Archive storage</td>
+      <td>JPG</td>
+      <td>85-90%</td>
+      <td>40-60% smaller</td>
     </tr>
   </tbody>
 </table>
 
-<h2 id="privacy">Privacy</h2>
+<h2 id="resizing">Resizing During Compression</h2>
 <p>
-  All processing happens in your browser. Images are never uploaded to a server.
-  Your files stay on your device.
+  Large source images—from cameras or design software—often exceed what's needed for web display. A 6000×4000 photo displayed at 800×600 wastes bandwidth. Batch compression can resize during processing:
+</p>
+<ul>
+  <li>Set maximum width and/or height</li>
+  <li>Images larger than limits are scaled down proportionally</li>
+  <li>Smaller images remain unchanged</li>
+  <li>Aspect ratio is always preserved</li>
+</ul>
+<p>
+  Common maximum dimensions for web:
+</p>
+<ul>
+  <li><strong>Full-width hero images:</strong> 1920px wide</li>
+  <li><strong>Blog post images:</strong> 1200px wide</li>
+  <li><strong>Thumbnails:</strong> 300-600px wide</li>
+  <li><strong>Social media:</strong> Platform-specific (check requirements)</li>
+</ul>
+
+<h2 id="format-choice">Choosing Output Format</h2>
+
+<h3>WebP (Recommended for Web)</h3>
+<p>
+  WebP offers the best compression with excellent quality. Modern browsers all support it. For website images, WebP is typically the best choice—25-35% smaller than equivalent JPGs at the same visual quality.
 </p>
 
-<h2 id="limits">Limits</h2>
+<h3>JPEG (Maximum Compatibility)</h3>
 <p>
-  Browser-based processing handles most typical batches. For thousands of very large images,
-  a desktop tool may be more practical.
+  JPG works everywhere—every browser, every device, every software. If you need universal compatibility or are unsure about your audience's browser support, JPG is safe.
 </p>
 
-<h2 id="faq">FAQ</h2>
+<h3>PNG (Lossless with Transparency)</h3>
+<p>
+  Use PNG for graphics, logos, screenshots, or images requiring transparency. PNG uses lossless compression—no quality loss, but larger files than JPG/WebP for photographs.
+</p>
+
+<h3>Keep Original Format</h3>
+<p>
+  If you want to maintain existing formats, choose this option. JPGs stay as JPGs, PNGs stay as PNGs, each optimized according to their format's compression method.
+</p>
+
+<h2 id="use-cases">Common Use Cases</h2>
+
+<h3>Website Migration</h3>
+<p>
+  Migrating to a new CMS or host? Batch compress your entire media library before re-uploading. Start fresh with optimized images rather than carrying over bloated files.
+</p>
+
+<h3>Photo Archive Optimization</h3>
+<p>
+  Years of photos consuming terabytes? Batch compress while maintaining acceptable quality. Even modest compression across thousands of photos saves significant storage.
+</p>
+
+<h3>Print-to-Web Conversion</h3>
+<p>
+  Print-resolution images (300 DPI, huge dimensions) are far too large for web. Batch resize and compress print assets for web use without affecting your print masters.
+</p>
+
+<h3>Client Gallery Preparation</h3>
+<p>
+  Photographers preparing client galleries can batch process sessions. Create web-sized previews while keeping original files for prints and albums.
+</p>
+
+<h3>CMS Upload Preparation</h3>
+<p>
+  Before bulk-uploading to WordPress, Shopify, or other platforms, batch optimize everything. Faster uploads, better page speed, lower hosting costs.
+</p>
+
+<h2 id="privacy">Privacy and Security</h2>
+<p>
+  The tool is designed to process images locally in your browser. That means there’s no “upload a folder to our servers” step. If you want to verify it, open DevTools → Network while you compress a batch and confirm there aren’t large POST requests leaving your browser.
+</p>
+<ul>
+  <li><strong>Local-first:</strong> Image data stays in your browser during processing</li>
+  <li><strong>No upload wait:</strong> Processing starts immediately</li>
+  <li><strong>Device limits:</strong> Batch size is mostly RAM and CPU</li>
+  <li><strong>Good habit:</strong> Keep originals, especially for anything important</li>
+</ul>
+
+<h2 id="limits">Practical Limits</h2>
+<p>
+  Browser-based processing uses your device's resources. Practical limits depend on your hardware:
+</p>
+<ul>
+  <li><strong>Typical batches:</strong> 50-100 images process easily on most devices</li>
+  <li><strong>Large batches:</strong> 200+ images work but may take longer</li>
+  <li><strong>Very large images:</strong> 50+ megapixel images use significant memory</li>
+  <li><strong>Older devices:</strong> May handle smaller batches more reliably</li>
+</ul>
+<p>
+  For extremely large collections (thousands of images), process in batches of 50-100 at a time.
+</p>
+
+<h2 id="faq">Frequently Asked Questions</h2>
 
 <h3>How many images can I process at once?</h3>
 <p>
-  Depends on your device. Most can handle 50-100 images easily.
-  Processing happens in parallel.
+  Depends on your device. Most computers handle 50-100 images easily. Processing happens in parallel, so modern devices with more cores process faster.
 </p>
 
 <h3>Will file names be preserved?</h3>
 <p>
-  Yes. The ZIP contains files with original names (extension may change if you convert formats).
+  Yes. Output files keep original names (with extension changed if you converted formats). The ZIP download contains all files with their names intact.
 </p>
 
 <h3>Can I resize while compressing?</h3>
 <p>
-  Yes. Set max dimensions and images larger than that will be scaled down.
+  Yes. Set maximum dimensions and images larger than those limits are scaled down proportionally. Aspect ratio is always preserved.
 </p>
 
-<h2 id="next">Next steps</h2>
+<h3>What about EXIF data?</h3>
 <p>
-  Ready to optimize a batch of images? Open <a href="/tools/image-compressor/">TinyUtils Image Compressor</a>,
-  drop your files, and download the compressed ZIP.
+  EXIF metadata (camera settings, date, location) may be stripped during compression depending on format and settings. If you need to preserve metadata, check output files.
+</p>
+
+<h3>Can I process RAW files?</h3>
+<p>
+  RAW camera files (CR2, NEF, ARW, etc.) aren't supported directly. Convert to JPG or PNG first, then batch compress.
+</p>
+
+<h3>What if my browser crashes?</h3>
+<p>
+  Very large batches or limited device memory can cause issues. Process smaller batches or try a device with more RAM.
+</p>
+
+<h2 id="tips">Tips for Better Results</h2>
+<ul>
+  <li><strong>Start with quality 80%:</strong> Good balance of size and visual quality for most uses.</li>
+  <li><strong>Preview before download:</strong> Check a few samples before downloading the entire batch.</li>
+  <li><strong>Use WebP for web:</strong> Best compression ratio for modern websites.</li>
+  <li><strong>Keep originals:</strong> Always retain source files before batch processing.</li>
+  <li><strong>Resize appropriately:</strong> Don't serve 4000px images for 400px display slots.</li>
+</ul>
+
+<h2 id="why-online">Why Use a Browser-Based Tool?</h2>
+<p>
+  While desktop software exists for batch compression, browser-based tools offer advantages:
+</p>
+<ul>
+  <li><strong>No installation:</strong> Works immediately on any device with a browser</li>
+  <li><strong>Privacy by design:</strong> Designed to process locally (check the Network tab if you want proof)</li>
+  <li><strong>Cross-platform:</strong> Same tool on Windows, Mac, Linux, Chromebook</li>
+  <li><strong>Always current:</strong> No software updates to manage</li>
+  <li><strong>Free access:</strong> No license fees or subscriptions</li>
+</ul>
+
+<h2 id="next">Do a Quick Batch Run</h2>
+<p>
+  If you just want to get this done: open <a href="/tools/image-compressor/">TinyUtils Image Compressor</a>, drop your images, set a sensible quality (and a max width if they’re huge), then download the ZIP. Keep your originals, especially if the images are for print.
+</p>
+<p>
+  Need specific format conversions? Check out our guides for <a href="/blog/jpeg-to-webp-converter">JPEG to WebP</a>, <a href="/blog/png-to-jpg-converter">PNG to JPG</a>, and <a href="/blog/webp-compression-guide">WebP optimization</a>.
 </p>
