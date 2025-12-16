@@ -123,6 +123,50 @@
   Become proper Word tables with borders. You can resize columns and format as needed.
 </p>
 
+<h2 id="troubles">When the conversion needs manual TLC</h2>
+<p>
+  Rarely the converter nails every layout decision. If the source Markdown used inline HTML, custom admonition blocks, or relies on the way your editor wraps lines, expect to do a quick polish in Word. The goal is not “perfectly identical” but “a readable starting point” where the hard part (copying text) is already done.
+</p>
+<ul>
+  <li><strong>Headers that repeat:</strong> Word applies its own spacing. Tweak the heading styles if the document feels too airy.</li>
+  <li><strong>Images float oddly:</strong> Right-click → Wrap Text in Word to switch between “In Line” and “Square” as needed.</li>
+  <li><strong>Long code blocks:</strong> Word might truncate horizontal scrollbars—consider wrapping them in a text box or screenshot if the visual matters.</li>
+  <li><strong>Special metadata:</strong> Frontmatter stays at the top unless you delete it. If you need it in headers/footers, copy-paste manually.</li>
+</ul>
+<p>
+  Think of this like baking a draft: the conversion handles the regular ingredients, and you finish with the garnish that only Word can do.
+</p>
+
+<h2 id="qa-checklist">QA checklist</h2>
+<p>
+  Before you send the DOCX to clients or upload it, run through a quick checklist:
+</p>
+<ul>
+  <li><strong>Headings:</strong> Do the Word styles match your structure? Update the style settings if H1/H2/H3 spacing feels off.</li>
+  <li><strong>Tables:</strong> Check column widths and borders; Word often adds extra padding.</li>
+  <li><strong>Images:</strong> Are they embedded and the right resolution? Swap to the source file if the converter downsized them too much.</li>
+  <li><strong>Links:</strong> Test a few hyperlinks to confirm they point where you expect.</li>
+  <li><strong>Track Changes:</strong> Turn it on, make a tiny edit, verify Word keeps showing edits correctly.</li>
+  <li><strong>Metadata:</strong> If you care about the author/title, update Word’s document properties.</li>
+</ul>
+<p>
+  Spending five minutes on this checklist saves the “it looks off” back-and-forth later.
+</p>
+
+<h2 id="workflow">A realistic workflow</h2>
+<p>
+  Here’s how a typical Markdown → DOCX workflow looks:
+</p>
+<ol>
+  <li>Draft in your favorite Markdown editor (VS Code, Obsidian, etc.).</li>
+  <li>Convert to DOCX via TinyUtils when the draft is ready for review.</li>
+  <li>Open the generated Word doc, enable Track Changes, and push it to stakeholders.</li>
+  <li>Review their comments in Word, then export a clean PDF or convert back to Markdown if you need a cleaned source.</li>
+</ol>
+<p>
+  If you automate this (scripts, CI, etc.), stash the Markdown + DOCX pairs in a shared drive or version control so everyone can trace edits back to text.
+</p>
+
 <h2 id="images">Images</h2>
 <p>
   If your Markdown references local images, the safest approach is to upload a ZIP that contains your <code>.md</code> file and the image files in the expected paths.
