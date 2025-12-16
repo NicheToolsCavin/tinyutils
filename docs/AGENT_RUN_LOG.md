@@ -1601,3 +1601,15 @@ Tests: pnpm check PASS (0 errors), pnpm test PASS (72/72)
 - **Follow-ups:**
   - Merge fix/about-route into main so the fixed /about route (and canonical/OG fixes) reaches production.
 
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-16 03:48 CET - Manual - fix wayback light inputs
+- **Mode:** manual
+- **Branch:** `fix/wayback-light-inputs`
+- **Summary:**
+  - Aligned the --surface-elevated token for dark/light palettes so cards, inputs, and toasts share the right cream/navy tones.
+  - Wayback Fixer inputs should no longer fall back to the navy default in light mode while the dark fallback stays intact.
+  - Tests: pnpm test (node 25.x warning about expected Node 20)
+- **Evidence:** NONE
+- **Follow-ups:**
+
