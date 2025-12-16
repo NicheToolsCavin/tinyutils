@@ -1576,3 +1576,28 @@ Tests: pnpm check PASS (0 errors), pnpm test PASS (72/72)
 - **Follow-ups:**
   - Open a PR for review + Preview URL.
 
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-16 03:23 CET - Manual - restore /about route
+- **Mode:** manual
+- **Branch:** `fix/about-route`
+- **Summary:**
+  - Added a dedicated /about page to prevent 404s (new src/routes/about/+page.svelte mirrors the existing content with /about canonical).
+  - pnpm test
+  - Tests: pnpm test
+- **Evidence:** artifacts/blog/20251216/pnpm-test-4.log
+- **Follow-ups:**
+  - Merge fix/about-route into main so Vercel redeploys with the clean /about route
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-16 03:40 CET - Manual - fix about canonical + OG
+- **Mode:** manual
+- **Branch:** `fix/about-route`
+- **Summary:**
+  - Aligned both /about and /about.html canonical tags to /about and added OG/twitter meta for consistent SEO/preview metadata.
+  - Re-ran pnpm test (Node 20) to ensure the new page passes the suite.
+- **Evidence:** artifacts/blog/20251216/pnpm-test-4.log
+- **Follow-ups:**
+  - Merge fix/about-route into main so the fixed /about route (and canonical/OG fixes) reaches production.
+

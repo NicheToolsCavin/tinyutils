@@ -10,6 +10,10 @@
     property="og:description"
     content="Learn what TinyUtils is, who it's for, and how we think about privacy and reliability."
   />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="/og.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
 </svelte:head>
 
 <div class="container">
