@@ -1,6 +1,6 @@
 <p>
-  PDFs are locked. Word documents are editable. When you need to modify a PDF,
-  the cleanest path is converting to DOCX first.
+  PDFs are great for “here’s the final version.” They’re not great for “can you fix two lines and send it back by 5pm?”
+  If you need to actually edit what’s inside a PDF, converting it to a Word document (DOCX) is usually the least painful move.
 </p>
 
 <h2 id="tldr">TL;DR</h2>
@@ -11,6 +11,17 @@
   <li>Download the Word document</li>
   <li>Edit as needed</li>
 </ul>
+
+<h2 id="before-you-convert">Before you convert: is it a real PDF, or a scan?</h2>
+<p>
+  Quick test: open the PDF and try to select a sentence with your mouse. If you can highlight text, you’re in decent shape.
+  If you can’t select anything (or you only select “blocks”), it’s probably a scanned document — basically a set of images —
+  and you’ll need OCR before any converter can give you editable text.
+</p>
+<p>
+  Another quick clue: if it’s a fillable form, expect extra weirdness. Form fields often flatten into awkward tables or positioned text.
+  Sometimes the fastest solution is rebuilding the form in Word instead of trying to preserve the exact layout.
+</p>
 
 <h2 id="why">Why convert PDF to Word?</h2>
 <ul>
@@ -23,8 +34,8 @@
 
 <h2 id="reality">Expectations vs. reality</h2>
 <p>
-  PDF to Word isn't perfect. PDFs don't store document structure — they store
-  where to draw text and lines. The converter does its best to reconstruct:
+  PDF to Word isn’t perfect, because PDFs don’t store “this is a heading” or “this is a table.” They store “draw this text
+  at this coordinate.” The converter has to guess the structure. It usually gets you most of the way there, but expect a little cleanup.
 </p>
 <ul>
   <li><strong>Text</strong> — Usually accurate</li>
@@ -61,8 +72,19 @@
 
 <h2 id="scanned">Scanned PDFs</h2>
 <p>
-  If your PDF is a scanned image (no selectable text), you need OCR first.
-  The converter extracts what text it can, but image-only PDFs yield minimal text.
+  If your PDF is a scanned image (no selectable text), you need OCR first. A converter can’t “read” text that isn’t there —
+  it can only extract the text layer the PDF already contains.
+</p>
+<p>
+  If you’re not sure where to start, here are a few common OCR paths:
+</p>
+<ul>
+  <li><strong>Adobe Acrobat OCR</strong> (paid, usually good).</li>
+  <li><strong>Google Drive OCR</strong> (upload → open with Google Docs; quality varies).</li>
+  <li><strong>Phone scan apps</strong> that bake in text (useful for quick paperwork).</li>
+</ul>
+<p>
+  Once you have a text-based PDF (or a DOCX from the OCR step), the conversion becomes dramatically less painful.
 </p>
 
 <h2 id="cleanup">After conversion</h2>
@@ -76,7 +98,18 @@
   <li>Reposition images</li>
 </ul>
 <p>
+  Two specific fixes that come up a lot:
+</p>
+<ul>
+  <li><strong>Repeated headers/footers:</strong> if every page title becomes a line in the middle of your doc, delete one and then search for the pattern.</li>
+  <li><strong>Hyphenation:</strong> PDFs often split words at line ends (<code>docu-</code> + <code>ment</code>). A quick find/replace can clean it up.</li>
+</ul>
+<p>
   Still faster than retyping the whole document.
+</p>
+<p>
+  One underrated option: if you don’t care about the original layout, convert/extract to plain text and paste it into a clean Word template.
+  You lose “looks like the PDF,” but you gain a document that’s easy to edit.
 </p>
 
 <h2 id="batch">Multiple PDFs</h2>
@@ -88,8 +121,8 @@
 
 <h3>Will the Word doc look exactly like the PDF?</h3>
 <p>
-  Close, but not identical. PDF layout doesn't map 1:1 to Word.
-  Expect 80-95% accuracy depending on document complexity.
+  Sometimes it’s surprisingly close. Sometimes it’s a bit of a mess — especially with multi‑column layouts, complex tables, or forms.
+  Treat the DOCX as an editable draft you can fix, not a pixel‑perfect clone of the PDF.
 </p>
 
 <h3>Can I convert password-protected PDFs?</h3>
@@ -104,8 +137,8 @@
 
 <h3>Is the conversion private?</h3>
 <p>
-  Yes. Files are processed on the server and deleted after conversion.
-  We don't store your documents.
+  TinyUtils needs to process your file to create the output. For the details (what we store, logs, retention), see our
+  <a href="/privacy.html">Privacy policy</a> and <a href="/faq/">FAQ</a>.
 </p>
 
 <h2 id="alternatives">Other PDF extractions</h2>

@@ -31,6 +31,15 @@
   <li>Server logs and analytics (what people actually hit)</li>
   <li>Backlink exports (what other sites still reference)</li>
 </ul>
+<p>
+  In practice, you don’t need the full universe on day one. Start with a “top 50” list: pages with traffic, pages with backlinks,
+  and anything that still appears in navigation.
+</p>
+<pre><code># Example inventory (made-up URLs)
+/pricing/
+/docs/getting-started/
+/blog/how-to-choose-a-widget/
+/downloads/widget-spec-sheet.pdf</code></pre>
 
 <h3>2) Find the best Wayback snapshots</h3>
 <p>
@@ -40,6 +49,14 @@
   <a href="/tools/wayback-fixer/">TinyUtils Wayback Fixer</a>
   to bulk map URLs to snapshots and export the results.
 </p>
+<p>
+  Snapshot picking is where people waste time. A simple rule that works:
+  pick the newest capture that still looks “complete” (has the content, not just a shell page).
+  If the newest capture is broken, go back a few months.
+</p>
+<pre><code># Example output mapping (also made-up)
+/pricing/  →  https://web.archive.org/web/20240115*/example.com/pricing/
+/docs/getting-started/  →  https://web.archive.org/web/20231002*/example.com/docs/getting-started/</code></pre>
 
 <h3>3) Restore content and assets</h3>
 <p>
@@ -53,6 +70,25 @@
   <li>Pages with backlinks</li>
   <li>Downloads and critical resources</li>
 </ul>
+<p>
+  One annoying gotcha: you might recover the page HTML, but the images are missing because they were hosted on a different domain,
+  or they were blocked by <code>robots.txt</code> at the time. That’s not you doing it wrong — it’s just how archiving works.
+</p>
+
+<h3>3.5) Fix internal links (Wayback URLs are not the goal)</h3>
+<p>
+  Wayback recovery often leaves you with links that point back into the archive or to old absolute URLs.
+  That’s fine for the first “get something live” pass, but you’ll want to clean it up quickly:
+</p>
+<ul>
+  <li><strong>Convert Wayback links back to real site URLs</strong> (otherwise users bounce into the archive mid‑journey).</li>
+  <li><strong>Rehost critical images</strong> and update <code>src</code> paths so they’re not dependent on the archive.</li>
+  <li><strong>Check downloads</strong> (PDFs, ZIPs). These are often the first things to disappear in migrations.</li>
+</ul>
+<p>
+  This is also where you decide what “good enough” means. You don’t need every old tracking pixel and widget script back.
+  You need the content, the key images, and a page that isn’t broken.
+</p>
 
 <h3>4) Build a redirect plan (or your recovery won’t stick)</h3>
 <p>
@@ -84,6 +120,20 @@
   <li>Key landing pages return and start earning traffic again.</li>
   <li>The team has a repeatable process for future changes.</li>
 </ul>
+
+<h2 id="verify">Verification (so you don’t re-break it next week)</h2>
+<p>
+  After you restore the important pages and add redirects, do a quick validation pass:
+</p>
+<ul>
+  <li><strong>Crawl the site:</strong> check for 404s, redirect chains, and missing images.</li>
+  <li><strong>Spot-check templates:</strong> nav/footer links multiply mistakes fast.</li>
+  <li><strong>Re-check the top URLs</strong> from your inventory list: they should be one hop (301) to a 200.</li>
+</ul>
+<p>
+  Tools like <a href="/tools/dead-link-finder/">Dead Link Finder</a> and <a href="/tools/sitemap-delta/">Sitemap Delta</a> make this less miserable,
+  but the important part is the mindset: verify, then iterate.
+</p>
 
 <h2 id="lessons">Lessons learned (aka “the boring secret sauce”)</h2>
 <ol>

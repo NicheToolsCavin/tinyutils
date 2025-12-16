@@ -11,9 +11,9 @@
 <h2 id="tldr">TL;DR</h2>
 <ul>
   <li>Use <a href="/tools/image-compressor/">TinyUtils Image Compressor</a> to convert PNG to WebP in your browser.</li>
-  <li>WebP is typically 50-80% smaller than PNG at similar quality.</li>
+  <li>WebP is often much smaller than PNG for the same “looks fine” result.</li>
   <li>WebP supports transparency (unlike JPEG).</li>
-  <li>All modern browsers support WebP (Safari since 2020, everything else earlier).</li>
+  <li>Modern browsers support WebP; for older browsers, serve PNG as a fallback.</li>
 </ul>
 
 <h2 id="why">Why convert PNG to WebP?</h2>
@@ -22,7 +22,7 @@
   WebP uses smarter compression that produces much smaller files.
 </p>
 <ul>
-  <li><strong>Smaller files</strong> — 50-80% smaller than equivalent PNG</li>
+  <li><strong>Smaller files</strong> — often dramatically smaller than equivalent PNG</li>
   <li><strong>Faster pages</strong> — less bandwidth, quicker loads</li>
   <li><strong>Transparency</strong> — WebP keeps your alpha channel</li>
   <li><strong>Universal support</strong> — Chrome, Firefox, Safari, Edge all support it</li>
@@ -38,7 +38,8 @@
 </ol>
 
 <p>
-  Everything happens in your browser. No upload, no account, no waiting.
+  Browser‑based converters can do this locally (client‑side). If privacy matters, verify it:
+  open DevTools → <strong>Network</strong>, convert one image, and confirm there’s no large upload request sending your file data to a server.
 </p>
 
 <h2 id="quality">What quality setting should I use?</h2>
@@ -58,19 +59,18 @@
   Your PNG with a transparent background will convert cleanly to WebP with the same transparency.
 </p>
 
-<h2 id="compatibility">Browser compatibility in 2025</h2>
+<h2 id="compatibility">Browser compatibility</h2>
 <p>
   WebP is supported by:
 </p>
 <ul>
-  <li>Chrome (since 2014)</li>
-  <li>Firefox (since 2019)</li>
-  <li>Safari (since 2020 — macOS Big Sur / iOS 14)</li>
-  <li>Edge (since forever, it's Chromium)</li>
+  <li>Chrome</li>
+  <li>Firefox</li>
+  <li>Safari (recent versions)</li>
+  <li>Edge</li>
 </ul>
 <p>
-  The only holdouts are ancient browsers (IE11, old Safari).
-  For those edge cases, you can serve PNG as a fallback using the <code>&lt;picture&gt;</code> element.
+  The main holdouts are older browsers (think IE11-era). For those, you can serve PNG as a fallback using the <code>&lt;picture&gt;</code> element.
 </p>
 
 <h2 id="batch">Batch conversion</h2>
@@ -79,39 +79,36 @@
   The tool processes them in parallel and gives you a ZIP download.
 </p>
 
-<h2 id="results">Real conversion results</h2>
-<table>
-  <thead>
-    <tr>
-      <th>Original PNG</th>
-      <th>WebP @ 85%</th>
-      <th>Savings</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>1.2 MB (screenshot)</td>
-      <td>95 KB</td>
-      <td>92%</td>
-    </tr>
-    <tr>
-      <td>450 KB (logo with transparency)</td>
-      <td>28 KB</td>
-      <td>94%</td>
-    </tr>
-    <tr>
-      <td>3.5 MB (illustration)</td>
-      <td>320 KB</td>
-      <td>91%</td>
-    </tr>
-  </tbody>
-</table>
+<h2 id="serve">How to serve WebP with a safe fallback</h2>
+<p>
+  If you’re using WebP on a website and you want maximum compatibility, don’t make it an all-or-nothing switch.
+  Use <code>&lt;picture&gt;</code> so older browsers still get PNG:
+</p>
+<pre><code>&lt;picture&gt;
+  &lt;source srcset=\"logo.webp\" type=\"image/webp\"&gt;
+  &lt;img src=\"logo.png\" alt=\"Logo\"&gt;
+&lt;/picture&gt;</code></pre>
+<p>
+  If you’re self-hosting files, make sure your server sends the right MIME type for WebP (<code>image/webp</code>).
+  Otherwise some browsers will treat it as “a download” instead of displaying it, which is… not the vibe.
+</p>
+
+<h2 id="results">What to expect</h2>
+<ul>
+  <li><strong>Big wins:</strong> photos and complex graphics usually shrink a lot.</li>
+  <li><strong>Smaller wins:</strong> tiny icons and already‑optimized PNGs won’t move as much.</li>
+  <li><strong>Best win of all:</strong> resizing an oversized PNG before you convert.</li>
+</ul>
+<p>
+  One workflow that stays sane: keep the original PNG as your “source” (especially for logos and UI assets),
+  and generate WebP only for shipping. That way you’re never editing a lossy file, and you can re-export cleanly later.
+</p>
 
 <h2 id="vs-avif">WebP vs AVIF: which is better?</h2>
 <p>
   AVIF is newer and often produces even smaller files.
-  But browser support is still catching up (no Safari until late 2023).
-  For now, WebP is the safe choice. AVIF support is coming to TinyUtils soon.
+  Browser support is improving, but it’s not universal everywhere (especially on older devices).
+  WebP is the boring “works basically everywhere” choice. If you want to serve AVIF too, use a <code>&lt;picture&gt;</code> fallback so older browsers still get WebP/PNG.
 </p>
 
 <h2 id="faq">FAQ</h2>
@@ -136,5 +133,11 @@
 <h2 id="next">Next steps</h2>
 <p>
   Ready to convert? Open <a href="/tools/image-compressor/">TinyUtils Image Compressor</a>,
-  drop in your PNGs, select WebP, and watch your file sizes plummet.
+  drop in your PNGs, select WebP, and compare the results side by side.
+</p>
+<p>
+  Keep the original PNGs somewhere safe.
+</p>
+<p>
+  If you’re publishing on the web, remember to actually serve the WebP files (or use <code>&lt;picture&gt;</code> with fallbacks). Converting is easy; shipping the right file is the win.
 </p>

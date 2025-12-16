@@ -1,34 +1,69 @@
 <p>
-  Moving from Microsoft Word to LibreOffice? Convert your DOCX files
-  to ODT for native compatibility with open-source office suites.
+  Word is common, but LibreOffice (and other OpenDocument editors) work best with ODT. Converting DOCX to ODT gives you a file that’s native to that ecosystem. You’ll still want to spot-check fonts and complex layouts, but it avoids a lot of “imported from Word” weirdness.
 </p>
 
 <h2 id="tldr">TL;DR</h2>
 <ul>
   <li>Upload DOCX to <a href="/tools/text-converter/">TinyUtils Document Converter</a></li>
   <li>Select <strong>ODT</strong> as output</li>
-  <li>Download and open in LibreOffice</li>
-  <li>All formatting preserved in the open standard</li>
-</ul>
-
-<h2 id="why">Why convert to ODT?</h2>
-<ul>
-  <li><strong>No license fees</strong> — LibreOffice is free</li>
-  <li><strong>Open standard</strong> — ISO-certified format</li>
-  <li><strong>Cross-platform</strong> — Works on Windows, Mac, Linux</li>
-  <li><strong>Future-proof</strong> — Open standards last longer</li>
-</ul>
-
-<h2 id="steps">How to convert</h2>
-<ol>
-  <li>Open <a href="/tools/text-converter/">TinyUtils Document Converter</a></li>
-  <li>Upload your .docx file</li>
-  <li>Choose <strong>ODT</strong> from the format list</li>
-  <li>Click <strong>Convert</strong></li>
   <li>Download and open in LibreOffice Writer</li>
-</ol>
+  <li>Most formatting preserved in an open standard</li>
+</ul>
 
-<h2 id="compatibility">What converts well</h2>
+<h2 id="understanding-formats">Understanding DOCX and ODT</h2>
+
+<h3>What is DOCX?</h3>
+<p>
+  DOCX is Microsoft Word's native format since Office 2007. Based on Office Open XML (OOXML), it stores documents as structured XML inside a ZIP container. DOCX supports all of Word's features: Track Changes, comments, styles, complex formatting, embedded objects, and deep integration with Microsoft's ecosystem.
+</p>
+<p>
+  DOCX has become the de facto standard for business documents. When someone asks for a "Word document," they mean DOCX. The format's dominance means most document exchange assumes DOCX compatibility—which can be limiting if you prefer not to use Microsoft's software.
+</p>
+
+<h3>What is ODT?</h3>
+<p>
+  ODT (Open Document Text) is the native format for LibreOffice Writer and other OpenDocument-compatible applications. Developed by OASIS and recognized by ISO, ODT is an open standard based on XML. Unlike proprietary formats, ODT's specification is publicly available, meaning anyone can implement software that reads and writes ODT files without licensing fees or vendor permission.
+</p>
+<p>
+  ODT offers full word processing capabilities: styles, formatting, tables, images, headers, footers, tracked changes, and comments. For users of LibreOffice, Google Docs (which can export ODT), or any OpenDocument-compliant software, ODT provides everything needed for professional document creation.
+</p>
+
+<h2 id="why">Why Convert DOCX to ODT?</h2>
+
+<h3>1. No License Fees</h3>
+<p>
+  LibreOffice is completely free—no subscription, no purchase, no license management. Converting your DOCX files to ODT lets you leave Microsoft Office without losing access to your documents. For individuals, small businesses, and organizations with tight budgets, this represents real savings.
+</p>
+
+<h3>2. Open Standard Benefits</h3>
+<p>
+  ODT is an ISO-certified open standard (ISO/IEC 26300). This means the format specification is public, stable, and not controlled by any single company. Your documents won't become unreadable due to a vendor's business decisions. Open standards provide long-term document accessibility that proprietary formats can't guarantee.
+</p>
+
+<h3>3. Cross-Platform Compatibility</h3>
+<p>
+  LibreOffice runs on Windows, macOS, and Linux with identical functionality. Your ODT documents work the same everywhere. If your team uses mixed operating systems, ODT provides a common format without the Windows-centric assumptions of DOCX.
+</p>
+
+<h3>4. Government and Education Requirements</h3>
+<p>
+  Many government agencies, educational institutions, and public organizations mandate open document formats for accessibility, archival, and vendor neutrality. ODT meets these requirements. Converting existing DOCX archives to ODT ensures compliance with open format policies.
+</p>
+
+<h3>5. Future-Proof Documents</h3>
+<p>
+  Open standards tend to outlast proprietary formats. ODT documents created today will remain readable for decades because the format specification is public and implemented by multiple independent applications. This is particularly important for archival documents and records that must remain accessible long-term.
+</p>
+
+<h3>6. Native Performance in LibreOffice</h3>
+<p>
+  While LibreOffice can open DOCX files directly, it works best with its native ODT format. Converting to ODT eliminates compatibility layers, improves performance, and ensures all features work correctly without "import translation" artifacts.
+</p>
+
+<h2 id="compatibility">What Converts from DOCX to ODT</h2>
+<p>
+  The conversion maintains document fidelity across most features:
+</p>
 <table>
   <thead>
     <tr>
@@ -38,73 +73,182 @@
   </thead>
   <tbody>
     <tr>
-      <td>Text formatting</td>
-      <td>Excellent</td>
+      <td>Text and paragraphs</td>
+      <td>Excellent — full fidelity</td>
     </tr>
     <tr>
-      <td>Headings/styles</td>
-      <td>Excellent</td>
+      <td>Character formatting (bold, italic, underline)</td>
+      <td>Excellent — fully preserved</td>
+    </tr>
+    <tr>
+      <td>Paragraph formatting (alignment, spacing, indentation)</td>
+      <td>Excellent — fully preserved</td>
+    </tr>
+    <tr>
+      <td>Headings and styles</td>
+      <td>Excellent — maps to ODT styles</td>
     </tr>
     <tr>
       <td>Tables</td>
-      <td>Very good</td>
+      <td>Very good — structure preserved</td>
     </tr>
     <tr>
-      <td>Images</td>
-      <td>Very good</td>
+      <td>Images and graphics</td>
+      <td>Very good — embedded correctly</td>
     </tr>
     <tr>
-      <td>Track changes</td>
-      <td>Good</td>
+      <td>Headers and footers</td>
+      <td>Very good — content preserved</td>
     </tr>
     <tr>
-      <td>Macros</td>
-      <td>Not compatible</td>
+      <td>Track Changes</td>
+      <td>Good — may display differently</td>
+    </tr>
+    <tr>
+      <td>Comments</td>
+      <td>Good — preserved as ODT annotations</td>
+    </tr>
+    <tr>
+      <td>VBA Macros</td>
+      <td>Not compatible — different languages</td>
     </tr>
   </tbody>
 </table>
 
-<h2 id="use-cases">Common use cases</h2>
+<h3>What May Need Attention</h3>
+<p>
+  Some features require manual review after conversion:
+</p>
+<ul>
+  <li><strong>Complex page layouts</strong> — Multi-column layouts, text boxes, and positioned frames may shift slightly</li>
+  <li><strong>Fonts</strong> — If fonts aren't installed on the target system, substitution occurs</li>
+  <li><strong>Track Changes</strong> — Revision history converts but may display differently; consider accepting changes before conversion for cleanest results</li>
+  <li><strong>Macros</strong> — Word VBA macros don't run in LibreOffice; automation would need rewriting in LibreOffice Basic</li>
+  <li><strong>Embedded objects</strong> — Some embedded objects may convert as images rather than editable content</li>
+</ul>
+
+<h2 id="steps">How to Convert DOCX to ODT</h2>
+
+<h3>Using TinyUtils Document Converter</h3>
+<ol>
+  <li>Navigate to <a href="/tools/text-converter/">TinyUtils Document Converter</a></li>
+  <li>Click the upload area or drag and drop your .docx file</li>
+  <li>Select <strong>ODT</strong> from the output format dropdown</li>
+  <li>Click <strong>Convert</strong> to process the document</li>
+  <li>Download your .odt file</li>
+  <li>Open in LibreOffice Writer (or any ODT-compatible application)</li>
+</ol>
+<p>
+  The converter produces a clean ODT file that opens natively in LibreOffice without compatibility warnings or import artifacts.
+</p>
+
+<h3>Batch Conversion</h3>
+<p>
+  Converting an entire document library? Upload multiple DOCX files at once. The converter processes each file individually and delivers a ZIP archive containing all your ODT documents, preserving original filenames with .odt extensions.
+</p>
+
+<h2 id="use-cases">Common Use Cases</h2>
 
 <h3>Migrating to LibreOffice</h3>
 <p>
-  Converting your document library from DOCX to ODT ensures
-  native support without compatibility issues.
+  When an organization switches from Microsoft Office to LibreOffice, existing documents need conversion. Converting DOCX archives to ODT ensures native compatibility and eliminates the ongoing dependency on Microsoft file formats.
 </p>
 
-<h3>Government/education requirements</h3>
+<h3>Government and Public Sector</h3>
 <p>
-  Many public institutions require open formats. ODT meets
-  accessibility and archival standards.
+  Many government agencies require open document formats for public documents. Converting DOCX to ODT meets accessibility requirements and ensures documents remain publicly accessible without proprietary software.
 </p>
 
-<h3>Collaboration with mixed software</h3>
+<h3>Educational Institutions</h3>
 <p>
-  Teams using different office suites can standardize on ODT
-  as a common interchange format.
+  Schools and universities often mandate open formats for assignments, publications, and administrative documents. Students and staff can convert DOCX files to ODT for compliance with institutional policies.
 </p>
 
-<h2 id="faq">FAQ</h2>
+<h3>Document Archival</h3>
+<p>
+  For long-term document preservation, open formats provide better guarantees of future readability. Converting critical documents from DOCX to ODT creates archives that don't depend on Microsoft's continued support.
+</p>
+
+<h3>Mixed Software Environments</h3>
+<p>
+  Teams using a mix of Word, LibreOffice, and Google Docs can standardize on ODT as a common interchange format. Everyone can work with the files regardless of their primary office software.
+</p>
+
+<h3>Cost Reduction</h3>
+<p>
+  Organizations seeking to reduce software costs can migrate to LibreOffice and convert existing documents to ODT. The conversion enables the transition without losing access to historical documents.
+</p>
+
+<h2 id="after-conversion">After Conversion: Tips for LibreOffice</h2>
+
+<h3>Review Formatting</h3>
+<p>
+  After conversion, open the ODT file in LibreOffice Writer and review for any formatting issues. Most documents convert cleanly, but complex layouts may need minor adjustments.
+</p>
+
+<h3>Update Styles</h3>
+<p>
+  LibreOffice uses different style definitions than Word. If your document relies heavily on custom styles, consider mapping them to LibreOffice's built-in styles for best compatibility with features like table of contents generation.
+</p>
+
+<h3>Check Fonts</h3>
+<p>
+  If the original DOCX used fonts not installed on your system, LibreOffice substitutes available fonts. For important documents, ensure required fonts are installed or choose universally available alternatives.
+</p>
+
+<h3>Accept Tracked Changes</h3>
+<p>
+  If your document has tracked changes, consider accepting or rejecting them before conversion for the cleanest result. Track Changes information converts, but the display may differ from Word's presentation.
+</p>
+
+<h2 id="faq">Frequently Asked Questions</h2>
 
 <h3>Will my fonts look the same?</h3>
 <p>
-  Font references are preserved. If the exact font isn't installed,
-  LibreOffice substitutes a similar one.
+  Font references are preserved in the ODT file. If the exact font is installed on the target system, the document looks identical. If not, LibreOffice substitutes a similar font. For the most consistent results, use fonts available on all target systems (Liberation, DejaVu, or common system fonts).
 </p>
 
 <h3>What about tracked changes?</h3>
 <p>
-  Track changes convert, but may display differently.
-  Accept or reject changes before converting for cleanest results.
+  Track Changes information converts to ODT's equivalent feature. The content is preserved, but the display may differ from Word. For cleanest results with collaborative documents, accept or reject changes before conversion.
 </p>
 
 <h3>Can I batch convert multiple files?</h3>
 <p>
-  Upload multiple files at once. The converter handles batch processing.
+  Yes. Upload multiple DOCX files at once. The converter handles batch processing automatically and delivers all converted files in a single ZIP archive.
 </p>
 
-<h2 id="next">Next steps</h2>
+<h3>Will macros transfer?</h3>
 <p>
-  Ready to switch to open formats? Convert your DOCX files with
-  <a href="/tools/text-converter/">TinyUtils Document Converter</a>.
+  No. Word uses VBA for macros; LibreOffice uses LibreOffice Basic. These are different languages, so macros require rewriting. Document content converts; automation does not.
+</p>
+
+<h3>Can I convert back to DOCX later?</h3>
+<p>
+  Yes. TinyUtils supports bidirectional conversion. If you need to share documents with Word users, you can convert ODT back to DOCX. However, for the best workflow, maintain one primary format and convert only when necessary.
+</p>
+
+<h3>What's the maximum file size?</h3>
+<p>
+  The converter handles files up to 50MB, which covers most documents. Very large documents with many images may take a few seconds longer to process.
+</p>
+
+<h2 id="why-online">Why Use an Online Converter?</h2>
+<p>
+  While LibreOffice can open DOCX files directly, converting through an online tool offers specific advantages:
+</p>
+<ul>
+  <li><strong>Consistent conversion</strong> — Same output quality regardless of LibreOffice version</li>
+  <li><strong>No LibreOffice required</strong> — Convert before installing LibreOffice or from devices without it</li>
+  <li><strong>Batch processing</strong> — Convert multiple files at once, download as ZIP</li>
+  <li><strong>Clean conversion</strong> — Purpose-built for format translation, often cleaner than direct import</li>
+  <li><strong>Quick access</strong> — Faster than opening LibreOffice for occasional conversions</li>
+</ul>
+
+<h2 id="next">Ready to Embrace Open Formats?</h2>
+<p>
+  Converting DOCX to ODT moves your documents into the open standard that ensures long-term accessibility without vendor lock-in. Open <a href="/tools/text-converter/">TinyUtils Document Converter</a>, upload your Word documents, and download ODT files ready for LibreOffice.
+</p>
+<p>
+  Need other format conversions? Check out our guides for <a href="/blog/odt-to-docx-converter">ODT to DOCX</a>, <a href="/blog/docx-to-pdf-converter">DOCX to PDF</a>, and <a href="/blog/odt-to-pdf-converter">ODT to PDF</a> workflows.
 </p>

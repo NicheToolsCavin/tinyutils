@@ -1,6 +1,6 @@
 <p>
-  Markdown is perfect for writing. But when you need to share a polished document,
-  PDF is the universal format. Here's how to convert your .md files to PDF.
+  Markdown is a lovely format for writing. It’s calm. It’s portable. It doesn’t try to “help” you by moving your headings around.
+  But the moment you need to email something to a non‑Markdown person (or print it), PDF becomes the obvious target.
 </p>
 
 <h2 id="tldr">TL;DR</h2>
@@ -27,9 +27,18 @@
   <li><strong>Lists</strong> — Bullets and numbered lists preserved</li>
   <li><strong>Bold/Italic</strong> — **bold** and *italic* formatting</li>
   <li><strong>Links</strong> — Clickable in the PDF</li>
-  <li><strong>Code blocks</strong> — Syntax highlighting preserved</li>
+  <li><strong>Code blocks</strong> — Code stays code (styling depends on the renderer)</li>
   <li><strong>Tables</strong> — Markdown tables become PDF tables</li>
-  <li><strong>Images</strong> — Referenced images embedded in PDF</li>
+  <li><strong>Images</strong> — Can be embedded when the converter can access them</li>
+</ul>
+
+<h2 id="gotchas">Common gotchas (so you don’t panic)</h2>
+<ul>
+  <li><strong>Wide tables:</strong> PDFs don’t magically invent horizontal scrolling. Big tables may wrap awkwardly.</li>
+  <li><strong>Long code lines:</strong> A 200‑character URL in a code block will either wrap or spill off the page.</li>
+  <li><strong>Page breaks:</strong> Markdown has no “this starts on a new page” concept unless the renderer adds rules.</li>
+  <li><strong>Fonts:</strong> If your Markdown uses emojis or uncommon symbols, font fallback can change the look.</li>
+  <li><strong>Images:</strong> Missing images usually means the converter couldn’t find the files.</li>
 </ul>
 
 <h2 id="steps">How to convert</h2>
@@ -42,24 +51,47 @@
   <li>Download your PDF</li>
 </ol>
 
-<h2 id="styling">Styling options</h2>
+<h2 id="qa">Quick QA (worth 30 seconds)</h2>
 <p>
-  The converter applies sensible defaults:
+  Before you send it, do a quick scan:
 </p>
 <ul>
-  <li>Clean, readable font</li>
-  <li>Appropriate margins</li>
-  <li>Page breaks before major headings</li>
-  <li>Syntax highlighting for code</li>
+  <li><strong>Page breaks:</strong> did any section titles land alone at the bottom of a page?</li>
+  <li><strong>Tables/code:</strong> anything overflowing off the page?</li>
+  <li><strong>Links:</strong> click one or two if they matter.</li>
+  <li><strong>Mobile view:</strong> if your recipient is likely on a phone, open it once on your phone too.</li>
 </ul>
+
+<h2 id="styling">Styling options</h2>
+<p>
+  Most converters apply sensible defaults:
+</p>
+<ul>
+  <li>Clean, readable typography</li>
+  <li>Reasonable margins</li>
+  <li>Code blocks rendered in a monospace style</li>
+  <li>Optional extras (like syntax highlighting) depend on the renderer</li>
+</ul>
+
+<h2 id="layout">If you need precise layout (cover page, page breaks, headers)</h2>
+<p>
+  Markdown is intentionally light on layout control. If you need “this heading starts on a new page” or you want a proper cover page,
+  the easiest workflow is usually:
+</p>
+<ol>
+  <li>Convert Markdown → HTML.</li>
+  <li>Add a little CSS for print (<code>@page</code>, page breaks, margins).</li>
+  <li>Convert that HTML → PDF.</li>
+</ol>
+<p>
+  It’s not as “pure” as direct Markdown → PDF, but it gives you the knobs you actually want.
+</p>
 
 <h2 id="images">How images work</h2>
 <p>
   If your Markdown references images with relative paths like <code>![](images/diagram.png)</code>,
-  make sure those images are included. The converter embeds them in the PDF.
-</p>
-<p>
-  For images hosted online, the converter fetches and embeds them.
+  make sure those images are included. The easiest way is to upload a ZIP that contains your <code>.md</code> and the <code>images/</code> folder.
+  Then the converter can embed them without guessing.
 </p>
 
 <h2 id="batch">Multiple files</h2>
@@ -70,7 +102,7 @@
 
 <h2 id="frontmatter">YAML frontmatter</h2>
 <p>
-  If your Markdown has YAML frontmatter (title, author, date), it's processed:
+  If your Markdown has YAML frontmatter (title, author, date), some converters use it as metadata:
 </p>
 <pre><code>---
 title: My Document
@@ -81,14 +113,15 @@ date: 2025-01-15
 # Introduction
 ...</code></pre>
 <p>
-  The title and author appear in the PDF metadata.
+  If you see the frontmatter printed at the top of the PDF, it just means the renderer treated it as plain text — delete it from the source and re‑convert.
 </p>
 
 <h2 id="faq">FAQ</h2>
 
 <h3>What Markdown flavor is supported?</h3>
 <p>
-  GitHub Flavored Markdown (GFM). Tables, task lists, strikethrough, and fenced code blocks all work.
+  The common stuff: headings, lists, links, code blocks, and tables. If you use a lot of GitHub‑specific extensions (task list checkboxes, diagrams, custom containers),
+  run a quick test conversion and see what comes through.
 </p>
 
 <h3>Can I customize fonts or colors?</h3>
@@ -104,7 +137,7 @@ date: 2025-01-15
 
 <h3>What about math equations?</h3>
 <p>
-  LaTeX math (like <code>$x^2$</code>) is rendered if present in the source.
+  Some Markdown renderers handle LaTeX math well, some don’t. If math is critical, do a quick sample conversion (one page) before you commit to the workflow.
 </p>
 
 <h2 id="alternatives">Other output formats</h2>

@@ -1,81 +1,288 @@
 <p>
-  Found broken links on your site? Before deleting them, check if
-  the Internet Archive has saved copies. Preserve your link value with archived versions.
+  The web is not permanent. Sites disappear, pages move, companies fold, domains expire. That link you added to your content six months ago might be a 404 today. Before you delete those broken links and lose the reference entirely, check if the Internet Archive has preserved a copy. Archive.org's Wayback Machine has been saving the web since 1996, and it might have exactly the page you need—even if the original is long gone.
 </p>
 
 <h2 id="tldr">TL;DR</h2>
 <ul>
-  <li>Use <a href="/tools/wayback-fixer/">TinyUtils Wayback Fixer</a> to find archived pages</li>
-  <li>Replace broken links with archive.org URLs</li>
-  <li>Preserve SEO value and user experience</li>
+  <li>Use <a href="/tools/wayback-fixer/">TinyUtils Wayback Fixer</a> to find archived versions of dead URLs</li>
+  <li>Replace broken links with archive.org snapshot URLs</li>
+  <li>Preserve SEO value, citations, and user experience</li>
   <li>Works for any page the Wayback Machine has captured</li>
+  <li>Queue missing pages for future archival with Save Page Now</li>
 </ul>
 
-<h2 id="why">Why use archived versions?</h2>
+<h2 id="why-archive"><span id="why"></span>Why Use Archived Versions?</h2>
+
+<h3>Preserve Context</h3>
+<p>
+  When you link to an external source, you're citing evidence, providing context, or sending users to additional resources. If that link dies, your content loses its supporting reference. Archive links maintain that context—readers can still access the cited material, even if the original site disappeared.
+</p>
+
+<h3>Maintain SEO Value</h3>
+<p>
+  Outbound links to quality sources contribute to your content's authority. Broken links signal neglect to search engines and users alike. Replacing dead links with archived versions preserves the link equity and demonstrates maintenance.
+</p>
+
+<h3>Protect User Experience</h3>
+<p>
+  Clicking a link and hitting a 404 is frustrating. Users may question your content's reliability if links don't work. Archive links provide a functional destination, even if it's a snapshot rather than the live page.
+</p>
+
+<h3>Academic and Journalistic Integrity</h3>
+<p>
+  Citations matter in academic writing, journalism, and research. A claim backed by a source that no longer exists weakens your argument. Archive links prove the source existed and preserve what it said when you cited it.
+</p>
+
+<h3>Historical Record</h3>
+<p>
+  Some content is genuinely important to preserve. News articles, research papers, documentation, policy statements—these shouldn't vanish from the historical record. Archive links contribute to web preservation.
+</p>
+
+<h2 id="understanding">Understanding the Wayback Machine</h2>
+
+<h3>What It Does</h3>
+<p>
+  The Internet Archive's Wayback Machine crawls the web and saves snapshots of pages at specific points in time. When you access an archived URL, you're seeing the page exactly as it appeared when the crawler captured it—HTML, images, styles, everything that was publicly accessible.
+</p>
+
+<h3>How Archive URLs Work</h3>
+<p>
+  Archived URLs follow a consistent format:
+</p>
+<pre><code>https://web.archive.org/web/[TIMESTAMP]/[ORIGINAL_URL]</code></pre>
+<p>
+  For example:
+</p>
+<pre><code>https://web.archive.org/web/20230415120000/https://example.com/page</code></pre>
+<p>
+  The timestamp (YYYYMMDDhhmmss) indicates when the snapshot was captured. Multiple snapshots may exist for frequently-crawled pages, letting you choose the most appropriate version.
+</p>
+
+<h3>What's Preserved</h3>
 <ul>
-  <li><strong>Preserve context</strong> — References make sense with original content</li>
-  <li><strong>SEO value</strong> — Keep outbound link equity</li>
-  <li><strong>User experience</strong> — Readers can still access cited sources</li>
-  <li><strong>Citations</strong> — Academic and journalistic integrity</li>
+  <li>HTML content and structure</li>
+  <li>CSS styles (usually)</li>
+  <li>Images (if they were loaded when crawled)</li>
+  <li>Static assets on the same domain</li>
+  <li>JavaScript (with caveats—interactive features may not work)</li>
 </ul>
 
-<h2 id="steps">How to fix with Wayback</h2>
+<h3>What May Not Work</h3>
+<ul>
+  <li>JavaScript-dependent content that loads dynamically</li>
+  <li>Login-required or authenticated content</li>
+  <li>Content loaded from third-party domains that weren't archived</li>
+  <li>Forms and interactive features</li>
+  <li>Real-time data</li>
+</ul>
+
+<h2 id="workflow"><span id="steps"></span>How to Fix Broken Links with Archive.org</h2>
+
+<h3>Step 1: Identify Broken Links</h3>
+<p>
+  First, find which links are broken. Use <a href="/tools/dead-link-finder/">TinyUtils Dead Link Finder</a> to scan your pages and get a list of URLs returning 404, 500, or other error codes.
+</p>
+
+<h3>Step 2: Find Archived Versions</h3>
+<p>
+  Take your broken URLs to <a href="/tools/wayback-fixer/">TinyUtils Wayback Fixer</a>:
+</p>
 <ol>
-  <li>Identify broken links (use <a href="/tools/dead-link-finder/">Dead Link Finder</a>)</li>
-  <li>Go to <a href="/tools/wayback-fixer/">TinyUtils Wayback Fixer</a></li>
-  <li>Enter the broken URLs</li>
-  <li>Get archive.org snapshot URLs</li>
-  <li>Update your links to point to archived versions</li>
+  <li>Enter the broken URL(s)</li>
+  <li>The tool checks the Wayback Machine for available snapshots</li>
+  <li>Review available archive dates</li>
+  <li>Get the archive.org URL for the best snapshot</li>
 </ol>
 
-<h2 id="how-it-works">How the Wayback Machine works</h2>
+<h3>Step 3: Verify Content</h3>
 <p>
-  The Internet Archive's Wayback Machine crawls and saves web pages.
-  It stores historical snapshots that remain accessible even after
-  the original site disappears.
+  Before using an archived link, verify it has the content you need:
 </p>
-<p>
-  Archive URLs look like: <code>https://web.archive.org/web/20231015/https://example.com/page</code>
-</p>
-
-<h2 id="best-practices">Best practices</h2>
 <ul>
-  <li><strong>Choose recent snapshots</strong> — Closer to when you originally linked</li>
-  <li><strong>Verify content</strong> — Make sure the archived version has the content you need</li>
-  <li><strong>Note the archive</strong> — Consider adding "(archived)" to link text</li>
-  <li><strong>Batch processing</strong> — Fix multiple broken links at once</li>
+  <li>Does the snapshot include the relevant text or data?</li>
+  <li>Are images and formatting preserved?</li>
+  <li>Is the snapshot date appropriate (before content changed or was removed)?</li>
 </ul>
 
-<h2 id="limitations">Limitations</h2>
+<h3>Step 4: Update Your Links</h3>
+<p>
+  Replace the broken URL with the archive.org URL in your content. Consider adding context to let readers know they're accessing an archived version.
+</p>
+
+<h3>Step 5: Queue Unarchived URLs</h3>
+<p>
+  If a page isn't in the Wayback Machine, you can request archival using the "Save Page Now" feature. This won't help with already-dead pages, but it can preserve currently-live pages for future reference.
+</p>
+
+<h2 id="using-wayback-fixer">Using TinyUtils Wayback Fixer</h2>
+
+<h3>Single URL Lookup</h3>
+<ol>
+  <li>Navigate to <a href="/tools/wayback-fixer/">TinyUtils Wayback Fixer</a></li>
+  <li>Enter the broken URL</li>
+  <li>Click to search the Wayback Machine</li>
+  <li>View available snapshots with dates</li>
+  <li>Copy the archive URL for the best snapshot</li>
+</ol>
+
+<h3>Batch Processing</h3>
+<p>
+  Have multiple broken links? Enter them all at once. The tool checks each URL against the Wayback Machine and returns archive URLs where available. Export results as CSV for easier integration with your content management workflow.
+</p>
+
+<h3>Snapshot Selection</h3>
+<p>
+  When multiple snapshots exist, the tool shows available dates. Generally, choose:
+</p>
 <ul>
-  <li><strong>Not everything is archived</strong> — Some pages were never crawled</li>
-  <li><strong>Dynamic content</strong> — JavaScript-heavy sites may not capture well</li>
-  <li><strong>Login-required pages</strong> — Private content isn't archived</li>
-  <li><strong>Recent content</strong> — Very new pages may not be captured yet</li>
+  <li><strong>Most recent before the link broke:</strong> Usually has the content you originally linked to</li>
+  <li><strong>Closest to when you created your content:</strong> Matches what you saw when writing</li>
+  <li><strong>Earliest complete snapshot:</strong> If later versions have missing content</li>
 </ul>
 
-<h2 id="faq">FAQ</h2>
+<h2 id="best-practices">Best Practices</h2>
+
+<h3>Choose Appropriate Snapshots</h3>
+<p>
+  Not all snapshots are equal. Some may have missing images, incomplete content, or capture the page in a transitional state. Review the snapshot before using it.
+</p>
+
+<h3>Verify Content Matches Your Citation</h3>
+<p>
+  Websites change over time. The snapshot should contain what you originally cited. If the content evolved significantly before being archived, the snapshot might not support your reference.
+</p>
+
+<h3>Consider Noting Archive Status</h3>
+<p>
+  For transparency, consider indicating when a link goes to an archived version:
+</p>
+<pre><code>For more information, see [Original Article Title](archive-url) (archived)</code></pre>
+<p>
+  This sets appropriate expectations for readers.
+</p>
+
+<h3>Keep Track of Changes</h3>
+<p>
+  Document which links you've updated with archive versions. This helps with future maintenance and lets you revisit if the original source comes back online.
+</p>
+
+<h3>Proactive Archival</h3>
+<p>
+  Don't wait for links to break. When you link to important external resources, consider triggering an archive save immediately. This ensures a snapshot exists if the page disappears later.
+</p>
+
+<h2 id="limitations">Limitations to Know</h2>
+
+<h3>Not Everything Is Archived</h3>
+<p>
+  The Wayback Machine doesn't capture every page on the internet. Pages that were never popular enough to be crawled, sites that blocked archival via robots.txt, and content behind authentication typically have no snapshots.
+</p>
+
+<h3>Dynamic Content May Be Missing</h3>
+<p>
+  JavaScript-heavy sites, single-page applications, and dynamically-loaded content may not archive well. The snapshot might show a loading spinner or empty containers instead of actual content.
+</p>
+
+<h3>Media May Be Incomplete</h3>
+<p>
+  Images, videos, and other media hosted on different domains might not be included in the snapshot. You may see broken images even in otherwise-functional archives.
+</p>
+
+<h3>Recent Pages May Not Exist Yet</h3>
+<p>
+  Very new content may not have been crawled yet. The Wayback Machine isn't real-time—there's a delay between page creation and archival.
+</p>
+
+<h3>Some Sites Block Archival</h3>
+<p>
+  Websites can use robots.txt to request not being archived. While the Internet Archive generally respects these requests, this means some sites have no snapshots or had snapshots removed.
+</p>
+
+<h2 id="alternatives">When Archive.org Doesn't Work</h2>
+
+<h3>Find Alternative Sources</h3>
+<p>
+  If no archive exists, look for:
+</p>
+<ul>
+  <li>Other sites with similar information</li>
+  <li>Updated URLs on the same domain</li>
+  <li>Academic databases that may have preserved the content</li>
+  <li>Google Cache (short-term only)</li>
+</ul>
+
+<h3>Remove the Link</h3>
+<p>
+  If the reference isn't critical and no archive exists, removing the broken link is better than leaving a 404. Update your content to stand on its own or find a new supporting source.
+</p>
+
+<h3>Contact the Site Owner</h3>
+<p>
+  For important resources, reaching out to the original publisher might reveal that content moved rather than disappeared. They may provide the new URL.
+</p>
+
+<h2 id="faq">Frequently Asked Questions</h2>
 
 <h3>What if there's no archived version?</h3>
 <p>
-  Remove the link, find an alternative source, or update content
-  to remove the reference.
+  Unfortunately, not every page is archived. You'll need to find an alternative source, remove the broken link, or update your content to not require that reference.
 </p>
 
 <h3>Can I request a page be archived?</h3>
 <p>
-  Yes, the Wayback Machine's "Save Page Now" feature lets you
-  capture pages. Use it proactively for important links.
+  Yes. The Internet Archive's "Save Page Now" feature lets you submit URLs for archival. This captures a new snapshot of currently-live pages. It can't revive pages that are already gone.
 </p>
 
 <h3>Are archived links permanent?</h3>
 <p>
-  The Internet Archive aims for permanent access, but it's a nonprofit.
-  For critical references, consider additional preservation methods.
+  The Internet Archive aims for permanent preservation, but it's a nonprofit organization depending on donations and goodwill. For truly critical references, consider multiple preservation strategies.
 </p>
 
-<h2 id="next">Next steps</h2>
+<h3>Will search engines follow archive links?</h3>
 <p>
-  Have broken links to fix? Use <a href="/tools/wayback-fixer/">TinyUtils Wayback Fixer</a>
-  to find archived versions and restore your links.
+  Yes. Archive.org URLs are regular web URLs that search engines can crawl and follow. However, the SEO value differs from linking to the original authoritative source.
+</p>
+
+<h3>Can I use archive links in academic citations?</h3>
+<p>
+  Many citation styles accept archived URLs, especially when the original is unavailable. Include both the original URL and the archive URL with access date for complete citation.
+</p>
+
+<h3>Do archived pages look exactly like the original?</h3>
+<p>
+  Usually very close, but not always identical. Some styling, interactive features, or dynamically-loaded content may not render correctly. The text content is typically preserved accurately.
+</p>
+
+<h2 id="maintaining">Maintaining Link Health</h2>
+
+<h3>Regular Audits</h3>
+<p>
+  Don't wait for users to report broken links. Run regular link checks—monthly for active sites, quarterly for stable content. Catch and fix broken links before they accumulate.
+</p>
+
+<h3>Proactive Archival</h3>
+<p>
+  When you add important external links, queue them for archival immediately. If the source disappears later, you'll have a snapshot ready.
+</p>
+
+<h3>Internal Link Management</h3>
+<p>
+  For your own site, use redirects rather than letting pages disappear. When you move or remove content, set up proper 301 redirects so external links to your pages don't break.
+</p>
+
+<h2 id="why-online">Why Use an Online Tool?</h2>
+<ul>
+  <li><strong>Batch processing:</strong> Check multiple URLs at once</li>
+  <li><strong>No API setup:</strong> Query the Wayback Machine without learning its API</li>
+  <li><strong>Snapshot comparison:</strong> See available dates and choose the best one</li>
+  <li><strong>Export results:</strong> Get CSV output for integration with your workflow</li>
+  <li><strong>Consistent interface:</strong> Same experience regardless of your technical setup</li>
+</ul>
+
+<h2 id="next">Ready to Fix Your Broken Links?</h2>
+<p>
+  Don't let broken links degrade your content. Check for archived versions before deleting references. Open <a href="/tools/wayback-fixer/">TinyUtils Wayback Fixer</a>, enter your broken URLs, and restore access to lost content.
+</p>
+<p>
+  For finding broken links in the first place, see our <a href="/blog/broken-link-checker-agencies">agency link checking workflow</a>. For API-based automation, check out the <a href="/blog/broken-link-checker-api">broken link checker API</a>.
 </p>

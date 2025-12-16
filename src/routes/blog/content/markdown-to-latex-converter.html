@@ -1,5 +1,5 @@
 <p>
-  Academic writing has a problem: the tools optimized for thinking and drafting aren't the same tools required for publication. Markdown excels at capturing ideas quickly—no fussing with formatting, just write. But when it's time to submit to a journal, conference, or thesis committee, LaTeX is the gold standard. Converting Markdown to LaTeX bridges these two worlds, letting you draft in simplicity and publish with professional typesetting.
+  Academic writing has a small, annoying problem: the tool you draft in isn’t always the tool you submit. Markdown is great for drafts—no menus, no weird formatting surprises, just text. But if you’re working with a LaTeX template (or submitting somewhere that expects LaTeX), converting your Markdown gives you a starting .tex file without rewriting everything.
 </p>
 
 <h2 id="tldr">TL;DR</h2>
@@ -35,17 +35,17 @@
 
 <h3>1. Academic Publishing Requirements</h3>
 <p>
-  Many journals, conferences, and academic institutions require LaTeX submissions. ArXiv, the dominant preprint server for physics and mathematics, expects LaTeX. IEEE, ACM, and countless scientific publishers provide LaTeX templates. If you're targeting academic publication, LaTeX isn't optional—it's expected.
+  Many conferences and publishers provide LaTeX templates, and in some fields LaTeX is simply the default workflow. arXiv accepts LaTeX source, and venues like IEEE/ACM often publish official templates. Even when LaTeX isn’t strictly required, using the template everyone else uses can save time.
 </p>
 
 <h3>2. Superior Mathematical Typesetting</h3>
 <p>
-  LaTeX's mathematical typesetting is unmatched. Equations render with proper spacing, subscripts and superscripts align correctly, and complex notation displays clearly. While Markdown can embed LaTeX math syntax (which the converter preserves), the final PDF requires LaTeX compilation to render these equations properly.
+  LaTeX’s math typesetting is hard to beat. Equations render with proper spacing, subscripts and superscripts align correctly, and complex notation stays readable. Markdown can embed LaTeX math syntax (which the converter preserves), but the final PDF still needs LaTeX compilation to actually render the math.
 </p>
 
 <h3>3. Professional Typography</h3>
 <p>
-  LaTeX produces documents with professional-quality typography: proper ligatures, micro-typography, justified text with intelligent hyphenation, and consistent spacing. The visual quality difference between a LaTeX document and a word processor document is immediately apparent.
+  LaTeX can produce really clean typography: consistent spacing, good hyphenation, and documents that don’t slowly drift into “why is this paragraph different?” territory. The difference is most noticeable on longer documents with lots of references, figures, and math.
 </p>
 
 <h3>4. Document Structure at Scale</h3>
@@ -261,9 +261,9 @@
   <li><strong>Cross-platform</strong> — Works on any device with a browser</li>
 </ul>
 
-<h2 id="next">Ready for Professional Typesetting?</h2>
+<h2 id="next">Convert, Then Compile</h2>
 <p>
-  Converting Markdown to LaTeX unlocks academic publishing's gold standard while preserving the simplicity of plain-text drafting. Open <a href="/tools/text-converter/">TinyUtils Document Converter</a>, upload your Markdown draft, and download a LaTeX file ready for professional typesetting.
+  If you’re drafting in Markdown but need a .tex file as a starting point, open <a href="/tools/text-converter/">TinyUtils Document Converter</a>, upload your Markdown, and convert to LaTeX. Then compile the result in your usual LaTeX setup (and do a quick pass on figures, tables, and citations).
 </p>
 <p>
   Need other format conversions? Check out our guides for <a href="/blog/latex-to-pdf-converter">LaTeX to PDF</a>, <a href="/blog/markdown-to-pdf-converter">Markdown to PDF</a>, and <a href="/blog/latex-to-html-converter">LaTeX to HTML</a> workflows.

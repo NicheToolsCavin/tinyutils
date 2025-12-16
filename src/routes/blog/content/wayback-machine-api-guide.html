@@ -77,10 +77,42 @@
   <li><code>fl</code> — fields you want back (timestamp, original, statuscode, etc.).</li>
 </ul>
 
+<h3><code>matchType</code> examples (when you want more than one page)</h3>
+<p>
+  By default you’ll often query one URL. If you want broader coverage:
+</p>
+<pre><code># One exact URL
+curl \"https://web.archive.org/cdx/search/cdx?url=example.com/docs/getting-started/&amp;output=json\"
+
+# Everything under a path prefix
+curl \"https://web.archive.org/cdx/search/cdx?url=example.com/docs/&amp;matchType=prefix&amp;output=json\"
+
+# Everything on a host
+curl \"https://web.archive.org/cdx/search/cdx?url=example.com&amp;matchType=host&amp;output=json\"
+</code></pre>
+<p>
+  These broader queries can return a lot of data, so combine them with filters (<code>from</code>, <code>to</code>, <code>collapse</code>) unless you enjoy scrolling.
+</p>
+
 <blockquote>
   Practical tip: if you only need one snapshot per day, use <code>collapse=timestamp:8</code>.
   It keeps results usable.
 </blockquote>
+
+<h2 id="urls">Building a Wayback URL</h2>
+<p>
+  Once you have a timestamp from CDX, you can build a “real” archive URL like this:
+</p>
+<pre><code>https://web.archive.org/web/&lt;TIMESTAMP&gt;/&lt;ORIGINAL_URL&gt;
+
+# Example
+https://web.archive.org/web/20231002123456/https://example.com/docs/getting-started/
+</code></pre>
+<p>
+  If you want the archive to “rewrite” assets (images/CSS) to point at archived copies, you’ll often see a <code>*</code> after the timestamp:
+</p>
+<pre><code>https://web.archive.org/web/20231002123456*/https://example.com/docs/getting-started/
+</code></pre>
 
 <h2 id="savepagenow">3) SavePageNow (request a new snapshot)</h2>
 <p>
@@ -109,6 +141,21 @@
   <li>Retry on <code>429</code> and <code>5xx</code> with a short jitter delay.</li>
   <li>Cache results so you don’t re-hit the same URLs repeatedly.</li>
 </ul>
+
+<h2 id="gotchas">Common gotchas (stuff that looks like “the API is broken”)</h2>
+<p>
+  Most Wayback API confusion comes down to URLs not matching the way you think they match. A few quick checks can save you a lot of head-scratching.
+</p>
+<ul>
+  <li><strong>Try the obvious variants:</strong> <code>http</code> vs <code>https</code>, with and without a trailing slash, and with or without <code>www</code>.</li>
+  <li><strong>Be careful with query strings:</strong> CDX can treat <code>?ref=</code> and tracking params as “different pages.” Consider stripping obvious junk before you query.</li>
+  <li><strong>Redirects change things:</strong> you might have snapshots of the final URL, not the original redirecting URL. If your availability result looks empty, try the destination.</li>
+  <li><strong>Dynamic sites archive poorly:</strong> sometimes you get a shell of HTML and missing JS/API calls. That’s not your fault; it’s just how archiving works.</li>
+  <li><strong>Robots rules can bite later:</strong> access policies can change over time, and some snapshots become unavailable.</li>
+</ul>
+<p>
+  If you only need one working citation link, the fastest test is still: open the snapshot in a browser, scroll, click the key links, and make sure the page actually renders.
+</p>
 
 <h2 id="nocode">No-code option (bulk restore/export)</h2>
 <p>

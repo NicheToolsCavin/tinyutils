@@ -1562,3 +1562,17 @@ Tests: pnpm check PASS (0 errors), pnpm test PASS (72/72)
   - Local: `pnpm build` OK; `pnpm check` + `pnpm test` OK.
 - **Follow-ups:**
   - None (ready to merge when desired).
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-16 02:40 CET - Manual - blog quality + human voice pass (AdSense)
+- **Mode:** manual
+- **Branch:** `feat/blog-humanize-adsense`
+- **Summary:**
+  - Expanded and rewrote blog posts to reduce thin-content risk and better match AdSense quality expectations (more practical steps, tradeoffs, QA checklists).
+  - Removed/softened template-y wording and overconfident claims; kept privacy language verifiable (DevTools Network tab + privacy/FAQ links).
+  - Validated build integrity (pnpm test/check/build) and confirmed all 73 blog posts are >=700 words via HTML-stripped word-count report.
+- **Evidence:** artifacts/blog/20251216/
+- **Follow-ups:**
+  - Open a PR for review + Preview URL.
+
