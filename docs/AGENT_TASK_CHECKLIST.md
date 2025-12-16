@@ -13,6 +13,7 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 ## Active Tasks (Newest First)
 
 | Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
+| Humanize blog posts for AdSense | manual-2025-12-16 02:40 CET | Completed | ✅ Expanded + humanized 71 blog posts; reduced template-y tone and softened unverifiable claims; ensured all blog pages >=700 words (heuristic). Commits: dfbd030. Evidence: artifacts/blog/20251216/word-counts-2.txt, artifacts/blog/20251216/pnpm-build-2.log, artifacts/blog/20251216/pnpm-test-2.log. |
 | CSP unsafe-inline refactor (static tools) | audit-2025-12-15 CET | Future | 🔸 Security audit identified `'unsafe-inline'` in script-src CSP (vercel.json line 39). Removing requires extracting inline `<script>` from all static HTML tools (DLF, Sitemap Delta, Wayback Fixer, Image Compressor, etc.) to external .js files and using nonce/hash-based CSP. Low urgency but tracked for future hardening. |
 | Bug fixes: redirect loop, worker slot tracking, DOM perf | audit-2025-12-15 CET | Completed | ✅ Fixed check.js off-by-one redirect loop (line 276: `<=` → `<`), added slotAcquired guard for worker counter decrement (lines 964-1012), added nested sitemap warning in sitemap-delta.js, added DocumentFragment rendering in DLF. |
 | Open PR: nav/blog uniformity | manual-2025-12-14 CET | Completed | ✅ Opened PR #62 from branch nav-blog-uniform (commit 7485897) and pushed to origin. Next: grab Vercel Preview URL from PR comment and run preview_smoke.mjs. |
