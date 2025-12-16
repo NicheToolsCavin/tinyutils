@@ -1578,12 +1578,26 @@ Tests: pnpm check PASS (0 errors), pnpm test PASS (72/72)
 
 <!-- RECENT ACTIVITY (Full Context) -->
 
-### 2025-12-16 03:02 CET - Manual - beef up Markdown→DOCX post
+### 2025-12-16 03:23 CET - Manual - restore /about route
 - **Mode:** manual
-- **Branch:** `feat/blog-humanize-adsense`
+- **Branch:** `fix/about-route`
 - **Summary:**
-  - Added workflow guidance, QA checklist, and troubleshooting tips to /blog/markdown-to-docx-converter to give the post more substance.
-  - Re-ran pnpm test and captured a fresh word-count report (see artifacts/blog/20251216/word-counts-3.txt).
-- **Evidence:** artifacts/blog/20251216/word-counts-3.txt; artifacts/blog/20251216/pnpm-test-3.log
+  - Added a dedicated /about page to prevent 404s (new src/routes/about/+page.svelte mirrors the existing content with /about canonical).
+  - pnpm test
+  - Tests: pnpm test
+- **Evidence:** artifacts/blog/20251216/pnpm-test-4.log
 - **Follow-ups:**
+  - Merge fix/about-route into main so Vercel redeploys with the clean /about route
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-16 03:40 CET - Manual - fix about canonical + OG
+- **Mode:** manual
+- **Branch:** `fix/about-route`
+- **Summary:**
+  - Aligned both /about and /about.html canonical tags to /about and added OG/twitter meta for consistent SEO/preview metadata.
+  - Re-ran pnpm test (Node 20) to ensure the new page passes the suite.
+- **Evidence:** artifacts/blog/20251216/pnpm-test-4.log
+- **Follow-ups:**
+  - Merge fix/about-route into main so the fixed /about route (and canonical/OG fixes) reaches production.
 
