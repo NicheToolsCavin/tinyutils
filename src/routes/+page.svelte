@@ -79,7 +79,7 @@
   <meta property="og:title" content="TinyUtils — Useful web tools for SEOs &amp; builders" />
   <meta
     property="og:description"
-    content="Dead Link Finder, Sitemap Delta, Wayback Fixer, Document Converter, Image Compressor, and data tools for SEOs and builders."
+    content="Dead Link Finder, Sitemap Delta, Wayback Fixer, Document Converter, Image Compressor, and data tools like CSV Joiner, JSON↔CSV, and Bulk PDF extractor. Fast, polite, privacy-friendly tools for SEOs and builders."
   />
   <meta property="og:image" content="/og.png" />
   <meta property="og:url" content="https://tinyutils.net/" />

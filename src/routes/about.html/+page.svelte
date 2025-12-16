@@ -4,7 +4,7 @@
     name="description"
     content="Learn what TinyUtils is, who it's for, and how we think about privacy and reliability."
   />
-  <link rel="canonical" href="/about" />
+  <link rel="canonical" href="/about/" />
   <meta property="og:title" content="About — TinyUtils" />
   <meta
     property="og:description"
