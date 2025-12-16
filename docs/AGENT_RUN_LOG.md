@@ -1576,3 +1576,14 @@ Tests: pnpm check PASS (0 errors), pnpm test PASS (72/72)
 - **Follow-ups:**
   - Open a PR for review + Preview URL.
 
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-16 03:02 CET - Manual - beef up Markdown→DOCX post
+- **Mode:** manual
+- **Branch:** `feat/blog-humanize-adsense`
+- **Summary:**
+  - Added workflow guidance, QA checklist, and troubleshooting tips to /blog/markdown-to-docx-converter to give the post more substance.
+  - Re-ran pnpm test and captured a fresh word-count report (see artifacts/blog/20251216/word-counts-3.txt).
+- **Evidence:** artifacts/blog/20251216/word-counts-3.txt; artifacts/blog/20251216/pnpm-test-3.log
+- **Follow-ups:**
+
