@@ -1,93 +1,275 @@
 <p>
-  Most online tools upload your files to their servers. That's a privacy risk.
-  Here's how to find and use tools that process data locally.
+  Before you drop a passport scan, a client contract, or your kid’s photos into a random “free converter,” it’s worth asking one boring question: where does the file go?
+</p>
+<p>
+  Most online tools upload your file to a server, process it there, then send something back. Privacy‑first tools flip that: the work happens locally in your browser, so your file doesn’t need to leave your device.
 </p>
 
 <h2 id="tldr">TL;DR</h2>
 <ul>
-  <li>Look for "browser-based" or "no upload" claims</li>
-  <li>Check network requests in browser dev tools</li>
-  <li>Prefer open-source tools where possible</li>
-  <li>TinyUtils processes images entirely in your browser</li>
+  <li>Privacy-first tools try to do the work locally in your browser (no upload step)</li>
+  <li>Verify it: open DevTools → Network while processing</li>
+  <li><a href="/tools/image-compressor/">TinyUtils Image Compressor</a> is designed to process images locally in your browser</li>
+  <li>If you care, double-check the behavior yourself (and skim <a href="/privacy.html">privacy</a> / <a href="/faq/">FAQ</a>)</li>
+  <li>Some tasks still require servers — understand the tradeoffs</li>
 </ul>
 
-<h2 id="risk">The privacy risk</h2>
+<h2 id="risk">The Privacy Risk of Online Tools</h2>
+
+<h3>What Happens When You Upload</h3>
 <p>
-  When you upload a file to an online converter, that file goes to someone else's server.
-  They might:
+  Traditional online tools work by uploading your file to their servers, processing it remotely, and sending back the result. During this process, your file:
 </p>
 <ul>
-  <li>Store your files (intentionally or by accident)</li>
-  <li>Use them for training AI models</li>
-  <li>Be hacked, exposing your data</li>
-  <li>Share data with third parties</li>
+  <li>Travels over the internet (typically encrypted in transit, but still leaving your device)</li>
+  <li>Gets stored on the service's servers (even if "temporarily")</li>
+  <li>May be cached, backed up, or logged</li>
+  <li>Could be accessed by the service's employees or systems</li>
+  <li>Might be retained longer than expected due to backup schedules</li>
 </ul>
 
-<h2 id="local">How local processing works</h2>
+<h3>Real Privacy Concerns</h3>
 <p>
-  Privacy-first tools use JavaScript and WebAssembly to process files in your browser.
-  Your files never leave your device. The server only serves the web page code —
-  it never sees your data.
+  These aren't hypothetical risks. Depending on the service (and its policies), uploaded files can end up being:
 </p>
+<ul>
+  <li><strong>Retained longer than you expect:</strong> “temporary” storage plus backups can stretch out</li>
+  <li><strong>Used for diagnostics/analytics:</strong> failures sometimes end up in logs</li>
+  <li><strong>Exposed in a breach:</strong> anything stored server-side becomes a target</li>
+  <li><strong>Shared with third parties:</strong> hosting, analytics, or other vendors in the stack</li>
+  <li><strong>Subject to legal requests:</strong> if a provider has the data, it can be requested</li>
+</ul>
 
-<h2 id="verify">How to verify</h2>
+<h3>What You're Really Risking</h3>
+<p>
+  Depending on what you upload, exposure could mean:
+</p>
+<ul>
+  <li><strong>Personal photos:</strong> Privacy violation, potential misuse</li>
+  <li><strong>Business documents:</strong> Competitive intelligence leak</li>
+  <li><strong>Legal documents:</strong> Confidentiality breach, malpractice issues</li>
+  <li><strong>Medical records:</strong> HIPAA violations, identity theft</li>
+  <li><strong>Financial documents:</strong> Fraud risk, identity theft</li>
+</ul>
+
+<h2 id="local">How Local Processing Works</h2>
+
+<h3>The Technical Approach</h3>
+<p>
+  Privacy-first tools use JavaScript and WebAssembly to process files entirely within your browser. The processing power comes from your own device, not a remote server. Here's what happens:
+</p>
 <ol>
-  <li>Open browser dev tools (F12)</li>
-  <li>Go to the Network tab</li>
-  <li>Process a file</li>
-  <li>Check if any requests contain your file data</li>
+  <li>You select or drag a file into the web application</li>
+  <li>JavaScript reads the file from your local filesystem</li>
+  <li>Processing algorithms run in your browser's sandbox</li>
+  <li>The result is generated locally</li>
+  <li>You download the result—it's created on your device, not fetched from a server</li>
 </ol>
-<p>
-  For truly local tools, you'll only see the initial page load — no file uploads.
-</p>
 
-<h2 id="tinyutils">TinyUtils privacy</h2>
+<h3>What the Server Sees</h3>
 <p>
-  TinyUtils Image Compressor processes everything locally:
+  In a properly implemented local processing tool, the server only provides:
 </p>
 <ul>
-  <li>Images are decoded in your browser</li>
-  <li>Compression happens on your device</li>
-  <li>Downloads come from your browser, not our servers</li>
-  <li>We literally can't see your files</li>
+  <li>The HTML, CSS, and JavaScript code for the application</li>
+  <li>Any static assets (fonts, icons, images for the UI)</li>
 </ul>
-
-<h2 id="limits">Limitations of local processing</h2>
-<ul>
-  <li><strong>Device power</strong> — Your computer does the work</li>
-  <li><strong>File size</strong> — Very large files may strain browser memory</li>
-  <li><strong>Complex processing</strong> — Some operations need server power</li>
-</ul>
-
-<h2 id="when-upload">When upload is OK</h2>
 <p>
-  Not all uploads are bad. Consider:
-</p>
-<ul>
-  <li><strong>Non-sensitive files</strong> — Public documents, stock photos</li>
-  <li><strong>Trusted providers</strong> — Established companies with privacy policies</li>
-  <li><strong>Temporary processing</strong> — Files deleted immediately after</li>
-</ul>
-
-<h2 id="faq">FAQ</h2>
-
-<h3>How do I know if a tool really doesn't upload?</h3>
-<p>
-  Check the Network tab in dev tools. No outbound data = truly local.
+  If the tool is truly local, the server just ships the app code. The file contents stay in your browser (and you can verify that in the Network tab).
 </p>
 
-<h3>Are desktop apps more private?</h3>
+<h2 id="verify">How to Verify Local Processing</h2>
+
+<h3>Using Browser Developer Tools</h3>
 <p>
-  Not necessarily. Some desktop apps phone home. Local web apps can be just as private.
+  Don't trust claims—verify them yourself. Here's how:
+</p>
+<ol>
+  <li>Open your browser's developer tools (F12 or right-click → Inspect)</li>
+  <li>Go to the Network tab</li>
+  <li>Clear any existing requests</li>
+  <li>Process a file with the tool</li>
+  <li>Examine all network requests that occurred</li>
+</ol>
+
+<h3>What to Look For</h3>
+<ul>
+  <li><strong>No file uploads:</strong> You shouldn't see POST requests with large payloads</li>
+  <li><strong>No FormData:</strong> File uploads typically use multipart/form-data</li>
+  <li><strong>No fetch/XHR with file content:</strong> Your file data shouldn't appear in any request</li>
+  <li><strong>Download is a blob:</strong> The download should come from a local blob URL, not a server URL</li>
+</ul>
+
+<h3>Red Flags</h3>
+<ul>
+  <li>Large POST requests during processing</li>
+  <li>Requests to upload endpoints (e.g., /api/upload)</li>
+  <li>Progress indicators showing "uploading"</li>
+  <li>Processing speed limited by internet connection</li>
+  <li>Download URLs that point to server paths</li>
+</ul>
+
+<h2 id="tinyutils">TinyUtils Privacy Architecture</h2>
+
+<h3>How TinyUtils Image Compressor Works</h3>
+<p>
+  <a href="/tools/image-compressor/">TinyUtils Image Compressor</a> is designed for privacy:
+</p>
+<ul>
+  <li><strong>Decoding:</strong> Images are decoded using browser-native APIs and JavaScript</li>
+  <li><strong>Processing:</strong> Compression and format conversion happen in your browser</li>
+  <li><strong>Encoding:</strong> The output is generated locally using WebAssembly encoders</li>
+  <li><strong>Download:</strong> The result is served from a blob URL—data that exists only in your browser's memory</li>
+</ul>
+
+<h3>What We Can't See</h3>
+<p>
+  The image compressor is built so your image data doesn’t need to be uploaded to a server. That means we generally don’t see:
+</p>
+<ul>
+  <li>What images you process</li>
+  <li>How many files you convert</li>
+  <li>What the content of your images is</li>
+  <li>The names of your files</li>
+</ul>
+<p>
+  If you want a quick reality check, run one conversion with DevTools open and make sure there’s no big upload request.
+</p>
+
+<h2 id="limitations">Limitations of Local Processing</h2>
+
+<h3>Device Processing Power</h3>
+<p>
+  Your computer does all the work. For simple tasks like image compression, modern devices handle this easily. For computationally intensive tasks, you're limited by your device's capabilities. An older phone takes longer than a modern laptop.
+</p>
+
+<h3>Memory Constraints</h3>
+<p>
+  Browsers have memory limits. Very large files (hundreds of megabytes) may strain available memory, potentially causing the browser to slow down or crash. Server-side processing can handle arbitrarily large files; local processing is constrained by your device.
+</p>
+
+<h3>Complex Processing</h3>
+<p>
+  Some tasks genuinely require server resources:
+</p>
+<ul>
+  <li><strong>OCR:</strong> Advanced optical character recognition needs substantial compute</li>
+  <li><strong>AI processing:</strong> Machine learning models are too large for browser delivery</li>
+  <li><strong>Video encoding:</strong> High-quality video processing exceeds browser capabilities</li>
+  <li><strong>Large-scale data processing:</strong> Big data operations need server infrastructure</li>
+</ul>
+
+<h3>Browser Support</h3>
+<p>
+  Local processing relies on modern browser features (WebAssembly, certain APIs). Very old browsers may not support these features. Modern versions of Chrome, Firefox, Safari, and Edge all work well.
+</p>
+
+<h2 id="when-upload">When Server Upload Is Acceptable</h2>
+
+<h3>Non-Sensitive Files</h3>
+<p>
+  Public documents, stock photos, test files—content that isn't private can be processed server-side without concern.
+</p>
+
+<h3>Trusted Providers</h3>
+<p>
+  Established companies with clear privacy policies, security certifications, and reputations to protect may be acceptable for sensitive files when local processing isn't available.
+</p>
+
+<h3>Temporary Processing</h3>
+<p>
+  Some services demonstrably delete files immediately after processing. This is better than indefinite storage, though you're still trusting their claims.
+</p>
+
+<h3>Required Features</h3>
+<p>
+  If you need AI-powered features, OCR, or other capabilities that require server processing, the tradeoff might be worth it. Understand what you're trading and make an informed decision.
+</p>
+
+<h2 id="identifying">Identifying Privacy-First Tools</h2>
+
+<h3>Claims to Look For</h3>
+<ul>
+  <li>"No upload required"</li>
+  <li>"Files processed locally"</li>
+  <li>"Client-side processing"</li>
+  <li>"Your files never leave your device"</li>
+  <li>"Browser-based processing"</li>
+</ul>
+
+<h3>Verify, Don't Trust</h3>
+<p>
+  Claims are easy to make. Use the Network tab verification method above. A tool that truly processes locally will show no file upload traffic during processing.
+</p>
+
+<h3>Open Source Advantage</h3>
+<p>
+  Open source tools let you inspect the code. You can verify there's no hidden upload logic. This is the highest level of assurance available.
+</p>
+
+<h2 id="faq">Frequently Asked Questions</h2>
+
+<h3>How do I know if a tool really doesn't upload my files?</h3>
+<p>
+  Check the Network tab in your browser's developer tools during processing. No outbound data = truly local. Look for POST requests and large payloads.
+</p>
+
+<h3>Are desktop apps more private than web tools?</h3>
+<p>
+  Not necessarily. Desktop apps can send data over the network just like web apps. Some "phone home" with usage data or require cloud features. A properly implemented local web app can be just as private as a desktop application.
 </p>
 
 <h3>What about AI-powered tools?</h3>
 <p>
-  AI typically requires server processing. If you need AI features, your data will be processed remotely.
+  AI features typically require server processing—the models are too large to run in a browser. Some tools are experimenting with on-device AI, but most AI features today involve sending your data to servers.
 </p>
 
-<h2 id="next">Next steps</h2>
+<h3>Can I use privacy-first tools offline?</h3>
 <p>
-  Want privacy-first image compression? Open <a href="/tools/image-compressor/">TinyUtils Image Compressor</a> —
-  your images never leave your device.
+  Depends on implementation. Some local processing tools work offline once loaded. Others require an internet connection for their UI but still process files locally.
+</p>
+
+<h3>Why don't all tools process locally?</h3>
+<p>
+  Server-side processing is often easier to implement and can handle heavier workloads. Local-first tools take more engineering effort and you still hit browser limits (memory, CPU, file sizes).
+</p>
+
+<h3>Is HTTPS enough for privacy?</h3>
+<p>
+  HTTPS encrypts data in transit, protecting against eavesdropping. But it doesn't protect against the destination server. A service using HTTPS can still store, use, and potentially expose your files.
+</p>
+
+<h2 id="best-practices">Best Practices</h2>
+
+<h3>Default to Local</h3>
+<p>
+  When a local processing option exists, use it. Image compression, format conversion, simple transformations—these can all happen locally.
+</p>
+
+<h3>Evaluate Sensitivity</h3>
+<p>
+  Consider what you're uploading. Public marketing images? Server processing is fine. Personal photos, financial documents, client data? Use local tools or be very careful about provider selection.
+</p>
+
+<h3>Verify Claims</h3>
+<p>
+  Don't trust marketing. Check the Network tab. Two minutes of verification protects your privacy better than any privacy policy.
+</p>
+
+<h3>Keep Alternatives</h3>
+<p>
+  Know multiple tools for common tasks. If one requires upload, find one that processes locally. Competition improves privacy options.
+</p>
+
+<h2 id="why-this-matters">Why Privacy-First Matters</h2>
+<p>
+  If you’ve ever uploaded the wrong file to the wrong site, you already understand the appeal. Local processing reduces the number of places your document touches. It’s not magic, but it’s a simpler privacy story than “upload → process → store → delete later”.
+</p>
+
+<h2 id="next">Try Local-First Image Compression</h2>
+<p>
+  If you want to compress images without uploading them, try <a href="/tools/image-compressor/">TinyUtils Image Compressor</a>. If you’re cautious (fair), keep DevTools open the first time and watch for large POST requests.
+</p>
+<p>
+  For image optimization guides, see <a href="/blog/webp-compression-guide">WebP compression guide</a>, <a href="/blog/batch-image-compression">batch image compression</a>, and <a href="/blog/optimize-png-for-web">optimizing PNG for web</a>.
 </p>

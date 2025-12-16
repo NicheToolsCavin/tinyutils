@@ -119,6 +119,25 @@
   you didn’t pick a tool — you picked a hobby.
 </blockquote>
 
+<h2 id="false-positives">A note on “false positives”</h2>
+<p>
+  Sometimes a link checker reports a bunch of 403/429 errors and you panic… but the site is just rate-limiting crawlers.
+  Before you treat it as a real broken link wave:
+</p>
+<ul>
+  <li>Re-test a few URLs in a normal browser.</li>
+  <li>Check whether the failures cluster on one domain (often a sign of blocking).</li>
+  <li>Look for a tool that can slow down per host, or retry politely.</li>
+</ul>
+
+<h2 id="quick-picks">Quick picks (if you’re impatient)</h2>
+<ul>
+  <li><strong>Fast scan + CSV export:</strong> <a href="/tools/dead-link-finder/">TinyUtils Dead Link Finder</a></li>
+  <li><strong>Deep technical audit:</strong> a desktop crawler (Screaming Frog / Sitebulb style)</li>
+  <li><strong>Backlink-driven cleanup:</strong> an SEO suite that shows referring domains and link value</li>
+  <li><strong>Ongoing monitoring:</strong> an alerting/monitoring tool (or a scheduled crawl you control)</li>
+</ul>
+
 <h2 id="next">Next steps</h2>
 <p>
   If you want the simplest starting point, run a scan with

@@ -9,7 +9,7 @@
   <li>Upload your HTML file</li>
   <li>Select <strong>Markdown</strong> output</li>
   <li>Download clean .md file</li>
-  <li>Headings, links, lists all preserved</li>
+  <li>Headings, links, and lists usually come through cleanly</li>
 </ul>
 
 <h2 id="why">Why convert HTML to Markdown?</h2>
@@ -19,6 +19,17 @@
   <li><strong>Documentation</strong> — Docs-as-code workflows</li>
   <li><strong>Editing</strong> — Markdown is easier to read and write</li>
   <li><strong>Portability</strong> — Plain text never becomes obsolete</li>
+</ul>
+
+<h2 id="when-not">When not to convert</h2>
+<p>
+  Convert to Markdown when you want clean, portable text. Keep HTML when the exact styling matters.
+  A few examples where HTML is the better “source of truth”:
+</p>
+<ul>
+  <li><strong>Marketing pages:</strong> layout, spacing, and CSS classes matter</li>
+  <li><strong>Component-heavy pages:</strong> lots of non-semantic wrappers (<code>div</code> soup)</li>
+  <li><strong>Pages that rely on custom CSS:</strong> Markdown can’t carry those styles without extra tooling</li>
 </ul>
 
 <h2 id="preserved">What converts</h2>
@@ -63,6 +74,11 @@
   <li>Remove inline styles before converting</li>
   <li>Simplify nested structures</li>
 </ul>
+<p>
+  One practical tip: if you’re converting a live webpage, try to start with the <em>content</em>, not the whole page chrome.
+  Navigation menus, cookie banners, and “related posts” widgets all turn into junk Markdown.
+  If you can, grab the article HTML (or use Reader Mode and copy the main content) before you convert.
+</p>
 
 <h2 id="images">Images</h2>
 <p>
@@ -74,6 +90,17 @@
   Image files aren't downloaded, just referenced. Make sure paths still work
   in your destination.
 </p>
+
+<h2 id="links">Links and relative paths</h2>
+<p>
+  HTML pages often rely on a “base URL” that’s implicit in the site structure.
+  Once you convert to a standalone Markdown file, relative links can break because the file moved.
+  A quick check:
+</p>
+<ul>
+  <li>If you see links like <code>../about/</code> or <code>/docs/intro/</code>, confirm they still resolve where you’re publishing the Markdown.</li>
+  <li>If you’re moving content into a docs site, you may need to rewrite links to the new structure.</li>
+</ul>
 
 <h2 id="tables">Tables</h2>
 <p>
@@ -88,14 +115,29 @@
 
 <h2 id="flavor">Markdown flavor</h2>
 <p>
-  Output is GitHub Flavored Markdown (GFM):
+  Output aims for a GitHub‑flavored style of Markdown (GFM‑ish):
 </p>
 <ul>
   <li>Fenced code blocks with ```</li>
   <li>Tables with pipes</li>
   <li>Strikethrough with ~~text~~</li>
-  <li>Task lists with - [ ]</li>
+  <li>Some converters also emit task lists (<code>- [ ]</code>) when they can</li>
 </ul>
+
+<h2 id="cleanup-checklist">Quick cleanup checklist</h2>
+<p>
+  Even with good HTML, you’ll usually want a quick pass before you commit it to a docs site or a repo:
+</p>
+<ul>
+  <li><strong>Headings:</strong> confirm the hierarchy makes sense (one H1, then H2s, etc.).</li>
+  <li><strong>Line breaks:</strong> remove “one sentence per line” wrapping if it happened.</li>
+  <li><strong>Links:</strong> check relative URLs (they often need a new base path after moving files).</li>
+  <li><strong>Tables:</strong> if a table is wide, consider keeping it as HTML or splitting it.</li>
+  <li><strong>Code blocks:</strong> make sure code is fenced and not accidentally wrapped into paragraphs.</li>
+</ul>
+<p>
+  The goal isn’t perfection — it’s “clean enough that the next person can edit it without hating you.”
+</p>
 
 <h2 id="batch">Batch conversion</h2>
 <p>
@@ -126,4 +168,7 @@
 <p>
   Ready to convert your HTML to Markdown? Open <a href="/tools/text-converter/">TinyUtils Document Converter</a>,
   upload your file, and get clean Markdown.
+</p>
+<p>
+  Then skim it once.
 </p>

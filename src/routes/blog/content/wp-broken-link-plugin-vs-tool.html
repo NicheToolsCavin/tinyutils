@@ -56,6 +56,25 @@
   <a href="/tools/dead-link-finder/">TinyUtils Dead Link Finder</a>.
 </p>
 
+<h2 id="what-scanned">What each approach actually scans</h2>
+<p>
+  This is the part people miss, and it explains a lot of “why are our reports different?” arguments:
+</p>
+<ul>
+  <li>
+    <strong>Plugins</strong> often scan your WordPress database: posts, pages, and sometimes custom fields.
+    They can catch links that aren’t publicly crawlable yet (drafts, private pages).
+  </li>
+  <li>
+    <strong>External tools</strong> crawl what a visitor can reach.
+    They’re better at catching real-world problems (template links, nav/footer issues, redirects/404s), but they won’t see content behind a login wall.
+  </li>
+</ul>
+<p>
+  Neither is “more correct” — they’re answering slightly different questions.
+  Pick the one that matches the problem you’re trying to solve.
+</p>
+
 <h2 id="pick">When to pick each (quick guide)</h2>
 <table>
   <thead>
@@ -89,7 +108,27 @@
   </tbody>
 </table>
 
+<h2 id="workflow">A workflow that doesn’t make you hate your life</h2>
+<p>
+  If you have more than a handful of broken links, treat it like a bug triage problem:
+</p>
+<ol>
+  <li><strong>Scan externally first</strong> to catch the high-impact stuff (nav/footer, popular pages, obvious 404s).</li>
+  <li><strong>Export the report</strong> so you can sort by “where it’s found” and fix in batches.</li>
+  <li><strong>Fix inside WordPress</strong> (or your editor) so internal links don’t rely on redirects long-term.</li>
+  <li><strong>Re-scan</strong> to confirm you didn’t create new issues while fixing old ones.</li>
+  <li><strong>Only then</strong> consider a plugin if you want ongoing monitoring inside the dashboard.</li>
+</ol>
+<p>
+  The big win is avoiding “hero mode.” You don’t need to fix 2,000 links in one sitting.
+  You need to stop broken links from quietly piling up for the next six months.
+</p>
+
 <h2 id="tips">Migration tips (so you don’t make it worse)</h2>
+<p>
+  Treat broken links like a bug list: sort by impact, fix the obvious stuff first (nav/footer/top pages), then re-scan.
+  The goal isn’t “zero broken links” in a single heroic sprint — it’s “broken links stop quietly piling up.”
+</p>
 <ul>
   <li>
     <strong>Don’t scan during peak traffic.</strong> Crawls can spike CPU and DB load.
@@ -102,6 +141,12 @@
   </li>
   <li>
     <strong>Re-scan after fixes.</strong> Broken links are a regression-prone feature.
+  </li>
+  <li>
+    <strong>Watch redirects vs 404s.</strong> A 301 isn’t “broken,” but it’s still worth fixing internal links so you don’t chain redirects forever.
+  </li>
+  <li>
+    <strong>Expect some false alarms.</strong> Some sites rate-limit crawlers and respond with 403/429 even though the page is “fine” for normal users.
   </li>
 </ul>
 

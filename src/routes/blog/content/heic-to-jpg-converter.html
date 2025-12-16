@@ -10,7 +10,7 @@
 <h2 id="tldr">TL;DR</h2>
 <ul>
   <li>Use <a href="/tools/image-compressor/">TinyUtils Image Compressor</a> to convert HEIC to JPG.</li>
-  <li>Conversion happens in your browser — photos never leave your device.</li>
+  <li>If privacy matters: use a converter that runs locally in your browser (and verify in DevTools → Network).</li>
   <li>JPEG is universally compatible with everything.</li>
   <li>For smaller files, try HEIC → WebP instead.</li>
 </ul>
@@ -41,8 +41,8 @@
 </ol>
 
 <p>
-  <strong>Privacy note:</strong> Your photos are processed entirely in your browser using JavaScript.
-  Nothing is uploaded to any server.
+  <strong>Privacy note:</strong> Browser‑based converters can process images locally (client‑side).
+  If you want to be sure, open DevTools → <strong>Network</strong>, convert one photo, and confirm there’s no big upload request leaving your browser.
 </p>
 
 <h2 id="quality">Quality settings</h2>
@@ -53,6 +53,20 @@
   <li><strong>90-95%</strong> — Near-original quality, larger files</li>
   <li><strong>85%</strong> — Sweet spot for most uses</li>
   <li><strong>80%</strong> — Good for sharing where file size matters</li>
+</ul>
+
+<h2 id="hdr">HDR and “why do my colors look different?”</h2>
+<p>
+  iPhone photos can be wide‑gamut (Display P3) and sometimes HDR. That’s great on Apple screens.
+  On older Windows apps (and some web flows), it can make colors look a little muted or weird after conversion.
+</p>
+<p>
+  If that happens, it’s usually not “bad JPEG” — it’s color management.
+  Two easy fixes:
+</p>
+<ul>
+  <li>Open the converted photo in a modern editor/viewer and export again as sRGB.</li>
+  <li>If you’re uploading for the web, consider converting to <a href="/blog/convert-heic-to-webp/">WebP</a> instead.</li>
 </ul>
 
 <h2 id="batch">Batch conversion</h2>
@@ -79,12 +93,30 @@
   This makes iPhone capture in JPEG directly. Trade-off: larger files, more storage used.
 </p>
 
+<h2 id="share">Sharing tip: iPhone can convert on transfer</h2>
+<p>
+  If the only reason you’re converting is “I need to get these onto a Windows PC,” you might not need a converter every time.
+  iOS has a transfer setting:
+</p>
+<ol>
+  <li>Settings → Photos</li>
+  <li>Scroll down to <strong>Transfer to Mac or PC</strong></li>
+  <li>Choose <strong>Automatic</strong></li>
+</ol>
+<p>
+  With that enabled, iOS will often send JPEGs when transferring to a computer that doesn’t play nicely with HEIC.
+  It’s not a perfect fix for every workflow, but it saves a lot of “why won’t this open?” moments.
+</p>
+<p>
+  If you need something predictable (client upload portals, printing services, random CMS forms), converting to JPG first is still the safest move.
+</p>
+
 <h2 id="faq">FAQ</h2>
 
 <h3>Will I lose quality converting HEIC to JPEG?</h3>
 <p>
   A tiny bit. Both are compressed formats, so there's slight generation loss.
-  At 90% quality, it's imperceptible to humans.
+  At 90% quality, most people won’t notice unless you’re zooming in and comparing pixel-by-pixel.
 </p>
 
 <h3>What about Live Photos?</h3>

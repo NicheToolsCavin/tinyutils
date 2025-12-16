@@ -1,6 +1,6 @@
 <p>
-  HTML is for screens. PDF is for everything else — print, email, archival.
-  Here's how to convert your HTML pages to clean PDF documents.
+  HTML is for screens. PDF is for sending and printing.
+  If you’ve got an HTML page you need to email, archive, or attach to a ticket, converting it to PDF turns it into something predictable.
 </p>
 
 <h2 id="tldr">TL;DR</h2>
@@ -9,8 +9,19 @@
   <li>Upload your HTML file (or paste HTML code)</li>
   <li>Select <strong>PDF</strong> as output</li>
   <li>Download the PDF</li>
-  <li>Links, images, and formatting preserved</li>
+  <li>Expect basic formatting and links to come through</li>
 </ul>
+
+<h2 id="print-vs-convert">Quick note: sometimes “Print to PDF” is enough</h2>
+<p>
+  If you’re converting a live webpage, your browser’s <strong>Print</strong> dialog is often the fastest option:
+  it already has print settings, page size controls, and it can hide “screen stuff” like nav bars.
+  Use a converter when you need repeatable output, batch conversion, or you’re working from saved HTML files.
+</p>
+<p>
+  Bonus: a lot of sites already have <code>@media print</code> styles that make the page look decent on paper.
+  If the page has a “print view,” it’s worth trying before you fight with HTML/CSS fidelity.
+</p>
 
 <h2 id="why">Why HTML to PDF?</h2>
 <ul>
@@ -34,7 +45,7 @@
 <h2 id="not-preserved">What changes</h2>
 <ul>
   <li><strong>Interactive elements</strong> — Forms, buttons don't work</li>
-  <li><strong>JavaScript</strong> — Dynamic content captured at render time</li>
+  <li><strong>JavaScript</strong> — If content is injected by JS, it may not appear unless it’s present in the saved HTML</li>
   <li><strong>Animations</strong> — Static snapshot</li>
   <li><strong>Infinite scroll</strong> — Only visible content</li>
 </ul>
@@ -50,8 +61,9 @@
 
 <h2 id="css">CSS support</h2>
 <p>
-  Inline CSS and embedded <code>&lt;style&gt;</code> blocks are processed.
-  External stylesheets referenced via <code>&lt;link&gt;</code> are fetched if accessible.
+  Inline CSS and embedded <code>&lt;style&gt;</code> blocks are your best friend here.
+  External stylesheets referenced via <code>&lt;link&gt;</code> may or may not be fetched, depending on the converter.
+  If your converter supports bundling assets (for example, HTML + CSS + images in a ZIP), that’s usually the most reliable path.
 </p>
 <p>
   For best results, use print-friendly CSS:
@@ -61,17 +73,28 @@
   body { font-size: 12pt; }
 }</code></pre>
 
+<h2 id="print-friendly">Make your HTML PDF-friendly</h2>
+<p>
+  PDF conversion rewards boring, predictable HTML. A few small tweaks can save you from “why is half my sidebar on page 3?” moments:
+</p>
+<ul>
+  <li><strong>Set a max width</strong> so text doesn’t run edge-to-edge on wide pages.</li>
+  <li><strong>Disable sticky headers</strong> for print (<code>position: sticky</code> and fixed nav can duplicate).</li>
+  <li><strong>Avoid giant tables</strong> unless you have print styles that wrap gracefully.</li>
+  <li><strong>Use real headings</strong> (<code>h1</code>/<code>h2</code>) instead of “big bold divs” so the structure survives.</li>
+</ul>
+
 <h2 id="images">Images</h2>
 <p>
   Images are embedded in the PDF. If your HTML references images with relative paths,
-  the converter attempts to resolve them. For best results, use absolute URLs or
-  upload a ZIP containing HTML + images.
+  some converters can resolve them and some can’t. For best results, use absolute URLs (if the images are public),
+  or bundle the HTML + images together if your converter supports that.
 </p>
 
 <h2 id="page">Page setup</h2>
 <p>
-  Default output is A4 size with standard margins. The converter respects
-  <code>@page</code> CSS rules if present:
+  PDF output uses a default page size and margins unless you override it. Many tools default to A4 or Letter.
+  If your converter respects <code>@page</code>, you can control it with CSS:
 </p>
 <pre><code>@page {
   size: letter;
@@ -92,6 +115,13 @@
   use your browser's "Save As" to get the HTML, then convert.
 </p>
 
+<h3>Why is my PDF blank or missing chunks?</h3>
+<p>
+  The usual culprit is JavaScript-rendered content. If the page builds itself after load (React/Vue apps, dashboards, infinite scroll),
+  a saved <code>.html</code> file might not contain the real content — it just contains the app shell.
+  In that case, your browser’s <strong>Print to PDF</strong> (from the fully loaded page) is often the most reliable option.
+</p>
+
 <h3>What about multi-page documents?</h3>
 <p>
   Long HTML content flows across multiple PDF pages automatically.
@@ -101,7 +131,7 @@
 <h3>Are web fonts supported?</h3>
 <p>
   Google Fonts and other web fonts render if they're accessible.
-  For guaranteed results, use system fonts.
+  For the most predictable results, use system fonts.
 </p>
 
 <h3>Can I password-protect the PDF?</h3>

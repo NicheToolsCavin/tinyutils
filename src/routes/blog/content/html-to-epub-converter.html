@@ -1,6 +1,5 @@
 <p>
-  Want to read web content on your e-reader? Convert HTML pages
-  to EPUB for comfortable offline reading.
+  The web is full of brilliant long-form content—articles, tutorials, documentation, stories—but reading on screens can be tiring. Converting HTML to EPUB transforms web content into ebooks you can read on e-readers with adjustable fonts, comfortable e-ink displays, and no distractions. Take that 20,000-word investigative piece offline. Read documentation on your Kindle. Build a personal library from the web.
 </p>
 
 <h2 id="tldr">TL;DR</h2>
@@ -8,55 +7,81 @@
   <li>Upload HTML to <a href="/tools/text-converter/">TinyUtils Document Converter</a></li>
   <li>Select <strong>EPUB</strong> as output</li>
   <li>Download and load into your e-reader</li>
-  <li>Read articles offline with adjustable fonts</li>
+  <li>Read articles offline with customizable fonts</li>
 </ul>
 
-<h2 id="why">Why convert to EPUB?</h2>
+<h2 id="understanding-formats">Understanding HTML and EPUB</h2>
+
+<h3>What is HTML?</h3>
+<p>
+  HTML (HyperText Markup Language) is the foundation of every webpage. It structures content with semantic elements: headings, paragraphs, lists, links, and images. HTML is designed for browsers—interactive, connected, with infinite scroll, animations, ads, and navigation. Great for browsing, but not always great for focused reading.
+</p>
+<p>
+  Web content often comes with distractions: sidebars, comment sections, advertisements, related article suggestions, cookie banners. Even clean, well-designed articles compete with browser tabs, notifications, and the ever-present temptation to click away.
+</p>
+
+<h3>What is EPUB?</h3>
+<p>
+  EPUB (Electronic Publication) is the open ebook standard. Unlike fixed PDF pages, EPUB content reflows to fit any screen—from 6-inch Kindles to tablets to phones. Readers control the experience: font size, typeface, line spacing, margins, and color themes. EPUB is designed for reading, not browsing.
+</p>
+<p>
+  Interestingly, EPUB is built on web technologies—XHTML and CSS—but packaged for offline reading. Converting HTML to EPUB essentially repackages web content for e-readers, stripping away the noise and delivering just the content.
+</p>
+
+<h2 id="why">Why Convert HTML to EPUB?</h2>
+
+<h3>1. Comfortable Reading on E-Ink</h3>
+<p>
+  E-ink displays are easier on the eyes than backlit screens. Reading long articles on a Kindle is genuinely more comfortable than reading on a laptop or phone. Converting HTML to EPUB lets you enjoy web content on purpose-built reading devices.
+</p>
+
+<h3>2. Offline Access</h3>
+<p>
+  E-readers don't require internet connections. Convert that article before your flight, load it onto your Kindle, and read at 30,000 feet without paying for WiFi. Web content becomes truly portable.
+</p>
+
+<h3>3. Distraction-Free Environment</h3>
+<p>
+  No ads. No notifications. No "you might also like" suggestions. No browser tabs calling for attention. EPUB on an e-reader delivers pure, focused reading time.
+</p>
+
+<h3>4. Customizable Typography</h3>
+<p>
+  Websites choose fonts that may not suit your preferences or vision needs. EPUB readers let you pick fonts, sizes, and spacing. Make any article readable on your terms.
+</p>
+
+<h3>5. Personal Library Building</h3>
+<p>
+  Collect important articles, tutorials, and documentation into your personal ebook library. Reference them anytime without hunting through bookmarks or hoping the website still exists.
+</p>
+
+<h3>6. Better for Long-Form Content</h3>
+<p>
+  Some articles are book-length. Reading 15,000 words on a screen is exhausting. Converting to EPUB transforms long reads into a comfortable book experience.
+</p>
+
+<h2 id="best-results">What Converts Best</h2>
+<p>
+  HTML conversion quality depends on the source content:
+</p>
+
+<h3>Ideal for Conversion</h3>
 <ul>
-  <li><strong>Offline reading</strong> — No internet required</li>
-  <li><strong>E-ink friendly</strong> — Perfect for Kindle, Kobo</li>
-  <li><strong>Customizable</strong> — Change fonts, size, spacing</li>
-  <li><strong>No ads or clutter</strong> — Just the content</li>
+  <li><strong>Article pages:</strong> Blog posts, news articles, essays, tutorials</li>
+  <li><strong>Documentation:</strong> Technical guides, API references, manuals</li>
+  <li><strong>Long-form content:</strong> Investigative journalism, narratives, serialized content</li>
+  <li><strong>Clean HTML:</strong> Pages with semantic markup (proper headings, paragraphs)</li>
 </ul>
 
-<h2 id="steps">How to convert</h2>
-<ol>
-  <li>Open <a href="/tools/text-converter/">TinyUtils Document Converter</a></li>
-  <li>Upload your HTML file or saved webpage</li>
-  <li>Choose <strong>EPUB</strong> format</li>
-  <li>Click <strong>Convert</strong></li>
-  <li>Transfer to your e-reader</li>
-</ol>
-
-<h2 id="best-results">For best results</h2>
+<h3>May Need Attention</h3>
 <ul>
-  <li><strong>Clean HTML</strong> — Semantic markup converts better</li>
-  <li><strong>Proper headings</strong> — Creates table of contents</li>
-  <li><strong>Embedded images</strong> — External images may not load</li>
-  <li><strong>Single article</strong> — Works better than full sites</li>
+  <li><strong>Navigation-heavy pages:</strong> Menus and sidebars may clutter the output</li>
+  <li><strong>Interactive content:</strong> JavaScript-dependent features won't work</li>
+  <li><strong>Heavily styled pages:</strong> Complex CSS layouts simplify in reflowable EPUB</li>
+  <li><strong>Image galleries:</strong> Layout-dependent image arrangements may not transfer well</li>
 </ul>
 
-<h2 id="use-cases">Common use cases</h2>
-
-<h3>Long-form articles</h3>
-<p>
-  Save that 10,000-word article for reading on your
-  morning commute. No WiFi needed.
-</p>
-
-<h3>Documentation offline</h3>
-<p>
-  Convert web-based documentation for offline reference
-  when you're coding without internet.
-</p>
-
-<h3>Research reading</h3>
-<p>
-  Collect web articles into ebooks for focused study
-  away from browser distractions.
-</p>
-
-<h2 id="what-converts">What converts well</h2>
+<h2 id="what-converts">How HTML Elements Map to EPUB</h2>
 <table>
   <thead>
     <tr>
@@ -66,50 +91,178 @@
   </thead>
   <tbody>
     <tr>
-      <td>&lt;article&gt;</td>
-      <td>Main content</td>
+      <td>&lt;article&gt;, &lt;main&gt;</td>
+      <td>Primary content area</td>
     </tr>
     <tr>
-      <td>&lt;h1&gt; - &lt;h6&gt;</td>
-      <td>Chapter/section headings</td>
-    </tr>
-    <tr>
-      <td>&lt;img&gt; (embedded)</td>
-      <td>Inline images</td>
+      <td>&lt;h1&gt; through &lt;h6&gt;</td>
+      <td>Headings (create TOC structure)</td>
     </tr>
     <tr>
       <td>&lt;p&gt;</td>
       <td>Paragraphs</td>
     </tr>
     <tr>
+      <td>&lt;strong&gt;, &lt;b&gt;</td>
+      <td>Bold text</td>
+    </tr>
+    <tr>
+      <td>&lt;em&gt;, &lt;i&gt;</td>
+      <td>Italic text</td>
+    </tr>
+    <tr>
       <td>&lt;ul&gt;, &lt;ol&gt;</td>
       <td>Lists</td>
+    </tr>
+    <tr>
+      <td>&lt;blockquote&gt;</td>
+      <td>Block quotes</td>
+    </tr>
+    <tr>
+      <td>&lt;a&gt;</td>
+      <td>Links (if href is absolute)</td>
+    </tr>
+    <tr>
+      <td>&lt;img&gt; (embedded)</td>
+      <td>Images (if included in upload)</td>
+    </tr>
+    <tr>
+      <td>&lt;table&gt;</td>
+      <td>Tables (may simplify)</td>
     </tr>
   </tbody>
 </table>
 
-<h2 id="faq">FAQ</h2>
+<h2 id="steps">How to Convert HTML to EPUB</h2>
+
+<h3>Using TinyUtils Document Converter</h3>
+<ol>
+  <li>Save the webpage as HTML (File > Save As in your browser)</li>
+  <li>Navigate to <a href="/tools/text-converter/">TinyUtils Document Converter</a></li>
+  <li>Upload your saved HTML file</li>
+  <li>Select <strong>EPUB</strong> from the output format dropdown</li>
+  <li>Click <strong>Convert</strong> to process the page</li>
+  <li>Download your .epub file</li>
+  <li>Transfer to your e-reader</li>
+</ol>
+<p>
+  The converter extracts content, preserves semantic structure, generates a table of contents from headings, and packages everything into a valid EPUB.
+</p>
+
+<h3>Handling Images</h3>
+<p>
+  Images in HTML can be inline (embedded) or external (referenced by URL). For best results:
+</p>
+<ul>
+  <li>If your HTML references external images, they may not appear in the EPUB</li>
+  <li>For pages with important images, save the complete webpage (HTML with images folder)</li>
+  <li>Upload the HTML file; if images are in a relative path, they'll be included</li>
+</ul>
+
+<h3>Batch Conversion</h3>
+<p>
+  Converting multiple articles? Upload several HTML files at once. The converter processes each file separately and delivers all EPUBs in a ZIP archive.
+</p>
+
+<h2 id="use-cases">Common Use Cases</h2>
+
+<h3>Long-Form Articles</h3>
+<p>
+  That 10,000-word feature article deserves better than a browser window. Convert it to EPUB and read on your Kindle during your commute, at the beach, or in bed without blue light from screens.
+</p>
+
+<h3>Technical Documentation</h3>
+<p>
+  Developer documentation often lives online, but you might need it offline. Convert documentation pages to EPUB for reference when coding without internet access.
+</p>
+
+<h3>Research Collection</h3>
+<p>
+  Gathering web articles for a project or paper? Convert them to EPUBs for focused reading away from browser distractions. Take notes on your e-reader's annotation feature.
+</p>
+
+<h3>Language Learning</h3>
+<p>
+  Foreign language articles are great for learning. Convert them to EPUB to read on an e-reader with built-in dictionary lookup—tap any word for an instant definition.
+</p>
+
+<h3>Archival</h3>
+<p>
+  Web pages disappear. Links rot. Converting important articles to EPUB creates a personal archive that doesn't depend on websites staying online.
+</p>
+
+<h3>Content Curation</h3>
+<p>
+  Build curated collections of web content on specific topics. Convert the best articles and organize them in your e-reader library for future reference.
+</p>
+
+<h2 id="readers">Compatible E-Readers and Apps</h2>
+<ul>
+  <li><strong>Amazon Kindle:</strong> Newer Kindles support EPUB. Older models: email the EPUB to your Kindle address for automatic conversion.</li>
+  <li><strong>Kobo:</strong> Native EPUB support. Transfer via USB or cloud sync.</li>
+  <li><strong>Apple Books:</strong> Full EPUB support on iPhone, iPad, and Mac.</li>
+  <li><strong>Google Play Books:</strong> Upload EPUBs to your library via the web interface.</li>
+  <li><strong>Barnes & Noble Nook:</strong> Native EPUB support.</li>
+  <li><strong>Calibre:</strong> Desktop ebook management with EPUB support and format conversion.</li>
+  <li><strong>Mobile apps:</strong> Lithium, Moon+ Reader, Aldiko, and many others on Android and iOS.</li>
+</ul>
+
+<h2 id="faq">Frequently Asked Questions</h2>
 
 <h3>Will styling be preserved?</h3>
 <p>
-  Basic styling (bold, italic) transfers. Complex CSS layouts
-  are simplified for reflowable text.
+  Basic text formatting (bold, italic, headings) transfers. Complex CSS layouts—multi-column designs, precise positioning, custom fonts—are simplified for reflowable ebook text. This is usually an improvement for reading.
 </p>
 
 <h3>What about navigation menus?</h3>
 <p>
-  Site navigation typically doesn't convert meaningfully.
-  Extract the main content before converting.
+  Site navigation (menus, footers, sidebars) typically doesn't make sense in an ebook and may appear as unwanted content. For cleanest results, save just the article content or extract the main content before converting.
 </p>
 
-<h3>Can I batch convert multiple pages?</h3>
+<h3>Can I convert complete websites?</h3>
 <p>
-  Convert pages individually. For a multi-chapter ebook,
-  consider merging the HTML first.
+  The converter handles individual HTML files. For multi-page content, convert pages separately or merge them into a single HTML file first. Each page becomes an EPUB; you can combine them later with ebook management software like Calibre.
 </p>
 
-<h2 id="next">Next steps</h2>
+<h3>What about JavaScript-generated content?</h3>
 <p>
-  Want to read web content on your e-reader? Convert with
-  <a href="/tools/text-converter/">TinyUtils Document Converter</a>.
+  Content generated by JavaScript may not be captured when you save the page. The converter works with static HTML. For JavaScript-heavy pages, use browser "Save as PDF" first, then convert that—or find the actual content source.
+</p>
+
+<h3>Will links work?</h3>
+<p>
+  Internal links (within the document) work in EPUB. External links (to other websites) may or may not be clickable depending on your e-reader's capabilities. Some e-readers open links in a built-in browser.
+</p>
+
+<h3>What's the maximum file size?</h3>
+<p>
+  The converter handles HTML files up to 50MB. Most article pages are far smaller. Very large files with many images may take a bit longer to process.
+</p>
+
+<h2 id="tips">Tips for Better Conversions</h2>
+<ul>
+  <li><strong>Save complete pages:</strong> Use "Save Page As" with "Web Page, Complete" option to include images.</li>
+  <li><strong>Clean up first:</strong> Some browser extensions can remove ads and navigation before saving.</li>
+  <li><strong>Check the source:</strong> Well-structured HTML with proper headings converts better than div-soup.</li>
+  <li><strong>Test on device:</strong> After conversion, verify the EPUB looks good on your actual e-reader.</li>
+</ul>
+
+<h2 id="why-online">Why Use an Online Converter?</h2>
+<p>
+  While browser extensions exist for saving articles, a proper HTML-to-EPUB converter provides:
+</p>
+<ul>
+  <li><strong>Proper EPUB structure:</strong> Valid ebook format with navigation and metadata</li>
+  <li><strong>Table of contents:</strong> Generated from headings for easy navigation</li>
+  <li><strong>Cross-platform:</strong> Works from any device with a browser</li>
+  <li><strong>Batch processing:</strong> Convert multiple files at once</li>
+  <li><strong>Consistent output:</strong> Same quality regardless of source page complexity</li>
+</ul>
+
+<h2 id="next">Ready to Read the Web on Your E-Reader?</h2>
+<p>
+  Converting HTML to EPUB transforms web content into comfortable, portable ebooks. Open <a href="/tools/text-converter/">TinyUtils Document Converter</a>, upload your saved webpage, and download an EPUB ready for your Kindle, Kobo, or any e-reader.
+</p>
+<p>
+  Need other format conversions? Check out our guides for <a href="/blog/epub-to-markdown-converter">EPUB to Markdown</a>, <a href="/blog/html-to-markdown-converter">HTML to Markdown</a>, and <a href="/blog/pdf-to-epub-converter">PDF to EPUB</a> workflows.
 </p>

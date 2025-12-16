@@ -14,7 +14,7 @@
   <li>Use <a href="/tools/image-compressor/">TinyUtils Image Compressor</a> to convert WebP to PNG.</li>
   <li>PNG files will be larger than the original WebP (that's expected).</li>
   <li>Transparency is preserved during conversion.</li>
-  <li>No upload required — conversion happens in your browser.</li>
+  <li>If privacy matters: use a converter that runs locally in your browser (and verify in DevTools → Network).</li>
 </ul>
 
 <h2 id="why">Why convert WebP to PNG?</h2>
@@ -23,6 +23,25 @@
   <li><strong>Editing</strong> — PNG is universally supported in image editors</li>
   <li><strong>Printing</strong> — Print services often prefer PNG or TIFF</li>
   <li><strong>Transparency</strong> — Need an editable file with alpha channel</li>
+</ul>
+
+<h2 id="when-not">When PNG isn’t the right target</h2>
+<p>
+  PNG is fantastic for logos, UI, and anything that needs transparency.
+  It’s not always the best choice for photos.
+</p>
+<ul>
+  <li>
+    <strong>If it’s a photo:</strong> JPEG is usually smaller and widely accepted.
+    Try <a href="/blog/webp-to-jpg-converter/">WebP → JPG</a>.
+  </li>
+  <li>
+    <strong>If you’re converting just to upload to the web:</strong> see if the platform accepts WebP first.
+    Plenty do now, and you’ll keep the smaller file.
+  </li>
+  <li>
+    <strong>If you need transparency:</strong> PNG is the safe choice.
+  </li>
 </ul>
 
 <h2 id="how">How to convert WebP to PNG</h2>
@@ -35,6 +54,13 @@
 
 <p>
   That's it. No quality slider needed — PNG is lossless.
+</p>
+
+<h2 id="privacy">Quick “no upload” sanity check</h2>
+<p>
+  “No upload” should mean your file data never leaves your device.
+  If you want to verify: open DevTools → <strong>Network</strong>, convert one file, and look for any large <code>POST</code> requests.
+  You’ll still see normal requests for the website itself — you’re checking for image data uploads.
 </p>
 
 <h2 id="size">Why is my PNG bigger than the WebP?</h2>
@@ -67,6 +93,17 @@
 <p>
   For best results, start with high-quality WebP files (85%+) if you know you'll need to convert later.
 </p>
+
+<h2 id="weird">If the PNG looks worse than expected</h2>
+<p>
+  This surprises people: converting to PNG doesn’t magically “restore” detail. It can only preserve what’s already in the WebP.
+  A few common gotchas:
+</p>
+<ul>
+  <li><strong>Blocky/shimmery areas:</strong> the WebP was saved at a low quality and the artifacts are baked in.</li>
+  <li><strong>Halo around cutouts:</strong> the WebP might have been flattened against a background before you got it.</li>
+  <li><strong>Text looks crunchy:</strong> if it’s a screenshot or UI, try to find the original PNG/SVG instead of converting.</li>
+</ul>
 
 <h2 id="alternatives">When to use JPEG instead</h2>
 <p>
@@ -102,4 +139,8 @@
 <p>
   Need to convert WebP to PNG? Open <a href="/tools/image-compressor/">TinyUtils Image Compressor</a>,
   drop in your files, and get PNG versions in seconds.
+</p>
+<p>
+  One small workflow tip: keep the original WebP if you’re going to publish it back to the web.
+  Use the PNG for editing, then export a fresh WebP/JPEG for shipping.
 </p>
