@@ -991,7 +991,6 @@ def convert_one(
                     options=opts,
                     original_path=input_path,
                     original_from_format=from_format,
-                    extract_dir=extract_dir,
                 )
 
                 # DOCX stage size + suspected-blank guard for ODT/DOCX/HTML
@@ -1064,13 +1063,7 @@ def convert_one(
                     hasMoreNodes=has_more_nodes,
                 )
 
-            # Only create separate media artifact if:
-            # 1. Media exists
-            # 2. AND (markdown is NOT the only target OR no markdown target at all)
-            # If markdown is the only target, media is already bundled with it
-            has_md_target = "md" in normalized_targets or "markdown" in normalized_targets
-            md_only = has_md_target and len(normalized_targets) == 1
-            media_artifact = None if md_only else _build_media_artifact(extract_dir, _safe_stem(safe_name))
+            media_artifact = _build_media_artifact(extract_dir, _safe_stem(safe_name))
 
             result = ConversionResult(
                 name=name,
@@ -1249,7 +1242,6 @@ def _build_target_artifacts(
     options: Optional[ConversionOptions] = None,
     original_path: Optional[Path] = None,
     original_from_format: Optional[str] = None,
-    extract_dir: Optional[Path] = None,
 ) -> List[TargetArtifact]:
     artifacts: List[TargetArtifact] = []
     for target in targets:
@@ -1259,17 +1251,7 @@ def _build_target_artifacts(
             dialect = (md_dialect or default_dialect).strip().lower()
             # If dialect matches our default cleaned markdown, use cached text directly
             if dialect in (default_dialect, "markdown", "md", pandoc_runner.DEFAULT_OUTPUT_FORMAT):
-                # Check if we should bundle with media
-                data, artifact_name = _bundle_markdown_with_media(
-                    cleaned_path, extract_dir, base_name
-                )
-                # Update content type if bundled into ZIP
-                content_type = (
-                    "application/zip" if artifact_name.endswith(".zip")
-                    else TARGET_CONTENT_TYPES["md"]
-                )
-                if artifact_name.endswith(".zip") and logs is not None:
-                    logs.append("md_bundled_with_media=true")
+                data = cleaned_text.encode("utf-8")
             else:
                 pypandoc = _get_pypandoc()
                 try:
@@ -1280,16 +1262,12 @@ def _build_target_artifacts(
                         extra_args=["--wrap=none"],
                     )
                     data = rendered.encode("utf-8")
-                    artifact_name = f"{base_name}.{TARGET_EXTENSIONS[target]}"
-                    content_type = TARGET_CONTENT_TYPES["md"]
                     if logs is not None:
                         logs.append(f"md_dialect={dialect}")
                 except Exception as exc:
                     if logs is not None:
                         logs.append(f"md_dialect_error={exc.__class__.__name__}")
                     data = cleaned_text.encode("utf-8")
-                    artifact_name = f"{base_name}.{TARGET_EXTENSIONS[target]}"
-                    content_type = TARGET_CONTENT_TYPES["md"]
         else:
             # Prefer direct conversion from rich sources for higher fidelity.
             direct_rich_sources = {"odt", "docx", "rtf", "epub", "html"}
@@ -1322,14 +1300,11 @@ def _build_target_artifacts(
                     )
             else:
                 data = _render_markdown_target(cleaned_path, target, logs=logs, options=options)
-            # Set standard artifact metadata for non-md targets
-            artifact_name = f"{base_name}.{TARGET_EXTENSIONS[target]}"
-            content_type = TARGET_CONTENT_TYPES[target]
         artifacts.append(
             TargetArtifact(
                 target=target,
-                name=artifact_name,
-                content_type=content_type,
+                name=f"{base_name}.{TARGET_EXTENSIONS[target]}",
+                content_type=TARGET_CONTENT_TYPES[target],
                 data=data,
             )
         )
@@ -2146,37 +2121,6 @@ def _build_media_artifact(media_dir: Optional[Path], base_name: str) -> Optional
             bundle.write(file_path, file_path.relative_to(media_dir))
     data = archive_path.read_bytes()
     return MediaArtifact(name=archive_path.name, content_type="application/zip", data=data)
-
-
-def _bundle_markdown_with_media(
-    md_path: Path,
-    media_dir: Optional[Path],
-    base_name: str,
-) -> Tuple[bytes, str]:
-    """Bundle markdown file and media directory into a single ZIP.
-
-    Returns tuple of (zip_data, zip_filename).
-    If no media exists, returns (md_data, md_filename) unchanged.
-    """
-    # If no media directory or it's empty, return markdown as-is
-    if not media_dir or not media_dir.exists():
-        return md_path.read_bytes(), f"{base_name}.md"
-
-    files = [path for path in media_dir.rglob("*") if path.is_file()]
-    if not files:
-        return md_path.read_bytes(), f"{base_name}.md"
-
-    # Create bundle ZIP with markdown + media
-    bundle_path = md_path.parent / f"{base_name}.zip"
-    with zipfile.ZipFile(bundle_path, "w", compression=zipfile.ZIP_DEFLATED) as bundle:
-        # Add the markdown file at root
-        bundle.write(md_path, f"{base_name}.md")
-        # Add all media files in media/ subdirectory
-        for file_path in sorted(files):
-            arcname = "media" / file_path.relative_to(media_dir)
-            bundle.write(file_path, arcname)
-
-    return bundle_path.read_bytes(), bundle_path.name
 
 
 def _safe_name(name: str) -> str:
