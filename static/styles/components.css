@@ -644,6 +644,39 @@ html[data-theme="light"] .glass:hover {
   }
 }
 
+/* Accessibility: Respect reduced motion for orbs */
+@media (prefers-reduced-motion: reduce) {
+  .orb {
+    animation: none;
+  }
+}
+
+/* Performance: Reduce blur on mobile devices */
+@media (max-width: 768px) {
+  .glass,
+  .card,
+  .tool-card,
+  [class*="glass"] {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .orb {
+    filter: blur(60px); /* Reduced from 100px */
+  }
+}
+
+/* Fallback for browsers without backdrop-filter support */
+@supports not (backdrop-filter: blur(1px)) {
+  .glass,
+  .card,
+  .tool-card,
+  [class*="glass"] {
+    background: var(--surface-base);
+    border: 2px solid var(--glass-border);
+  }
+}
+
 /* ============================================
    FULL-WIDTH STICKY HEADER - Liquid Glass Design
    ============================================ */
