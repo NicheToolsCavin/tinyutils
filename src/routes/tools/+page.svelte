@@ -319,8 +319,12 @@
 </div>
 
 <style>
+  /* ═══════════════════════════════════════════════════════════
+     LIQUID GLASS TOOLS HUB
+     ═══════════════════════════════════════════════════════════ */
+
   .tools-sections-wrapper {
-    margin-top: var(--space-8);
+    margin-top: var(--space-12);
   }
 
   /* Tool Section Headers */
@@ -330,7 +334,7 @@
   }
 
   .tools-section-bottom {
-    margin-top: var(--space-8);
+    margin-top: var(--space-10);
   }
 
   .tools-section-bottom:first-child {
@@ -339,39 +343,84 @@
 
   .tools-top-layout {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
-    gap: var(--space-6);
-    margin-top: var(--space-6);
+    grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
+    gap: var(--space-8);
+    margin-top: var(--space-8);
   }
 
   /* Bottom layout mirrors top layout structure */
   .tools-bottom-layout {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
-    gap: var(--space-6);
-    margin-top: var(--space-8);
+    grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
+    gap: var(--space-8);
+    margin-top: var(--space-10);
   }
 
-  /* Enhanced Tool Cards */
+  /* Enhanced Tool Cards Grid */
   .tools-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
     gap: var(--space-6);
     align-items: stretch;
   }
 
   .tools-top-layout .tools-grid {
-    grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
   }
 
   /* Single featured tool - centered with max-width */
   .tools-grid.single-featured {
-    max-width: 600px;
+    max-width: 640px;
     margin: 0 auto;
   }
 
+  /* Glass "See more" button */
   .see-more {
     text-align: center;
-    margin: var(--space-6) 0 var(--space-2);
+    margin: var(--space-10) 0 var(--space-6);
+  }
+
+  .see-more .btn {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    padding: var(--space-3) var(--space-6);
+    border-radius: var(--radius-xl);
+    color: var(--text-primary);
+    font-weight: var(--font-medium);
+    transition: all 0.3s ease;
+  }
+
+  .see-more .btn:hover {
+    background: var(--glass-bg-hover);
+    border-color: var(--accent-primary);
+    transform: translateY(-2px);
+  }
+
+  /* Light mode enhancements */
+  :global(html[data-theme="light"]) .see-more .btn {
+    background: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+
+  :global(html[data-theme="light"]) .see-more .btn:hover {
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .tools-top-layout,
+    .tools-bottom-layout {
+      grid-template-columns: 1fr;
+      gap: var(--space-6);
+    }
+
+    .tools-grid {
+      grid-template-columns: 1fr;
+    }
   }
 </style>

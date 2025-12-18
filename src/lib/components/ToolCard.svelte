@@ -37,40 +37,82 @@
 </article>
 
 <style>
+  /* Liquid Glass Tool Card */
   .tool-card-enhanced {
     position: relative;
-    background: var(--surface-base);
-    border: 1px solid var(--border-default);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius-2xl);
-    padding: var(--space-5);
-    transition: all var(--transition-base);
+    padding: var(--space-6);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
+    gap: var(--space-3);
     height: 100%;
     min-height: 440px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   }
 
+  /* Light mode: Full liquid glass effect */
+  :global(html[data-theme="light"]) .tool-card-enhanced {
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.3) 100%),
+      rgba(255, 255, 255, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow:
+      0 8px 32px rgba(31, 38, 135, 0.08),
+      0 1px 0 rgba(255, 255, 255, 0.9) inset,
+      0 -1px 0 rgba(0, 0, 0, 0.05) inset;
+  }
+
+  /* Glass shine overlay - top highlight */
   .tool-card-enhanced::before {
     content: '';
     position: absolute;
-    inset: -1px;
-    border-radius: inherit;
-    border: 1px solid rgba(148, 163, 184, 0.35);
-    opacity: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--card-highlight);
+  }
+
+  /* Glass shine - curved surface reflection */
+  .tool-card-enhanced::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 100%);
+    border-radius: 24px 24px 100px 100px;
     pointer-events: none;
-    transition: opacity var(--transition-base), border-color var(--transition-base);
+    opacity: 0;
+  }
+
+  :global(html[data-theme="light"]) .tool-card-enhanced::after {
+    opacity: 1;
   }
 
   .tool-card-enhanced:hover {
-    transform: translateY(-4px);
-    border-color: var(--hover-accent);
-    box-shadow: 0 18px 50px var(--hover-shadow-color);
+    transform: translateY(-8px);
+    border-color: var(--glass-border-hover);
+    box-shadow: 0 24px 64px var(--glass-shadow);
   }
 
-  .tool-card-enhanced:hover::before {
-    opacity: 1;
-    border-color: var(--brand-500, #3b82f6);
+  :global(html[data-theme="light"]) .tool-card-enhanced:hover {
+    transform: translateY(-8px);
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.5) 100%),
+      rgba(255, 255, 255, 0.65);
+    border-color: rgba(255, 255, 255, 0.9);
+    box-shadow:
+      0 24px 64px rgba(31, 38, 135, 0.12),
+      0 1px 0 rgba(255, 255, 255, 1) inset,
+      0 -1px 0 rgba(0, 0, 0, 0.05) inset;
   }
 
   .tool-card-icon {
@@ -78,6 +120,8 @@
     line-height: 1;
     margin-bottom: var(--space-2);
     display: block;
+    position: relative;
+    z-index: 1;
   }
 
   .tool-card-title {
@@ -86,6 +130,8 @@
     color: var(--text-primary);
     margin: 0 0 var(--space-2);
     line-height: 1.3;
+    position: relative;
+    z-index: 1;
   }
 
   .tool-card-description {
@@ -93,6 +139,8 @@
     line-height: 1.6;
     flex: 1;
     margin: 0;
+    position: relative;
+    z-index: 1;
   }
 
   .tool-features {
@@ -100,17 +148,27 @@
     flex-wrap: wrap;
     gap: var(--space-2);
     margin-top: var(--space-2);
+    position: relative;
+    z-index: 1;
   }
 
   .feature-badge-small {
     display: inline-block;
     padding: var(--space-1) var(--space-2);
-    background: rgba(59, 130, 246, 0.1);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    border-radius: var(--radius-md);
+    background: rgba(59, 130, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.25);
+    border-radius: var(--radius-full);
     font-size: var(--text-xs);
     color: var(--brand-400);
     white-space: nowrap;
+    backdrop-filter: blur(4px);
+  }
+
+  :global(html[data-theme="light"]) .feature-badge-small {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.5) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 2px 8px rgba(31, 38, 135, 0.06), 0 1px 0 rgba(255, 255, 255, 0.9) inset;
+    color: #3b82f6;
   }
 
   .tool-card-action {
@@ -119,6 +177,8 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
+    position: relative;
+    z-index: 1;
   }
 
   .tool-card-subbox {
@@ -195,7 +255,20 @@
     }
     to {
       opacity: 1;
-      transform: translateY(0);
+      /* No transform here - allows hover transforms to work */
+    }
+  }
+
+  /* Accessibility: Respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .fade-in-up,
+    .tool-card-enhanced {
+      animation: none !important;
+      transition: none !important;
+    }
+    .delay-1, .delay-2, .delay-3, .delay-4, .delay-5 {
+      opacity: 1 !important;
+      animation: none !important;
     }
   }
 

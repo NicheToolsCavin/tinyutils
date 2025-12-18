@@ -302,62 +302,153 @@
 </div>
 
 <style>
+  /* ═══════════════════════════════════════════════════════════
+     LIQUID GLASS SITEMAP GENERATOR
+     ═══════════════════════════════════════════════════════════ */
+
   .tool-page {
     display: flex;
     flex-direction: column;
     gap: var(--space-6);
+    padding-bottom: var(--space-10);
   }
 
   .tool-hero {
     text-align: center;
-    padding: var(--space-10) 0 var(--space-6);
+    padding: var(--space-12) 0 var(--space-8);
   }
 
   .tool-hero-icon {
-    font-size: 3rem;
+    font-size: 3.5rem;
     display: block;
+    margin-bottom: var(--space-4);
+  }
+
+  .tool-hero h1 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: var(--font-bold);
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
     margin-bottom: var(--space-3);
+    letter-spacing: -0.02em;
   }
 
   .tool-hero-subtitle {
     max-width: 720px;
     margin: 0 auto;
     color: var(--text-secondary);
+    font-size: 0.98rem;
   }
 
+  /* Glass card */
   .card {
-    border-radius: var(--radius-xl);
-    border: 1px solid var(--border-default);
-    background: var(--surface-base);
+    position: relative;
+    border-radius: var(--radius-2xl);
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
     padding: var(--space-6);
-    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
+    opacity: 0.6;
+  }
+
+  .card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 40%;
+    background: var(--glass-shine);
+    pointer-events: none;
+    opacity: 0.3;
+  }
+
+  .card:hover {
+    border-color: var(--accent-primary);
+    box-shadow: 0 12px 40px var(--glass-shadow);
+  }
+
+  :global(html[data-theme="light"]) .card {
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+
+  :global(html[data-theme="light"]) .card::after {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, transparent 100%);
+    opacity: 1;
+  }
+
+  .card h2 {
+    position: relative;
+    z-index: 1;
+    color: var(--text-primary);
+    font-weight: var(--font-semibold);
   }
 
   .tool-grid {
     display: grid;
     grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.4fr);
     gap: var(--space-6);
+    position: relative;
+    z-index: 1;
   }
 
   .field-group {
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
+    position: relative;
+    z-index: 1;
   }
 
   .field-label {
-    font-weight: 500;
+    font-weight: var(--font-medium);
+    color: var(--text-primary);
   }
 
+  /* Glass inputs */
   .input,
   .textarea,
   select.input {
     width: 100%;
     border-radius: var(--radius-lg);
-    border: 1px solid var(--border-default);
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     padding: var(--space-2_5) var(--space-3);
-    background: var(--surface-input);
     color: var(--text-primary);
+    transition: all 0.2s ease;
+  }
+
+  .input:focus,
+  .textarea:focus,
+  select.input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  }
+
+  :global(html[data-theme="light"]) .input,
+  :global(html[data-theme="light"]) .textarea,
+  :global(html[data-theme="light"]) select.input {
+    background: rgba(255, 255, 255, 0.6);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06);
   }
 
   .textarea {
@@ -370,6 +461,8 @@
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: var(--space-4);
     margin-top: var(--space-6);
+    position: relative;
+    z-index: 1;
   }
 
   .checkbox-group {
@@ -382,6 +475,16 @@
     gap: var(--space-2);
     align-items: center;
     font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+
+  .checkbox code {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    padding: 1px 4px;
+    border-radius: 3px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
   }
 
   .actions-row {
@@ -390,11 +493,40 @@
     gap: var(--space-3);
     align-items: center;
     margin-top: var(--space-4);
+    position: relative;
+    z-index: 1;
   }
 
   .hint {
     font-size: 0.85rem;
-    color: var(--text-muted);
+    color: var(--text-tertiary);
+  }
+
+  .hint kbd {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    border-radius: 4px;
+    border: 1px solid var(--glass-border);
+    padding: 1px 5px;
+    background: var(--glass-bg);
+  }
+
+  /* Glass XML output */
+  .tableWrap {
+    max-height: 420px;
+    overflow: auto;
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    background: var(--glass-bg);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    position: relative;
+    z-index: 1;
+  }
+
+  :global(html[data-theme="light"]) .tableWrap {
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
   }
 
   .xml-output {
@@ -402,25 +534,31 @@
     font-size: 0.85rem;
     white-space: pre;
     padding: var(--space-3);
+    color: var(--text-secondary);
   }
 
-  .tableWrap {
-    max-height: 420px;
-    overflow: auto;
-  }
-
+  /* Glass toast */
   :global(.toast) {
     position: fixed;
     left: 50%;
     bottom: var(--space-6);
     transform: translateX(-50%);
-    background: var(--surface-elevated);
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     color: var(--text-primary);
     padding: var(--space-2) var(--space-4);
     border-radius: var(--radius-full);
-    border: 1px solid var(--border-default);
-    box-shadow: var(--shadow-md);
+    border: 1px solid var(--accent-primary);
+    box-shadow: 0 12px 40px var(--glass-shadow),
+                0 0 20px rgba(59, 130, 246, 0.2);
     z-index: 9999;
+  }
+
+  :global(html[data-theme="light"] .toast) {
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
   }
 
   @media (max-width: 768px) {

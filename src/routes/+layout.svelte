@@ -1,14 +1,60 @@
 <script>
   import { page } from '$app/state';
+  import { browser } from '$app/environment';
   import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
 
   const currentYear = new Date().getFullYear();
 
   injectSpeedInsights();
+
+  // Theme management
+  let theme = $state('dark');
+
+  function getPreferredTheme() {
+    if (!browser) return 'dark';
+    const stored = localStorage.getItem('theme');
+    if (stored) return stored;
+    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  }
+
+  function setTheme(newTheme) {
+    theme = newTheme;
+    if (browser) {
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+    }
+  }
+
+  function toggleTheme() {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  }
+
+  // Initialize theme on mount
+  $effect(() => {
+    if (browser) {
+      const preferredTheme = getPreferredTheme();
+      setTheme(preferredTheme);
+
+      // Listen for system preference changes
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: light)');
+      const handleChange = (e) => {
+        if (!localStorage.getItem('theme')) {
+          setTheme(e.matches ? 'light' : 'dark');
+        }
+      };
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    }
+  });
 </script>
 
 <svelte:head>
   <meta name="google-adsense-account" content="ca-pub-3079281180008443" />
+
+  <!-- Inter font for liquid glass design -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <link rel="icon" href="/icons/tinyutils-icon-dark-32.png" media="(prefers-color-scheme: dark)" />
   <link rel="icon" href="/icons/tinyutils-icon-light-32.png" media="(prefers-color-scheme: light)" />
@@ -23,82 +69,79 @@
     src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3079281180008443"
     crossorigin="anonymous"
   ></script>
-  <script src="/scripts/theme-toggle.js"></script>
   <script defer src="/scripts/consent.js"></script>
   <script defer src="/scripts/googlefc-consent-adapter.js"></script>
   <script defer src="/scripts/adsense-monitor.js"></script>
   <script defer src="/scripts/analytics.js"></script>
 </svelte:head>
 
+<!-- Animated background orbs - 3 orbs: blue, purple, cyan -->
+<div class="bg-orbs">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
 <a href="#main" class="skip-link">Skip to main content</a>
 
 <header class="site-header">
-  <div class="container row between center">
+  <div class="header-inner glass">
     <a class="brand" href="/">TinyUtils</a>
-    <div class="row center">
-      <nav class="nav">
+    <nav class="nav">
+      <a
+        href="/tools/"
+        class:active={page.url.pathname === '/tools' || page.url.pathname.startsWith('/tools/')}
+        aria-current={page.url.pathname === '/tools' || page.url.pathname.startsWith('/tools/') ? 'page' : undefined}
+      >Tools</a>
+      <a
+        href="/blog/"
+        class:active={page.url.pathname.startsWith('/blog')}
+        aria-current={page.url.pathname.startsWith('/blog') ? 'page' : undefined}
+      >Blog</a>
+      <a
+        href="/about/"
+        class:active={page.url.pathname.startsWith('/about')}
+        aria-current={page.url.pathname.startsWith('/about') ? 'page' : undefined}
+      >About</a>
+      <span class="nav-item">
         <a
-          href="/tools/"
-          class:active={page.url.pathname === '/tools' || page.url.pathname.startsWith('/tools/')}
-          aria-current={page.url.pathname === '/tools' || page.url.pathname.startsWith('/tools/') ? 'page' : undefined}
-          >Tools</a
-        >
-        <a
-          href="/blog/"
-          class:active={page.url.pathname.startsWith('/blog')}
-          aria-current={page.url.pathname.startsWith('/blog') ? 'page' : undefined}
-          >Blog</a
-        >
-        <a
-          href="/about.html"
-          class:active={page.url.pathname === '/about.html'}
-          aria-current={page.url.pathname === '/about.html' ? 'page' : undefined}
-          >About</a
-        >
-        <a href="https://buymeacoffee.com/tinyutils" target="_blank" rel="noopener" class="support-link">☕ Support</a>
-        <span class="nav-item">
+          href="/privacy.html"
+          class:active={
+            page.url.pathname === '/privacy.html' ||
+            page.url.pathname === '/cookies.html' ||
+            page.url.pathname === '/terms.html'
+          }
+          aria-current={
+            page.url.pathname === '/privacy.html' ||
+            page.url.pathname === '/cookies.html' ||
+            page.url.pathname === '/terms.html'
+              ? 'page'
+              : undefined
+          }
+        >Privacy</a>
+        <div class="nav-dropdown">
+          <a
+            href="/cookies.html"
+            class:active={page.url.pathname === '/cookies.html'}
+            aria-current={page.url.pathname === '/cookies.html' ? 'page' : undefined}
+          >Cookie settings</a>
           <a
             href="/privacy.html"
-            class:active={
-              page.url.pathname === '/privacy.html' ||
-              page.url.pathname === '/cookies.html' ||
-              page.url.pathname === '/terms.html'
-            }
-            aria-current={
-              page.url.pathname === '/privacy.html' ||
-              page.url.pathname === '/cookies.html' ||
-              page.url.pathname === '/terms.html'
-                ? 'page'
-                : undefined
-            }
-            >Privacy</a
-          >
-          <div class="nav-dropdown">
-            <a
-              href="/cookies.html"
-              class:active={page.url.pathname === '/cookies.html'}
-              aria-current={page.url.pathname === '/cookies.html' ? 'page' : undefined}
-              >Cookie settings</a
-            >
-            <a
-              href="/privacy.html"
-              class:active={page.url.pathname === '/privacy.html'}
-              aria-current={page.url.pathname === '/privacy.html' ? 'page' : undefined}
-              >Privacy policy</a
-            >
-            <a
-              href="/terms.html"
-              class:active={page.url.pathname === '/terms.html'}
-              aria-current={page.url.pathname === '/terms.html' ? 'page' : undefined}
-              >Terms of service</a
-            >
-          </div>
-        </span>
-      </nav>
-      <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false">
-        Dark
+            class:active={page.url.pathname === '/privacy.html'}
+            aria-current={page.url.pathname === '/privacy.html' ? 'page' : undefined}
+          >Privacy policy</a>
+          <a
+            href="/terms.html"
+            class:active={page.url.pathname === '/terms.html'}
+            aria-current={page.url.pathname === '/terms.html' ? 'page' : undefined}
+          >Terms of service</a>
+        </div>
+      </span>
+      <button class="theme-toggle" onclick={toggleTheme} type="button" aria-label="Toggle theme">
+        <span class="icon">{theme === 'dark' ? '☀' : '☾'}</span>
+        <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
       </button>
-    </div>
+    </nav>
   </div>
 </header>
 
@@ -107,43 +150,21 @@
 </main>
 
 <footer class="site-footer">
-  <div
-    class="container row between wrap"
-    style="padding: var(--space-8) var(--space-4); color: var(--text-tertiary);"
-  >
+  <div class="container row between wrap" style="gap: 1rem;">
     <span>
-      © <span id="y">{currentYear}</span> TinyUtils
+      &copy; <span id="y">{currentYear}</span> TinyUtils
     </span>
     <span>
-      <a href="/about.html" style="color: var(--text-tertiary)">About</a> ·
-      <a href="https://buymeacoffee.com/tinyutils" target="_blank" rel="noopener" style="color: var(--brand-500)">☕ Support Us</a> ·
-      <a href="/cookies.html" style="color: var(--text-tertiary)">Cookie &amp; privacy settings</a> ·
-      <a href="/privacy.html" style="color: var(--text-tertiary)">Privacy</a> ·
-      <a href="/terms.html" style="color: var(--text-tertiary)">Terms</a>
+      <a href="/about/">About</a> &middot;
+      <a href="https://buymeacoffee.com/tinyutils" target="_blank" rel="noopener">Support Us</a> &middot;
+      <a href="/cookies.html">Cookie &amp; privacy settings</a> &middot;
+      <a href="/privacy.html">Privacy</a> &middot;
+      <a href="/terms.html">Terms</a>
     </span>
   </div>
 </footer>
 
 <style>
-  :global(.nav a.support-link) {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 8px;
-    border-radius: var(--radius-md);
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    opacity: 0.85;
-    transition:
-      color var(--transition-base),
-      opacity var(--transition-base);
-  }
-
-  :global(.nav a.support-link:hover) {
-    color: var(--brand-500);
-    opacity: 1;
-  }
-
   :global(.nav-item) {
     position: relative;
     display: inline-block;
@@ -154,13 +175,15 @@
     position: absolute;
     top: 100%;
     right: 0;
-    background: var(--surface-base);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-lg);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur, 24px));
+    -webkit-backdrop-filter: blur(var(--glass-blur, 24px));
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
     padding: var(--space-2);
-    margin-top: var(--space-3);
-    min-width: 200px;
-    box-shadow: var(--shadow-xl);
+    margin-top: var(--space-2);
+    min-width: 180px;
+    box-shadow: 0 8px 32px var(--glass-shadow);
     z-index: 1000;
   }
 
@@ -172,15 +195,15 @@
   :global(.nav-dropdown a) {
     display: block;
     padding: var(--space-2) var(--space-3);
-    color: var(--text-primary);
+    color: var(--text-secondary);
     text-decoration: none;
-    border-radius: var(--radius-md);
-    transition: all var(--transition-base);
-    font-size: var(--text-sm);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
   }
 
   :global(.nav-dropdown a:hover) {
-    background: var(--surface-raised);
-    color: var(--brand-500);
+    background: var(--glass-bg-hover);
+    color: var(--text-primary);
   }
 </style>
