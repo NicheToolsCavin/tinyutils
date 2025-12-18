@@ -6,7 +6,7 @@
 import { describe, it, before, after } from 'node:test';
 import assert from 'node:assert';
 import { JSDOM } from 'jsdom';
-import { THEME_COLORS } from '../src/lib/theme/colors.js';
+import { THEME_COLORS, getThemeAwareColors, resetThemeCache } from '../src/lib/theme/colors.js';
 
 // Simulate browser environment
 function setupDOMEnvironment(theme = 'dark') {
@@ -17,36 +17,6 @@ function setupDOMEnvironment(theme = 'dark') {
 
 function teardownDOMEnvironment() {
   delete global.document;
-}
-
-// Copy of the getThemeAwareColors function from text-converter (with memoization)
-// Uses shared THEME_COLORS constants
-let cachedTheme = null;
-let cachedColors = null;
-
-function getThemeAwareColors() {
-  // SSR fallback - use dark theme colors
-  if (typeof document === 'undefined') {
-    return THEME_COLORS.dark;
-  }
-
-  const theme = document.documentElement.getAttribute('data-theme') || 'dark';
-
-  // Memoize: return cached colors if theme hasn't changed
-  if (cachedTheme === theme && cachedColors) {
-    return cachedColors;
-  }
-
-  cachedTheme = theme;
-  cachedColors = THEME_COLORS[theme] || THEME_COLORS.dark;
-
-  return cachedColors;
-}
-
-// Helper to reset cache between tests
-function resetCache() {
-  cachedTheme = null;
-  cachedColors = null;
 }
 
 describe('getThemeAwareColors()', () => {
@@ -224,16 +194,16 @@ describe('getThemeAwareColors()', () => {
 
     before(() => {
       dom = setupDOMEnvironment('dark');
-      resetCache(); // Clear cache before test suite
+      resetThemeCache(); // Clear cache before test suite
     });
 
     after(() => {
       teardownDOMEnvironment();
-      resetCache(); // Clear cache after test suite
+      resetThemeCache(); // Clear cache after test suite
     });
 
     it('should cache colors and return same object reference on repeated calls', () => {
-      resetCache(); // Ensure clean state for this test
+      resetThemeCache(); // Ensure clean state for this test
       // First call - should compute and cache
       const colors1 = getThemeAwareColors();
 
@@ -299,6 +269,50 @@ describe('getThemeAwareColors()', () => {
       assert.strictEqual(results[1], 'rgba(0,0,0,0.15)', 'first light should be black');
       assert.strictEqual(results[2], 'rgba(255,255,255,0.2)', 'second dark should be white');
       assert.strictEqual(results[3], 'rgba(0,0,0,0.15)', 'second light should be black');
+    });
+  });
+
+  describe('Error handling', () => {
+    before(() => {
+      setupDOMEnvironment();
+    });
+
+    after(() => {
+      teardownDOMEnvironment();
+      resetThemeCache();
+    });
+
+    it('should fall back to dark theme colors when theme detection throws error', () => {
+      resetThemeCache(); // Ensure clean state
+
+      // Mock console.error to verify it's called
+      const originalConsoleError = console.error;
+      let errorWasCalled = false;
+      console.error = (...args) => {
+        errorWasCalled = true;
+      };
+
+      // Mock getAttribute to throw an error
+      const originalGetAttribute = document.documentElement.getAttribute;
+      document.documentElement.getAttribute = () => {
+        throw new Error('Simulated DOM access error');
+      };
+
+      try {
+        const colors = getThemeAwareColors();
+
+        // Verify error handler was triggered
+        assert.strictEqual(errorWasCalled, true, 'console.error should be called on error');
+
+        // Verify fallback to dark theme colors
+        assert.strictEqual(colors.tableBorder, THEME_COLORS.dark.tableBorder, 'should return dark theme tableBorder');
+        assert.strictEqual(colors.tableBg, THEME_COLORS.dark.tableBg, 'should return dark theme tableBg');
+        assert.strictEqual(colors.cellBorder, THEME_COLORS.dark.cellBorder, 'should return dark theme cellBorder');
+      } finally {
+        // Restore mocks
+        document.documentElement.getAttribute = originalGetAttribute;
+        console.error = originalConsoleError;
+      }
     });
   });
 });

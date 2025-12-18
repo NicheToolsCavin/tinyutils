@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-  import { THEME_COLORS } from '$lib/theme/colors.js';
+  import { getThemeAwareColors, resetThemeCache } from '$lib/theme/colors.js';
 
   const PREVIEW_PARSE_BUDGET_MS = 150;
   const PREVIEW_RENDER_BUDGET_MS = 750;
@@ -39,56 +39,43 @@
   }
 
   /**
-   * Get theme-aware RGBA colors for inline CSS in iframes.
-   * Memoized to avoid re-computation on every render.
-   * Uses shared THEME_COLORS constants from $lib/theme/colors.js
-   *
-   * @returns {Object} Color palette with tableBorder, tableBg, cellBorder, headerBg, preBg, preBorder
-   */
-  let cachedTheme = null;
-  let cachedColors = null;
-
-  function getThemeAwareColors() {
-    try {
-      // SSR fallback - use dark theme colors
-      if (typeof document === 'undefined') {
-        return THEME_COLORS.dark;
-      }
-
-      const theme = document.documentElement.getAttribute('data-theme') || 'dark';
-
-      // Memoize: return cached colors if theme hasn't changed
-      if (cachedTheme === theme && cachedColors) {
-        return cachedColors;
-      }
-
-      cachedTheme = theme;
-      cachedColors = THEME_COLORS[theme] || THEME_COLORS.dark;
-
-      return cachedColors;
-    } catch (err) {
-      // Graceful fallback if theme detection fails
-      console.error('Failed to get theme colors, falling back to dark theme:', err);
-      logPreviewEvent('theme_colors_error_fallback', {
-        message: String(err && err.message || err)
-      });
-      return THEME_COLORS.dark;
-    }
-  }
-
-  /**
    * Watch for theme changes and invalidate cache when theme toggles.
    * This ensures previews update with correct colors when user switches themes.
    */
   onMount(() => {
     if (typeof document === 'undefined') return;
 
+    /**
+     * Watch for theme changes and invalidate cache when theme toggles.
+     *
+     * TIMING SAFETY:
+     * MutationObserver callbacks are async, but cache invalidation timing is safe because:
+     *
+     * 1. Browser processes DOM mutations synchronously before next render
+     *    - When user clicks theme toggle, data-theme attribute changes immediately
+     *    - MutationObserver callback fires before browser paints next frame
+     *    - Cache is invalidated before any preview component can re-render
+     *
+     * 2. Svelte reactivity + microtask queue guarantee correct order
+     *    - Svelte $effect runs AFTER DOM updates but BEFORE browser paint
+     *    - MutationObserver fires in microtask queue (same timing as Promise.then)
+     *    - Cache invalidation happens before getThemeAwareColors() next call
+     *
+     * 3. Even in edge case where preview renders before callback:
+     *    - getThemeAwareColors() checks current DOM state (getAttribute)
+     *    - If callback hasn't fired yet, it would compute new colors anyway
+     *    - Next render would use correctly cached colors
+     *
+     * ALTERNATIVE CONSIDERED:
+     * Synchronous cache reset in theme toggle onclick handler would be "safer"
+     * but couples preview logic to layout component. MutationObserver keeps
+     * concerns separated while providing sufficient timing guarantees.
+     */
     const observer = new MutationObserver((mutations) => {
       for (const mutation of mutations) {
         if (mutation.attributeName === 'data-theme') {
-          // Theme changed - invalidate cache to force re-computation
-          cachedTheme = null;
-          cachedColors = null;
+          // Theme changed - invalidate shared cache to force re-computation
+          resetThemeCache();
           logPreviewEvent('theme_change_cache_invalidated', {
             newTheme: document.documentElement.getAttribute('data-theme')
           });

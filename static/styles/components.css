@@ -585,12 +585,30 @@ html[data-theme="light"] .glass:hover {
    BACKGROUND ORBS - Liquid Glass Design
    Blue/Purple/Cyan linear gradients with 100px blur
    ============================================ */
+/**
+ * Background orbs container - viewport coverage fix
+ *
+ * ISSUE: Using height: 100% caused gap at bottom of page when scrolling
+ * FIX: height: 100vh + min-height: 100vh ensures full viewport coverage
+ *
+ * Why both properties are needed:
+ * - height: 100vh - Sets initial height to viewport height
+ * - min-height: 100vh - Prevents height from shrinking below viewport
+ *   (important for mobile browsers with dynamic UI that changes viewport height)
+ *
+ * TESTING:
+ * 1. Scroll to bottom of home page in both light and dark modes
+ * 2. Verify no white/transparent gap appears below orbs
+ * 3. Test on mobile Safari/Chrome (address bar hide/show affects viewport)
+ * 4. Verify background doesn't "jump" or flicker during scroll
+ */
 .bg-orbs {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  height: 100vh;
+  min-height: 100vh;  /* Prevents gap on scroll - see comment above */
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
