@@ -1,7 +1,6 @@
 <script>
 	import { fade, slide } from 'svelte/transition';
 	import { onMount } from 'svelte';
-	import Hero from '$lib/components/Hero.svelte';
 	import AdSlot from '$lib/components/AdSlot.svelte';
 
 	// State
@@ -227,90 +226,99 @@
 		content="bulk find replace, multi file search replace, batch text editor, regex replace files, find and replace zip"
 	/>
 	<meta name="robots" content="index, follow" />
+	<link rel="canonical" href="/tools/multi-file-search-replace/" />
 </svelte:head>
 
-<Hero
-	title="Bulk Find & Replace"
-	subtitle="Edit hundreds of files at once. Upload a ZIP, preview the diffs, download."
-/>
+<div class="tool-page" data-testid="mfsr-page">
+	<section class="tool-hero">
+		<span class="tool-hero-icon" aria-hidden="true">🔄</span>
+		<h1>Bulk Find & Replace</h1>
+		<p class="tool-hero-subtitle">
+			Edit hundreds of files at once. Upload a ZIP, preview the diffs, download.
+		</p>
+		<p><a class="cta" href="/tools/">← Back to all tools</a></p>
+	</section>
 
-	<div class="max-w-5xl mx-auto px-4 py-12" data-testid="mfsr-page">
+	<section class="container ad-slot" aria-label="Sponsored">
+		<ins
+			class="adsbygoogle"
+			style="display:block"
+			data-ad-client="ca-pub-3079281180008443"
+			data-ad-slot="3664281983"
+			data-ad-format="auto"
+			data-full-width-responsive="true"
+		></ins>
+		<svelte:element this={'script'}>
+			{`
+				try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) {}
+			`}
+		</svelte:element>
+	</section>
+
 	<!-- Main Card -->
-	<div class="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100">
+	<section class="card">
 		<!-- Step 1: Upload -->
-		<div class="p-8 border-b border-gray-100">
-			<div class="flex items-center justify-between mb-4">
-				<h2 class="text-lg font-semibold text-gray-700">1. Upload Project (ZIP)</h2>
+		<div class="step-section">
+			<div class="step-header">
+				<h2 class="step-title">1. Upload Project (ZIP)</h2>
 				{#if file}
-					<span
-						class="text-green-600 text-sm font-medium bg-green-50 px-3 py-1 rounded-full"
-					>
+					<span class="file-badge">
 						{file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
 					</span>
 				{/if}
 			</div>
 
-			<label class="block w-full cursor-pointer group" data-testid="mfsr-upload-zone">
-				<div
-					class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center transition-all group-hover:border-blue-500 group-hover:bg-blue-50"
-				>
-					<input
-						type="file"
-						accept=".zip"
-						class="hidden"
-						on:change={handleFileSelect}
-					/>
-					<div class="text-gray-500">
-						{#if file}
-							<p class="text-blue-600 font-medium">Click to change file</p>
-						{:else}
-							<span class="text-4xl block mb-2">📦</span>
-							<p class="font-medium text-gray-700">
-								Drag & drop your ZIP file here
-							</p>
-							<p class="text-sm text-gray-400 mt-1">Max 50MB • 500 files</p>
-						{/if}
-					</div>
+			<label class="dropzone" data-testid="mfsr-upload-zone">
+				<input
+					type="file"
+					accept=".zip"
+					class="dropzone-input"
+					on:change={handleFileSelect}
+				/>
+				<div class="dropzone-content">
+					{#if file}
+						<p class="file-change-text">Click to change file</p>
+					{:else}
+						<span class="dropzone-icon">📦</span>
+						<p class="dropzone-title">Drag & drop your ZIP file here</p>
+						<p class="dropzone-hint">Max 50MB • 500 files</p>
+					{/if}
 				</div>
 			</label>
 		</div>
 
 		<!-- Step 2: Configure -->
-		<div class="p-8 bg-gray-50/50">
-			<h2 class="text-lg font-semibold text-gray-700 mb-4">2. Define Rules</h2>
+		<div class="step-section config-section">
+			<h2 class="step-title">2. Define Rules</h2>
 
-			<div class="flex gap-2 mb-6">
+			<div class="mode-switcher">
 				<button
+					type="button"
 					on:click={() => (mode = 'simple')}
-					class="px-5 py-2 rounded-lg font-medium text-sm transition-colors {mode ===
-					'simple'
-						? 'bg-white shadow text-blue-600 ring-1 ring-blue-100'
-						: 'text-gray-500 hover:text-gray-700'}"
+					class="mode-tab"
+					class:active={mode === 'simple'}
 				>
 					Simple Text
 				</button>
 				<button
+					type="button"
 					on:click={() => (mode = 'regex')}
-					class="px-5 py-2 rounded-lg font-medium text-sm transition-colors flex items-center gap-2 {mode ===
-					'regex'
-						? 'bg-white shadow text-purple-600 ring-1 ring-purple-100'
-						: 'text-gray-500 hover:text-gray-700'}"
+					class="mode-tab mode-tab-regex"
+					class:active={mode === 'regex'}
 				>
-					<span>⚡ Advanced Regex</span>
+					⚡ Advanced Regex
 				</button>
 			</div>
 
 			{#if mode === 'regex'}
-				<div
-					class="mb-4 bg-purple-50 border border-purple-100 rounded-lg p-3"
-					transition:slide
-				>
-					<p class="text-sm text-purple-800 font-medium mb-2">Quick Examples:</p>
-					<div class="flex flex-wrap gap-2">
+				<div class="regex-examples" transition:slide>
+					<p class="regex-examples-title">Quick Examples:</p>
+					<div class="regex-examples-grid">
 						{#each REGEX_EXAMPLES as example}
 							<button
+								type="button"
 								on:click={() => applyExample(example)}
-								class="text-xs bg-white px-3 py-1 rounded border border-purple-200 hover:bg-purple-100 transition"
+								class="regex-example-btn"
 								title={example.desc}
 							>
 								{example.name}
@@ -320,12 +328,9 @@
 				</div>
 			{/if}
 
-			<div class="grid grid-cols-1 md:grid-cols-2 gap-6" in:fade>
-				<div>
-					<label
-						class="block text-sm font-medium text-gray-700 mb-2"
-						for="find-text"
-					>
+			<div class="input-grid" in:fade>
+				<div class="input-group">
+					<label class="input-label" for="find-text">
 						Find {mode === 'regex' ? '(Regex Pattern)' : 'Text'}
 					</label>
 					<input
@@ -333,74 +338,48 @@
 						data-testid="mfsr-find-input"
 						bind:value={findText}
 						type="text"
-						class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-3 border font-mono text-sm"
+						class="glass-input"
 						placeholder={mode === 'regex'
 							? 'e.g., \\d{4}-\\d{2}'
 							: 'e.g., Copyright 2023'}
 					/>
 					{#if mode === 'regex'}
-						<p class="text-xs text-gray-500 mt-1">
-							Supports Python re syntax (Multiline enabled)
-						</p>
+						<p class="input-hint">Supports Python re syntax (Multiline enabled)</p>
 					{/if}
 				</div>
-				<div>
-					<label
-						class="block text-sm font-medium text-gray-700 mb-2"
-						for="replace-text"
-					>
-						Replace with
-					</label>
+				<div class="input-group">
+					<label class="input-label" for="replace-text">Replace with</label>
 					<input
 						id="replace-text"
 						data-testid="mfsr-replace-input"
 						bind:value={replaceText}
 						type="text"
-						class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-3 border font-mono text-sm"
+						class="glass-input"
 						placeholder={mode === 'regex' ? 'e.g., \\1-\\2' : 'e.g., Copyright 2025'}
 					/>
 				</div>
 			</div>
 
-			<div class="mt-4 flex items-center">
+			<div class="checkbox-row">
 				<input
 					id="case-sensitive"
 					data-testid="mfsr-case-checkbox"
 					type="checkbox"
 					bind:checked={isCaseSensitive}
-					class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+					class="glass-checkbox"
 				/>
-				<label for="case-sensitive" class="ml-2 text-sm text-gray-600 select-none"
-					>Case Sensitive</label
-				>
+				<label for="case-sensitive" class="checkbox-label">Case Sensitive</label>
 			</div>
 
-			<div class="mt-8 flex justify-end gap-4">
+			<div class="action-row">
 				<button
 					disabled={!file || status === 'uploading' || !findText}
 					on:click={() => processFiles('preview')}
 					data-testid="mfsr-preview-button"
-					class="px-6 py-3 bg-gray-800 hover:bg-gray-900 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+					class="btn primary"
 				>
 					{#if status === 'uploading'}
-						<svg
-							class="animate-spin h-5 w-5 text-white"
-							xmlns="http://www.w3.org/2000/svg"
-							fill="none"
-							viewBox="0 0 24 24"
-							><circle
-								class="opacity-25"
-								cx="12"
-								cy="12"
-								r="10"
-								stroke="currentColor"
-								stroke-width="4"
-							></circle><path
-								class="opacity-75"
-								fill="currentColor"
-								d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-							></path></svg
-						>
+						<span class="spinner-inline">⚙️</span>
 						Scanning...
 					{:else}
 						Preview Changes
@@ -409,138 +388,76 @@
 			</div>
 
 			{#if errorMessage}
-				<div
-					class="mt-4 p-4 bg-red-50 text-red-700 rounded-lg border border-red-100 flex items-start gap-3"
-					transition:slide
-				>
-					<span class="text-xl">⚠️</span>
-					<p>{errorMessage}</p>
+				<div class="error" transition:slide role="status" aria-live="polite">
+					⚠️ {errorMessage}
 				</div>
 			{/if}
 
-			<p class="text-xs text-gray-500 mt-4 text-center">
-				💡 Tip: Press <kbd class="px-2 py-1 bg-gray-200 rounded text-xs">Cmd+Enter</kbd
-				> to preview
+			<p class="tip">
+				💡 Tip: Press <kbd>Cmd+Enter</kbd> to preview
 			</p>
 		</div>
-	</div>
+	</section>
 
 	<!-- Step 3: Results -->
 	{#if status === 'previewing' && previewData}
-		<div class="mt-12" transition:slide data-testid="mfsr-review-section">
-			<div class="flex items-center justify-between mb-6">
-				<h3 class="text-2xl font-bold text-gray-800">Review Changes</h3>
-				<div class="flex gap-3">
-					<button
-						on:click={exportCSV}
-						class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg shadow transition-colors flex items-center gap-2"
-					>
+		<section class="results-section" transition:slide data-testid="mfsr-review-section">
+			<div class="results-header">
+				<h3 class="results-title">Review Changes</h3>
+				<div class="results-actions">
+					<button type="button" on:click={exportCSV} class="btn secondary">
 						Export CSV
 					</button>
-					<button
-						on:click={() => processFiles('download')}
-						class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg shadow transition-colors flex items-center gap-2"
-					>
-						Download ZIP
-						<svg
-							class="w-5 h-5"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-							><path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-							></path></svg
-						>
+					<button type="button" on:click={() => processFiles('download')} class="btn primary">
+						Download ZIP ↓
 					</button>
 				</div>
 			</div>
 
 			<!-- Statistics -->
-				<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" data-testid="mfsr-stats-grid">
-					<div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 text-center" data-testid="mfsr-stats-files-scanned">
-					<div class="text-3xl font-bold text-gray-800">
-						{previewData.stats.filesScanned}
-					</div>
-					<div class="text-gray-500 text-sm">Files Scanned</div>
+			<div class="stats-grid" data-testid="mfsr-stats-grid">
+				<div class="stat-card" data-testid="mfsr-stats-files-scanned">
+					<div class="stat-value">{previewData.stats.filesScanned}</div>
+					<div class="stat-label">Files Scanned</div>
 				</div>
-					<div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 text-center" data-testid="mfsr-stats-files-modified">
-					<div class="text-3xl font-bold text-blue-600">
-						{previewData.stats.filesModified}
-					</div>
-					<div class="text-gray-500 text-sm">Files Modified</div>
+				<div class="stat-card stat-blue" data-testid="mfsr-stats-files-modified">
+					<div class="stat-value">{previewData.stats.filesModified}</div>
+					<div class="stat-label">Files Modified</div>
 				</div>
-					<div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 text-center" data-testid="mfsr-stats-total-matches">
-					<div class="text-3xl font-bold text-purple-600">
-						{previewData.stats.totalReplacements}
-					</div>
-					<div class="text-gray-500 text-sm">Total Matches</div>
+				<div class="stat-card stat-purple" data-testid="mfsr-stats-total-matches">
+					<div class="stat-value">{previewData.stats.totalReplacements}</div>
+					<div class="stat-label">Total Matches</div>
 				</div>
-					<div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 text-center" data-testid="mfsr-stats-files-skipped">
-					<div class="text-3xl font-bold text-gray-400">
-						{previewData.stats.filesSkipped}
-					</div>
-					<div class="text-gray-500 text-sm">Files Skipped</div>
+				<div class="stat-card stat-muted" data-testid="mfsr-stats-files-skipped">
+					<div class="stat-value">{previewData.stats.filesSkipped}</div>
+					<div class="stat-label">Files Skipped</div>
 				</div>
 			</div>
 
 			<!-- Diffs -->
-			<div class="space-y-6">
+			<div class="diffs-container">
 				{#if previewData.diffs.length === 0}
-					<div
-						class="text-center p-12 bg-gray-50 rounded-lg border border-dashed border-gray-300"
-					>
-						<p class="text-gray-500">
-							No matches found. Check your search text or case sensitivity.
-						</p>
+					<div class="no-matches">
+						<p>No matches found. Check your search text or case sensitivity.</p>
 					</div>
 				{:else}
 					{#each previewData.diffs as diff}
-						<div
-							class="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm"
-							data-testid="mfsr-diff-item"
-							data-filename={diff.filename}
-						>
-							<div
-								class="bg-gray-50 px-4 py-2 border-b border-gray-200 text-sm font-mono text-gray-600 font-semibold flex justify-between items-center"
-							>
-								<span>{diff.filename}</span>
-								<span class="text-xs text-purple-600"
-									>{diff.matchCount} match{diff.matchCount !== 1 ? 'es' : ''}</span
-								>
+						<div class="diff-card" data-testid="mfsr-diff-item" data-filename={diff.filename}>
+							<div class="diff-header">
+								<span class="diff-filename">{diff.filename}</span>
+								<span class="diff-count">{diff.matchCount} match{diff.matchCount !== 1 ? 'es' : ''}</span>
 							</div>
-							<div class="overflow-x-auto">
-								<table class="w-full text-left border-collapse">
-									<tbody class="font-mono text-xs">
+							<div class="diff-body">
+								<table class="diff-table">
+									<tbody>
 										{#each diff.diff.split('\n') as line}
 											{@const parsed = parseDiffLine(line)}
 											{#if parsed.type !== 'header'}
-												<tr
-													class="{parsed.type === 'add'
-														? 'bg-green-50'
-														: parsed.type === 'del'
-															? 'bg-red-50'
-															: ''}"
-												>
-													<td
-														class="w-8 select-none text-right px-2 py-1 text-gray-400 border-r border-gray-100"
-													>
-														{parsed.type === 'add'
-															? '+'
-															: parsed.type === 'del'
-																? '-'
-																: ''}
+												<tr class="diff-row diff-row-{parsed.type}">
+													<td class="diff-gutter">
+														{parsed.type === 'add' ? '+' : parsed.type === 'del' ? '-' : ''}
 													</td>
-													<td
-														class="px-4 py-1 whitespace-pre-wrap break-all {parsed.type ===
-														'add'
-															? 'text-green-800'
-															: parsed.type === 'del'
-																? 'text-red-800 line-through opacity-60'
-																: 'text-gray-600'}"
-													>
+													<td class="diff-content">
 														{parsed.text}
 													</td>
 												</tr>
@@ -554,22 +471,566 @@
 				{/if}
 			</div>
 
-			<p class="text-xs text-gray-500 mt-6 text-center">
-				💡 Tip: Press <kbd class="px-2 py-1 bg-gray-200 rounded text-xs">Cmd+D</kbd> to
-				download • <kbd class="px-2 py-1 bg-gray-200 rounded text-xs">Cmd+E</kbd> to export
-				CSV
+			<p class="tip">
+				💡 Tip: Press <kbd>Cmd+D</kbd> to download • <kbd>Cmd+E</kbd> to export CSV
 			</p>
-		</div>
+		</section>
 	{/if}
 
-	<!-- Ad Slot -->
-	<div class="mt-12">
+	<div class="ad-container">
 		<AdSlot slot="2563094163" format="horizontal" />
 	</div>
 </div>
 
 <style>
+	/* ═══════════════════════════════════════════════════════════
+	   LIQUID GLASS BULK FIND & REPLACE
+	   ═══════════════════════════════════════════════════════════ */
+
+	.tool-page {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-6);
+		padding-bottom: var(--space-10);
+	}
+
+	.tool-hero {
+		text-align: center;
+		padding: var(--space-12) 0 var(--space-8);
+	}
+
+	.tool-hero-icon {
+		font-size: 3.5rem;
+		display: block;
+		margin-bottom: var(--space-4);
+	}
+
+	.tool-hero h1 {
+		font-size: clamp(2rem, 5vw, 3rem);
+		font-weight: var(--font-bold);
+		background: var(--accent-gradient);
+		-webkit-background-clip: text;
+		background-clip: text;
+		-webkit-text-fill-color: transparent;
+		margin-bottom: var(--space-3);
+		letter-spacing: -0.02em;
+	}
+
+	.tool-hero-subtitle {
+		max-width: 720px;
+		margin: 0 auto;
+		color: var(--text-secondary);
+		font-size: 0.98rem;
+	}
+
+	/* Glass card */
+	.card {
+		position: relative;
+		border-radius: var(--radius-2xl);
+		border: 1px solid var(--glass-border);
+		background: var(--glass-bg);
+		backdrop-filter: blur(var(--glass-blur));
+		-webkit-backdrop-filter: blur(var(--glass-blur));
+		overflow: hidden;
+		transition: all 0.3s ease;
+	}
+
+	.card::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 1px;
+		background: linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
+		opacity: 0.6;
+	}
+
+	.card::after {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 40%;
+		background: var(--glass-shine);
+		pointer-events: none;
+		opacity: 0.3;
+	}
+
+	.card:hover {
+		border-color: var(--accent-primary);
+		box-shadow: 0 12px 40px var(--glass-shadow);
+	}
+
+	:global(html[data-theme="light"]) .card {
+		box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06),
+					inset 0 1px 0 rgba(255, 255, 255, 0.9);
+	}
+
+	:global(html[data-theme="light"]) .card::after {
+		background: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, transparent 100%);
+		opacity: 1;
+	}
+
+	/* Step sections */
+	.step-section {
+		position: relative;
+		z-index: 1;
+		padding: var(--space-6);
+		border-bottom: 1px solid var(--glass-border);
+	}
+
+	.step-section:last-child {
+		border-bottom: none;
+	}
+
+	.config-section {
+		background: var(--glass-bg);
+	}
+
+	.step-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: var(--space-4);
+		flex-wrap: wrap;
+		gap: var(--space-2);
+	}
+
+	.step-title {
+		font-size: 1.1rem;
+		font-weight: var(--font-semibold);
+		color: var(--text-primary);
+	}
+
+	.file-badge {
+		font-size: 0.85rem;
+		font-weight: var(--font-medium);
+		color: #22c55e;
+		background: rgba(34, 197, 94, 0.1);
+		padding: var(--space-1) var(--space-3);
+		border-radius: 9999px;
+	}
+
+	/* Glass dropzone */
+	.dropzone {
+		position: relative;
+		display: block;
+		border: 2px dashed var(--glass-border);
+		border-radius: var(--radius-xl);
+		background: var(--glass-bg);
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
+		padding: var(--space-8);
+		text-align: center;
+		transition: all 0.2s ease;
+		cursor: pointer;
+	}
+
+	.dropzone:hover {
+		border-color: var(--accent-primary);
+		background: var(--glass-bg-hover);
+	}
+
+	.dropzone-input {
+		display: none;
+	}
+
+	.dropzone-icon {
+		font-size: 3rem;
+		display: block;
+		margin-bottom: var(--space-3);
+	}
+
+	.dropzone-title {
+		font-weight: var(--font-medium);
+		color: var(--text-primary);
+		margin-bottom: var(--space-1);
+	}
+
+	.dropzone-hint {
+		font-size: 0.85rem;
+		color: var(--text-tertiary);
+	}
+
+	.file-change-text {
+		font-weight: var(--font-medium);
+		color: var(--accent-primary);
+	}
+
+	/* Mode switcher */
+	.mode-switcher {
+		display: flex;
+		gap: var(--space-2);
+		margin-bottom: var(--space-6);
+	}
+
+	.mode-tab {
+		padding: var(--space-2) var(--space-4);
+		border-radius: var(--radius-lg);
+		font-size: 0.9rem;
+		font-weight: var(--font-medium);
+		color: var(--text-tertiary);
+		background: transparent;
+		border: 1px solid transparent;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	.mode-tab:hover {
+		color: var(--text-primary);
+	}
+
+	.mode-tab.active {
+		background: var(--glass-bg-hover);
+		color: var(--accent-primary);
+		border-color: var(--glass-border);
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	}
+
+	.mode-tab-regex.active {
+		color: #a855f7;
+	}
+
+	:global(html[data-theme="light"]) .mode-tab.active {
+		background: rgba(255, 255, 255, 0.9);
+	}
+
+	/* Regex examples */
+	.regex-examples {
+		margin-bottom: var(--space-4);
+		padding: var(--space-3);
+		background: rgba(168, 85, 247, 0.08);
+		border: 1px solid rgba(168, 85, 247, 0.2);
+		border-radius: var(--radius-lg);
+	}
+
+	.regex-examples-title {
+		font-size: 0.9rem;
+		font-weight: var(--font-medium);
+		color: #a855f7;
+		margin-bottom: var(--space-2);
+	}
+
+	.regex-examples-grid {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2);
+	}
+
+	.regex-example-btn {
+		font-size: 0.75rem;
+		padding: var(--space-1) var(--space-3);
+		background: var(--glass-bg);
+		border: 1px solid rgba(168, 85, 247, 0.3);
+		border-radius: var(--radius-md);
+		color: var(--text-secondary);
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	.regex-example-btn:hover {
+		background: rgba(168, 85, 247, 0.1);
+		color: #a855f7;
+	}
+
+	/* Input grid */
+	.input-grid {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: var(--space-4);
+	}
+
+	@media (min-width: 768px) {
+		.input-grid {
+			grid-template-columns: 1fr 1fr;
+		}
+	}
+
+	.input-group {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.input-label {
+		font-size: 0.9rem;
+		font-weight: var(--font-medium);
+		color: var(--text-primary);
+		margin-bottom: var(--space-2);
+	}
+
+	.glass-input {
+		width: 100%;
+		padding: var(--space-3);
+		font-family: var(--font-mono);
+		font-size: 0.9rem;
+		background: var(--glass-bg);
+		border: 1px solid var(--glass-border);
+		border-radius: var(--radius-lg);
+		color: var(--text-primary);
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
+		transition: all 0.2s ease;
+	}
+
+	.glass-input:focus {
+		outline: none;
+		border-color: var(--accent-primary);
+		box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+	}
+
+	.glass-input::placeholder {
+		color: var(--text-tertiary);
+	}
+
+	.input-hint {
+		font-size: 0.75rem;
+		color: var(--text-tertiary);
+		margin-top: var(--space-1);
+	}
+
+	/* Checkbox */
+	.checkbox-row {
+		display: flex;
+		align-items: center;
+		margin-top: var(--space-4);
+	}
+
+	.glass-checkbox {
+		width: 1rem;
+		height: 1rem;
+		accent-color: var(--accent-primary);
+		cursor: pointer;
+	}
+
+	.checkbox-label {
+		margin-left: var(--space-2);
+		font-size: 0.9rem;
+		color: var(--text-secondary);
+		cursor: pointer;
+		user-select: none;
+	}
+
+	/* Action row */
+	.action-row {
+		display: flex;
+		justify-content: flex-end;
+		margin-top: var(--space-6);
+	}
+
+	/* Error state */
+	.error {
+		margin-top: var(--space-4);
+		padding: var(--space-3);
+		border-radius: var(--radius-lg);
+		background: rgba(239, 68, 68, 0.1);
+		border: 1px solid rgba(239, 68, 68, 0.3);
+		color: #f87171;
+		font-size: 0.9rem;
+	}
+
+	/* Tips */
+	.tip {
+		margin-top: var(--space-4);
+		text-align: center;
+		font-size: 0.85rem;
+		color: var(--text-tertiary);
+	}
+
 	kbd {
-		font-family: monospace;
+		font-family: var(--font-mono);
+		font-size: 0.75rem;
+		padding: 2px 6px;
+		background: var(--glass-bg);
+		border: 1px solid var(--glass-border);
+		border-radius: var(--radius-sm);
+		color: var(--text-secondary);
+	}
+
+	/* Spinner */
+	.spinner-inline {
+		display: inline-block;
+		animation: spin 1s linear infinite;
+		margin-right: var(--space-2);
+	}
+
+	@keyframes spin {
+		from { transform: rotate(0deg); }
+		to { transform: rotate(360deg); }
+	}
+
+	/* Results section */
+	.results-section {
+		margin-top: var(--space-8);
+	}
+
+	.results-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: var(--space-6);
+		flex-wrap: wrap;
+		gap: var(--space-3);
+	}
+
+	.results-title {
+		font-size: 1.5rem;
+		font-weight: var(--font-bold);
+		color: var(--text-primary);
+	}
+
+	.results-actions {
+		display: flex;
+		gap: var(--space-3);
+	}
+
+	/* Stats grid */
+	.stats-grid {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: var(--space-4);
+		margin-bottom: var(--space-6);
+	}
+
+	@media (min-width: 768px) {
+		.stats-grid {
+			grid-template-columns: repeat(4, 1fr);
+		}
+	}
+
+	.stat-card {
+		position: relative;
+		padding: var(--space-4);
+		text-align: center;
+		border-radius: var(--radius-xl);
+		border: 1px solid var(--glass-border);
+		background: var(--glass-bg);
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
+	}
+
+	.stat-value {
+		font-size: 1.75rem;
+		font-weight: var(--font-bold);
+		color: var(--text-primary);
+	}
+
+	.stat-label {
+		font-size: 0.85rem;
+		color: var(--text-tertiary);
+		margin-top: var(--space-1);
+	}
+
+	.stat-blue .stat-value {
+		color: #3b82f6;
+	}
+
+	.stat-purple .stat-value {
+		color: #a855f7;
+	}
+
+	.stat-muted .stat-value {
+		color: var(--text-tertiary);
+	}
+
+	/* Diffs container */
+	.diffs-container {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-4);
+	}
+
+	.no-matches {
+		text-align: center;
+		padding: var(--space-10);
+		background: var(--glass-bg);
+		border-radius: var(--radius-xl);
+		border: 2px dashed var(--glass-border);
+		color: var(--text-tertiary);
+	}
+
+	/* Diff card */
+	.diff-card {
+		border-radius: var(--radius-xl);
+		border: 1px solid var(--glass-border);
+		background: var(--glass-bg);
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
+		overflow: hidden;
+	}
+
+	.diff-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: var(--space-3) var(--space-4);
+		background: var(--glass-bg);
+		border-bottom: 1px solid var(--glass-border);
+	}
+
+	.diff-filename {
+		font-family: var(--font-mono);
+		font-size: 0.85rem;
+		font-weight: var(--font-semibold);
+		color: var(--text-secondary);
+	}
+
+	.diff-count {
+		font-size: 0.75rem;
+		color: #a855f7;
+	}
+
+	.diff-body {
+		overflow-x: auto;
+	}
+
+	.diff-table {
+		width: 100%;
+		border-collapse: collapse;
+		font-family: var(--font-mono);
+		font-size: 0.75rem;
+	}
+
+	.diff-row {
+		transition: background 0.15s ease;
+	}
+
+	.diff-row-add {
+		background: rgba(34, 197, 94, 0.1);
+	}
+
+	.diff-row-del {
+		background: rgba(239, 68, 68, 0.1);
+	}
+
+	.diff-gutter {
+		width: 2rem;
+		text-align: right;
+		padding: var(--space-1) var(--space-2);
+		color: var(--text-tertiary);
+		border-right: 1px solid var(--glass-border);
+		user-select: none;
+	}
+
+	.diff-content {
+		padding: var(--space-1) var(--space-3);
+		white-space: pre-wrap;
+		word-break: break-all;
+		color: var(--text-secondary);
+	}
+
+	.diff-row-add .diff-content {
+		color: #22c55e;
+	}
+
+	.diff-row-del .diff-content {
+		color: #ef4444;
+		text-decoration: line-through;
+		opacity: 0.7;
+	}
+
+	.ad-container {
+		margin-top: var(--space-8);
 	}
 </style>

@@ -103,12 +103,11 @@
 }
 
 /* Unified hover animation for cards & CTA panels */
+/* NOTE: .tool-card and .tool-card-enhanced removed - they have page-specific styles */
 :is(.card-hoverable,
     .card,
     .cta-box,
-    .blog-card,
-    .tool-card,
-    .tool-card-enhanced) {
+    .blog-card) {
   transition: transform var(--transition-base),
               border-color var(--transition-base),
               box-shadow var(--transition-base);
@@ -118,33 +117,25 @@
 :is(.card-hoverable,
     .card,
     .cta-box,
-    .blog-card,
-    .tool-card,
-    .tool-card-enhanced):hover,
+    .blog-card):hover,
 :is(.card-hoverable,
     .card,
     .cta-box,
-    .blog-card,
-    .tool-card,
-    .tool-card-enhanced):focus-within {
-  transform: translateY(-4px);
+    .blog-card):focus-within {
+  transform: translateY(-8px);
   border-color: var(--hover-accent);
-  box-shadow: 0 12px 40px var(--hover-shadow-color);
+  box-shadow: 0 24px 64px var(--glass-shadow);
 }
 
 @media (prefers-reduced-motion: reduce) {
   :is(.card-hoverable,
       .card,
       .cta-box,
-      .blog-card,
-      .tool-card,
-      .tool-card-enhanced):hover,
+      .blog-card):hover,
   :is(.card-hoverable,
       .card,
       .cta-box,
-      .blog-card,
-      .tool-card,
-      .tool-card-enhanced):focus-within {
+      .blog-card):focus-within {
     transform: none;
   }
 }
@@ -303,12 +294,12 @@
   }
 }
 
-/* Floating animation for hero elements */
-.float {
-  animation: float 6s ease-in-out infinite;
+/* Floating animation for hero elements (subtle vertical) */
+.float-subtle {
+  animation: float-subtle 6s ease-in-out infinite;
 }
 
-@keyframes float {
+@keyframes float-subtle {
   0%, 100% {
     transform: translateY(0px);
   }
@@ -316,6 +307,9 @@
     transform: translateY(-10px);
   }
 }
+
+/* NOTE: The main .orb float animation is defined in components.css
+   with the 3-keyframe translate+scale effect */
 
 /* ============================================
    ICON ANIMATIONS

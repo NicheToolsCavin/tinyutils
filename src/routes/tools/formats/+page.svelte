@@ -79,34 +79,50 @@
 </div>
 
 <style>
+  /* ═══════════════════════════════════════════════════════════
+     LIQUID GLASS FORMATS PAGE
+     ═══════════════════════════════════════════════════════════ */
+
   .tool-page {
     display: flex;
     flex-direction: column;
     gap: var(--space-6);
+    padding-bottom: var(--space-10);
   }
 
   .tool-hero {
     text-align: center;
-    padding: var(--space-10) 0 var(--space-6);
+    padding: var(--space-12) 0 var(--space-8);
   }
 
   .tool-hero-icon {
-    font-size: 3rem;
+    font-size: 3.5rem;
     display: block;
+    margin-bottom: var(--space-4);
+  }
+
+  .tool-hero h1 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: var(--font-bold);
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
     margin-bottom: var(--space-3);
+    letter-spacing: -0.02em;
   }
 
   .tool-hero-subtitle {
     max-width: 720px;
     margin: 0 auto;
     color: var(--text-secondary);
+    font-size: 0.98rem;
   }
 
   .formats-layout {
     display: flex;
     flex-direction: column;
     gap: var(--space-6);
-    padding-bottom: var(--space-10);
   }
 
   .formats-grid {
@@ -115,12 +131,63 @@
     gap: var(--space-6);
   }
 
+  /* Glass card */
   .card {
-    border-radius: var(--radius-xl);
-    border: 1px solid var(--border-default);
-    background: var(--surface-base);
+    position: relative;
+    border-radius: var(--radius-2xl);
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
     padding: var(--space-6);
-    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
+    opacity: 0.6;
+  }
+
+  .card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 40%;
+    background: var(--glass-shine);
+    pointer-events: none;
+    opacity: 0.3;
+  }
+
+  .card:hover {
+    border-color: var(--accent-primary);
+    box-shadow: 0 12px 40px var(--glass-shadow);
+  }
+
+  :global(html[data-theme="light"]) .card {
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+
+  :global(html[data-theme="light"]) .card::after {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, transparent 100%);
+    opacity: 1;
+  }
+
+  .card h2 {
+    position: relative;
+    z-index: 1;
+    color: var(--text-primary);
+    font-weight: var(--font-semibold);
+    margin-bottom: var(--space-4);
   }
 
   .formats-list {
@@ -130,20 +197,30 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
+    position: relative;
+    z-index: 1;
   }
 
   .formats-list li {
     padding: var(--space-2) 0;
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    font-size: 0.95rem;
   }
 
   .formats-list li:last-child {
     border-bottom: none;
   }
 
+  .formats-list li strong {
+    color: var(--text-primary);
+    font-weight: var(--font-semibold);
+  }
+
   .help {
-    color: var(--text-muted, #97a3c2);
+    color: var(--text-tertiary);
     margin: var(--space-4) 0;
+    font-size: 0.9rem;
   }
 
   .actions-row {

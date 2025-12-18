@@ -848,41 +848,108 @@
 </div>
 
 <style>
+  /* ═══════════════════════════════════════════════════════════
+     LIQUID GLASS SITEMAP DELTA
+     ═══════════════════════════════════════════════════════════ */
+
   .tool-page {
     display: flex;
     flex-direction: column;
     gap: var(--space-6);
+    padding-bottom: var(--space-10);
   }
 
   .tool-hero {
     text-align: center;
-    padding: var(--space-10) 0 var(--space-6);
+    padding: var(--space-12) 0 var(--space-8);
   }
 
   .tool-hero-icon {
-    font-size: 3rem;
+    font-size: 3.5rem;
     display: block;
+    margin-bottom: var(--space-4);
+  }
+
+  .tool-hero h1 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: var(--font-bold);
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
     margin-bottom: var(--space-3);
+    letter-spacing: -0.02em;
   }
 
   .tool-hero-subtitle {
     max-width: 720px;
     margin: 0 auto;
     color: var(--text-secondary);
+    font-size: 0.98rem;
   }
 
+  /* Glass card */
   .card {
-    border-radius: var(--radius-xl);
-    border: 1px solid var(--border-default);
-    background: var(--surface-base);
+    position: relative;
+    border-radius: var(--radius-2xl);
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
     padding: var(--space-6);
-    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
+    opacity: 0.6;
+  }
+
+  .card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 40%;
+    background: var(--glass-shine);
+    pointer-events: none;
+    opacity: 0.3;
+  }
+
+  .card:hover {
+    border-color: var(--accent-primary);
+    box-shadow: 0 12px 40px var(--glass-shadow);
+  }
+
+  :global(html[data-theme="light"]) .card {
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+
+  :global(html[data-theme="light"]) .card:hover {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+
+  :global(html[data-theme="light"]) .card::after {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, transparent 100%);
+    opacity: 1;
   }
 
   .tool-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: var(--space-5);
+    position: relative;
+    z-index: 1;
   }
 
   .field {
@@ -895,17 +962,35 @@
   .field-label {
     font-weight: var(--font-semibold);
     font-size: var(--text-sm);
+    color: var(--text-primary);
   }
 
+  /* Glass inputs */
   .input,
   .textarea {
     width: 100%;
     border-radius: var(--radius-lg);
-    border: 1px solid var(--border-default);
-    background: var(--surface-base);
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     padding: var(--space-3) var(--space-4);
     color: var(--text-primary);
     font-size: var(--text-base);
+    transition: all 0.2s ease;
+  }
+
+  .input:focus,
+  .textarea:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  }
+
+  :global(html[data-theme="light"]) .input,
+  :global(html[data-theme="light"]) .textarea {
+    background: rgba(255, 255, 255, 0.6);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06);
   }
 
   .textarea {
@@ -917,6 +1002,8 @@
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: var(--space-3);
     margin: var(--space-4) 0;
+    position: relative;
+    z-index: 1;
   }
 
   .checkbox {
@@ -924,6 +1011,7 @@
     gap: var(--space-2);
     align-items: center;
     font-size: var(--text-sm);
+    color: var(--text-secondary);
   }
 
   .actions-row {
@@ -932,6 +1020,8 @@
     align-items: center;
     flex-wrap: wrap;
     margin-top: var(--space-3);
+    position: relative;
+    z-index: 1;
   }
 
   .hint {
@@ -939,25 +1029,79 @@
     color: var(--text-tertiary);
   }
 
+  .hint kbd {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    border-radius: 4px;
+    border: 1px solid var(--glass-border);
+    padding: 1px 5px;
+    background: var(--glass-bg);
+  }
+
+  /* Glass status bar */
   .status-bar {
     margin-top: var(--space-3);
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-full);
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
     display: flex;
     gap: var(--space-3);
     align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  :global(html[data-theme="light"]) .status-bar {
+    background: rgba(255, 255, 255, 0.7);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+
+  .status-bar span {
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
   }
 
   .status-bar progress {
     height: 6px;
     width: 160px;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .status-bar progress::-webkit-progress-bar {
+    background: var(--glass-border);
+    border-radius: 3px;
+  }
+
+  .status-bar progress::-webkit-progress-value {
+    background: var(--accent-gradient);
+    border-radius: 3px;
+  }
+
+  .status-bar progress::-moz-progress-bar {
+    background: var(--accent-gradient);
+    border-radius: 3px;
   }
 
   .error {
-    color: var(--color-danger);
+    color: var(--color-error, #fca5a5);
     margin-top: var(--space-2);
+    position: relative;
+    z-index: 1;
   }
 
   .card-header {
     margin-bottom: var(--space-3);
+    position: relative;
+    z-index: 1;
+  }
+
+  .card-header h2 {
+    color: var(--text-primary);
+    font-weight: var(--font-semibold);
   }
 
   .summary-line {
@@ -966,6 +1110,7 @@
     font-size: var(--text-base);
   }
 
+  /* Glass chips */
   .chips {
     display: flex;
     gap: var(--space-2);
@@ -978,30 +1123,48 @@
     gap: var(--space-1);
     padding: var(--space-1) var(--space-3);
     border-radius: var(--radius-full);
-    background: var(--surface-raised);
+    background: var(--glass-bg);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid var(--glass-border);
     color: var(--text-secondary);
     font-size: var(--text-xs);
   }
 
+  .chip b {
+    color: var(--text-primary);
+  }
+
   .chip-warn {
-    background: var(--warning-bg);
-    color: var(--warning-text);
+    background: rgba(251, 146, 60, 0.15);
+    border-color: rgba(251, 146, 60, 0.3);
+    color: #fb923c;
   }
 
   .confidence-controls {
     margin: var(--space-4) 0;
+    position: relative;
+    z-index: 1;
   }
 
   .chip-button {
-    border: 1px solid var(--border-default);
-    background: transparent;
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .chip-button:hover {
+    border-color: var(--accent-primary);
+    background: var(--glass-bg-hover);
   }
 
   .chip-active {
-    background: var(--brand-500);
-    color: var(--text-inverse);
-    border-color: var(--brand-500);
+    background: var(--accent-gradient);
+    color: white;
+    border-color: var(--accent-primary);
   }
 
   .export-row {
@@ -1009,19 +1172,32 @@
     flex-wrap: wrap;
     gap: var(--space-2);
     margin-bottom: var(--space-4);
+    position: relative;
+    z-index: 1;
   }
 
   .results-tables {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: var(--space-4);
+    position: relative;
+    z-index: 1;
   }
 
+  /* Glass table wrapper */
   .tableWrap {
     max-height: 320px;
     overflow: auto;
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-lg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    background: var(--glass-bg);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  :global(html[data-theme="light"]) .tableWrap {
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
   }
 
   table {
@@ -1033,17 +1209,30 @@
   thead th {
     position: sticky;
     top: 0;
-    background: var(--surface-base);
+    background: var(--glass-bg-hover);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     text-align: left;
     padding: var(--space-2) var(--space-3);
-    border-bottom: 1px solid var(--border-default);
+    border-bottom: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    font-weight: var(--font-semibold);
+  }
+
+  :global(html[data-theme="light"]) thead th {
+    background: rgba(255, 255, 255, 0.8);
   }
 
   tbody td {
     padding: var(--space-2) var(--space-3);
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: 1px solid var(--glass-border);
     vertical-align: top;
     word-break: break-word;
+    color: var(--text-secondary);
+  }
+
+  tbody tr:hover {
+    background: var(--glass-bg-hover);
   }
 
   tbody tr:last-child td {
@@ -1061,28 +1250,40 @@
     }
   }
 
+  /* Glass toast */
   .toast {
     position: fixed;
     bottom: 16px;
     right: 16px;
-    background: var(--brand-500, #3b82f6);
-    color: white;
-    padding: 12px 16px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    font-size: 0.9rem;
-    animation: slideIn 0.3s ease-out;
-    z-index: 1000;
+    padding: 10px 16px;
+    border-radius: var(--radius-full);
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--accent-primary);
+    color: var(--text-primary);
+    font-size: 0.86rem;
+    z-index: 9999;
+    box-shadow: 0 12px 40px var(--glass-shadow),
+                0 0 20px rgba(59, 130, 246, 0.2);
+    animation: toastIn 0.3s ease-out;
   }
 
-  @keyframes slideIn {
+  @keyframes toastIn {
     from {
-      transform: translateY(100px);
       opacity: 0;
+      transform: translateY(10px);
     }
     to {
-      transform: translateY(0);
       opacity: 1;
+      transform: translateY(0);
     }
+  }
+
+  :global(html[data-theme="light"]) .toast {
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15),
+                0 0 20px rgba(59, 130, 246, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
   }
 </style>
