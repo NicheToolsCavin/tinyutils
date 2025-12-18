@@ -158,23 +158,32 @@ textarea:focus-visible{
 
 /* Ad slots (theme-aware, low CLS) */
 .ad-slot{
-  margin:12px 0 0;
-  padding:8px 10px;
-  border-radius:var(--radius);
-  border:1px solid var(--border);
-  background:var(--panel);
-  min-height:80px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  margin: var(--space-4) auto;
+  padding: 8px 10px;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 1100px;
+}
+.ad-slot-wide {
+  width: 100%;
+  max-width: 1100px;
+  margin: var(--space-6) auto;
 }
 .ad-slot .adsbygoogle{
-  display:block;
-  width:100%;
-  min-height:90px;
+  display: block;
+  width: 100%;
+  min-height: 90px;
 }
 html.ads-hidden .ad-slot{
-  display:none !important;
+  display: none !important;
 }
 
 /* Shared progress / working banner */
@@ -346,52 +355,58 @@ html[data-theme="light"] textarea:focus {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
 }
 
-/* Light mode: Table headers */
+/* Light mode: Table headers - Liquid Glass */
 html[data-theme="light"] thead th,
 html[data-theme="light"] .tableWrap thead th,
 html[data-theme="light"] #results thead th {
-  background: #e0d5c5 !important;  /* Darker parchment for contrast */
-  color: var(--text-primary, #2d1f0f);
-  border-bottom-color: var(--border-default, #d5c4af);
+  background: var(--glass-bg-hover) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--text-primary);
+  border-bottom-color: var(--glass-border);
 }
 
-/* Light mode: Progress banner */
+/* Light mode: Progress banner - Liquid Glass */
 html[data-theme="light"] .progress-banner {
-  background: transparent;
-  color: var(--text-primary, #2d1f0f);
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--text-primary);
 }
 
 html[data-theme="light"] .progress-banner .progress-text {
-  color: var(--text-primary, #2d1f0f);
+  color: var(--text-primary);
 }
 
 html[data-theme="light"] .progress-banner progress {
-  background: rgba(93, 74, 53, 0.15);
+  background: rgba(59, 130, 246, 0.1);
 }
 
 html[data-theme="light"] .progress-banner progress::-webkit-progress-bar {
-  background: rgba(93, 74, 53, 0.15);
+  background: rgba(59, 130, 246, 0.1);
 }
 
-/* Light mode: Badges */
+/* Light mode: Badges - Liquid Glass */
 html[data-theme="light"] .badge {
-  background: #e0d5c5;
-  color: var(--text-secondary, #4a3520);
-  border-color: var(--border-default, #d5c4af);
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--text-secondary);
+  border: 1px solid var(--glass-border);
 }
 
-/* Light mode: Table rows */
+/* Light mode: Table rows - Liquid Glass */
 html[data-theme="light"] tbody tr:nth-child(odd) {
-  background: rgba(93, 74, 53, 0.04);
+  background: rgba(59, 130, 246, 0.02);
 }
 
 html[data-theme="light"] tbody tr:hover {
-  background: rgba(93, 74, 53, 0.08);
+  background: var(--glass-bg-hover);
 }
 
 html[data-theme="light"] th,
 html[data-theme="light"] td {
-  border-bottom-color: var(--border-default, #d5c4af);
+  border-bottom-color: var(--glass-border);
 }
 
 /* Small phones */

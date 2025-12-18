@@ -56,16 +56,15 @@
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   }
 
-  /* Light mode: Full liquid glass effect */
+  /* Light mode: Liquid glass effect with subtle transparency */
   :global(html[data-theme="light"]) .tool-card-enhanced {
     background:
-      linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.3) 100%),
-      rgba(255, 255, 255, 0.45);
-    border: 1px solid rgba(255, 255, 255, 0.7);
+      linear-gradient(135deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0.25) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.6);
     box-shadow:
-      0 8px 32px rgba(31, 38, 135, 0.08),
-      0 1px 0 rgba(255, 255, 255, 0.9) inset,
-      0 -1px 0 rgba(0, 0, 0, 0.05) inset;
+      0 8px 32px rgba(31, 38, 135, 0.07),
+      0 1px 0 rgba(255, 255, 255, 0.8) inset,
+      0 -1px 0 rgba(0, 0, 0, 0.03) inset;
   }
 
   /* Glass shine overlay - top highlight */
@@ -106,13 +105,12 @@
   :global(html[data-theme="light"]) .tool-card-enhanced:hover {
     transform: translateY(-8px);
     background:
-      linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.5) 100%),
-      rgba(255, 255, 255, 0.65);
-    border-color: rgba(255, 255, 255, 0.9);
+      linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.4) 100%);
+    border-color: rgba(255, 255, 255, 0.8);
     box-shadow:
-      0 24px 64px rgba(31, 38, 135, 0.12),
-      0 1px 0 rgba(255, 255, 255, 1) inset,
-      0 -1px 0 rgba(0, 0, 0, 0.05) inset;
+      0 24px 64px rgba(31, 38, 135, 0.1),
+      0 1px 0 rgba(255, 255, 255, 0.95) inset,
+      0 -1px 0 rgba(0, 0, 0, 0.03) inset;
   }
 
   .tool-card-icon {

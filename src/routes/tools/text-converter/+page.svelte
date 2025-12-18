@@ -270,7 +270,7 @@
           return;
         }
 
-        let html = '<style>.tableWrap{max-height:480px;overflow:auto;}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:8px;text-align:left}th{background:#f4f4f4;position:sticky;top:0;z-index:1}</style><div class="tableWrap"><table>';
+        let html = '<style>.tableWrap{max-height:480px;overflow:auto;border-radius:12px;border:1px solid rgba(255,255,255,0.2)}table{border-collapse:collapse;width:100%;background:rgba(255,255,255,0.03)}th,td{border:1px solid rgba(255,255,255,0.1);padding:8px;text-align:left}th{background:rgba(255,255,255,0.08);position:sticky;top:0;z-index:1;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}</style><div class="tableWrap"><table>';
         let renderBudgetHit = false;
 
         rows.forEach((cells, idx) => {
@@ -483,7 +483,7 @@ Prism.highlightAll();
       const start = hasPerf ? performance.now() : 0;
       const lines = content.split('\n');
       const numbered = lines.map((l, i) => `${String(i + 1).padStart(4, ' ')} | ${escapeHtml(l)}`).join('\n');
-      const html = `<style>pre{background:#f8f8f8;padding:1rem;font-family:monospace;overflow:auto}</style><pre>${numbered}</pre>`;
+      const html = `<style>pre{background:rgba(255,255,255,0.05);padding:1rem;font-family:monospace;overflow:auto;border-radius:8px;border:1px solid rgba(255,255,255,0.1)}</style><pre>${numbered}</pre>`;
       if (hasPerf && start) {
         const renderMs = performance.now() - start;
         if (renderMs > PREVIEW_RENDER_BUDGET_MS) {
