@@ -16,7 +16,7 @@
 
 import { mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { createTinyReactiveClient, preflightBypass } from './harness/client.mjs';
+import { createTinyReactiveClient } from './harness/client.mjs';
 
 const BYPASS_TOKEN = process.env.VERCEL_AUTOMATION_BYPASS_SECRET
   || process.env.PREVIEW_BYPASS_TOKEN
@@ -52,6 +52,38 @@ const dateSlug = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(
   today.getDate(),
 ).padStart(2, '0')}`;
 const artifactDir = resolve(process.env.ARTIFACT_DIR || 'artifacts', 'ui', 'theme-switching', dateSlug);
+
+// Test configuration constants
+const THEME_TRANSITION_WAIT_MS = 50;  // Poll interval
+const THEME_TRANSITION_TIMEOUT_MS = 3000;  // Max wait time
+const PREVIEW_LOAD_TIMEOUT_MS = 5000;
+
+/**
+ * Wait for theme attribute to change to expected value.
+ * Polls the data-theme attribute instead of using fixed delays.
+ *
+ * @param {Object} client - TinyReactive client
+ * @param {string} expectedTheme - Expected theme value ('light' or 'dark')
+ * @param {number} timeout - Maximum wait time in milliseconds
+ * @returns {Promise<void>}
+ */
+async function waitForThemeChange(client, expectedTheme, timeout = THEME_TRANSITION_TIMEOUT_MS) {
+  const startTime = Date.now();
+
+  while (Date.now() - startTime < timeout) {
+    const themeResp = await client.evaluate(`
+      document.documentElement.getAttribute('data-theme')
+    `);
+
+    if (themeResp.ok && themeResp.result === expectedTheme) {
+      return; // Theme changed successfully
+    }
+
+    await new Promise(resolve => setTimeout(resolve, THEME_TRANSITION_WAIT_MS));
+  }
+
+  throw new Error(`Theme did not change to "${expectedTheme}" within ${timeout}ms`);
+}
 
 async function run() {
   const client = createTinyReactiveClient(TR_BASE, TR_TOKEN);
@@ -118,7 +150,7 @@ async function run() {
     // Wait for preview iframe to appear
     await client.waitFor('[data-testid="converter-preview-iframe"]', {
       state: 'visible',
-      timeoutMs: 5000
+      timeoutMs: PREVIEW_LOAD_TIMEOUT_MS
     });
 
     results.phases.generatePreview = { ok: true };
@@ -182,17 +214,14 @@ async function run() {
       }
 
       themeToggle.click();
-
-      // Wait a bit for theme to apply
-      new Promise(resolve => setTimeout(resolve, 500));
     `);
 
     if (!toggleResp.ok) {
       throw new Error(`Toggle failed: ${toggleResp.error || 'unknown'}`);
     }
 
-    // Wait for theme attribute to change
-    await new Promise(resolve => setTimeout(resolve, 600));
+    // Wait for theme attribute to change to 'light'
+    await waitForThemeChange(client, 'light');
 
     results.phases.toggleToLight = { ok: true };
     console.log('✅ Toggled to light mode\n');
@@ -268,14 +297,14 @@ async function run() {
         || document.querySelector('button[aria-label*="Theme"]');
 
       themeToggle.click();
-      new Promise(resolve => setTimeout(resolve, 500));
     `);
 
     if (!toggleBackResp.ok) {
       throw new Error(`Toggle back failed: ${toggleBackResp.error || 'unknown'}`);
     }
 
-    await new Promise(resolve => setTimeout(resolve, 600));
+    // Wait for theme attribute to change back to 'dark'
+    await waitForThemeChange(client, 'dark');
 
     results.phases.toggleBackToDark = { ok: true };
     console.log('✅ Toggled back to dark mode\n');

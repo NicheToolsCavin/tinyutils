@@ -271,4 +271,48 @@ describe('getThemeAwareColors()', () => {
       assert.strictEqual(results[3], 'rgba(0,0,0,0.15)', 'second light should be black');
     });
   });
+
+  describe('Error handling', () => {
+    before(() => {
+      setupDOMEnvironment();
+    });
+
+    after(() => {
+      teardownDOMEnvironment();
+      resetThemeCache();
+    });
+
+    it('should fall back to dark theme colors when theme detection throws error', () => {
+      resetThemeCache(); // Ensure clean state
+
+      // Mock console.error to verify it's called
+      const originalConsoleError = console.error;
+      let errorWasCalled = false;
+      console.error = (...args) => {
+        errorWasCalled = true;
+      };
+
+      // Mock getAttribute to throw an error
+      const originalGetAttribute = document.documentElement.getAttribute;
+      document.documentElement.getAttribute = () => {
+        throw new Error('Simulated DOM access error');
+      };
+
+      try {
+        const colors = getThemeAwareColors();
+
+        // Verify error handler was triggered
+        assert.strictEqual(errorWasCalled, true, 'console.error should be called on error');
+
+        // Verify fallback to dark theme colors
+        assert.strictEqual(colors.tableBorder, THEME_COLORS.dark.tableBorder, 'should return dark theme tableBorder');
+        assert.strictEqual(colors.tableBg, THEME_COLORS.dark.tableBg, 'should return dark theme tableBg');
+        assert.strictEqual(colors.cellBorder, THEME_COLORS.dark.cellBorder, 'should return dark theme cellBorder');
+      } finally {
+        // Restore mocks
+        document.documentElement.getAttribute = originalGetAttribute;
+        console.error = originalConsoleError;
+      }
+    });
+  });
 });
