@@ -51,3 +51,52 @@ export function getThemeColors(theme) {
 
   return THEME_COLORS[theme] || THEME_COLORS.dark;
 }
+
+// Memoization cache for getThemeAwareColors
+let cachedTheme = null;
+let cachedColors = null;
+
+/**
+ * Get theme-aware RGBA colors for inline CSS in iframes.
+ * Memoized to avoid re-computation on every render.
+ * Automatically detects current theme from document.documentElement.
+ *
+ * SECURITY NOTE: These color values are injected into iframe srcdoc HTML as inline styles.
+ * Only use trusted, hardcoded color constants from THEME_COLORS - never user input or external sources.
+ * Current implementation is safe because it only returns predefined RGBA strings.
+ *
+ * @returns {Object} Color palette with tableBorder, tableBg, cellBorder, headerBg, preBg, preBorder
+ */
+export function getThemeAwareColors() {
+  try {
+    // SSR fallback - use dark theme colors
+    if (typeof document === 'undefined') {
+      return THEME_COLORS.dark;
+    }
+
+    const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+
+    // Memoize: return cached colors if theme hasn't changed
+    if (cachedTheme === theme && cachedColors) {
+      return cachedColors;
+    }
+
+    cachedTheme = theme;
+    cachedColors = THEME_COLORS[theme] || THEME_COLORS.dark;
+
+    return cachedColors;
+  } catch (err) {
+    // Graceful fallback if theme detection fails
+    console.error('Failed to get theme colors, falling back to dark theme:', err);
+    return THEME_COLORS.dark;
+  }
+}
+
+/**
+ * Reset the memoization cache for getThemeAwareColors.
+ * Useful for testing or when you need to force a re-computation.
+ */
+export function resetThemeCache() {
+  cachedTheme = null;
+  cachedColors = null;
+}
