@@ -6,7 +6,7 @@
 import { describe, it, before, after } from 'node:test';
 import assert from 'node:assert';
 import { JSDOM } from 'jsdom';
-import { THEME_COLORS } from '../src/lib/theme/colors.js';
+import { THEME_COLORS, getThemeAwareColors, resetThemeCache } from '../src/lib/theme/colors.js';
 
 // Simulate browser environment
 function setupDOMEnvironment(theme = 'dark') {
@@ -17,36 +17,6 @@ function setupDOMEnvironment(theme = 'dark') {
 
 function teardownDOMEnvironment() {
   delete global.document;
-}
-
-// Copy of the getThemeAwareColors function from text-converter (with memoization)
-// Uses shared THEME_COLORS constants
-let cachedTheme = null;
-let cachedColors = null;
-
-function getThemeAwareColors() {
-  // SSR fallback - use dark theme colors
-  if (typeof document === 'undefined') {
-    return THEME_COLORS.dark;
-  }
-
-  const theme = document.documentElement.getAttribute('data-theme') || 'dark';
-
-  // Memoize: return cached colors if theme hasn't changed
-  if (cachedTheme === theme && cachedColors) {
-    return cachedColors;
-  }
-
-  cachedTheme = theme;
-  cachedColors = THEME_COLORS[theme] || THEME_COLORS.dark;
-
-  return cachedColors;
-}
-
-// Helper to reset cache between tests
-function resetCache() {
-  cachedTheme = null;
-  cachedColors = null;
 }
 
 describe('getThemeAwareColors()', () => {
@@ -224,16 +194,16 @@ describe('getThemeAwareColors()', () => {
 
     before(() => {
       dom = setupDOMEnvironment('dark');
-      resetCache(); // Clear cache before test suite
+      resetThemeCache(); // Clear cache before test suite
     });
 
     after(() => {
       teardownDOMEnvironment();
-      resetCache(); // Clear cache after test suite
+      resetThemeCache(); // Clear cache after test suite
     });
 
     it('should cache colors and return same object reference on repeated calls', () => {
-      resetCache(); // Ensure clean state for this test
+      resetThemeCache(); // Ensure clean state for this test
       // First call - should compute and cache
       const colors1 = getThemeAwareColors();
 
