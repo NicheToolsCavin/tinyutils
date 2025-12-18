@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte';
+  import { THEME_COLORS } from '$lib/theme/colors.js';
 
   const PREVIEW_PARSE_BUDGET_MS = 150;
   const PREVIEW_RENDER_BUDGET_MS = 750;
@@ -40,12 +41,7 @@
   /**
    * Get theme-aware RGBA colors for inline CSS in iframes.
    * Memoized to avoid re-computation on every render.
-   *
-   * Opacity values are carefully tuned for readability:
-   * - Borders (0.08-0.2): Visible structure without overwhelming content
-   * - Backgrounds (0.02-0.08): Subtle depth without blocking text
-   * - Light mode uses dark colors (rgba(0,0,0,...)) for contrast on white
-   * - Dark mode uses light colors (rgba(255,255,255,...)) for contrast on black
+   * Uses shared THEME_COLORS constants from $lib/theme/colors.js
    *
    * @returns {Object} Color palette with tableBorder, tableBg, cellBorder, headerBg, preBg, preBorder
    */
@@ -53,51 +49,61 @@
   let cachedColors = null;
 
   function getThemeAwareColors() {
-    if (typeof document === 'undefined') {
+    try {
       // SSR fallback - use dark theme colors
-      return {
-        tableBorder: 'rgba(255,255,255,0.2)',    // 20% white for visible table outline
-        tableBg: 'rgba(255,255,255,0.03)',       // 3% white for subtle depth
-        cellBorder: 'rgba(255,255,255,0.1)',     // 10% white for cell separation
-        headerBg: 'rgba(255,255,255,0.08)',      // 8% white for sticky header contrast
-        preBg: 'rgba(255,255,255,0.05)',         // 5% white for code block background
-        preBorder: 'rgba(255,255,255,0.1)'       // 10% white for code block outline
-      };
-    }
+      if (typeof document === 'undefined') {
+        return THEME_COLORS.dark;
+      }
 
-    const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+      const theme = document.documentElement.getAttribute('data-theme') || 'dark';
 
-    // Memoize: return cached colors if theme hasn't changed
-    if (cachedTheme === theme && cachedColors) {
+      // Memoize: return cached colors if theme hasn't changed
+      if (cachedTheme === theme && cachedColors) {
+        return cachedColors;
+      }
+
+      cachedTheme = theme;
+      cachedColors = THEME_COLORS[theme] || THEME_COLORS.dark;
+
       return cachedColors;
+    } catch (err) {
+      // Graceful fallback if theme detection fails
+      console.error('Failed to get theme colors, falling back to dark theme:', err);
+      logPreviewEvent('theme_colors_error_fallback', {
+        message: String(err && err.message || err)
+      });
+      return THEME_COLORS.dark;
     }
-
-    cachedTheme = theme;
-
-    if (theme === 'light') {
-      // Light mode: Dark colors on light backgrounds
-      cachedColors = {
-        tableBorder: 'rgba(0,0,0,0.15)',         // 15% black - slightly stronger for visibility on white
-        tableBg: 'rgba(0,0,0,0.02)',             // 2% black - extremely subtle depth
-        cellBorder: 'rgba(0,0,0,0.08)',          // 8% black - gentle cell separation
-        headerBg: 'rgba(0,0,0,0.05)',            // 5% black - sticky header distinction
-        preBg: 'rgba(0,0,0,0.03)',               // 3% black - code block background
-        preBorder: 'rgba(0,0,0,0.1)'             // 10% black - code block outline
-      };
-    } else {
-      // Dark mode: Light colors on dark backgrounds
-      cachedColors = {
-        tableBorder: 'rgba(255,255,255,0.2)',    // 20% white for visible table outline
-        tableBg: 'rgba(255,255,255,0.03)',       // 3% white for subtle depth
-        cellBorder: 'rgba(255,255,255,0.1)',     // 10% white for cell separation
-        headerBg: 'rgba(255,255,255,0.08)',      // 8% white for sticky header contrast
-        preBg: 'rgba(255,255,255,0.05)',         // 5% white for code block background
-        preBorder: 'rgba(255,255,255,0.1)'       // 10% white for code block outline
-      };
-    }
-
-    return cachedColors;
   }
+
+  /**
+   * Watch for theme changes and invalidate cache when theme toggles.
+   * This ensures previews update with correct colors when user switches themes.
+   */
+  onMount(() => {
+    if (typeof document === 'undefined') return;
+
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.attributeName === 'data-theme') {
+          // Theme changed - invalidate cache to force re-computation
+          cachedTheme = null;
+          cachedColors = null;
+          logPreviewEvent('theme_change_cache_invalidated', {
+            newTheme: document.documentElement.getAttribute('data-theme')
+          });
+          break;
+        }
+      }
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme']
+    });
+
+    return () => observer.disconnect();
+  });
 
   const DEMO_SNIPPET = [
     '# TinyUtils Demo Document',

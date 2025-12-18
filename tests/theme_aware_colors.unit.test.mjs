@@ -6,6 +6,7 @@
 import { describe, it, before, after } from 'node:test';
 import assert from 'node:assert';
 import { JSDOM } from 'jsdom';
+import { THEME_COLORS } from '../src/lib/theme/colors.js';
 
 // Simulate browser environment
 function setupDOMEnvironment(theme = 'dark') {
@@ -18,43 +19,34 @@ function teardownDOMEnvironment() {
   delete global.document;
 }
 
-// Copy of the getThemeAwareColors function from text-converter
+// Copy of the getThemeAwareColors function from text-converter (with memoization)
+// Uses shared THEME_COLORS constants
+let cachedTheme = null;
+let cachedColors = null;
+
 function getThemeAwareColors() {
+  // SSR fallback - use dark theme colors
   if (typeof document === 'undefined') {
-    // SSR fallback - dark theme
-    return {
-      tableBorder: 'rgba(255,255,255,0.2)',
-      tableBg: 'rgba(255,255,255,0.03)',
-      cellBorder: 'rgba(255,255,255,0.1)',
-      headerBg: 'rgba(255,255,255,0.08)',
-      preBg: 'rgba(255,255,255,0.05)',
-      preBorder: 'rgba(255,255,255,0.1)'
-    };
+    return THEME_COLORS.dark;
   }
 
   const theme = document.documentElement.getAttribute('data-theme') || 'dark';
 
-  if (theme === 'light') {
-    // Light mode: Use dark borders and subtle backgrounds
-    return {
-      tableBorder: 'rgba(0,0,0,0.15)',
-      tableBg: 'rgba(0,0,0,0.02)',
-      cellBorder: 'rgba(0,0,0,0.08)',
-      headerBg: 'rgba(0,0,0,0.05)',
-      preBg: 'rgba(0,0,0,0.03)',
-      preBorder: 'rgba(0,0,0,0.1)'
-    };
-  } else {
-    // Dark mode: Use light borders and subtle backgrounds
-    return {
-      tableBorder: 'rgba(255,255,255,0.2)',
-      tableBg: 'rgba(255,255,255,0.03)',
-      cellBorder: 'rgba(255,255,255,0.1)',
-      headerBg: 'rgba(255,255,255,0.08)',
-      preBg: 'rgba(255,255,255,0.05)',
-      preBorder: 'rgba(255,255,255,0.1)'
-    };
+  // Memoize: return cached colors if theme hasn't changed
+  if (cachedTheme === theme && cachedColors) {
+    return cachedColors;
   }
+
+  cachedTheme = theme;
+  cachedColors = THEME_COLORS[theme] || THEME_COLORS.dark;
+
+  return cachedColors;
+}
+
+// Helper to reset cache between tests
+function resetCache() {
+  cachedTheme = null;
+  cachedColors = null;
 }
 
 describe('getThemeAwareColors()', () => {
@@ -224,6 +216,89 @@ describe('getThemeAwareColors()', () => {
       assert.ok(rgbaPattern.test(colors.headerBg), 'headerBg should be valid RGBA');
       assert.ok(rgbaPattern.test(colors.preBg), 'preBg should be valid RGBA');
       assert.ok(rgbaPattern.test(colors.preBorder), 'preBorder should be valid RGBA');
+    });
+  });
+
+  describe('Memoization behavior', () => {
+    let dom;
+
+    before(() => {
+      dom = setupDOMEnvironment('dark');
+      resetCache(); // Clear cache before test suite
+    });
+
+    after(() => {
+      teardownDOMEnvironment();
+      resetCache(); // Clear cache after test suite
+    });
+
+    it('should cache colors and return same object reference on repeated calls', () => {
+      resetCache(); // Ensure clean state for this test
+      // First call - should compute and cache
+      const colors1 = getThemeAwareColors();
+
+      // Second call - should return cached reference
+      const colors2 = getThemeAwareColors();
+
+      // Verify it's the exact same object (reference equality)
+      assert.strictEqual(colors1, colors2, 'should return same cached object reference');
+    });
+
+    it('should invalidate cache and return new object when theme changes', () => {
+      // Get colors for dark theme
+      const darkColors = getThemeAwareColors();
+
+      // Change theme to light
+      document.documentElement.setAttribute('data-theme', 'light');
+
+      // Get colors again - should be different object
+      const lightColors = getThemeAwareColors();
+
+      // Verify it's a NEW object (cache was invalidated)
+      assert.notStrictEqual(darkColors, lightColors, 'should return new object after theme change');
+
+      // Verify the colors are actually different
+      assert.notStrictEqual(darkColors.tableBorder, lightColors.tableBorder, 'colors should be different');
+    });
+
+    it('should cache light theme colors after theme switch', () => {
+      // Switch to light theme
+      document.documentElement.setAttribute('data-theme', 'light');
+
+      // First call in light mode
+      const colors1 = getThemeAwareColors();
+
+      // Second call in light mode
+      const colors2 = getThemeAwareColors();
+
+      // Should return cached reference
+      assert.strictEqual(colors1, colors2, 'should cache light theme colors');
+    });
+
+    it('should handle rapid theme switching correctly', () => {
+      const results = [];
+
+      // Dark
+      document.documentElement.setAttribute('data-theme', 'dark');
+      results.push(getThemeAwareColors().tableBorder);
+
+      // Light
+      document.documentElement.setAttribute('data-theme', 'light');
+      results.push(getThemeAwareColors().tableBorder);
+
+      // Dark again
+      document.documentElement.setAttribute('data-theme', 'dark');
+      results.push(getThemeAwareColors().tableBorder);
+
+      // Light again
+      document.documentElement.setAttribute('data-theme', 'light');
+      results.push(getThemeAwareColors().tableBorder);
+
+      // Verify correct colors for each theme
+      assert.strictEqual(results[0], 'rgba(255,255,255,0.2)', 'first dark should be white');
+      assert.strictEqual(results[1], 'rgba(0,0,0,0.15)', 'first light should be black');
+      assert.strictEqual(results[2], 'rgba(255,255,255,0.2)', 'second dark should be white');
+      assert.strictEqual(results[3], 'rgba(0,0,0,0.15)', 'second light should be black');
     });
   });
 });
