@@ -160,6 +160,7 @@
     color: var(--brand-400);
     white-space: nowrap;
     backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
   }
 
   :global(html[data-theme="light"]) .feature-badge-small {
