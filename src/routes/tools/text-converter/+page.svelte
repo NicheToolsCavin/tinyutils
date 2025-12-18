@@ -39,44 +39,64 @@
 
   /**
    * Get theme-aware RGBA colors for inline CSS in iframes.
-   * Light mode uses dark borders/backgrounds, dark mode uses light borders/backgrounds.
+   * Memoized to avoid re-computation on every render.
+   *
+   * Opacity values are carefully tuned for readability:
+   * - Borders (0.08-0.2): Visible structure without overwhelming content
+   * - Backgrounds (0.02-0.08): Subtle depth without blocking text
+   * - Light mode uses dark colors (rgba(0,0,0,...)) for contrast on white
+   * - Dark mode uses light colors (rgba(255,255,255,...)) for contrast on black
+   *
+   * @returns {Object} Color palette with tableBorder, tableBg, cellBorder, headerBg, preBg, preBorder
    */
+  let cachedTheme = null;
+  let cachedColors = null;
+
   function getThemeAwareColors() {
     if (typeof document === 'undefined') {
-      // SSR fallback - dark theme
+      // SSR fallback - use dark theme colors
       return {
-        tableBorder: 'rgba(255,255,255,0.2)',
-        tableBg: 'rgba(255,255,255,0.03)',
-        cellBorder: 'rgba(255,255,255,0.1)',
-        headerBg: 'rgba(255,255,255,0.08)',
-        preBg: 'rgba(255,255,255,0.05)',
-        preBorder: 'rgba(255,255,255,0.1)'
+        tableBorder: 'rgba(255,255,255,0.2)',    // 20% white for visible table outline
+        tableBg: 'rgba(255,255,255,0.03)',       // 3% white for subtle depth
+        cellBorder: 'rgba(255,255,255,0.1)',     // 10% white for cell separation
+        headerBg: 'rgba(255,255,255,0.08)',      // 8% white for sticky header contrast
+        preBg: 'rgba(255,255,255,0.05)',         // 5% white for code block background
+        preBorder: 'rgba(255,255,255,0.1)'       // 10% white for code block outline
       };
     }
 
     const theme = document.documentElement.getAttribute('data-theme') || 'dark';
 
+    // Memoize: return cached colors if theme hasn't changed
+    if (cachedTheme === theme && cachedColors) {
+      return cachedColors;
+    }
+
+    cachedTheme = theme;
+
     if (theme === 'light') {
-      // Light mode: Use dark borders and subtle backgrounds
-      return {
-        tableBorder: 'rgba(0,0,0,0.15)',
-        tableBg: 'rgba(0,0,0,0.02)',
-        cellBorder: 'rgba(0,0,0,0.08)',
-        headerBg: 'rgba(0,0,0,0.05)',
-        preBg: 'rgba(0,0,0,0.03)',
-        preBorder: 'rgba(0,0,0,0.1)'
+      // Light mode: Dark colors on light backgrounds
+      cachedColors = {
+        tableBorder: 'rgba(0,0,0,0.15)',         // 15% black - slightly stronger for visibility on white
+        tableBg: 'rgba(0,0,0,0.02)',             // 2% black - extremely subtle depth
+        cellBorder: 'rgba(0,0,0,0.08)',          // 8% black - gentle cell separation
+        headerBg: 'rgba(0,0,0,0.05)',            // 5% black - sticky header distinction
+        preBg: 'rgba(0,0,0,0.03)',               // 3% black - code block background
+        preBorder: 'rgba(0,0,0,0.1)'             // 10% black - code block outline
       };
     } else {
-      // Dark mode: Use light borders and subtle backgrounds
-      return {
-        tableBorder: 'rgba(255,255,255,0.2)',
-        tableBg: 'rgba(255,255,255,0.03)',
-        cellBorder: 'rgba(255,255,255,0.1)',
-        headerBg: 'rgba(255,255,255,0.08)',
-        preBg: 'rgba(255,255,255,0.05)',
-        preBorder: 'rgba(255,255,255,0.1)'
+      // Dark mode: Light colors on dark backgrounds
+      cachedColors = {
+        tableBorder: 'rgba(255,255,255,0.2)',    // 20% white for visible table outline
+        tableBg: 'rgba(255,255,255,0.03)',       // 3% white for subtle depth
+        cellBorder: 'rgba(255,255,255,0.1)',     // 10% white for cell separation
+        headerBg: 'rgba(255,255,255,0.08)',      // 8% white for sticky header contrast
+        preBg: 'rgba(255,255,255,0.05)',         // 5% white for code block background
+        preBorder: 'rgba(255,255,255,0.1)'       // 10% white for code block outline
       };
     }
+
+    return cachedColors;
   }
 
   const DEMO_SNIPPET = [
@@ -313,7 +333,16 @@
         }
 
         const colors = getThemeAwareColors();
-        let html = `<style>.tableWrap{max-height:480px;overflow:auto;border-radius:12px;border:1px solid ${colors.tableBorder}}table{border-collapse:collapse;width:100%;background:${colors.tableBg}}th,td{border:1px solid ${colors.cellBorder};padding:8px;text-align:left}th{background:${colors.headerBg};position:sticky;top:0;z-index:1;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}</style><div class="tableWrap"><table>`;
+
+        // Build inline CSS for theme-aware table preview
+        const tableStyles = `
+          .tableWrap{max-height:480px;overflow:auto;border-radius:12px;border:1px solid ${colors.tableBorder}}
+          table{border-collapse:collapse;width:100%;background:${colors.tableBg}}
+          th,td{border:1px solid ${colors.cellBorder};padding:8px;text-align:left}
+          th{background:${colors.headerBg};position:sticky;top:0;z-index:1;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+        `;
+
+        let html = `<style>${tableStyles}</style><div class="tableWrap"><table>`;
         let renderBudgetHit = false;
 
         rows.forEach((cells, idx) => {
@@ -527,7 +556,11 @@ Prism.highlightAll();
       const lines = content.split('\n');
       const numbered = lines.map((l, i) => `${String(i + 1).padStart(4, ' ')} | ${escapeHtml(l)}`).join('\n');
       const colors = getThemeAwareColors();
-      const html = `<style>pre{background:${colors.preBg};padding:1rem;font-family:monospace;overflow:auto;border-radius:8px;border:1px solid ${colors.preBorder}}</style><pre>${numbered}</pre>`;
+
+      // Build inline CSS for theme-aware text preview
+      const preStyles = `pre{background:${colors.preBg};padding:1rem;font-family:monospace;overflow:auto;border-radius:8px;border:1px solid ${colors.preBorder}}`;
+      const html = `<style>${preStyles}</style><pre>${numbered}</pre>`;
+
       if (hasPerf && start) {
         const renderMs = performance.now() - start;
         if (renderMs > PREVIEW_RENDER_BUDGET_MS) {
