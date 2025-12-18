@@ -82,13 +82,18 @@ async function setTheme(client, theme) {
   await new Promise(resolve => setTimeout(resolve, 400));
 }
 
+/**
+ * Scroll to an element using safe parameterized evaluate.
+ * @param {Object} client - TinyReactive client
+ * @param {string} selector - CSS selector (passed safely as parameter, not interpolated)
+ */
 async function scrollToElement(client, selector) {
-  await client.evaluate(`
-    const el = document.querySelector('${selector}');
+  await client.evaluate((sel) => {
+    const el = document.querySelector(sel);
     if (el) {
       el.scrollIntoView({ behavior: 'instant', block: 'center' });
     }
-  `);
+  }, selector);
   await new Promise(resolve => setTimeout(resolve, 300));
 }
 

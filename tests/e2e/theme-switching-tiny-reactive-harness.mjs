@@ -59,7 +59,7 @@ const THEME_TRANSITION_TIMEOUT_MS = 3000;  // Max wait time
 const PREVIEW_LOAD_TIMEOUT_MS = 5000;
 
 /**
- * Wait for theme attribute to change to expected value.
+ * Wait for theme attribute to change to expected value using safe parameterized evaluate.
  * Polls the data-theme attribute instead of using fixed delays.
  *
  * @param {Object} client - TinyReactive client
@@ -71,9 +71,9 @@ async function waitForThemeChange(client, expectedTheme, timeout = THEME_TRANSIT
   const startTime = Date.now();
 
   while (Date.now() - startTime < timeout) {
-    const themeResp = await client.evaluate(`
-      document.documentElement.getAttribute('data-theme')
-    `);
+    const themeResp = await client.evaluate(() => {
+      return document.documentElement.getAttribute('data-theme');
+    });
 
     if (themeResp.ok && themeResp.result === expectedTheme) {
       return; // Theme changed successfully
@@ -139,9 +139,10 @@ async function run() {
     console.log('Phase 3: Generate preview...');
 
     // Use evaluate to click the button (more reliable than browser_click)
-    const clickResp = await client.evaluate(`
+    // Using parameterized evaluate to avoid injection patterns
+    const clickResp = await client.evaluate(() => {
       document.querySelector('[data-testid="converter-preview-button"]').click();
-    `);
+    });
 
     if (!clickResp.ok) {
       throw new Error(`Click failed: ${clickResp.error || 'unknown'}`);
@@ -159,7 +160,7 @@ async function run() {
     // Phase 4: Capture dark mode colors
     console.log('Phase 4: Capture dark mode iframe colors...');
 
-    const darkColorsResp = await client.evaluate(`
+    const darkColorsResp = await client.evaluate(() => {
       const iframe = document.querySelector('[data-testid="converter-preview-iframe"]');
       const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
       const table = iframeDoc.querySelector('table');
@@ -170,14 +171,14 @@ async function run() {
 
       const computedStyle = iframeDoc.defaultView.getComputedStyle(table);
 
-      ({
+      return {
         theme: document.documentElement.getAttribute('data-theme'),
         tableBorder: computedStyle.borderColor,
         tableBackground: computedStyle.backgroundColor,
         // Sample a cell to get cell border color
         cellBorder: iframeDoc.defaultView.getComputedStyle(table.querySelector('td')).borderColor
-      })
-    `);
+      };
+    });
 
     if (!darkColorsResp.ok) {
       throw new Error(`Failed to capture dark colors: ${darkColorsResp.error || 'unknown'}`);
@@ -203,7 +204,7 @@ async function run() {
     // Phase 5: Toggle to light mode
     console.log('Phase 5: Toggle to light mode...');
 
-    const toggleResp = await client.evaluate(`
+    const toggleResp = await client.evaluate(() => {
       // Find and click the theme toggle button
       const themeToggle = document.querySelector('[data-testid="theme-toggle"]')
         || document.querySelector('button[aria-label*="theme"]')
@@ -214,7 +215,7 @@ async function run() {
       }
 
       themeToggle.click();
-    `);
+    });
 
     if (!toggleResp.ok) {
       throw new Error(`Toggle failed: ${toggleResp.error || 'unknown'}`);
@@ -229,7 +230,7 @@ async function run() {
     // Phase 6: Capture light mode colors
     console.log('Phase 6: Capture light mode iframe colors...');
 
-    const lightColorsResp = await client.evaluate(`
+    const lightColorsResp = await client.evaluate(() => {
       const iframe = document.querySelector('[data-testid="converter-preview-iframe"]');
       const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
       const table = iframeDoc.querySelector('table');
@@ -240,13 +241,13 @@ async function run() {
 
       const computedStyle = iframeDoc.defaultView.getComputedStyle(table);
 
-      ({
+      return {
         theme: document.documentElement.getAttribute('data-theme'),
         tableBorder: computedStyle.borderColor,
         tableBackground: computedStyle.backgroundColor,
         cellBorder: iframeDoc.defaultView.getComputedStyle(table.querySelector('td')).borderColor
-      })
-    `);
+      };
+    });
 
     if (!lightColorsResp.ok) {
       throw new Error(`Failed to capture light colors: ${lightColorsResp.error || 'unknown'}`);
@@ -291,13 +292,13 @@ async function run() {
     // Phase 8: Toggle back to dark mode
     console.log('Phase 8: Toggle back to dark mode...');
 
-    const toggleBackResp = await client.evaluate(`
+    const toggleBackResp = await client.evaluate(() => {
       const themeToggle = document.querySelector('[data-testid="theme-toggle"]')
         || document.querySelector('button[aria-label*="theme"]')
         || document.querySelector('button[aria-label*="Theme"]');
 
       themeToggle.click();
-    `);
+    });
 
     if (!toggleBackResp.ok) {
       throw new Error(`Toggle back failed: ${toggleBackResp.error || 'unknown'}`);
@@ -312,19 +313,19 @@ async function run() {
     // Phase 9: Verify colors reverted
     console.log('Phase 9: Verify colors reverted...');
 
-    const revertedColorsResp = await client.evaluate(`
+    const revertedColorsResp = await client.evaluate(() => {
       const iframe = document.querySelector('[data-testid="converter-preview-iframe"]');
       const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
       const table = iframeDoc.querySelector('table');
       const computedStyle = iframeDoc.defaultView.getComputedStyle(table);
 
-      ({
+      return {
         theme: document.documentElement.getAttribute('data-theme'),
         tableBorder: computedStyle.borderColor,
         tableBackground: computedStyle.backgroundColor,
         cellBorder: iframeDoc.defaultView.getComputedStyle(table.querySelector('td')).borderColor
-      })
-    `);
+      };
+    });
 
     if (!revertedColorsResp.ok) {
       throw new Error(`Failed to capture reverted colors: ${revertedColorsResp.error || 'unknown'}`);

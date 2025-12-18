@@ -67,7 +67,23 @@
       0 -1px 0 rgba(0, 0, 0, 0.03) inset;
   }
 
-  /* High contrast mode: Increase opacity for better WCAG compliance */
+  /**
+   * High Contrast Mode - WCAG 2.1 Level AA Compliance
+   *
+   * When users enable "Increase Contrast" in OS settings (prefers-contrast: high),
+   * we increase card opacity to ensure text and UI elements meet WCAG contrast requirements.
+   *
+   * Light Mode: 0.55 → 0.8 (start), 0.25 → 0.6 (end)
+   *   - Increases background opacity to strengthen contrast against colored backgrounds
+   *   - Border opacity 0.6 → 0.9 for clearer card boundaries
+   *
+   * Dark Mode: 0.15 → 0.25 (start), 0.1 → 0.15 (end)
+   *   - Increases glass overlay opacity for better text readability
+   *   - Border opacity 0.2 → 0.35 for improved definition
+   *
+   * Target: 4.5:1 contrast ratio for normal text (WCAG Level AA)
+   * Testing: Verify with OS high-contrast settings enabled + contrast checker tools
+   */
   @media (prefers-contrast: high) {
     :global(html[data-theme="light"]) .tool-card-enhanced {
       background:

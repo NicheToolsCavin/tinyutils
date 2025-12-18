@@ -45,6 +45,32 @@
   onMount(() => {
     if (typeof document === 'undefined') return;
 
+    /**
+     * Watch for theme changes and invalidate cache when theme toggles.
+     *
+     * TIMING SAFETY:
+     * MutationObserver callbacks are async, but cache invalidation timing is safe because:
+     *
+     * 1. Browser processes DOM mutations synchronously before next render
+     *    - When user clicks theme toggle, data-theme attribute changes immediately
+     *    - MutationObserver callback fires before browser paints next frame
+     *    - Cache is invalidated before any preview component can re-render
+     *
+     * 2. Svelte reactivity + microtask queue guarantee correct order
+     *    - Svelte $effect runs AFTER DOM updates but BEFORE browser paint
+     *    - MutationObserver fires in microtask queue (same timing as Promise.then)
+     *    - Cache invalidation happens before getThemeAwareColors() next call
+     *
+     * 3. Even in edge case where preview renders before callback:
+     *    - getThemeAwareColors() checks current DOM state (getAttribute)
+     *    - If callback hasn't fired yet, it would compute new colors anyway
+     *    - Next render would use correctly cached colors
+     *
+     * ALTERNATIVE CONSIDERED:
+     * Synchronous cache reset in theme toggle onclick handler would be "safer"
+     * but couples preview logic to layout component. MutationObserver keeps
+     * concerns separated while providing sufficient timing guarantees.
+     */
     const observer = new MutationObserver((mutations) => {
       for (const mutation of mutations) {
         if (mutation.attributeName === 'data-theme') {
