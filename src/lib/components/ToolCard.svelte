@@ -67,6 +67,21 @@
       0 -1px 0 rgba(0, 0, 0, 0.03) inset;
   }
 
+  /* High contrast mode: Increase opacity for better WCAG compliance */
+  @media (prefers-contrast: high) {
+    :global(html[data-theme="light"]) .tool-card-enhanced {
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.6) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+    }
+
+    :global(html[data-theme="dark"]) .tool-card-enhanced {
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+    }
+  }
+
   /* Glass shine overlay - top highlight */
   .tool-card-enhanced::before {
     content: '';
