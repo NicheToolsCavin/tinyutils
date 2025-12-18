@@ -137,7 +137,7 @@
           >Terms of service</a>
         </div>
       </span>
-      <button class="theme-toggle" onclick={toggleTheme} type="button" aria-label="Toggle theme">
+      <button class="theme-toggle" onclick={toggleTheme} type="button" aria-label="Toggle theme" data-testid="theme-toggle">
         <span class="icon">{theme === 'dark' ? '☀' : '☾'}</span>
         <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
       </button>
