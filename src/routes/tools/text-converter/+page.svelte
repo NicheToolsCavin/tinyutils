@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte';
+  import { THEME_COLORS } from '$lib/theme/colors.js';
 
   const PREVIEW_PARSE_BUDGET_MS = 150;
   const PREVIEW_RENDER_BUDGET_MS = 750;
@@ -36,6 +37,73 @@
     const border = (styles.getPropertyValue('--border-default') || '').trim() || 'rgba(148, 163, 184, 0.4)';
     return { surface, text, border };
   }
+
+  /**
+   * Get theme-aware RGBA colors for inline CSS in iframes.
+   * Memoized to avoid re-computation on every render.
+   * Uses shared THEME_COLORS constants from $lib/theme/colors.js
+   *
+   * @returns {Object} Color palette with tableBorder, tableBg, cellBorder, headerBg, preBg, preBorder
+   */
+  let cachedTheme = null;
+  let cachedColors = null;
+
+  function getThemeAwareColors() {
+    try {
+      // SSR fallback - use dark theme colors
+      if (typeof document === 'undefined') {
+        return THEME_COLORS.dark;
+      }
+
+      const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+
+      // Memoize: return cached colors if theme hasn't changed
+      if (cachedTheme === theme && cachedColors) {
+        return cachedColors;
+      }
+
+      cachedTheme = theme;
+      cachedColors = THEME_COLORS[theme] || THEME_COLORS.dark;
+
+      return cachedColors;
+    } catch (err) {
+      // Graceful fallback if theme detection fails
+      console.error('Failed to get theme colors, falling back to dark theme:', err);
+      logPreviewEvent('theme_colors_error_fallback', {
+        message: String(err && err.message || err)
+      });
+      return THEME_COLORS.dark;
+    }
+  }
+
+  /**
+   * Watch for theme changes and invalidate cache when theme toggles.
+   * This ensures previews update with correct colors when user switches themes.
+   */
+  onMount(() => {
+    if (typeof document === 'undefined') return;
+
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.attributeName === 'data-theme') {
+          // Theme changed - invalidate cache to force re-computation
+          cachedTheme = null;
+          cachedColors = null;
+          logPreviewEvent('theme_change_cache_invalidated', {
+            newTheme: document.documentElement.getAttribute('data-theme')
+          });
+          break;
+        }
+      }
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme']
+    });
+
+    return () => observer.disconnect();
+  });
 
   const DEMO_SNIPPET = [
     '# TinyUtils Demo Document',
@@ -270,7 +338,17 @@
           return;
         }
 
-        let html = '<style>.tableWrap{max-height:480px;overflow:auto;}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:8px;text-align:left}th{background:#f4f4f4;position:sticky;top:0;z-index:1}</style><div class="tableWrap"><table>';
+        const colors = getThemeAwareColors();
+
+        // Build inline CSS for theme-aware table preview
+        const tableStyles = `
+          .tableWrap{max-height:480px;overflow:auto;border-radius:12px;border:1px solid ${colors.tableBorder}}
+          table{border-collapse:collapse;width:100%;background:${colors.tableBg}}
+          th,td{border:1px solid ${colors.cellBorder};padding:8px;text-align:left}
+          th{background:${colors.headerBg};position:sticky;top:0;z-index:1;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+        `;
+
+        let html = `<style>${tableStyles}</style><div class="tableWrap"><table>`;
         let renderBudgetHit = false;
 
         rows.forEach((cells, idx) => {
@@ -483,7 +561,12 @@ Prism.highlightAll();
       const start = hasPerf ? performance.now() : 0;
       const lines = content.split('\n');
       const numbered = lines.map((l, i) => `${String(i + 1).padStart(4, ' ')} | ${escapeHtml(l)}`).join('\n');
-      const html = `<style>pre{background:#f8f8f8;padding:1rem;font-family:monospace;overflow:auto}</style><pre>${numbered}</pre>`;
+      const colors = getThemeAwareColors();
+
+      // Build inline CSS for theme-aware text preview
+      const preStyles = `pre{background:${colors.preBg};padding:1rem;font-family:monospace;overflow:auto;border-radius:8px;border:1px solid ${colors.preBorder}}`;
+      const html = `<style>${preStyles}</style><pre>${numbered}</pre>`;
+
       if (hasPerf && start) {
         const renderMs = performance.now() - start;
         if (renderMs > PREVIEW_RENDER_BUDGET_MS) {

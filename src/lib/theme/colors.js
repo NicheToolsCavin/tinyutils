@@ -1,0 +1,53 @@
+/**
+ * Theme-aware color constants for inline CSS generation.
+ *
+ * These colors are used in iframes where CSS custom properties aren't available.
+ * Opacity values are carefully tuned for readability:
+ * - Borders (0.08-0.2): Visible structure without overwhelming content
+ * - Backgrounds (0.02-0.08): Subtle depth without blocking text
+ */
+
+export const THEME_COLORS = {
+  /**
+   * Light theme: Dark colors for contrast on light backgrounds
+   */
+  light: {
+    tableBorder: 'rgba(0,0,0,0.15)',     // 15% black - slightly stronger for visibility on white
+    tableBg: 'rgba(0,0,0,0.02)',         // 2% black - extremely subtle depth
+    cellBorder: 'rgba(0,0,0,0.08)',      // 8% black - gentle cell separation
+    headerBg: 'rgba(0,0,0,0.05)',        // 5% black - sticky header distinction
+    preBg: 'rgba(0,0,0,0.03)',           // 3% black - code block background
+    preBorder: 'rgba(0,0,0,0.1)'         // 10% black - code block outline
+  },
+
+  /**
+   * Dark theme: Light colors for contrast on dark backgrounds
+   */
+  dark: {
+    tableBorder: 'rgba(255,255,255,0.2)',    // 20% white for visible table outline
+    tableBg: 'rgba(255,255,255,0.03)',       // 3% white for subtle depth
+    cellBorder: 'rgba(255,255,255,0.1)',     // 10% white for cell separation
+    headerBg: 'rgba(255,255,255,0.08)',      // 8% white for sticky header contrast
+    preBg: 'rgba(255,255,255,0.05)',         // 5% white for code block background
+    preBorder: 'rgba(255,255,255,0.1)'       // 10% white for code block outline
+  }
+};
+
+/**
+ * Get theme-aware colors for the current or specified theme.
+ *
+ * @param {string} [theme] - Optional theme name ('light' or 'dark').
+ *                           If not provided, reads from document.documentElement
+ * @returns {Object} Color palette with tableBorder, tableBg, cellBorder, headerBg, preBg, preBorder
+ */
+export function getThemeColors(theme) {
+  // If theme not provided, try to read from DOM
+  if (!theme && typeof document !== 'undefined') {
+    theme = document.documentElement.getAttribute('data-theme') || 'dark';
+  }
+
+  // Default to dark if still no theme
+  theme = theme || 'dark';
+
+  return THEME_COLORS[theme] || THEME_COLORS.dark;
+}

@@ -707,16 +707,15 @@ html[data-theme="light"] .glass:hover {
   overflow: hidden;
 }
 
-/* Light mode header gets the liquid glass effect */
+/* Light mode header gets the liquid glass effect with transparency */
 html[data-theme="light"] .site-header .header-inner {
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.3) 100%),
-    var(--glass-bg);
-  border: 1px solid rgba(255, 255, 255, 0.7);
+    linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.25) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   box-shadow:
-    0 8px 32px rgba(31, 38, 135, 0.08),
-    0 1px 0 rgba(255, 255, 255, 0.9) inset,
-    0 -1px 0 rgba(0, 0, 0, 0.05) inset;
+    0 8px 32px rgba(31, 38, 135, 0.06),
+    0 1px 0 rgba(255, 255, 255, 0.7) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.03) inset;
 }
 
 .site-header .brand {

@@ -766,6 +766,7 @@
     padding: 0.375rem 0.75rem;
     background: rgba(255, 215, 0, 0.12);
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 215, 0, 0.3);
     border-radius: 100px;
     font-size: 0.75rem;
