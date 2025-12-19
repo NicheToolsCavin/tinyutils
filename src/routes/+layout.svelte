@@ -7,6 +7,15 @@
 
   injectSpeedInsights();
 
+  // Navigation active state helpers (computed once, not on every render)
+  $: isToolsActive = page.url.pathname === '/tools' || page.url.pathname.startsWith('/tools/');
+  $: isBlogActive = page.url.pathname.startsWith('/blog');
+  $: isAboutActive = page.url.pathname.startsWith('/about');
+  $: isPrivacyActive =
+    page.url.pathname === '/privacy.html' ||
+    page.url.pathname === '/cookies.html' ||
+    page.url.pathname === '/terms.html';
+
   // Theme management
   let theme = $state('dark');
 
@@ -90,51 +99,33 @@
     <nav class="nav">
       <a
         href="/tools/"
-        class:active={page.url.pathname === '/tools' || page.url.pathname.startsWith('/tools/')}
-        aria-current={page.url.pathname === '/tools' || page.url.pathname.startsWith('/tools/') ? 'page' : undefined}
+        class:active={isToolsActive}
+        aria-current={isToolsActive ? 'page' : undefined}
+        data-sveltekit-preload-data="hover"
       >Tools</a>
       <a
         href="/blog/"
-        class:active={page.url.pathname.startsWith('/blog')}
-        aria-current={page.url.pathname.startsWith('/blog') ? 'page' : undefined}
+        class:active={isBlogActive}
+        aria-current={isBlogActive ? 'page' : undefined}
+        data-sveltekit-preload-data="hover"
       >Blog</a>
       <a
         href="/about/"
-        class:active={page.url.pathname.startsWith('/about')}
-        aria-current={page.url.pathname.startsWith('/about') ? 'page' : undefined}
+        class:active={isAboutActive}
+        aria-current={isAboutActive ? 'page' : undefined}
+        data-sveltekit-preload-data="hover"
       >About</a>
       <span class="nav-item">
         <a
           href="/privacy.html"
-          class:active={
-            page.url.pathname === '/privacy.html' ||
-            page.url.pathname === '/cookies.html' ||
-            page.url.pathname === '/terms.html'
-          }
-          aria-current={
-            page.url.pathname === '/privacy.html' ||
-            page.url.pathname === '/cookies.html' ||
-            page.url.pathname === '/terms.html'
-              ? 'page'
-              : undefined
-          }
+          class:active={isPrivacyActive}
+          aria-current={isPrivacyActive ? 'page' : undefined}
+          data-sveltekit-reload
         >Privacy</a>
         <div class="nav-dropdown">
-          <a
-            href="/cookies.html"
-            class:active={page.url.pathname === '/cookies.html'}
-            aria-current={page.url.pathname === '/cookies.html' ? 'page' : undefined}
-          >Cookie settings</a>
-          <a
-            href="/privacy.html"
-            class:active={page.url.pathname === '/privacy.html'}
-            aria-current={page.url.pathname === '/privacy.html' ? 'page' : undefined}
-          >Privacy policy</a>
-          <a
-            href="/terms.html"
-            class:active={page.url.pathname === '/terms.html'}
-            aria-current={page.url.pathname === '/terms.html' ? 'page' : undefined}
-          >Terms of service</a>
+          <a href="/cookies.html" data-sveltekit-reload>Cookie settings</a>
+          <a href="/privacy.html" data-sveltekit-reload>Privacy policy</a>
+          <a href="/terms.html" data-sveltekit-reload>Terms of service</a>
         </div>
       </span>
       <button class="theme-toggle" onclick={toggleTheme} type="button" aria-label="Toggle theme" data-testid="theme-toggle">

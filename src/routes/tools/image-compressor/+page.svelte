@@ -599,10 +599,17 @@
 			on:dragleave={onDragLeave}
 			on:dragover={onDragOver}
 			on:drop={onDrop}
-			on:click={() => !isProcessing && fileInputEl?.click()}
+			on:click={() => {
+				if (!isProcessing) {
+					// Defer file dialog to next frame for better INP
+					requestAnimationFrame(() => fileInputEl?.click());
+				}
+			}}
 			on:keydown={(e) => {
 				if (isProcessing) return;
-				if (e.key === 'Enter' || e.key === ' ') fileInputEl?.click();
+				if (e.key === 'Enter' || e.key === ' ') {
+					requestAnimationFrame(() => fileInputEl?.click());
+				}
 			}}
 		>
 			<div class="dropzone-inner">
@@ -616,7 +623,11 @@
 						class="btn primary"
 						type="button"
 						disabled={isProcessing}
-						on:click|stopPropagation={() => !isProcessing && fileInputEl?.click()}
+						on:click|stopPropagation={() => {
+							if (!isProcessing) {
+								requestAnimationFrame(() => fileInputEl?.click());
+							}
+						}}
 					>
 						Choose files
 					</button>
@@ -681,7 +692,7 @@
 						class="input color-input"
 						type="color"
 						value={settings.jpegBackground}
-						on:input={(e) => updateSettings({ jpegBackground: (e.currentTarget as HTMLInputElement).value })}
+						on:change={(e) => updateSettings({ jpegBackground: (e.currentTarget as HTMLInputElement).value })}
 					/>
 				</label>
 			</section>
