@@ -58,6 +58,8 @@
   <title>{title}</title>
   <meta name="description" content={description} />
   <link rel="canonical" href={canonicalUrl ?? `/blog/${slug}/`} />
+  <!-- Preload hero image for faster LCP -->
+  <link rel="preload" as="image" href={thumb} fetchpriority="high" />
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
   <meta property="og:type" content="article" />
@@ -79,7 +81,13 @@
 
 <div class="blog-article">
   <div class="article-hero-image">
-    <img src={thumb} alt="{category} category" />
+    <img
+      src={thumb}
+      alt="{category} category"
+      fetchpriority="high"
+      width="1200"
+      height="320"
+    />
     <div class="article-hero-overlay"></div>
   </div>
   <article class="container">
