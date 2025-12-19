@@ -26,9 +26,29 @@
     loadVercelAnalytics();
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
+  // Delay analytics init until after first user interaction to improve INP
+  function initOnInteraction() {
     init();
+    // Remove listeners after first interaction
+    removeEventListener('click', initOnInteraction, { once: true });
+    removeEventListener('keydown', initOnInteraction, { once: true });
+    removeEventListener('touchstart', initOnInteraction, { once: true });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      // Wait for first interaction before loading analytics
+      addEventListener('click', initOnInteraction, { once: true });
+      addEventListener('keydown', initOnInteraction, { once: true });
+      addEventListener('touchstart', initOnInteraction, { once: true });
+      // Fallback: load after 3 seconds if no interaction
+      setTimeout(init, 3000);
+    });
+  } else {
+    // Page already loaded, wait for interaction or 3s timeout
+    addEventListener('click', initOnInteraction, { once: true });
+    addEventListener('keydown', initOnInteraction, { once: true });
+    addEventListener('touchstart', initOnInteraction, { once: true });
+    setTimeout(init, 3000);
   }
 })();

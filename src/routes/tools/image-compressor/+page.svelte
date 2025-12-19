@@ -453,24 +453,41 @@
 					task.status = 'error';
 					task.error = err?.message || 'Processing failed.';
 				}
-			} finally {
-				// Yield to UI
-				await new Promise((r) => setTimeout(r, 0));
-				tasks = tasks;
 			}
 		};
 
-		// Concurrency-limited runner
+		// Concurrency-limited runner with batched UI updates
 		let idx = 0;
+		let processedCount = 0;
+		const BATCH_SIZE = 5; // Update UI every 5 images instead of every image
+
 		const runners = Array.from({ length: concurrency }, async () => {
 			while (true) {
 				const i = idx++;
 				if (i >= tasks.length) break;
+
 				await processOne(tasks[i]);
+				processedCount++;
+
+				// Batch UI updates: only trigger reactivity every BATCH_SIZE files
+				if (processedCount % BATCH_SIZE === 0) {
+					tasks = tasks; // Trigger Svelte reactivity
+
+					// Yield to browser for rendering using requestIdleCallback if available
+					if (typeof requestIdleCallback !== 'undefined') {
+						await new Promise((resolve) => requestIdleCallback(resolve, { timeout: 50 }));
+					} else {
+						// Fallback for browsers without requestIdleCallback
+						await new Promise((resolve) => setTimeout(resolve, 0));
+					}
+				}
 			}
 		});
 
 		await Promise.all(runners);
+
+		// Final update to catch any remaining files not in a complete batch
+		tasks = tasks;
 
 		isProcessing = false;
 		isCancelling = false;
