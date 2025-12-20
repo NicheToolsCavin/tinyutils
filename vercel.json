@@ -13,6 +13,13 @@
       "maxDuration": 60
     }
   },
+  "redirects": [
+    {
+      "source": "/:path*",
+      "destination": "https://www.tinyutils.net/:path*",
+      "permanent": true
+    }
+  ],
   "headers": [
     {
       "source": "/ads.txt",
