@@ -7,14 +7,15 @@
 
   injectSpeedInsights();
 
-  // Navigation active state helpers (computed once, not on every render)
-  $: isToolsActive = page.url.pathname === '/tools' || page.url.pathname.startsWith('/tools/');
-  $: isBlogActive = page.url.pathname.startsWith('/blog');
-  $: isAboutActive = page.url.pathname.startsWith('/about');
-  $: isPrivacyActive =
+  // Navigation active state helpers (computed once per route change, not on every render)
+  let isToolsActive = $derived(page.url.pathname === '/tools' || page.url.pathname.startsWith('/tools/'));
+  let isBlogActive = $derived(page.url.pathname.startsWith('/blog'));
+  let isAboutActive = $derived(page.url.pathname.startsWith('/about'));
+  let isPrivacyActive = $derived(
     page.url.pathname === '/privacy.html' ||
     page.url.pathname === '/cookies.html' ||
-    page.url.pathname === '/terms.html';
+    page.url.pathname === '/terms.html'
+  );
 
   // Theme management
   let theme = $state('dark');
@@ -189,7 +190,8 @@
     color: var(--text-secondary);
     text-decoration: none;
     border-radius: 8px;
-    transition: all 0.3s ease;
+    /* Only transition properties that change on hover */
+    transition: background-color 0.2s ease, color 0.2s ease;
     font-size: 0.9rem;
   }
 

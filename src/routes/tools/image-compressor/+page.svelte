@@ -350,7 +350,11 @@
 			...partial,
 			resize: { ...settings.resize, ...(partial.resize ?? {}) }
 		};
-		saveSettings(settings);
+		// Defer localStorage write to avoid blocking main thread during interaction
+		// This is critical for INP - localStorage.setItem is synchronous
+		requestAnimationFrame(() => {
+			saveSettings(settings);
+		});
 	}
 
 	function getPerTaskSavingsPct(t: ImageTask): number | null {
@@ -587,6 +591,7 @@
 			<strong>Privacy:</strong> images are processed locally in your browser - nothing is uploaded.
 		</p>
 
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div
 			bind:this={dropzoneEl}
 			class="dropzone"
@@ -599,10 +604,14 @@
 			on:dragleave={onDragLeave}
 			on:dragover={onDragOver}
 			on:drop={onDrop}
-			on:click={() => {
-				if (!isProcessing) {
-					// Defer file dialog to next frame for better INP
-					requestAnimationFrame(() => fileInputEl?.click());
+			on:click={(e) => {
+				// Only trigger if clicking the dropzone itself, not child buttons
+				// This prevents double-handling when clicking inner buttons
+				if (e.target === dropzoneEl || (e.target as HTMLElement).closest('.dropzone-inner:not(button)')) {
+					if (!isProcessing) {
+						// Defer file dialog to next frame for better INP
+						requestAnimationFrame(() => fileInputEl?.click());
+					}
 				}
 			}}
 			on:keydown={(e) => {
@@ -972,7 +981,8 @@
 		backdrop-filter: blur(var(--glass-blur));
 		-webkit-backdrop-filter: blur(var(--glass-blur));
 		cursor: pointer;
-		transition: all 0.3s ease;
+		/* Only transition properties that change on hover/dragging */
+		transition: border-color 0.2s ease, box-shadow 0.2s ease;
 		overflow: hidden;
 	}
 
@@ -1043,7 +1053,8 @@
 		backdrop-filter: blur(8px);
 		-webkit-backdrop-filter: blur(8px);
 		overflow: hidden;
-		transition: all 0.3s ease;
+		/* Only transition border-color which changes on hover */
+		transition: border-color 0.2s ease;
 	}
 
 	.settings-card::before {
@@ -1120,7 +1131,8 @@
 		backdrop-filter: blur(8px);
 		-webkit-backdrop-filter: blur(8px);
 		color: var(--text-primary);
-		transition: all 0.2s ease;
+		/* Only transition properties that change on focus */
+		transition: border-color 0.15s ease, box-shadow 0.15s ease;
 	}
 
 	.input:focus {
@@ -1225,7 +1237,8 @@
 		background: var(--glass-bg);
 		backdrop-filter: blur(8px);
 		-webkit-backdrop-filter: blur(8px);
-		transition: all 0.2s ease;
+		/* Only transition properties that change on hover */
+		transition: border-color 0.2s ease, box-shadow 0.2s ease;
 	}
 
 	.file-row:hover {
