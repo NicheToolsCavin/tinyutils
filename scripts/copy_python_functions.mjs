@@ -24,12 +24,14 @@ const pythonFunctions = [
   {
     source: 'api/convert',
     dest: 'api/convert',
-    route: { handle: 'filesystem' } // Let Vercel handle file-based routing
+    // Shared modules that this function imports (relative to rootDir)
+    // Note: convert_backend imports from api._lib, so we need to copy that too
+    sharedModules: ['convert_backend', 'api/_lib']
   },
   {
     source: 'api/bulk-replace',
     dest: 'api/bulk-replace',
-    route: { handle: 'filesystem' }
+    sharedModules: []
   }
 ];
 
@@ -48,6 +50,18 @@ for (const fn of pythonFunctions) {
   console.log(`  ✓ Copying ${fn.source} → .vercel/output/functions/${fn.dest}`);
   mkdirSync(dirname(destPath), { recursive: true });
   cpSync(sourcePath, destPath, { recursive: true });
+
+  // Copy shared modules into the function directory so imports work
+  for (const mod of fn.sharedModules || []) {
+    const modSource = join(rootDir, mod);
+    const modDest = join(destPath, mod);
+    if (!existsSync(modSource)) {
+      console.warn(`⚠️  Shared module not found: ${mod}`);
+      continue;
+    }
+    console.log(`  ✓ Copying shared module ${mod} → .vercel/output/functions/${fn.dest}/${mod}`);
+    cpSync(modSource, modDest, { recursive: true });
+  }
 }
 
 // Step 2: Modify config.json to add Python routes BEFORE the catch-all
