@@ -5,8 +5,14 @@
  * Problem: SvelteKit's adapter-vercel generates .vercel/output/ with a catch-all route
  * that intercepts ALL requests, including /api/* routes for Python functions.
  *
- * Solution: Manually copy Python functions and inject routes into config.json BEFORE
- * the catch-all, so Vercel routes /api/* to Python functions instead of SvelteKit.
+ * Solution: Manually copy Python functions to .vercel/output/functions/ with the required
+ * .func suffix, configure .vc-config.json properly, and inject routes into config.json
+ * BEFORE the catch-all.
+ *
+ * Key requirements for Vercel Build Output API:
+ * 1. Function directories MUST have .func suffix (e.g., api/convert.func/)
+ * 2. .vc-config.json MUST include: runtime, handler, launcherType
+ * 3. Routes must point to the function path without .func suffix
  */
 
 import { readFileSync, writeFileSync, cpSync, mkdirSync, existsSync } from 'fs';
@@ -23,21 +29,41 @@ const functionsDir = join(outputDir, 'functions');
 const pythonFunctions = [
   {
     source: 'api/convert',
-    dest: 'api/convert',
+    // Vercel Build Output API requires .func suffix for function directories
+    dest: 'api/convert.func',
+    route: '/api/convert',
     // Shared modules that this function imports (relative to rootDir)
     // Note: convert_backend imports from api._lib, so we need to copy that too
-    sharedModules: ['convert_backend', 'api/_lib']
+    sharedModules: ['convert_backend', 'api/_lib'],
+    // .vc-config.json settings
+    config: {
+      runtime: 'python3.12',
+      handler: 'index.py',
+      launcherType: 'Nodejs',
+      shouldAddHelpers: true,
+      memory: 2048,
+      maxDuration: 120
+    }
   },
   {
     source: 'api/bulk-replace',
-    dest: 'api/bulk-replace',
-    sharedModules: []
+    dest: 'api/bulk-replace.func',
+    route: '/api/bulk-replace',
+    sharedModules: [],
+    config: {
+      runtime: 'python3.12',
+      handler: 'index.py',
+      launcherType: 'Nodejs',
+      shouldAddHelpers: true,
+      memory: 1024,
+      maxDuration: 60
+    }
   }
 ];
 
 console.log('📦 Copying Python serverless functions to .vercel/output/...\n');
 
-// Step 1: Copy Python function source code to output/functions/
+// Step 1: Copy Python function source code to output/functions/ with .func suffix
 for (const fn of pythonFunctions) {
   const sourcePath = join(rootDir, fn.source);
   const destPath = join(functionsDir, fn.dest);
@@ -62,6 +88,11 @@ for (const fn of pythonFunctions) {
     console.log(`  ✓ Copying shared module ${mod} → .vercel/output/functions/${fn.dest}/${mod}`);
     cpSync(modSource, modDest, { recursive: true });
   }
+
+  // Write the proper .vc-config.json with all required fields
+  const vcConfigPath = join(destPath, '.vc-config.json');
+  console.log(`  ✓ Writing .vc-config.json with handler and launcherType`);
+  writeFileSync(vcConfigPath, JSON.stringify(fn.config, null, 2));
 }
 
 // Step 2: Modify config.json to add Python routes BEFORE the catch-all
@@ -78,18 +109,12 @@ if (catchAllIndex === -1) {
 }
 
 // Insert Python routes BEFORE the catch-all
-const pythonRoutes = [
-  {
-    src: '^/api/convert(/.*)?$',
-    dest: '/api/convert',
-    check: true
-  },
-  {
-    src: '^/api/bulk-replace(/.*)?$',
-    dest: '/api/bulk-replace',
-    check: true
-  }
-];
+// Route dest should NOT include .func suffix - Vercel handles that internally
+const pythonRoutes = pythonFunctions.map(fn => ({
+  src: `^${fn.route}(/.*)?$`,
+  dest: fn.route,
+  check: true
+}));
 
 config.routes.splice(catchAllIndex, 0, ...pythonRoutes);
 
@@ -97,5 +122,6 @@ console.log(`  ✓ Inserted ${pythonRoutes.length} Python routes before catch-al
 writeFileSync(configPath, JSON.stringify(config, null, 2));
 
 console.log('\n✅ Python functions integrated successfully!');
-console.log('   Routes: /api/convert, /api/bulk-replace');
+console.log('   Routes:', pythonFunctions.map(fn => fn.route).join(', '));
+console.log('   Function dirs:', pythonFunctions.map(fn => fn.dest).join(', '));
 console.log('   These will now be handled by Python instead of SvelteKit\n');
