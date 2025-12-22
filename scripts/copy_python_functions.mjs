@@ -37,7 +37,9 @@ const pythonFunctions = [
     sharedModules: ['convert_backend', 'api/_lib'],
     // .vc-config.json settings
     config: {
-      runtime: 'python3.12',
+      // Using Python 3.11 because 3.12 has known ASGI issues on Vercel
+      // See: https://github.com/vercel/vercel/issues/11545
+      runtime: 'python3.11',
       handler: 'index.py',
       launcherType: 'Nodejs',
       shouldAddHelpers: true,
@@ -51,7 +53,7 @@ const pythonFunctions = [
     route: '/api/bulk-replace',
     sharedModules: [],
     config: {
-      runtime: 'python3.12',
+      runtime: 'python3.11',
       handler: 'index.py',
       launcherType: 'Nodejs',
       shouldAddHelpers: true,
