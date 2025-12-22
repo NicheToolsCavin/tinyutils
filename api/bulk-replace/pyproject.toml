@@ -1,9 +1,0 @@
-[project]
-name = "bulk-replace"
-version = "1.0.0"
-requires-python = ">=3.9,<3.13"
-dependencies = [
-    "fastapi>=0.110,<1.0",
-    "python-multipart>=0.0.6,<1.0",
-    "chardet>=5.0,<6.0",
-]
