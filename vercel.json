@@ -2,27 +2,21 @@
   "builds": [
     {
       "src": "api/convert/index.py",
-      "use": "@vercel/python"
+      "use": "@vercel/python",
+      "config": {
+        "memory": 2048,
+        "maxDuration": 120
+      }
     },
     {
       "src": "api/bulk-replace/index.py",
-      "use": "@vercel/python"
+      "use": "@vercel/python",
+      "config": {
+        "memory": 1024,
+        "maxDuration": 60
+      }
     }
   ],
-  "functions": {
-    "api/*.js": {
-      "memory": 1024,
-      "maxDuration": 60
-    },
-    "api/convert/index.py": {
-      "memory": 2048,
-      "maxDuration": 120
-    },
-    "api/bulk-replace/index.py": {
-      "memory": 1024,
-      "maxDuration": 60
-    }
-  },
   "rewrites": [
     {
       "source": "/api/convert/:path*",
