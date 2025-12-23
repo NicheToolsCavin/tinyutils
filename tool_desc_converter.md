@@ -25,7 +25,7 @@ Testing
 • Pending: PR #78 CI `Python requirements check` rerun
 
 Commits
-• TBD
+• 6b264ca - Disable pdfminer/pdfplumber on Vercel
 
 ### Major changes — 2025-12-03 22:00 CET (UTC+01:00) — Phase 5: Comprehensive Rich-Text Coverage & Final Documentation
 
