@@ -188,3 +188,16 @@ Activity log for AI agents working on TinyUtils. Newest first.
 - **Follow-ups:**
   - Open PR and redeploy to confirm build succeeds
 
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-23 02:18 CET - Manual - address PR #77 review feedback
+- **Mode:** manual
+- **Branch:** `fix/vercel-config-functions`
+- **Summary:**
+  - Updated copy_python_functions.mjs to emit Build Output API .vc-config.json and copy shared modules
+  - Fixed DLF gate workflow to run npm ci so jsdom-dependent tests pass
+  - Captured preview ads.txt headers/body for AdSense routing verification
+- **Evidence:** artifacts/vercel-build-fail/20251223/inspect-error-excerpt.txt
+- **Follow-ups:**
+  - Push updates, re-run CI, respond to Claude review, then merge
+
