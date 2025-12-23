@@ -1,5 +1,32 @@
 ## Converter Tool — Description and Change Log
 
+### Major changes — 2025-12-24 00:47 CET (UTC+01:00) — Restore PDF text extraction deps
+
+Added
+• Re-enabled `pdfplumber` and `pdfminer.six` dependencies for PDF text extraction in the converter backend.
+
+Modified
+• Removed the temporary uv/cffi removal note in requirements now that deps are restored.
+
+Fixed
+• **Problem:** PDF text extraction could only use the pypdf fallback after deps were removed.
+  - **Root cause:** `pdfplumber`/`pdfminer.six` were commented out in requirements.
+  - **Fix:** Re-added both dependencies so the higher-fidelity extraction path is available again.
+  - **Evidence:** `artifacts/python-runtime/20251223/pip-validate-missing-pdfminer.txt`
+
+Human-readable summary
+Re-enabled the libraries that read PDF text with better layout fidelity so the converter can once again extract PDFs as expected and the dependency checks pass.
+
+Impact
+• Higher-fidelity PDF text extraction path restored ✅
+• CI dependency smoke aligns with converter requirements ✅
+
+Testing
+• Pending: PR #78 CI rerun (pip-validate) and preview /api/convert/health
+
+Commits
+• cac9c1b - Restore pdfplumber/pdfminer dependencies
+
 ### Major changes — 2025-12-03 22:00 CET (UTC+01:00) — Phase 5: Comprehensive Rich-Text Coverage & Final Documentation
 
 Added

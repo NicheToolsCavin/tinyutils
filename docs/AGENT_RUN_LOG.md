@@ -237,3 +237,15 @@ Activity log for AI agents working on TinyUtils. Newest first.
 - **Follow-ups:**
   - Re-run PR checks and verify preview /api/convert/health
 
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-24 00:49 CET - Manual - document PDF dependency restore
+- **Mode:** manual
+- **Branch:** `fix/python-launcher-config`
+- **Summary:**
+  - Updated tool_desc_converter.md with entry for restored pdfplumber/pdfminer
+  - Noted impact and pending CI verification
+- **Evidence:** artifacts/python-runtime/20251223/pip-validate-missing-pdfminer.txt
+- **Follow-ups:**
+  - Push doc update and re-check PR 78 status
+
