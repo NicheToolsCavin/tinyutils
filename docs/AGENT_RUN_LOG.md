@@ -249,3 +249,16 @@ Activity log for AI agents working on TinyUtils. Newest first.
 - **Follow-ups:**
   - Push doc update and re-check PR 78 status
 
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-24 00:54 CET - Manual - avoid Vercel uv/cffi build failure
+- **Mode:** manual
+- **Branch:** `fix/python-launcher-config`
+- **Summary:**
+  - Removed pdfplumber/pdfminer.six from converter requirements to avoid uv/cffi ENOENT during Vercel builds
+  - Updated python requirements check workflow to stop importing pdfminer/pdfplumber
+  - Documented the temporary pypdf-only PDF extraction in tool_desc_converter.md
+- **Evidence:** artifacts/python-runtime/20251223/uv-cffi-enoent.txt
+- **Follow-ups:**
+  - Push updates and verify PR #78 Vercel preview + /api/convert/health
+
