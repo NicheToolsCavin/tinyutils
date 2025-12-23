@@ -14,8 +14,13 @@ from collections import OrderedDict
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
-import pdfminer.high_level
-import pdfminer.layout
+# pdfminer is optional (breaks on Vercel due to cffi symlink issues with uv)
+try:  # pragma: no cover — optional dependency at runtime
+    import pdfminer.high_level  # type: ignore
+    import pdfminer.layout  # type: ignore
+except Exception:  # pragma: no cover
+    pdfminer = None  # type: ignore
+
 # pdfplumber is optional; import lazily/optionally
 try:  # pragma: no cover — optional dependency at runtime
     import pdfplumber  # type: ignore
