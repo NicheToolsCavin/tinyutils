@@ -4,12 +4,16 @@
       "src": "api/convert/index.py",
       "use": "@vercel/python",
       "config": {
-        "maxLambdaSize": "50mb"
+        "maxLambdaSize": "50mb",
+        "includeFiles": ["api/convert/**", "convert_backend/**", "api/_lib/**"]
       }
     },
     {
       "src": "api/bulk-replace/index.py",
-      "use": "@vercel/python"
+      "use": "@vercel/python",
+      "config": {
+        "includeFiles": ["api/bulk-replace/**"]
+      }
     }
   ],
   "rewrites": [
