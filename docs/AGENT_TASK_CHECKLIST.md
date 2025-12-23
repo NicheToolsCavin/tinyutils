@@ -13,6 +13,7 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 ## Active Tasks (Newest First)
 
 | Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
+| Fix DLF gate dependency install | manual-2025-12-23 CET | Completed | ✅ Switched DLF gate to corepack+pnpm install/test to avoid npm ERESOLVE. Evidence: artifacts/vercel-build-fail/20251223/ci-npm-eresolve.txt |
 | Address PR #77 review feedback | manual-2025-12-23 CET | Completed | ✅ Added Build Output API .vc-config.json emission and shared module copy in scripts/copy_python_functions.mjs. ✅ Updated DLF gate to run npm ci so jsdom tests pass. Evidence: artifacts/vercel-build-fail/20251223/ads-preview-headers.txt, ads-preview-body-head.txt, inspect-error-excerpt.txt |
 | Fix Vercel build failure (functions block) | manual-2025-12-23 CET | Completed | ✅ Removed functions block from vercel.json to resolve Vercel unmatched function pattern. Commits: NONE (uncommitted). Evidence: artifacts/vercel-build-fail/20251223/inspect-error.log |
 | Add reduced transparency preference for performance | PR74-followup-2025-12-18 CET | Future | 🔸 Add @media (prefers-reduced-transparency) to disable backdrop-filter effects on low-end devices (battery life + GPU concerns). Low priority, performance optimization. |

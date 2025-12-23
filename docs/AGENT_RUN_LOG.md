@@ -201,3 +201,15 @@ Activity log for AI agents working on TinyUtils. Newest first.
 - **Follow-ups:**
   - Push updates, re-run CI, respond to Claude review, then merge
 
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-23 02:20 CET - Manual - fix DLF gate install method
+- **Mode:** manual
+- **Branch:** `fix/vercel-config-functions`
+- **Summary:**
+  - Switched DLF gate workflow to pnpm via corepack to avoid npm ERESOLVE on Svelte peer deps
+  - Runs pnpm install --frozen-lockfile and pnpm test in CI
+- **Evidence:** artifacts/vercel-build-fail/20251223/ci-npm-eresolve.txt
+- **Follow-ups:**
+  - Push update and recheck PR checks
+
