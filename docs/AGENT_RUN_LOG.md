@@ -213,3 +213,15 @@ Activity log for AI agents working on TinyUtils. Newest first.
 - **Follow-ups:**
   - Push update and recheck PR checks
 
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-24 00:44 CET - Manual - stop Build Output API Python injection
+- **Mode:** manual
+- **Branch:** `fix/python-launcher-config`
+- **Summary:**
+  - Removed copy_python_functions.mjs from build script so @vercel/python can package Python helpers
+  - Added runtime error artifact capturing missing vc__handler__python.py
+- **Evidence:** artifacts/python-runtime/20251223/runtime-error.txt
+- **Follow-ups:**
+  - Deploy preview to confirm /api/convert/health and /api/bulk-replace/health no longer 500
+
