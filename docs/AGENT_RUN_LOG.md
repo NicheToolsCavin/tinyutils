@@ -225,3 +225,15 @@ Activity log for AI agents working on TinyUtils. Newest first.
 - **Follow-ups:**
   - Deploy preview to confirm /api/convert/health and /api/bulk-replace/health no longer 500
 
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-24 00:48 CET - Manual - restore PDF extraction deps
+- **Mode:** manual
+- **Branch:** `fix/python-launcher-config`
+- **Summary:**
+  - Re-added pdfplumber and pdfminer.six to api/convert/requirements.txt
+  - Unblocks pip-validate smoke import and restores PDF text extraction path
+- **Evidence:** artifacts/python-runtime/20251223/pip-validate-missing-pdfminer.txt
+- **Follow-ups:**
+  - Re-run PR checks and verify preview /api/convert/health
+
