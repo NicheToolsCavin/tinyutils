@@ -1,4 +1,27 @@
 {
+  "builds": [
+    {
+      "src": "api/convert/index.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "50mb"
+      }
+    },
+    {
+      "src": "api/bulk-replace/index.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/convert/:path*",
+      "destination": "/api/convert/index.py"
+    },
+    {
+      "source": "/api/bulk-replace/:path*",
+      "destination": "/api/bulk-replace/index.py"
+    }
+  ],
   "redirects": [
     {
       "source": "/:path*",
