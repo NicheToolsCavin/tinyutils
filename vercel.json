@@ -1,19 +1,4 @@
 {
-  "functions": {
-    "api/*.js": {
-      "memory": 1024,
-      "maxDuration": 60
-    },
-    "api/convert/index.py": {
-      "memory": 2048,
-      "maxDuration": 120,
-      "includeFiles": "{convert_backend/**,api/_lib/**}"
-    },
-    "api/bulk-replace/index.py": {
-      "memory": 1024,
-      "maxDuration": 60
-    }
-  },
   "redirects": [
     {
       "source": "/:path*",

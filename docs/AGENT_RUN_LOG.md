@@ -175,3 +175,16 @@ Activity log for AI agents working on TinyUtils. Newest first.
 ---
 
 *Log trimmed 2025-12-16. Historical entries compressed to one-liners.*
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-23 01:52 CET - Manual - fix Vercel config build failure
+- **Mode:** manual
+- **Branch:** `fix/vercel-config-functions`
+- **Summary:**
+  - Removed functions block from vercel.json to comply with headers-only guardrails
+  - Addresses Vercel build error: unmatched Serverless Function pattern for api/convert/index.py
+- **Evidence:** artifacts/vercel-build-fail/20251223/inspect-error.log
+- **Follow-ups:**
+  - Open PR and redeploy to confirm build succeeds
+

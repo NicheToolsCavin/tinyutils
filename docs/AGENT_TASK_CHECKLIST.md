@@ -13,6 +13,7 @@ Shared tracker so agents can see which work items are planned, in progress, or f
 ## Active Tasks (Newest First)
 
 | Task | Source (Session / Date) | Status | Notes / Evidence / Plan Changes |
+| Fix Vercel build failure (functions block) | manual-2025-12-23 CET | Completed | ✅ Removed functions block from vercel.json to resolve Vercel unmatched function pattern. Commits: NONE (uncommitted). Evidence: artifacts/vercel-build-fail/20251223/inspect-error.log |
 | Add reduced transparency preference for performance | PR74-followup-2025-12-18 CET | Future | 🔸 Add @media (prefers-reduced-transparency) to disable backdrop-filter effects on low-end devices (battery life + GPU concerns). Low priority, performance optimization. |
 | Add feature detection for backdrop-filter fallback | PR74-followup-2025-12-18 CET | Future | 🔸 Add JS feature detection for more granular backdrop-filter fallback control beyond global CSS. Low priority browser compatibility enhancement. |
 | Fix cache invalidation race condition with Svelte $effect | PR74-followup-2025-12-18 CET | Future | 🔸 Replace MutationObserver cache invalidation with Svelte $effect reactive statement to ensure re-renders when theme changes. Low priority potential bug fix. |
