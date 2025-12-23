@@ -37,11 +37,6 @@ jobs:
           import requests
           import pypandoc
           import pypdf
-          import pdfminer
-          import pdfplumber
-          from importlib.metadata import version
-          v = version("pdfminer.six")
-          print(f"pdfminer.six version: {v}")
-          assert int(v.replace('.','').split()[0]) >= 20231228, "pdfminer.six too old"
+          # pdfminer/pdfplumber disabled due to Vercel uv/cffi symlink bug
           print("imports_ok")
           PY

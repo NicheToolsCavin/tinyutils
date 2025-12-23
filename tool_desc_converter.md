@@ -1,31 +1,31 @@
 ## Converter Tool — Description and Change Log
 
-### Major changes — 2025-12-24 00:47 CET (UTC+01:00) — Restore PDF text extraction deps
+### Major changes — 2025-12-24 00:47 CET (UTC+01:00) — Disable pdfplumber/pdfminer on Vercel (uv/cffi bug)
 
 Added
-• Re-enabled `pdfplumber` and `pdfminer.six` dependencies for PDF text extraction in the converter backend.
+• None
 
 Modified
-• Removed the temporary uv/cffi removal note in requirements now that deps are restored.
+• PDF text extraction on Vercel uses the pypdf fallback because pdfplumber/pdfminer.six are disabled.
 
 Fixed
-• **Problem:** PDF text extraction could only use the pypdf fallback after deps were removed.
-  - **Root cause:** `pdfplumber`/`pdfminer.six` were commented out in requirements.
-  - **Fix:** Re-added both dependencies so the higher-fidelity extraction path is available again.
-  - **Evidence:** `artifacts/python-runtime/20251223/pip-validate-missing-pdfminer.txt`
+• **Problem:** Vercel builds failed with ENOENT for `_cffi_backend...so` when uv installed cffi-dependent packages.
+  - **Root cause:** Vercel uv symlink bug (vercel/vercel#14041).
+  - **Fix:** Remove pdfplumber/pdfminer.six from requirements to avoid cffi in the build.
+  - **Evidence:** `artifacts/python-runtime/20251223/uv-cffi-enoent.txt`
 
 Human-readable summary
-Re-enabled the libraries that read PDF text with better layout fidelity so the converter can once again extract PDFs as expected and the dependency checks pass.
+We temporarily disable the heavier PDF text extraction stack on Vercel so builds succeed; PDFs still extract via pypdf, just with less layout fidelity.
 
 Impact
-• Higher-fidelity PDF text extraction path restored ✅
-• CI dependency smoke aligns with converter requirements ✅
+• Vercel builds succeed without uv/cffi failures ✅
+• PDF text extraction is pypdf-only on Vercel (lower fidelity) ⚠️
 
 Testing
-• Pending: PR #78 CI rerun (pip-validate) and preview /api/convert/health
+• Pending: PR #78 CI `Python requirements check` rerun
 
 Commits
-• cac9c1b - Restore pdfplumber/pdfminer dependencies
+• TBD
 
 ### Major changes — 2025-12-03 22:00 CET (UTC+01:00) — Phase 5: Comprehensive Rich-Text Coverage & Final Documentation
 
