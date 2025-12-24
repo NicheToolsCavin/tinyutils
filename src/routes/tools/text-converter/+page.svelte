@@ -13,6 +13,10 @@
       import.meta.env.MODE === 'development' ||
       import.meta.env.MODE === 'preview');
 
+  // Cloud Run fallback URL for when Vercel Python is broken
+  // See: https://github.com/vercel/vercel/issues/14041
+  const CLOUD_RUN_CONVERTER_URL = 'https://tinyutils-converter-1086963596430.europe-west1.run.app';
+
   function logPreviewEvent(event, details = {}) {
     if (!DEV_TELEMETRY_ENABLED) return;
     try {
@@ -898,11 +902,13 @@ Prism.highlightAll();
             preview: previewOnly ? true : undefined
           };
 
-        async function sendOnce() {
+        async function sendToEndpoint(baseUrl) {
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 90000);
           try {
-            return await fetch('/api/convert', {
+            // Note: Cloud Run requires trailing slash due to FastAPI mount behavior
+            const url = baseUrl ? `${baseUrl}/api/convert/` : '/api/convert';
+            return await fetch(url, {
               method: 'POST',
               headers: { 'content-type': 'application/json' },
               body: JSON.stringify(payload),
@@ -913,14 +919,35 @@ Prism.highlightAll();
           }
         }
 
+        // Try Vercel first, fall back to Cloud Run if Vercel Python is broken
         let response;
+        let usedFallback = false;
         try {
-          response = await sendOnce();
+          response = await sendToEndpoint(null); // Try Vercel first
+
+          // Check if Vercel returned a platform error (Python runtime issue)
+          const contentType = response.headers.get('content-type') || '';
+          if (!contentType.includes('application/json')) {
+            const text = await response.text();
+            if (text.includes('FUNCTION_INVOCATION_FAILED') || (response.status === 500 && text.includes('server error'))) {
+              // Vercel Python is broken, try Cloud Run fallback
+              updateProgressState('Switching to backup server...', 30);
+              response = await sendToEndpoint(CLOUD_RUN_CONVERTER_URL);
+              usedFallback = true;
+            } else {
+              throw new Error(text || `Non-JSON response (${response.status})`);
+            }
+          }
         } catch (err) {
           if (err && err.name === 'AbortError') {
             updateProgressState('Timed out, retrying…', 45);
             await new Promise((r) => setTimeout(r, 50 + Math.random() * 100));
-            response = await sendOnce();
+            response = await sendToEndpoint(null);
+          } else if (!usedFallback && err.message && err.message.includes('fetch')) {
+            // Network error on Vercel, try Cloud Run
+            updateProgressState('Switching to backup server...', 30);
+            response = await sendToEndpoint(CLOUD_RUN_CONVERTER_URL);
+            usedFallback = true;
           } else {
             throw err;
           }
@@ -928,8 +955,9 @@ Prism.highlightAll();
 
         const contentType = response.headers.get('content-type') || '';
         let data;
-        if (contentType.includes('application/json')) data = await response.json();
-        else {
+        if (contentType.includes('application/json')) {
+          data = await response.json();
+        } else {
           const text = await response.text();
           throw new Error(text || `Non-JSON response (${response.status})`);
         }
