@@ -3,6 +3,10 @@
 	import { onMount } from 'svelte';
 	import AdSlot from '$lib/components/AdSlot.svelte';
 
+	// Cloud Run fallback URL for when Vercel Python is broken
+	// See: https://github.com/vercel/vercel/issues/14041
+	const CLOUD_RUN_BULK_REPLACE_URL = 'https://tinyutils-converter-1086963596430.europe-west1.run.app';
+
 	// State
 	let file = null;
 	let mode = 'simple'; // 'simple' | 'regex'
@@ -97,8 +101,28 @@
 		formData.append('replace', replaceText);
 		formData.append('case_sensitive', isCaseSensitive.toString());
 
+		async function tryFetch(baseUrl) {
+			// Note: Cloud Run requires trailing slash due to FastAPI mount behavior
+			const url = baseUrl ? `${baseUrl}/api/bulk-replace/` : '/api/bulk-replace';
+			return await fetch(url, { method: 'POST', body: formData });
+		}
+
 		try {
-			const res = await fetch('/api/bulk-replace', { method: 'POST', body: formData });
+			// Try Vercel first, fall back to Cloud Run if broken
+			let res = await tryFetch(null);
+
+			// Check for Vercel platform error
+			const contentType = res.headers.get('content-type') || '';
+			if (!contentType.includes('application/json') && !contentType.includes('application/zip')) {
+				const text = await res.text();
+				if (text.includes('FUNCTION_INVOCATION_FAILED') || (res.status === 500 && text.includes('server error'))) {
+					// Vercel Python is broken, try Cloud Run fallback
+					status = 'uploading'; // Show "Switching to backup..."
+					res = await tryFetch(CLOUD_RUN_BULK_REPLACE_URL);
+				} else {
+					throw new Error(text || `Server error (${res.status})`);
+				}
+			}
 
 			if (action === 'download') {
 				if (!res.ok) {

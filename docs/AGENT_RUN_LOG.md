@@ -213,3 +213,52 @@ Activity log for AI agents working on TinyUtils. Newest first.
 - **Follow-ups:**
   - Push update and recheck PR checks
 
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-24 00:44 CET - Manual - stop Build Output API Python injection
+- **Mode:** manual
+- **Branch:** `fix/python-launcher-config`
+- **Summary:**
+  - Removed copy_python_functions.mjs from build script so @vercel/python can package Python helpers
+  - Added runtime error artifact capturing missing vc__handler__python.py
+- **Evidence:** artifacts/python-runtime/20251223/runtime-error.txt
+- **Follow-ups:**
+  - Deploy preview to confirm /api/convert/health and /api/bulk-replace/health no longer 500
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-24 00:48 CET - Manual - restore PDF extraction deps
+- **Mode:** manual
+- **Branch:** `fix/python-launcher-config`
+- **Summary:**
+  - Re-added pdfplumber and pdfminer.six to api/convert/requirements.txt
+  - Unblocks pip-validate smoke import and restores PDF text extraction path
+- **Evidence:** artifacts/python-runtime/20251223/pip-validate-missing-pdfminer.txt
+- **Follow-ups:**
+  - Re-run PR checks and verify preview /api/convert/health
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-24 00:49 CET - Manual - document PDF dependency restore
+- **Mode:** manual
+- **Branch:** `fix/python-launcher-config`
+- **Summary:**
+  - Updated tool_desc_converter.md with entry for restored pdfplumber/pdfminer
+  - Noted impact and pending CI verification
+- **Evidence:** artifacts/python-runtime/20251223/pip-validate-missing-pdfminer.txt
+- **Follow-ups:**
+  - Push doc update and re-check PR 78 status
+
+<!-- RECENT ACTIVITY (Full Context) -->
+
+### 2025-12-24 00:54 CET - Manual - avoid Vercel uv/cffi build failure
+- **Mode:** manual
+- **Branch:** `fix/python-launcher-config`
+- **Summary:**
+  - Removed pdfplumber/pdfminer.six from converter requirements to avoid uv/cffi ENOENT during Vercel builds
+  - Updated python requirements check workflow to stop importing pdfminer/pdfplumber
+  - Documented the temporary pypdf-only PDF extraction in tool_desc_converter.md
+- **Evidence:** artifacts/python-runtime/20251223/uv-cffi-enoent.txt
+- **Follow-ups:**
+  - Push updates and verify PR #78 Vercel preview + /api/convert/health
+

@@ -1,5 +1,32 @@
 ## Converter Tool — Description and Change Log
 
+### Major changes — 2025-12-24 00:47 CET (UTC+01:00) — Disable pdfplumber/pdfminer on Vercel (uv/cffi bug)
+
+Added
+• None
+
+Modified
+• PDF text extraction on Vercel uses the pypdf fallback because pdfplumber/pdfminer.six are disabled.
+
+Fixed
+• **Problem:** Vercel builds failed with ENOENT for `_cffi_backend...so` when uv installed cffi-dependent packages.
+  - **Root cause:** Vercel uv symlink bug (vercel/vercel#14041).
+  - **Fix:** Remove pdfplumber/pdfminer.six from requirements to avoid cffi in the build.
+  - **Evidence:** `artifacts/python-runtime/20251223/uv-cffi-enoent.txt`
+
+Human-readable summary
+We temporarily disable the heavier PDF text extraction stack on Vercel so builds succeed; PDFs still extract via pypdf, just with less layout fidelity.
+
+Impact
+• Vercel builds succeed without uv/cffi failures ✅
+• PDF text extraction is pypdf-only on Vercel (lower fidelity) ⚠️
+
+Testing
+• Pending: PR #78 CI `Python requirements check` rerun
+
+Commits
+• 6b264ca - Disable pdfminer/pdfplumber on Vercel
+
 ### Major changes — 2025-12-03 22:00 CET (UTC+01:00) — Phase 5: Comprehensive Rich-Text Coverage & Final Documentation
 
 Added

@@ -13,7 +13,7 @@
     "ui:smoke:sd": "node scripts/ui_smoke_sitemap.mjs",
     "ui:smoke:wbf": "node scripts/ui_smoke_wayback.mjs",
     "dev": "vite dev",
-    "build": "vite build && node scripts/copy_python_functions.mjs",
+    "build": "vite build",
     "preview": "vite preview",
     "check": "svelte-check"
   },
