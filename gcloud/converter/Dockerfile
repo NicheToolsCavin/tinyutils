@@ -49,6 +49,10 @@ COPY convert_backend/ /app/convert_backend/
 COPY api/_lib/ /app/api/_lib/
 COPY api/convert/ /app/api/convert/
 COPY api/bulk_replace/ /app/api/bulk_replace/
+# Note: bulk-replace is copied as bulk_replace for Python import compatibility
+
+# Copy extra API wrappers (csv_join, json_tools, pdf_extract)
+COPY extra_apis/ /app/extra_apis/
 
 # Create the main entry point
 COPY entrypoint.py /app/entrypoint.py

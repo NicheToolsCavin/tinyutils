@@ -2,6 +2,10 @@
 	import { fade, slide } from 'svelte/transition';
 	import AdSlot from '$lib/components/AdSlot.svelte';
 
+	// Cloud Run fallback while Vercel Python runtime has uv symlink bug
+	// https://github.com/vercel/vercel/issues/14041
+	const CLOUD_RUN_URL = 'https://tinyutils-converter-1086963596430.europe-west1.run.app';
+
 	let files = /** @type {File[]} */ ([]);
 	let step = 1; // 1: Upload, 2: Configure, 3: Processing
 	let fileData = /** @type {Array<{ id: number; delimiter?: string; headers?: string[]; error?: string }>} */ ([]);
@@ -11,6 +15,27 @@
 	let joinKeyB = 0;
 	let joinType = 'inner'; // 'inner' | 'left'
 	let errorMsg = '';
+
+	/**
+	 * Try fetch with Cloud Run fallback on Vercel platform error
+	 * @param {string} endpoint
+	 * @param {FormData} formData
+	 * @returns {Promise<Response>}
+	 */
+	async function fetchWithFallback(endpoint, formData) {
+		let res = await fetch(endpoint, { method: 'POST', body: formData });
+
+		// Check for Vercel platform error and fallback to Cloud Run
+		const contentType = res.headers.get('content-type') || '';
+		if (!contentType.includes('application/json') && !contentType.includes('text/csv')) {
+			const text = await res.text();
+			if (text.includes('FUNCTION_INVOCATION_FAILED')) {
+				// Note: Cloud Run requires trailing slash due to FastAPI mount behavior
+				res = await fetch(`${CLOUD_RUN_URL}/api/csv_join/`, { method: 'POST', body: formData });
+			}
+		}
+		return res;
+	}
 
 	async function handleScan() {
 		if (!files || files.length !== 2) {
@@ -27,7 +52,7 @@
 		formData.append('files', files[1]);
 
 		try {
-			const res = await fetch('/api/csv_join', { method: 'POST', body: formData });
+			const res = await fetchWithFallback('/api/csv_join', formData);
 			const data = await res.json();
 
 			if (!res.ok || data.error) {
@@ -76,7 +101,7 @@
 		formData.append('join_type', joinType);
 
 		try {
-			const res = await fetch('/api/csv_join', { method: 'POST', body: formData });
+			const res = await fetchWithFallback('/api/csv_join', formData);
 			if (!res.ok) {
 				let message = 'Join failed';
 				try {
