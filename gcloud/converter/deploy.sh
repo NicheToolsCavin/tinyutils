@@ -36,6 +36,7 @@ cp -r ../../convert_backend ./convert_backend
 mkdir -p ./api
 cp -r ../../api/_lib ./api/_lib
 cp -r ../../api/convert ./api/convert
+cp -r ../../api/bulk-replace ./api/bulk_replace
 
 # Build and push the container
 echo ""
@@ -84,3 +85,5 @@ echo "  CONVERTER_URL=${SERVICE_URL}"
 echo ""
 echo "Cleaning up temporary files..."
 rm -rf ./convert_backend ./api
+
+echo "Done!"

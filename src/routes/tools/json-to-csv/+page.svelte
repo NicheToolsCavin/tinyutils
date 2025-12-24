@@ -2,6 +2,10 @@
 	import { fade } from 'svelte/transition';
 	import AdSlot from '$lib/components/AdSlot.svelte';
 
+	// Cloud Run fallback while Vercel Python runtime has uv symlink bug
+	// https://github.com/vercel/vercel/issues/14041
+	const CLOUD_RUN_URL = 'https://tinyutils-converter-1086963596430.europe-west1.run.app';
+
 	let file = /** @type {File | null} */ (null);
 	let mode = 'json_to_csv'; // 'json_to_csv' | 'csv_to_json'
 	let isProcessing = false;
@@ -24,6 +28,26 @@
 		}
 	}
 
+	/**
+	 * Try fetch with Cloud Run fallback on Vercel platform error
+	 * @param {FormData} formData
+	 * @returns {Promise<Response>}
+	 */
+	async function fetchWithFallback(formData) {
+		let res = await fetch('/api/json_tools', { method: 'POST', body: formData });
+
+		// Check for Vercel platform error and fallback to Cloud Run
+		const contentType = res.headers.get('content-type') || '';
+		if (!contentType.includes('application/json') && !contentType.includes('text/csv')) {
+			const text = await res.text();
+			if (text.includes('FUNCTION_INVOCATION_FAILED')) {
+				// Note: Cloud Run requires trailing slash due to FastAPI mount behavior
+				res = await fetch(`${CLOUD_RUN_URL}/api/json_tools/`, { method: 'POST', body: formData });
+			}
+		}
+		return res;
+	}
+
 	async function convert() {
 		if (!file) return;
 		isProcessing = true;
@@ -34,7 +58,7 @@
 		formData.append('mode', mode);
 
 		try {
-			const res = await fetch('/api/json_tools', { method: 'POST', body: formData });
+			const res = await fetchWithFallback(formData);
 			if (!res.ok) {
 				let message = 'Conversion failed';
 				try {
